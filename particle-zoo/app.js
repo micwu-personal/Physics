@@ -124,41 +124,123 @@ const COMPOSITES = {
   'ud':  {name:'(unstable diquark)', mass:'—', charge:'+1/3 e', notes:'Not a real particle — you need 3 quarks or q+q̄.'},
 };
 
-/* ================ DECORATE TILES with year + color dots ================ */
-function shortYear(d){
-  if(!d) return '';
-  const m = String(d).match(/\d{4}/);
-  return m ? m[0] : '';
-}
-document.querySelectorAll('.ptile[data-id]').forEach(tile=>{
-  const id = tile.dataset.id;
+/* ================ RENDER STANDARD MODEL TILES ================ */
+const TILE_GROUPS = {
+  'quarks-top':          ['up','charm','top'],
+  'quarks-bot':          ['down','strange','bottom'],
+  'leptons-charged':     ['electron','muon','tau'],
+  'leptons-neutrinos':   ['nu_e','nu_mu','nu_tau'],
+  'bosons-gauge':        ['photon','gluon','wboson','zboson'],
+  'bosons-higgs':        ['higgs'],
+  'antiquarks-top':      ['anti_up','anti_charm','anti_top'],
+  'antiquarks-bot':      ['anti_down','anti_strange','anti_bottom'],
+  'antileptons-charged': ['positron','anti_muon','anti_tau'],
+  'antileptons-neutrinos':['anti_nu_e','anti_nu_mu','anti_nu_tau'],
+  'selfanti':            ['photon','zboson','higgs','gluon']
+};
+
+function tileClassFor(id){
   const p = PARTICLES[id];
-  if(!p) return;
-  // year
-  const y = shortYear(p.discovered);
-  if(y){
-    const yb = document.createElement('div');
-    yb.className='p-year'; yb.textContent=y;
-    tile.appendChild(yb);
+  if(!p) return '';
+  const isAnti = id.startsWith('anti_') || id==='positron';
+  if(p.cls.includes('Quark') || p.cls.includes('Antiquark') || p.cls.includes('夸克') || p.cls.includes('反夸克')){
+    return isAnti ? 'antiquark' : 'quark';
   }
-  // color dots for quarks/antiquarks
-  const isQ = tile.classList.contains('quark');
-  const isAQ = tile.classList.contains('antiquark');
-  if(isQ || isAQ){
-    const cd = document.createElement('div');
-    cd.className='color-dots';
-    if(isQ) cd.innerHTML='<i class="r" title="red"></i><i class="g" title="green"></i><i class="b" title="blue"></i>';
-    else    cd.innerHTML='<i class="ar" title="anti-red"></i><i class="ag" title="anti-green"></i><i class="ab" title="anti-blue"></i>';
-    tile.appendChild(cd);
-  }
-  // anti-badge
-  if(id==='gluon'){
-    const ab = document.createElement('div'); ab.className='anti-badge'; ab.textContent='×8 colors'; tile.appendChild(ab);
-  }
-  if(tile.classList.contains('antiquark') || tile.classList.contains('antilepton') || tile.classList.contains('antineutrino')){
-    // already visually marked; nothing more
-  }
-});
+  if(p.color==='neutrino') return isAnti ? 'antilepton antineutrino' : 'lepton neutrino';
+  if(p.color==='lepton')   return isAnti ? 'antilepton' : 'lepton';
+  if(p.color==='higgs')    return 'higgs-tile';
+  return 'boson';
+}
+function shortYear(d){ if(!d) return ''; const m = String(d).match(/\d{4}/); return m ? m[0] : ''; }
+function chargeShort(p){
+  // Extract short charge display for the meta line
+  const c = p.charge;
+  if(c==='+2/3 e') return '+⅔';
+  if(c==='−2/3 e') return '−⅔';
+  if(c==='+1/3 e') return '+⅓';
+  if(c==='−1/3 e') return '−⅓';
+  if(c==='+1 e') return '+1';
+  if(c==='−1 e') return '−1';
+  return c;
+}
+function massShort(m){
+  if(!m) return '';
+  return m.replace(/\/c²$/, '').replace(/ MeV/,' MeV').replace(/ GeV/,' GeV').replace(/ eV/,' eV');
+}
+function symbolFor(id){
+  // Symbol for the big tile display
+  const p = PARTICLES[id];
+  if(!p) return '';
+  // For chart tiles, keep single-letter form for quarks (u,d,c,s,t,b)
+  const simple = {up:'u',down:'d',charm:'c',strange:'s',top:'t',bottom:'b',
+                  anti_up:'ū',anti_down:'d̄',anti_charm:'c̄',anti_strange:'s̄',anti_top:'t̄',anti_bottom:'b̄',
+                  electron:'e',muon:'μ',tau:'τ',
+                  nu_e:'ν<sub>e</sub>',nu_mu:'ν<sub>μ</sub>',nu_tau:'ν<sub>τ</sub>',
+                  positron:'e⁺',anti_muon:'μ⁺',anti_tau:'τ⁺',
+                  anti_nu_e:'ν̄<sub>e</sub>',anti_nu_mu:'ν̄<sub>μ</sub>',anti_nu_tau:'ν̄<sub>τ</sub>',
+                  photon:'γ',gluon:'g',wboson:'W±',zboson:'Z⁰',higgs:'H'};
+  return simple[id] || p.sym;
+}
+function shortName(id, lang){
+  const over = PARTICLES_I18N?.[lang]?.[id];
+  if(over && over.name) return over.name;
+  // English short names for tiles
+  const short = {up:'up',down:'down',charm:'charm',strange:'strange',top:'top',bottom:'bottom',
+                 anti_up:'anti-up',anti_down:'anti-down',anti_charm:'anti-charm',anti_strange:'anti-strange',anti_top:'anti-top',anti_bottom:'anti-bottom',
+                 electron:'electron',muon:'muon',tau:'tau',
+                 nu_e:'e-neutrino',nu_mu:'μ-neutrino',nu_tau:'τ-neutrino',
+                 positron:'positron',anti_muon:'anti-muon',anti_tau:'anti-tau',
+                 anti_nu_e:'e-antineutrino',anti_nu_mu:'μ-antineutrino',anti_nu_tau:'τ-antineutrino',
+                 photon:'photon',gluon:'gluon',wboson:'W boson',zboson:'Z boson',higgs:'Higgs'};
+  return short[id] || PARTICLES[id]?.name || id;
+}
+
+function rebuildStandardModelTiles(){
+  const lang = window.CURRENT_LANG || 'en';
+  Object.entries(TILE_GROUPS).forEach(([group, ids])=>{
+    const container = document.querySelector(`[data-tiles="${group}"]`);
+    if(!container) return;
+    container.innerHTML = '';
+    ids.forEach(id=>{
+      const p = PARTICLES[id]; if(!p) return;
+      const tile = document.createElement('div');
+      tile.className = 'ptile ' + tileClassFor(id) + (group==='selfanti' ? ' self-a' : '');
+      tile.dataset.id = id;
+      const sym = symbolFor(id);
+      const name = shortName(id, lang);
+      let meta;
+      if(group==='selfanti'){
+        meta = id==='photon' ? 'γ = γ̄' : id==='zboson' ? 'Z = Z̄' : id==='higgs' ? 'H = H̄' : '*color-anticolor';
+      } else {
+        meta = `${massShort(p.mass)} · ${chargeShort(p)}`;
+      }
+      tile.innerHTML = `<div class="p-sym">${sym}</div><div class="p-name">${name}</div><div class="p-meta">${meta}</div>`;
+      // year badge
+      const y = shortYear(p.discovered);
+      if(y){ const yb=document.createElement('div'); yb.className='p-year'; yb.textContent=y; tile.appendChild(yb); }
+      // color dots for quarks/antiquarks
+      const cls = tileClassFor(id);
+      if(cls==='quark'){
+        const cd=document.createElement('div'); cd.className='color-dots';
+        cd.innerHTML='<i class="r"></i><i class="g"></i><i class="b"></i>';
+        tile.appendChild(cd);
+      } else if(cls==='antiquark'){
+        const cd=document.createElement('div'); cd.className='color-dots';
+        cd.innerHTML='<i class="ar"></i><i class="ag"></i><i class="ab"></i>';
+        tile.appendChild(cd);
+      }
+      if(id==='gluon' && group!=='selfanti'){
+        const ab=document.createElement('div'); ab.className='anti-badge'; ab.textContent='×8'; tile.appendChild(ab);
+      }
+      tile.addEventListener('click',()=>{
+        document.querySelector('.tab[data-tab="detail"]').click();
+        showParticle(id);
+      });
+      container.appendChild(tile);
+    });
+  });
+}
+
 
 /* ================ TABS ================ */
 document.querySelectorAll('.tab').forEach(t=>{
@@ -186,13 +268,15 @@ const pDetail = document.getElementById('pDetail');
 const pfilter = document.getElementById('pfilter');
 
 function renderList(filter=''){
+  const lang = window.CURRENT_LANG || 'en';
   pList.innerHTML='';
   Object.entries(PARTICLES).forEach(([id,p])=>{
-    if(filter && !(p.name+p.sym+p.cls).toLowerCase().includes(filter.toLowerCase())) return;
+    const localName = shortName(id, lang);
+    if(filter && !(localName+p.sym+p.cls).toLowerCase().includes(filter.toLowerCase())) return;
     const el = document.createElement('div');
     el.className='pl-item';
     el.dataset.id=id;
-    el.innerHTML=`<span>${p.name}</span><span class="pl-sym">${p.sym}</span>`;
+    el.innerHTML=`<span>${localName}</span><span class="pl-sym">${p.sym}</span>`;
     el.onclick=()=>showParticle(id);
     pList.appendChild(el);
   });
@@ -201,34 +285,38 @@ renderList();
 pfilter.addEventListener('input',e=>renderList(e.target.value));
 
 function showParticle(id){
-  const p = PARTICLES[id]; if(!p) return;
+  const p = getP(id); if(!p) return;
+  const lang = window.CURRENT_LANG || 'en';
+  const dict = LOCALES[lang];
+  const t = (k)=> dict[k] || LOCALES.en[k] || k;
   document.querySelectorAll('.pl-item').forEach(x=>x.classList.toggle('active', x.dataset.id===id));
   const colorMap = {quark:'#ff6b9d',lepton:'#4ea8ff',neutrino:'#7ee8c5',boson:'#ffb547',higgs:'#c77dff'};
   const c = colorMap[p.color];
-  const isQuark = p.cls.startsWith('Quark');
-  const isAntiquark = p.cls.startsWith('Antiquark');
+  const isQuark = /Quark|夸克/.test(p.cls) && !/Anti|反/.test(p.cls);
+  const isAntiquark = /Antiquark|反夸克/.test(p.cls);
   const isGluon = id==='gluon';
 
   let colorInfo = '';
   if(isQuark || isAntiquark){
+    const label = isAntiquark ? t('detail.color.quark.3anti') : t('detail.color.quark.3col');
     colorInfo = `
       <div class="d-section">
-        <h4>Color charge</h4>
-        <p style="color:#c8cff0;line-height:1.7;font-size:14px">Comes in ${isAntiquark?'<b>3 anticolors</b> (<span class="col-ar">r̄</span>, <span class="col-ag">ḡ</span>, <span class="col-ab">b̄</span>)':'<b>3 colors</b> (<span class="col-r">red</span>, <span class="col-g">green</span>, <span class="col-b">blue</span>)'}. Only colorless combinations exist freely in nature — via strong-force confinement.</p>
+        <h4>${t('detail.section.color')}</h4>
+        <p style="color:#c8cff0;line-height:1.7;font-size:14px">${t('detail.color.quark.a')} <b>${label}</b>${t('detail.color.quark.b')}</p>
       </div>`;
   } else if(isGluon){
     colorInfo = `
       <div class="d-section">
-        <h4>Color charge — 8 gluons</h4>
-        <p style="color:#c8cff0;line-height:1.7;font-size:14px">Each gluon carries a <b>color + anticolor</b> (like R+ḡ). Naively there are 9 combinations, but SU(3) symmetry removes one, leaving <b>8 independent gluons</b>. That\'s why gluons can interact with each other — unlike photons.</p>
+        <h4>${t('detail.section.color.gluon')}</h4>
+        <p style="color:#c8cff0;line-height:1.7;font-size:14px">${t('detail.color.gluon')}</p>
       </div>`;
   }
 
   let relatedInfo = '';
-  if(p.antiparticle && !p.antiparticle.includes('own') && !p.antiparticle.includes('self')){
-    relatedInfo = `<div class="d-section"><h4>Antiparticle</h4><p style="color:#c8cff0;line-height:1.7;font-size:14px">${p.antiparticle}</p></div>`;
+  if(p.antiparticle && !p.antiparticle.includes('own') && !p.antiparticle.includes('self') && !p.antiparticle.includes('自身')){
+    relatedInfo = `<div class="d-section"><h4>${t('detail.section.anti')}</h4><p style="color:#c8cff0;line-height:1.7;font-size:14px">${p.antiparticle}</p></div>`;
   } else if(p.antiparticle){
-    relatedInfo = `<div class="d-section"><h4>Antiparticle</h4><p style="color:#c8cff0;line-height:1.7;font-size:14px"><b>Self-conjugate</b> — this particle is its own antiparticle.</p></div>`;
+    relatedInfo = `<div class="d-section"><h4>${t('detail.section.anti')}</h4><p style="color:#c8cff0;line-height:1.7;font-size:14px"><b>${t('detail.section.anti.self')}</b></p></div>`;
   }
 
   pDetail.innerHTML = `
@@ -238,17 +326,17 @@ function showParticle(id){
     </div>
     <div class="d-desc">${p.desc}</div>
     <div class="d-props">
-      <div class="d-prop"><div class="k">Mass</div><div class="v">${p.mass}</div></div>
-      <div class="d-prop"><div class="k">Charge</div><div class="v">${p.charge}</div></div>
-      <div class="d-prop"><div class="k">Spin</div><div class="v">${p.spin}</div></div>
-      <div class="d-prop"><div class="k">Antiparticle</div><div class="v" style="font-size:13px">${p.antiparticle}</div></div>
-      <div class="d-prop"><div class="k">Discovered</div><div class="v" style="font-size:13px">${p.discovered}</div></div>
-      <div class="d-prop"><div class="k">Feels forces</div><div class="v" style="font-size:12px">${p.forces.join(' · ')}</div></div>
+      <div class="d-prop"><div class="k">${t('detail.prop.mass')}</div><div class="v">${p.mass}</div></div>
+      <div class="d-prop"><div class="k">${t('detail.prop.charge')}</div><div class="v">${p.charge}</div></div>
+      <div class="d-prop"><div class="k">${t('detail.prop.spin')}</div><div class="v">${p.spin}</div></div>
+      <div class="d-prop"><div class="k">${t('detail.prop.antiparticle')}</div><div class="v" style="font-size:13px">${p.antiparticle}</div></div>
+      <div class="d-prop"><div class="k">${t('detail.prop.discovered')}</div><div class="v" style="font-size:13px">${p.discovered}</div></div>
+      <div class="d-prop"><div class="k">${t('detail.prop.forces')}</div><div class="v" style="font-size:12px">${tForces(p.forces).join(' · ')}</div></div>
     </div>
     ${colorInfo}
     ${relatedInfo}
     <div class="d-section">
-      <h4>Key facts</h4>
+      <h4>${t('detail.section.facts')}</h4>
       <ul>${p.facts.map(f=>`<li>${f}</li>`).join('')}</ul>
     </div>
     <div class="d-fun">✦ ${p.fun}</div>
@@ -386,13 +474,34 @@ function buildComposites(){
 }
 
 /* ---- analyze produces text summary ---- */
+const ATOM_I18N = {
+  'zh-CN': {
+    '1p0n0e':['H⁺ (质子 / 氢离子)','稳定'],
+    '1p0n1e':['⚛ 氢原子 (¹H)','稳定 — 占普通物质的 74%'],
+    '1p1n0e':['²H⁺ (氘核)','稳定'],
+    '1p1n1e':['⚛ 氘原子 (²H)','稳定,俗称"重氢"'],
+    '1p2n0e':['³H⁺ (氚核)','有放射性'],
+    '1p2n1e':['⚛ 氚原子 (³H)','β⁻ 衰变,半衰期 12.3 年'],
+    '2p1n2e':['⚛ 氦-3 原子 (³He)','稳定,天然含量极低'],
+    '2p2n2e':['⚛ 氦-4 原子 (⁴He)','稳定,最常见的氦'],
+    '2p2n0e':['α 粒子 (⁴He²⁺)','α 衰变的产物'],
+    '3p3n3e':['⚛ 锂-6 原子 (⁶Li)','稳定'],
+    '3p4n3e':['⚛ 锂-7 原子 (⁷Li)','稳定,地球上最常见的锂同位素']
+  }
+};
+const ELEMENT_I18N = {
+  'zh-CN': ['','氢','氦','锂','铍','硼','碳','氮','氧','氟','氖','钠','镁','铝','硅','磷','硫','氯','氩','钾','钙']
+};
 function analyze(){
   const {nucleons, electrons, freeQuarks, u, d, e} = buildViz;
   const q = u+d;
   const charge = u*(2/3) + d*(-1/3) + e*(-1);
+  const lang = window.CURRENT_LANG || 'en';
+  const dict = LOCALES[lang];
+  const t = (k)=> dict[k] || LOCALES.en[k] || k;
 
   if(parts.length===0){
-    buildResult.textContent='Nothing yet.';
+    buildResult.textContent = t('builder.result.empty');
     buildResult.className='result';
     buildStats.innerHTML='';
     return;
@@ -409,7 +518,7 @@ function analyze(){
   const nElectrons = e;
   const key = `${protons}p${neutrons}n${nElectrons}e`;
 
-  const atomMap = {
+  const atomMap_en = {
     '1p0n0e':['H⁺ (proton / hydrogen ion)','stable'],
     '1p0n1e':['⚛ Hydrogen atom (¹H)','stable — 74% of ordinary matter'],
     '1p1n0e':['²H⁺ (deuteron ion)','stable'],
@@ -422,20 +531,23 @@ function analyze(){
     '3p3n3e':['⚛ Lithium-6 (⁶Li)','stable'],
     '3p4n3e':['⚛ Lithium-7 (⁷Li)','stable, most Li on Earth'],
   };
+  const atomMap = ATOM_I18N[lang] || atomMap_en;
   if(atomMap[key]){
     name = atomMap[key][0] + ' — ' + atomMap[key][1];
     cls = 'result success';
   } else if(protons===0 && neutrons===1 && nElectrons===0 && freeQuarks.length===0){
-    name='Free neutron (n⁰) — decays in ~15 min'; cls='result success';
+    name = t('builder.msg.freeneutron'); cls='result success';
   } else if(totalNucleons===0 && nElectrons>0 && freeQuarks.length===0){
-    name = nElectrons===1 ? 'A lone electron (e⁻)' : `${nElectrons} free electrons`; cls='result success';
+    name = nElectrons===1 ? t('builder.msg.electron.one') : `${nElectrons} ${t('builder.msg.electron.many')}`; cls='result success';
   } else if(freeQuarks.length>0){
-    name='⚠ Free quarks present — the strong force forbids this (confinement)!'; cls='result';
+    name = t('builder.msg.freeq'); cls='result';
   } else if(deltas>0){
-    name='Δ baryon(s) present — unstable, decays quickly'; cls='result success';
+    name = t('builder.msg.delta'); cls='result success';
   } else if(totalNucleons>0){
-    const symb = elementSymbol(protons);
-    name = `${symb ? symb + ' — ' : ''}${protons}p + ${neutrons}n${nElectrons?` + ${nElectrons}e⁻`:''}`;
+    const els = ELEMENT_I18N[lang] || ['','H','He','Li','Be','B','C','N','O','F','Ne','Na','Mg','Al','Si','P','S','Cl','Ar','K','Ca'];
+    const symb = els[protons] || `Z=${protons}`;
+    const eLabel = lang==='zh-CN' ? '电子' : 'e⁻';
+    name = `${symb} — ${protons}p + ${neutrons}n${nElectrons?` + ${nElectrons}${eLabel}`:''}`;
     cls = 'result success';
   }
 
@@ -444,11 +556,12 @@ function analyze(){
 
   const chargeVal = Math.round(charge*100)/100;
   buildStats.innerHTML = `
-    <div>Up quarks (u): <b>${u}</b> · Down (d): <b>${d}</b> · Electrons: <b>${e}</b></div>
-    <div>Protons: <b>${protons}</b> · Neutrons: <b>${neutrons}</b>${deltas?` · Δ: <b>${deltas}</b>`:''}${freeQuarks.length?` · <span style="color:#ff6b9d">Free q: ${freeQuarks.length}</span>`:''}</div>
-    <div>Total charge: <b>${chargeVal===0?'0':(chargeVal>0?'+':'')+chargeVal} e</b></div>
-    <div>Total parts: <b>${parts.length}</b></div>
+    <div>${t('builder.stats.up')}: <b>${u}</b> · ${t('builder.stats.down')}: <b>${d}</b> · ${t('builder.stats.electrons')}: <b>${e}</b></div>
+    <div>${t('builder.stats.protons')}: <b>${protons}</b> · ${t('builder.stats.neutrons')}: <b>${neutrons}</b>${deltas?` · ${t('builder.stats.delta')}: <b>${deltas}</b>`:''}${freeQuarks.length?` · <span style="color:#ff6b9d">${t('builder.stats.freeq')}: ${freeQuarks.length}</span>`:''}</div>
+    <div>${t('builder.stats.charge')}: <b>${chargeVal===0?'0':(chargeVal>0?'+':'')+chargeVal} e</b></div>
+    <div>${t('builder.stats.parts')}: <b>${parts.length}</b></div>
   `;
+}
 }
 function elementSymbol(z){
   const els=['','H','He','Li','Be','B','C','N','O','F','Ne','Na','Mg','Al','Si','P','S','Cl','Ar','K','Ca'];
@@ -486,7 +599,7 @@ function drawBuild(){
     bctx.fillStyle='rgba(78,168,255,0.5)';
     bctx.font='11px JetBrains Mono, monospace';
     bctx.textAlign='left';
-    bctx.fillText('electron shell (EM binding)', cx-atomR+10, cy-atomR-8);
+    bctx.fillText((LOCALES[window.CURRENT_LANG||'en']||LOCALES.en)['builder.label.shell'], cx-atomR+10, cy-atomR-8);
   }
 
   // Nucleus shell (strong force binding all nucleons)
@@ -504,7 +617,7 @@ function drawBuild(){
     bctx.fillStyle='rgba(255,107,157,0.6)';
     bctx.font='11px JetBrains Mono, monospace';
     bctx.textAlign='center';
-    bctx.fillText('nucleus (residual strong force)', cx, cy-R-8);
+    bctx.fillText((LOCALES[window.CURRENT_LANG||'en']||LOCALES.en)['builder.label.nucleus'], cx, cy-R-8);
 
     // draw pion-exchange lines between adjacent nucleons
     for(let i=0;i<nucleons.length;i++){
@@ -579,7 +692,7 @@ function drawBuild(){
     bctx.fillStyle='rgba(255,120,120,0.9)';
     bctx.font='10px Space Grotesk, sans-serif';
     bctx.textAlign='center';
-    bctx.fillText('confinement violated!', fq.x, fq.y+22);
+    bctx.fillText((LOCALES[window.CURRENT_LANG||'en']||LOCALES.en)['builder.confine'], fq.x, fq.y+22);
   });
 
   requestAnimationFrame(drawBuild);
@@ -844,4 +957,18 @@ setTimeout(()=>{
 },400);
 
 /* Show hydrogen as default in detail */
+// (deferred until after applyI18n)
+
+/* ================ LANGUAGE SWITCHER ================ */
+document.querySelectorAll('.lang-pill').forEach(b=>{
+  b.addEventListener('click',()=>{
+    const lang = b.dataset.lang;
+    try { localStorage.setItem('pz-lang', lang); } catch(_){}
+    applyI18n(lang);
+  });
+});
+const savedLang = (function(){ try { return localStorage.getItem('pz-lang'); } catch(_){ return null; } })();
+const browserLang = (navigator.language||'').toLowerCase();
+const initLang = savedLang || (browserLang.startsWith('zh') ? 'zh-CN' : 'en');
+applyI18n(initLang);
 showParticle('electron');

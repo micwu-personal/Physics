@@ -1,0 +1,787 @@
+/* ================== i18n ==================
+   Supported: en (default), zh-CN
+   Usage: data-i18n="key" on elements; call applyI18n(lang).
+   Particle data comes from PARTICLES_I18N[lang][id].
+   Terminology follows the CAS-approved Chinese physics glossary
+   (《物理学名词》 全国科学技术名词审定委员会).
+================================================== */
+
+const LOCALES = {
+  'en': {
+    // Meta
+    'page.title': 'Particle Zoo — An Interactive Journey into the Standard Model',
+    'hero.badge': 'The Standard Model · Interactive',
+    'hero.title.a': 'Particle',
+    'hero.title.b': 'Zoo',
+    'hero.tag': "Meet the elementary particles that build everything you've ever touched, seen, or dreamed of.",
+
+    // Tabs
+    'tab.chart': 'Standard Model',
+    'tab.detail': 'Particle Detail',
+    'tab.builder': 'Composition Builder',
+    'tab.forces': 'Forces & Interactions',
+    'tab.bsm': 'Beyond Standard Model',
+    'tab.phenomena': 'Quantum Phenomena',
+    'tab.playground': 'Physics Playground',
+
+    // Chart tab
+    'chart.h2': 'The Standard Model',
+    'chart.desc.a': '17',
+    'chart.desc.b': 'particle types — but quarks come in 3 colors and gluons in 8 varieties. Counted with all quantum states:',
+    'chart.desc.c': '61 distinct particles',
+    'chart.desc.d': '.',
+    'block.quarks': 'Quarks',
+    'block.quarks.hint': '— feel all four forces',
+    'block.leptons': 'Leptons',
+    'block.leptons.hint': '— electrons and neutrinos',
+    'block.bosons': 'Gauge Bosons',
+    'block.bosons.hint': '— force carriers',
+    'block.higgs': 'Scalar Boson',
+    'block.higgs.hint': '— gives mass',
+    'block.antiquarks': 'Antiquarks',
+    'block.antiquarks.hint': '— opposite charge, opposite color',
+    'block.antileptons': 'Anti-leptons',
+    'block.antileptons.hint': '— positron & friends',
+    'block.selfanti': 'Self-conjugate',
+    'block.selfanti.hint': "— its own antiparticle",
+    'selfanti.note': "W⁺ and W⁻ are each other's antiparticle. Gluons carry color-anticolor pairs, effectively being their own anti-family.",
+    'anti.h2': 'Antimatter — the Mirror World',
+    'anti.desc': 'Every fermion has an antiparticle with opposite charge and quantum numbers. Some bosons are their own antiparticle.',
+    'ct.quarks': 'Quarks',
+    'ct.quarks.sub': 'flavor × color',
+    'ct.antiquarks': 'Antiquarks',
+    'ct.antiquarks.sub': 'flavor × anticolor',
+    'ct.leptons': 'Leptons',
+    'ct.leptons.sub': '+ 6 anti',
+    'ct.gluons': 'Gluons',
+    'ct.gluons.sub': 'color combos',
+    'ct.ewbosons': 'EW bosons',
+    'ct.ewbosons.sub': 'W±, Z⁰, γ',
+    'ct.higgs': 'Higgs',
+    'ct.total': 'Quantum states',
+    'color.h3': '🎨 Color Charge — the "Strong" Rainbow',
+    'color.p1.a': 'Quarks carry one of three "color charges" (nothing to do with visible color) —',
+    'color.p1.red': 'red',
+    'color.p1.green': 'green',
+    'color.p1.blue': 'blue',
+    'color.p1.b': '. Antiquarks carry',
+    'color.p1.ar': 'anti-red',
+    'color.p1.ag': 'anti-green',
+    'color.p1.ab': 'anti-blue',
+    'color.p1.c': '. Only',
+    'color.p1.d': 'colorless',
+    'color.p1.e': 'combinations exist in nature: R+G+B (baryon) or C+C̄ (meson).',
+    'color.demo.proton': 'Proton (colorless: R+G+B)',
+    'color.demo.pion': 'π⁺ meson (color+anticolor)',
+    'color.p2.a': 'Gluons carry a color',
+    'color.p2.b': 'and',
+    'color.p2.c': "an anticolor at once — giving",
+    'color.p2.d': '8',
+    'color.p2.e': "independent gluons (not 9, because one combination is forbidden by SU(3) symmetry). This is why gluons interact with each other and cause quark",
+    'color.p2.f': 'confinement',
+    'color.p2.g': '.',
+
+    // Legend
+    'legend.quarks': 'Quarks',
+    'legend.leptons': 'Charged Leptons',
+    'legend.neutrinos': 'Neutrinos',
+    'legend.bosons': 'Gauge Bosons',
+    'legend.higgs': 'Higgs',
+
+    // Detail tab
+    'detail.search': 'Search particles...',
+    'detail.empty': 'Select a particle to explore its properties',
+    'detail.prop.mass': 'Mass',
+    'detail.prop.charge': 'Charge',
+    'detail.prop.spin': 'Spin',
+    'detail.prop.antiparticle': 'Antiparticle',
+    'detail.prop.discovered': 'Discovered',
+    'detail.prop.forces': 'Feels forces',
+    'detail.section.color': 'Color charge',
+    'detail.section.color.gluon': 'Color charge — 8 gluons',
+    'detail.section.anti': 'Antiparticle',
+    'detail.section.anti.self': 'Self-conjugate — this particle is its own antiparticle.',
+    'detail.section.facts': 'Key facts',
+    'detail.color.quark.a': 'Comes in',
+    'detail.color.quark.3col': '3 colors',
+    'detail.color.quark.3anti': '3 anticolors',
+    'detail.color.quark.b': ". Only colorless combinations exist freely in nature — via strong-force confinement.",
+    'detail.color.gluon': "Each gluon carries a color + anticolor (like R+ḡ). Naively there are 9 combinations, but SU(3) symmetry removes one, leaving 8 independent gluons. That's why gluons can interact with each other — unlike photons.",
+
+    // Builder tab
+    'builder.h2': 'Build the Universe',
+    'builder.desc': 'Drag quarks and electrons into the assembly zone. Watch protons, neutrons, and atoms come to life.',
+    'builder.parts': 'Parts',
+    'builder.clear': 'Clear',
+    'builder.tip': 'Tip: 2 up + 1 down = proton · 1 up + 2 down = neutron · proton + electron = hydrogen',
+    'builder.hint': 'Drop parts here — watch forces & composites form',
+    'builder.legend.strong': 'strong (gluon)',
+    'builder.legend.emattract': 'EM attract (photon)',
+    'builder.legend.emrepel': 'EM repel (photon)',
+    'builder.result.title': 'You built:',
+    'builder.result.empty': 'Nothing yet.',
+    'builder.stats.up': 'Up quarks (u)',
+    'builder.stats.down': 'Down (d)',
+    'builder.stats.electrons': 'Electrons',
+    'builder.stats.protons': 'Protons',
+    'builder.stats.neutrons': 'Neutrons',
+    'builder.stats.delta': 'Δ',
+    'builder.stats.freeq': 'Free q',
+    'builder.stats.charge': 'Total charge',
+    'builder.stats.parts': 'Total parts',
+    'builder.msg.freeq': '⚠ Free quarks present — the strong force forbids this (confinement)!',
+    'builder.msg.delta': 'Δ baryon(s) present — unstable, decays quickly',
+    'builder.msg.freeneutron': 'Free neutron (n⁰) — decays in ~15 min',
+    'builder.msg.electron.one': 'A lone electron (e⁻)',
+    'builder.msg.electron.many': 'free electrons',
+    'builder.confine': 'confinement violated!',
+    'builder.label.nucleus': 'nucleus (residual strong force)',
+    'builder.label.shell': 'electron shell (EM binding)',
+
+    // Forces tab
+    'forces.h2': 'The Four Fundamental Forces',
+    'forces.desc': 'Every interaction in the universe is one of these four.',
+    'forces.carrier': 'Carrier:',
+    'forces.carriers': 'Carriers:',
+    'forces.strength': 'Relative strength:',
+    'forces.range': 'Range:',
+    'forces.strong.h': 'Strong Force',
+    'forces.strong.c': 'Gluon (g)',
+    'forces.strong.s': '1 (strongest)',
+    'forces.strong.r': '~10⁻¹⁵ m (nucleus-size)',
+    'forces.strong.p': 'Binds quarks into protons/neutrons and holds the nucleus together. Gets stronger as quarks separate — you can never pull one out alone (confinement).',
+    'forces.strong.ex': 'Example: three quarks glued into a proton.',
+    'forces.em.h': 'Electromagnetism',
+    'forces.em.c': 'Photon (γ)',
+    'forces.em.s': '1/137',
+    'forces.em.r': 'infinite',
+    'forces.em.p': 'Governs charged particles. Responsible for light, chemistry, magnets, electricity, and every solid surface you touch.',
+    'forces.em.ex': 'Example: electron orbiting a proton = hydrogen atom.',
+    'forces.weak.h': 'Weak Force',
+    'forces.weak.c': 'W±, Z⁰ bosons',
+    'forces.weak.s': '10⁻⁶',
+    'forces.weak.r': '~10⁻¹⁸ m',
+    'forces.weak.p': 'Changes one flavor of quark or lepton into another. Powers radioactive beta decay and the fusion reactions inside the Sun.',
+    'forces.weak.ex': 'Example: neutron → proton + electron + antineutrino.',
+    'forces.grav.h': 'Gravity',
+    'forces.grav.c': 'Graviton? (hypothetical)',
+    'forces.grav.s': '10⁻³⁹',
+    'forces.grav.r': 'infinite',
+    'forces.grav.p': 'By far the weakest, but it always attracts and never cancels — so at cosmic scales it dominates. Not yet part of the Standard Model.',
+    'forces.grav.ex': 'Example: the Earth orbits the Sun.',
+    'ix.h3': 'Common Interactions',
+    'ix.beta': 'β⁻ decay:',
+    'ix.beta.note': '(weak force)',
+    'ix.pair': 'Pair production:',
+    'ix.pair.note': '(EM near a nucleus)',
+    'ix.annih': 'Annihilation:',
+    'ix.annih.note': '(EM)',
+    'ix.fusion': 'Fusion:',
+    'ix.fusion.note': '(weak — powers the Sun)',
+    'ix.higgs': 'Higgs decay:',
+    'ix.higgs.note': '(observed at LHC)',
+    'ix.gluon': 'Gluon exchange:',
+    'ix.gluon.note': '(strong — binds nucleons)',
+
+    // BSM tab
+    'bsm.h2': 'Beyond the Standard Model',
+    'bsm.desc': "The Standard Model is spectacular — but incomplete. It doesn't explain dark matter, gravity, or why the universe has more matter than antimatter. Here are the leading candidates.",
+    'flag.ok': 'CONFIRMED',
+    'flag.hypo': 'HYPOTHETICAL',
+    'flag.exotic': 'EXOTIC',
+    'flag.exoticreal': 'EXOTIC — real!',
+    'pkey.predicted': 'Predicted',
+    'pkey.discovered': 'Discovered',
+    'pkey.status': 'Status',
+    'pkey.type': 'Type',
+    'pkey.spin': 'Spin',
+    'pkey.mass': 'Mass',
+
+    'bsm.majorana.h': 'Majorana Fermion?',
+    'bsm.majorana.sub': 'a fermion that is its own antiparticle',
+    'bsm.majorana.pred': '1937 (Ettore Majorana)',
+    'bsm.majorana.stat': 'Neutrinos might be — searches ongoing',
+    'bsm.majorana.p': "Ettore Majorana proposed that a neutral spin-½ fermion could be identical to its own antiparticle. Neutrinos are the only Standard-Model fermions where this is still possible. Experiments looking for neutrinoless double-beta decay (0νββ) — KamLAND-Zen, CUORE, LEGEND — would prove it. If true, the seesaw mechanism would explain why neutrinos have such tiny masses.",
+    'bsm.majorana.tag': "Also emerges as \"Majorana zero modes\" in topological superconductors — used in Microsoft's 2025 Majorana-1 quantum chip.",
+
+    'bsm.oscill.h': 'Neutrino Oscillation',
+    'bsm.oscill.sub': 'first crack in the Standard Model',
+    'bsm.oscill.disc': '1998 (Super-Kamiokande) — Nobel 2015',
+    'bsm.oscill.stat': 'Confirmed & measured',
+    'bsm.oscill.p': "Neutrinos change flavor mid-flight (νₑ ↔ ν_μ ↔ ν_τ). This only works if neutrinos have mass, contradicting the original massless-neutrino Standard Model. The mechanism giving them mass is unknown — this is our best experimental window into new physics.",
+
+    'bsm.graviton.h': 'Graviton',
+    'bsm.graviton.sub': 'force carrier of gravity',
+    'bsm.graviton.pred': '1930s',
+    'bsm.graviton.spin': '2 (massless)',
+    'bsm.graviton.stat': 'Individually undetectable in practice',
+    'bsm.graviton.p': "If gravity is quantum, it needs a carrier — the graviton. A single graviton is so weakly-coupled that detecting one would require a Jupiter-mass detector orbiting a neutron star. We've detected gravitational waves (LIGO, 2015) — but not individual gravitons.",
+
+    'bsm.sterile.h': 'Sterile Neutrino (ν<sub>s</sub>)',
+    'bsm.sterile.sub': 'right-handed, no weak force',
+    'bsm.sterile.pred': '1970s',
+    'bsm.sterile.stat': 'Anomalies at LSND/MiniBooNE, unconfirmed',
+    'bsm.sterile.p': "A neutrino that doesn't feel any Standard-Model force except gravity. Could be dark matter, could explain neutrino masses. Fermilab's Short-Baseline Neutrino program is hunting for it now.",
+
+    'bsm.axion.h': 'Axion',
+    'bsm.axion.sub': 'dark matter candidate',
+    'bsm.axion.pred': '1977 (Peccei-Quinn)',
+    'bsm.axion.mass': '~μeV to meV (ultra-light)',
+    'bsm.axion.stat': 'Actively searched (ADMX, HAYSTAC, ABRACADABRA)',
+    'bsm.axion.p': "Invented to solve the \"strong CP problem\" (why the strong force doesn't violate CP-symmetry). Turned out to also be a great dark-matter candidate — ultra-light, extremely weakly coupled, forming a cosmic wave filling the galaxy.",
+
+    'bsm.wimp.h': 'WIMPs',
+    'bsm.wimp.sub': 'Weakly-Interacting Massive Particles',
+    'bsm.wimp.pred': '1970s onward',
+    'bsm.wimp.mass': '10 GeV – TeV',
+    'bsm.wimp.stat': 'Not found; parameter space shrinking rapidly',
+    'bsm.wimp.p': 'Once the leading dark matter candidate. Experiments like XENONnT, LZ, and PandaX have ruled out huge swaths of parameter space. Still viable, but axions and sterile neutrinos are gaining favor.',
+
+    'bsm.susy.h': 'SUSY Partners',
+    'bsm.susy.sub': 'selectron, squark, gluino, neutralino, …',
+    'bsm.susy.pred': '1970s (Gelfand, Wess, Zumino)',
+    'bsm.susy.stat': 'None found up to ~2 TeV at LHC',
+    'bsm.susy.p': 'Supersymmetry doubles the particle count — every fermion gets a "s-" partner boson (selectron, squark), every boson gets a "-ino" partner fermion (photino, gluino, higgsino). Would unify forces & provide dark matter (lightest neutralino). The simplest SUSY models are now excluded.',
+
+    'bsm.monopole.h': 'Magnetic Monopole',
+    'bsm.monopole.sub': 'isolated magnetic charge',
+    'bsm.monopole.pred': '1931 (Dirac)',
+    'bsm.monopole.stat': 'Never found; MoEDAL at LHC searches',
+    'bsm.monopole.p': 'Existence of even one would explain why electric charge is quantized. GUTs predict them ultra-heavy (~10¹⁶ GeV). One tantalizing candidate event at Stanford in 1982 — never repeated.',
+
+    'bsm.anyon.h': 'Anyons',
+    'bsm.anyon.sub': 'neither fermion nor boson',
+    'bsm.anyon.pred': '1977 (Leinaas & Myrheim), 1982 (Wilczek)',
+    'bsm.anyon.disc': '2020 (fractional quantum Hall systems)',
+    'bsm.anyon.p': 'In 2D, particles can be neither bosons nor fermions — swapping two gives an arbitrary phase (hence "any"-ons). Non-abelian anyons are the basis of topological quantum computing.',
+
+    'bsm.tetra.h': 'Tetraquarks & Pentaquarks',
+    'bsm.tetra.sub': 'exotic hadrons',
+    'bsm.tetra.disc': '2003 (X(3872)), 2015 (LHCb pentaquarks)',
+    'bsm.tetra.stat': 'Confirmed — dozens known',
+    'bsm.tetra.p': 'QCD allows more than just 3-quark baryons and 2-quark mesons. LHCb keeps finding new tetraquarks (Tcc⁺, 2021) and pentaquarks that push the limits of hadronic physics.',
+
+    'bsm.glueball.h': 'Glueball',
+    'bsm.glueball.sub': 'a particle of pure gluons',
+    'bsm.glueball.pred': '1972 (QCD)',
+    'bsm.glueball.stat': 'Candidates (f₀(1710)) — 2024 BESIII strong evidence',
+    'bsm.glueball.p': 'Because gluons carry color charge themselves, they can bind into pure-glue particles. Very hard to distinguish from ordinary mesons — but the BESIII experiment has strong evidence.',
+
+    'bsm.preon.h': 'Preons',
+    'bsm.preon.sub': '"inside" the quarks & leptons?',
+    'bsm.preon.pred': '1970s–80s',
+    'bsm.preon.stat': 'No evidence; LHC probes to ~10⁻²⁰ m',
+    'bsm.preon.p': 'What if quarks and leptons are themselves made of smaller things? "Preon" models keep being ruled out as colliders find no substructure. But the pattern of 3 generations is still unexplained.',
+
+    // Phenomena
+    'phen.h2': 'Emergent Quantum Phenomena',
+    'phen.desc': 'When many particles obey quantum rules together, matter enters entirely new states.',
+
+    'phen.bec.h': 'Bose-Einstein Condensate (BEC)',
+    'phen.bec.sub': 'Predicted 1924–25 (Bose & Einstein) · Realized 1995 · Nobel 2001',
+    'phen.bec.p': 'Cool bosons below ~10⁻⁷ K and thousands of atoms collapse into the same quantum state — a single macroscopic "super-atom" you can photograph. Wavefunctions overlap; quantum mechanics goes visible.',
+    'phen.bec.key': 'Requires integer-spin particles (bosons) that can pile into one state — strictly forbidden for fermions by Pauli exclusion.',
+    'phen.bec.ex': 'Made with rubidium-87, sodium-23, hydrogen, and even photons in optical cavities.',
+
+    'phen.super.h': 'Superconductivity & Cooper Pairs',
+    'phen.super.sub': 'Discovered 1911 (Kamerlingh Onnes) · Explained 1957 (BCS)',
+    'phen.super.p': 'Below a critical temperature, electrons pair up into Cooper pairs. Two electrons (fermions) form a composite boson, which then Bose-condense and flow with zero resistance.',
+    'phen.super.key': 'Cooper pairs = fermion-to-boson metamorphosis. Related to BEC but occurring inside a metal lattice.',
+    'phen.super.ex': 'MRI magnets, particle accelerators, and superconducting qubits (IBM, Google) all use this.',
+
+    'phen.superfluid.h': 'Superfluidity',
+    'phen.superfluid.sub': 'Discovered 1937 (Kapitsa, Allen & Misener) · Nobel 1978',
+    'phen.superfluid.p': 'Liquid ⁴He below 2.17 K flows without any viscosity, climbs container walls, and passes through microscopic pores. ⁴He nuclei are bosons (spin-0), so they Bose-condense.',
+    'phen.superfluid.key': '⁴He = 12 fermions total → integer spin → boson. ³He is fermionic and needs Cooper pairs to become superfluid (at millikelvin temperatures).',
+
+    'phen.qgp.h': 'Quark-Gluon Plasma',
+    'phen.qgp.sub': 'Created 2000 (RHIC), 2010 (LHC ALICE)',
+    'phen.qgp.p': 'Heat ordinary matter above ~2 trillion K and quarks become "deconfined" — the strong force loses grip; quarks and gluons flow as a nearly-perfect liquid. This is what the universe looked like ~10 microseconds after the Big Bang.',
+    'phen.qgp.key': 'The only state where free quarks briefly exist. Cools back into hadrons in less than 10⁻²³ seconds.',
+
+    'phen.entangle.h': 'Quantum Entanglement',
+    'phen.entangle.sub': 'EPR paradox 1935 · Bell 1964 · Nobel 2022 (Aspect, Clauser, Zeilinger)',
+    'phen.entangle.p': 'Two particles can share a single quantum state — measuring one instantly determines the other, even light-years apart. Not "spooky communication" but a genuine feature of quantum mechanics.',
+    'phen.entangle.ex': 'Basis of quantum cryptography (BB84), quantum teleportation, and quantum computing.',
+
+    'phen.pauli.h': 'Pauli Exclusion & Degeneracy Pressure',
+    'phen.pauli.sub': 'Pauli, 1925 · Nobel 1945',
+    'phen.pauli.p': "Two fermions can't occupy the same quantum state. This is why atoms have shells, why the periodic table works, and why white dwarf stars don't collapse — the pressure of packed electrons holds them up.",
+    'phen.pauli.key': 'Above the Chandrasekhar limit (1.4 M☉), even electron pressure fails and the star becomes a neutron star, held up by neutron degeneracy pressure.',
+
+    'phen.topo.h': 'Topological Matter',
+    'phen.topo.sub': 'Nobel 2016 (Thouless, Haldane, Kosterlitz)',
+    'phen.topo.p': 'Some materials host quasi-particles that behave like massless Dirac fermions — or even Majorana zero modes. These are the frontier of quantum computing.',
+    'phen.topo.ex': "Topological insulators, Weyl semimetals, and Microsoft's Majorana-1 chip (Feb 2025) — the first claim of a topological qubit.",
+
+    'phen.hawking.h': 'Hawking Radiation',
+    'phen.hawking.sub': 'Predicted 1974 (Hawking)',
+    'phen.hawking.p': 'Quantum field fluctuations near a black hole horizon produce virtual particle pairs; one falls in, one escapes as radiation. Never directly observed astronomically but seen in analog systems (sonic black holes, 2019).',
+
+    'phen.fermicond.h': 'Fermionic Condensate',
+    'phen.fermicond.sub': 'Realized 2003 (Deborah Jin, JILA)',
+    'phen.fermicond.p': 'The fermionic cousin of BEC. Ultra-cold ⁶Li or ⁴⁰K fermions pair up (BCS-like) and condense. Bridges the gap between BEC and superconductivity in a controlled system.',
+
+    // Playground
+    'pg.h2': 'Physics Playground',
+    'pg.desc': 'Spawn particles and watch them interact. Opposite charges attract, like charges repel, matter + antimatter annihilate into photons.',
+    'pg.spawn.e': '+ Electron (e⁻)',
+    'pg.spawn.p': '+ Positron (e⁺)',
+    'pg.spawn.pr': '+ Proton',
+    'pg.spawn.ph': '+ Photon',
+    'pg.spawn.n': '+ Neutron',
+    'pg.clear': 'Clear',
+    'pg.trails': 'trails',
+
+    // Footer
+    'footer': 'Built for curiosity · data from the Particle Data Group'
+  },
+
+  'zh-CN': {
+    'page.title': '粒子动物园 — 标准模型的交互之旅',
+    'hero.badge': '粒子物理标准模型 · 交互式',
+    'hero.title.a': '粒子',
+    'hero.title.b': '动物园',
+    'hero.tag': '认识构成万物的基本粒子——从你触摸到的物体、看到的光,到你的每一个念头。',
+
+    'tab.chart': '标准模型',
+    'tab.detail': '粒子详情',
+    'tab.builder': '组合搭建器',
+    'tab.forces': '基本相互作用',
+    'tab.bsm': '超出标准模型',
+    'tab.phenomena': '量子现象',
+    'tab.playground': '物理沙盘',
+
+    'chart.h2': '粒子物理标准模型',
+    'chart.desc.a': '17',
+    'chart.desc.b': '种基本粒子——但夸克有 3 种色荷,胶子有 8 种。计入所有量子态后共有:',
+    'chart.desc.c': '61 种独立粒子',
+    'chart.desc.d': '。',
+    'block.quarks': '夸克',
+    'block.quarks.hint': '— 参与全部四种基本相互作用',
+    'block.leptons': '轻子',
+    'block.leptons.hint': '— 电子与中微子',
+    'block.bosons': '规范玻色子',
+    'block.bosons.hint': '— 相互作用的媒介粒子',
+    'block.higgs': '标量玻色子',
+    'block.higgs.hint': '— 赋予质量',
+    'block.antiquarks': '反夸克',
+    'block.antiquarks.hint': '— 电荷相反、色荷相反',
+    'block.antileptons': '反轻子',
+    'block.antileptons.hint': '— 正电子及其同伴',
+    'block.selfanti': '自共轭粒子',
+    'block.selfanti.hint': '— 是其自身的反粒子',
+    'selfanti.note': 'W⁺ 与 W⁻ 互为反粒子。胶子携带"色—反色"对,整个胶子家族在某种意义上是自共轭的。',
+    'anti.h2': '反物质 — 镜像世界',
+    'anti.desc': '每一种费米子都有一个电荷及量子数相反的反粒子。部分玻色子的反粒子就是它自己。',
+    'ct.quarks': '夸克',
+    'ct.quarks.sub': '味 × 色',
+    'ct.antiquarks': '反夸克',
+    'ct.antiquarks.sub': '味 × 反色',
+    'ct.leptons': '轻子',
+    'ct.leptons.sub': '+ 6 反轻子',
+    'ct.gluons': '胶子',
+    'ct.gluons.sub': '色荷组合',
+    'ct.ewbosons': '电弱玻色子',
+    'ct.ewbosons.sub': 'W±, Z⁰, γ',
+    'ct.higgs': '希格斯',
+    'ct.total': '量子态总数',
+    'color.h3': '🎨 色荷 — 强相互作用的"彩虹"',
+    'color.p1.a': '夸克带有三种"色荷"之一(与可见光的颜色无关)——',
+    'color.p1.red': '红',
+    'color.p1.green': '绿',
+    'color.p1.blue': '蓝',
+    'color.p1.b': ';反夸克则带',
+    'color.p1.ar': '反红',
+    'color.p1.ag': '反绿',
+    'color.p1.ab': '反蓝',
+    'color.p1.c': '。自然界中只允许出现',
+    'color.p1.d': '色单态',
+    'color.p1.e': '组合:红+绿+蓝(重子)或色+反色(介子)。',
+    'color.demo.proton': '质子(色单态:R+G+B)',
+    'color.demo.pion': 'π⁺ 介子(色+反色)',
+    'color.p2.a': '胶子同时携带一种色荷',
+    'color.p2.b': '和',
+    'color.p2.c': '一种反色荷——因此共有',
+    'color.p2.d': '8',
+    'color.p2.e': '种独立胶子(不是 9 种,因为 SU(3) 对称性去除了一种组合)。正因为如此,胶子之间会相互作用,导致夸克',
+    'color.p2.f': '色禁闭',
+    'color.p2.g': '。',
+
+    'legend.quarks': '夸克',
+    'legend.leptons': '带电轻子',
+    'legend.neutrinos': '中微子',
+    'legend.bosons': '规范玻色子',
+    'legend.higgs': '希格斯',
+
+    'detail.search': '搜索粒子...',
+    'detail.empty': '选择一种粒子以查看其性质',
+    'detail.prop.mass': '质量',
+    'detail.prop.charge': '电荷',
+    'detail.prop.spin': '自旋',
+    'detail.prop.antiparticle': '反粒子',
+    'detail.prop.discovered': '发现时间',
+    'detail.prop.forces': '参与的相互作用',
+    'detail.section.color': '色荷',
+    'detail.section.color.gluon': '色荷 — 8 种胶子',
+    'detail.section.anti': '反粒子',
+    'detail.section.anti.self': '自共轭 — 该粒子是其自身的反粒子。',
+    'detail.section.facts': '要点',
+    'detail.color.quark.a': '共有',
+    'detail.color.quark.3col': '3 种色荷',
+    'detail.color.quark.3anti': '3 种反色荷',
+    'detail.color.quark.b': '。自然界中只允许色单态组合自由存在——这源于强相互作用的色禁闭。',
+    'detail.color.gluon': '每个胶子同时携带一种色荷与一种反色荷(如 R+ḡ)。表面上有 9 种组合,但 SU(3) 对称性排除了其中一种,剩下 8 种独立胶子。这也是胶子彼此相互作用(不同于光子)的根本原因。',
+
+    'builder.h2': '搭建宇宙',
+    'builder.desc': '把夸克和电子拖进组合区,观察质子、中子和原子如何诞生。',
+    'builder.parts': '零件',
+    'builder.clear': '清空',
+    'builder.tip': '提示: 2 个 up + 1 个 down = 质子 · 1 个 up + 2 个 down = 中子 · 质子 + 电子 = 氢原子',
+    'builder.hint': '把零件拖到此处 — 观察各种相互作用与复合粒子的形成',
+    'builder.legend.strong': '强相互作用(胶子)',
+    'builder.legend.emattract': '电磁吸引(光子)',
+    'builder.legend.emrepel': '电磁排斥(光子)',
+    'builder.result.title': '你搭建出:',
+    'builder.result.empty': '尚未组装。',
+    'builder.stats.up': '上夸克 (u)',
+    'builder.stats.down': '下夸克 (d)',
+    'builder.stats.electrons': '电子',
+    'builder.stats.protons': '质子',
+    'builder.stats.neutrons': '中子',
+    'builder.stats.delta': 'Δ 重子',
+    'builder.stats.freeq': '游离夸克',
+    'builder.stats.charge': '总电荷',
+    'builder.stats.parts': '总零件数',
+    'builder.msg.freeq': '⚠ 存在游离夸克——强相互作用的色禁闭禁止这种情况!',
+    'builder.msg.delta': '包含 Δ 重子 — 不稳定,会迅速衰变',
+    'builder.msg.freeneutron': '自由中子 (n⁰) — 平均寿命约 15 分钟',
+    'builder.msg.electron.one': '一个孤立电子 (e⁻)',
+    'builder.msg.electron.many': '个自由电子',
+    'builder.confine': '违反色禁闭!',
+    'builder.label.nucleus': '原子核(剩余强相互作用)',
+    'builder.label.shell': '电子壳层(电磁束缚)',
+
+    'forces.h2': '四种基本相互作用',
+    'forces.desc': '宇宙中的一切相互作用都属于这四种之一。',
+    'forces.carrier': '媒介粒子:',
+    'forces.carriers': '媒介粒子:',
+    'forces.strength': '相对强度:',
+    'forces.range': '作用范围:',
+    'forces.strong.h': '强相互作用',
+    'forces.strong.c': '胶子 (g)',
+    'forces.strong.s': '1(最强)',
+    'forces.strong.r': '约 10⁻¹⁵ 米(原子核尺度)',
+    'forces.strong.p': '把夸克束缚成质子/中子,并把原子核维系在一起。夸克越分离,力越强——你永远无法把单个夸克拉出来(色禁闭)。',
+    'forces.strong.ex': '例子:三个夸克被"胶合"成一个质子。',
+    'forces.em.h': '电磁相互作用',
+    'forces.em.c': '光子 (γ)',
+    'forces.em.s': '1/137',
+    'forces.em.r': '无穷远',
+    'forces.em.p': '支配带电粒子。是光、化学、磁性、电流,以及你所触碰的每一个固体表面的根源。',
+    'forces.em.ex': '例子:电子围绕质子运行 = 氢原子。',
+    'forces.weak.h': '弱相互作用',
+    'forces.weak.c': 'W±、Z⁰ 玻色子',
+    'forces.weak.s': '10⁻⁶',
+    'forces.weak.r': '约 10⁻¹⁸ 米',
+    'forces.weak.p': '能改变夸克或轻子的味。放射性 β 衰变、太阳内部的聚变反应都靠它。',
+    'forces.weak.ex': '例子:中子 → 质子 + 电子 + 反中微子。',
+    'forces.grav.h': '万有引力',
+    'forces.grav.c': '引力子?(假想)',
+    'forces.grav.s': '10⁻³⁹',
+    'forces.grav.r': '无穷远',
+    'forces.grav.p': '目前已知最弱的相互作用,但它总是吸引且永不抵消——因此在宇宙尺度上占主导。尚未纳入标准模型。',
+    'forces.grav.ex': '例子:地球绕太阳公转。',
+    'ix.h3': '常见的相互作用过程',
+    'ix.beta': 'β⁻ 衰变:',
+    'ix.beta.note': '(弱相互作用)',
+    'ix.pair': '正反粒子对产生:',
+    'ix.pair.note': '(原子核附近的电磁过程)',
+    'ix.annih': '正反粒子湮灭:',
+    'ix.annih.note': '(电磁相互作用)',
+    'ix.fusion': '核聚变:',
+    'ix.fusion.note': '(弱相互作用 — 太阳的能量来源)',
+    'ix.higgs': '希格斯衰变:',
+    'ix.higgs.note': '(已在 LHC 观测到)',
+    'ix.gluon': '胶子交换:',
+    'ix.gluon.note': '(强相互作用 — 束缚核子)',
+
+    'bsm.h2': '超出标准模型',
+    'bsm.desc': '标准模型极其成功,但仍不完备。它无法解释暗物质、引力,也无法解释宇宙中为何物质多于反物质。以下是最主要的候选者。',
+    'flag.ok': '已确认',
+    'flag.hypo': '假想',
+    'flag.exotic': '奇特',
+    'flag.exoticreal': '奇特 — 已发现!',
+    'pkey.predicted': '提出时间',
+    'pkey.discovered': '发现时间',
+    'pkey.status': '现状',
+    'pkey.type': '类型',
+    'pkey.spin': '自旋',
+    'pkey.mass': '质量',
+
+    'bsm.majorana.h': '马约拉纳费米子?',
+    'bsm.majorana.sub': '自身即为其反粒子的费米子',
+    'bsm.majorana.pred': '1937(埃托雷·马约拉纳)',
+    'bsm.majorana.stat': '中微子可能是——实验正在进行',
+    'bsm.majorana.p': '马约拉纳提出:中性自旋 1/2 的费米子可能与其自身反粒子相同。中微子是标准模型中唯一仍可能满足此性质的费米子。搜寻"无中微子双β衰变"(0νββ)的实验——KamLAND-Zen、CUORE、LEGEND 等——将可证实这一点。若成立,"跷跷板机制"可解释中微子为何如此轻。',
+    'bsm.majorana.tag': '在拓扑超导体中也会以"马约拉纳零模"的形式出现——即微软 2025 年 Majorana-1 量子芯片所依赖的物理。',
+
+    'bsm.oscill.h': '中微子振荡',
+    'bsm.oscill.sub': '标准模型出现的第一道裂纹',
+    'bsm.oscill.disc': '1998(超级神冈)— 2015 年诺贝尔奖',
+    'bsm.oscill.stat': '已确认并精确测量',
+    'bsm.oscill.p': '中微子在飞行中会改变味(νₑ ↔ ν_μ ↔ ν_τ)。这一现象只有在中微子具有质量的前提下才能发生,与原始的"零质量中微子"标准模型不符。赋予中微子质量的机制尚不明确——这是我们通向新物理最重要的实验窗口。',
+
+    'bsm.graviton.h': '引力子',
+    'bsm.graviton.sub': '引力的媒介粒子',
+    'bsm.graviton.pred': '20 世纪 30 年代',
+    'bsm.graviton.spin': '2(无质量)',
+    'bsm.graviton.stat': '在实际上无法探测到单个引力子',
+    'bsm.graviton.p': '如果引力是量子化的,就应存在其媒介粒子——引力子。单个引力子的耦合极弱,要探测它需要一个绕中子星运行的木星质量的探测器。我们已经探测到"引力波"(LIGO,2015),但从未探测到单个引力子。',
+
+    'bsm.sterile.h': '惰性中微子 (ν<sub>s</sub>)',
+    'bsm.sterile.sub': '右手性,不参与弱相互作用',
+    'bsm.sterile.pred': '20 世纪 70 年代',
+    'bsm.sterile.stat': 'LSND/MiniBooNE 出现反常,尚未证实',
+    'bsm.sterile.p': '一种除引力外不参与任何标准模型相互作用的中微子。可能构成暗物质,也可能解释中微子质量。费米实验室的"短基线中微子计划"正在寻找它。',
+
+    'bsm.axion.h': '轴子',
+    'bsm.axion.sub': '暗物质候选者',
+    'bsm.axion.pred': '1977(佩塞-奎因)',
+    'bsm.axion.mass': '约 μeV 至 meV(超轻)',
+    'bsm.axion.stat': '正积极搜寻(ADMX、HAYSTAC、ABRACADABRA)',
+    'bsm.axion.p': '最初为解决"强 CP 问题"(强相互作用为何不破坏 CP 对称性)而提出,后来发现它还是极佳的暗物质候选者——超轻、耦合极弱,可以在整个星系中形成一片"轴子背景波"。',
+
+    'bsm.wimp.h': '弱作用重粒子 (WIMP)',
+    'bsm.wimp.sub': '弱相互作用大质量粒子',
+    'bsm.wimp.pred': '1970 年代起',
+    'bsm.wimp.mass': '10 GeV — TeV',
+    'bsm.wimp.stat': '尚未发现,允许的参数空间正快速缩小',
+    'bsm.wimp.p': '曾是最热门的暗物质候选者。XENONnT、LZ、PandaX 等实验已排除了绝大部分参数空间。虽仍有余地,但轴子与惰性中微子如今更受青睐。',
+
+    'bsm.susy.h': '超对称伙伴',
+    'bsm.susy.sub': '标量电子、标量夸克、胶微子、中性微子……',
+    'bsm.susy.pred': '1970 年代(格尔范德、韦斯、朱米诺)',
+    'bsm.susy.stat': 'LHC 至 2 TeV 未发现任何超对称粒子',
+    'bsm.susy.p': '超对称让粒子数翻倍——每个费米子都有一个前缀"s-"的玻色子伙伴(标量电子、标量夸克),每个玻色子都有一个后缀"-ino"的费米子伙伴(光微子、胶微子、希格斯微子)。它将统一各种相互作用,并给出天然的暗物质候选者(最轻的中性微子)。目前最简单的超对称模型已被 LHC 排除。',
+
+    'bsm.monopole.h': '磁单极子',
+    'bsm.monopole.sub': '孤立的磁"电荷"',
+    'bsm.monopole.pred': '1931(狄拉克)',
+    'bsm.monopole.stat': '从未发现,LHC 的 MoEDAL 实验持续搜寻',
+    'bsm.monopole.p': '哪怕只发现一个磁单极子,也可解释电荷为何是量子化的。大统一理论预言其质量极大(约 10¹⁶ GeV)。1982 年斯坦福曾观测到一个疑似事件,此后再未重现。',
+
+    'bsm.anyon.h': '任意子',
+    'bsm.anyon.sub': '既非费米子也非玻色子',
+    'bsm.anyon.pred': '1977(莱纳斯-米尔海姆)、1982(维尔切克)',
+    'bsm.anyon.disc': '2020(分数量子霍尔系统)',
+    'bsm.anyon.p': '在二维中,粒子可以既非玻色子也非费米子——交换两个任意子会带来一个任意的相位,因此得名。非阿贝尔任意子是"拓扑量子计算"的基础。',
+
+    'bsm.tetra.h': '四夸克态与五夸克态',
+    'bsm.tetra.sub': '奇特强子',
+    'bsm.tetra.disc': '2003(X(3872))、2015(LHCb 五夸克态)',
+    'bsm.tetra.stat': '已确认,已知数十种',
+    'bsm.tetra.p': 'QCD 允许远不止 3 夸克重子与 2 夸克介子。LHCb 不断发现新的四夸克态(如 2021 年的 Tcc⁺)和五夸克态,持续拓展强子物理的边界。',
+
+    'bsm.glueball.h': '胶球',
+    'bsm.glueball.sub': '完全由胶子构成的粒子',
+    'bsm.glueball.pred': '1972(QCD)',
+    'bsm.glueball.stat': '存在候选者 f₀(1710) — 2024 年 BESIII 获得强证据',
+    'bsm.glueball.p': '由于胶子自身带有色荷,它们可以彼此束缚形成"纯胶子"粒子。与普通介子难以区分——但北京谱仪(BESIII)已提供了强证据。',
+
+    'bsm.preon.h': '前子 (Preon)',
+    'bsm.preon.sub': '夸克与轻子内部是否还有结构?',
+    'bsm.preon.pred': '20 世纪 70—80 年代',
+    'bsm.preon.stat': '无证据;LHC 已探测到约 10⁻²⁰ 米,未见内部结构',
+    'bsm.preon.p': '若夸克和轻子本身由更小的东西组成会怎样?对撞机没有发现任何内部结构,"前子"模型不断被排除。但"三代"的模式为何存在,至今仍是未解之谜。',
+
+    'phen.h2': '涌现出的量子现象',
+    'phen.desc': '当大量粒子共同遵循量子规则时,物质会进入全新的相态。',
+
+    'phen.bec.h': '玻色—爱因斯坦凝聚 (BEC)',
+    'phen.bec.sub': '1924—25 年由玻色与爱因斯坦预言 · 1995 年首次实现 · 2001 年诺贝尔奖',
+    'phen.bec.p': '将玻色子冷却到约 10⁻⁷ K 以下,数以千计的原子会坍缩到同一个量子态——形成一个宏观的"超原子",甚至可以直接拍照观测。波函数彼此重叠,量子力学"显形"于宏观世界。',
+    'phen.bec.key': '要求整数自旋粒子(玻色子)能堆积在同一量子态——费米子由于泡利不相容原理严格禁止。',
+    'phen.bec.ex': '已用铷-87、钠-23、氢原子,甚至光学腔中的光子实现。',
+
+    'phen.super.h': '超导性与库珀对',
+    'phen.super.sub': '1911 年发现(卡末林·昂内斯)· 1957 年 BCS 理论解释',
+    'phen.super.p': '在临界温度以下,电子会两两配对形成"库珀对"。两个电子(费米子)组合成一个复合玻色子,继而发生玻色凝聚,以零电阻的方式流动。',
+    'phen.super.key': '库珀对 = 从费米子到玻色子的蜕变。原理与 BEC 类似,但发生在金属晶格内部。',
+    'phen.super.ex': '核磁共振磁体、粒子加速器,以及超导量子比特(IBM、Google)都基于这一原理。',
+
+    'phen.superfluid.h': '超流性',
+    'phen.superfluid.sub': '1937 年发现(卡皮察、艾伦与米森纳)· 1978 年诺贝尔奖',
+    'phen.superfluid.p': '⁴He 液体在 2.17 K 以下没有任何粘滞性,可以沿容器壁向上爬,还能通过极其细小的孔隙。⁴He 核是玻色子(自旋为 0),因此发生玻色凝聚。',
+    'phen.superfluid.key': '⁴He 由 12 个费米子构成 → 总自旋为整数 → 玻色子。³He 是费米子,只有在毫开尔文温度下形成库珀对后才具有超流性。',
+
+    'phen.qgp.h': '夸克—胶子等离子体',
+    'phen.qgp.sub': '2000 年 RHIC、2010 年 LHC ALICE 首次产生',
+    'phen.qgp.p': '将普通物质加热到约 2 万亿 K 以上,夸克便进入"解禁闭"状态——强相互作用不再束缚,夸克与胶子像近乎完美的液体一样流动。这正是宇宙大爆炸后约 10 微秒时的模样。',
+    'phen.qgp.key': '这是唯一存在游离夸克的相态,但会在 10⁻²³ 秒内冷却回强子。',
+
+    'phen.entangle.h': '量子纠缠',
+    'phen.entangle.sub': '1935 EPR 佯谬 · 1964 贝尔不等式 · 2022 诺贝尔奖(阿斯佩、克劳泽、蔡林格)',
+    'phen.entangle.p': '两个粒子可以共享一个量子态——测量其中一个,另一个的状态便被瞬时决定,即使相隔光年。这并非"超光速通信",而是量子力学固有的性质。',
+    'phen.entangle.ex': '是量子密钥分发(BB84)、量子隐形传态与量子计算的基础。',
+
+    'phen.pauli.h': '泡利不相容与简并压',
+    'phen.pauli.sub': '泡利,1925 · 1945 年诺贝尔奖',
+    'phen.pauli.p': '两个费米子不能占据同一个量子态。正因为如此,原子才有电子壳层,元素周期律才成立,白矮星才不会坍缩——是密集堆积的电子撑起了它。',
+    'phen.pauli.key': '一旦超过钱德拉塞卡极限(1.4 太阳质量),电子简并压也无能为力,恒星就会坍缩成中子星,由"中子简并压"支撑。',
+
+    'phen.topo.h': '拓扑物态',
+    'phen.topo.sub': '2016 年诺贝尔奖(索利斯、霍尔丹、科斯特利茨)',
+    'phen.topo.p': '某些材料中会出现类似无质量狄拉克费米子,甚至"马约拉纳零模"的准粒子。它们是量子计算的前沿方向。',
+    'phen.topo.ex': '拓扑绝缘体、外尔半金属,以及微软 2025 年 2 月发布的 Majorana-1 芯片——首次声称实现拓扑量子比特。',
+
+    'phen.hawking.h': '霍金辐射',
+    'phen.hawking.sub': '1974 年由霍金预言',
+    'phen.hawking.p': '在黑洞视界附近,量子场涨落产生虚粒子对;其中一个落入黑洞,另一个逃逸出来形成辐射。天文学上尚未直接观测到,但在类比系统中(声学黑洞,2019 年)已有观测。',
+
+    'phen.fermicond.h': '费米子凝聚',
+    'phen.fermicond.sub': '2003 年首次实现(黛博拉·金,JILA)',
+    'phen.fermicond.p': '与 BEC 对应的费米子版本。将 ⁶Li 或 ⁴⁰K 费米子冷却至极低温后,它们类似 BCS 机制两两配对再发生凝聚。它在一个可控体系中连接了 BEC 与超导性。',
+
+    'pg.h2': '物理沙盘',
+    'pg.desc': '生成粒子并观察它们的相互作用。异号电荷相互吸引,同号电荷相互排斥;正反粒子相遇则湮灭为光子。',
+    'pg.spawn.e': '+ 电子 (e⁻)',
+    'pg.spawn.p': '+ 正电子 (e⁺)',
+    'pg.spawn.pr': '+ 质子',
+    'pg.spawn.ph': '+ 光子',
+    'pg.spawn.n': '+ 中子',
+    'pg.clear': '清空',
+    'pg.trails': '轨迹',
+
+    'footer': '为好奇心而造 · 数据来自粒子数据组 (PDG)'
+  }
+};
+
+/* ================= Particle data translations =================
+   Chinese physics names follow《物理学名词》(全国科学技术名词审定委员会).
+================================================================= */
+
+const PARTICLES_I18N = {
+  'zh-CN': {
+    up:      {name:'上夸克',    cls:'夸克(第一代)',   desc:'第一代夸克之一,也是构成质子与中子的两种基本组分之一。上夸克参与全部四种基本相互作用。',
+      facts:['两个上夸克 + 一个下夸克 = 质子','一个上夸克 + 两个下夸克 = 中子','带有色荷(红、绿或蓝)——始终被禁闭在强子内部','从未被单独观测到:强行拉开夸克会产生新的正反夸克对'],
+      fun:'按粒子数计,你身体大约一半是上夸克。'},
+    down:    {name:'下夸克',    cls:'夸克(第一代)',   desc:'第二种第一代夸克,略重于上夸克。中子内部的下夸克转变为上夸克时,中子就变成了质子——这就是 β 衰变。',
+      facts:['中子 = udd;质子 = uud','β 衰变: d → u + W⁻ → u + e⁻ + ν̄ₑ','自由中子平均寿命约 15 分钟便由此衰变'],
+      fun:'上、下夸克的质量差导致中子比质子略重——这也是物质得以存在的根本原因之一。'},
+    charm:   {name:'粲夸克',    cls:'夸克(第二代)',   desc:'上夸克的更重同类。1974 年"十一月革命"中被发现,确立了夸克模型。',
+      facts:['约为上夸克质量的 600 倍','构成 J/ψ (cc̄) 等奇特粒子','通过弱相互作用衰变,寿命约 10⁻¹² 秒'],
+      fun:'J/ψ 介子被两组科学家同时独立发现,后共享诺贝尔奖。'},
+    strange: {name:'奇夸克',    cls:'夸克(第二代)',   desc:'最早在宇宙线中通过异常长寿命的"奇异粒子"发现。',
+      facts:['构成 K 介子、Λ 重子等','中子星内部可能存在"奇异物质"','其缓慢的弱衰变解释了奇异粒子的长寿命'],
+      fun:'"奇异"之名源于这些粒子看起来"异常缓慢"地衰变。'},
+    top:     {name:'顶夸克',    cls:'夸克(第三代)',   desc:'目前已知最重的基本粒子——质量堪比一个金原子却集中在一点。寿命仅约 5×10⁻²⁵ 秒,来不及形成任何束缚态。',
+      facts:['唯一从不构成强子的夸克','几乎 100% 衰变为底夸克 + W 玻色子','其巨大的质量暗示它与希格斯有特殊耦合'],
+      fun:'一个顶夸克的质量与一个钨原子相当。'},
+    bottom:  {name:'底夸克',    cls:'夸克(第三代)',   desc:'又称"美夸克"。LHCb 实验专门用来研究物质—反物质之间的微小不对称性。',
+      facts:['构成 B 介子 (bq̄)','寿命足以在探测器中飞行毫米量级','是研究 CP 破坏的关键'],
+      fun:'B 介子的衰变或许能解释宇宙中为何物质多于反物质。'},
+
+    electron:{name:'电子',      cls:'轻子(第一代)',   desc:'最轻的带电粒子——化学反应中的主角。所有电流、化学键、可见光的辐射,都离不开电子。',
+      facts:['在原子的电子壳层中运动','其电荷定义为"1 个基本电荷"','稳定粒子,从未观测到衰变','化学的绝大部分现象都由它主导'],
+      fun:'你现在看到的屏幕之所以发光,是因为电子在能级之间跳跃。'},
+    muon:    {name:'μ 子(μ-)', cls:'轻子(第二代)',   desc:'电子的重同类,质量约为电子的 207 倍。宇宙线不断把它们撒到地面上。',
+      facts:['每分钟每平方米约有 10000 个 μ 子到达地面','寿命 2.2 μs,衰变为 e⁻ + ν̄ₑ + ν_μ','用于"μ 子成像"金字塔、火山等大型结构'],
+      fun:'μ 子刚被发现时,物理学家 I.I. 拉比问:"这是谁点的?"'},
+    tau:     {name:'τ 子(τ-)', cls:'轻子(第三代)',   desc:'最重的带电轻子。质量之大足以衰变为强子(夸克)——一个像"夸克工厂"的轻子。',
+      facts:['寿命仅 2.9×10⁻¹³ s','可衰变为 π、K 等由夸克构成的粒子','质量近乎质子的两倍'],
+      fun:'即便接近光速运动,它在衰变前也只能飞行不到 1 毫米。'},
+    nu_e:    {name:'电子中微子', cls:'轻子(第一代)',   desc:'一种近乎零质量、几乎不与物质相互作用的"幽灵粒子"。每秒有约 650 亿个来自太阳的中微子穿过你身体的每平方厘米。',
+      facts:['只参与弱相互作用','穿过 1 光年的铅也只有 50% 概率发生一次相互作用','有三种"味",而且会相互振荡!'],
+      fun:'1987 年的一次超新星爆发中,24 个中微子先于光到达地球数小时。'},
+    nu_mu:   {name:'μ 中微子',  cls:'轻子(第二代)',   desc:'弱相互作用中与 μ 子成对出现的中微子。它的发现证明了中微子分"味"。',
+      facts:['来自 π⁺ → μ⁺ + ν_μ 的衰变','会在飞行途中振荡为其它味','由超级神冈等巨型探测器研究'],
+      fun:'中微子振荡的发现证明中微子有(极小的)质量——这是标准模型出现的第一道裂纹。'},
+    nu_tau:  {name:'τ 中微子',  cls:'轻子(第三代)',   desc:'费米子中最后被直接探测到的一种。极难观测,因为 τ 轻子本身就很难产生。',
+      facts:['被发现时仅有约 15 例直接观测','完整补齐了三代结构','比其他中微子相互作用还要罕见'],
+      fun:'DONUT 实验(Direct Observation of the NU Tau)用了多年才捕捉到少量事件。'},
+
+    photon:  {name:'光子',      cls:'规范玻色子',      desc:'光的量子——同时也是电磁相互作用的媒介粒子。任何两个带电粒子之间的相互作用,本质上都是交换光子。',
+      facts:['始终以光速 c 运动','携带能量 E = hf','自身就是自己的反粒子','从射电波到 γ 射线,都只是不同能量的同一种粒子'],
+      fun:'此刻进入你眼睛的光子,大约 8 分钟前从太阳出发。'},
+    gluon:   {name:'胶子',      cls:'规范玻色子',      desc:'原子核内部的"胶水"。胶子自身带有色荷,所以彼此可以相互作用,这使强相互作用表现出奇特的行为。',
+      facts:['共 8 种(色—反色组合)','色禁闭:从未被单独观测到','导致"渐近自由":夸克在极近距离表现得几乎自由','把夸克束缚成质子和中子,再把质子中子束缚成原子核'],
+      fun:'质子质量中约 99% 来自其内部胶子的运动能量。'},
+    wboson:  {name:'W 玻色子',   cls:'规范玻色子',      desc:'一种非常重的带电玻色子,可将一种夸克或轻子的"味"变成另一种。放射性衰变正是它的杰作。',
+      facts:['质量约为质子的 85 倍','可改变味:d → u,μ → ν_μ','其巨大质量使弱相互作用作用范围极短','驱动太阳内部把质子转变为中子'],
+      fun:'如果没有 W 玻色子,太阳就无法进行氢聚变,生命也就不可能存在。'},
+    zboson:  {name:'Z 玻色子',   cls:'规范玻色子',      desc:'W 玻色子的中性伙伴。它介导那些不改变粒子身份的弱相互作用——比如中微子与电子的散射。',
+      facts:['质量略高于 W','中性:不会改变味','与 W 同一年(1983)在 CERN 被发现','对其质量的精确测量可用于极精细地检验标准模型'],
+      fun:'LEP 加速器制造了数百万个 Z 玻色子,精确证明了中微子恰好有三代。'},
+    higgs:   {name:'希格斯玻色子',cls:'标量玻色子',     desc:'赋予质量的粒子。希格斯场弥漫于整个空间;与它耦合越强的粒子(如顶夸克)质量就越大;完全不耦合的粒子(如光子)则保持无质量。',
+      facts:['1964 年预言,2012 年发现','已知唯一的基本标量(自旋 0)粒子','寿命约 10⁻²² 秒,衰变为 γγ、bb̄、ZZ、WW 等末态','确认了 W、Z 及费米子获得质量的机制'],
+      fun:'花费了世界上最大的机器(LHC)和 40 多年时间才找到它——彼得·希格斯次年获得诺贝尔奖。'},
+
+    anti_up:{name:'反上夸克',cls:'反夸克(第一代)',desc:'上夸克的反物质伙伴。质量相同,电荷相反,色荷相反(反红、反绿、反蓝)。',facts:['与夸克组合构成介子(如 π⁻ = ūd)','与上夸克相遇发生湮灭 → 能量','在宇宙线与对撞机中被发现'],fun:'反质子 (ū ū d̄) 在 CERN 已能常规产生并被捕获。'},
+    anti_down:{name:'反下夸克',cls:'反夸克(第一代)',desc:'下夸克的反物质伙伴。两个反下 + 一个反上构成反中子;两个反上 + 一个反下构成反质子。',facts:['π⁺ = u d̄','反质子 = ū ū d̄','与下夸克相遇会湮灭'],fun:'反氢原子(反质子 + 正电子)已被制造出来,2023 年确认其在重力场中"下落"。'},
+    anti_charm:{name:'反粲夸克',cls:'反夸克(第二代)',desc:'粲夸克的反粒子。',facts:['J/ψ 介子 = c c̄','由 BaBar 与 Belle 实验大量研究'],fun:'"粲偶素"(cc̄)在夸克世界里就像"夸克版氢原子",其能级可精确计算。'},
+    anti_strange:{name:'反奇夸克',cls:'反夸克(第二代)',desc:'奇夸克的反粒子。出现在 K 介子等奇异介子中。',facts:['K⁺ = u s̄','出现在经典的 CP 破坏实验中'],fun:'反奇夸克帮助证明了物质与反物质并不完全对称。'},
+    anti_top:{name:'反顶夸克',cls:'反夸克(第三代)',desc:'顶夸克的反物质伙伴,总是以正反顶夸克对的形式产生。',facts:['始终成对产生:t t̄','来不及形成束缚态就已衰变'],fun:'产生一对 t t̄ 大约需要 350 GeV,即便对 LHC 而言也不便宜。'},
+    anti_bottom:{name:'反底夸克',cls:'反夸克(第三代)',desc:'底夸克的反物质伙伴,被广泛用于研究物质—反物质不对称。',facts:['B⁰ = d b̄;B̄⁰ = d̄ b','B 介子会与自身的反粒子相互振荡'],fun:'LHCb 就是专为研究 b̄ 物理而建造的。'},
+
+    positron:{name:'正电子',cls:'反轻子(第一代)',desc:'电子的反物质伙伴——历史上第一个被发现的反粒子。正电子如今每天都被用于医院的 PET 扫描。',facts:['与电子湮灭 → 两个 511 keV 光子','正电子发射断层扫描(PET)在医学上广泛应用','β⁺ 衰变中产生: p → n + e⁺ + νₑ'],fun:'1928 年狄拉克预言正电子时,把它称作"负能海洋中的一个空穴",几乎没人相信;四年后,安德森在实验中找到了它。'},
+    anti_muon:{name:'反 μ 子(μ⁺)',cls:'反轻子(第二代)',desc:'电子的更重反物质同类。',facts:['来自宇宙线','衰变: μ⁺ → e⁺ + νₑ + ν̄_μ','是 μ 子反常磁矩 g−2 精确测量的主角之一'],fun:'2021 年费米实验室的 μ 子(正负两种)测量结果暗示可能存在超出标准模型的新物理。'},
+    anti_tau:{name:'反 τ 子(τ⁺)',cls:'反轻子(第三代)',desc:'最重的反轻子。',facts:['可衰变为强子或更轻的轻子','由 B 工厂大量研究'],fun:'反 τ 中微子几乎从未被直接观测到。'},
+    anti_nu_e:{name:'电子反中微子',cls:'反轻子(第一代)',desc:'电子中微子的反粒子。中子的普通 β⁻ 衰变会释放它。',facts:['n → p + e⁻ + ν̄ₑ','通过反 β 反应探测: ν̄ₑ + p → n + e⁺','核反应堆是最亮的人工来源'],fun:'历史上第一个被探测到的中微子(1956 年)其实是来自反应堆的反中微子。'},
+    anti_nu_mu:{name:'μ 反中微子',cls:'反轻子(第二代)',desc:'μ 子对应的反中微子。',facts:['来自 μ⁻ 衰变','与 ν̄_e、ν̄_τ 相互振荡'],fun:'中微子振荡实验会分别处理中微子与反中微子,以搜寻 CP 破坏。'},
+    anti_nu_tau:{name:'τ 反中微子',cls:'反轻子(第三代)',desc:'标准模型中最罕见、最难探测的反粒子。',facts:['历史上被直接观测到的次数寥寥可数','补全了反轻子家族'],fun:'中微子与反中微子是否本质上是同一种粒子("马约拉纳性质"),至今是未解之谜。'}
+  }
+};
+
+/* ================= applyI18n(lang) ================= */
+function applyI18n(lang){
+  const dict = LOCALES[lang] || LOCALES.en;
+  document.documentElement.lang = (lang==='zh-CN' ? 'zh-CN' : 'en');
+
+  // Text content
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    const key = el.getAttribute('data-i18n');
+    if(dict[key] !== undefined) el.innerHTML = dict[key];
+  });
+  // placeholder
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el=>{
+    const key = el.getAttribute('data-i18n-placeholder');
+    if(dict[key] !== undefined) el.setAttribute('placeholder', dict[key]);
+  });
+  // title
+  const titleKey = document.querySelector('title')?.getAttribute('data-i18n');
+  if(titleKey && dict[titleKey]) document.title = dict[titleKey];
+
+  // active language pill
+  document.querySelectorAll('.lang-pill').forEach(b=>{
+    b.classList.toggle('active', b.dataset.lang===lang);
+  });
+
+  // Rebuild dynamic sections
+  window.CURRENT_LANG = lang;
+  if(typeof renderList==='function') renderList(document.getElementById('pfilter')?.value || '');
+  if(typeof rebuildStandardModelTiles==='function') rebuildStandardModelTiles();
+  const active = document.querySelector('.pl-item.active')?.dataset.id;
+  if(active && typeof showParticle==='function') showParticle(active);
+  if(typeof analyze==='function') analyze();
+}
+
+/* Return localized particle data (falls back to English) */
+function getP(id){
+  const base = PARTICLES[id];
+  if(!base) return null;
+  const lang = window.CURRENT_LANG || 'en';
+  const over = PARTICLES_I18N[lang]?.[id];
+  if(!over) return base;
+  return Object.assign({}, base, over);
+}
+/* Helper: localized force list */
+const FORCE_I18N = {
+  'zh-CN': {'Strong':'强','EM':'电磁','Weak':'弱','Gravity':'引力','Mediates EM':'电磁作用的媒介','Mediates Strong':'强作用的媒介','Mediates Weak':'弱作用的媒介','Couples to mass':'与质量耦合'}
+};
+function tForces(arr){
+  const lang = window.CURRENT_LANG || 'en';
+  const map = FORCE_I18N[lang];
+  if(!map) return arr;
+  return arr.map(f=>map[f] || f);
+}

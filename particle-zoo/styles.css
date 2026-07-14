@@ -14,7 +14,8 @@
   --higgs:#c77dff;
 }
 *{box-sizing:border-box;margin:0;padding:0}
-html,body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',system-ui,sans-serif;min-height:100vh;overflow-x:hidden}
+html,body{background:var(--bg);color:var(--text);font-family:'Space Grotesk','Noto Sans SC',system-ui,sans-serif;min-height:100vh;overflow-x:hidden}
+html[lang="zh-CN"] body{font-family:'Noto Sans SC','Space Grotesk',system-ui,sans-serif}
 body{
   background:
     radial-gradient(ellipse 80% 60% at 50% -10%, rgba(124,92,255,0.25), transparent 60%),
@@ -303,3 +304,9 @@ footer{text-align:center;padding:40px 20px;color:var(--dim);font-size:12px;posit
 .phen-card p{color:#c8cff0;line-height:1.7;font-size:14px;margin-bottom:12px}
 .phen-key{margin-top:12px;padding:10px 14px;background:linear-gradient(135deg,rgba(124,92,255,0.15),rgba(0,212,255,0.08));border-left:2px solid var(--accent);border-radius:6px;font-size:13px;color:#dfe4ff;line-height:1.6}
 .phen-example{margin-top:8px;font-size:12px;color:var(--dim);font-style:italic}
+
+/* ---------- Language switcher ---------- */
+.lang-switch{position:fixed;top:14px;right:16px;z-index:100;display:flex;gap:4px;background:rgba(5,6,13,0.7);backdrop-filter:blur(20px);border:1px solid var(--panel-b);border-radius:999px;padding:3px}
+.lang-pill{background:transparent;color:var(--dim);border:none;padding:6px 12px;border-radius:999px;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;letter-spacing:0.5px}
+.lang-pill:hover{color:var(--text)}
+.lang-pill.active{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff}

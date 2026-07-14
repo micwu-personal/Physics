@@ -1,0 +1,9 @@
+{
+  "name": "particle-zoo",
+  "version": "1.0.0",
+  "description": "Interactive Standard Model of particle physics.",
+  "scripts": {
+    "build": "node build.js"
+  },
+  "private": true
+}
