@@ -562,11 +562,6 @@ function analyze(){
     <div>${t('builder.stats.parts')}: <b>${parts.length}</b></div>
   `;
 }
-}
-function elementSymbol(z){
-  const els=['','H','He','Li','Be','B','C','N','O','F','Ne','Na','Mg','Al','Si','P','S','Cl','Ar','K','Ca'];
-  return els[z] || `Z=${z}`;
-}
 
 /* ---- Animation loop for builder canvas ---- */
 let bt = 0;
