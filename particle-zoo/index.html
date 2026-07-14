@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Particle Zoo — An Interactive Journey into the Standard Model</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div id="bg-stars"></div>
+
+  <header class="hero">
+    <div class="hero-inner">
+      <div class="badge">The Standard Model · Interactive</div>
+      <h1>Particle <span class="grad">Zoo</span></h1>
+      <p class="tag">Meet the elementary particles that build everything you've ever touched, seen, or dreamed of.</p>
+    </div>
+  </header>
+
+  <nav class="tabs">
+    <button class="tab active" data-tab="chart">Standard Model</button>
+    <button class="tab" data-tab="detail">Particle Detail</button>
+    <button class="tab" data-tab="builder">Composition Builder</button>
+    <button class="tab" data-tab="forces">Forces &amp; Interactions</button>
+    <button class="tab" data-tab="bsm">Beyond Standard Model</button>
+    <button class="tab" data-tab="phenomena">Quantum Phenomena</button>
+    <button class="tab" data-tab="playground">Physics Playground</button>
+  </nav>
+
+  <main>
+    <!-- ============ TAB 1: STANDARD MODEL CHART ============ -->
+    <section id="tab-chart" class="tab-panel active">
+      <div class="section-head">
+        <h2>The Standard Model</h2>
+        <p><b>17</b> particle types &mdash; but quarks come in 3 colors and gluons in 8 varieties. Counted with all quantum states: <b>61 distinct particles</b>.</p>
+      </div>
+
+      <div class="sm-grid">
+        <!-- Fermions -->
+        <div class="sm-column">
+          <div class="col-label">Gen I</div>
+          <div class="col-label">Gen II</div>
+          <div class="col-label">Gen III</div>
+        </div>
+
+        <div class="sm-block quarks">
+          <div class="block-title">Quarks <span class="hint">— feel all four forces</span></div>
+          <div class="row">
+            <div class="ptile quark" data-id="up">
+              <div class="p-sym">u</div><div class="p-name">up</div>
+              <div class="p-meta">2.2 MeV · +⅔</div>
+            </div>
+            <div class="ptile quark" data-id="charm">
+              <div class="p-sym">c</div><div class="p-name">charm</div>
+              <div class="p-meta">1.27 GeV · +⅔</div>
+            </div>
+            <div class="ptile quark" data-id="top">
+              <div class="p-sym">t</div><div class="p-name">top</div>
+              <div class="p-meta">173 GeV · +⅔</div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="ptile quark" data-id="down">
+              <div class="p-sym">d</div><div class="p-name">down</div>
+              <div class="p-meta">4.7 MeV · −⅓</div>
+            </div>
+            <div class="ptile quark" data-id="strange">
+              <div class="p-sym">s</div><div class="p-name">strange</div>
+              <div class="p-meta">95 MeV · −⅓</div>
+            </div>
+            <div class="ptile quark" data-id="bottom">
+              <div class="p-sym">b</div><div class="p-name">bottom</div>
+              <div class="p-meta">4.18 GeV · −⅓</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="sm-block leptons">
+          <div class="block-title">Leptons <span class="hint">— electrons and neutrinos</span></div>
+          <div class="row">
+            <div class="ptile lepton" data-id="electron">
+              <div class="p-sym">e</div><div class="p-name">electron</div>
+              <div class="p-meta">0.511 MeV · −1</div>
+            </div>
+            <div class="ptile lepton" data-id="muon">
+              <div class="p-sym">μ</div><div class="p-name">muon</div>
+              <div class="p-meta">105.7 MeV · −1</div>
+            </div>
+            <div class="ptile lepton" data-id="tau">
+              <div class="p-sym">τ</div><div class="p-name">tau</div>
+              <div class="p-meta">1.777 GeV · −1</div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="ptile lepton neutrino" data-id="nu_e">
+              <div class="p-sym">ν<sub>e</sub></div><div class="p-name">e-neutrino</div>
+              <div class="p-meta">&lt;2 eV · 0</div>
+            </div>
+            <div class="ptile lepton neutrino" data-id="nu_mu">
+              <div class="p-sym">ν<sub>μ</sub></div><div class="p-name">μ-neutrino</div>
+              <div class="p-meta">&lt;0.19 MeV · 0</div>
+            </div>
+            <div class="ptile lepton neutrino" data-id="nu_tau">
+              <div class="p-sym">ν<sub>τ</sub></div><div class="p-name">τ-neutrino</div>
+              <div class="p-meta">&lt;18.2 MeV · 0</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="sm-block bosons">
+          <div class="block-title">Gauge Bosons <span class="hint">— force carriers</span></div>
+          <div class="boson-row">
+            <div class="ptile boson" data-id="photon">
+              <div class="p-sym">γ</div><div class="p-name">photon</div>
+              <div class="p-meta">0 · EM force</div>
+            </div>
+            <div class="ptile boson" data-id="gluon">
+              <div class="p-sym">g</div><div class="p-name">gluon</div>
+              <div class="p-meta">0 · Strong</div>
+            </div>
+            <div class="ptile boson" data-id="wboson">
+              <div class="p-sym">W±</div><div class="p-name">W boson</div>
+              <div class="p-meta">80.4 GeV · Weak</div>
+            </div>
+            <div class="ptile boson" data-id="zboson">
+              <div class="p-sym">Z⁰</div><div class="p-name">Z boson</div>
+              <div class="p-meta">91.2 GeV · Weak</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="sm-block higgs">
+          <div class="block-title">Scalar Boson <span class="hint">— gives mass</span></div>
+          <div class="boson-row">
+            <div class="ptile higgs-tile" data-id="higgs">
+              <div class="p-sym">H</div><div class="p-name">Higgs</div>
+              <div class="p-meta">125 GeV · 0</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="legend">
+        <span class="lg quark">Quarks</span>
+        <span class="lg lepton">Charged Leptons</span>
+        <span class="lg neutrino">Neutrinos</span>
+        <span class="lg boson">Gauge Bosons</span>
+        <span class="lg higgs-tile">Higgs</span>
+      </div>
+
+      <div class="section-head" style="margin-top:48px">
+        <h2>Antimatter — the Mirror World</h2>
+        <p>Every fermion has an antiparticle with opposite charge and quantum numbers. Some bosons are their own antiparticle.</p>
+      </div>
+
+      <div class="sm-grid">
+        <div class="sm-block anti-quarks">
+          <div class="block-title">Antiquarks <span class="hint">— opposite charge, opposite color</span></div>
+          <div class="row">
+            <div class="ptile antiquark" data-id="anti_up"><div class="p-sym">u&#772;</div><div class="p-name">anti-up</div><div class="p-meta">2.2 MeV · −⅔</div></div>
+            <div class="ptile antiquark" data-id="anti_charm"><div class="p-sym">c&#772;</div><div class="p-name">anti-charm</div><div class="p-meta">1.27 GeV · −⅔</div></div>
+            <div class="ptile antiquark" data-id="anti_top"><div class="p-sym">t&#772;</div><div class="p-name">anti-top</div><div class="p-meta">173 GeV · −⅔</div></div>
+          </div>
+          <div class="row">
+            <div class="ptile antiquark" data-id="anti_down"><div class="p-sym">d&#772;</div><div class="p-name">anti-down</div><div class="p-meta">4.7 MeV · +⅓</div></div>
+            <div class="ptile antiquark" data-id="anti_strange"><div class="p-sym">s&#772;</div><div class="p-name">anti-strange</div><div class="p-meta">95 MeV · +⅓</div></div>
+            <div class="ptile antiquark" data-id="anti_bottom"><div class="p-sym">b&#772;</div><div class="p-name">anti-bottom</div><div class="p-meta">4.18 GeV · +⅓</div></div>
+          </div>
+        </div>
+
+        <div class="sm-block anti-leptons">
+          <div class="block-title">Anti-leptons <span class="hint">— positron &amp; friends</span></div>
+          <div class="row">
+            <div class="ptile antilepton" data-id="positron"><div class="p-sym">e⁺</div><div class="p-name">positron</div><div class="p-meta">0.511 MeV · +1</div></div>
+            <div class="ptile antilepton" data-id="anti_muon"><div class="p-sym">μ⁺</div><div class="p-name">anti-muon</div><div class="p-meta">105.7 MeV · +1</div></div>
+            <div class="ptile antilepton" data-id="anti_tau"><div class="p-sym">τ⁺</div><div class="p-name">anti-tau</div><div class="p-meta">1.777 GeV · +1</div></div>
+          </div>
+          <div class="row">
+            <div class="ptile antilepton antineutrino" data-id="anti_nu_e"><div class="p-sym">ν&#772;<sub>e</sub></div><div class="p-name">e-antineutrino</div><div class="p-meta">&lt;2 eV · 0</div></div>
+            <div class="ptile antilepton antineutrino" data-id="anti_nu_mu"><div class="p-sym">ν&#772;<sub>μ</sub></div><div class="p-name">μ-antineutrino</div><div class="p-meta">&lt;0.19 MeV · 0</div></div>
+            <div class="ptile antilepton antineutrino" data-id="anti_nu_tau"><div class="p-sym">ν&#772;<sub>τ</sub></div><div class="p-name">τ-antineutrino</div><div class="p-meta">&lt;18.2 MeV · 0</div></div>
+          </div>
+        </div>
+
+        <div class="sm-block self-anti">
+          <div class="block-title">Self-conjugate <span class="hint">— its own antiparticle</span></div>
+          <div class="boson-row">
+            <div class="ptile boson self-a" data-id="photon"><div class="p-sym">γ</div><div class="p-name">photon</div><div class="p-meta">γ = γ&#772;</div></div>
+            <div class="ptile boson self-a" data-id="zboson"><div class="p-sym">Z⁰</div><div class="p-name">Z boson</div><div class="p-meta">Z = Z&#772;</div></div>
+            <div class="ptile higgs-tile self-a" data-id="higgs"><div class="p-sym">H</div><div class="p-name">Higgs</div><div class="p-meta">H = H&#772;</div></div>
+            <div class="ptile boson self-a" data-id="gluon"><div class="p-sym">g</div><div class="p-name">gluon*</div><div class="p-meta">*color-anticolor</div></div>
+          </div>
+          <div class="hint2" style="border:none;padding-top:12px">W⁺ and W⁻ are each other's antiparticle. Gluons carry color-anticolor pairs, effectively being their own anti-family.</div>
+        </div>
+      </div>
+
+      <div class="count-summary">
+        <div class="ct-card"><div class="ct-num">6×3</div><div class="ct-lbl">Quarks<br><small>flavor × color</small></div></div>
+        <div class="ct-op">+</div>
+        <div class="ct-card"><div class="ct-num">6×3</div><div class="ct-lbl">Antiquarks<br><small>flavor × anticolor</small></div></div>
+        <div class="ct-op">+</div>
+        <div class="ct-card"><div class="ct-num">6</div><div class="ct-lbl">Leptons<br><small>+ 6 anti</small></div></div>
+        <div class="ct-op">+</div>
+        <div class="ct-card"><div class="ct-num">8</div><div class="ct-lbl">Gluons<br><small>color combos</small></div></div>
+        <div class="ct-op">+</div>
+        <div class="ct-card"><div class="ct-num">4</div><div class="ct-lbl">EW bosons<br><small>W±, Z⁰, γ</small></div></div>
+        <div class="ct-op">+</div>
+        <div class="ct-card"><div class="ct-num">1</div><div class="ct-lbl">Higgs</div></div>
+        <div class="ct-op">=</div>
+        <div class="ct-card ct-total"><div class="ct-num">61</div><div class="ct-lbl">Quantum states</div></div>
+      </div>
+
+      <div class="color-panel">
+        <h3>🎨 Color Charge — the "Strong" Rainbow</h3>
+        <p>Quarks carry one of three "color charges" (nothing to do with visible color) — <span class="col-r">red</span>, <span class="col-g">green</span>, <span class="col-b">blue</span>. Antiquarks carry <span class="col-ar">anti-red</span>, <span class="col-ag">anti-green</span>, <span class="col-ab">anti-blue</span>. Only <em>colorless</em> combinations exist in nature: R+G+B (baryon) or C+C̄ (meson).</p>
+        <div class="color-demo">
+          <div class="cd-item"><div class="qball col-r">u</div><div class="qball col-g">u</div><div class="qball col-b">d</div><div class="cd-lbl">Proton (colorless: R+G+B)</div></div>
+          <div class="cd-item"><div class="qball col-r">u</div><div class="qball col-ar">d̄</div><div class="cd-lbl">π⁺ meson (color+anticolor)</div></div>
+        </div>
+        <p class="hint2" style="border:none;padding-top:8px">Gluons carry a color <em>and</em> an anticolor at once — giving <b>8</b> independent gluons (not 9, because one combination is forbidden by SU(3) symmetry). This is why gluons interact with each other and cause quark <b>confinement</b>.</p>
+      </div>
+    </section>
+
+    <!-- ============ TAB 2: PARTICLE DETAIL ============ -->
+    <section id="tab-detail" class="tab-panel">
+      <div class="detail-wrap">
+        <aside class="detail-list">
+          <input id="pfilter" placeholder="Search particles..." />
+          <div id="pList"></div>
+        </aside>
+        <article id="pDetail" class="detail-card">
+          <div class="empty">Select a particle to explore its properties</div>
+        </article>
+      </div>
+    </section>
+
+    <!-- ============ TAB 3: BUILDER ============ -->
+    <section id="tab-builder" class="tab-panel">
+      <div class="section-head">
+        <h2>Build the Universe</h2>
+        <p>Drag quarks and electrons into the assembly zone. Watch protons, neutrons, and atoms come to life.</p>
+      </div>
+
+      <div class="builder">
+        <div class="parts-tray">
+          <h3>Parts</h3>
+          <div class="tray-part" draggable="true" data-part="u">u <span>up · +⅔</span></div>
+          <div class="tray-part" draggable="true" data-part="d">d <span>down · −⅓</span></div>
+          <div class="tray-part" draggable="true" data-part="e">e⁻ <span>electron · −1</span></div>
+          <button id="clearBuild" class="btn ghost">Clear</button>
+          <div class="hint2">Tip: 2 up + 1 down = proton · 1 up + 2 down = neutron · proton + electron = hydrogen</div>
+        </div>
+
+        <div id="assemblyZone" class="assembly">
+          <canvas id="buildCanvas"></canvas>
+          <div class="assembly-hint">Drop parts here — watch forces &amp; composites form</div>
+          <div class="build-legend">
+            <span><i style="background:#ff6b9d"></i>strong (gluon)</span>
+            <span><i style="background:#ffd166"></i>EM attract (photon)</span>
+            <span><i style="background:#4ea8ff"></i>EM repel (photon)</span>
+          </div>
+        </div>
+
+        <div class="build-out">
+          <h3>You built:</h3>
+          <div id="buildResult" class="result">Nothing yet.</div>
+          <div id="buildStats" class="stats"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ TAB 4: FORCES ============ -->
+    <section id="tab-forces" class="tab-panel">
+      <div class="section-head">
+        <h2>The Four Fundamental Forces</h2>
+        <p>Every interaction in the universe is one of these four.</p>
+      </div>
+
+      <div class="forces-grid">
+        <div class="force-card f-strong">
+          <div class="fc-head"><span class="fdot"></span><h3>Strong Force</h3></div>
+          <div class="fc-carrier">Carrier: <b>Gluon (g)</b></div>
+          <div class="fc-strength">Relative strength: <b>1</b> (strongest)</div>
+          <div class="fc-range">Range: <b>~10⁻¹⁵ m</b> (nucleus-size)</div>
+          <p>Binds quarks into protons/neutrons and holds the nucleus together. Gets <em>stronger</em> as quarks separate — you can never pull one out alone (confinement).</p>
+          <div class="fc-example">Example: three quarks glued into a proton.</div>
+        </div>
+
+        <div class="force-card f-em">
+          <div class="fc-head"><span class="fdot"></span><h3>Electromagnetism</h3></div>
+          <div class="fc-carrier">Carrier: <b>Photon (γ)</b></div>
+          <div class="fc-strength">Relative strength: <b>1/137</b></div>
+          <div class="fc-range">Range: <b>infinite</b></div>
+          <p>Governs charged particles. Responsible for light, chemistry, magnets, electricity, and every solid surface you touch.</p>
+          <div class="fc-example">Example: electron orbiting a proton = hydrogen atom.</div>
+        </div>
+
+        <div class="force-card f-weak">
+          <div class="fc-head"><span class="fdot"></span><h3>Weak Force</h3></div>
+          <div class="fc-carrier">Carriers: <b>W±, Z⁰ bosons</b></div>
+          <div class="fc-strength">Relative strength: <b>10⁻⁶</b></div>
+          <div class="fc-range">Range: <b>~10⁻¹⁸ m</b></div>
+          <p>Changes one flavor of quark or lepton into another. Powers radioactive beta decay and the fusion reactions inside the Sun.</p>
+          <div class="fc-example">Example: neutron → proton + electron + antineutrino.</div>
+        </div>
+
+        <div class="force-card f-grav">
+          <div class="fc-head"><span class="fdot"></span><h3>Gravity</h3></div>
+          <div class="fc-carrier">Carrier: <b>Graviton?</b> (hypothetical)</div>
+          <div class="fc-strength">Relative strength: <b>10⁻³⁹</b></div>
+          <div class="fc-range">Range: <b>infinite</b></div>
+          <p>By far the weakest, but it always attracts and never cancels — so at cosmic scales it dominates. Not yet part of the Standard Model.</p>
+          <div class="fc-example">Example: the Earth orbits the Sun.</div>
+        </div>
+      </div>
+
+      <div class="interactions">
+        <h3>Common Interactions</h3>
+        <div class="i-list">
+          <div class="ix"><b>β⁻ decay:</b> <span class="mono">n → p + e⁻ + ν̄ₑ</span> <em>(weak force)</em></div>
+          <div class="ix"><b>Pair production:</b> <span class="mono">γ → e⁻ + e⁺</span> <em>(EM near a nucleus)</em></div>
+          <div class="ix"><b>Annihilation:</b> <span class="mono">e⁻ + e⁺ → γ + γ</span> <em>(EM)</em></div>
+          <div class="ix"><b>Fusion:</b> <span class="mono">p + p → ²H + e⁺ + νₑ</span> <em>(weak — powers the Sun)</em></div>
+          <div class="ix"><b>Higgs decay:</b> <span class="mono">H → γ + γ</span> <em>(observed at LHC)</em></div>
+          <div class="ix"><b>Gluon exchange:</b> <span class="mono">q ↔ q (via g)</span> <em>(strong — binds nucleons)</em></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ TAB: BEYOND STANDARD MODEL ============ -->
+    <section id="tab-bsm" class="tab-panel">
+      <div class="section-head">
+        <h2>Beyond the Standard Model</h2>
+        <p>The Standard Model is spectacular — but incomplete. It doesn't explain dark matter, gravity, or why the universe has more matter than antimatter. Here are the leading candidates.</p>
+      </div>
+
+      <div class="bsm-grid">
+        <div class="bsm-card confirmed">
+          <div class="bsm-flag flag-ok">CONFIRMED</div>
+          <div class="bsm-head"><h3>Majorana Fermion?</h3><span class="bsm-sub">a fermion that is its own antiparticle</span></div>
+          <div class="bsm-props">
+            <div class="pkey">Predicted</div><div>1937 (Ettore Majorana)</div>
+            <div class="pkey">Status</div><div>Neutrinos might be — searches ongoing</div>
+          </div>
+          <p>Ettore Majorana proposed that a neutral spin-½ fermion could be identical to its own antiparticle. Neutrinos are the only Standard-Model fermions where this is still possible. Experiments looking for <b>neutrinoless double-beta decay</b> (0νββ) — KamLAND-Zen, CUORE, LEGEND — would prove it. If true, the <em>seesaw mechanism</em> would explain why neutrinos have such tiny masses.</p>
+          <div class="bsm-tag">Also emerges as "Majorana zero modes" in topological superconductors — used in Microsoft\'s 2025 Majorana-1 quantum chip.</div>
+        </div>
+
+        <div class="bsm-card confirmed">
+          <div class="bsm-flag flag-ok">CONFIRMED</div>
+          <div class="bsm-head"><h3>Neutrino Oscillation</h3><span class="bsm-sub">first crack in the Standard Model</span></div>
+          <div class="bsm-props">
+            <div class="pkey">Discovered</div><div>1998 (Super-Kamiokande) — Nobel 2015</div>
+            <div class="pkey">Status</div><div>Confirmed &amp; measured</div>
+          </div>
+          <p>Neutrinos change flavor mid-flight (νₑ ↔ ν_μ ↔ ν_τ). This <em>only works</em> if neutrinos have mass, contradicting the original massless-neutrino Standard Model. The mechanism giving them mass is unknown — this is our best experimental window into new physics.</p>
+        </div>
+
+        <div class="bsm-card theoretical">
+          <div class="bsm-flag flag-hypo">HYPOTHETICAL</div>
+          <div class="bsm-head"><h3>Graviton</h3><span class="bsm-sub">force carrier of gravity</span></div>
+          <div class="bsm-props">
+            <div class="pkey">Predicted</div><div>1930s</div>
+            <div class="pkey">Spin</div><div>2 (massless)</div>
+            <div class="pkey">Status</div><div>Individually undetectable in practice</div>
+          </div>
+          <p>If gravity is quantum, it needs a carrier — the graviton. A single graviton is so weakly-coupled that detecting one would require a Jupiter-mass detector orbiting a neutron star. We\'ve detected <em>gravitational waves</em> (LIGO, 2015) — but not individual gravitons.</p>
+        </div>
+
+        <div class="bsm-card theoretical">
+          <div class="bsm-flag flag-hypo">HYPOTHETICAL</div>
+          <div class="bsm-head"><h3>Sterile Neutrino (ν<sub>s</sub>)</h3><span class="bsm-sub">right-handed, no weak force</span></div>
+          <div class="bsm-props">
+            <div class="pkey">Predicted</div><div>1970s</div>
+            <div class="pkey">Status</div><div>Anomalies at LSND/MiniBooNE, unconfirmed</div>
+          </div>
+          <p>A neutrino that doesn\'t feel any Standard-Model force except gravity. Could be dark matter, could explain neutrino masses. Fermilab\'s Short-Baseline Neutrino program is hunting for it now.</p>
+        </div>
+
+        <div class="bsm-card theoretical">
+          <div class="bsm-flag flag-hypo">HYPOTHETICAL</div>
+          <div class="bsm-head"><h3>Axion</h3><span class="bsm-sub">dark matter candidate</span></div>
+          <div class="bsm-props">
+            <div class="pkey">Predicted</div><div>1977 (Peccei-Quinn)</div>
+            <div class="pkey">Mass</div><div>~μeV to meV (ultra-light)</div>
+            <div class="pkey">Status</div><div>Actively searched (ADMX, HAYSTAC, ABRACADABRA)</div>
+          </div>
+          <p>Invented to solve the "strong CP problem" (why the strong force doesn\'t violate CP-symmetry). Turned out to also be a great dark-matter candidate — ultra-light, extremely weakly coupled, forming a cosmic wave filling the galaxy.</p>
+        </div>
+
+        <div class="bsm-card theoretical">
+          <div class="bsm-flag flag-hypo">HYPOTHETICAL</div>
+          <div class="bsm-head"><h3>WIMPs</h3><span class="bsm-sub">Weakly-Interacting Massive Particles</span></div>
+          <div class="bsm-props">
+            <div class="pkey">Predicted</div><div>1970s onward</div>
+            <div class="pkey">Mass</div><div>10 GeV – TeV</div>
+            <div class="pkey">Status</div><div>Not found; parameter space shrinking rapidly</div>
+          </div>
+          <p>Once the leading dark matter candidate. Experiments like XENONnT, LZ, and PandaX have ruled out huge swaths of parameter space. Still viable, but axions and sterile neutrinos are gaining favor.</p>
+        </div>
+
+        <div class="bsm-card theoretical">
+          <div class="bsm-flag flag-hypo">HYPOTHETICAL</div>
+          <div class="bsm-head"><h3>SUSY Partners</h3><span class="bsm-sub">selectron, squark, gluino, neutralino, …</span></div>
+          <div class="bsm-props">
+            <div class="pkey">Predicted</div><div>1970s (Gelfand, Wess, Zumino)</div>
+            <div class="pkey">Status</div><div>None found up to ~2 TeV at LHC</div>
+          </div>
+          <p>Supersymmetry doubles the particle count — every fermion gets a "s-" partner boson (selectron, squark), every boson gets a "-ino" partner fermion (photino, gluino, higgsino). Would unify forces &amp; provide dark matter (lightest neutralino). The simplest SUSY models are now excluded.</p>
+        </div>
+
+        <div class="bsm-card theoretical">
+          <div class="bsm-flag flag-hypo">HYPOTHETICAL</div>
+          <div class="bsm-head"><h3>Magnetic Monopole</h3><span class="bsm-sub">isolated magnetic charge</span></div>
+          <div class="bsm-props">
+            <div class="pkey">Predicted</div><div>1931 (Dirac)</div>
+            <div class="pkey">Status</div><div>Never found; MoEDAL at LHC searches</div>
+          </div>
+          <p>Existence of even one would explain why electric charge is quantized. GUTs predict them ultra-heavy (~10¹⁶ GeV). One tantalizing candidate event at Stanford in 1982 — never repeated.</p>
+        </div>
+
+        <div class="bsm-card exotic">
+          <div class="bsm-flag flag-exotic">EXOTIC — real!</div>
+          <div class="bsm-head"><h3>Anyons</h3><span class="bsm-sub">neither fermion nor boson</span></div>
+          <div class="bsm-props">
+            <div class="pkey">Predicted</div><div>1977 (Leinaas &amp; Myrheim), 1982 (Wilczek)</div>
+            <div class="pkey">Discovered</div><div>2020 (fractional quantum Hall systems)</div>
+          </div>
+          <p>In 2D, particles can be neither bosons nor fermions — swapping two gives an <em>arbitrary</em> phase (hence "any"-ons). Non-abelian anyons are the basis of topological quantum computing.</p>
+        </div>
+
+        <div class="bsm-card exotic">
+          <div class="bsm-flag flag-exotic">EXOTIC — real!</div>
+          <div class="bsm-head"><h3>Tetraquarks &amp; Pentaquarks</h3><span class="bsm-sub">exotic hadrons</span></div>
+          <div class="bsm-props">
+            <div class="pkey">Discovered</div><div>2003 (X(3872)), 2015 (LHCb pentaquarks)</div>
+            <div class="pkey">Status</div><div>Confirmed — dozens known</div>
+          </div>
+          <p>QCD allows more than just 3-quark baryons and 2-quark mesons. LHCb keeps finding new tetraquarks (Tcc⁺, 2021) and pentaquarks that push the limits of hadronic physics.</p>
+        </div>
+
+        <div class="bsm-card exotic">
+          <div class="bsm-flag flag-exotic">EXOTIC</div>
+          <div class="bsm-head"><h3>Glueball</h3><span class="bsm-sub">a particle of pure gluons</span></div>
+          <div class="bsm-props">
+            <div class="pkey">Predicted</div><div>1972 (QCD)</div>
+            <div class="pkey">Status</div><div>Candidates (f₀(1710)) — 2024 BESIII strong evidence</div>
+          </div>
+          <p>Because gluons carry color charge themselves, they can bind into pure-glue particles. Very hard to distinguish from ordinary mesons — but the BESIII experiment has strong evidence.</p>
+        </div>
+
+        <div class="bsm-card theoretical">
+          <div class="bsm-flag flag-hypo">HYPOTHETICAL</div>
+          <div class="bsm-head"><h3>Preons</h3><span class="bsm-sub">"inside" the quarks &amp; leptons?</span></div>
+          <div class="bsm-props">
+            <div class="pkey">Predicted</div><div>1970s–80s</div>
+            <div class="pkey">Status</div><div>No evidence; LHC probes to ~10⁻²⁰ m</div>
+          </div>
+          <p>What if quarks and leptons are themselves made of smaller things? "Preon" models keep being ruled out as colliders find no substructure. But the pattern of 3 generations is still unexplained.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ TAB: QUANTUM PHENOMENA ============ -->
+    <section id="tab-phenomena" class="tab-panel">
+      <div class="section-head">
+        <h2>Emergent Quantum Phenomena</h2>
+        <p>When many particles obey quantum rules together, matter enters entirely new states.</p>
+      </div>
+
+      <div class="phen-grid">
+        <div class="phen-card">
+          <div class="phen-icon">❄</div>
+          <h3>Bose-Einstein Condensate (BEC)</h3>
+          <div class="phen-sub">Predicted 1924–25 (Bose &amp; Einstein) · Realized 1995 · Nobel 2001</div>
+          <p>Cool bosons below ~10⁻⁷ K and thousands of atoms collapse into the <em>same</em> quantum state — a single macroscopic "super-atom" you can photograph. Wavefunctions overlap; quantum mechanics goes visible.</p>
+          <div class="phen-key">Requires integer-spin particles (bosons) that can pile into one state — strictly forbidden for fermions by Pauli exclusion.</div>
+          <div class="phen-example">Made with rubidium-87, sodium-23, hydrogen, and even photons in optical cavities.</div>
+        </div>
+
+        <div class="phen-card">
+          <div class="phen-icon">⚡</div>
+          <h3>Superconductivity &amp; Cooper Pairs</h3>
+          <div class="phen-sub">Discovered 1911 (Kamerlingh Onnes) · Explained 1957 (BCS)</div>
+          <p>Below a critical temperature, electrons pair up into <b>Cooper pairs</b>. Two electrons (fermions) form a composite boson, which then Bose-condense and flow with <em>zero</em> resistance.</p>
+          <div class="phen-key">Cooper pairs = fermion-to-boson metamorphosis. Related to BEC but occurring inside a metal lattice.</div>
+          <div class="phen-example">MRI magnets, particle accelerators, and superconducting qubits (IBM, Google) all use this.</div>
+        </div>
+
+        <div class="phen-card">
+          <div class="phen-icon">💧</div>
+          <h3>Superfluidity</h3>
+          <div class="phen-sub">Discovered 1937 (Kapitsa, Allen &amp; Misener) · Nobel 1978</div>
+          <p>Liquid ⁴He below 2.17 K flows without any viscosity, climbs container walls, and passes through microscopic pores. ⁴He nuclei are bosons (spin-0), so they Bose-condense.</p>
+          <div class="phen-key">⁴He = 12 fermions total → integer spin → boson. ³He is fermionic and needs Cooper pairs to become superfluid (at millikelvin temperatures).</div>
+        </div>
+
+        <div class="phen-card">
+          <div class="phen-icon">🌌</div>
+          <h3>Quark-Gluon Plasma</h3>
+          <div class="phen-sub">Created 2000 (RHIC), 2010 (LHC ALICE)</div>
+          <p>Heat ordinary matter above ~2 trillion K and quarks become "deconfined" — the strong force loses grip; quarks and gluons flow as a nearly-perfect liquid. This is what the universe looked like ~10 microseconds after the Big Bang.</p>
+          <div class="phen-key">The only state where free quarks briefly exist. Cools back into hadrons in less than 10⁻²³ seconds.</div>
+        </div>
+
+        <div class="phen-card">
+          <div class="phen-icon">🔀</div>
+          <h3>Quantum Entanglement</h3>
+          <div class="phen-sub">EPR paradox 1935 · Bell 1964 · Nobel 2022 (Aspect, Clauser, Zeilinger)</div>
+          <p>Two particles can share a single quantum state — measuring one instantly determines the other, even light-years apart. Not "spooky communication" but a genuine feature of quantum mechanics.</p>
+          <div class="phen-example">Basis of quantum cryptography (BB84), quantum teleportation, and quantum computing.</div>
+        </div>
+
+        <div class="phen-card">
+          <div class="phen-icon">🌊</div>
+          <h3>Pauli Exclusion &amp; Degeneracy Pressure</h3>
+          <div class="phen-sub">Pauli, 1925 · Nobel 1945</div>
+          <p>Two fermions can\'t occupy the same quantum state. This is why atoms have shells, why the periodic table works, and why white dwarf stars don\'t collapse — the pressure of packed electrons holds them up.</p>
+          <div class="phen-key">Above the Chandrasekhar limit (1.4 M☉), even electron pressure fails and the star becomes a neutron star, held up by <em>neutron</em> degeneracy pressure.</div>
+        </div>
+
+        <div class="phen-card">
+          <div class="phen-icon">🔮</div>
+          <h3>Topological Matter</h3>
+          <div class="phen-sub">Nobel 2016 (Thouless, Haldane, Kosterlitz)</div>
+          <p>Some materials host quasi-particles that behave like massless Dirac fermions — or even Majorana zero modes. These are the frontier of quantum computing.</p>
+          <div class="phen-example">Topological insulators, Weyl semimetals, and Microsoft\'s Majorana-1 chip (Feb 2025) — the first claim of a topological qubit.</div>
+        </div>
+
+        <div class="phen-card">
+          <div class="phen-icon">🎇</div>
+          <h3>Hawking Radiation</h3>
+          <div class="phen-sub">Predicted 1974 (Hawking)</div>
+          <p>Quantum field fluctuations near a black hole horizon produce virtual particle pairs; one falls in, one escapes as radiation. Never directly observed astronomically but seen in analog systems (sonic black holes, 2019).</p>
+        </div>
+
+        <div class="phen-card">
+          <div class="phen-icon">🧊</div>
+          <h3>Fermionic Condensate</h3>
+          <div class="phen-sub">Realized 2003 (Deborah Jin, JILA)</div>
+          <p>The fermionic cousin of BEC. Ultra-cold ⁶Li or ⁴⁰K fermions pair up (BCS-like) and condense. Bridges the gap between BEC and superconductivity in a controlled system.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ TAB 5: PLAYGROUND ============ -->
+    <section id="tab-playground" class="tab-panel">
+      <div class="section-head">
+        <h2>Physics Playground</h2>
+        <p>Spawn particles and watch them interact. Opposite charges attract, like charges repel, matter + antimatter annihilate into photons.</p>
+      </div>
+
+      <div class="pg-controls">
+        <button class="btn" data-spawn="electron">+ Electron (e⁻)</button>
+        <button class="btn" data-spawn="positron">+ Positron (e⁺)</button>
+        <button class="btn" data-spawn="proton">+ Proton</button>
+        <button class="btn" data-spawn="photon">+ Photon</button>
+        <button class="btn" data-spawn="neutron">+ Neutron</button>
+        <button class="btn ghost" id="pgClear">Clear</button>
+        <label class="switch"><input type="checkbox" id="pgTrails" checked> trails</label>
+      </div>
+
+      <canvas id="pgCanvas"></canvas>
+
+      <div class="pg-legend">
+        <span><i class="dot" style="background:#4ea8ff"></i>electron</span>
+        <span><i class="dot" style="background:#ff5c8a"></i>positron</span>
+        <span><i class="dot" style="background:#ffd166"></i>proton</span>
+        <span><i class="dot" style="background:#a0a0a0"></i>neutron</span>
+        <span><i class="dot" style="background:#fff;box-shadow:0 0 8px #fff"></i>photon</span>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <span>Built for curiosity · data from the Particle Data Group</span>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
