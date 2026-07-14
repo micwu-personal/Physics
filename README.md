@@ -34,8 +34,8 @@ An interactive journey through the entire history of the universe.
 - open `big-bang/index.html`
 
 **Single-file version** (mobile-friendly, one HTML file, ~60–160 KB):
-- open `particle-zoo/mobile/index.html`  or  `particle-zoo/mobile/particle-zoo.html`
-- open `big-bang/mobile/index.html`  or  `big-bang/mobile/big-bang.html`
+- open `particle-zoo/mobile/index.html`
+- open `big-bang/mobile/index.html`
 
 Copy the single-file version to your phone, email it, drop it on a USB stick — it Just Works, offline (only Google Fonts are external, and the app degrades gracefully without them).
 

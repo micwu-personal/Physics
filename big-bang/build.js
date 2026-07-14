@@ -31,11 +31,8 @@ const banner =
 `;
 out = out.replace(/^<!DOCTYPE html>/i, `<!DOCTYPE html>\n${banner}`);
 
-const outPath1 = path.join(OUT_DIR, 'index.html');
-const outPath2 = path.join(OUT_DIR, 'big-bang.html');
-fs.writeFileSync(outPath1, out);
-fs.writeFileSync(outPath2, out);
+const outPath = path.join(OUT_DIR, 'index.html');
+fs.writeFileSync(outPath, out);
 
 const sizeKB = (Buffer.byteLength(out, 'utf8') / 1024).toFixed(1);
-console.log(`✓ Wrote ${outPath1} (${sizeKB} KB)`);
-console.log(`✓ Wrote ${outPath2} (${sizeKB} KB)`);
+console.log(`✓ Wrote ${outPath} (${sizeKB} KB)`);
