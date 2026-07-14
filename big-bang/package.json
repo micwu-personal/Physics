@@ -1,0 +1,7 @@
+{
+  "name": "big-bang",
+  "version": "1.0.0",
+  "description": "Interactive journey through 13.8 billion years of cosmic history.",
+  "scripts": { "build": "node build.js" },
+  "private": true
+}

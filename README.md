@@ -1,53 +1,62 @@
 # Physics
 
-A collection of interactive apps exploring physics concepts. Each sub-folder is a self-contained app.
+A collection of interactive apps exploring physics concepts. Each sub-folder is a self-contained app. All apps are localized in **English** and **简体中文** (auto-detected from the browser; switch anytime with the pill in the top-right).
 
 ## Apps
 
-### 🌌 [particle-zoo](./particle-zoo/)
-An interactive visual journey through the Standard Model of particle physics — and beyond. **Available in English and 简体中文** (auto-detected from your browser, switch anytime with the pill in the top-right corner).
+### 🌌 [particle-zoo](./particle-zoo/) — the Standard Model
+An interactive visual journey through the Standard Model of particle physics — and beyond.
 
-**Features:**
-- **Standard Model chart** — all 17 fundamental particles + antimatter mirror + color/anticolor + 8 gluons + discovery years
-- **Particle Detail** — searchable, with mass/charge/spin/discovery/forces/color-charge/facts for 29+ particles
-- **Composition Builder** — drag quarks & electrons; live canvas shows the strong force (gluon lines), nuclear residual force, EM attraction/repulsion; auto-detects H, ²H, ³H, ³He, ⁴He, Li, α, Δ, free quarks, etc.
-- **Forces & Interactions** — the four fundamental forces + famous reactions (β decay, pair production, annihilation, fusion, Higgs decay, gluon exchange)
-- **Beyond Standard Model** — Majorana fermions, gravitons, sterile neutrinos, axions, WIMPs, SUSY, magnetic monopoles, anyons, tetra/pentaquarks, glueballs, preons — each flagged CONFIRMED / HYPOTHETICAL / EXOTIC
-- **Quantum Phenomena** — BEC, Cooper pairs & superconductivity, superfluidity, quark-gluon plasma, entanglement, Pauli exclusion, topological matter, Hawking radiation, fermionic condensate
-- **Physics Playground** — live canvas simulation: Coulomb forces, electron-positron annihilation → 2γ
+- Standard Model chart (17 particles + antimatter mirror + 8 gluon colors + discovery years)
+- Particle Detail — searchable, with mass/charge/spin/discovery/forces/color/facts for 29+ particles
+- Composition Builder — drag quarks & electrons; live canvas shows strong-force gluon lines, nuclear residual force, EM attraction/repulsion; auto-detects H, ²H, ³H, ³He, ⁴He, Li, α, Δ, free quarks
+- Forces & Interactions — the four forces + famous reactions
+- Beyond Standard Model — Majorana, gravitons, sterile neutrinos, axions, WIMPs, SUSY, monopoles, anyons, tetra/pentaquarks, glueballs, preons
+- Quantum Phenomena — BEC, Cooper pairs, superfluidity, quark-gluon plasma, entanglement, Pauli exclusion, topological matter, Hawking radiation, fermionic condensate
+- Physics Playground — canvas simulation of Coulomb forces & e⁻/e⁺ annihilation
 
-**Two ways to run it:**
+### 🌠 [big-bang](./big-bang/) — 13.8 Billion Years
+An interactive journey through the entire history of the universe.
 
-1. **Full multi-file version:** open [`particle-zoo/index.html`](./particle-zoo/index.html) — best for desktop.
-2. **Single-file version (mobile-friendly):** open [`particle-zoo/mobile/index.html`](./particle-zoo/mobile/index.html) or [`particle-zoo/mobile/particle-zoo.html`](./particle-zoo/mobile/particle-zoo.html) — one file (~160 KB), copy it to your phone, email it, drop it on a USB stick.
+- **Cosmic Timeline** — every epoch from Planck time to the far future, with time / temperature / size / density / dominant content / key events / evidence
+- **Time Machine** — log-scale slider spanning 10⁻⁴³ s → 10¹⁸ s; watch the universe grow, cool, and change composition in real time
+- **Composition** — pie charts of ordinary matter / dark matter / dark energy at three key moments (now, recombination, post-nucleosynthesis)
+- **Size of the Universe** — from subatomic to 93 billion light-years across, with familiar comparisons
+- **Ultimate Fates** — Big Freeze, Big Rip, Big Crunch, Big Bounce, Vacuum Decay
+- **Open Mysteries** — dark matter, dark energy, baryon asymmetry, inflation, Hubble tension, multiverse, fine-tuning
 
-**Chinese physics terminology** in the localized version follows the CAS-approved glossary (《物理学名词》, 全国科学技术名词审定委员会).
+**Chinese physics terminology** in all apps follows the CAS-approved glossary (《物理学名词》, 全国科学技术名词审定委员会).
+
+## Running an app
+
+**Full multi-file version** (best for desktop):
+- open `particle-zoo/index.html`
+- open `big-bang/index.html`
+
+**Single-file version** (mobile-friendly, one HTML file, ~60–160 KB):
+- open `particle-zoo/mobile/index.html`  or  `particle-zoo/mobile/particle-zoo.html`
+- open `big-bang/mobile/index.html`  or  `big-bang/mobile/big-bang.html`
+
+Copy the single-file version to your phone, email it, drop it on a USB stick — it Just Works, offline (only Google Fonts are external, and the app degrades gracefully without them).
 
 ## Keeping the single-file version in sync
 
-The single-file build is generated from the source files. **Never edit `mobile/*.html` by hand.**
+**Never edit `mobile/*.html` by hand** — they're generated.
 
 ### Manual rebuild
 ```bash
-cd particle-zoo
+cd particle-zoo   # or: cd big-bang
 node build.js
-# or: npm run build
 ```
 
 ### Automatic rebuild on commit (recommended)
-This repo ships a git pre-commit hook that rebuilds the single-file version whenever any of `index.html`, `styles.css`, `i18n.js`, `app.js`, or `build.js` change. To enable it after cloning:
+This repo ships a git pre-commit hook that rebuilds any app whose source files (`index.html`, `styles.css`, `i18n.js`, `app.js`, `build.js`) are changing. Enable once after cloning:
 
 ```bash
 git config core.hooksPath .githooks
 ```
 
-(This has already been done in the working repo; the config is stored in `.git/config` so each clone must re-run it once.)
-
-After that, `git commit` will automatically rebuild `mobile/index.html` and stage it alongside your changes. Requires Node.js on your PATH.
-
-## Roadmap
-
-More physics apps will be added here over time.
+After that, `git commit` will rebuild any affected `mobile/*.html` files and stage them alongside your changes. Requires Node.js on your `PATH`.
 
 ## License
 

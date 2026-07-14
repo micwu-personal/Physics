@@ -1,22 +1,26 @@
 #!/bin/sh
-# .githooks/pre-commit
-# Auto-rebuild the single-file mobile version if any source file changed,
-# then stage the rebuilt files.
+# .githooks/pre-commit — rebuilds single-file mobile bundles for any app
+# whose source files are changing.
 
 ROOT="$(git rev-parse --show-toplevel)"
-SRC_DIR="$ROOT/particle-zoo"
 
-# Check if any of the source files are being committed
-CHANGED=$(git diff --cached --name-only | grep -E '^particle-zoo/(index\.html|styles\.css|i18n\.js|app\.js|build\.js)$' || true)
+# Detect changes per app
+CHANGED_APPS=""
+for APP in particle-zoo big-bang; do
+  if git diff --cached --name-only | grep -qE "^${APP}/(index\.html|styles\.css|i18n\.js|app\.js|build\.js)$"; then
+    CHANGED_APPS="$CHANGED_APPS $APP"
+  fi
+done
 
-if [ -n "$CHANGED" ]; then
-  echo "→ particle-zoo source changed, rebuilding single-file version..."
-  if command -v node >/dev/null 2>&1; then
-    (cd "$SRC_DIR" && node build.js)
-    git add "$SRC_DIR/mobile/index.html" "$SRC_DIR/mobile/particle-zoo.html"
-    echo "→ single-file build updated & staged."
-  else
-    echo "⚠ node not found — cannot rebuild single-file version. Install Node.js or run 'node particle-zoo/build.js' manually before committing."
+if [ -n "$CHANGED_APPS" ]; then
+  if ! command -v node >/dev/null 2>&1; then
+    echo "⚠ node not found — cannot rebuild single-file version. Install Node.js or run 'node <app>/build.js' manually before committing."
     exit 1
   fi
+  for APP in $CHANGED_APPS; do
+    echo "→ Rebuilding single-file version for $APP..."
+    (cd "$ROOT/$APP" && node build.js)
+    git add "$ROOT/$APP/mobile/"*.html
+  done
+  echo "→ single-file builds updated & staged."
 fi

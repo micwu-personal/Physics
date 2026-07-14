@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title data-i18n="page.title">Big Bang — 13.8 Billion Years in an Afternoon</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div id="bg-stars"></div>
+  <canvas id="bgCanvas"></canvas>
+
+  <div class="lang-switch">
+    <button class="lang-pill active" data-lang="en">EN</button>
+    <button class="lang-pill" data-lang="zh-CN">中文</button>
+  </div>
+
+  <header class="hero">
+    <div class="hero-inner">
+      <div class="badge" data-i18n="hero.badge">Cosmic History · Interactive</div>
+      <h1><span data-i18n="hero.title.a">Big</span> <span class="grad" data-i18n="hero.title.b">Bang</span></h1>
+      <p class="tag" data-i18n="hero.tag">From 10⁻⁴³ seconds to the heat death of the universe. Walk the timeline that built everything.</p>
+    </div>
+  </header>
+
+  <nav class="tabs">
+    <button class="tab active" data-tab="timeline" data-i18n="tab.timeline">Cosmic Timeline</button>
+    <button class="tab" data-tab="machine" data-i18n="tab.machine">Time Machine</button>
+    <button class="tab" data-tab="composition" data-i18n="tab.composition">Composition</button>
+    <button class="tab" data-tab="scale" data-i18n="tab.scale">Size of the Universe</button>
+    <button class="tab" data-tab="fates" data-i18n="tab.fates">Ultimate Fates</button>
+    <button class="tab" data-tab="mysteries" data-i18n="tab.mysteries">Open Mysteries</button>
+  </nav>
+
+  <main>
+    <!-- Cosmic Timeline -->
+    <section id="tab-timeline" class="tab-panel active">
+      <div class="section-head">
+        <h2 data-i18n="timeline.h2">Cosmic Timeline</h2>
+        <p data-i18n="timeline.desc">Every epoch since t = 0. Click a card to zoom in.</p>
+      </div>
+      <div id="timelineWrap" class="timeline-wrap"></div>
+    </section>
+
+    <!-- Time Machine -->
+    <section id="tab-machine" class="tab-panel">
+      <div class="section-head">
+        <h2 data-i18n="machine.h2">Cosmic Time Machine</h2>
+        <p data-i18n="machine.desc">Drag the slider through 13.8 billion years of cosmic history. Log scale — each step is a factor of 10.</p>
+      </div>
+      <div class="machine">
+        <canvas id="machineCanvas"></canvas>
+        <div class="machine-panel">
+          <div class="mp-time" id="mpTime">3 min</div>
+          <div class="mp-epoch" id="mpEpoch">—</div>
+          <div class="mp-props">
+            <div class="mp-p"><div class="mp-k" data-i18n="machine.temp">Temperature</div><div class="mp-v" id="mpTemp">—</div></div>
+            <div class="mp-p"><div class="mp-k" data-i18n="machine.size">Observable universe radius</div><div class="mp-v" id="mpSize">—</div></div>
+            <div class="mp-p"><div class="mp-k" data-i18n="machine.density">Energy density</div><div class="mp-v" id="mpDens">—</div></div>
+            <div class="mp-p"><div class="mp-k" data-i18n="machine.dominant">What exists</div><div class="mp-v" id="mpDom">—</div></div>
+          </div>
+          <div class="mp-event"><div class="mp-ek" data-i18n="machine.event">Key event</div><div class="mp-ev" id="mpEvent">—</div></div>
+        </div>
+        <div class="slider-wrap">
+          <input type="range" id="timeSlider" min="-43" max="18" step="0.1" value="2.26">
+          <div class="slider-marks" id="sliderMarks"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Composition -->
+    <section id="tab-composition" class="tab-panel">
+      <div class="section-head">
+        <h2 data-i18n="comp.h2">What is the Universe made of?</h2>
+        <p data-i18n="comp.desc">The mix has changed dramatically over cosmic history. Today, only 5% of the universe is ordinary matter.</p>
+      </div>
+      <div class="comp-grid" id="compGrid"></div>
+    </section>
+
+    <!-- Size / Scale -->
+    <section id="tab-scale" class="tab-panel">
+      <div class="section-head">
+        <h2 data-i18n="scale.h2">How big was the universe?</h2>
+        <p data-i18n="scale.desc">The <b>observable</b> universe grew from smaller than an atom to 93 billion light-years across.</p>
+      </div>
+      <div id="scaleWrap" class="scale-wrap"></div>
+    </section>
+
+    <!-- Fates -->
+    <section id="tab-fates" class="tab-panel">
+      <div class="section-head">
+        <h2 data-i18n="fates.h2">How does it end?</h2>
+        <p data-i18n="fates.desc">The universe's ultimate fate depends on the density of dark energy. Three main scenarios are debated.</p>
+      </div>
+      <div id="fatesGrid" class="fates-grid"></div>
+    </section>
+
+    <!-- Mysteries -->
+    <section id="tab-mysteries" class="tab-panel">
+      <div class="section-head">
+        <h2 data-i18n="myst.h2">What we still don't know</h2>
+        <p data-i18n="myst.desc">Cosmology has spectacular successes — and equally spectacular open problems.</p>
+      </div>
+      <div id="mysteriesGrid" class="myst-grid"></div>
+    </section>
+  </main>
+
+  <footer><span data-i18n="footer">Values from Planck 2018 (Λ-CDM), NASA/ESA, and PDG.</span></footer>
+
+  <script src="i18n.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
