@@ -76,8 +76,15 @@ function openDetail(z){
   document.querySelectorAll('.cell').forEach(c=>c.classList.toggle('active', +c.dataset.z===z));
   detailEl.classList.remove('hidden');
   refreshDetail();
-  // Scroll into view
-  setTimeout(()=>detailEl.scrollIntoView({behavior:'smooth', block:'start'}), 50);
+  // Scroll into view + re-render canvases once layout has settled
+  requestAnimationFrame(()=>{
+    detailEl.scrollIntoView({behavior:'smooth', block:'start'});
+    // Re-draw canvases now that they have real dimensions
+    drawBohr(currentZ);
+    if(currentHybrid) drawOrbital(currentHybrid);
+    const el = ELEMENTS[currentZ];
+    if(el) drawNucleus(el.Z, Math.round(el.mass - el.Z));
+  });
 }
 document.getElementById('detailClose').addEventListener('click',()=>{
   detailEl.classList.add('hidden'); currentZ=null;
@@ -87,7 +94,7 @@ document.getElementById('detailClose').addEventListener('click',()=>{
 function refreshDetail(){
   if(!currentZ) return;
   const el = ELEMENTS[currentZ];
-  const ext = EXTENDED[currentZ] || {};
+  const ext = Object.assign({}, generateFallbackExt(el), EXTENDED[currentZ] || {});
   const lang = window.CURRENT_LANG || 'en';
   const catColor = CATEGORY_COLORS[el.category];
   const nm = lang==='zh-CN' ? el.name_zh : el.name_en;
@@ -140,7 +147,11 @@ function refreshDetail(){
     if(!availHybrids.includes(currentHybrid)) currentHybrid = availHybrids[0];
     orbTabs.querySelectorAll('button').forEach(b=>{
       b.classList.toggle('active', b.dataset.h===currentHybrid);
-      b.addEventListener('click',()=>{ currentHybrid=b.dataset.h; refreshOrbital(); });
+      b.addEventListener('click',()=>{
+        currentHybrid = b.dataset.h;
+        orbTabs.querySelectorAll('button').forEach(x=>x.classList.toggle('active', x.dataset.h===currentHybrid));
+        refreshOrbital();
+      });
     });
     refreshOrbital();
   } else {
@@ -244,16 +255,14 @@ function drawBohr(z){
   cancelAnimationFrame(bohrRAF);
   const canvas = document.getElementById('bohrCanvas');
   const ctx = canvas.getContext('2d');
-  const resize = ()=>{
-    const r = canvas.getBoundingClientRect();
-    canvas.width = r.width * devicePixelRatio;
-    canvas.height = r.height * devicePixelRatio;
-    ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);
-  };
-  resize();
+  const bc = canvas.getBoundingClientRect();
+  if(bc.width < 20 || bc.height < 20) return;
+  canvas.width = bc.width * devicePixelRatio;
+  canvas.height = bc.height * devicePixelRatio;
+  ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);
   const shells = shellCounts(z).filter(x=>x>0);
-  const W = canvas.getBoundingClientRect().width;
-  const H = canvas.getBoundingClientRect().height;
+  const W = bc.width;
+  const H = bc.height;
   const cx = W/2, cy = H/2;
   const maxR = Math.min(W,H)/2 - 20;
   const el = ELEMENTS[z];
@@ -309,6 +318,7 @@ function drawOrbital(h){
   const canvas = document.getElementById('orbitalCanvas');
   const ctx = canvas.getContext('2d');
   const r = canvas.getBoundingClientRect();
+  if(r.width < 20 || r.height < 20) return; // not laid out yet
   canvas.width = r.width * devicePixelRatio;
   canvas.height = r.height * devicePixelRatio;
   ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);
@@ -316,39 +326,40 @@ function drawOrbital(h){
   const cx=W/2, cy=H/2;
   const start = performance.now();
 
-  // Define lobes: array of {angle, tilt(polar), color, kind:'sphere'|'lobe'}
   const shapes = shapesForHybrid(h);
-  const R = Math.min(W,H)*0.32;
+  const R = Math.min(W,H)*0.4;
 
   function frame(){
     const t = (performance.now()-start)/1000;
     ctx.clearRect(0,0,W,H);
-    // subtle grid
-    ctx.strokeStyle='rgba(255,255,255,0.05)';
+    // axes
+    ctx.strokeStyle='rgba(255,255,255,0.06)';
+    ctx.lineWidth=1;
     ctx.beginPath(); ctx.moveTo(0,cy); ctx.lineTo(W,cy); ctx.stroke();
     ctx.beginPath(); ctx.moveTo(cx,0); ctx.lineTo(cx,H); ctx.stroke();
 
-    // Rotate whole cloud around center
-    const rot = t*0.3;
+    const rot = t*0.35;
     shapes.forEach(s=>{
       const a = s.a + rot;
-      const px = cx + Math.cos(a)*R*0.5;
-      const py = cy + Math.sin(a)*R*0.5;
-      // Draw two-lobed shape: outer + inner
       if(s.kind==='sphere'){
-        const g = ctx.createRadialGradient(cx,cy,0, cx,cy,R*0.9);
+        const g = ctx.createRadialGradient(cx,cy,0, cx,cy,R);
         g.addColorStop(0, s.color);
-        g.addColorStop(1, s.color+'00');
+        g.addColorStop(0.5, s.color.slice(0,7)+'55');
+        g.addColorStop(1, s.color.slice(0,7)+'00');
         ctx.fillStyle=g;
-        ctx.beginPath(); ctx.arc(cx,cy,R*0.9,0,Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.arc(cx,cy,R,0,Math.PI*2); ctx.fill();
       } else {
-        // Teardrop / dumbbell lobe
         drawLobe(ctx, cx, cy, R, a, s.color);
       }
     });
     // Center nucleus
     ctx.fillStyle='#fff';
-    ctx.beginPath(); ctx.arc(cx,cy,4,0,Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(cx,cy,5,0,Math.PI*2); ctx.fill();
+    // Hybrid label
+    ctx.fillStyle='rgba(255,255,255,0.6)';
+    ctx.font='bold 11px JetBrains Mono, monospace';
+    ctx.textAlign='left';
+    ctx.fillText(labelForHybrid(h), 10, 18);
     orbRAF = requestAnimationFrame(frame);
   }
   frame();
@@ -357,14 +368,14 @@ function drawLobe(ctx, cx, cy, R, angle, color){
   ctx.save();
   ctx.translate(cx,cy);
   ctx.rotate(angle);
-  // Two lobes (positive + negative phase for p-like)
   for(let side of [1,-1]){
-    const g = ctx.createRadialGradient(side*R*0.55, 0, 0, side*R*0.55, 0, R*0.5);
+    const g = ctx.createRadialGradient(side*R*0.55, 0, 0, side*R*0.55, 0, R*0.55);
     g.addColorStop(0, color);
-    g.addColorStop(1, color+'00');
+    g.addColorStop(0.4, color.slice(0,7)+'88');
+    g.addColorStop(1, color.slice(0,7)+'00');
     ctx.fillStyle = g;
     ctx.beginPath();
-    ctx.ellipse(side*R*0.55, 0, R*0.5, R*0.28, 0, 0, Math.PI*2);
+    ctx.ellipse(side*R*0.55, 0, R*0.5, R*0.3, 0, 0, Math.PI*2);
     ctx.fill();
   }
   ctx.restore();
@@ -455,6 +466,7 @@ function drawNucleus(protons, neutrons){
   const canvas = document.getElementById('nucleusCanvas');
   const ctx = canvas.getContext('2d');
   const rct = canvas.getBoundingClientRect();
+  if(rct.width < 20 || rct.height < 20) return;
   canvas.width = rct.width * devicePixelRatio;
   canvas.height = rct.height * devicePixelRatio;
   ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);

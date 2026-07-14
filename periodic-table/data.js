@@ -270,3 +270,148 @@ const PHASE_I18N = {
   en: {solid:'Solid', liquid:'Liquid', gas:'Gas'},
   'zh-CN': {solid:'固态', liquid:'液态', gas:'气态'}
 };
+
+/* ================ DISCOVERY YEARS ================
+   Compact table: Z -> [year, discoverer]. year<0 = ancient.
+================================================== */
+const DISCOVERY = {
+  1:[1766,'Henry Cavendish'], 2:[1868,'P. Janssen & N. Lockyer'], 3:[1817,'J. A. Arfwedson'],
+  4:[1797,'L. N. Vauquelin'], 5:[1808,'H. Davy, J. L. Gay-Lussac & L. J. Thénard'],
+  6:[-3750,'known since antiquity'], 7:[1772,'Daniel Rutherford'], 8:[1774,'Joseph Priestley'],
+  9:[1886,'Henri Moissan'], 10:[1898,'W. Ramsay & M. W. Travers'],
+  11:[1807,'Humphry Davy'], 12:[1755,'Joseph Black'], 13:[1825,'H. C. Ørsted'],
+  14:[1824,'Jöns Jacob Berzelius'], 15:[1669,'Hennig Brand'], 16:[-2000,'known since antiquity'],
+  17:[1774,'Carl Wilhelm Scheele'], 18:[1894,'Lord Rayleigh & W. Ramsay'],
+  19:[1807,'Humphry Davy'], 20:[1808,'Humphry Davy'], 21:[1879,'L. F. Nilson'],
+  22:[1791,'William Gregor'], 23:[1801,'A. M. del Río'], 24:[1797,'L. N. Vauquelin'],
+  25:[1774,'C. W. Scheele & J. G. Gahn'], 26:[-5000,'known since prehistory'],
+  27:[1735,'Georg Brandt'], 28:[1751,'A. F. Cronstedt'], 29:[-9000,'known since antiquity'],
+  30:[-1000,'known since antiquity'], 31:[1875,'Lecoq de Boisbaudran'], 32:[1886,'C. A. Winkler'],
+  33:[-1000,'known since antiquity'], 34:[1817,'J. J. Berzelius'], 35:[1826,'A. J. Balard'],
+  36:[1898,'W. Ramsay & M. W. Travers'], 37:[1861,'R. Bunsen & G. Kirchhoff'],
+  38:[1790,'A. Crawford'], 39:[1794,'J. Gadolin'], 40:[1789,'M. H. Klaproth'],
+  41:[1801,'C. Hatchett'], 42:[1778,'C. W. Scheele'], 43:[1937,'C. Perrier & E. Segrè'],
+  44:[1844,'K. E. Claus'], 45:[1803,'W. H. Wollaston'], 46:[1803,'W. H. Wollaston'],
+  47:[-5000,'known since antiquity'], 48:[1817,'F. Stromeyer'], 49:[1863,'F. Reich & T. Richter'],
+  50:[-2100,'known since antiquity'], 51:[-3000,'known since antiquity'],
+  52:[1782,'F.-J. Müller von Reichenstein'], 53:[1811,'B. Courtois'],
+  54:[1898,'W. Ramsay & M. W. Travers'], 55:[1860,'R. Bunsen & G. Kirchhoff'],
+  56:[1808,'Humphry Davy'], 57:[1839,'C. G. Mosander'], 58:[1803,'J. J. Berzelius & W. Hisinger'],
+  59:[1885,'C. Auer von Welsbach'], 60:[1885,'C. Auer von Welsbach'],
+  61:[1945,'Marinsky, Glendenin & Coryell'], 62:[1879,'Lecoq de Boisbaudran'],
+  63:[1901,'E. Demarçay'], 64:[1880,'J.-C. G. de Marignac'], 65:[1843,'C. G. Mosander'],
+  66:[1886,'Lecoq de Boisbaudran'], 67:[1878,'M. Delafontaine & J.-L. Soret'],
+  68:[1843,'C. G. Mosander'], 69:[1879,'P. T. Cleve'], 70:[1878,'J.-C. G. de Marignac'],
+  71:[1907,'G. Urbain'], 72:[1923,'D. Coster & G. von Hevesy'], 73:[1802,'A. G. Ekeberg'],
+  74:[1783,'d\'Elhuyar brothers'], 75:[1925,'Noddack, Berg & Tacke'], 76:[1803,'S. Tennant'],
+  77:[1803,'S. Tennant'], 78:[1735,'A. de Ulloa'], 79:[-6000,'known since antiquity'],
+  80:[-2000,'known since antiquity'], 81:[1861,'William Crookes'],
+  82:[-7000,'known since antiquity'], 83:[1753,'C. F. Geoffroy'], 84:[1898,'Marie & Pierre Curie'],
+  85:[1940,'Corson, MacKenzie & Segrè'], 86:[1900,'F. E. Dorn'], 87:[1939,'Marguerite Perey'],
+  88:[1898,'Marie & Pierre Curie'], 89:[1899,'A. Debierne'], 90:[1829,'J. J. Berzelius'],
+  91:[1913,'K. Fajans & O. Göhring'], 92:[1789,'M. H. Klaproth'], 93:[1940,'McMillan & Abelson'],
+  94:[1940,'Seaborg, McMillan, Kennedy & Wahl'], 95:[1944,'Seaborg, James, Morgan & Ghiorso'],
+  96:[1944,'Seaborg, James & Ghiorso'], 97:[1949,'Thompson, Ghiorso & Seaborg'],
+  98:[1950,'Thompson, Street, Ghiorso & Seaborg'], 99:[1952,'Ghiorso et al. (Ivy Mike fallout)'],
+  100:[1952,'Ghiorso et al. (Ivy Mike fallout)'], 101:[1955,'Ghiorso et al.'],
+  102:[1966,'Flerov et al. (JINR)'], 103:[1961,'Ghiorso et al.'],
+  104:[1964,'JINR / LBNL'], 105:[1968,'JINR / LBNL'], 106:[1974,'LBNL / JINR'],
+  107:[1981,'GSI Darmstadt'], 108:[1984,'GSI Darmstadt'], 109:[1982,'GSI Darmstadt'],
+  110:[1994,'GSI Darmstadt'], 111:[1994,'GSI Darmstadt'], 112:[1996,'GSI Darmstadt'],
+  113:[2003,'RIKEN (Japan)'], 114:[1998,'JINR (Dubna)'], 115:[2003,'JINR / LLNL'],
+  116:[2000,'JINR / LLNL'], 117:[2010,'JINR / ORNL / LLNL'], 118:[2002,'JINR / LLNL']
+};
+
+/* ================ USES BY CATEGORY (fallback text) ================ */
+const CATEGORY_USES = {
+  en: {
+    alkali: 'Highly reactive metal — reacts vigorously with water. Used in alloys, batteries, atomic clocks, and organic synthesis.',
+    alkaline: 'Reactive light metal. Used in alloys, flares, medical imaging, and structural materials.',
+    transition: 'Transition metal with variable oxidation states. Widely used in alloys, catalysts, pigments, and electronics.',
+    posttransition: 'Post-transition metal (main-group). Used in alloys, coatings, solders, and semiconductor devices.',
+    metalloid: 'Metalloid with properties between metals and non-metals. Used in semiconductors, glass, alloys, and specialty chemicals.',
+    nonmetal: 'Reactive non-metal essential to living organisms and industrial chemistry.',
+    halogen: 'Highly reactive non-metal. Used in disinfectants, salts, polymers, and pharmaceuticals.',
+    noble: 'Noble gas — extremely unreactive. Used in lighting, lasers, cryogenics, and inert atmospheres.',
+    lanthanide: 'Rare-earth element. Used in magnets, phosphors, catalysts, and specialty optics.',
+    actinide: 'Actinide — radioactive metal. Uses limited to nuclear fuel, weapons research, and specialized instrumentation.'
+  },
+  'zh-CN': {
+    alkali: '化学性质极其活泼的金属——遇水剧烈反应。用于合金、电池、原子钟和有机合成。',
+    alkaline: '较活泼的轻金属。用于合金、照明弹、医学影像和结构材料。',
+    transition: '过渡金属,具有可变化合价。广泛用于合金、催化剂、颜料和电子器件。',
+    posttransition: '贫金属(主族金属)。用于合金、镀层、焊料和半导体器件。',
+    metalloid: '类金属,性质介于金属与非金属之间。用于半导体、玻璃、合金及特种化学品。',
+    nonmetal: '化学性质活泼的非金属,对生命和工业化学至关重要。',
+    halogen: '化学性质极其活泼的非金属。用于消毒剂、盐类、聚合物和医药。',
+    noble: '稀有气体——化学惰性极高。用于照明、激光、低温制冷及惰性保护气氛。',
+    lanthanide: '稀土元素。用于永磁体、荧光粉、催化剂和特殊光学材料。',
+    actinide: '锕系元素——具有放射性的金属。用途局限于核燃料、武器研究及特殊仪器。'
+  }
+};
+
+/* ================ REACTION TEMPLATES BY CATEGORY ================ */
+const CATEGORY_REACTIONS = {
+  alkali: (sym)=>[
+    {eq:`4${sym} + O₂ → 2${sym}₂O`, note_en:'burns in air', note_zh:'在空气中燃烧'},
+    {eq:`2${sym} + 2H₂O → 2${sym}OH + H₂↑`, note_en:'reacts vigorously with water', note_zh:'与水剧烈反应放氢'},
+    {eq:`2${sym} + Cl₂ → 2${sym}Cl`, note_en:'forms ionic salt', note_zh:'生成离子型盐'}
+  ],
+  alkaline: (sym)=>[
+    {eq:`2${sym} + O₂ → 2${sym}O`, note_en:'oxidation on burning', note_zh:'燃烧生成氧化物'},
+    {eq:`${sym} + 2H₂O → ${sym}(OH)₂ + H₂↑`, note_en:'reacts with water', note_zh:'与水反应放氢'}
+  ],
+  halogen: (sym)=>[
+    {eq:`H₂ + ${sym}₂ → 2H${sym}`, note_en:'forms hydrogen halide', note_zh:'生成卤化氢'},
+    {eq:`2Na + ${sym}₂ → 2Na${sym}`, note_en:'ionic salt formation', note_zh:'生成离子型盐'}
+  ],
+  transition: (sym)=>[
+    {eq:`2${sym} + O₂ → 2${sym}O`, note_en:'typical oxidation', note_zh:'典型的氧化反应'}
+  ],
+  posttransition: (sym)=>[
+    {eq:`4${sym} + 3O₂ → 2${sym}₂O₃`, note_en:'oxidation', note_zh:'氧化反应'}
+  ],
+  nonmetal: (sym)=>[
+    {eq:`${sym} + O₂ → ${sym}O₂`, note_en:'combustion', note_zh:'燃烧'}
+  ],
+  metalloid: (sym)=>[
+    {eq:`${sym} + O₂ → ${sym}O₂`, note_en:'oxidation', note_zh:'氧化反应'}
+  ],
+  lanthanide: (sym)=>[
+    {eq:`4${sym} + 3O₂ → 2${sym}₂O₃`, note_en:'typical +3 oxide', note_zh:'典型的 +3 氧化物'}
+  ],
+  actinide: (sym)=>[]
+};
+
+/* ================ FALLBACK EXTENDED DATA GENERATOR ================ */
+function generateFallbackExt(el){
+  const lang = window.CURRENT_LANG || 'en';
+  // Phase heuristic
+  let phase = 'solid';
+  if(['H','N','O','F','Cl','Ar','Ne','He','Kr','Xe','Rn'].includes(el.symbol)) phase='gas';
+  else if(['Br','Hg'].includes(el.symbol)) phase='liquid';
+
+  // Uses fallback per category
+  const uses_en = (CATEGORY_USES.en[el.category]||'').replace(/element/, el.name_en);
+  const uses_zh = (CATEGORY_USES['zh-CN'][el.category]||'').replace(/元素/, el.name_zh);
+
+  // Discovery
+  const disc = DISCOVERY[el.Z];
+  const discovery = disc ? { year: disc[0], who: disc[1] } : null;
+
+  // Isotopes: one representative
+  const massNum = Math.round(el.mass);
+  const isotopes = [{
+    s: `${massNum}${el.symbol}`,
+    ab: el.radioactive===2 ? '—' : '≈100%',
+    stable: el.radioactive===0,
+    note: el.radioactive===0 ? '' : (el.radioactive===1 ? (lang==='zh-CN'?'具有天然放射性':'naturally radioactive') : (lang==='zh-CN'?'人工合成同位素':'artificially synthesized'))
+  }];
+
+  // Reactions by category
+  const rxGen = CATEGORY_REACTIONS[el.category];
+  const reactions = (rxGen && el.radioactive!==2) ? rxGen(el.symbol) : [];
+
+  return { phase, uses_en, uses_zh, discovery, isotopes, reactions };
+}
+
