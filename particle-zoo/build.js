@@ -24,6 +24,12 @@ let out = html.replace(
   `<style>\n${css}\n</style>`
 );
 
+// 1b) strip all external CDN links (Google Fonts) so the mobile build is
+//     fully offline / self-contained. CSS already falls back to system fonts.
+out = out.replace(/<link\s+rel="preconnect"[^>]*>\s*/g, '');
+out = out.replace(/<link\s+href="https:\/\/fonts\.googleapis\.com[^"]*"\s+rel="stylesheet"[^>]*>\s*/g, '');
+out = out.replace(/<link\s+rel="stylesheet"\s+href="https:\/\/fonts\.googleapis\.com[^"]*"[^>]*>\s*/g, '');
+
 // 2) replace <script src="i18n.js"></script> and <script src="app.js"></script>
 out = out.replace(
   /<script\s+src="i18n\.js"><\/script>/,
@@ -46,9 +52,12 @@ const banner =
 `;
 out = out.replace(/^<!DOCTYPE html>/i, `<!DOCTYPE html>\n${banner}`);
 
-const outPath = path.join(OUT_DIR, 'index.html');
-fs.writeFileSync(outPath, out);
+const outPath1 = path.join(OUT_DIR, 'index.html');
+const outPath2 = path.join(OUT_DIR, 'particle-zoo.html');
+fs.writeFileSync(outPath1, out);
+fs.writeFileSync(outPath2, out);
 
 const sizeKB = (Buffer.byteLength(out, 'utf8') / 1024).toFixed(1);
-console.log(`✓ Wrote ${outPath} (${sizeKB} KB)`);
+console.log(`✓ Wrote ${outPath1} (${sizeKB} KB)`);
+console.log(`✓ Wrote ${outPath2} (${sizeKB} KB)`);
 console.log(`\nOpen the file directly in a browser or transfer to a phone.`);

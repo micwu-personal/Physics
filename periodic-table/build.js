@@ -22,6 +22,12 @@ let out = html
   .replace(/<script\s+src="data\.js"><\/script>/, `<script>\n${dataJs}\n</script>`)
   .replace(/<script\s+src="app\.js"><\/script>/,  `<script>\n${appJs}\n</script>`);
 
+// Strip external CDN links (Google Fonts) for offline / self-contained use.
+// CSS already falls back to system fonts.
+out = out.replace(/<link\s+rel="preconnect"[^>]*>\s*/g, '');
+out = out.replace(/<link\s+href="https:\/\/fonts\.googleapis\.com[^"]*"\s+rel="stylesheet"[^>]*>\s*/g, '');
+out = out.replace(/<link\s+rel="stylesheet"\s+href="https:\/\/fonts\.googleapis\.com[^"]*"[^>]*>\s*/g, '');
+
 const banner =
 `<!--
   Periodic Table — SINGLE-FILE BUILD
