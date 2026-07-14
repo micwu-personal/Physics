@@ -1,0 +1,272 @@
+/* ================ ELEMENT DATA ================
+   Compact table for all 118 elements + rich extended data for common ones.
+   Categories: alkali | alkaline | transition | posttransition | metalloid |
+               nonmetal | halogen | noble | lanthanide | actinide | unknown
+   Group: 1..18 (main groups 1,2,13..18; sub-groups 3..12); lanthanides/actinides = 'f'
+================================================== */
+
+// [Z, symbol, en-name, zh-name, category, group(1..18 or 'f'), period,
+//  mass, config-short, common-oxidation-states, EN-electroneg or null,
+//  radioactive: 0 none/1 unstable but some stable isotopes/2 fully radioactive]
+const ELEMENT_TABLE = [
+  [1,'H','Hydrogen','氢','nonmetal',1,1,1.008,'1s¹','−1,+1',2.20,0],
+  [2,'He','Helium','氦','noble',18,1,4.003,'1s²','0',null,0],
+  [3,'Li','Lithium','锂','alkali',1,2,6.94,'[He] 2s¹','+1',0.98,0],
+  [4,'Be','Beryllium','铍','alkaline',2,2,9.012,'[He] 2s²','+2',1.57,0],
+  [5,'B','Boron','硼','metalloid',13,2,10.81,'[He] 2s²2p¹','+3',2.04,0],
+  [6,'C','Carbon','碳','nonmetal',14,2,12.011,'[He] 2s²2p²','−4,+2,+4',2.55,0],
+  [7,'N','Nitrogen','氮','nonmetal',15,2,14.007,'[He] 2s²2p³','−3,+1,+2,+3,+4,+5',3.04,0],
+  [8,'O','Oxygen','氧','nonmetal',16,2,15.999,'[He] 2s²2p⁴','−2',3.44,0],
+  [9,'F','Fluorine','氟','halogen',17,2,18.998,'[He] 2s²2p⁵','−1',3.98,0],
+  [10,'Ne','Neon','氖','noble',18,2,20.180,'[He] 2s²2p⁶','0',null,0],
+  [11,'Na','Sodium','钠','alkali',1,3,22.990,'[Ne] 3s¹','+1',0.93,0],
+  [12,'Mg','Magnesium','镁','alkaline',2,3,24.305,'[Ne] 3s²','+2',1.31,0],
+  [13,'Al','Aluminium','铝','posttransition',13,3,26.982,'[Ne] 3s²3p¹','+3',1.61,0],
+  [14,'Si','Silicon','硅','metalloid',14,3,28.085,'[Ne] 3s²3p²','−4,+4',1.90,0],
+  [15,'P','Phosphorus','磷','nonmetal',15,3,30.974,'[Ne] 3s²3p³','−3,+3,+5',2.19,0],
+  [16,'S','Sulfur','硫','nonmetal',16,3,32.06,'[Ne] 3s²3p⁴','−2,+2,+4,+6',2.58,0],
+  [17,'Cl','Chlorine','氯','halogen',17,3,35.45,'[Ne] 3s²3p⁵','−1,+1,+3,+5,+7',3.16,0],
+  [18,'Ar','Argon','氩','noble',18,3,39.948,'[Ne] 3s²3p⁶','0',null,0],
+  [19,'K','Potassium','钾','alkali',1,4,39.098,'[Ar] 4s¹','+1',0.82,0],
+  [20,'Ca','Calcium','钙','alkaline',2,4,40.078,'[Ar] 4s²','+2',1.00,0],
+  [21,'Sc','Scandium','钪','transition',3,4,44.956,'[Ar] 3d¹4s²','+3',1.36,0],
+  [22,'Ti','Titanium','钛','transition',4,4,47.867,'[Ar] 3d²4s²','+2,+3,+4',1.54,0],
+  [23,'V','Vanadium','钒','transition',5,4,50.942,'[Ar] 3d³4s²','+2,+3,+4,+5',1.63,0],
+  [24,'Cr','Chromium','铬','transition',6,4,51.996,'[Ar] 3d⁵4s¹','+2,+3,+6',1.66,0],
+  [25,'Mn','Manganese','锰','transition',7,4,54.938,'[Ar] 3d⁵4s²','+2,+3,+4,+6,+7',1.55,0],
+  [26,'Fe','Iron','铁','transition',8,4,55.845,'[Ar] 3d⁶4s²','+2,+3',1.83,0],
+  [27,'Co','Cobalt','钴','transition',9,4,58.933,'[Ar] 3d⁷4s²','+2,+3',1.88,0],
+  [28,'Ni','Nickel','镍','transition',10,4,58.693,'[Ar] 3d⁸4s²','+2,+3',1.91,0],
+  [29,'Cu','Copper','铜','transition',11,4,63.546,'[Ar] 3d¹⁰4s¹','+1,+2',1.90,0],
+  [30,'Zn','Zinc','锌','transition',12,4,65.38,'[Ar] 3d¹⁰4s²','+2',1.65,0],
+  [31,'Ga','Gallium','镓','posttransition',13,4,69.723,'[Ar] 3d¹⁰4s²4p¹','+3',1.81,0],
+  [32,'Ge','Germanium','锗','metalloid',14,4,72.630,'[Ar] 3d¹⁰4s²4p²','−4,+2,+4',2.01,0],
+  [33,'As','Arsenic','砷','metalloid',15,4,74.922,'[Ar] 3d¹⁰4s²4p³','−3,+3,+5',2.18,0],
+  [34,'Se','Selenium','硒','nonmetal',16,4,78.971,'[Ar] 3d¹⁰4s²4p⁴','−2,+4,+6',2.55,0],
+  [35,'Br','Bromine','溴','halogen',17,4,79.904,'[Ar] 3d¹⁰4s²4p⁵','−1,+1,+3,+5,+7',2.96,0],
+  [36,'Kr','Krypton','氪','noble',18,4,83.798,'[Ar] 3d¹⁰4s²4p⁶','0,+2',3.00,0],
+  [37,'Rb','Rubidium','铷','alkali',1,5,85.468,'[Kr] 5s¹','+1',0.82,0],
+  [38,'Sr','Strontium','锶','alkaline',2,5,87.62,'[Kr] 5s²','+2',0.95,0],
+  [39,'Y','Yttrium','钇','transition',3,5,88.906,'[Kr] 4d¹5s²','+3',1.22,0],
+  [40,'Zr','Zirconium','锆','transition',4,5,91.224,'[Kr] 4d²5s²','+4',1.33,0],
+  [41,'Nb','Niobium','铌','transition',5,5,92.906,'[Kr] 4d⁴5s¹','+3,+5',1.6,0],
+  [42,'Mo','Molybdenum','钼','transition',6,5,95.95,'[Kr] 4d⁵5s¹','+4,+6',2.16,0],
+  [43,'Tc','Technetium','锝','transition',7,5,98,'[Kr] 4d⁵5s²','+4,+7',1.9,2],
+  [44,'Ru','Ruthenium','钌','transition',8,5,101.07,'[Kr] 4d⁷5s¹','+3,+4',2.2,0],
+  [45,'Rh','Rhodium','铑','transition',9,5,102.91,'[Kr] 4d⁸5s¹','+3',2.28,0],
+  [46,'Pd','Palladium','钯','transition',10,5,106.42,'[Kr] 4d¹⁰','+2,+4',2.20,0],
+  [47,'Ag','Silver','银','transition',11,5,107.87,'[Kr] 4d¹⁰5s¹','+1',1.93,0],
+  [48,'Cd','Cadmium','镉','transition',12,5,112.41,'[Kr] 4d¹⁰5s²','+2',1.69,0],
+  [49,'In','Indium','铟','posttransition',13,5,114.82,'[Kr] 4d¹⁰5s²5p¹','+3',1.78,0],
+  [50,'Sn','Tin','锡','posttransition',14,5,118.71,'[Kr] 4d¹⁰5s²5p²','+2,+4',1.96,0],
+  [51,'Sb','Antimony','锑','metalloid',15,5,121.76,'[Kr] 4d¹⁰5s²5p³','−3,+3,+5',2.05,0],
+  [52,'Te','Tellurium','碲','metalloid',16,5,127.60,'[Kr] 4d¹⁰5s²5p⁴','−2,+4,+6',2.1,0],
+  [53,'I','Iodine','碘','halogen',17,5,126.90,'[Kr] 4d¹⁰5s²5p⁵','−1,+1,+3,+5,+7',2.66,0],
+  [54,'Xe','Xenon','氙','noble',18,5,131.29,'[Kr] 4d¹⁰5s²5p⁶','0,+2,+4,+6,+8',2.60,0],
+  [55,'Cs','Caesium','铯','alkali',1,6,132.91,'[Xe] 6s¹','+1',0.79,0],
+  [56,'Ba','Barium','钡','alkaline',2,6,137.33,'[Xe] 6s²','+2',0.89,0],
+  [57,'La','Lanthanum','镧','lanthanide','f',6,138.91,'[Xe] 5d¹6s²','+3',1.10,0],
+  [58,'Ce','Cerium','铈','lanthanide','f',6,140.12,'[Xe] 4f¹5d¹6s²','+3,+4',1.12,0],
+  [59,'Pr','Praseodymium','镨','lanthanide','f',6,140.91,'[Xe] 4f³6s²','+3',1.13,0],
+  [60,'Nd','Neodymium','钕','lanthanide','f',6,144.24,'[Xe] 4f⁴6s²','+3',1.14,0],
+  [61,'Pm','Promethium','钷','lanthanide','f',6,145,'[Xe] 4f⁵6s²','+3',1.13,2],
+  [62,'Sm','Samarium','钐','lanthanide','f',6,150.36,'[Xe] 4f⁶6s²','+2,+3',1.17,0],
+  [63,'Eu','Europium','铕','lanthanide','f',6,151.96,'[Xe] 4f⁷6s²','+2,+3',1.2,0],
+  [64,'Gd','Gadolinium','钆','lanthanide','f',6,157.25,'[Xe] 4f⁷5d¹6s²','+3',1.20,0],
+  [65,'Tb','Terbium','铽','lanthanide','f',6,158.93,'[Xe] 4f⁹6s²','+3,+4',1.2,0],
+  [66,'Dy','Dysprosium','镝','lanthanide','f',6,162.50,'[Xe] 4f¹⁰6s²','+3',1.22,0],
+  [67,'Ho','Holmium','钬','lanthanide','f',6,164.93,'[Xe] 4f¹¹6s²','+3',1.23,0],
+  [68,'Er','Erbium','铒','lanthanide','f',6,167.26,'[Xe] 4f¹²6s²','+3',1.24,0],
+  [69,'Tm','Thulium','铥','lanthanide','f',6,168.93,'[Xe] 4f¹³6s²','+3',1.25,0],
+  [70,'Yb','Ytterbium','镱','lanthanide','f',6,173.05,'[Xe] 4f¹⁴6s²','+2,+3',1.1,0],
+  [71,'Lu','Lutetium','镥','lanthanide','f',6,174.97,'[Xe] 4f¹⁴5d¹6s²','+3',1.27,0],
+  [72,'Hf','Hafnium','铪','transition',4,6,178.49,'[Xe] 4f¹⁴5d²6s²','+4',1.3,0],
+  [73,'Ta','Tantalum','钽','transition',5,6,180.95,'[Xe] 4f¹⁴5d³6s²','+5',1.5,0],
+  [74,'W','Tungsten','钨','transition',6,6,183.84,'[Xe] 4f¹⁴5d⁴6s²','+4,+6',2.36,0],
+  [75,'Re','Rhenium','铼','transition',7,6,186.21,'[Xe] 4f¹⁴5d⁵6s²','+4,+7',1.9,0],
+  [76,'Os','Osmium','锇','transition',8,6,190.23,'[Xe] 4f¹⁴5d⁶6s²','+3,+4,+8',2.2,0],
+  [77,'Ir','Iridium','铱','transition',9,6,192.22,'[Xe] 4f¹⁴5d⁷6s²','+3,+4',2.20,0],
+  [78,'Pt','Platinum','铂','transition',10,6,195.08,'[Xe] 4f¹⁴5d⁹6s¹','+2,+4',2.28,0],
+  [79,'Au','Gold','金','transition',11,6,196.97,'[Xe] 4f¹⁴5d¹⁰6s¹','+1,+3',2.54,0],
+  [80,'Hg','Mercury','汞','transition',12,6,200.59,'[Xe] 4f¹⁴5d¹⁰6s²','+1,+2',2.00,0],
+  [81,'Tl','Thallium','铊','posttransition',13,6,204.38,'[Xe] 4f¹⁴5d¹⁰6s²6p¹','+1,+3',1.62,0],
+  [82,'Pb','Lead','铅','posttransition',14,6,207.2,'[Xe] 4f¹⁴5d¹⁰6s²6p²','+2,+4',2.33,0],
+  [83,'Bi','Bismuth','铋','posttransition',15,6,208.98,'[Xe] 4f¹⁴5d¹⁰6s²6p³','+3,+5',2.02,1],
+  [84,'Po','Polonium','钋','metalloid',16,6,209,'[Xe] 4f¹⁴5d¹⁰6s²6p⁴','+2,+4',2.0,2],
+  [85,'At','Astatine','砹','halogen',17,6,210,'[Xe] 4f¹⁴5d¹⁰6s²6p⁵','−1,+1,+3,+5,+7',2.2,2],
+  [86,'Rn','Radon','氡','noble',18,6,222,'[Xe] 4f¹⁴5d¹⁰6s²6p⁶','0,+2',2.2,2],
+  [87,'Fr','Francium','钫','alkali',1,7,223,'[Rn] 7s¹','+1',0.7,2],
+  [88,'Ra','Radium','镭','alkaline',2,7,226,'[Rn] 7s²','+2',0.9,2],
+  [89,'Ac','Actinium','锕','actinide','f',7,227,'[Rn] 6d¹7s²','+3',1.1,2],
+  [90,'Th','Thorium','钍','actinide','f',7,232.04,'[Rn] 6d²7s²','+4',1.3,2],
+  [91,'Pa','Protactinium','镤','actinide','f',7,231.04,'[Rn] 5f²6d¹7s²','+4,+5',1.5,2],
+  [92,'U','Uranium','铀','actinide','f',7,238.03,'[Rn] 5f³6d¹7s²','+3,+4,+5,+6',1.38,2],
+  [93,'Np','Neptunium','镎','actinide','f',7,237,'[Rn] 5f⁴6d¹7s²','+3,+4,+5,+6,+7',1.36,2],
+  [94,'Pu','Plutonium','钚','actinide','f',7,244,'[Rn] 5f⁶7s²','+3,+4,+5,+6',1.28,2],
+  [95,'Am','Americium','镅','actinide','f',7,243,'[Rn] 5f⁷7s²','+3,+4,+5,+6',1.13,2],
+  [96,'Cm','Curium','锔','actinide','f',7,247,'[Rn] 5f⁷6d¹7s²','+3',1.28,2],
+  [97,'Bk','Berkelium','锫','actinide','f',7,247,'[Rn] 5f⁹7s²','+3,+4',1.3,2],
+  [98,'Cf','Californium','锎','actinide','f',7,251,'[Rn] 5f¹⁰7s²','+3',1.3,2],
+  [99,'Es','Einsteinium','锿','actinide','f',7,252,'[Rn] 5f¹¹7s²','+3',1.3,2],
+  [100,'Fm','Fermium','镄','actinide','f',7,257,'[Rn] 5f¹²7s²','+3',1.3,2],
+  [101,'Md','Mendelevium','钔','actinide','f',7,258,'[Rn] 5f¹³7s²','+2,+3',1.3,2],
+  [102,'No','Nobelium','锘','actinide','f',7,259,'[Rn] 5f¹⁴7s²','+2,+3',1.3,2],
+  [103,'Lr','Lawrencium','铹','actinide','f',7,266,'[Rn] 5f¹⁴7s²7p¹','+3',1.3,2],
+  [104,'Rf','Rutherfordium','鑪','transition',4,7,267,'[Rn] 5f¹⁴6d²7s²','+4',null,2],
+  [105,'Db','Dubnium','𨧀','transition',5,7,268,'[Rn] 5f¹⁴6d³7s²','+5',null,2],
+  [106,'Sg','Seaborgium','𨭎','transition',6,7,269,'[Rn] 5f¹⁴6d⁴7s²','+6',null,2],
+  [107,'Bh','Bohrium','𨨏','transition',7,7,270,'[Rn] 5f¹⁴6d⁵7s²','+7',null,2],
+  [108,'Hs','Hassium','𨭆','transition',8,7,269,'[Rn] 5f¹⁴6d⁶7s²','+8',null,2],
+  [109,'Mt','Meitnerium','鿏','transition',9,7,278,'[Rn] 5f¹⁴6d⁷7s²','?',null,2],
+  [110,'Ds','Darmstadtium','𨭏','transition',10,7,281,'[Rn] 5f¹⁴6d⁸7s²','?',null,2],
+  [111,'Rg','Roentgenium','𬬭','transition',11,7,282,'[Rn] 5f¹⁴6d⁹7s²','?',null,2],
+  [112,'Cn','Copernicium','鿔','transition',12,7,285,'[Rn] 5f¹⁴6d¹⁰7s²','+2',null,2],
+  [113,'Nh','Nihonium','鿭','posttransition',13,7,286,'[Rn] 5f¹⁴6d¹⁰7s²7p¹','?',null,2],
+  [114,'Fl','Flerovium','𫓧','posttransition',14,7,289,'[Rn] 5f¹⁴6d¹⁰7s²7p²','?',null,2],
+  [115,'Mc','Moscovium','镆','posttransition',15,7,290,'[Rn] 5f¹⁴6d¹⁰7s²7p³','?',null,2],
+  [116,'Lv','Livermorium','𫟷','posttransition',16,7,293,'[Rn] 5f¹⁴6d¹⁰7s²7p⁴','?',null,2],
+  [117,'Ts','Tennessine','鿬','halogen',17,7,294,'[Rn] 5f¹⁴6d¹⁰7s²7p⁵','?',null,2],
+  [118,'Og','Oganesson','鿫','noble',18,7,294,'[Rn] 5f¹⁴6d¹⁰7s²7p⁶','?',null,2],
+];
+
+/* Build lookup */
+const ELEMENTS = {};
+ELEMENT_TABLE.forEach(row=>{
+  const [Z,sym,en,zh,cat,group,period,mass,cfg,ox,en_,rad]=row;
+  ELEMENTS[Z] = {Z,symbol:sym,name_en:en,name_zh:zh,category:cat,group,period,mass,config:cfg,oxidation:ox,electronegativity:en_,radioactive:rad};
+});
+
+/* Compute electron shells from config */
+function shellCounts(z){
+  // Simple shell-filling table (approx aufbau)
+  const cap=[2,8,18,32,32,18,8]; // K,L,M,N,O,P,Q
+  const shells=[0,0,0,0,0,0,0];
+  let rem=z;
+  for(let i=0;i<shells.length && rem>0;i++){
+    const take=Math.min(cap[i],rem);
+    shells[i]=take; rem-=take;
+  }
+  // Correct for transition elements (outer shell keeps 2 or 1 while d fills)
+  return shells;
+}
+
+/* Extended data for detailed elements */
+const EXTENDED = {
+  1:  {phase:'gas', melt:14.01, boil:20.28, density:0.00009,
+       discovery:{year:1766, who:'Henry Cavendish'},
+       uses_en:'Ammonia synthesis, rocket fuel, hydrogen fuel cells, hydrogenation of oils, coolant in generators.',
+       uses_zh:'合成氨、火箭燃料、氢燃料电池、油脂加氢、发电机冷却。',
+       isotopes:[{s:'¹H',ab:'99.98%',stable:true,note:'protium'},{s:'²H',ab:'0.02%',stable:true,note:'deuterium'},{s:'³H',ab:'trace',stable:false,note:'tritium, β⁻, t½=12.3y'}],
+       hybrid:['s'],
+       reactions:[{eq:'2H₂ + O₂ → 2H₂O',note_en:'combustion',note_zh:'燃烧生成水'},{eq:'N₂ + 3H₂ ⇌ 2NH₃',note_en:'Haber process',note_zh:'哈伯法合成氨'}]},
+  2:  {phase:'gas', melt:0.95, boil:4.22, density:0.000178,
+       discovery:{year:1868, who:'Janssen & Lockyer'},
+       uses_en:'Balloons, MRI cryogenics, deep-sea breathing mixes, protective atmosphere.',
+       uses_zh:'气球、核磁共振低温冷却、深海呼吸混合气、保护气氛。',
+       isotopes:[{s:'³He',ab:'0.0001%',stable:true,note:''},{s:'⁴He',ab:'99.99%',stable:true,note:''}],
+       hybrid:[],
+       reactions:[]},
+  3:  {phase:'solid', melt:453.65, boil:1615, density:0.534,
+       discovery:{year:1817, who:'Johan August Arfwedson'},
+       uses_en:'Lithium-ion batteries, mood-stabilizing drugs, lithium grease, glass and ceramics.',
+       uses_zh:'锂离子电池、稳定情绪药物(碳酸锂)、锂基润滑脂、玻璃与陶瓷。',
+       isotopes:[{s:'⁶Li',ab:'7.6%',stable:true,note:''},{s:'⁷Li',ab:'92.4%',stable:true,note:''}],
+       hybrid:['s'],
+       reactions:[{eq:'4Li + O₂ → 2Li₂O',note_en:'burns with crimson flame',note_zh:'燃烧发深红色火焰'},{eq:'2Li + 2H₂O → 2LiOH + H₂↑',note_en:'reacts with water',note_zh:'与水反应放氢'}]},
+  6:  {phase:'solid', melt:3823, boil:4098, density:2.267,
+       discovery:{year:-3750, who:'known since antiquity'},
+       uses_en:'Backbone of organic chemistry & life. Steel, graphite, diamond, carbon fiber, nanotubes, batteries.',
+       uses_zh:'有机化学与生命的骨架。钢铁冶炼、石墨、金刚石、碳纤维、纳米管、电池。',
+       isotopes:[{s:'¹²C',ab:'98.9%',stable:true,note:'defines atomic mass unit'},{s:'¹³C',ab:'1.1%',stable:true,note:''},{s:'¹⁴C',ab:'trace',stable:false,note:'β⁻, t½=5730y, radiocarbon dating'}],
+       hybrid:['sp','sp²','sp³'],
+       reactions:[{eq:'C + O₂ → CO₂',note_en:'complete combustion',note_zh:'完全燃烧'},{eq:'2C + O₂ → 2CO',note_en:'incomplete combustion',note_zh:'不完全燃烧'},{eq:'CH₄ + 2O₂ → CO₂ + 2H₂O',note_en:'methane burning',note_zh:'甲烷燃烧'}]},
+  7:  {phase:'gas', melt:63.15, boil:77.36, density:0.001251,
+       discovery:{year:1772, who:'Daniel Rutherford'},
+       uses_en:'78% of atmosphere. Fertilizers, explosives, cryogenics, protective atmosphere.',
+       uses_zh:'占大气 78%。化肥、炸药、低温制冷、保护气氛。',
+       isotopes:[{s:'¹⁴N',ab:'99.6%',stable:true,note:''},{s:'¹⁵N',ab:'0.4%',stable:true,note:''}],
+       hybrid:['sp','sp²','sp³'],
+       reactions:[{eq:'N₂ + 3H₂ ⇌ 2NH₃',note_en:'Haber-Bosch (industrial)',note_zh:'哈伯-博施法'},{eq:'N₂ + O₂ → 2NO',note_en:'lightning; smog',note_zh:'闪电反应；产生光化学烟雾'}]},
+  8:  {phase:'gas', melt:54.36, boil:90.20, density:0.001429,
+       discovery:{year:1774, who:'Joseph Priestley'},
+       uses_en:'Respiration, combustion, steel-making, medical use, rocket propellant oxidizer.',
+       uses_zh:'呼吸、燃烧、炼钢、医疗供氧、火箭氧化剂。',
+       isotopes:[{s:'¹⁶O',ab:'99.76%',stable:true,note:''},{s:'¹⁷O',ab:'0.04%',stable:true,note:''},{s:'¹⁸O',ab:'0.20%',stable:true,note:''}],
+       hybrid:['sp²','sp³'],
+       reactions:[{eq:'2H₂ + O₂ → 2H₂O',note_en:'water formation',note_zh:'生成水'},{eq:'3O₂ → 2O₃',note_en:'ozone formation (UV)',note_zh:'紫外线下生成臭氧'}]},
+  11: {phase:'solid', melt:370.87, boil:1156, density:0.968,
+       discovery:{year:1807, who:'Humphry Davy'},
+       uses_en:'Table salt (NaCl), sodium-vapor lamps, sodium-cooled reactors, soap manufacture.',
+       uses_zh:'食盐(NaCl)、钠灯、钠冷反应堆、肥皂制造。',
+       isotopes:[{s:'²³Na',ab:'100%',stable:true,note:''}],
+       hybrid:['s'],
+       reactions:[{eq:'2Na + Cl₂ → 2NaCl',note_en:'violent, exothermic',note_zh:'剧烈放热反应'},{eq:'2Na + 2H₂O → 2NaOH + H₂↑',note_en:'reacts strongly with water',note_zh:'与水剧烈反应放氢'}]},
+  17: {phase:'gas', melt:171.6, boil:239.11, density:0.003214,
+       discovery:{year:1774, who:'Carl Wilhelm Scheele'},
+       uses_en:'Water disinfection, PVC & organic solvents, bleaches, hydrochloric acid.',
+       uses_zh:'饮用水消毒、聚氯乙烯与有机溶剂、漂白剂、盐酸。',
+       isotopes:[{s:'³⁵Cl',ab:'75.8%',stable:true,note:''},{s:'³⁷Cl',ab:'24.2%',stable:true,note:''}],
+       hybrid:['sp³'],
+       reactions:[{eq:'H₂ + Cl₂ → 2HCl',note_en:'photochemical chain reaction',note_zh:'光化学链反应'},{eq:'2Na + Cl₂ → 2NaCl',note_en:'ionic salt formation',note_zh:'生成离子化合物'}]},
+  26: {phase:'solid', melt:1811, boil:3134, density:7.874,
+       discovery:{year:-5000, who:'known since prehistory'},
+       uses_en:'Steel & cast iron (~90% of all metal used), hemoglobin, magnetic cores, catalysts.',
+       uses_zh:'钢铁与铸铁(占全部金属用量约 90%)、血红蛋白、磁芯、催化剂。',
+       isotopes:[{s:'⁵⁴Fe',ab:'5.8%',stable:true,note:''},{s:'⁵⁶Fe',ab:'91.8%',stable:true,note:'most tightly bound nucleus'},{s:'⁵⁷Fe',ab:'2.1%',stable:true,note:''},{s:'⁵⁸Fe',ab:'0.3%',stable:true,note:''}],
+       hybrid:['d²sp³','sp³d²'],
+       reactions:[{eq:'4Fe + 3O₂ → 2Fe₂O₃',note_en:'rusting',note_zh:'生锈(氧化)'},{eq:'Fe + 2HCl → FeCl₂ + H₂↑',note_en:'reacts with acid',note_zh:'与酸反应放氢'}]},
+  29: {phase:'solid', melt:1357.77, boil:2835, density:8.96,
+       discovery:{year:-9000, who:'known since antiquity'},
+       uses_en:'Electrical wiring, plumbing, alloys (bronze, brass), antimicrobial surfaces.',
+       uses_zh:'电线、水管、合金(青铜、黄铜)、抗菌表面。',
+       isotopes:[{s:'⁶³Cu',ab:'69.2%',stable:true,note:''},{s:'⁶⁵Cu',ab:'30.8%',stable:true,note:''}],
+       hybrid:['sp','sp³','dsp²'],
+       reactions:[{eq:'2Cu + O₂ → 2CuO',note_en:'oxidation on heating',note_zh:'加热氧化'},{eq:'Cu + 2AgNO₃ → Cu(NO₃)₂ + 2Ag',note_en:'displacement (single-replacement)',note_zh:'置换反应'}]},
+  79: {phase:'solid', melt:1337.33, boil:3129, density:19.30,
+       discovery:{year:-6000, who:'known since antiquity'},
+       uses_en:'Jewelry, monetary reserves, electronics contacts, medical, dentistry.',
+       uses_zh:'珠宝、货币储备、电子接点、医疗、牙科。',
+       isotopes:[{s:'¹⁹⁷Au',ab:'100%',stable:true,note:'only stable isotope'}],
+       hybrid:['sp','sp³','dsp²'],
+       reactions:[{eq:'Au + HNO₃/HCl (aqua regia) → HAuCl₄',note_en:'dissolves in aqua regia',note_zh:'溶于王水'}]},
+  92: {phase:'solid', melt:1405.3, boil:4404, density:19.1,
+       discovery:{year:1789, who:'Martin Heinrich Klaproth'},
+       uses_en:'Nuclear fuel (²³⁵U fission), armor-piercing rounds (depleted U), radiometric dating.',
+       uses_zh:'核燃料(²³⁵U 裂变)、贫铀穿甲弹、放射性同位素测年。',
+       isotopes:[{s:'²³⁴U',ab:'0.005%',stable:false,note:'α, t½=245,500 y'},{s:'²³⁵U',ab:'0.72%',stable:false,note:'α, t½=704 My, fissile'},{s:'²³⁸U',ab:'99.27%',stable:false,note:'α, t½=4.47 By'}],
+       hybrid:['f'],
+       reactions:[{eq:'²³⁵U + n → fission fragments + 2-3n + ~200 MeV',note_en:'nuclear fission',note_zh:'核裂变'}]}
+};
+
+/* Categories → color, translations */
+const CATEGORY_COLORS = {
+  alkali:         '#ff6b6b',
+  alkaline:       '#ff9f43',
+  transition:     '#feca57',
+  posttransition: '#48dbfb',
+  metalloid:      '#a29bfe',
+  nonmetal:       '#5aff8a',
+  halogen:        '#00d4ff',
+  noble:          '#c77dff',
+  lanthanide:     '#ff6b9d',
+  actinide:       '#ff8ac9',
+  unknown:        '#888'
+};
+
+const CATEGORY_I18N = {
+  en: {
+    alkali:'Alkali metal', alkaline:'Alkaline-earth metal', transition:'Transition metal',
+    posttransition:'Post-transition metal', metalloid:'Metalloid', nonmetal:'Reactive nonmetal',
+    halogen:'Halogen', noble:'Noble gas', lanthanide:'Lanthanide', actinide:'Actinide', unknown:'Unknown'
+  },
+  'zh-CN': {
+    alkali:'碱金属', alkaline:'碱土金属', transition:'过渡金属',
+    posttransition:'贫金属(主族金属)', metalloid:'类金属', nonmetal:'非金属',
+    halogen:'卤素', noble:'稀有气体', lanthanide:'镧系元素', actinide:'锕系元素', unknown:'未知'
+  }
+};
+
+const PHASE_I18N = {
+  en: {solid:'Solid', liquid:'Liquid', gas:'Gas'},
+  'zh-CN': {solid:'固态', liquid:'液态', gas:'气态'}
+};

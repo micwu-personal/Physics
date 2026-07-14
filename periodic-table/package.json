@@ -1,0 +1,9 @@
+{
+  "name": "periodic-table",
+  "version": "1.0.0",
+  "description": "Interactive periodic table of the elements.",
+  "scripts": {
+    "build": "node build.js"
+  },
+  "private": true
+}

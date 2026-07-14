@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title data-i18n="page.title">Periodic Table — An Interactive Journey into the Elements</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div id="bg-stars"></div>
+
+  <div class="lang-switch">
+    <button class="lang-pill active" data-lang="en">EN</button>
+    <button class="lang-pill" data-lang="zh-CN">中文</button>
+  </div>
+
+  <header class="hero">
+    <div class="hero-inner">
+      <div class="badge" data-i18n="hero.badge">All 118 Elements · Interactive</div>
+      <h1><span data-i18n="hero.title.a">Periodic</span> <span class="grad" data-i18n="hero.title.b">Table</span></h1>
+      <p class="tag" data-i18n="hero.tag">Click any element. Every characteristic — orbitals, hybridization, oxidation states, bonds, reactions, radioactivity — appears right there.</p>
+    </div>
+  </header>
+
+  <div class="legend">
+    <span class="lg alkali" data-i18n="cat.alkali">Alkali metal</span>
+    <span class="lg alkaline" data-i18n="cat.alkaline">Alkaline-earth metal</span>
+    <span class="lg transition" data-i18n="cat.transition">Transition metal</span>
+    <span class="lg posttransition" data-i18n="cat.posttransition">Post-transition metal</span>
+    <span class="lg metalloid" data-i18n="cat.metalloid">Metalloid</span>
+    <span class="lg nonmetal" data-i18n="cat.nonmetal">Reactive nonmetal</span>
+    <span class="lg halogen" data-i18n="cat.halogen">Halogen</span>
+    <span class="lg noble" data-i18n="cat.noble">Noble gas</span>
+    <span class="lg lanthanide" data-i18n="cat.lanthanide">Lanthanide</span>
+    <span class="lg actinide" data-i18n="cat.actinide">Actinide</span>
+  </div>
+
+  <main>
+    <!-- The periodic table grid -->
+    <div class="pt-wrap">
+      <div id="ptGrid" class="pt-grid"></div>
+      <div class="pt-fseries">
+        <div class="fs-label" data-i18n="ptable.fseries">f-block (Lanthanides · Actinides)</div>
+        <div id="ptFBlock" class="pt-fblock"></div>
+      </div>
+    </div>
+
+    <!-- Detail panel (in-context) -->
+    <section id="detail" class="detail hidden">
+      <button class="detail-close" id="detailClose" aria-label="Close">✕</button>
+
+      <div class="detail-head">
+        <div class="d-tile-wrap">
+          <div id="dTile" class="d-tile"></div>
+        </div>
+        <div class="d-header-info">
+          <div class="d-name-row">
+            <h2 id="dName">Hydrogen</h2>
+            <button class="tts" id="ttsEn" title="Play English pronunciation">🔊 EN</button>
+            <button class="tts" id="ttsZh" title="播放中文发音">🔊 中文</button>
+          </div>
+          <div id="dCategory" class="d-category"></div>
+          <div id="dTagline" class="d-tagline"></div>
+        </div>
+      </div>
+
+      <!-- Basic characteristics grid -->
+      <div class="d-props" id="dProps"></div>
+
+      <!-- Visualization: atomic model + electron config -->
+      <div class="d-viz-row">
+        <div class="d-viz-card">
+          <h3 data-i18n="detail.section.atom">Bohr Model &amp; Electron Shells</h3>
+          <canvas id="bohrCanvas"></canvas>
+          <div id="dShellText" class="d-shell-text"></div>
+        </div>
+
+        <div class="d-viz-card">
+          <h3 data-i18n="detail.section.orbital">Orbital Shape &amp; Hybridization</h3>
+          <div class="orbital-tabs" id="orbitalTabs"></div>
+          <canvas id="orbitalCanvas"></canvas>
+          <div id="dHybridText" class="d-shell-text"></div>
+        </div>
+      </div>
+
+      <!-- Oxidation states as chips -->
+      <div class="d-block">
+        <h3 data-i18n="detail.section.ox">Common Oxidation States</h3>
+        <div id="dOx" class="d-ox-row"></div>
+        <div class="d-hint" data-i18n="detail.ox.hint">These are the charges this element can take in compounds — determining what bonds &amp; reactions it prefers.</div>
+      </div>
+
+      <!-- Bonding types -->
+      <div class="d-block">
+        <h3 data-i18n="detail.section.bond">Chemical Bonding</h3>
+        <div id="dBonds" class="bond-grid"></div>
+      </div>
+
+      <!-- Reactions -->
+      <div class="d-block" id="dReactionsBlock">
+        <h3 data-i18n="detail.section.rx">Signature Reactions</h3>
+        <div id="dRx" class="rx-list"></div>
+      </div>
+
+      <!-- Nucleus / isotopes / radioactivity -->
+      <div class="d-block">
+        <h3 data-i18n="detail.section.nucleus">Inside the Nucleus · Isotopes · Radioactivity</h3>
+        <div class="nucleus-row">
+          <div class="nucleus-viz">
+            <canvas id="nucleusCanvas"></canvas>
+            <div id="dNucStat" class="nuc-stat"></div>
+          </div>
+          <div class="isotopes">
+            <div class="iso-head">
+              <span data-i18n="detail.iso.symbol">Isotope</span>
+              <span data-i18n="detail.iso.ab">Abundance</span>
+              <span data-i18n="detail.iso.stab">Stability</span>
+              <span data-i18n="detail.iso.note">Notes</span>
+            </div>
+            <div id="dIsotopes"></div>
+          </div>
+        </div>
+        <div id="dRadio" class="radio-note"></div>
+      </div>
+
+      <!-- Uses & discovery -->
+      <div class="d-block">
+        <h3 data-i18n="detail.section.uses">Uses &amp; Discovery</h3>
+        <p id="dUses" class="d-uses"></p>
+        <div id="dDiscovery" class="d-discovery"></div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <span data-i18n="footer">Interactive · data compiled from IUPAC &amp; NIST · Chinese terminology per CAS glossary</span>
+  </footer>
+
+  <script src="i18n.js"></script>
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,62 +1,58 @@
 # Physics
 
-A collection of interactive apps exploring physics concepts. Each sub-folder is a self-contained app. All apps are localized in **English** and **简体中文** (auto-detected from the browser; switch anytime with the pill in the top-right).
+A collection of interactive apps exploring physics & chemistry concepts. Each sub-folder is a self-contained app with EN/中文 support.
 
 ## Apps
 
-### 🌌 [particle-zoo](./particle-zoo/) — the Standard Model
+### 🌌 [particle-zoo](./particle-zoo/) — The Standard Model
 An interactive visual journey through the Standard Model of particle physics — and beyond.
 
-- Standard Model chart (17 particles + antimatter mirror + 8 gluon colors + discovery years)
-- Particle Detail — searchable, with mass/charge/spin/discovery/forces/color/facts for 29+ particles
-- Composition Builder — drag quarks & electrons; live canvas shows strong-force gluon lines, nuclear residual force, EM attraction/repulsion; auto-detects H, ²H, ³H, ³He, ⁴He, Li, α, Δ, free quarks
-- Forces & Interactions — the four forces + famous reactions
-- Beyond Standard Model — Majorana, gravitons, sterile neutrinos, axions, WIMPs, SUSY, monopoles, anyons, tetra/pentaquarks, glueballs, preons
-- Quantum Phenomena — BEC, Cooper pairs, superfluidity, quark-gluon plasma, entanglement, Pauli exclusion, topological matter, Hawking radiation, fermionic condensate
-- Physics Playground — canvas simulation of Coulomb forces & e⁻/e⁺ annihilation
+- Standard Model chart (17 fundamental + antimatter + 8 gluons + discovery years)
+- Particle detail: mass/charge/spin/discovery/forces/color-charge for 29+ particles
+- Composition Builder: drag quarks & electrons → live proton/neutron/atom formation with gluon lines, EM attraction/repulsion, nuclear residual force
+- Forces & Interactions, Beyond Standard Model (Majorana, gravitons, sterile ν, axions, WIMPs, SUSY, anyons, glueballs…)
+- Quantum Phenomena (BEC, Cooper pairs, superfluidity, quark-gluon plasma, entanglement, Pauli exclusion, topological matter, Hawking radiation)
+- Live physics playground: e⁻/e⁺ annihilation → 2γ
 
-### 🌠 [big-bang](./big-bang/) — 13.8 Billion Years
-An interactive journey through the entire history of the universe.
+### ⚛ [periodic-table](./periodic-table/) — The 118 Elements
+An interactive periodic table where every characteristic appears **in-context** for each element.
 
-- **Cosmic Timeline** — every epoch from Planck time to the far future, with time / temperature / size / density / dominant content / key events / evidence
-- **Time Machine** — log-scale slider spanning 10⁻⁴³ s → 10¹⁸ s; watch the universe grow, cool, and change composition in real time
-- **Composition** — pie charts of ordinary matter / dark matter / dark energy at three key moments (now, recombination, post-nucleosynthesis)
-- **Size of the Universe** — from subatomic to 93 billion light-years across, with familiar comparisons
-- **Ultimate Fates** — Big Freeze, Big Rip, Big Crunch, Big Bounce, Vacuum Decay
-- **Open Mysteries** — dark matter, dark energy, baryon asymmetry, inflation, Hubble tension, multiverse, fine-tuning
+- Full 118-element grid, color-coded by category (metal → metalloid → nonmetal → noble gas), radioactive elements flagged with ☢
+- Click any element → in-line detail panel with:
+  - Atomic properties (Z, mass, group, period, config, electronegativity, phase, melting/boiling, density)
+  - **Animated Bohr model** — nucleus + orbiting electrons per shell (K, L, M, N…)
+  - **Orbital shapes & hybridization** — pick sp, sp², sp³, sp³d, sp³d², d²sp³, dsp², or f (auto-filtered per element)
+  - **Common oxidation states** as color-coded chips
+  - **Chemical bonding matrix** (ionic, covalent, metallic, hydrogen, van der Waals) marked ● per element
+  - **Signature reactions** with animated visualization (▶ Play)
+  - **Nucleus / isotopes / radioactivity** — animated nucleus, isotope table, natural vs. artificial radioactivity flag
+  - **Uses & discovery** (year + discoverer)
+- 🔊 **English & Chinese pronunciation** via Web Speech API (buttons next to each name)
+- Chinese terminology per CAS (全国科学技术名词审定委员会) glossary.
 
-**Chinese physics terminology** in all apps follows the CAS-approved glossary (《物理学名词》, 全国科学技术名词审定委员会).
+## Two ways to run any app
 
-## Running an app
-
-**Full multi-file version** (best for desktop):
-- open `particle-zoo/index.html`
-- open `big-bang/index.html`
-
-**Single-file version** (mobile-friendly, one HTML file, ~60–160 KB):
-- open `particle-zoo/mobile/index.html`
-- open `big-bang/mobile/index.html`
-
-Copy the single-file version to your phone, email it, drop it on a USB stick — it Just Works, offline (only Google Fonts are external, and the app degrades gracefully without them).
+1. **Full multi-file version** — open `<app>/index.html`. Best for desktop.
+2. **Single-file mobile version** — open `<app>/mobile/index.html` (or the `.html` file with the app's name). Copy to phone / USB / email; runs offline.
 
 ## Keeping the single-file version in sync
 
-**Never edit `mobile/*.html` by hand** — they're generated.
+Each app has a `build.js` that inlines all source files into `mobile/index.html`. **Never edit `mobile/*.html` by hand.**
 
 ### Manual rebuild
 ```bash
-cd particle-zoo   # or: cd big-bang
+cd <app>
 node build.js
+# or: npm run build
 ```
 
 ### Automatic rebuild on commit (recommended)
-This repo ships a git pre-commit hook that rebuilds any app whose source files (`index.html`, `styles.css`, `i18n.js`, `app.js`, `build.js`) are changing. Enable once after cloning:
-
+A shared git pre-commit hook rebuilds any app whose source files change and stages the result. To enable after cloning:
 ```bash
 git config core.hooksPath .githooks
 ```
 
-After that, `git commit` will rebuild any affected `mobile/*.html` files and stage them alongside your changes. Requires Node.js on your `PATH`.
+Requires Node.js on your PATH.
 
 ## License
 

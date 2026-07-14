@@ -1,26 +1,31 @@
 #!/bin/sh
-# .githooks/pre-commit — rebuilds single-file mobile bundles for any app
-# whose source files are changing.
+# .githooks/pre-commit
+# Auto-rebuild the single-file mobile versions of any app whose source
+# files changed, then stage the rebuilt files.
 
 ROOT="$(git rev-parse --show-toplevel)"
 
-# Detect changes per app
-CHANGED_APPS=""
-for APP in particle-zoo big-bang; do
-  if git diff --cached --name-only | grep -qE "^${APP}/(index\.html|styles\.css|i18n\.js|app\.js|build\.js)$"; then
-    CHANGED_APPS="$CHANGED_APPS $APP"
-  fi
-done
+CHANGED=$(git diff --cached --name-only)
 
-if [ -n "$CHANGED_APPS" ]; then
+need_node() {
   if ! command -v node >/dev/null 2>&1; then
-    echo "⚠ node not found — cannot rebuild single-file version. Install Node.js or run 'node <app>/build.js' manually before committing."
+    echo "⚠ node not found — cannot rebuild single-file versions. Install Node.js or run 'node <app>/build.js' manually before committing."
     exit 1
   fi
-  for APP in $CHANGED_APPS; do
-    echo "→ Rebuilding single-file version for $APP..."
-    (cd "$ROOT/$APP" && node build.js)
-    git add "$ROOT/$APP/mobile/"*.html
-  done
-  echo "→ single-file builds updated & staged."
+}
+
+# particle-zoo
+if echo "$CHANGED" | grep -qE '^particle-zoo/(index\.html|styles\.css|i18n\.js|app\.js|build\.js)$'; then
+  need_node
+  echo "→ particle-zoo source changed, rebuilding..."
+  (cd "$ROOT/particle-zoo" && node build.js)
+  git add "$ROOT/particle-zoo/mobile/index.html" "$ROOT/particle-zoo/mobile/particle-zoo.html"
+fi
+
+# periodic-table
+if echo "$CHANGED" | grep -qE '^periodic-table/(index\.html|styles\.css|i18n\.js|data\.js|app\.js|build\.js)$'; then
+  need_node
+  echo "→ periodic-table source changed, rebuilding..."
+  (cd "$ROOT/periodic-table" && node build.js)
+  git add "$ROOT/periodic-table/mobile/index.html" "$ROOT/periodic-table/mobile/periodic-table.html"
 fi
