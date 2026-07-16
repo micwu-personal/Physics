@@ -228,14 +228,17 @@ const EXTENDED = {
        uses_zh:'珠宝、货币储备、电子接点、医疗、牙科。',
        isotopes:[{s:'¹⁹⁷Au',ab:'100%',stable:true,note:'only stable isotope'}],
        hybrid:['sp','sp³','dsp²'],
-       reactions:[{eq:'Au + HNO₃/HCl (aqua regia) → HAuCl₄',note_en:'dissolves in aqua regia',note_zh:'溶于王水'}]},
+       reactions:[{eq:'Au + HNO₃ + 4HCl → HAuCl₄ + NO↑ + 2H₂O',note_en:'aqua regia: HNO₃ oxidizes, HCl complexes Au',note_zh:'王水:HNO₃ 氧化,HCl 与金形成配合物'}]},
   92: {phase:'solid', melt:1405.3, boil:4404, density:19.1,
        discovery:{year:1789, who:'Martin Heinrich Klaproth'},
        uses_en:'Nuclear fuel (²³⁵U fission), armor-piercing rounds (depleted U), radiometric dating.',
        uses_zh:'核燃料(²³⁵U 裂变)、贫铀穿甲弹、放射性同位素测年。',
        isotopes:[{s:'²³⁴U',ab:'0.005%',stable:false,note:'α, t½=245,500 y'},{s:'²³⁵U',ab:'0.72%',stable:false,note:'α, t½=704 My, fissile'},{s:'²³⁸U',ab:'99.27%',stable:false,note:'α, t½=4.47 By'}],
        hybrid:['f'],
-       reactions:[{eq:'²³⁵U + n → fission fragments + 2-3n + ~200 MeV',note_en:'nuclear fission',note_zh:'核裂变'}]}
+       reactions:[
+         {eq:'U + 3F₂ → UF₆', note_en:'used for enrichment (gaseous UF₆)', note_zh:'用于铀浓缩(六氟化铀)'},
+         {eq:'2U + 3O₂ → 2UO₃', note_en:'oxidation in air (yellowcake chemistry)', note_zh:'空气中氧化(黄饼化学)'}
+       ]}
 };
 
 /* Categories → color, translations */

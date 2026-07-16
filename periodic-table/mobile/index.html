@@ -124,7 +124,8 @@ main{position:relative;z-index:1;max-width:1400px;margin:0 auto;padding:20px 12p
 .cell.empty{background:transparent;border:none;pointer-events:none}
 .cell .z{position:absolute;top:3px;left:5px;font-size:9px;color:rgba(255,255,255,0.6);font-family:'JetBrains Mono',ui-monospace,'SF Mono','Cascadia Mono','Consolas',monospace}
 .cell .sym{font-size:18px;font-weight:700;font-family:'JetBrains Mono',ui-monospace,'SF Mono','Cascadia Mono','Consolas',monospace;line-height:1}
-.cell .nm{font-size:8px;color:rgba(255,255,255,0.7);margin-top:2px;line-height:1;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;width:100%}
+.cell .nm{font-size:9px;color:rgba(255,255,255,0.75);margin-top:2px;line-height:1;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;width:100%}
+html[lang="zh-CN"] .cell .nm{font-size:12px;font-weight:500;color:#fff;margin-top:3px;letter-spacing:-0.3px}
 .cell .ms{position:absolute;bottom:2px;right:4px;font-size:8px;color:rgba(255,255,255,0.5);font-family:'JetBrains Mono',ui-monospace,'SF Mono','Cascadia Mono','Consolas',monospace}
 
 /* category coloring */
@@ -882,14 +883,17 @@ const EXTENDED = {
        uses_zh:'珠宝、货币储备、电子接点、医疗、牙科。',
        isotopes:[{s:'¹⁹⁷Au',ab:'100%',stable:true,note:'only stable isotope'}],
        hybrid:['sp','sp³','dsp²'],
-       reactions:[{eq:'Au + HNO₃/HCl (aqua regia) → HAuCl₄',note_en:'dissolves in aqua regia',note_zh:'溶于王水'}]},
+       reactions:[{eq:'Au + HNO₃ + 4HCl → HAuCl₄ + NO↑ + 2H₂O',note_en:'aqua regia: HNO₃ oxidizes, HCl complexes Au',note_zh:'王水:HNO₃ 氧化,HCl 与金形成配合物'}]},
   92: {phase:'solid', melt:1405.3, boil:4404, density:19.1,
        discovery:{year:1789, who:'Martin Heinrich Klaproth'},
        uses_en:'Nuclear fuel (²³⁵U fission), armor-piercing rounds (depleted U), radiometric dating.',
        uses_zh:'核燃料(²³⁵U 裂变)、贫铀穿甲弹、放射性同位素测年。',
        isotopes:[{s:'²³⁴U',ab:'0.005%',stable:false,note:'α, t½=245,500 y'},{s:'²³⁵U',ab:'0.72%',stable:false,note:'α, t½=704 My, fissile'},{s:'²³⁸U',ab:'99.27%',stable:false,note:'α, t½=4.47 By'}],
        hybrid:['f'],
-       reactions:[{eq:'²³⁵U + n → fission fragments + 2-3n + ~200 MeV',note_en:'nuclear fission',note_zh:'核裂变'}]}
+       reactions:[
+         {eq:'U + 3F₂ → UF₆', note_en:'used for enrichment (gaseous UF₆)', note_zh:'用于铀浓缩(六氟化铀)'},
+         {eq:'2U + 3O₂ → 2UO₃', note_en:'oxidation in air (yellowcake chemistry)', note_zh:'空气中氧化(黄饼化学)'}
+       ]}
 };
 
 /* Categories → color, translations */
@@ -2398,6 +2402,40 @@ function moleculeShape(formula){
     atoms:[{sym:mx3[1],x:0,y:0},{sym:mx3[2],x:D,y:0},{sym:mx3[2],x:-D*0.5,y:D*0.87},{sym:mx3[2],x:-D*0.5,y:-D*0.87}],
     bonds:[[0,1,1],[0,2,1],[0,3,1]]
   };
+  // MX4 (tetrahedral drawn in 2D as a plus)
+  const mx4 = F.match(/^([A-Z][a-z]?)([A-Z][a-z]?)4$/);
+  if(mx4) return {
+    atoms:[
+      {sym:mx4[1],x:0,y:0},
+      {sym:mx4[2],x:D,y:0},{sym:mx4[2],x:-D,y:0},
+      {sym:mx4[2],x:0,y:D},{sym:mx4[2],x:0,y:-D}
+    ],
+    bonds:[[0,1,1],[0,2,1],[0,3,1],[0,4,1]]
+  };
+  // MX5 (trigonal bipyramidal → 3 in a triangle + 2 vertical)
+  const mx5 = F.match(/^([A-Z][a-z]?)([A-Z][a-z]?)5$/);
+  if(mx5) return {
+    atoms:[
+      {sym:mx5[1],x:0,y:0},
+      {sym:mx5[2],x:D,y:0},
+      {sym:mx5[2],x:-D*0.5,y:D*0.87},
+      {sym:mx5[2],x:-D*0.5,y:-D*0.87},
+      {sym:mx5[2],x:D*0.4,y:D*1.4},
+      {sym:mx5[2],x:D*0.4,y:-D*1.4}
+    ],
+    bonds:[[0,1,1],[0,2,1],[0,3,1],[0,4,1],[0,5,1]]
+  };
+  // MX6 (octahedral)
+  const mx6 = F.match(/^([A-Z][a-z]?)([A-Z][a-z]?)6$/);
+  if(mx6) return {
+    atoms:[
+      {sym:mx6[1],x:0,y:0},
+      {sym:mx6[2],x:D,y:0},{sym:mx6[2],x:-D,y:0},
+      {sym:mx6[2],x:0,y:D},{sym:mx6[2],x:0,y:-D},
+      {sym:mx6[2],x:D*0.6,y:D*0.6},{sym:mx6[2],x:-D*0.6,y:-D*0.6}
+    ],
+    bonds:[[0,1,1],[0,2,1],[0,3,1],[0,4,1],[0,5,1],[0,6,1]]
+  };
   // M2O (alkali oxide)
   const m2o = F.match(/^([A-Z][a-z]?)2O$/);
   if(m2o) return {
@@ -2440,26 +2478,174 @@ function moleculeShape(formula){
     ],
     bonds:[[0,4,1],[1,4,1],[0,2,1],[1,3,1]]
   };
+  // Metal-nitrate M(NO3): trigonal-planar NO3 group hanging off M
+  const mno3 = F.match(/^([A-Z][a-z]?)NO3$/);
+  if(mno3){
+    // atoms: M, N, O, O, O
+    return {
+      atoms:[
+        {sym:mno3[1], x:-D*1.6, y:0},
+        {sym:'N', x:0, y:0},
+        {sym:'O', x:D, y:-D*0.87},
+        {sym:'O', x:D, y:D*0.87},
+        {sym:'O', x:-D*0.6, y:0}
+      ],
+      bonds:[[0,4,1],[1,4,1],[1,2,2],[1,3,1]]
+    };
+  }
+  // Metal di-nitrate M(NO3)2
+  const mno32 = F.match(/^([A-Z][a-z]?)\(NO3\)2$/);
+  if(mno32){
+    // atoms: M plus two nitrate groups
+    return {
+      atoms:[
+        {sym:mno32[1], x:0, y:0},
+        // Nitrate 1 (left)
+        {sym:'O', x:-D*1.4, y:0},
+        {sym:'N', x:-D*2.3, y:0},
+        {sym:'O', x:-D*3.1, y:-D*0.7},
+        {sym:'O', x:-D*3.1, y:D*0.7},
+        // Nitrate 2 (right)
+        {sym:'O', x:D*1.4, y:0},
+        {sym:'N', x:D*2.3, y:0},
+        {sym:'O', x:D*3.1, y:-D*0.7},
+        {sym:'O', x:D*3.1, y:D*0.7}
+      ],
+      bonds:[[0,1,1],[1,2,1],[2,3,2],[2,4,1], [0,5,1],[5,6,1],[6,7,2],[6,8,1]]
+    };
+  }
+  // Metal tri-nitrate M(NO3)3
+  const mno33 = F.match(/^([A-Z][a-z]?)\(NO3\)3$/);
+  if(mno33){
+    const M = mno33[1];
+    const groups = [0, 2*Math.PI/3, 4*Math.PI/3];
+    const atoms = [{sym:M, x:0, y:0}];
+    const bonds = [];
+    groups.forEach((theta,g)=>{
+      const cx = Math.cos(theta), cy = Math.sin(theta);
+      const base = atoms.length;
+      atoms.push({sym:'O', x:cx*D*1.4, y:cy*D*1.4});             // O bridge
+      atoms.push({sym:'N', x:cx*D*2.3, y:cy*D*2.3});             // N center
+      // Two terminal O's perpendicular to the M-O-N axis
+      const nx = -cy, ny = cx;
+      atoms.push({sym:'O', x:cx*D*3.1 + nx*D*0.7, y:cy*D*3.1 + ny*D*0.7});
+      atoms.push({sym:'O', x:cx*D*3.1 - nx*D*0.7, y:cy*D*3.1 - ny*D*0.7});
+      bonds.push([0, base, 1]);
+      bonds.push([base, base+1, 1]);
+      bonds.push([base+1, base+2, 2]);
+      bonds.push([base+1, base+3, 1]);
+    });
+    return {atoms, bonds};
+  }
+  // Metal hydroxide MOH — already handled above; ensure not clobbered
+  // H2SO4 sulfuric acid
+  if(F==='H2SO4'){
+    return {
+      atoms:[
+        {sym:'S', x:0, y:0},
+        {sym:'O', x:0, y:-D*1.2},                      // =O top
+        {sym:'O', x:0, y:D*1.2},                       // =O bottom
+        {sym:'O', x:-D*1.2, y:0}, {sym:'H', x:-D*2.2, y:0},  // -O-H left
+        {sym:'O', x:D*1.2, y:0},  {sym:'H', x:D*2.2, y:0}    // -O-H right
+      ],
+      bonds:[[0,1,2],[0,2,2],[0,3,1],[3,4,1],[0,5,1],[5,6,1]]
+    };
+  }
+  // HNO3 nitric acid
+  if(F==='HNO3'){
+    return {
+      atoms:[
+        {sym:'N', x:0, y:0},
+        {sym:'O', x:D*1.2, y:-D*0.6},                  // =O
+        {sym:'O', x:D*1.2, y:D*0.6},                   // -O
+        {sym:'O', x:-D*1.2, y:0}, {sym:'H', x:-D*2.2, y:0}
+      ],
+      bonds:[[0,1,2],[0,2,1],[0,3,1],[3,4,1]]
+    };
+  }
+  // H2SO3 sulfurous acid (similar layout)
+  if(F==='H2SO3'){
+    return {
+      atoms:[
+        {sym:'S', x:0, y:0},
+        {sym:'O', x:0, y:-D*1.2},                       // =O
+        {sym:'O', x:-D*1.2, y:0}, {sym:'H', x:-D*2.2, y:0},
+        {sym:'O', x:D*1.2, y:0},  {sym:'H', x:D*2.2, y:0}
+      ],
+      bonds:[[0,1,2],[0,2,1],[2,3,1],[0,4,1],[4,5,1]]
+    };
+  }
+  // HAuCl4 (tetrachloroauric acid) — square planar
+  if(F==='HAuCl4'){
+    return {
+      atoms:[
+        {sym:'Au', x:0, y:0},
+        {sym:'Cl', x:D*1.4, y:0}, {sym:'Cl', x:-D*1.4, y:0},
+        {sym:'Cl', x:0, y:D*1.4}, {sym:'Cl', x:0, y:-D*1.4},
+        {sym:'H',  x:D*2.4, y:0}
+      ],
+      bonds:[[0,1,1],[0,2,1],[0,3,1],[0,4,1],[1,5,1]]
+    };
+  }
   // Fallback: chain the atoms horizontally
   return chainMolecule(F);
 }
 function chainMolecule(formula){
-  // Very rough tokenization: match Symbol then optional digit
-  const re = /([A-Z][a-z]?)(\d*)/g;
-  const atoms = [];
-  let m;
-  while((m = re.exec(formula))!==null){
-    const sym = m[1]; const n = m[2] ? +m[2] : 1;
-    for(let k=0;k<Math.min(n,4);k++) atoms.push({sym});
-  }
+  // Real chemical-formula tokenizer with parenthesis + multiplier support.
+  // Returns { atoms:[{sym,x,y}], bonds:[[i,j,order]] }
+  const atoms = expandFormula(formula);
   if(!atoms.length) return { atoms:[], bonds:[] };
   const bonds = [];
+  const n = atoms.length;
   atoms.forEach((a,i)=>{
-    a.x = (i-(atoms.length-1)/2)*D;
+    a.x = (i-(n-1)/2) * D;
     a.y = 0;
-    if(i>0) bonds.push([i-1,i,1]);
+    if(i>0) bonds.push([i-1, i, 1]);
   });
   return { atoms, bonds };
+}
+
+/* Expand a formula like "Cu(NO3)2" into a list of atom symbols. */
+function expandFormula(formula){
+  const out = [];
+  // Parenthesis pass: recursively expand (…)_n groups
+  // We build a mini-parser: read Symbol|Group[Number]* and push atoms.
+  let i = 0;
+  function readAtoms(){
+    const local = [];
+    while(i < formula.length){
+      const ch = formula[i];
+      if(ch === '(' ){
+        i++;
+        const sub = readAtoms();
+        // Expect matching ')'
+        if(formula[i] === ')') i++;
+        // Optional multiplier
+        const mult = readNumber();
+        for(let k=0;k<mult;k++) local.push(...sub);
+      } else if(ch === ')'){
+        // Return to caller
+        return local;
+      } else if(/[A-Z]/.test(ch)){
+        let sym = ch; i++;
+        if(i < formula.length && /[a-z]/.test(formula[i])){ sym += formula[i]; i++; }
+        const mult = readNumber();
+        for(let k=0;k<mult;k++) local.push({sym});
+      } else {
+        // skip anything else (space, dot, etc.)
+        i++;
+      }
+    }
+    return local;
+  }
+  function readNumber(){
+    let n = '';
+    while(i < formula.length && /\d/.test(formula[i])){ n += formula[i]; i++; }
+    return n ? Math.max(1, parseInt(n,10)) : 1;
+  }
+  const parsed = readAtoms();
+  // Safety cap
+  return parsed.slice(0, 30);
 }
 
 /* ---- 3. build all atoms on each side, with initial positions ---- */

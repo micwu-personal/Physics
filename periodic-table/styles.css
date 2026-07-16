@@ -109,7 +109,8 @@ main{position:relative;z-index:1;max-width:1400px;margin:0 auto;padding:20px 12p
 .cell.empty{background:transparent;border:none;pointer-events:none}
 .cell .z{position:absolute;top:3px;left:5px;font-size:9px;color:rgba(255,255,255,0.6);font-family:'JetBrains Mono',ui-monospace,'SF Mono','Cascadia Mono','Consolas',monospace}
 .cell .sym{font-size:18px;font-weight:700;font-family:'JetBrains Mono',ui-monospace,'SF Mono','Cascadia Mono','Consolas',monospace;line-height:1}
-.cell .nm{font-size:8px;color:rgba(255,255,255,0.7);margin-top:2px;line-height:1;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;width:100%}
+.cell .nm{font-size:9px;color:rgba(255,255,255,0.75);margin-top:2px;line-height:1;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;width:100%}
+html[lang="zh-CN"] .cell .nm{font-size:12px;font-weight:500;color:#fff;margin-top:3px;letter-spacing:-0.3px}
 .cell .ms{position:absolute;bottom:2px;right:4px;font-size:8px;color:rgba(255,255,255,0.5);font-family:'JetBrains Mono',ui-monospace,'SF Mono','Cascadia Mono','Consolas',monospace}
 
 /* category coloring */
