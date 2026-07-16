@@ -30,25 +30,56 @@ let currentHybrid = null;
 function rerenderGrid(){
   const lang = window.CURRENT_LANG || 'en';
   gridEl.innerHTML='';
-  LAYOUT.forEach(row=>{
+  LAYOUT.forEach((row, rowIdx)=>{
+    const rowDiv = document.createElement('div');
+    rowDiv.className = 'pt-row';
+    // Row-read speaker button
+    const speak = document.createElement('button');
+    speak.className = 'row-speak';
+    speak.innerHTML = '🔊';
+    speak.title = (lang==='zh-CN' ? '朗读第 ' : 'Read period ') + (rowIdx+1);
+    const rowZs = row.filter(c=>typeof c === 'number');
+    speak.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      speakSequence(rowZs, lang);
+      speak.classList.add('playing');
+      setTimeout(()=>speak.classList.remove('playing'), rowZs.length*900 + 500);
+    });
+    rowDiv.appendChild(speak);
     row.forEach(cell=>{
       if(cell===0){
         const empty=document.createElement('div'); empty.className='cell empty';
-        gridEl.appendChild(empty);
+        rowDiv.appendChild(empty);
       } else if(cell==='La-Lu' || cell==='Ac-Lr'){
         const ph=document.createElement('div');
         ph.className='cell placeholder ' + (cell==='La-Lu'?'lanthanide':'actinide');
         ph.textContent=cell;
         ph.title = cell==='La-Lu' ? '57–71 Lanthanides' : '89–103 Actinides';
-        gridEl.appendChild(ph);
+        rowDiv.appendChild(ph);
       } else {
-        gridEl.appendChild(makeCell(cell,lang));
+        rowDiv.appendChild(makeCell(cell,lang));
       }
     });
+    gridEl.appendChild(rowDiv);
   });
   fblockEl.innerHTML='';
-  F_BLOCK.forEach(row=>{
-    row.forEach(z=>fblockEl.appendChild(makeCell(z,lang)));
+  F_BLOCK.forEach((row, fRowIdx)=>{
+    const rowDiv = document.createElement('div');
+    rowDiv.className = 'pt-frow';
+    const speak = document.createElement('button');
+    speak.className = 'row-speak';
+    speak.innerHTML = '🔊';
+    const label = fRowIdx===0 ? (lang==='zh-CN'?'朗读镧系':'Read lanthanides') : (lang==='zh-CN'?'朗读锕系':'Read actinides');
+    speak.title = label;
+    speak.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      speakSequence(row, lang);
+      speak.classList.add('playing');
+      setTimeout(()=>speak.classList.remove('playing'), row.length*900 + 500);
+    });
+    rowDiv.appendChild(speak);
+    row.forEach(z=>rowDiv.appendChild(makeCell(z,lang)));
+    fblockEl.appendChild(rowDiv);
   });
 }
 
@@ -199,6 +230,9 @@ function refreshDetail(){
     rxEl.querySelectorAll('.rx-play').forEach(b=>{
       b.addEventListener('click',()=>animateReaction(reactions[+b.dataset.i].eq));
     });
+
+    // 3D molecule viewers for formulas that have MOLECULE_3D data
+    render3DViewers(reactions);
   } else {
     rxBlock.style.display='none';
   }
@@ -947,28 +981,86 @@ function drawSideBonds(ctx, side, alpha, sideMarker){
 }
 function line(ctx, x1,y1,x2,y2){ ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke(); }
 
+/* CPK-inspired per-element colors for reaction atoms. */
+const ATOM_COLORS = {
+  H:'#e8f0ff', He:'#d9c1ff',
+  Li:'#c060ff', Be:'#6ee16e', B:'#ffb3b3', C:'#404040', N:'#3a70e6', O:'#e63a3a', F:'#a5f070', Ne:'#b3e0ff',
+  Na:'#b833ff', Mg:'#5adc5a', Al:'#c8a0a0', Si:'#f0c078', P:'#ff9838', S:'#f0d040', Cl:'#3fdc3f', Ar:'#80c0ff',
+  K:'#8f28ff', Ca:'#48ff48',
+  Sc:'#e6e6e6', Ti:'#bfc4c9', V:'#a0a5b0', Cr:'#8a99ac', Mn:'#9c7ac2', Fe:'#e07a35', Co:'#f0a0c0', Ni:'#4fd48b', Cu:'#ff8040', Zn:'#7d80b0',
+  Ga:'#c68b8b', Ge:'#5a8080', As:'#bd80e3', Se:'#ffa100', Br:'#a52a2a', Kr:'#5cb8d1',
+  Rb:'#702eb0', Sr:'#00ff00',
+  Y:'#94ffff', Zr:'#94e0e0', Nb:'#73c2c9', Mo:'#54b5b5', Tc:'#3b9e9e', Ru:'#248f8f', Rh:'#0a7d8c', Pd:'#006985', Ag:'#c0c0c0', Cd:'#ffd98f',
+  In:'#a67573', Sn:'#668080', Sb:'#9e63b5', Te:'#d47a00', I:'#8a1fbf', Xe:'#429eb0',
+  Cs:'#57178f', Ba:'#00c900',
+  La:'#70d4ff', Ce:'#ffffc7', Pr:'#d9ffc7', Nd:'#c7ffc7', Pm:'#a3ffc7', Sm:'#8fffc7', Eu:'#61ffc7', Gd:'#45ffc7', Tb:'#30ffc7', Dy:'#1fffc7', Ho:'#00ff9c', Er:'#00e675', Tm:'#00d452', Yb:'#00bf38', Lu:'#00ab24',
+  Hf:'#4dc2ff', Ta:'#4da6ff', W:'#2194d6', Re:'#267dab', Os:'#266696', Ir:'#175487', Pt:'#d0d0e0', Au:'#ffd23f', Hg:'#b8b8d0',
+  Tl:'#a6544d', Pb:'#575961', Bi:'#9e4fb5', Po:'#ab5c00', At:'#754f45', Rn:'#428296',
+  Fr:'#420066', Ra:'#007d00',
+  Ac:'#70abfa', Th:'#00baff', Pa:'#00a1ff', U:'#008fff', Np:'#0080ff', Pu:'#006bff',
+  Am:'#545cf2', Cm:'#785ce3', Bk:'#8a4fe3', Cf:'#a136d4', Es:'#b31fd4', Fm:'#b31fba',
+  Md:'#b30da6', No:'#bd0d87', Lr:'#c70066',
+  Rf:'#cc0059', Db:'#d1004f', Sg:'#d90045', Bh:'#e00038', Hs:'#e6002e', Mt:'#eb0026',
+  Ds:'#ee001d', Rg:'#f00014', Cn:'#f10012', Nh:'#f10010', Fl:'#f1000e', Mc:'#f1000c',
+  Lv:'#f1000a', Ts:'#f00008', Og:'#f00006'
+};
+function colorForAtom(sym){ return ATOM_COLORS[sym] || '#7fe3ff'; }
+/* Given a fill hex, return a contrasting text color (black or white). */
+function contrastText(hex){
+  const h = hex.replace('#','');
+  const r = parseInt(h.slice(0,2),16), g = parseInt(h.slice(2,4),16), b = parseInt(h.slice(4,6),16);
+  // Relative luminance
+  const L = (0.2126*r + 0.7152*g + 0.0722*b)/255;
+  return L > 0.55 ? '#000' : '#fff';
+}
+
 function drawAtom(ctx, x, y, sym, alpha=1){
-  const cat = symToCategory(sym);
-  const color = CATEGORY_COLORS[cat] || '#7fe3ff';
+  const color = colorForAtom(sym);
   ctx.save();
   ctx.globalAlpha = alpha;
-  const g = ctx.createRadialGradient(x,y,0,x,y,20);
+  // Outer soft halo
+  const g = ctx.createRadialGradient(x,y,0,x,y,22);
   g.addColorStop(0, color);
   g.addColorStop(1, color+'00');
   ctx.fillStyle=g;
-  ctx.beginPath(); ctx.arc(x,y,20,0,Math.PI*2); ctx.fill();
-  ctx.fillStyle=color;
-  ctx.beginPath(); ctx.arc(x,y,11,0,Math.PI*2); ctx.fill();
-  // white outline for contrast
-  ctx.strokeStyle='rgba(255,255,255,0.35)';
-  ctx.lineWidth=1;
-  ctx.beginPath(); ctx.arc(x,y,11,0,Math.PI*2); ctx.stroke();
-  ctx.fillStyle='#fff';
-  ctx.font='bold 10px JetBrains Mono, monospace';
+  ctx.beginPath(); ctx.arc(x,y,22,0,Math.PI*2); ctx.fill();
+  // Sphere with subtle 3D shading
+  const sph = ctx.createRadialGradient(x-4,y-4,1, x,y,13);
+  sph.addColorStop(0, lighten(color, 0.35));
+  sph.addColorStop(0.6, color);
+  sph.addColorStop(1, darken(color, 0.3));
+  ctx.fillStyle = sph;
+  ctx.beginPath(); ctx.arc(x,y,13,0,Math.PI*2); ctx.fill();
+  // Rim
+  ctx.strokeStyle = darken(color, 0.4);
+  ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.arc(x,y,13,0,Math.PI*2); ctx.stroke();
+  // Label with contrast outline
+  const txtColor = contrastText(color);
+  const outline  = txtColor==='#fff' ? 'rgba(0,0,0,0.85)' : 'rgba(255,255,255,0.85)';
+  ctx.font='bold 12px JetBrains Mono, ui-monospace, monospace';
   ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.lineWidth = 3;
+  ctx.strokeStyle = outline;
+  ctx.strokeText(sym, x, y);
+  ctx.fillStyle = txtColor;
   ctx.fillText(sym, x, y);
   ctx.textBaseline='alphabetic';
   ctx.restore();
+}
+function lighten(hex, amt){
+  const h=hex.replace('#','');
+  const r=Math.min(255, Math.round(parseInt(h.slice(0,2),16) + 255*amt));
+  const g=Math.min(255, Math.round(parseInt(h.slice(2,4),16) + 255*amt));
+  const b=Math.min(255, Math.round(parseInt(h.slice(4,6),16) + 255*amt));
+  return '#'+[r,g,b].map(v=>v.toString(16).padStart(2,'0')).join('');
+}
+function darken(hex, amt){
+  const h=hex.replace('#','');
+  const r=Math.max(0, Math.round(parseInt(h.slice(0,2),16) * (1-amt)));
+  const g=Math.max(0, Math.round(parseInt(h.slice(2,4),16) * (1-amt)));
+  const b=Math.max(0, Math.round(parseInt(h.slice(4,6),16) * (1-amt)));
+  return '#'+[r,g,b].map(v=>v.toString(16).padStart(2,'0')).join('');
 }
 function symToCategory(sym){
   for(const z in ELEMENTS) if(ELEMENTS[z].symbol===sym) return ELEMENTS[z].category;
@@ -996,7 +1088,25 @@ async function speak(text, langHint){
   const match = voices.find(v=>v.lang.toLowerCase().startsWith(langHint.toLowerCase().slice(0,2)));
   if(match) u.voice = match;
   u.rate = 0.9;
-  speechSynthesis.speak(u);
+  return new Promise(resolve=>{
+    u.onend = resolve;
+    u.onerror = resolve;
+    speechSynthesis.speak(u);
+  });
+}
+
+/* Read a sequence of elements (by Z) in the current language. */
+async function speakSequence(zList, lang){
+  if(!('speechSynthesis' in window)){ alert(t('tts.unavailable')); return; }
+  speechSynthesis.cancel();
+  const langHint = lang==='zh-CN' ? 'zh-CN' : 'en-US';
+  for(const z of zList){
+    const el = ELEMENTS[z]; if(!el) continue;
+    const name = lang==='zh-CN' ? el.name_zh : el.name_en;
+    await speak(name, langHint);
+    // small pause between names
+    await new Promise(r=>setTimeout(r, 150));
+  }
 }
 document.getElementById('ttsEn').addEventListener('click',(e)=>{
   if(!currentZ) return;
@@ -1010,6 +1120,244 @@ document.getElementById('ttsZh').addEventListener('click',(e)=>{
   speak(ELEMENTS[currentZ].name_zh, 'zh-CN');
   setTimeout(()=>e.currentTarget.classList.remove('playing'), 2000);
 });
+
+/* ================ 3D MOLECULAR VIEWER ================
+   Pure-canvas ball-and-stick with perspective projection.
+   Rotate: drag with mouse / finger. Auto-rotates when idle.
+================================================== */
+const SHAPE_LABELS = {
+  'H2O':['bent','弯曲(V 形)'],
+  'H2O2':['open-book','开书结构'],
+  'NH3':['trigonal pyramidal','三角锥形'],
+  'CH4':['tetrahedral','正四面体'],
+  'C2H4':['planar','平面'],
+  'C2H2':['linear','直线形'],
+  'C2H6':['staggered','交错构象'],
+  'CO2':['linear','直线形'],
+  'CO':['linear','直线形'],
+  'SF6':['octahedral','正八面体'],
+  'PCl5':['trigonal bipyramidal','三角双锥形'],
+  'C6H6':['aromatic ring','芳香环'],
+  'H2SO4':['tetrahedral','四面体'],
+  'NaCl':['rock-salt lattice','岩盐晶格'],
+  'C_diamond':['tetrahedral network','四面体网络'],
+  'Fe2O3':['ionic oxide','离子型氧化物']
+};
+
+/* Collect all unique formulas appearing in reactions, look up their 3D data,
+   and render one viewer per known structure. */
+function render3DViewers(reactions){
+  const block = document.getElementById('d3dBlock');
+  const grid = document.getElementById('d3d');
+  const lang = window.CURRENT_LANG || 'en';
+  const seen = new Set();
+  const known = [];
+  reactions.forEach(r=>{
+    const parsed = parseEquation(r.eq);
+    [...parsed.lhs, ...parsed.rhs].forEach(g=>{
+      const f = g.formula;
+      if(!seen.has(f) && MOLECULE_3D[f]){
+        seen.add(f); known.push(f);
+      }
+    });
+  });
+  if(known.length===0){ block.style.display='none'; grid.innerHTML=''; return; }
+  block.style.display='block';
+  grid.innerHTML = known.map(f=>{
+    const shape = SHAPE_LABELS[f];
+    const shapeTxt = shape ? (lang==='zh-CN'?shape[1]:shape[0]) : '';
+    return `<div class="mol3d-card" data-formula="${f}">
+      <canvas></canvas>
+      <div class="mol3d-caption">${prettyFormula(f)}</div>
+      <div class="mol3d-shape">${shapeTxt}</div>
+    </div>`;
+  }).join('');
+  // Start viewers
+  grid.querySelectorAll('.mol3d-card').forEach(card=>{
+    initMol3D(card, card.dataset.formula);
+  });
+}
+function prettyFormula(f){
+  // Convert digits to subscripts for display
+  return f.replace(/([A-Za-z\)])(\d+)/g, (_,pre,n)=>pre + n.replace(/\d/g, d=>'₀₁₂₃₄₅₆₇₈₉'[+d]))
+          .replace(/_diamond/,' (diamond)');
+}
+
+const molViewers = new Map(); // card -> {raf, state}
+function initMol3D(card, formula){
+  const mol = MOLECULE_3D[formula];
+  if(!mol) return;
+  const canvas = card.querySelector('canvas');
+  const ctx = canvas.getContext('2d');
+  // Center + scale atoms
+  const cx = mol.atoms.reduce((s,a)=>s+a.x,0)/mol.atoms.length;
+  const cy = mol.atoms.reduce((s,a)=>s+a.y,0)/mol.atoms.length;
+  const cz = mol.atoms.reduce((s,a)=>s+a.z,0)/mol.atoms.length;
+  const centered = mol.atoms.map(a=>({sym:a.sym, x:a.x-cx, y:a.y-cy, z:a.z-cz}));
+  const maxR = Math.max(...centered.map(a=>Math.hypot(a.x,a.y,a.z))) || 1;
+
+  const state = {
+    rotY: 0.6, rotX: 0.2, autoSpin: true,
+    dragging: false, lastX:0, lastY:0, velY:0.006, velX:0
+  };
+
+  // Drag / touch
+  card.addEventListener('pointerdown', e=>{
+    state.dragging = true; state.autoSpin = false;
+    state.lastX = e.clientX; state.lastY = e.clientY;
+    card.setPointerCapture(e.pointerId);
+  });
+  card.addEventListener('pointermove', e=>{
+    if(!state.dragging) return;
+    const dx = e.clientX - state.lastX;
+    const dy = e.clientY - state.lastY;
+    state.rotY += dx * 0.01;
+    state.rotX += dy * 0.01;
+    state.velY = dx * 0.001;
+    state.velX = dy * 0.001;
+    state.lastX = e.clientX; state.lastY = e.clientY;
+  });
+  card.addEventListener('pointerup', e=>{
+    state.dragging = false;
+    // Resume auto-spin after brief idle
+    setTimeout(()=>{ if(!state.dragging) state.autoSpin = true; }, 1200);
+  });
+
+  function frame(){
+    const r = canvas.getBoundingClientRect();
+    if(r.width<20 || r.height<20){ state.raf = requestAnimationFrame(frame); return; }
+    if(canvas.width !== r.width*devicePixelRatio){
+      canvas.width = r.width*devicePixelRatio;
+      canvas.height = r.height*devicePixelRatio;
+      ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);
+    }
+    const W = r.width, H = r.height;
+    ctx.clearRect(0,0,W,H);
+    // subtle background grid
+    ctx.strokeStyle='rgba(255,255,255,0.03)';
+    ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(0,H/2); ctx.lineTo(W,H/2); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(W/2,0); ctx.lineTo(W/2,H); ctx.stroke();
+
+    if(state.autoSpin){
+      state.rotY += 0.006;
+      state.rotX += Math.sin(performance.now()/6000)*0.002;
+    }
+    // Clamp rotX to avoid gimbal weirdness
+    state.rotX = Math.max(-Math.PI/2, Math.min(Math.PI/2, state.rotX));
+
+    // Rotate atoms
+    const cosY = Math.cos(state.rotY), sinY = Math.sin(state.rotY);
+    const cosX = Math.cos(state.rotX), sinX = Math.sin(state.rotX);
+    const projected = centered.map((a,i)=>{
+      // Y rotation
+      let x = a.x*cosY + a.z*sinY;
+      let z = -a.x*sinY + a.z*cosY;
+      let y = a.y;
+      // X rotation
+      const y2 = y*cosX - z*sinX;
+      const z2 = y*sinX + z*cosX;
+      y = y2; z = z2;
+      return {i, sym:a.sym, x, y, z};
+    });
+    // Perspective project
+    const scale = Math.min(W,H) * 0.35 / maxR;
+    const cxp = W/2, cyp = H/2;
+    const camZ = maxR * 3;
+    const proj = projected.map(a=>{
+      const fov = camZ / (camZ - a.z);
+      return {i:a.i, sym:a.sym, sx: cxp + a.x*scale*fov, sy: cyp + a.y*scale*fov, sz: a.z, size: 14*fov};
+    });
+    // Sort by z for painter's algorithm
+    const order = proj.slice().sort((a,b)=>a.sz - b.sz);
+
+    // Draw bonds first (in z order of midpoint)
+    const bondItems = mol.bonds.map(([i,j,order])=>{
+      const a = proj[i], b = proj[j];
+      return {a, b, order, midZ:(a.sz+b.sz)/2};
+    }).sort((x,y)=>x.midZ - y.midZ);
+
+    // Interleave drawing: for each atom in z-order, draw bonds that end before it, then it
+    // Simpler: draw all bonds first (back-to-front), then all atoms (back-to-front)
+    bondItems.forEach(bnd=>{
+      drawBond3D(ctx, bnd.a, bnd.b, bnd.order);
+    });
+    order.forEach(a=>{
+      drawAtom3D(ctx, a.sx, a.sy, a.size, a.sym);
+    });
+
+    state.raf = requestAnimationFrame(frame);
+  }
+  frame();
+  molViewers.set(card, state);
+}
+function drawAtom3D(ctx, x, y, radius, sym){
+  const color = colorForAtom(sym);
+  // Outer glow
+  const halo = ctx.createRadialGradient(x,y,radius*0.4, x,y,radius*1.9);
+  halo.addColorStop(0, color+'55');
+  halo.addColorStop(1, color+'00');
+  ctx.fillStyle = halo;
+  ctx.beginPath(); ctx.arc(x,y,radius*1.9,0,Math.PI*2); ctx.fill();
+  // Sphere with 3D shading
+  const sph = ctx.createRadialGradient(x-radius*0.35, y-radius*0.35, radius*0.1, x, y, radius);
+  sph.addColorStop(0, lighten(color, 0.4));
+  sph.addColorStop(0.6, color);
+  sph.addColorStop(1, darken(color, 0.4));
+  ctx.fillStyle = sph;
+  ctx.beginPath(); ctx.arc(x,y,radius,0,Math.PI*2); ctx.fill();
+  // Rim
+  ctx.strokeStyle = darken(color, 0.5);
+  ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.arc(x,y,radius,0,Math.PI*2); ctx.stroke();
+  // Highlight
+  const hi = ctx.createRadialGradient(x-radius*0.35, y-radius*0.35, 0, x-radius*0.35, y-radius*0.35, radius*0.5);
+  hi.addColorStop(0, 'rgba(255,255,255,0.7)');
+  hi.addColorStop(1, 'rgba(255,255,255,0)');
+  ctx.fillStyle = hi;
+  ctx.beginPath(); ctx.arc(x-radius*0.35, y-radius*0.35, radius*0.5, 0, Math.PI*2); ctx.fill();
+  // Label if atom is big enough
+  if(radius > 8){
+    const txt = contrastText(color);
+    const outline = txt==='#fff' ? 'rgba(0,0,0,0.8)' : 'rgba(255,255,255,0.8)';
+    ctx.font = `bold ${Math.round(radius*0.85)}px JetBrains Mono, ui-monospace, monospace`;
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.lineWidth = 2.5;
+    ctx.strokeStyle = outline;
+    ctx.strokeText(sym, x, y);
+    ctx.fillStyle = txt;
+    ctx.fillText(sym, x, y);
+    ctx.textBaseline='alphabetic';
+  }
+}
+function drawBond3D(ctx, a, b, order){
+  const dx = b.sx-a.sx, dy = b.sy-a.sy;
+  const len = Math.hypot(dx,dy);
+  if(len < 2) return;
+  // Bond as two color-split cylinders (halfway color)
+  const midX = (a.sx+b.sx)/2, midY = (a.sy+b.sy)/2;
+  const ca = colorForAtom(a.sym), cb = colorForAtom(b.sym);
+  const width = Math.max(3, Math.min(a.size, b.size) * 0.4);
+  // Offset for double/triple bonds
+  const nx = -dy/len, ny = dx/len;
+  const offset = order===1 ? [0] : order===2 ? [-width*0.5, width*0.5] : [-width, 0, width];
+  offset.forEach(off=>{
+    // Half A
+    ctx.strokeStyle = darken(ca, 0.15);
+    ctx.lineWidth = width;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(a.sx + nx*off, a.sy + ny*off);
+    ctx.lineTo(midX + nx*off, midY + ny*off);
+    ctx.stroke();
+    // Half B
+    ctx.strokeStyle = darken(cb, 0.15);
+    ctx.beginPath();
+    ctx.moveTo(midX + nx*off, midY + ny*off);
+    ctx.lineTo(b.sx + nx*off, b.sy + ny*off);
+    ctx.stroke();
+  });
+}
 
 /* ================ LANGUAGE SWITCHER ================ */
 document.querySelectorAll('.lang-pill').forEach(b=>{

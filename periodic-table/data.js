@@ -534,6 +534,177 @@ const CATEGORY_REACTIONS = {
   actinide: (sym)=>[]
 };
 
+/* ================ 3D MOLECULAR STRUCTURES ================
+   Each molecule: { atoms:[{sym,x,y,z}], bonds:[[i,j,order]] }
+   Coordinates in Ångstroms (approximate). The viewer auto-scales.
+==================================================== */
+const MOLECULE_3D = {
+  // Water — bent, 104.5°
+  'H2O': {
+    atoms:[
+      {sym:'O',x:0,y:0,z:0},
+      {sym:'H',x:0.757,y:0.586,z:0},
+      {sym:'H',x:-0.757,y:0.586,z:0}
+    ],
+    bonds:[[0,1,1],[0,2,1]]
+  },
+  // Hydrogen peroxide — open-book, ~111°
+  'H2O2': {
+    atoms:[
+      {sym:'O',x:-0.735,y:0.10,z:0},
+      {sym:'O',x:0.735,y:0.10,z:0},
+      {sym:'H',x:-0.98,y:0.65,z:0.75},
+      {sym:'H',x:0.98,y:0.65,z:-0.75}
+    ],
+    bonds:[[0,1,1],[0,2,1],[1,3,1]]
+  },
+  // Ammonia — trigonal pyramidal, 107°
+  'NH3': {
+    atoms:[
+      {sym:'N',x:0,y:0,z:0},
+      {sym:'H',x:0.94,y:-0.33,z:0},
+      {sym:'H',x:-0.47,y:-0.33,z:0.81},
+      {sym:'H',x:-0.47,y:-0.33,z:-0.81}
+    ],
+    bonds:[[0,1,1],[0,2,1],[0,3,1]]
+  },
+  // Methane — tetrahedral 109.5°
+  'CH4': {
+    atoms:[
+      {sym:'C',x:0,y:0,z:0},
+      {sym:'H',x:0.629,y:0.629,z:0.629},
+      {sym:'H',x:-0.629,y:-0.629,z:0.629},
+      {sym:'H',x:-0.629,y:0.629,z:-0.629},
+      {sym:'H',x:0.629,y:-0.629,z:-0.629}
+    ],
+    bonds:[[0,1,1],[0,2,1],[0,3,1],[0,4,1]]
+  },
+  // Ethylene C2H4 — planar
+  'C2H4': {
+    atoms:[
+      {sym:'C',x:-0.67,y:0,z:0},{sym:'C',x:0.67,y:0,z:0},
+      {sym:'H',x:-1.24,y:0.93,z:0},{sym:'H',x:-1.24,y:-0.93,z:0},
+      {sym:'H',x:1.24,y:0.93,z:0},{sym:'H',x:1.24,y:-0.93,z:0}
+    ],
+    bonds:[[0,1,2],[0,2,1],[0,3,1],[1,4,1],[1,5,1]]
+  },
+  // Acetylene — linear
+  'C2H2': {
+    atoms:[
+      {sym:'H',x:-1.66,y:0,z:0},{sym:'C',x:-0.6,y:0,z:0},
+      {sym:'C',x:0.6,y:0,z:0},{sym:'H',x:1.66,y:0,z:0}
+    ],
+    bonds:[[0,1,1],[1,2,3],[2,3,1]]
+  },
+  // Ethane — staggered
+  'C2H6': {
+    atoms:[
+      {sym:'C',x:-0.77,y:0,z:0},{sym:'C',x:0.77,y:0,z:0},
+      {sym:'H',x:-1.15,y:1.02,z:0},{sym:'H',x:-1.15,y:-0.51,z:0.88},{sym:'H',x:-1.15,y:-0.51,z:-0.88},
+      {sym:'H',x:1.15,y:-1.02,z:0},{sym:'H',x:1.15,y:0.51,z:0.88},{sym:'H',x:1.15,y:0.51,z:-0.88}
+    ],
+    bonds:[[0,1,1],[0,2,1],[0,3,1],[0,4,1],[1,5,1],[1,6,1],[1,7,1]]
+  },
+  // CO2 — linear O=C=O
+  'CO2': {
+    atoms:[{sym:'O',x:-1.16,y:0,z:0},{sym:'C',x:0,y:0,z:0},{sym:'O',x:1.16,y:0,z:0}],
+    bonds:[[0,1,2],[1,2,2]]
+  },
+  // CO — triple bond
+  'CO': {
+    atoms:[{sym:'C',x:-0.56,y:0,z:0},{sym:'O',x:0.56,y:0,z:0}],
+    bonds:[[0,1,3]]
+  },
+  // SF6 — octahedral
+  'SF6': {
+    atoms:[
+      {sym:'S',x:0,y:0,z:0},
+      {sym:'F',x:1.56,y:0,z:0},{sym:'F',x:-1.56,y:0,z:0},
+      {sym:'F',x:0,y:1.56,z:0},{sym:'F',x:0,y:-1.56,z:0},
+      {sym:'F',x:0,y:0,z:1.56},{sym:'F',x:0,y:0,z:-1.56}
+    ],
+    bonds:[[0,1,1],[0,2,1],[0,3,1],[0,4,1],[0,5,1],[0,6,1]]
+  },
+  // PCl5 — trigonal bipyramidal
+  'PCl5': {
+    atoms:[
+      {sym:'P',x:0,y:0,z:0},
+      {sym:'Cl',x:2.02,y:0,z:0},
+      {sym:'Cl',x:-1.01,y:0,z:1.75},
+      {sym:'Cl',x:-1.01,y:0,z:-1.75},
+      {sym:'Cl',x:0,y:2.14,z:0},
+      {sym:'Cl',x:0,y:-2.14,z:0}
+    ],
+    bonds:[[0,1,1],[0,2,1],[0,3,1],[0,4,1],[0,5,1]]
+  },
+  // Benzene — planar hexagon (aromatic)
+  'C6H6': {
+    atoms:(function(){
+      const R=1.4, RH=2.48;
+      const a=[]; for(let i=0;i<6;i++){const t=i*Math.PI/3; a.push({sym:'C',x:R*Math.cos(t),y:R*Math.sin(t),z:0});}
+      for(let i=0;i<6;i++){const t=i*Math.PI/3; a.push({sym:'H',x:RH*Math.cos(t),y:RH*Math.sin(t),z:0});}
+      return a;
+    })(),
+    bonds:(function(){
+      const b=[]; for(let i=0;i<6;i++){ b.push([i,(i+1)%6, i%2===0?2:1]); b.push([i,i+6,1]); } return b;
+    })()
+  },
+  // Sulfuric acid H2SO4 — tetrahedral S
+  'H2SO4': {
+    atoms:[
+      {sym:'S',x:0,y:0,z:0},
+      {sym:'O',x:1.42,y:0.35,z:0.35},
+      {sym:'O',x:-1.42,y:0.35,z:-0.35},
+      {sym:'O',x:0.35,y:-1.42,z:0.35},
+      {sym:'O',x:-0.35,y:1.42,z:-0.35},
+      {sym:'H',x:1.0,y:-1.9,z:0.6},
+      {sym:'H',x:-1.0,y:1.9,z:-0.6}
+    ],
+    bonds:[[0,1,2],[0,2,2],[0,3,1],[0,4,1],[3,5,1],[4,6,1]]
+  },
+  // Sodium chloride crystal fragment — face of the rock-salt lattice
+  'NaCl': {
+    atoms:(function(){
+      const a=[]; const N=2, d=2.82;
+      for(let i=0;i<=N;i++) for(let j=0;j<=N;j++) for(let k=0;k<=N;k++){
+        const parity=(i+j+k)%2;
+        a.push({sym: parity===0?'Na':'Cl', x:(i-N/2)*d, y:(j-N/2)*d, z:(k-N/2)*d});
+      }
+      return a;
+    })(),
+    bonds:(function(){
+      const N=2, d=2.82, size=N+1, tol=0.1;
+      const b=[]; const total=size**3;
+      for(let a=0;a<total;a++){ for(let bb=a+1;bb<total;bb++){
+        // Only bond nearest neighbors along axes
+        const ax=a%size, ay=Math.floor(a/size)%size, az=Math.floor(a/(size*size));
+        const bx=bb%size, by=Math.floor(bb/size)%size, bz=Math.floor(bb/(size*size));
+        const dx=ax-bx, dy=ay-by, dz=az-bz;
+        if(dx*dx+dy*dy+dz*dz===1) b.push([a,bb,1]);
+      }}
+      return b;
+    })()
+  },
+  // Diamond fragment C - tetrahedral network (small chunk)
+  'C_diamond': {
+    atoms:[
+      {sym:'C',x:0,y:0,z:0},
+      {sym:'C',x:1,y:1,z:1},{sym:'C',x:-1,y:-1,z:1},{sym:'C',x:-1,y:1,z:-1},{sym:'C',x:1,y:-1,z:-1},
+      {sym:'C',x:2,y:2,z:0},{sym:'C',x:2,y:0,z:2},{sym:'C',x:0,y:2,z:2}
+    ],
+    bonds:[[0,1,1],[0,2,1],[0,3,1],[0,4,1],[1,5,1],[1,6,1],[1,7,1]]
+  },
+  // Iron(III) oxide Fe2O3 - simplified corundum unit
+  'Fe2O3': {
+    atoms:[
+      {sym:'Fe',x:-1.4,y:0,z:0},{sym:'Fe',x:1.4,y:0,z:0},
+      {sym:'O',x:0,y:1.2,z:0},{sym:'O',x:0,y:-1.2,z:0},{sym:'O',x:0,y:0,z:1.3}
+    ],
+    bonds:[[0,2,1],[0,3,1],[0,4,1],[1,2,1],[1,3,1],[1,4,1]]
+  }
+};
+
+
 /* ================ FALLBACK EXTENDED DATA GENERATOR ================ */
 function generateFallbackExt(el){
   const lang = window.CURRENT_LANG || 'en';

@@ -60,15 +60,29 @@ main{position:relative;z-index:1;max-width:1400px;margin:0 auto;padding:20px 12p
 
 /* ============ PERIODIC TABLE GRID ============ */
 .pt-wrap{max-width:1400px;margin:0 auto}
-.pt-grid{
-  display:grid;
-  grid-template-columns:repeat(18, 1fr);
-  gap:4px;
-  padding:8px;
-}
+.pt-grid{display:flex;flex-direction:column;gap:4px;padding:8px}
+.pt-row{display:grid;grid-template-columns:32px repeat(18, 1fr);gap:4px;align-items:stretch}
 .pt-fseries{margin-top:16px;padding:8px}
 .fs-label{color:var(--dim);font-size:11px;text-transform:uppercase;letter-spacing:2px;text-align:center;margin-bottom:8px}
-.pt-fblock{display:grid;grid-template-columns:repeat(15, 1fr);gap:4px}
+.pt-fblock{display:flex;flex-direction:column;gap:4px}
+.pt-frow{display:grid;grid-template-columns:32px repeat(15, 1fr);gap:4px;align-items:stretch}
+
+.row-speak{
+  background:linear-gradient(135deg,rgba(0,212,255,0.15),rgba(124,92,255,0.08));
+  border:1px solid rgba(0,212,255,0.3);
+  color:#7fe3ff;
+  border-radius:6px;
+  cursor:pointer;
+  font-size:14px;
+  font-family:inherit;
+  padding:0;
+  transition:all .15s;
+  display:flex;align-items:center;justify-content:center;
+  aspect-ratio:1;
+}
+.row-speak:hover{background:linear-gradient(135deg,rgba(0,212,255,0.35),rgba(124,92,255,0.15));transform:scale(1.05);border-color:#00d4ff}
+.row-speak.playing{background:linear-gradient(135deg,rgba(0,212,255,0.5),rgba(124,92,255,0.3));animation:rowPulse 0.9s infinite}
+@keyframes rowPulse{0%,100%{opacity:1}50%{opacity:0.5}}
 
 .cell{
   aspect-ratio:1;
@@ -178,6 +192,14 @@ main{position:relative;z-index:1;max-width:1400px;margin:0 auto;padding:20px 12p
 .color-hex{font-family:'JetBrains Mono',ui-monospace,'SF Mono','Cascadia Mono','Consolas',monospace;font-size:10px;color:var(--dim);margin-top:2px}
 .color-empty{color:var(--dim);font-size:13px;font-style:italic;padding:10px 4px}
 
+/* ---------- 3D molecular viewers ---------- */
+.mol3d-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+.mol3d-card{background:radial-gradient(ellipse at center, #0a1130 0%, #030510 100%);border:1px solid var(--panel-b);border-radius:12px;overflow:hidden;position:relative;aspect-ratio:1;user-select:none;cursor:grab;touch-action:none}
+.mol3d-card:active{cursor:grabbing}
+.mol3d-card canvas{width:100%;height:100%;display:block}
+.mol3d-caption{position:absolute;top:8px;left:10px;color:#fff;font-family:'JetBrains Mono',ui-monospace,'SF Mono','Cascadia Mono','Consolas',monospace;font-size:12px;font-weight:700;text-shadow:0 1px 3px rgba(0,0,0,0.9);pointer-events:none}
+.mol3d-shape{position:absolute;top:8px;right:10px;color:var(--accent2);font-size:10px;text-transform:uppercase;letter-spacing:1px;pointer-events:none}
+
 .bond-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
 .bond-card{background:rgba(0,0,0,0.3);border:1px solid var(--panel-b);border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:6px}
 .bond-name{font-size:14px;font-weight:600;color:#fff}
@@ -228,6 +250,9 @@ footer{text-align:center;padding:40px 20px;color:var(--dim);font-size:12px;posit
 }
 @media (max-width:700px){
   .pt-grid{gap:2px;padding:4px}
+  .pt-row{grid-template-columns:22px repeat(18, 1fr);gap:2px}
+  .pt-frow{grid-template-columns:22px repeat(15, 1fr);gap:2px}
+  .row-speak{font-size:10px}
   .pt-fblock{gap:2px}
   .cell{min-height:28px;border-radius:4px}
   .cell .z{font-size:7px}
