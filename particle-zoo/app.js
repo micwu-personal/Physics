@@ -397,33 +397,103 @@ function addPart(p){
 }
 
 /* ---- Build composite structures from raw parts ----
-   Group quarks in triplets: prefer proton (uud), neutron (udd), else Δ.
-   Remaining quarks left "free" and warned about confinement.
-   Extra electrons orbit the atom shell.
+   1. Pair each quark with an antiquark of any flavour → meson.
+   2. Group remaining light (u,d) quarks into baryons (proton/neutron/Δ).
+   3. Heavy quarks (s,c,b) without partner → free.
+   4. Electrons orbit only if there's a nucleus of protons.
 */
-let buildViz = { particles:[], nucleons:[], atomR:0, cx:0, cy:0 };
+let buildViz = { particles:[], nucleons:[], mesons:[], atomR:0, cx:0, cy:0 };
+
+// Meson lookup: (quark, antiquark) → { name (en), zh, latex, mass, lifetime, tag }
+// Symmetric on qq̄ vs q̄q; we normalise so the flavour is stored as (q,q̄).
+const MESON_TABLE = {
+  'u|ubar': { sym:'π⁰', en:'Pion (π⁰)', zh:'π⁰ 介子', note:'lightest meson; τ ~ 8·10⁻¹⁷ s → γγ' },
+  'd|dbar': { sym:'π⁰', en:'Pion (π⁰)', zh:'π⁰ 介子', note:'lightest meson; τ ~ 8·10⁻¹⁷ s → γγ' },
+  'u|dbar': { sym:'π⁺', en:'Pion (π⁺)', zh:'π⁺ 介子', note:'τ ~ 26 ns → μ⁺ νμ' },
+  'd|ubar': { sym:'π⁻', en:'Pion (π⁻)', zh:'π⁻ 介子', note:'τ ~ 26 ns → μ⁻ ν̄μ' },
+  'u|sbar': { sym:'K⁺', en:'Kaon (K⁺)', zh:'K⁺ 介子', note:'first "strange" particle; τ ~ 12 ns' },
+  's|ubar': { sym:'K⁻', en:'Kaon (K⁻)', zh:'K⁻ 介子', note:'τ ~ 12 ns' },
+  'd|sbar': { sym:'K⁰', en:'Kaon (K⁰)', zh:'K⁰ 介子', note:'oscillates with K̄⁰ — CP violation lab' },
+  's|dbar': { sym:'K̄⁰', en:'Kaon (K̄⁰)', zh:'K̄⁰ 介子', note:'oscillates with K⁰' },
+  's|sbar': { sym:'η/φ', en:'η or φ meson', zh:'η / φ 介子', note:'mostly ss̄; φ → K⁺K⁻' },
+  'c|cbar': { sym:'J/ψ', en:'J/ψ meson', zh:'J/ψ 粒子', note:'Nov 1974 "November Revolution"; confirmed charm' },
+  'c|dbar': { sym:'D⁺', en:'D meson (D⁺)', zh:'D⁺ 介子', note:'lightest charmed meson; τ ~ 1 ps' },
+  'd|cbar': { sym:'D⁻', en:'D meson (D⁻)', zh:'D⁻ 介子', note:'τ ~ 1 ps' },
+  'c|ubar': { sym:'D̄⁰', en:'D meson (D̄⁰)', zh:'D̄⁰ 介子', note:'D⁰-D̄⁰ oscillations confirmed 2007' },
+  'u|cbar': { sym:'D⁰', en:'D meson (D⁰)', zh:'D⁰ 介子', note:'D⁰-D̄⁰ oscillations confirmed 2007' },
+  'c|sbar': { sym:'Dₛ⁺', en:'Dₛ meson', zh:'Dₛ⁺ 介子', note:'"charmed-strange"; used in CKM measurements' },
+  's|cbar': { sym:'Dₛ⁻', en:'Dₛ meson', zh:'Dₛ⁻ 介子', note:'antiparticle of Dₛ⁺' },
+  'b|bbar': { sym:'Υ', en:'Upsilon (Υ)', zh:'Υ 粒子', note:'discovered 1977, confirmed bottom quark' },
+  'b|ubar': { sym:'B⁻', en:'B meson (B⁻)', zh:'B⁻ 介子', note:'the meson factories\' bread and butter' },
+  'u|bbar': { sym:'B⁺', en:'B meson (B⁺)', zh:'B⁺ 介子', note:'CP violation studied at BaBar/Belle/LHCb' },
+  'b|dbar': { sym:'B⁰', en:'B meson (B⁰)', zh:'B⁰ 介子', note:'B⁰-B̄⁰ oscillations' },
+  'd|bbar': { sym:'B̄⁰', en:'B meson (B̄⁰)', zh:'B̄⁰ 介子', note:'B⁰-B̄⁰ oscillations' },
+  'b|sbar': { sym:'Bₛ⁰', en:'Bₛ meson', zh:'Bₛ⁰ 介子', note:'ultra-fast Bₛ-B̄ₛ oscillation (LHCb, 2006)' },
+  's|bbar': { sym:'B̄ₛ⁰', en:'Bₛ meson', zh:'B̄ₛ⁰ 介子', note:'antiparticle of Bₛ⁰' },
+  'b|cbar': { sym:'Bc⁻', en:'Bc meson', zh:'Bc⁻ 介子', note:'the only bc̄ meson; heaviest well-studied meson' },
+  'c|bbar': { sym:'Bc⁺', en:'Bc meson', zh:'Bc⁺ 介子', note:'discovered 1998 at Tevatron' },
+};
+const QUARK_CHARGE = { u:+2/3, c:+2/3, t:+2/3, d:-1/3, s:-1/3, b:-1/3,
+                        ubar:-2/3, cbar:-2/3, tbar:-2/3, dbar:+1/3, sbar:+1/3, bbar:+1/3 };
+const QUARK_COLOR = { u:'#ff6b9d', d:'#ff8fb8', s:'#ffd166', c:'#ffb347', b:'#c39bff', t:'#c39bff',
+                       ubar:'#7ee8c5', dbar:'#a8f0d8', sbar:'#4ea8ff', cbar:'#5db8ff', bbar:'#ff6bff', tbar:'#ff6bff' };
+function isAntiQ(p){ return p && p.endsWith && p.endsWith('bar'); }
+function isQuarkPart(p){ return p in QUARK_CHARGE; }
+function isHeavyQ(p){ return ['s','c','b','sbar','cbar','bbar'].indexOf(p)>=0; }
+function baseFlavor(p){ return p.replace('bar',''); }
 
 function buildComposites(){
-  const u = parts.filter(x=>x==='u').length;
-  const d = parts.filter(x=>x==='d').length;
-  const e = parts.filter(x=>x==='e').length;
+  const counts = {};
+  parts.forEach(p=>counts[p]=(counts[p]||0)+1);
+  const e = counts.e||0;
 
-  // Greedy: form protons first (2u+1d), then neutrons (1u+2d), then Δ⁺⁺ (uuu), Δ⁻ (ddd), else leftover
-  let uL=u, dL=d;
+  // 1) Form mesons: pair each quark with any available antiquark, prefer same-flavour.
+  const mesons = [];
+  const qList = [], aqList = [];
+  for(const p in counts){
+    if(!isQuarkPart(p)) continue;
+    for(let i=0;i<counts[p];i++) (isAntiQ(p)?aqList:qList).push(p);
+  }
+  // Prefer same-flavour pairings first
+  for(let i=qList.length-1;i>=0;i--){
+    const q = qList[i], want = q+'bar';
+    const j = aqList.indexOf(want);
+    if(j>=0){
+      mesons.push({q, aq:aqList[j]});
+      qList.splice(i,1); aqList.splice(j,1);
+    }
+  }
+  // Then any remaining q with any aq (mixed-flavour meson)
+  while(qList.length && aqList.length){
+    mesons.push({q:qList.shift(), aq:aqList.shift()});
+  }
+  const freeAntiQuarks = aqList.slice();  // orphaned antiquarks
+
+  // Attach meson metadata + friendly name.
+  mesons.forEach(m=>{
+    const key = `${baseFlavor(m.q)}|${m.aq}`;
+    const info = MESON_TABLE[key] || MESON_TABLE[`${baseFlavor(m.aq).replace('bar','')}|${m.q}bar`];
+    m.info = info || { sym:`${m.q}${m.aq}`, en:'exotic qq̄', zh:'奇特 qq̄', note:'not in the meson tables' };
+    m.charge = (QUARK_CHARGE[m.q]||0) + (QUARK_CHARGE[m.aq]||0);
+  });
+
+  // 2) Remaining bare quarks go to baryon builder (u,d only).
+  const uL0 = qList.filter(x=>x==='u').length;
+  const dL0 = qList.filter(x=>x==='d').length;
+  const heavyFree = qList.filter(x=>x!=='u' && x!=='d');
+  let uL=uL0, dL=dL0;
   const nucleons = [];
-  // proton
   while(uL>=2 && dL>=1){ nucleons.push({kind:'proton', q:[ 'u','u','d' ]}); uL-=2; dL-=1; }
-  // neutron
   while(uL>=1 && dL>=2){ nucleons.push({kind:'neutron', q:[ 'u','d','d' ]}); uL-=1; dL-=2; }
-  // Δ⁺⁺
   while(uL>=3){ nucleons.push({kind:'delta++', q:['u','u','u']}); uL-=3; }
-  // Δ⁻
   while(dL>=3){ nucleons.push({kind:'delta-', q:['d','d','d']}); dL-=3; }
   const leftoverQuarks = [];
   for(let i=0;i<uL;i++) leftoverQuarks.push('u');
   for(let i=0;i<dL;i++) leftoverQuarks.push('d');
+  heavyFree.forEach(p=>leftoverQuarks.push(p));
+  freeAntiQuarks.forEach(p=>leftoverQuarks.push(p));
 
-  // Position nucleons in cluster (nucleus)
+  // 3) Position nucleons in cluster (nucleus).
   const cx = BW/2, cy = BH/2;
   const N = nucleons.length;
   const nucR = N===0 ? 0 : (N===1 ? 0 : 32 + N*4);
@@ -434,20 +504,40 @@ function buildComposites(){
       n.x = cx + Math.cos(a)*nucR;
       n.y = cy + Math.sin(a)*nucR;
     }
-    n.r = 30; // radius of nucleon shell
-    // Place 3 quarks inside triangle
+    n.r = 30;
     n.q.forEach((ch,qi)=>{
       const qa = (qi/3)*Math.PI*2 - Math.PI/2;
       n.quarkPos = n.quarkPos || [];
-      n.quarkPos.push({
-        type: ch,
-        x: n.x + Math.cos(qa)*13,
-        y: n.y + Math.sin(qa)*13
-      });
+      n.quarkPos.push({ type: ch, x: n.x + Math.cos(qa)*13, y: n.y + Math.sin(qa)*13 });
     });
   });
 
-  // Electrons orbit outside nucleus
+  // 4) Position mesons: laid out horizontally near the top when no nucleus, else in an outer ring.
+  const M = mesons.length;
+  if(M){
+    if(N===0){
+      // spread horizontally
+      const spacing = Math.min(140, (BW-100)/Math.max(M,1));
+      mesons.forEach((m,i)=>{
+        m.x = cx + (i-(M-1)/2)*spacing;
+        m.y = cy;
+        m.r = 28;
+      });
+    } else {
+      // ring around the nucleus, outside atom orbit
+      const mR = Math.max(nucR + 160, 200);
+      mesons.forEach((m,i)=>{
+        const a = (i/M)*Math.PI*2 + 0.3;
+        m.x = cx + Math.cos(a)*mR; m.y = cy + Math.sin(a)*mR; m.r = 26;
+      });
+    }
+    mesons.forEach(m=>{
+      m.qPos  = { type:m.q,  x:m.x-14, y:m.y };
+      m.aqPos = { type:m.aq, x:m.x+14, y:m.y };
+    });
+  }
+
+  // 5) Electrons orbit outside nucleus (unchanged).
   const atomR = N>0 ? Math.max(nucR + 90, 120) : 0;
   const electrons = [];
   for(let i=0;i<e;i++){
@@ -455,18 +545,18 @@ function buildComposites(){
       const a = (i/Math.max(e,1))*Math.PI*2;
       electrons.push({ x: cx + Math.cos(a)*atomR, y: cy + Math.sin(a)*atomR, orbitA:a, orbitR:atomR + (Math.floor(i/8))*30 });
     } else {
-      // just scatter
       electrons.push({ x: cx + (Math.random()-0.5)*200, y: cy + (Math.random()-0.5)*200, free:true });
     }
   }
 
-  // Leftover free quarks — draw with warning glow
-  const freeQuarks = leftoverQuarks.map((t,i)=>{
+  // 6) Free quarks (confinement violation).
+  const freeQuarks = leftoverQuarks.map((tt,i)=>{
     const a = (i/Math.max(leftoverQuarks.length,1))*Math.PI*2;
-    return { type:t, x: cx + Math.cos(a)*80 + 200, y: cy + Math.sin(a)*80, free:true };
+    return { type:tt, x: cx + Math.cos(a)*80 + 220, y: cy + Math.sin(a)*80, free:true };
   });
 
-  buildViz = { nucleons, electrons, freeQuarks, cx, cy, nucR, atomR, N, e, u, d,
+  buildViz = { nucleons, mesons, electrons, freeQuarks, cx, cy, nucR, atomR, N, e,
+    u: (counts.u||0), d: (counts.d||0),
     hasNucleus: N>0, hasAtom: N>0 && e>0 };
 
   zone.classList.toggle('has-items', parts.length>0);
@@ -493,12 +583,15 @@ const ELEMENT_I18N = {
   'zh-CN': ['','氢','氦','锂','铍','硼','碳','氮','氧','氟','氖','钠','镁','铝','硅','磷','硫','氯','氩','钾','钙']
 };
 function analyze(){
-  const {nucleons, electrons, freeQuarks, u, d, e} = buildViz;
-  const q = u+d;
-  const charge = u*(2/3) + d*(-1/3) + e*(-1);
+  const {nucleons, mesons=[], electrons, freeQuarks, u, d, e} = buildViz;
+  // Real charge sum (includes heavy quarks, antiquarks, mesons already in freeQuarks)
+  let charge = -e;
+  parts.forEach(p=>{ if(p in QUARK_CHARGE) charge += QUARK_CHARGE[p]; });
   const lang = window.CURRENT_LANG || 'en';
   const dict = LOCALES[lang];
   const t = (k)=> dict[k] || LOCALES.en[k] || k;
+  const decayBar = document.getElementById('buildDecayBar');
+  if(decayBar) decayBar.hidden = true;
 
   if(parts.length===0){
     buildResult.textContent = t('builder.result.empty');
@@ -532,35 +625,59 @@ function analyze(){
     '3p4n3e':['⚛ Lithium-7 (⁷Li)','stable, most Li on Earth'],
   };
   const atomMap = ATOM_I18N[lang] || atomMap_en;
-  if(atomMap[key]){
+
+  // Meson-only assembly: proudly show what was formed
+  if(totalNucleons===0 && nElectrons===0 && freeQuarks.length===0 && mesons.length>0){
+    const names = mesons.map(m=> lang==='zh-CN' ? m.info.zh : m.info.en);
+    name = names.length===1 ? names[0] : `${names.length} × ${lang==='zh-CN'?'介子':'mesons'}: ${names.join(', ')}`;
+    cls = 'result success';
+  } else if(atomMap[key] && mesons.length===0){
     name = atomMap[key][0] + ' — ' + atomMap[key][1];
     cls = 'result success';
-  } else if(protons===0 && neutrons===1 && nElectrons===0 && freeQuarks.length===0){
+  } else if(protons===0 && neutrons===1 && nElectrons===0 && freeQuarks.length===0 && mesons.length===0){
     name = t('builder.msg.freeneutron'); cls='result success';
-  } else if(totalNucleons===0 && nElectrons>0 && freeQuarks.length===0){
+  } else if(totalNucleons===0 && nElectrons>0 && freeQuarks.length===0 && mesons.length===0){
     name = nElectrons===1 ? t('builder.msg.electron.one') : `${nElectrons} ${t('builder.msg.electron.many')}`; cls='result success';
   } else if(freeQuarks.length>0){
     name = t('builder.msg.freeq'); cls='result';
-  } else if(deltas>0){
+  } else if(deltas>0 && mesons.length===0){
     name = t('builder.msg.delta'); cls='result success';
   } else if(totalNucleons>0){
     const els = ELEMENT_I18N[lang] || ['','H','He','Li','Be','B','C','N','O','F','Ne','Na','Mg','Al','Si','P','S','Cl','Ar','K','Ca'];
     const symb = els[protons] || `Z=${protons}`;
     const eLabel = lang==='zh-CN' ? '电子' : 'e⁻';
-    name = `${symb} — ${protons}p + ${neutrons}n${nElectrons?` + ${nElectrons}${eLabel}`:''}`;
+    const mesonSuffix = mesons.length ? ` + ${mesons.length} ${lang==='zh-CN'?'介子':'meson(s)'}` : '';
+    name = `${symb} — ${protons}p + ${neutrons}n${nElectrons?` + ${nElectrons}${eLabel}`:''}${mesonSuffix}`;
     cls = 'result success';
   }
 
   buildResult.textContent = name;
   buildResult.className = cls;
 
+  // Stats line — includes mesons and heavy-quark totals.
+  const heavyCounts = {};
+  ['s','c','b','sbar','cbar','bbar','ubar','dbar'].forEach(k=>{ if(parts.includes(k)) heavyCounts[k]=parts.filter(x=>x===k).length; });
+  const heavyStr = Object.keys(heavyCounts).map(k=>`${k}:${heavyCounts[k]}`).join(' · ');
   const chargeVal = Math.round(charge*100)/100;
   buildStats.innerHTML = `
-    <div>${t('builder.stats.up')}: <b>${u}</b> · ${t('builder.stats.down')}: <b>${d}</b> · ${t('builder.stats.electrons')}: <b>${e}</b></div>
-    <div>${t('builder.stats.protons')}: <b>${protons}</b> · ${t('builder.stats.neutrons')}: <b>${neutrons}</b>${deltas?` · ${t('builder.stats.delta')}: <b>${deltas}</b>`:''}${freeQuarks.length?` · <span style="color:#ff6b9d">${t('builder.stats.freeq')}: ${freeQuarks.length}</span>`:''}</div>
+    <div>${t('builder.stats.up')}: <b>${parts.filter(x=>x==='u').length}</b> · ${t('builder.stats.down')}: <b>${parts.filter(x=>x==='d').length}</b> · ${t('builder.stats.electrons')}: <b>${e}</b>${heavyStr?` · <span style="color:#ffd166">${heavyStr}</span>`:''}</div>
+    <div>${t('builder.stats.protons')}: <b>${protons}</b> · ${t('builder.stats.neutrons')}: <b>${neutrons}</b>${deltas?` · ${t('builder.stats.delta')}: <b>${deltas}</b>`:''}${mesons.length?` · <span style="color:#7ee8c5">${t('builder.stats.mesons')||'mesons'}: ${mesons.length}</span>`:''}${freeQuarks.length?` · <span style="color:#ff6b9d">${t('builder.stats.freeq')}: ${freeQuarks.length}</span>`:''}</div>
     <div>${t('builder.stats.charge')}: <b>${chargeVal===0?'0':(chargeVal>0?'+':'')+chargeVal} e</b></div>
     <div>${t('builder.stats.parts')}: <b>${parts.length}</b></div>
   `;
+
+  // Show decay bar for unstable atoms/nuclei — see DECAY_MODES.
+  const decayModes = getDecayModes(protons, neutrons, nElectrons);
+  if(decayBar && decayModes.length){
+    decayBar.hidden = false;
+    decayBar.innerHTML =
+      `<div class="decay-title">${t('builder.decay.title')||'This isotope is unstable — try a decay'}</div>`+
+      `<div class="decay-modes">`+
+        decayModes.map(m=>`<button data-mode="${m.id}">${m.label[lang]||m.label.en}</button>`).join('')+
+      `</div>`+
+      `<div class="decay-note">${t('builder.decay.note')||'Watch the emitted particle fly out on the canvas.'}</div>`;
+    decayBar.querySelectorAll('button').forEach(b=> b.onclick = ()=> triggerDecay(b.dataset.mode));
+  }
 }
 
 /* ---- Animation loop for builder canvas ---- */
@@ -690,21 +807,153 @@ function drawBuild(){
     bctx.fillText((LOCALES[window.CURRENT_LANG||'en']||LOCALES.en)['builder.confine'], fq.x, fq.y+22);
   });
 
+  // Mesons: two quarks joined by a bright gluon string
+  const mesons = buildViz.mesons || [];
+  mesons.forEach(m=>{
+    // soft shell
+    const g = bctx.createRadialGradient(m.x,m.y,4, m.x,m.y,m.r+8);
+    g.addColorStop(0,'rgba(126,232,197,0.18)');
+    g.addColorStop(1,'rgba(126,232,197,0)');
+    bctx.fillStyle=g;
+    bctx.beginPath(); bctx.ellipse(m.x,m.y,m.r+8,m.r-4,0,0,Math.PI*2); bctx.fill();
+    bctx.strokeStyle='rgba(126,232,197,0.45)';
+    bctx.setLineDash([3,3]);
+    bctx.lineWidth=1.2;
+    bctx.beginPath(); bctx.ellipse(m.x,m.y,m.r+8,m.r-4,0,0,Math.PI*2); bctx.stroke();
+    bctx.setLineDash([]);
+    // gluon string (helical) between q and q̄
+    drawGluonLine(m.qPos, m.aqPos, bt*1.2);
+    // the two quark bubbles
+    drawQuark(m.qPos.x, m.qPos.y, m.qPos.type);
+    drawQuark(m.aqPos.x, m.aqPos.y, m.aqPos.type);
+    // meson symbol label
+    bctx.fillStyle='#7ee8c5';
+    bctx.font='bold 12px JetBrains Mono, monospace';
+    bctx.textAlign='center';
+    bctx.fillText(m.info.sym, m.x, m.y - m.r - 4);
+  });
+
+  // Decay-animation overlay (α, β⁻, β⁺, γ, EC ejecta)
+  if(decayFX && decayFX.length){
+    for(let i=decayFX.length-1;i>=0;i--){
+      const f = decayFX[i];
+      f.t += 0.016;
+      const p = f.t / f.dur;
+      if(p>=1){ decayFX.splice(i,1); continue; }
+      const ex = f.x + f.vx * p * 400;
+      const ey = f.y + f.vy * p * 400;
+      // trail
+      bctx.strokeStyle = f.color + (Math.floor((1-p)*220)).toString(16).padStart(2,'0');
+      bctx.lineWidth = 2;
+      bctx.beginPath(); bctx.moveTo(f.x, f.y); bctx.lineTo(ex, ey); bctx.stroke();
+      // particle head
+      bctx.fillStyle = f.color;
+      bctx.beginPath(); bctx.arc(ex, ey, 6, 0, Math.PI*2); bctx.fill();
+      bctx.fillStyle='#fff';
+      bctx.font='bold 10px JetBrains Mono, monospace';
+      bctx.textAlign='center'; bctx.textBaseline='middle';
+      bctx.fillText(f.label, ex, ey);
+      bctx.textBaseline='alphabetic';
+    }
+  }
+
   requestAnimationFrame(drawBuild);
 }
+let decayFX = [];
+
+/* ---- Decay chain support (activated when Builder shows an unstable isotope) ---- */
+// Return an array of {id, label:{en,zh}, apply(parts,e)} decay modes for the current isotope.
+function getDecayModes(protons, neutrons, electrons){
+  const modes = [];
+  const A = protons + neutrons, Z = protons;
+  // Neutron-rich → β⁻
+  if(neutrons > protons && A>1){
+    modes.push({ id:'bm', label:{en:'β⁻ (n→p + e⁻ + ν̄)', zh:'β⁻ 衰变 (n→p+e⁻+ν̄)'} });
+  }
+  // Proton-rich → β⁺
+  if(protons > neutrons+1 && A>1){
+    modes.push({ id:'bp', label:{en:'β⁺ (p→n + e⁺ + ν)', zh:'β⁺ 衰变 (p→n+e⁺+ν)'} });
+  }
+  // Heavy → α
+  if(A >= 5){
+    modes.push({ id:'alpha', label:{en:'α (emit ⁴He)', zh:'α 衰变 (发射 ⁴He)'} });
+  }
+  // Any excited nucleus → γ (always available if any nucleus exists)
+  if(A >= 2){
+    modes.push({ id:'gamma', label:{en:'γ (photon)', zh:'γ 衰变 (光子)'} });
+  }
+  // Electron capture (proton-rich w/ electron present)
+  if(protons > neutrons && electrons > 0 && A>1){
+    modes.push({ id:'ec', label:{en:'EC (electron capture)', zh:'电子俘获 (EC)'} });
+  }
+  // Filter: don't bother for known-stable nuclei (¹H atom, ²H atom, ⁴He atom, etc.)
+  const stableKeys = ['1p0n1e','1p1n1e','2p2n2e','2p1n2e','3p3n3e','3p4n3e'];
+  const key = `${protons}p${neutrons}n${electrons}e`;
+  if(stableKeys.indexOf(key)>=0) return [];
+  return modes;
+}
+
+function triggerDecay(id){
+  const {cx, cy, nucR} = buildViz;
+  const r = Math.max(nucR, 30);
+  const jitter = ()=> (Math.random()-0.5)*0.3;
+  if(id==='bm'){
+    // Convert one neutron → proton, emit e⁻ + ν̄
+    const idx = parts.indexOf('d');
+    if(idx>=0){ parts[idx]='u'; parts.push('e'); }
+    decayFX.push({ x:cx+r, y:cy, vx:1+jitter(), vy:-0.4+jitter(), t:0, dur:2.2, color:'#ffd166', label:'e⁻' });
+    decayFX.push({ x:cx+r, y:cy, vx:0.8+jitter(), vy:0.5+jitter(), t:0, dur:2.2, color:'#8fa8ff', label:'ν̄' });
+  } else if(id==='bp'){
+    // Convert one proton → neutron, emit e⁺ + ν; if no electron to add, spawn positron leaving
+    const idx = parts.indexOf('u');
+    if(idx>=0){ parts[idx]='d'; }
+    decayFX.push({ x:cx+r, y:cy, vx:-1+jitter(), vy:-0.4+jitter(), t:0, dur:2.2, color:'#ff6b9d', label:'e⁺' });
+    decayFX.push({ x:cx+r, y:cy, vx:-0.8+jitter(), vy:0.5+jitter(), t:0, dur:2.2, color:'#8fa8ff', label:'ν' });
+  } else if(id==='alpha'){
+    // Remove 2 protons (2u+1d each) + 2 neutrons (1u+2d each) = 6u + 6d worth of quarks
+    // Simpler: drop 4 nucleons (2 of each) from parts, i.e. remove 6u and 6d.
+    for(let k=0;k<6;k++){ const i=parts.indexOf('u'); if(i>=0) parts.splice(i,1); }
+    for(let k=0;k<6;k++){ const i=parts.indexOf('d'); if(i>=0) parts.splice(i,1); }
+    decayFX.push({ x:cx, y:cy, vx:1+jitter(), vy:-0.6+jitter(), t:0, dur:2.5, color:'#ffd166', label:'α' });
+  } else if(id==='gamma'){
+    decayFX.push({ x:cx, y:cy, vx:1.2+jitter(), vy:-0.6+jitter(), t:0, dur:1.6, color:'#ffffff', label:'γ' });
+  } else if(id==='ec'){
+    // Remove one electron + convert one proton → neutron, emit neutrino
+    const iE = parts.indexOf('e'); if(iE>=0) parts.splice(iE,1);
+    const iU = parts.indexOf('u'); if(iU>=0) parts[iU]='d';
+    decayFX.push({ x:cx, y:cy, vx:0.6+jitter(), vy:-1+jitter(), t:0, dur:2.2, color:'#8fa8ff', label:'ν' });
+  }
+  buildComposites();
+}
 function drawQuark(x,y,type){
-  const isUp = type==='u';
-  const c1 = isUp ? '#ff9ec2' : '#ffbdd7';
-  const c2 = isUp ? '#ff6b9d' : '#ff85b0';
+  // Determine color by flavor; anti-quarks get their teal/blue palette.
+  const isAnti = type && type.endsWith && type.endsWith('bar');
+  const flavor = isAnti ? type.slice(0,-3) : type;
+  const palette = {
+    u:['#ff9ec2','#ff6b9d'], d:['#ffbdd7','#ff85b0'],
+    s:['#ffe28a','#ffd166'], c:['#ffc99b','#ffb347'],
+    b:['#d8b9ff','#c39bff'], t:['#d8b9ff','#c39bff']
+  };
+  const antiPalette = {
+    u:['#a8f0d8','#7ee8c5'], d:['#c0f5e2','#a4ecd0'],
+    s:['#a0c8ff','#4ea8ff'], c:['#bcd7ff','#5db8ff'],
+    b:['#ffbdf5','#ff6bff'], t:['#ffbdf5','#ff6bff']
+  };
+  const pal = (isAnti ? antiPalette : palette)[flavor] || ['#ff9ec2','#ff6b9d'];
   const g = bctx.createRadialGradient(x-2,y-2,0,x,y,10);
-  g.addColorStop(0,c1); g.addColorStop(1,c2);
+  g.addColorStop(0,pal[0]); g.addColorStop(1,pal[1]);
   bctx.fillStyle=g;
   bctx.beginPath(); bctx.arc(x,y,9,0,Math.PI*2); bctx.fill();
   bctx.fillStyle='#fff';
   bctx.font='bold 10px JetBrains Mono, monospace';
   bctx.textAlign='center'; bctx.textBaseline='middle';
-  bctx.fillText(type, x, y);
+  bctx.fillText(flavor, x, y);
   bctx.textBaseline='alphabetic';
+  if(isAnti){
+    // small overbar
+    bctx.strokeStyle='#fff'; bctx.lineWidth=1.4;
+    bctx.beginPath(); bctx.moveTo(x-5,y-5); bctx.lineTo(x+5,y-5); bctx.stroke();
+  }
 }
 function drawElectron(x,y){
   const g = bctx.createRadialGradient(x,y,0,x,y,14);
@@ -1559,3 +1808,502 @@ document.querySelectorAll('.tab').forEach(t=>{
 buildInteractionTiles();
 // If forces is the initial tab, start immediately; otherwise start on demand.
 if(document.querySelector('.tab.active')?.dataset.tab === 'forces') ixStart();
+
+/* ================ PHYSICS LAB TAB ================ */
+/* Three demos: Confinement / flux tube, Detector cross-section, Higgs lattice.
+   All share a single rAF loop that runs only while the Lab tab is active. */
+
+let labRAF=null, labT=0;
+const LAB = {}; // per-demo state
+
+// ---- shared canvas helper ----
+function labSizeCanvas(c){
+  const r = c.getBoundingClientRect();
+  c.width  = r.width * devicePixelRatio;
+  c.height = r.height * devicePixelRatio;
+  const ctx = c.getContext('2d');
+  ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);
+  return { ctx, w:r.width, h:r.height };
+}
+
+/* ---------- Demo 1: Confinement / flux tube ---------- */
+function labInitConfinement(){
+  const c = document.getElementById('confCanvas'); if(!c) return;
+  const { ctx, w, h } = labSizeCanvas(c);
+  LAB.conf = { ctx, w, h, canvas:c, q:{x:w*0.4,y:h/2}, aq:{x:w*0.6,y:h/2},
+               dragging:null, snapPop:0, snapPos:null, snapPair:null, hint:0 };
+  // Drag handling
+  const pick = (mx,my)=>{
+    const d1=(mx-LAB.conf.q.x)**2+(my-LAB.conf.q.y)**2;
+    const d2=(mx-LAB.conf.aq.x)**2+(my-LAB.conf.aq.y)**2;
+    if(Math.min(d1,d2)>500) return null;
+    return d1<d2 ? 'q' : 'aq';
+  };
+  const local = (e)=>{ const r=c.getBoundingClientRect(); return { x:e.clientX-r.left, y:e.clientY-r.top }; };
+  c.addEventListener('mousedown', e=>{ const p=local(e); LAB.conf.dragging = pick(p.x,p.y); });
+  c.addEventListener('mousemove', e=>{
+    if(!LAB.conf.dragging) return;
+    const p = local(e);
+    const target = LAB.conf.dragging==='q' ? LAB.conf.q : LAB.conf.aq;
+    target.x = Math.max(20, Math.min(LAB.conf.w-20, p.x));
+    target.y = Math.max(30, Math.min(LAB.conf.h-30, p.y));
+  });
+  window.addEventListener('mouseup', ()=>{ LAB.conf.dragging=null; });
+  // Touch
+  c.addEventListener('touchstart', e=>{ const r=c.getBoundingClientRect(); const t=e.touches[0]; LAB.conf.dragging = pick(t.clientX-r.left, t.clientY-r.top); e.preventDefault(); }, {passive:false});
+  c.addEventListener('touchmove', e=>{
+    if(!LAB.conf.dragging) return;
+    const r=c.getBoundingClientRect(); const t=e.touches[0];
+    const target = LAB.conf.dragging==='q' ? LAB.conf.q : LAB.conf.aq;
+    target.x = Math.max(20, Math.min(LAB.conf.w-20, t.clientX-r.left));
+    target.y = Math.max(30, Math.min(LAB.conf.h-30, t.clientY-r.top));
+    e.preventDefault();
+  }, {passive:false});
+  c.addEventListener('touchend', ()=>{ LAB.conf.dragging=null; });
+
+  document.getElementById('confReset').onclick = ()=>{
+    LAB.conf.q  = {x:w*0.4, y:h/2};
+    LAB.conf.aq = {x:w*0.6, y:h/2};
+    LAB.conf.snapPop = 0; LAB.conf.snapPos=null; LAB.conf.snapPair=null;
+  };
+}
+function labDrawConfinement(){
+  const S = LAB.conf; if(!S) return;
+  const { ctx, w, h } = S;
+  ctx.clearRect(0,0,w,h);
+
+  // Auto-pull mode: gently drag antiquark right until snap.
+  const auto = document.getElementById('confAuto');
+  if(auto && auto.checked && !S.dragging && !S.snapPos){
+    S.aq.x += 0.35;
+    if(S.aq.x > w-40) S.aq.x = w-40;
+  }
+
+  // background grid
+  ctx.strokeStyle='rgba(255,255,255,0.03)'; ctx.lineWidth=1;
+  for(let x=0;x<w;x+=30){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,h);ctx.stroke();}
+  for(let y=0;y<h;y+=30){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke();}
+
+  const q = S.q, aq = S.aq;
+  const dx = aq.x-q.x, dy = aq.y-q.y, L = Math.hypot(dx,dy);
+  const stretch = L / 80; // 1 = relaxed
+  const SNAP = 3.4;       // stretch factor at which the tube snaps
+
+  if(!S.snapPos){
+    // Draw the flux tube — colour ramps from teal (relaxed) to hot pink (about to snap)
+    const tension = Math.min(1, Math.max(0, (stretch-1)/(SNAP-1)));
+    const colStart = `hsl(${170 - tension*140}, 80%, 55%)`;
+    const colEnd   = `hsl(${170 - tension*140}, 90%, 65%)`;
+    const grad = ctx.createLinearGradient(q.x,q.y,aq.x,aq.y);
+    grad.addColorStop(0, colStart); grad.addColorStop(1, colEnd);
+    // tube thickness grows with stretch (energy stored)
+    ctx.strokeStyle = grad;
+    ctx.lineWidth = 3 + tension*8;
+    ctx.beginPath();
+    // sinusoidal fatness along the tube (vibrating flux)
+    const N=40;
+    ctx.moveTo(q.x, q.y);
+    for(let i=1;i<=N;i++){
+      const t=i/N;
+      const ux=dx/L, uy=dy/L, nx=-uy, ny=ux;
+      const wobble = Math.sin(t*Math.PI*6 + labT*4) * (2 + tension*6);
+      ctx.lineTo(q.x + dx*t + nx*wobble, q.y + dy*t + ny*wobble);
+    }
+    ctx.stroke();
+
+    // Energy ticks along tube
+    ctx.fillStyle=`rgba(255,209,102,${0.3+tension*0.6})`;
+    for(let i=1;i<8;i++){
+      const t=i/8;
+      const px=q.x+dx*t, py=q.y+dy*t;
+      ctx.beginPath(); ctx.arc(px,py,1.5+tension*1.5,0,Math.PI*2); ctx.fill();
+    }
+
+    // Energy / distance readout
+    ctx.fillStyle='#8b93b3';
+    ctx.font='11px JetBrains Mono, monospace';
+    ctx.textAlign='left';
+    ctx.fillText(`separation ≈ ${L.toFixed(0)} px`, 12, h-24);
+    ctx.fillText(`stored energy ≈ ${(L*0.6).toFixed(1)} MeV (linear!)`, 12, h-10);
+
+    // Snap!
+    if(stretch >= SNAP){
+      const mid = { x:(q.x+aq.x)/2, y:(q.y+aq.y)/2 };
+      S.snapPos = mid;
+      S.snapPair = { q2:{x:mid.x-16, y:mid.y}, aq2:{x:mid.x+16, y:mid.y} };
+      S.snapPop = 0;
+      // Flash
+      ctx.fillStyle='rgba(255,255,255,0.7)';
+      ctx.beginPath(); ctx.arc(mid.x, mid.y, 30, 0, Math.PI*2); ctx.fill();
+    }
+  } else {
+    // Post-snap animation: two mesons flying apart
+    S.snapPop += 0.03;
+    const p = Math.min(1, S.snapPop);
+    // flash fading
+    ctx.fillStyle=`rgba(255,255,255,${0.6*(1-p)})`;
+    ctx.beginPath(); ctx.arc(S.snapPos.x, S.snapPos.y, 30+p*30, 0, Math.PI*2); ctx.fill();
+    // meson A = q + aq2 (original quark + new antiquark)
+    const aq2 = { x: S.snapPair.aq2.x - p*80, y: S.snapPair.aq2.y };
+    const q2  = { x: S.snapPair.q2.x  + p*80, y: S.snapPair.q2.y  };
+    // draw two thin flux tubes each (short)
+    ctx.strokeStyle='#7ee8c5'; ctx.lineWidth=2;
+    ctx.beginPath(); ctx.moveTo(q.x,q.y); ctx.lineTo(aq2.x,aq2.y); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(q2.x,q2.y); ctx.lineTo(aq.x,aq.y); ctx.stroke();
+    // label
+    ctx.fillStyle='#7ee8c5'; ctx.font='bold 11px JetBrains Mono, monospace'; ctx.textAlign='center';
+    ctx.fillText('new q̄', aq2.x, aq2.y-14);
+    ctx.fillText('new q',  q2.x,  q2.y-14);
+    ctx.fillStyle='#ffd166'; ctx.font='11px Space Grotesk, sans-serif';
+    ctx.fillText('→ 2 mesons (never 1 free quark)', S.snapPos.x, S.snapPos.y+50);
+    if(p>=1){
+      // reset for next cycle
+      setTimeout(()=>{
+        if(!LAB.conf) return;
+        LAB.conf.q  = {x:w*0.4, y:h/2};
+        LAB.conf.aq = {x:w*0.6, y:h/2};
+        LAB.conf.snapPos=null; LAB.conf.snapPair=null; LAB.conf.snapPop=0;
+      }, 400);
+      S.snapPos = { x:-9999, y:-9999 }; // freeze until reset fires
+    }
+  }
+
+  // Draw the quark & antiquark on top
+  drawLabQuark(ctx, q.x, q.y, '#ff6b9d', 'q');
+  drawLabQuark(ctx, aq.x, aq.y, '#7ee8c5', 'q̄');
+}
+function drawLabQuark(ctx, x, y, color, label){
+  const g = ctx.createRadialGradient(x-3,y-3,0,x,y,16);
+  g.addColorStop(0,'#fff'); g.addColorStop(0.4,color); g.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle=g; ctx.beginPath(); ctx.arc(x,y,16,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle=color; ctx.beginPath(); ctx.arc(x,y,8,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle='#fff'; ctx.font='bold 11px JetBrains Mono, monospace';
+  ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(label, x, y);
+  ctx.textBaseline='alphabetic';
+}
+
+/* ---------- Demo 2: Detector cross-section ---------- */
+// Layers (inside → out): beam pipe, tracker, ECAL, HCAL, solenoid, muon chambers.
+// Each particle lights up specific layers with a colour trace and a "hit" pattern.
+const DET_LAYERS = [
+  { name:'Beam pipe',      r0:0,   r1:22,  fill:'rgba(255,255,255,0.03)', ring:'rgba(255,255,255,0.15)' },
+  { name:'Tracker',        r0:22,  r1:70,  fill:'rgba(78,168,255,0.06)',  ring:'rgba(78,168,255,0.35)' },
+  { name:'ECAL',           r0:70,  r1:100, fill:'rgba(255,209,102,0.08)', ring:'rgba(255,209,102,0.4)' },
+  { name:'HCAL',           r0:100, r1:140, fill:'rgba(255,107,157,0.08)', ring:'rgba(255,107,157,0.4)' },
+  { name:'Solenoid',       r0:140, r1:150, fill:'rgba(255,255,255,0.05)', ring:'rgba(255,255,255,0.2)' },
+  { name:'Muon chambers',  r0:150, r1:195, fill:'rgba(126,232,197,0.06)', ring:'rgba(126,232,197,0.4)' },
+];
+// signature[layer] = 'curve' | 'hit' | 'shower' | 'jet' | 'miss'
+const DET_PARTICLES = {
+  electron: { label:'e⁻', color:'#4ea8ff', sig:{ tracker:'curve', ECAL:'shower', HCAL:'miss', muon:'miss' } },
+  photon:   { label:'γ',  color:'#ffd166', sig:{ tracker:'miss',  ECAL:'shower', HCAL:'miss', muon:'miss' } },
+  muon:     { label:'μ⁻', color:'#7ee8c5', sig:{ tracker:'curve', ECAL:'miss',   HCAL:'miss', muon:'hit' } },
+  pion:     { label:'π⁺', color:'#ff6b9d', sig:{ tracker:'curve', ECAL:'miss',   HCAL:'shower', muon:'miss' } },
+  neutron:  { label:'n⁰', color:'#c8cff0', sig:{ tracker:'miss',  ECAL:'miss',   HCAL:'shower', muon:'miss' } },
+  neutrino: { label:'ν',  color:'#8fa8ff', sig:{ tracker:'miss',  ECAL:'miss',   HCAL:'miss',   muon:'miss' } },
+  jet:      { label:'jet',color:'#c39bff', sig:{ tracker:'jet',   ECAL:'shower', HCAL:'shower', muon:'miss' } },
+};
+function labInitDetector(){
+  const c = document.getElementById('detCanvas'); if(!c) return;
+  const { ctx, w, h } = labSizeCanvas(c);
+  LAB.det = { ctx, w, h, canvas:c, current:'electron' };
+  // picker buttons
+  const picker = document.getElementById('detPicker');
+  picker.innerHTML = '';
+  Object.keys(DET_PARTICLES).forEach(k=>{
+    const b = document.createElement('button');
+    b.textContent = DET_PARTICLES[k].label + ' · ' + k;
+    b.style.color = DET_PARTICLES[k].color;
+    if(k===LAB.det.current) b.classList.add('active');
+    b.onclick = ()=>{
+      LAB.det.current = k;
+      picker.querySelectorAll('button').forEach(x=>x.classList.remove('active'));
+      b.classList.add('active');
+    };
+    picker.appendChild(b);
+  });
+  // legend
+  const leg = document.getElementById('detLegend');
+  leg.innerHTML = DET_LAYERS.map(L=>
+    `<span class="ll-item"><i class="bar" style="background:${L.ring};color:${L.ring}"></i>${L.name}</span>`
+  ).join('');
+}
+function labDrawDetector(){
+  const S = LAB.det; if(!S) return;
+  const { ctx, w, h } = S;
+  ctx.clearRect(0,0,w,h);
+  const cx = w/2, cy = h/2;
+  const maxR = Math.min(w,h)/2 - 10;
+  // Scale layers to canvas size
+  const scale = maxR / 195;
+  // 1) draw layers
+  for(let i=DET_LAYERS.length-1;i>=0;i--){
+    const L = DET_LAYERS[i];
+    ctx.fillStyle = L.fill;
+    ctx.beginPath(); ctx.arc(cx,cy,L.r1*scale,0,Math.PI*2); ctx.fill();
+  }
+  DET_LAYERS.forEach(L=>{
+    ctx.strokeStyle = L.ring; ctx.lineWidth = 1.2;
+    ctx.beginPath(); ctx.arc(cx,cy,L.r1*scale,0,Math.PI*2); ctx.stroke();
+  });
+  // Layer labels (top)
+  ctx.fillStyle='#8b93b3'; ctx.font='9px JetBrains Mono, monospace';
+  ctx.textAlign='center';
+  DET_LAYERS.forEach(L=>{
+    const rMid=(L.r0+L.r1)/2*scale;
+    if(rMid>10) ctx.fillText(L.name, cx, cy - rMid);
+  });
+
+  // 2) collision point
+  ctx.fillStyle='#fff';
+  ctx.beginPath(); ctx.arc(cx,cy,3,0,Math.PI*2); ctx.fill();
+
+  // 3) draw the particle signature
+  const P = DET_PARTICLES[S.current];
+  const th = (labT*0.6) % (Math.PI*2); // slowly rotating direction — one particle emerging
+  const angles = P.label==='jet' ? [th-0.15, th, th+0.15, th+0.3] : [th];
+  angles.forEach((ang, ai)=>{
+    const dir = { x: Math.cos(ang), y: Math.sin(ang) };
+    // Tracker: helical curve (bent by magnetic field)
+    const trkSig = P.sig.tracker;
+    if(trkSig==='curve' || trkSig==='jet'){
+      ctx.strokeStyle = P.color; ctx.lineWidth = 1.8;
+      ctx.beginPath();
+      const R = 22*scale, R1 = 70*scale;
+      // simulate curved track
+      const bend = 0.4; // bending radius per length
+      for(let t=0;t<=1;t+=0.02){
+        const r = R + (R1-R)*t;
+        const ang2 = ang + bend*t;
+        const x = cx + Math.cos(ang2)*r;
+        const y = cy + Math.sin(ang2)*r;
+        if(t===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+      }
+      ctx.stroke();
+    }
+    // ECAL: bright shower blob
+    const ecSig = P.sig.ECAL;
+    if(ecSig==='shower'){
+      const angLine = ang + 0.4;
+      const r0 = 70*scale, r1 = 100*scale, mid = (r0+r1)/2;
+      const bx = cx + Math.cos(angLine)*mid, by = cy + Math.sin(angLine)*mid;
+      const g = ctx.createRadialGradient(bx,by,0,bx,by,20*scale);
+      g.addColorStop(0, P.color); g.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle=g;
+      ctx.beginPath(); ctx.arc(bx,by,20*scale,0,Math.PI*2); ctx.fill();
+      // labelled hit
+      ctx.fillStyle=P.color; ctx.font='9px JetBrains Mono, monospace'; ctx.textAlign='center';
+      ctx.fillText('shower', bx, by + 26);
+    }
+    // HCAL: wider hadronic shower
+    const hSig = P.sig.HCAL;
+    if(hSig==='shower' || hSig==='jet'){
+      const angLine = ang + 0.6;
+      const r0 = 100*scale, r1 = 140*scale, mid = (r0+r1)/2;
+      const bx = cx + Math.cos(angLine)*mid, by = cy + Math.sin(angLine)*mid;
+      const g = ctx.createRadialGradient(bx,by,0,bx,by,26*scale);
+      g.addColorStop(0, P.color); g.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle=g;
+      ctx.beginPath(); ctx.arc(bx,by,26*scale,0,Math.PI*2); ctx.fill();
+      ctx.fillStyle=P.color; ctx.font='9px JetBrains Mono, monospace'; ctx.textAlign='center';
+      ctx.fillText('hadronic shower', bx, by + 30);
+    }
+    // Muon chambers: outgoing straight track past everything
+    const mSig = P.sig.muon;
+    if(mSig==='hit'){
+      ctx.strokeStyle=P.color; ctx.lineWidth=2; ctx.setLineDash([]);
+      ctx.beginPath();
+      ctx.moveTo(cx + dir.x*140*scale, cy + dir.y*140*scale);
+      ctx.lineTo(cx + dir.x*195*scale, cy + dir.y*195*scale);
+      ctx.stroke();
+      // hit stars in muon chambers
+      const hx = cx + dir.x*170*scale, hy = cy + dir.y*170*scale;
+      ctx.fillStyle=P.color;
+      ctx.beginPath(); ctx.arc(hx,hy,4,0,Math.PI*2); ctx.fill();
+    }
+  });
+
+  // 4) "missing energy" callout for neutrino
+  if(S.current==='neutrino'){
+    ctx.strokeStyle='#8fa8ff'; ctx.lineWidth=1.4; ctx.setLineDash([4,4]);
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.lineTo(cx + Math.cos(th)*195*scale, cy + Math.sin(th)*195*scale);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle='#8fa8ff'; ctx.font='11px JetBrains Mono, monospace';
+    ctx.textAlign='center';
+    ctx.fillText('missing E_T (invisible)', cx, cy - maxR - 6);
+  }
+
+  // 5) headline caption
+  ctx.fillStyle='#e8ecff'; ctx.font='13px JetBrains Mono, monospace';
+  ctx.textAlign='left';
+  ctx.fillText(`Signature of ${S.current}:`, 12, 20);
+  ctx.fillStyle=P.color;
+  const sigWords = Object.keys(P.sig).map(k=>`${k}=${P.sig[k]}`).join('  ');
+  ctx.font='11px JetBrains Mono, monospace';
+  ctx.fillText(sigWords, 12, 36);
+}
+
+/* ---------- Demo 3: Higgs field lattice ---------- */
+// The vacuum is a lattice of oscillators; particles fly through and "drag" the field.
+// Coupling strength (proxy for mass) sets how much each particle disturbs the lattice.
+const HIGGS_PARTICLES = [
+  { id:'photon',   label:'γ',    color:'#ffd166', coupling:0.0,   mass:'0',            note:'no coupling → massless' },
+  { id:'electron', label:'e⁻',   color:'#4ea8ff', coupling:0.05,  mass:'0.511 MeV',    note:'tiny coupling → very light' },
+  { id:'muon',     label:'μ⁻',   color:'#7ee8c5', coupling:0.35,  mass:'106 MeV',      note:'heavier lepton' },
+  { id:'tau',      label:'τ⁻',   color:'#c39bff', coupling:0.6,   mass:'1.78 GeV',     note:'heaviest lepton' },
+  { id:'W',        label:'W±',   color:'#5aa8ff', coupling:0.85,  mass:'80.4 GeV',     note:'gets mass from Higgs (electroweak)' },
+  { id:'top',      label:'t',    color:'#ff5c8a', coupling:1.0,   mass:'173 GeV',      note:'strongest Yukawa coupling known' },
+];
+function labInitHiggs(){
+  const c = document.getElementById('higgsCanvas'); if(!c) return;
+  const { ctx, w, h } = labSizeCanvas(c);
+  LAB.higgs = { ctx, w, h, canvas:c, current:'electron', fires:[] };
+  // lattice offsets (persistent per site) — for the "drag" effect
+  const cols = 40, rows = 14;
+  const gridX = w/cols, gridY = h/rows;
+  const sites = [];
+  for(let iy=0;iy<rows;iy++) for(let ix=0;ix<cols;ix++){
+    sites.push({ x:(ix+0.5)*gridX, y:(iy+0.5)*gridY, ox:0, oy:0, phase:Math.random()*Math.PI*2 });
+  }
+  LAB.higgs.sites = sites;
+  LAB.higgs.gridX = gridX; LAB.higgs.gridY = gridY;
+
+  const picker = document.getElementById('higgsPicker');
+  picker.innerHTML = '';
+  HIGGS_PARTICLES.forEach(P=>{
+    const b = document.createElement('button');
+    b.textContent = `${P.label} · ${P.mass}`;
+    b.style.color = P.color;
+    if(P.id===LAB.higgs.current) b.classList.add('active');
+    b.onclick = ()=>{
+      LAB.higgs.current = P.id;
+      picker.querySelectorAll('button').forEach(x=>x.classList.remove('active'));
+      b.classList.add('active');
+      // fire a particle from left to right
+      LAB.higgs.fires.push({ P, x:-20, y:h/2 + (Math.random()-0.5)*40, t:0 });
+    };
+    picker.appendChild(b);
+  });
+  // Auto-fire the first one so users see motion immediately
+  const P0 = HIGGS_PARTICLES.find(p=>p.id===LAB.higgs.current);
+  LAB.higgs.fires.push({ P:P0, x:-20, y:h/2, t:0 });
+}
+function labDrawHiggs(){
+  const S = LAB.higgs; if(!S) return;
+  const { ctx, w, h, sites } = S;
+  ctx.clearRect(0,0,w,h);
+  // dim purple background
+  const bg = ctx.createRadialGradient(w/2,h/2,0,w/2,h/2,Math.max(w,h)/1.4);
+  bg.addColorStop(0,'rgba(60,20,90,0.35)');
+  bg.addColorStop(1,'rgba(3,5,16,1)');
+  ctx.fillStyle=bg; ctx.fillRect(0,0,w,h);
+
+  // Update lattice: each site oscillates and gets pushed by any nearby particle proportional to coupling.
+  sites.forEach(s=>{
+    // spring back to rest
+    s.ox *= 0.88; s.oy *= 0.88;
+    // gentle vacuum jitter
+    s.ox += Math.cos(labT*2 + s.phase)*0.05;
+    s.oy += Math.sin(labT*2 + s.phase)*0.05;
+  });
+  // Advance every firing particle and push nearby sites
+  for(let i=S.fires.length-1;i>=0;i--){
+    const f = S.fires[i];
+    const speed = f.P.coupling===0 ? 6 : 6 - f.P.coupling*3.5; // heavy = slower
+    f.x += speed; f.t += 0.016;
+    if(f.P.coupling > 0){
+      sites.forEach(s=>{
+        const dx = s.x - f.x, dy = s.y - f.y;
+        const d2 = dx*dx + dy*dy;
+        if(d2 < 3600){
+          const d = Math.sqrt(d2)+0.1;
+          const push = (f.P.coupling * 12) / d;
+          s.ox += (dx/d) * push * 0.15;
+          s.oy += (dy/d) * push * 0.15;
+        }
+      });
+    }
+    if(f.x > w+30) S.fires.splice(i,1);
+  }
+
+  // Draw the lattice: connect neighbours (in original grid) using displaced positions.
+  ctx.strokeStyle='rgba(195,155,255,0.20)';
+  ctx.lineWidth = 0.6;
+  const cols = Math.round(w / S.gridX);
+  const rows = Math.round(h / S.gridY);
+  ctx.beginPath();
+  for(let iy=0;iy<rows;iy++){
+    for(let ix=0;ix<cols;ix++){
+      const s = sites[iy*cols+ix]; if(!s) continue;
+      const rx = ix<cols-1 ? sites[iy*cols+ix+1] : null;
+      const dy2 = iy<rows-1 ? sites[(iy+1)*cols+ix] : null;
+      if(rx){ ctx.moveTo(s.x+s.ox, s.y+s.oy); ctx.lineTo(rx.x+rx.ox, rx.y+rx.oy); }
+      if(dy2){ ctx.moveTo(s.x+s.ox, s.y+s.oy); ctx.lineTo(dy2.x+dy2.ox, dy2.y+dy2.oy); }
+    }
+  }
+  ctx.stroke();
+  // dots at lattice sites
+  ctx.fillStyle='rgba(195,155,255,0.55)';
+  sites.forEach(s=>{
+    ctx.beginPath(); ctx.arc(s.x+s.ox, s.y+s.oy, 1.2, 0, Math.PI*2); ctx.fill();
+  });
+
+  // Draw firing particles with wake
+  S.fires.forEach(f=>{
+    // wake / trail (only if coupling > 0)
+    if(f.P.coupling>0){
+      const wakeGrad = ctx.createLinearGradient(f.x-60, f.y, f.x, f.y);
+      wakeGrad.addColorStop(0, 'rgba(0,0,0,0)');
+      wakeGrad.addColorStop(1, f.P.color + '80');
+      ctx.strokeStyle = wakeGrad; ctx.lineWidth = 2 + f.P.coupling*6;
+      ctx.beginPath(); ctx.moveTo(f.x-60, f.y); ctx.lineTo(f.x, f.y); ctx.stroke();
+    }
+    const g = ctx.createRadialGradient(f.x,f.y,0,f.x,f.y,14);
+    g.addColorStop(0,'#fff'); g.addColorStop(0.5,f.P.color); g.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle=g; ctx.beginPath(); ctx.arc(f.x,f.y,14,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle='#fff'; ctx.font='bold 11px JetBrains Mono, monospace';
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(f.P.label, f.x, f.y);
+    ctx.textBaseline='alphabetic';
+  });
+
+  // Caption
+  const P = HIGGS_PARTICLES.find(p=>p.id===S.current);
+  ctx.fillStyle='#e8ecff'; ctx.font='13px JetBrains Mono, monospace'; ctx.textAlign='left';
+  ctx.fillText(`${P.label} · mass = ${P.mass}`, 12, 20);
+  ctx.fillStyle='#c39bff'; ctx.font='11px Space Grotesk, sans-serif';
+  ctx.fillText(P.note, 12, 36);
+  ctx.fillStyle='#8b93b3'; ctx.font='11px JetBrains Mono, monospace';
+  ctx.fillText(`Yukawa coupling ≈ ${P.coupling.toFixed(2)}`, 12, h-10);
+}
+
+/* ---------- Lab loop + tab hook ---------- */
+function labLoop(){
+  labT += 0.016;
+  labDrawConfinement();
+  labDrawDetector();
+  labDrawHiggs();
+  labRAF = requestAnimationFrame(labLoop);
+}
+function labStart(){
+  if(labRAF!=null) return;
+  // (Re-)initialise every time we enter the tab to get proper sizes.
+  labInitConfinement();
+  labInitDetector();
+  labInitHiggs();
+  labLoop();
+}
+function labStop(){ if(labRAF!=null){ cancelAnimationFrame(labRAF); labRAF=null; } }
+
+document.querySelectorAll('.tab').forEach(t=>{
+  t.addEventListener('click',()=>{
+    if(t.dataset.tab==='lab') labStart(); else labStop();
+  });
+});
+window.addEventListener('resize', ()=>{ if(labRAF!=null){ labStop(); labStart(); } });
+
+// If lab is the initial tab (unlikely), start it.
+if(document.querySelector('.tab.active')?.dataset.tab === 'lab') labStart();

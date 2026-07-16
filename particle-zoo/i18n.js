@@ -20,6 +20,7 @@ const LOCALES = {
     'tab.detail': 'Particle Detail',
     'tab.builder': 'Composition Builder',
     'tab.forces': 'Forces & Interactions',
+    'tab.lab': 'Physics Lab',
     'tab.bsm': 'Beyond Standard Model',
     'tab.phenomena': 'Quantum Phenomena',
     'tab.playground': 'Physics Playground',
@@ -374,7 +375,36 @@ const LOCALES = {
     'pg.trails': 'trails',
 
     // Footer
-    'footer': 'Built for curiosity · data from the Particle Data Group'
+    'footer': 'Built for curiosity · data from the Particle Data Group',
+
+    // Builder — new parts + decay
+    'builder.parts.g1': 'Gen I quarks',
+    'builder.parts.g23': 'Heavy quarks',
+    'builder.parts.lept': 'Leptons',
+    'builder.stats.mesons': 'mesons',
+    'builder.decay.title': 'This isotope is unstable — try a decay',
+    'builder.decay.note': 'Watch the emitted particle fly out on the canvas.',
+
+    // Physics Lab tab
+    'lab.h2': 'Physics Lab',
+    'lab.desc': 'Four hands-on visualisations that make the deepest ideas of the Standard Model tangible.',
+    'lab.conf.h': '1 · Colour confinement',
+    'lab.conf.tag': 'strong force',
+    'lab.conf.p': 'Drag the antiquark away from the quark. The gluon field between them behaves like a stretched rubber band — its energy grows with distance until a new q q̄ pair pops out of the vacuum. That is why you can never isolate a single quark.',
+    'lab.conf.reset': 'Reset',
+    'lab.conf.auto': 'Auto-pull',
+    'lab.conf.leg.q': 'quark',
+    'lab.conf.leg.aq': 'antiquark',
+    'lab.conf.leg.tube': 'flux tube',
+    'lab.det.h': '2 · Inside a collider detector',
+    'lab.det.tag': 'ATLAS / CMS style',
+    'lab.det.p': 'A modern collider detector is an onion of specialised layers. Each particle type leaves a unique signature. Click a particle to see what the detector sees.',
+    'lab.higgs.h': '3 · The Higgs field: why mass exists',
+    'lab.higgs.tag': 'Higgs mechanism',
+    'lab.higgs.p': 'The vacuum is filled with the Higgs field — imagined here as a lattice of tiny oscillators. Different particles couple to it with different strengths: photons ignore it (mass 0), electrons barely feel it, the top quark drags heavily. Click a particle to fire it through the field.',
+    'lab.xlink.h': 'See also',
+    'lab.xlink.p': 'Curious how these particles emerged from the early universe? Our companion app Big Bang walks through the cosmic timeline from 10⁻⁴³ s to today.',
+    'lab.xlink.go': 'Open Big Bang →'
   },
 
   'zh-CN': {
@@ -388,6 +418,7 @@ const LOCALES = {
     'tab.detail': '粒子详情',
     'tab.builder': '组合搭建器',
     'tab.forces': '基本相互作用',
+    'tab.lab': '物理实验室',
     'tab.bsm': '超出标准模型',
     'tab.phenomena': '量子现象',
     'tab.playground': '物理沙盘',
@@ -733,7 +764,36 @@ const LOCALES = {
     'pg.clear': '清空',
     'pg.trails': '轨迹',
 
-    'footer': '为好奇心而造 · 数据来自粒子数据组 (PDG)'
+    'footer': '为好奇心而造 · 数据来自粒子数据组 (PDG)',
+
+    // Builder — new parts + decay
+    'builder.parts.g1': '第一代夸克',
+    'builder.parts.g23': '重夸克',
+    'builder.parts.lept': '轻子',
+    'builder.stats.mesons': '介子',
+    'builder.decay.title': '此同位素不稳定 — 试一次衰变',
+    'builder.decay.note': '注意画布上飞出的粒子。',
+
+    // 物理实验室
+    'lab.h2': '物理实验室',
+    'lab.desc': '四个可动手的可视化演示,让标准模型中最深奥的思想变得直观可见。',
+    'lab.conf.h': '1 · 色禁闭',
+    'lab.conf.tag': '强相互作用',
+    'lab.conf.p': '把反夸克从夸克旁边拉开。两者之间的胶子场像一根被拉伸的橡皮筋——储存的能量随距离线性增长,直到从真空中蹦出一对新的 q q̄ 对。这就是为什么你永远无法分离出一个孤立的夸克。',
+    'lab.conf.reset': '重置',
+    'lab.conf.auto': '自动拉开',
+    'lab.conf.leg.q': '夸克',
+    'lab.conf.leg.aq': '反夸克',
+    'lab.conf.leg.tube': '色流管',
+    'lab.det.h': '2 · 对撞机探测器内部',
+    'lab.det.tag': 'ATLAS / CMS 结构',
+    'lab.det.p': '现代对撞机探测器像洋葱一样一层套一层。每种粒子会在不同层留下独特的"签名"。点击一个粒子,看看探测器"看到"了什么。',
+    'lab.higgs.h': '3 · 希格斯场:质量从何而来',
+    'lab.higgs.tag': '希格斯机制',
+    'lab.higgs.p': '真空中充满了希格斯场——这里想象为一格格微小振子的晶格。不同粒子与它的耦合强弱不同:光子完全不理它(质量 0),电子几乎不感觉它,顶夸克则被它重重拖拽。点击一个粒子,让它穿过这片场。',
+    'lab.xlink.h': '延伸阅读',
+    'lab.xlink.p': '想了解这些粒子如何从早期宇宙中诞生?我们的姊妹项目 Big Bang 从 10⁻⁴³ 秒开始一路讲到今天。',
+    'lab.xlink.go': '打开 Big Bang →'
   }
 };
 

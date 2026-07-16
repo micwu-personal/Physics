@@ -30,6 +30,7 @@
     <button class="tab" data-tab="detail" data-i18n="tab.detail">Particle Detail</button>
     <button class="tab" data-tab="builder" data-i18n="tab.builder">Composition Builder</button>
     <button class="tab" data-tab="forces" data-i18n="tab.forces">Forces &amp; Interactions</button>
+    <button class="tab" data-tab="lab" data-i18n="tab.lab">Physics Lab</button>
     <button class="tab" data-tab="bsm" data-i18n="tab.bsm">Beyond Standard Model</button>
     <button class="tab" data-tab="phenomena" data-i18n="tab.phenomena">Quantum Phenomena</button>
     <button class="tab" data-tab="playground" data-i18n="tab.playground">Physics Playground</button>
@@ -156,11 +157,22 @@
       <div class="builder">
         <div class="parts-tray">
           <h3 data-i18n="builder.parts">Parts</h3>
+          <div class="tray-group" data-i18n="builder.parts.g1">Gen I quarks</div>
           <div class="tray-part" draggable="true" data-part="u">u <span>up · +⅔</span></div>
           <div class="tray-part" draggable="true" data-part="d">d <span>down · −⅓</span></div>
+          <div class="tray-part anti" draggable="true" data-part="ubar">ū <span>anti-up · −⅔</span></div>
+          <div class="tray-part anti" draggable="true" data-part="dbar">d̄ <span>anti-down · +⅓</span></div>
+          <div class="tray-group" data-i18n="builder.parts.g23">Heavy quarks</div>
+          <div class="tray-part" draggable="true" data-part="s">s <span>strange · −⅓</span></div>
+          <div class="tray-part anti" draggable="true" data-part="sbar">s̄ <span>anti-s · +⅓</span></div>
+          <div class="tray-part" draggable="true" data-part="c">c <span>charm · +⅔</span></div>
+          <div class="tray-part anti" draggable="true" data-part="cbar">c̄ <span>anti-c · −⅔</span></div>
+          <div class="tray-part" draggable="true" data-part="b">b <span>bottom · −⅓</span></div>
+          <div class="tray-part anti" draggable="true" data-part="bbar">b̄ <span>anti-b · +⅓</span></div>
+          <div class="tray-group" data-i18n="builder.parts.lept">Leptons</div>
           <div class="tray-part" draggable="true" data-part="e">e⁻ <span>electron · −1</span></div>
           <button id="clearBuild" class="btn ghost" data-i18n="builder.clear">Clear</button>
-          <div class="hint2" data-i18n="builder.tip">Tip: 2 up + 1 down = proton · 1 up + 2 down = neutron · proton + electron = hydrogen</div>
+          <div class="hint2" data-i18n="builder.tip">Tip: 2u+1d = proton · 1u+2d = neutron · qq̄ = meson (π, K, J/ψ…) · proton+e⁻ = hydrogen</div>
         </div>
 
         <div id="assemblyZone" class="assembly">
@@ -177,6 +189,7 @@
           <h3 data-i18n="builder.result.title">You built:</h3>
           <div id="buildResult" class="result" data-i18n="builder.result.empty">Nothing yet.</div>
           <div id="buildStats" class="stats"></div>
+          <div id="buildDecayBar" class="decay-bar" hidden></div>
         </div>
       </div>
     </section>
@@ -238,6 +251,71 @@
         <h3 style="margin-top:28px" data-i18n="ix.h3c">Less Common / High-Energy</h3>
         <p class="ix-hint" data-i18n="ix.hint3">Rarer processes seen in colliders, cosmic rays, or the early universe.</p>
         <div class="i-list ix-anim" data-group="rare"></div>
+      </div>
+    </section>
+
+    <!-- ============ TAB: PHYSICS LAB (interactive demos) ============ -->
+    <section id="tab-lab" class="tab-panel">
+      <div class="section-head">
+        <h2 data-i18n="lab.h2">Physics Lab</h2>
+        <p data-i18n="lab.desc">Four hands-on visualisations that make the deepest ideas of the Standard Model tangible.</p>
+      </div>
+
+      <!-- Demo 1: Confinement / flux tube -->
+      <div class="lab-card">
+        <div class="lab-head">
+          <h3 data-i18n="lab.conf.h">1 · Colour confinement</h3>
+          <span class="lab-tag t-strong" data-i18n="lab.conf.tag">strong force</span>
+        </div>
+        <p data-i18n="lab.conf.p">Drag the antiquark away from the quark. The gluon field between them behaves like a stretched rubber band — its energy grows with distance until a new q q̄ pair pops out of the vacuum. That's why you can never isolate a single quark.</p>
+        <div class="lab-viz">
+          <canvas id="confCanvas"></canvas>
+          <div class="lab-controls">
+            <button class="btn" id="confReset" data-i18n="lab.conf.reset">Reset</button>
+            <label class="switch"><input type="checkbox" id="confAuto" checked><span data-i18n="lab.conf.auto">Auto-pull</span></label>
+          </div>
+        </div>
+        <div class="lab-legend">
+          <span class="ll-item"><i class="dot" style="background:#ff6b9d"></i><span data-i18n="lab.conf.leg.q">quark</span></span>
+          <span class="ll-item"><i class="dot" style="background:#7ee8c5"></i><span data-i18n="lab.conf.leg.aq">antiquark</span></span>
+          <span class="ll-item"><i class="dot" style="background:#ffd166"></i><span data-i18n="lab.conf.leg.tube">flux tube</span></span>
+        </div>
+      </div>
+
+      <!-- Demo 2: Detector cross-section -->
+      <div class="lab-card">
+        <div class="lab-head">
+          <h3 data-i18n="lab.det.h">2 · Inside a collider detector</h3>
+          <span class="lab-tag t-em" data-i18n="lab.det.tag">ATLAS / CMS style</span>
+        </div>
+        <p data-i18n="lab.det.p">A modern collider detector is an onion of specialised layers. Each particle type leaves a unique signature. Click a particle to see what the detector sees.</p>
+        <div class="lab-viz">
+          <canvas id="detCanvas"></canvas>
+          <div class="det-picker" id="detPicker"></div>
+        </div>
+        <div class="lab-legend" id="detLegend"></div>
+      </div>
+
+      <!-- Demo 3: Higgs field lattice -->
+      <div class="lab-card">
+        <div class="lab-head">
+          <h3 data-i18n="lab.higgs.h">3 · The Higgs field: why mass exists</h3>
+          <span class="lab-tag t-higgs" data-i18n="lab.higgs.tag">Higgs mechanism</span>
+        </div>
+        <p data-i18n="lab.higgs.p">The vacuum is filled with the Higgs field — imagined here as a lattice of tiny oscillators. Different particles couple to it with different strengths: photons ignore it (mass 0), electrons barely feel it, the top quark drags heavily. Click a particle to fire it through the field.</p>
+        <div class="lab-viz">
+          <canvas id="higgsCanvas"></canvas>
+          <div class="higgs-picker" id="higgsPicker"></div>
+        </div>
+      </div>
+
+      <!-- Cross-link to big-bang app -->
+      <div class="lab-card cross-link">
+        <div class="lab-head">
+          <h3 data-i18n="lab.xlink.h">See also</h3>
+        </div>
+        <p data-i18n="lab.xlink.p">Curious how these particles emerged from the early universe? Our companion app <b>Big Bang</b> walks through the cosmic timeline from 10⁻⁴³ s to today.</p>
+        <p><a class="btn" href="../big-bang/index.html" data-i18n="lab.xlink.go">Open Big Bang →</a></p>
       </div>
     </section>
 
