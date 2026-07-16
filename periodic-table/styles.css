@@ -61,11 +61,11 @@ main{position:relative;z-index:1;max-width:1400px;margin:0 auto;padding:20px 12p
 /* ============ PERIODIC TABLE GRID ============ */
 .pt-wrap{max-width:1400px;margin:0 auto}
 .pt-grid{display:flex;flex-direction:column;gap:4px;padding:8px}
-.pt-row{display:grid;grid-template-columns:32px repeat(18, 1fr);gap:4px;align-items:stretch}
+.pt-row{display:grid;grid-template-columns:36px repeat(18, 1fr);gap:6px;align-items:stretch}
 .pt-fseries{margin-top:16px;padding:8px}
 .fs-label{color:var(--dim);font-size:11px;text-transform:uppercase;letter-spacing:2px;text-align:center;margin-bottom:8px}
 .pt-fblock{display:flex;flex-direction:column;gap:4px}
-.pt-frow{display:grid;grid-template-columns:32px repeat(15, 1fr);gap:4px;align-items:stretch}
+.pt-frow{display:grid;grid-template-columns:36px repeat(15, 1fr);gap:6px;align-items:stretch}
 
 .row-speak{
   background:linear-gradient(135deg,rgba(0,212,255,0.15),rgba(124,92,255,0.08));
@@ -78,7 +78,11 @@ main{position:relative;z-index:1;max-width:1400px;margin:0 auto;padding:20px 12p
   padding:0;
   transition:all .15s;
   display:flex;align-items:center;justify-content:center;
-  aspect-ratio:1;
+  width:36px;
+  min-width:36px;
+  max-width:36px;
+  height:36px;
+  align-self:center;
 }
 .row-speak:hover{background:linear-gradient(135deg,rgba(0,212,255,0.35),rgba(124,92,255,0.15));transform:scale(1.05);border-color:#00d4ff}
 .row-speak.playing{background:linear-gradient(135deg,rgba(0,212,255,0.5),rgba(124,92,255,0.3));animation:rowPulse 0.9s infinite}
@@ -165,6 +169,11 @@ main{position:relative;z-index:1;max-width:1400px;margin:0 auto;padding:20px 12p
 .d-viz-card h3{font-size:14px;font-weight:600;color:var(--accent2);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:12px}
 #bohrCanvas,#orbitalCanvas,#nucleusCanvas{width:100%;height:280px;display:block;background:radial-gradient(ellipse at center, #0a1130 0%, #030510 100%);border-radius:10px}
 .d-shell-text{margin-top:10px;font-size:12px;color:var(--dim);font-family:'JetBrains Mono',ui-monospace,'SF Mono','Cascadia Mono','Consolas',monospace;text-align:center}
+.orb-desc{margin-top:12px;padding:12px 14px;background:linear-gradient(135deg,rgba(127,227,255,0.10),rgba(199,125,255,0.06));border:1px solid rgba(127,227,255,0.25);border-radius:10px;text-align:left}
+.orb-title{color:#7fe3ff;font-weight:600;font-size:13px;margin-bottom:6px;letter-spacing:0.3px}
+.orb-body{color:#dfe4ff;font-size:12.5px;line-height:1.65}
+.orb-body b{color:#fff}
+.orb-body em{color:#ffcf7f;font-style:italic}
 .orbital-tabs{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap}
 .orbital-tabs button{background:rgba(255,255,255,0.05);border:1px solid var(--panel-b);color:var(--dim);padding:5px 12px;border-radius:6px;cursor:pointer;font-family:inherit;font-size:11px;font-weight:600;letter-spacing:0.5px;transition:all .15s}
 .orbital-tabs button:hover{color:#fff}
@@ -250,9 +259,9 @@ footer{text-align:center;padding:40px 20px;color:var(--dim);font-size:12px;posit
 }
 @media (max-width:700px){
   .pt-grid{gap:2px;padding:4px}
-  .pt-row{grid-template-columns:22px repeat(18, 1fr);gap:2px}
-  .pt-frow{grid-template-columns:22px repeat(15, 1fr);gap:2px}
-  .row-speak{font-size:10px}
+  .pt-row{grid-template-columns:24px repeat(18, 1fr);gap:3px}
+  .pt-frow{grid-template-columns:24px repeat(15, 1fr);gap:3px}
+  .row-speak{font-size:10px;width:24px;min-width:24px;max-width:24px;height:24px}
   .pt-fblock{gap:2px}
   .cell{min-height:28px;border-radius:4px}
   .cell .z{font-size:7px}

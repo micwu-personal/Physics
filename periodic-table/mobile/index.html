@@ -76,11 +76,11 @@ main{position:relative;z-index:1;max-width:1400px;margin:0 auto;padding:20px 12p
 /* ============ PERIODIC TABLE GRID ============ */
 .pt-wrap{max-width:1400px;margin:0 auto}
 .pt-grid{display:flex;flex-direction:column;gap:4px;padding:8px}
-.pt-row{display:grid;grid-template-columns:32px repeat(18, 1fr);gap:4px;align-items:stretch}
+.pt-row{display:grid;grid-template-columns:36px repeat(18, 1fr);gap:6px;align-items:stretch}
 .pt-fseries{margin-top:16px;padding:8px}
 .fs-label{color:var(--dim);font-size:11px;text-transform:uppercase;letter-spacing:2px;text-align:center;margin-bottom:8px}
 .pt-fblock{display:flex;flex-direction:column;gap:4px}
-.pt-frow{display:grid;grid-template-columns:32px repeat(15, 1fr);gap:4px;align-items:stretch}
+.pt-frow{display:grid;grid-template-columns:36px repeat(15, 1fr);gap:6px;align-items:stretch}
 
 .row-speak{
   background:linear-gradient(135deg,rgba(0,212,255,0.15),rgba(124,92,255,0.08));
@@ -93,7 +93,11 @@ main{position:relative;z-index:1;max-width:1400px;margin:0 auto;padding:20px 12p
   padding:0;
   transition:all .15s;
   display:flex;align-items:center;justify-content:center;
-  aspect-ratio:1;
+  width:36px;
+  min-width:36px;
+  max-width:36px;
+  height:36px;
+  align-self:center;
 }
 .row-speak:hover{background:linear-gradient(135deg,rgba(0,212,255,0.35),rgba(124,92,255,0.15));transform:scale(1.05);border-color:#00d4ff}
 .row-speak.playing{background:linear-gradient(135deg,rgba(0,212,255,0.5),rgba(124,92,255,0.3));animation:rowPulse 0.9s infinite}
@@ -180,6 +184,11 @@ main{position:relative;z-index:1;max-width:1400px;margin:0 auto;padding:20px 12p
 .d-viz-card h3{font-size:14px;font-weight:600;color:var(--accent2);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:12px}
 #bohrCanvas,#orbitalCanvas,#nucleusCanvas{width:100%;height:280px;display:block;background:radial-gradient(ellipse at center, #0a1130 0%, #030510 100%);border-radius:10px}
 .d-shell-text{margin-top:10px;font-size:12px;color:var(--dim);font-family:'JetBrains Mono',ui-monospace,'SF Mono','Cascadia Mono','Consolas',monospace;text-align:center}
+.orb-desc{margin-top:12px;padding:12px 14px;background:linear-gradient(135deg,rgba(127,227,255,0.10),rgba(199,125,255,0.06));border:1px solid rgba(127,227,255,0.25);border-radius:10px;text-align:left}
+.orb-title{color:#7fe3ff;font-weight:600;font-size:13px;margin-bottom:6px;letter-spacing:0.3px}
+.orb-body{color:#dfe4ff;font-size:12.5px;line-height:1.65}
+.orb-body b{color:#fff}
+.orb-body em{color:#ffcf7f;font-style:italic}
 .orbital-tabs{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap}
 .orbital-tabs button{background:rgba(255,255,255,0.05);border:1px solid var(--panel-b);color:var(--dim);padding:5px 12px;border-radius:6px;cursor:pointer;font-family:inherit;font-size:11px;font-weight:600;letter-spacing:0.5px;transition:all .15s}
 .orbital-tabs button:hover{color:#fff}
@@ -265,9 +274,9 @@ footer{text-align:center;padding:40px 20px;color:var(--dim);font-size:12px;posit
 }
 @media (max-width:700px){
   .pt-grid{gap:2px;padding:4px}
-  .pt-row{grid-template-columns:22px repeat(18, 1fr);gap:2px}
-  .pt-frow{grid-template-columns:22px repeat(15, 1fr);gap:2px}
-  .row-speak{font-size:10px}
+  .pt-row{grid-template-columns:24px repeat(18, 1fr);gap:3px}
+  .pt-frow{grid-template-columns:24px repeat(15, 1fr);gap:3px}
+  .row-speak{font-size:10px;width:24px;min-width:24px;max-width:24px;height:24px}
   .pt-fblock{gap:2px}
   .cell{min-height:28px;border-radius:4px}
   .cell .z{font-size:7px}
@@ -1561,7 +1570,7 @@ function refreshDetail(){
 
   // Orbital / hybridization
   const orbTabs = document.getElementById('orbitalTabs');
-  const availHybrids = (ext.hybrid && ext.hybrid.length) ? ext.hybrid : inferHybrids(el);
+  const availHybrids = inferHybrids(el);
   orbTabs.innerHTML = availHybrids.length ? availHybrids.map(h=>`<button data-h="${h}">${labelForHybrid(h)}</button>`).join('') : `<span style="color:var(--dim);font-size:12px">${t('hybrid.none')}</span>`;
   if(availHybrids.length){
     if(!availHybrids.includes(currentHybrid)) currentHybrid = availHybrids[0];
@@ -1657,20 +1666,233 @@ function refreshDetail(){
     : '';
 }
 
+/* ================ ORBITAL & HYBRIDIZATION ENGINE ================
+   Each entry describes a real quantum-mechanical shape as a list of
+   "lobes". Each lobe: {dir:[x,y,z], phase:+1|-1, kind:'lobe'|'torus'|'sphere', size?}
+   Rendering is done in 3D with perspective projection so p, d, f
+   orbitals look correct, and hybrid sets (sp, sp², sp³, sp³d,
+   sp³d², d²sp³, dsp²) point in true geometric directions.
+================================================================= */
+const ORBITAL_SHAPES = {
+  // Atomic orbitals ---------------------------------------------
+  's':      [ {kind:'sphere', phase:+1} ],
+  'p_x':    [ {kind:'lobe', dir:[+1,0,0], phase:+1}, {kind:'lobe', dir:[-1,0,0], phase:-1} ],
+  'p_y':    [ {kind:'lobe', dir:[0,+1,0], phase:+1}, {kind:'lobe', dir:[0,-1,0], phase:-1} ],
+  'p_z':    [ {kind:'lobe', dir:[0,0,+1], phase:+1}, {kind:'lobe', dir:[0,0,-1], phase:-1} ],
+  'd_z2':   [ {kind:'lobe', dir:[0,0,+1], phase:+1}, {kind:'lobe', dir:[0,0,-1], phase:+1},
+              {kind:'torus', dir:[0,0,1], phase:-1} ],
+  'd_x2y2': [ {kind:'lobe', dir:[+1,0,0], phase:+1}, {kind:'lobe', dir:[-1,0,0], phase:+1},
+              {kind:'lobe', dir:[0,+1,0], phase:-1}, {kind:'lobe', dir:[0,-1,0], phase:-1} ],
+  'd_xy':   [ {kind:'lobe', dir:[+1,+1,0], phase:+1}, {kind:'lobe', dir:[-1,-1,0], phase:+1},
+              {kind:'lobe', dir:[+1,-1,0], phase:-1}, {kind:'lobe', dir:[-1,+1,0], phase:-1} ],
+  'd_xz':   [ {kind:'lobe', dir:[+1,0,+1], phase:+1}, {kind:'lobe', dir:[-1,0,-1], phase:+1},
+              {kind:'lobe', dir:[+1,0,-1], phase:-1}, {kind:'lobe', dir:[-1,0,+1], phase:-1} ],
+  'd_yz':   [ {kind:'lobe', dir:[0,+1,+1], phase:+1}, {kind:'lobe', dir:[0,-1,-1], phase:+1},
+              {kind:'lobe', dir:[0,+1,-1], phase:-1}, {kind:'lobe', dir:[0,-1,+1], phase:-1} ],
+  'f_z3':   [ {kind:'lobe', dir:[0,0,+1], phase:+1, size:1.2}, {kind:'lobe', dir:[0,0,-1], phase:-1, size:1.2},
+              {kind:'torus', dir:[0,0,1], phase:+1, size:0.7} ],
+  'f_xyz':  [ {kind:'lobe', dir:[+1,+1,+1], phase:+1}, {kind:'lobe', dir:[-1,-1,+1], phase:+1},
+              {kind:'lobe', dir:[+1,-1,-1], phase:+1}, {kind:'lobe', dir:[-1,+1,-1], phase:+1},
+              {kind:'lobe', dir:[-1,+1,+1], phase:-1}, {kind:'lobe', dir:[+1,-1,+1], phase:-1},
+              {kind:'lobe', dir:[+1,+1,-1], phase:-1}, {kind:'lobe', dir:[-1,-1,-1], phase:-1} ],
+  // Hybrid orbitals (correct geometries) ------------------------
+  'sp':     [ {kind:'lobe', dir:[+1,0,0], phase:+1}, {kind:'lobe', dir:[-1,0,0], phase:+1} ],
+  'sp2':    [ {kind:'lobe', dir:[Math.cos(0),Math.sin(0),0], phase:+1},
+              {kind:'lobe', dir:[Math.cos(2*Math.PI/3),Math.sin(2*Math.PI/3),0], phase:+1},
+              {kind:'lobe', dir:[Math.cos(4*Math.PI/3),Math.sin(4*Math.PI/3),0], phase:+1} ],
+  'sp3':    [ // tetrahedral: (1,1,1),(-1,-1,1),(-1,1,-1),(1,-1,-1)
+              {kind:'lobe', dir:[+1,+1,+1], phase:+1},
+              {kind:'lobe', dir:[-1,-1,+1], phase:+1},
+              {kind:'lobe', dir:[-1,+1,-1], phase:+1},
+              {kind:'lobe', dir:[+1,-1,-1], phase:+1} ],
+  'sp3d':   [ // trigonal bipyramidal: 3 equatorial + 2 axial
+              {kind:'lobe', dir:[Math.cos(0),Math.sin(0),0], phase:+1},
+              {kind:'lobe', dir:[Math.cos(2*Math.PI/3),Math.sin(2*Math.PI/3),0], phase:+1},
+              {kind:'lobe', dir:[Math.cos(4*Math.PI/3),Math.sin(4*Math.PI/3),0], phase:+1},
+              {kind:'lobe', dir:[0,0,+1], phase:+1},
+              {kind:'lobe', dir:[0,0,-1], phase:+1} ],
+  'sp3d2':  [ // octahedral
+              {kind:'lobe', dir:[+1,0,0], phase:+1}, {kind:'lobe', dir:[-1,0,0], phase:+1},
+              {kind:'lobe', dir:[0,+1,0], phase:+1}, {kind:'lobe', dir:[0,-1,0], phase:+1},
+              {kind:'lobe', dir:[0,0,+1], phase:+1}, {kind:'lobe', dir:[0,0,-1], phase:+1} ],
+  'd2sp3':  [ // inner-orbital octahedral (visually same)
+              {kind:'lobe', dir:[+1,0,0], phase:+1}, {kind:'lobe', dir:[-1,0,0], phase:+1},
+              {kind:'lobe', dir:[0,+1,0], phase:+1}, {kind:'lobe', dir:[0,-1,0], phase:+1},
+              {kind:'lobe', dir:[0,0,+1], phase:+1}, {kind:'lobe', dir:[0,0,-1], phase:+1} ],
+  'dsp2':   [ // square planar
+              {kind:'lobe', dir:[+1,0,0], phase:+1}, {kind:'lobe', dir:[-1,0,0], phase:+1},
+              {kind:'lobe', dir:[0,+1,0], phase:+1}, {kind:'lobe', dir:[0,-1,0], phase:+1} ]
+};
+
+const HYBRID_LABELS = {
+  s:'s',
+  p_x:'p_x', p_y:'p_y', p_z:'p_z',
+  d_z2:'d_z²', d_x2y2:'d_x²−y²', d_xy:'d_xy', d_xz:'d_xz', d_yz:'d_yz',
+  f_z3:'f_z³', f_xyz:'f_xyz',
+  sp:'sp', sp2:'sp²', sp3:'sp³', sp3d:'sp³d', sp3d2:'sp³d²',
+  d2sp3:'d²sp³', dsp2:'dsp²'
+};
+
+/* Return the list of orbitals this element can reasonably display.
+   All elements can view atomic orbitals up to their highest occupied
+   shell. Hybrids reflect what the element commonly forms in compounds. */
 function inferHybrids(el){
-  // Rough heuristic
-  if(el.category==='noble') return [];
-  if(el.category==='lanthanide' || el.category==='actinide') return ['f'];
-  if(el.category==='transition') return ['dsp2','d2sp3','sp3d2'];
-  if(el.category==='alkali' || el.category==='alkaline') return ['s'];
-  return ['sp','sp2','sp3'];
+  const Z = el.Z;
+  const period = el.period;
+  const list = [];
+
+  // Everyone: view s
+  list.push('s');
+  // Anything from Li (Z=3) onward can access p orbitals
+  if(Z >= 5) list.push('p_x', 'p_y', 'p_z');
+  // Anything from Sc (Z=21) uses d orbitals
+  if(Z >= 21) list.push('d_z2','d_x2y2','d_xy');
+  // Lanthanides (57-71) / Actinides (89-103) fill f
+  if((Z>=57 && Z<=71) || (Z>=89 && Z<=103)) list.push('f_z3','f_xyz');
+
+  // Hybrid orbitals per category
+  if(el.category==='noble'){
+    // noble gases: only Xe / Kr / Rn form hybrids
+    if(Z>=36) list.push('sp3','sp3d','sp3d2');
+  } else if(el.category==='alkali'){
+    // Li–Fr: primarily 's-character', but form ionic bonds. No serious hybridization.
+    // We still allow sp for diatomic gas phase (e.g. Li2)
+    list.push('sp');
+  } else if(el.category==='alkaline'){
+    // Be sp; Mg-Ba are ionic but can show sp
+    list.push('sp');
+    if(Z===4) list.push('sp2'); // Be sometimes sp2 (BeCl2 vapor is linear -> sp)
+  } else if(el.category==='metalloid' || el.category==='nonmetal' || el.category==='halogen'){
+    // main-group non-metals: sp, sp², sp³, and sp³d / sp³d² starting from period 3
+    list.push('sp','sp2','sp3');
+    if(period >= 3) list.push('sp3d','sp3d2');
+  } else if(el.category==='posttransition'){
+    list.push('sp','sp2','sp3');
+    if(period >= 3) list.push('sp3d','sp3d2');
+  } else if(el.category==='transition'){
+    list.push('dsp2','d2sp3','sp3d2','sp3');
+  } else if(el.category==='lanthanide' || el.category==='actinide'){
+    // f-block: complex; usually treated with 4f/5f + spd hybrids
+    list.push('sp3','sp3d2');
+  }
+
+  // Uniqueify & preserve order
+  return [...new Set(list)];
 }
-function labelForHybrid(h){
-  return {s:'s',sp:'sp',sp2:'sp²',sp3:'sp³',sp3d:'sp³d',sp3d2:'sp³d²',d2sp3:'d²sp³',dsp2:'dsp²',f:'f'}[h] || h;
-}
+function labelForHybrid(h){ return HYBRID_LABELS[h] || h; }
 function refreshOrbital(){
   drawOrbital(currentHybrid);
-  document.getElementById('dHybridText').textContent = t('hybrid.'+(currentHybrid==='sp2'?'sp2':currentHybrid==='sp3'?'sp3':currentHybrid==='sp3d'?'sp3d':currentHybrid==='sp3d2'?'sp3d2':currentHybrid)) || '';
+  document.getElementById('dHybridText').innerHTML = descriptionForOrbital(currentHybrid);
+}
+
+/* Rich physics description per orbital / hybrid */
+function descriptionForOrbital(h){
+  const lang = window.CURRENT_LANG || 'en';
+  const zh = lang==='zh-CN';
+  const D = {
+    s: {
+      title: zh ? 's 轨道 — 球形对称' : 's orbital — spherically symmetric',
+      body: zh
+        ? '角量子数 <b>ℓ = 0</b>,球谐函数 Y₀⁰ 只是一个常数,因此波函数只依赖于半径 r,呈球对称。它是每一层的最内层轨道,最多容纳 2 个电子(自旋 ↑↓)。'
+        : 'Angular momentum <b>ℓ = 0</b>. The spherical harmonic Y₀⁰ is a constant, so the wavefunction depends only on radius r — hence perfect spherical symmetry. It is the innermost orbital in every shell and holds up to 2 electrons (spin ↑↓).'
+    },
+    p_x: {
+      title: zh ? 'p 轨道 — 哑铃形(沿轴向)' : 'p orbital — dumbbell along an axis',
+      body: zh
+        ? '<b>ℓ = 1</b>,共 3 个方向 (p_x, p_y, p_z),每个都是两瓣哑铃形,两瓣之间有一个"节面"(波函数为零)——两瓣电子云的相位相反(图中用不同颜色表示)。可容纳 6 个电子(每方向 2 个)。'
+        : '<b>ℓ = 1</b>. Three orientations (p_x, p_y, p_z), each a two-lobed dumbbell separated by a nodal plane where the wavefunction is exactly zero. The two lobes carry <em>opposite phases</em> (shown in different colors). Together they hold up to 6 electrons.'
+    },
+    p_y: null,
+    p_z: null,
+    d_z2: {
+      title: zh ? 'd_z² 轨道 — 沿 z 轴哑铃 + 环形节面' : 'd_z² orbital — z-axis dumbbell + torus',
+      body: zh
+        ? '<b>ℓ = 2</b> 的其中一个特殊形状。沿 ±z 各有一大瓣,在 xy 平面上还有一个"甜甜圈"形电子云,两者相位相反。这是 d 轨道中形状最独特的一个。'
+        : 'One of the five <b>ℓ = 2</b> d orbitals. It has two large lobes along ±z and a "donut" torus in the xy-plane, with opposite phase. The most visually distinctive d shape.'
+    },
+    d_x2y2: {
+      title: zh ? 'd_x²−y² 轨道 — 在 xy 平面上四瓣沿轴向' : 'd_x²−y² orbital — 4 lobes along ±x, ±y',
+      body: zh
+        ? '四瓣位于 xy 平面,沿 ±x 和 ±y 方向。相邻瓣的相位交替相反。这个轨道在配合物中常与配体在轴向方向的孤对电子相互作用,是"e_g"能级的成员。'
+        : 'Four lobes in the xy-plane, pointing along ±x and ±y. Adjacent lobes have opposite phase. In octahedral complexes this orbital points straight at the ligands and forms the <em>e_g</em> level.'
+    },
+    d_xy: {
+      title: zh ? 'd_xy 轨道 — xy 平面四瓣沿对角' : 'd_xy orbital — 4 lobes between the x, y axes',
+      body: zh
+        ? '与 d_x²−y² 类似,但四瓣旋转了 45°,指向 xy 平面的对角线方向。相邻瓣相位相反。在八面体配合物中它属于 t_2g 能级。'
+        : 'Similar to d_x²−y² but rotated by 45°, so the lobes point between the axes (diagonal). Adjacent lobes have opposite phase. In octahedral complexes it belongs to the <em>t₂g</em> level.'
+    },
+    d_xz: {
+      title: zh ? 'd_xz 轨道 — 在 xz 平面上四瓣沿对角' : 'd_xz orbital — 4 lobes in the xz-plane',
+      body: zh
+        ? '与 d_xy 相似,只是位于 xz 平面。四瓣位于 x 与 z 轴之间。'
+        : 'Same shape as d_xy, but in the xz-plane. The four lobes lie between the x and z axes.'
+    },
+    d_yz: {
+      title: zh ? 'd_yz 轨道 — 在 yz 平面上四瓣沿对角' : 'd_yz orbital — 4 lobes in the yz-plane',
+      body: zh
+        ? '与 d_xy 相似,位于 yz 平面。'
+        : 'Same shape as d_xy, but in the yz-plane.'
+    },
+    f_z3: {
+      title: zh ? 'f_z³ 轨道 — 沿 z 轴的复杂形状' : 'f_z³ orbital — z-axis dumbbell with rings',
+      body: zh
+        ? '<b>ℓ = 3</b>,共 7 个 f 轨道。f_z³ 沿 ±z 有两大瓣,并有节面。这些复杂形状源于球谐函数 Y_ℓ^m,f 电子对镧系与锕系元素的化学性质有决定性影响。'
+        : 'One of seven <b>ℓ = 3</b> f orbitals. Elongated lobes along ±z with additional nodal cones. These complex shapes come straight from spherical harmonics Y_ℓ^m and are what makes lanthanide / actinide chemistry so unusual.'
+    },
+    f_xyz: {
+      title: zh ? 'f_xyz 轨道 — 八瓣立方对角' : 'f_xyz orbital — 8 lobes along cube diagonals',
+      body: zh
+        ? '八瓣分别指向立方体的 8 个顶点方向。相邻瓣相位交替。这种 f 轨道使镧系元素能够形成配位数高达 9~12 的配合物。'
+        : 'Eight lobes pointing toward the eight vertices of a cube. Adjacent lobes alternate in phase. Orbitals like this allow lanthanides to form complexes with coordination numbers as high as 9–12.'
+    },
+    sp: {
+      title: zh ? 'sp 杂化 — 直线形 (180°)' : 'sp hybridization — linear (180°)',
+      body: zh
+        ? '一个 s 与一个 p 轨道等权重线性组合,产生 <b>2 个</b>大小相同、指向相反(180°)的杂化轨道。剩下的 2 个 p 轨道保持不变,常用来形成 π 键。'
+        : 'Linear combination of one s and one p orbital, giving <b>2</b> equivalent hybrid orbitals pointing 180° apart. The remaining two p orbitals stay pure and typically form π bonds.'
+    },
+    sp2: {
+      title: zh ? 'sp² 杂化 — 平面三角形 (120°)' : 'sp² hybridization — trigonal planar (120°)',
+      body: zh
+        ? '一个 s + 两个 p 轨道 → <b>3 个</b>等价 sp² 杂化轨道,位于同一平面内,互成 120°。第三个 p 轨道垂直于平面,常参与 π 键(如乙烯、苯)。'
+        : 'One s + two p orbitals → <b>3</b> equivalent sp² hybrids in the same plane, 120° apart. The remaining p orbital is perpendicular to the plane and typically forms a π bond (ethylene, benzene).'
+    },
+    sp3: {
+      title: zh ? 'sp³ 杂化 — 正四面体 (109.5°)' : 'sp³ hybridization — tetrahedral (109.5°)',
+      body: zh
+        ? '一个 s + 三个 p 轨道 → <b>4 个</b>等价 sp³ 杂化轨道,指向正四面体的四个顶点(键角 109.5°)。甲烷 CH₄、金刚石、SiO₄ 四面体均属于此。轨道方向指向立方体的四个不相邻顶点。'
+        : 'One s + three p → <b>4</b> equivalent sp³ hybrids pointing to the four vertices of a regular tetrahedron (bond angle 109.5°). Methane (CH₄), diamond, and SiO₄ tetrahedra all belong here. The lobes point to four non-adjacent corners of a cube.'
+    },
+    sp3d: {
+      title: zh ? 'sp³d 杂化 — 三角双锥 (120°/90°)' : 'sp³d hybridization — trigonal bipyramidal',
+      body: zh
+        ? '一个 s + 三个 p + 一个 d 轨道 → <b>5 个</b>杂化轨道。三个位于赤道平面内(120°),两个沿轴向(±z,与赤道方向 90°)。例:PCl₅。'
+        : 'One s + three p + one d → <b>5</b> hybrid orbitals: three equatorial (120° apart) plus two axial (±z, 90° to the equator). Example: PCl₅.'
+    },
+    sp3d2: {
+      title: zh ? 'sp³d² 杂化 — 正八面体 (90°)' : 'sp³d² hybridization — octahedral (90°)',
+      body: zh
+        ? '一个 s + 三个 p + 两个 d 轨道 → <b>6 个</b>等价杂化轨道,指向八面体的 6 个顶点(键角 90°)。SF₆、[Fe(H₂O)₆]²⁺ 等经典八面体分子/离子。'
+        : 'One s + three p + two d → <b>6</b> equivalent hybrids pointing at the six vertices of an octahedron (all bond angles 90°). SF₆, [Fe(H₂O)₆]²⁺ and most classical octahedral complexes belong here.'
+    },
+    d2sp3: {
+      title: zh ? 'd²sp³ 杂化 — 内轨型八面体' : 'd²sp³ hybridization — inner-orbital octahedral',
+      body: zh
+        ? '与 sp³d² 几何相同(正八面体),但由 (n−1)d 而非 nd 轨道参与,称为"内轨型"。低自旋配合物(如 [Fe(CN)₆]³⁻)常用此杂化。'
+        : 'Geometrically identical to sp³d² (octahedral), but uses <b>(n−1)d</b> orbitals instead of nd — hence "inner-orbital". Common in low-spin transition-metal complexes such as [Fe(CN)₆]³⁻.'
+    },
+    dsp2: {
+      title: zh ? 'dsp² 杂化 — 平面正方形' : 'dsp² hybridization — square planar',
+      body: zh
+        ? '一个 d + 一个 s + 两个 p → <b>4 个</b>杂化轨道在同一平面上,相邻夹角 90°。Ni²⁺、Pd²⁺、Pt²⁺、Cu²⁺ 的许多配合物(如顺铂 [PtCl₂(NH₃)₂])采用此几何。'
+        : 'One d + one s + two p → <b>4</b> equivalent hybrids in one plane, 90° apart. Adopted by many Ni²⁺, Pd²⁺, Pt²⁺, Cu²⁺ complexes such as cisplatin [PtCl₂(NH₃)₂].'
+    }
+  };
+  const spec = D[h] || (D[h?.replace(/_.*/, '')] || null);
+  const entry = D[h] || (h && h.startsWith('p_') ? D.p_x : null);
+  if(!entry) return '';
+  return `<div class="orb-desc"><div class="orb-title">${entry.title}</div><div class="orb-body">${entry.body}</div></div>`;
 }
 
 /* ================ CANVAS DRAWINGS ================ */
@@ -1739,24 +1961,51 @@ function drawBohr(z){
 
 /* ----- Orbital shapes ----- */
 let orbRAF=null;
+/* Real 3D orbital renderer with perspective projection.
+   Each lobe is drawn as a projected teardrop (using an eased ellipse),
+   torus rings are drawn as thick arcs. Painter's algorithm z-sort. */
+let orbState = { rotY:0.6, rotX:0.15, dragging:false, lastX:0, lastY:0, auto:true };
+
 function drawOrbital(h){
   cancelAnimationFrame(orbRAF);
   const canvas = document.getElementById('orbitalCanvas');
   const ctx = canvas.getContext('2d');
-  const r = canvas.getBoundingClientRect();
-  if(r.width < 20 || r.height < 20) return; // not laid out yet
-  canvas.width = r.width * devicePixelRatio;
-  canvas.height = r.height * devicePixelRatio;
+  const r0 = canvas.getBoundingClientRect();
+  if(r0.width < 20 || r0.height < 20) return;
+  canvas.width = r0.width * devicePixelRatio;
+  canvas.height = r0.height * devicePixelRatio;
   ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);
-  const W = r.width, H = r.height;
+  const W = r0.width, H = r0.height;
   const cx=W/2, cy=H/2;
-  const start = performance.now();
 
-  const shapes = shapesForHybrid(h);
-  const R = Math.min(W,H)*0.4;
+  const shape = ORBITAL_SHAPES[h] || ORBITAL_SHAPES['s'];
+  const R = Math.min(W,H) * 0.36;
+
+  // Attach drag handlers only once
+  if(!canvas._orbAttached){
+    canvas._orbAttached = true;
+    canvas.style.cursor = 'grab';
+    canvas.addEventListener('pointerdown', e=>{
+      orbState.dragging = true; orbState.auto = false;
+      orbState.lastX = e.clientX; orbState.lastY = e.clientY;
+      canvas.setPointerCapture(e.pointerId);
+      canvas.style.cursor = 'grabbing';
+    });
+    canvas.addEventListener('pointermove', e=>{
+      if(!orbState.dragging) return;
+      orbState.rotY += (e.clientX - orbState.lastX) * 0.01;
+      orbState.rotX += (e.clientY - orbState.lastY) * 0.01;
+      orbState.rotX = Math.max(-Math.PI/2, Math.min(Math.PI/2, orbState.rotX));
+      orbState.lastX = e.clientX; orbState.lastY = e.clientY;
+    });
+    canvas.addEventListener('pointerup', ()=>{
+      orbState.dragging = false;
+      canvas.style.cursor = 'grab';
+      setTimeout(()=>{ if(!orbState.dragging) orbState.auto = true; }, 1500);
+    });
+  }
 
   function frame(){
-    const t = (performance.now()-start)/1000;
     ctx.clearRect(0,0,W,H);
     // axes
     ctx.strokeStyle='rgba(255,255,255,0.06)';
@@ -1764,90 +2013,168 @@ function drawOrbital(h){
     ctx.beginPath(); ctx.moveTo(0,cy); ctx.lineTo(W,cy); ctx.stroke();
     ctx.beginPath(); ctx.moveTo(cx,0); ctx.lineTo(cx,H); ctx.stroke();
 
-    const rot = t*0.35;
-    shapes.forEach(s=>{
-      const a = s.a + rot;
-      if(s.kind==='sphere'){
-        const g = ctx.createRadialGradient(cx,cy,0, cx,cy,R);
-        g.addColorStop(0, s.color);
-        g.addColorStop(0.5, s.color.slice(0,7)+'55');
-        g.addColorStop(1, s.color.slice(0,7)+'00');
-        ctx.fillStyle=g;
-        ctx.beginPath(); ctx.arc(cx,cy,R,0,Math.PI*2); ctx.fill();
+    if(orbState.auto){ orbState.rotY += 0.005; }
+
+    // Build all draw items with depth
+    const items = [];
+    shape.forEach(lobe=>{
+      const dir = lobe.dir ? normalize(lobe.dir) : [0,0,1];
+      const rotated = rotate3D(dir, orbState.rotY, orbState.rotX);
+      const size = (lobe.size || 1);
+      if(lobe.kind === 'sphere'){
+        items.push({z:0, kind:'sphere', phase:lobe.phase, size});
+      } else if(lobe.kind === 'torus'){
+        // For d_z² torus etc., rotate the ring axis
+        items.push({z:0, kind:'torus', axis:rotated, phase:lobe.phase, size});
       } else {
-        drawLobe(ctx, cx, cy, R, a, s.color);
+        // lobe
+        const tip = rotated;
+        items.push({z:tip[2], kind:'lobe', dir:tip, phase:lobe.phase, size});
       }
     });
-    // Center nucleus
+    // Back-to-front sort
+    items.sort((a,b)=>a.z - b.z);
+
+    // Draw
+    items.forEach(it=>{
+      const pos = phaseColor(it.phase);
+      if(it.kind === 'sphere'){
+        const g = ctx.createRadialGradient(cx,cy,0, cx,cy,R*0.7);
+        g.addColorStop(0, pos.core);
+        g.addColorStop(0.6, pos.mid);
+        g.addColorStop(1, pos.edge);
+        ctx.fillStyle=g;
+        ctx.beginPath(); ctx.arc(cx,cy,R*0.7,0,Math.PI*2); ctx.fill();
+      } else if(it.kind === 'torus'){
+        drawTorus(ctx, cx, cy, R, it.axis, pos);
+      } else {
+        // Project the lobe: origin at nucleus, tip at cx+dir.x*R, cy-dir.y*R (screen y is inverted)
+        drawLobe3D(ctx, cx, cy, R * it.size, it.dir, pos);
+      }
+    });
+
+    // Nucleus dot on top
     ctx.fillStyle='#fff';
-    ctx.beginPath(); ctx.arc(cx,cy,5,0,Math.PI*2); ctx.fill();
-    // Hybrid label
-    ctx.fillStyle='rgba(255,255,255,0.6)';
-    ctx.font='bold 11px JetBrains Mono, monospace';
+    ctx.beginPath(); ctx.arc(cx,cy,4,0,Math.PI*2); ctx.fill();
+
+    // Label
+    ctx.fillStyle='rgba(255,255,255,0.75)';
+    ctx.font='bold 12px JetBrains Mono, ui-monospace, monospace';
     ctx.textAlign='left';
-    ctx.fillText(labelForHybrid(h), 10, 18);
+    ctx.fillText(labelForHybrid(h), 10, 20);
+    // Legend
+    const lang = window.CURRENT_LANG || 'en';
+    ctx.font='10px JetBrains Mono, ui-monospace, monospace';
+    ctx.fillStyle='rgba(127,227,255,0.9)';
+    ctx.fillText('+', W-40, 20);
+    ctx.fillStyle='rgba(255,158,194,0.9)';
+    ctx.fillText('−', W-24, 20);
+    ctx.fillStyle='rgba(255,255,255,0.5)';
+    ctx.fillText(lang==='zh-CN' ? '波函数相位' : 'wavefunction phase', W-120, 34);
+
     orbRAF = requestAnimationFrame(frame);
   }
   frame();
 }
-function drawLobe(ctx, cx, cy, R, angle, color){
-  ctx.save();
-  ctx.translate(cx,cy);
-  ctx.rotate(angle);
-  for(let side of [1,-1]){
-    const g = ctx.createRadialGradient(side*R*0.55, 0, 0, side*R*0.55, 0, R*0.55);
-    g.addColorStop(0, color);
-    g.addColorStop(0.4, color.slice(0,7)+'88');
-    g.addColorStop(1, color.slice(0,7)+'00');
-    ctx.fillStyle = g;
-    ctx.beginPath();
-    ctx.ellipse(side*R*0.55, 0, R*0.5, R*0.3, 0, 0, Math.PI*2);
-    ctx.fill();
+
+/* Colors: cyan = +phase, pink = −phase */
+function phaseColor(phase){
+  if(phase >= 0){
+    return { core:'rgba(127,227,255,0.85)', mid:'rgba(127,227,255,0.45)', edge:'rgba(127,227,255,0)', stroke:'rgba(90,180,220,0.7)' };
+  } else {
+    return { core:'rgba(255,158,194,0.85)', mid:'rgba(255,158,194,0.45)', edge:'rgba(255,158,194,0)', stroke:'rgba(210,120,150,0.7)' };
   }
+}
+function normalize(v){
+  const L = Math.hypot(v[0],v[1],v[2]) || 1;
+  return [v[0]/L, v[1]/L, v[2]/L];
+}
+function rotate3D(v, ry, rx){
+  const cy = Math.cos(ry), sy = Math.sin(ry);
+  const cx = Math.cos(rx), sx = Math.sin(rx);
+  // Y then X
+  let x = v[0]*cy + v[2]*sy;
+  let z = -v[0]*sy + v[2]*cy;
+  let y = v[1];
+  const y2 = y*cx - z*sx;
+  const z2 = y*sx + z*cx;
+  return [x, y2, z2];
+}
+/* Draw a single teardrop lobe from origin (nucleus) in direction dir (rotated) */
+function drawLobe3D(ctx, cx, cy, R, dir, pos){
+  // Screen coordinates: x maps to +x, y maps to -y (invert), z is depth
+  const sx = cx + dir[0] * R * 0.05;  // start at nucleus (offset a tiny bit)
+  const sy = cy - dir[1] * R * 0.05;
+  const tx = cx + dir[0] * R;
+  const ty = cy - dir[1] * R;
+  // Perspective scale based on z (closer = bigger)
+  const persp = 1 + dir[2] * 0.35;
+  const width = R * 0.32 * persp;
+  const length = Math.hypot(tx-sx, ty-sy);
+  const angle = Math.atan2(ty-sy, tx-sx);
+
+  // Draw teardrop as an ellipse offset from nucleus
+  ctx.save();
+  ctx.translate((sx+tx)/2, (sy+ty)/2);
+  ctx.rotate(angle);
+  // Radial gradient: pick sharper falloff away from tip
+  const g = ctx.createRadialGradient(length*0.15, 0, 0, length*0.15, 0, length*0.7);
+  g.addColorStop(0, pos.core);
+  g.addColorStop(0.5, pos.mid);
+  g.addColorStop(1, pos.edge);
+  ctx.fillStyle = g;
+  ctx.beginPath();
+  // Teardrop-like ellipse - use quadratic curves
+  ctx.moveTo(-length*0.5, 0);
+  ctx.quadraticCurveTo(-length*0.5, -width, length*0.15, -width);
+  ctx.quadraticCurveTo(length*0.55, -width*0.4, length*0.55, 0);
+  ctx.quadraticCurveTo(length*0.55, width*0.4, length*0.15, width);
+  ctx.quadraticCurveTo(-length*0.5, width, -length*0.5, 0);
+  ctx.closePath();
+  ctx.fill();
+  // Rim outline
+  ctx.strokeStyle = pos.stroke;
+  ctx.lineWidth = 0.6;
+  ctx.stroke();
   ctx.restore();
 }
-function shapesForHybrid(h){
-  const c1='#7fe3ffcc', c2='#ff9ec2cc', c3='#c0baffcc';
-  if(h==='s') return [{kind:'sphere', a:0, color:c1}];
-  if(h==='sp') return [{kind:'lobe', a:0, color:c1}];
-  if(h==='sp2') return [
-    {kind:'lobe', a:0, color:c1},
-    {kind:'lobe', a:Math.PI*2/3, color:c2},
-    {kind:'lobe', a:Math.PI*4/3, color:c3}
-  ];
-  if(h==='sp3') return [
-    {kind:'lobe', a:0, color:c1},
-    {kind:'lobe', a:Math.PI/2, color:c2},
-    {kind:'lobe', a:Math.PI, color:c3},
-    {kind:'lobe', a:3*Math.PI/2, color:c1}
-  ];
-  if(h==='sp3d') return [
-    {kind:'lobe', a:0, color:c1},
-    {kind:'lobe', a:2*Math.PI/3, color:c2},
-    {kind:'lobe', a:4*Math.PI/3, color:c3},
-    {kind:'lobe', a:Math.PI/6, color:c1},
-    {kind:'lobe', a:-Math.PI/6, color:c2}
-  ];
-  if(h==='sp3d2' || h==='d2sp3') return [
-    {kind:'lobe', a:0, color:c1},
-    {kind:'lobe', a:Math.PI/2, color:c2},
-    {kind:'lobe', a:Math.PI, color:c3},
-    {kind:'lobe', a:3*Math.PI/2, color:c1},
-    {kind:'lobe', a:Math.PI/4, color:c2},
-    {kind:'lobe', a:5*Math.PI/4, color:c3}
-  ];
-  if(h==='dsp2') return [
-    {kind:'lobe', a:0, color:c1},
-    {kind:'lobe', a:Math.PI/2, color:c2},
-    {kind:'lobe', a:Math.PI, color:c3},
-    {kind:'lobe', a:3*Math.PI/2, color:c1}
-  ];
-  if(h==='f') return [
-    {kind:'sphere', a:0, color:c2},
-    {kind:'lobe', a:0, color:c1},
-    {kind:'lobe', a:Math.PI/2, color:c3}
-  ];
-  return [{kind:'sphere', a:0, color:c1}];
+/* Draw a torus (ring) around an axis: e.g. d_z² has a torus in xy */
+function drawTorus(ctx, cx, cy, R, axis, pos){
+  // The torus lies in the plane perpendicular to axis. Draw it as
+  // an ellipse whose shape depends on axis direction.
+  // If axis is (ax,ay,az), the ring's projection onto the screen
+  // is an ellipse with semi-major axis R * ringR and semi-minor
+  // axis proportional to |z-component of axis|.
+  const ringR = R * 0.55;
+  // Find two vectors perpendicular to axis
+  const [ax, ay, az] = axis;
+  // Build orthogonal basis
+  const up = Math.abs(az) < 0.9 ? [0,0,1] : [1,0,0];
+  const e1 = normalize([ay*up[2]-az*up[1], az*up[0]-ax*up[2], ax*up[1]-ay*up[0]]);
+  const e2 = normalize([ay*e1[2]-az*e1[1], az*e1[0]-ax*e1[2], ax*e1[1]-ay*e1[0]]);
+  const N = 48;
+  const pts = [];
+  for(let i=0;i<=N;i++){
+    const th = (i/N)*Math.PI*2;
+    const c = Math.cos(th), s = Math.sin(th);
+    const x = e1[0]*c + e2[0]*s;
+    const y = e1[1]*c + e2[1]*s;
+    const z = e1[2]*c + e2[2]*s;
+    pts.push({x: cx + x*ringR, y: cy - y*ringR, z});
+  }
+  // Draw filled ring using two loops (outer and inner). Use gradient along z.
+  ctx.save();
+  ctx.strokeStyle = pos.core;
+  ctx.lineWidth = 12;
+  ctx.lineCap = 'round';
+  // Segment by segment for depth-tinted appearance
+  for(let i=0;i<N;i++){
+    const a = pts[i], b = pts[i+1];
+    const zAvg = (a.z + b.z)/2;
+    ctx.globalAlpha = 0.35 + Math.max(0, zAvg) * 0.5;
+    ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+  }
+  ctx.restore();
 }
 
 /* ----- Signature colors ----- */
