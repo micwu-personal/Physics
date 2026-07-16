@@ -226,7 +226,9 @@ html[lang="zh-CN"] .cell .nm{font-size:12px;font-weight:500;color:#fff;margin-to
 .mol3d-shape{position:absolute;top:8px;right:10px;color:var(--accent2);font-size:10px;text-transform:uppercase;letter-spacing:1px;pointer-events:none}
 
 .bond-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
-.bond-card{background:rgba(0,0,0,0.3);border:1px solid var(--panel-b);border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:6px}
+.bond-card{background:rgba(0,0,0,0.3);border:1px solid var(--panel-b);border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:6px;transition:opacity .15s}
+.bond-card-off{opacity:0.55}
+.bond-card-off .bond-name{color:var(--dim)}
 .bond-name{font-size:14px;font-weight:600;color:#fff}
 .bond-desc{font-size:12px;color:var(--dim);line-height:1.5}
 .bond-yes{color:#7ee8c5}
@@ -506,13 +508,21 @@ const LOCALES = {
     'bond.ionic.name':'Ionic bond',
     'bond.ionic.desc':'Transfer of electrons; strong electrostatic attraction between + and − ions.',
     'bond.covalent.name':'Covalent bond',
-    'bond.covalent.desc':'Sharing of electron pairs between atoms.',
+    'bond.covalent.desc':'Sharing of one or more electron pairs between two atoms. May be a single (σ only), double (σ + π), or triple (σ + 2π) bond.',
+    'bond.sigma.name':'σ (sigma) bond',
+    'bond.sigma.desc':'Head-on overlap of atomic orbitals along the bond axis. Every single bond is a σ bond; it is the strongest kind of covalent bond and is symmetric about the bond axis.',
+    'bond.pi.name':'π (pi) bond',
+    'bond.pi.desc':'Sideways overlap of two parallel p (or d) orbitals above and below the bond axis. Found in every double or triple bond (in addition to the σ), and in aromatic rings. Weaker than σ, and it prevents rotation about the bond.',
+    'bond.aromatic.name':'Aromatic / delocalized π',
+    'bond.aromatic.desc':'π electrons spread evenly over a ring of atoms (like benzene C₆H₆). All bonds become equivalent, and the ring gains extra stability from resonance.',
+    'bond.coordinate.name':'Coordinate (dative) bond',
+    'bond.coordinate.desc':'A covalent bond where one atom donates both shared electrons (Lewis-base → Lewis-acid). Key to complexes such as [Fe(H₂O)₆]²⁺ and NH₃·BF₃.',
     'bond.metallic.name':'Metallic bond',
-    'bond.metallic.desc':'A "sea" of delocalized electrons holds metal cations together.',
+    'bond.metallic.desc':'A "sea" of delocalized electrons holds metal cations together — the reason metals conduct heat & electricity and are malleable.',
     'bond.hydrogen.name':'Hydrogen bond',
-    'bond.hydrogen.desc':'Weak but important; H bonded to F/O/N attracts another F/O/N.',
+    'bond.hydrogen.desc':'Weak but important; H bonded to F/O/N attracts another F/O/N. Responsible for water\'s high boiling point and DNA base pairing.',
     'bond.vdw.name':'Van der Waals',
-    'bond.vdw.desc':'Weak transient dipole–dipole; the only force between noble-gas atoms.',
+    'bond.vdw.desc':'Weak transient dipole–dipole (London dispersion) forces present between all atoms. The only force between noble-gas atoms.',
     'bond.forms':'Forms',
     'bond.rarely':'Rarely / not typical',
 
@@ -599,13 +609,21 @@ const LOCALES = {
     'bond.ionic.name':'离子键',
     'bond.ionic.desc':'电子发生转移;正负离子之间的强静电吸引。',
     'bond.covalent.name':'共价键',
-    'bond.covalent.desc':'原子之间共用电子对。',
+    'bond.covalent.desc':'两个原子之间共用一对或多对电子。可以是单键(仅 σ)、双键(σ + π)或叁键(σ + 2π)。',
+    'bond.sigma.name':'σ(西格玛)键',
+    'bond.sigma.desc':'原子轨道沿键轴"头对头"重叠形成。任何单键都是 σ 键,是最强的共价键类型,且对键轴呈轴对称。',
+    'bond.pi.name':'π(派)键',
+    'bond.pi.desc':'两个平行的 p(或 d)轨道在键轴上下方"肩并肩"侧向重叠。每一个双键或叁键都包含 π 键(除 σ 之外),芳香环中也有 π 键。比 σ 弱,并使键不能自由旋转。',
+    'bond.aromatic.name':'芳香键 / 离域 π 键',
+    'bond.aromatic.desc':'π 电子在环状分子(如苯 C₆H₆)中均匀离域。所有键完全等价,并因共振获得额外稳定性。',
+    'bond.coordinate.name':'配位(共价)键',
+    'bond.coordinate.desc':'一种特殊的共价键,共用电子对完全由一方(Lewis 碱)提供,另一方(Lewis 酸)接受。是配合物 [Fe(H₂O)₆]²⁺、NH₃·BF₃ 等的成键基础。',
     'bond.metallic.name':'金属键',
-    'bond.metallic.desc':'"电子海"将金属阳离子连接在一起。',
+    'bond.metallic.desc':'"电子海"将金属阳离子连接在一起——这是金属能导热、导电、具有延展性的根本原因。',
     'bond.hydrogen.name':'氢键',
-    'bond.hydrogen.desc':'较弱但极重要;与 F/O/N 相连的 H 会被另一个 F/O/N 吸引。',
+    'bond.hydrogen.desc':'较弱但极重要;与 F/O/N 相连的 H 被另一个 F/O/N 吸引。水的高沸点、DNA 碱基配对都源于氢键。',
     'bond.vdw.name':'范德华力',
-    'bond.vdw.desc':'瞬时偶极诱导的弱吸引力;稀有气体之间唯一的作用力。',
+    'bond.vdw.desc':'原子之间普遍存在的瞬时偶极诱导的弱吸引力(伦敦色散力);稀有气体之间唯一的作用力。',
     'bond.forms':'可形成',
     'bond.rarely':'一般不形成',
 
@@ -2225,36 +2243,87 @@ function renderSignatureColors(el){
 /* ----- Bond types matrix ----- */
 function drawBonds(el){
   const grid = document.getElementById('dBonds');
-  // Determine which bonds this element typically forms
+  // Determine which bond kinds this element typically participates in.
   const bonds = {
-    ionic:    isIonic(el),
-    covalent: isCovalent(el),
-    metallic: isMetal(el),
-    hydrogen: canHBond(el),
-    vdw:      true  // everyone has vdW
+    ionic:      isIonic(el),
+    covalent:   isCovalent(el),
+    sigma:      canFormSigma(el),
+    pi:         canFormPi(el),
+    aromatic:   canFormAromatic(el),
+    coordinate: canFormCoordinate(el),
+    metallic:   isMetal(el),
+    hydrogen:   canHBond(el),
+    vdw:        true  // every atom has van der Waals interactions
   };
-  grid.innerHTML = ['ionic','covalent','metallic','hydrogen','vdw'].map(b=>{
+  const order = ['ionic','covalent','sigma','pi','aromatic','coordinate','metallic','hydrogen','vdw'];
+  grid.innerHTML = order.map(b=>{
     const yes = bonds[b];
     return `
-      <div class="bond-card">
+      <div class="bond-card${yes?'':' bond-card-off'}">
         <div class="bond-name">${t('bond.'+b+'.name')} <span class="${yes?'bond-yes':'bond-no'}" style="font-size:11px;margin-left:6px;">● ${yes?t('bond.forms'):t('bond.rarely')}</span></div>
         <div class="bond-desc">${t('bond.'+b+'.desc')}</div>
       </div>
     `;
   }).join('');
 }
+
+/* -------- Bond-capability heuristics -------- */
 function isMetal(el){
   return ['alkali','alkaline','transition','posttransition','lanthanide','actinide'].includes(el.category);
 }
 function isIonic(el){
-  // Highly EN diff — alkalis, alkaline earths, halogens, and O commonly form ionic
-  return ['alkali','alkaline','halogen'].includes(el.category) || el.Z===8;
+  // Ionic bonding = large EN difference. Alkali/alkaline-earth metals,
+  // halogens, chalcogens (O, S), and most lanthanides/actinides commonly form them.
+  return ['alkali','alkaline','halogen','lanthanide','actinide'].includes(el.category)
+      || [8,16,34,52].includes(el.Z);
 }
 function isCovalent(el){
-  return ['nonmetal','metalloid','halogen'].includes(el.category);
+  // Covalent bonding is characteristic of non-metals, metalloids, and halogens.
+  // Post-transition and transition metals form some covalent character in
+  // organometallic / complex chemistry, but ionic dominates for pure metals.
+  return ['nonmetal','metalloid','halogen','noble'].includes(el.category)
+      && el.Z !== 2 && el.Z !== 10; // He, Ne truly inert
+}
+/* A σ bond is the primary covalent bond: any element that can share electrons
+   in a head-on overlap. Effectively any element that can be part of a covalent
+   bond. Even metals form σ-type covalent bonds inside complexes / organometallics. */
+function canFormSigma(el){
+  if(el.Z===2 || el.Z===10) return false;                 // He, Ne
+  return el.category !== 'noble' || el.Z >= 36;           // Kr, Xe, Rn hybridize
+}
+/* π bonds require unhybridized p (or d) orbitals — mostly second/third-period
+   non-metals and many transition metals. Alkali & alkaline-earth metals
+   very rarely engage in π bonding under normal conditions. */
+function canFormPi(el){
+  if(el.Z <= 2) return false;                             // H, He: no p available
+  if(['alkali','alkaline'].includes(el.category)) return false;
+  if(el.category === 'noble') return false;
+  return true;
+}
+/* Aromatic (delocalized π) bonding — realistic mainly for period-2 non-metals
+   (C, N, O), some metalloids (B, Si), and a few transition metals in
+   sandwich complexes (Fe in ferrocene, Cr in bis-benzene-chromium). */
+function canFormAromatic(el){
+  if([5,6,7,8].includes(el.Z)) return true;               // B, C, N, O
+  if([14,15,16].includes(el.Z)) return true;              // Si, P, S
+  if(el.category === 'transition') return true;           // sandwich complexes
+  return false;
+}
+/* Coordinate (dative) bond — the donor atom supplies both electrons.
+   Common when the atom has a lone pair (N, O, P, S, halogens) OR is a
+   Lewis-acid transition metal that accepts a pair. */
+function canFormCoordinate(el){
+  if([7,8,15,16].includes(el.Z)) return true;             // N, O, P, S donors
+  if(el.category === 'halogen') return true;              // lone pairs
+  if(el.category === 'transition') return true;           // acceptors
+  if(el.category === 'lanthanide' || el.category === 'actinide') return true;
+  if(el.Z === 5) return true;                             // Boron (BH₃ + NH₃)
+  return false;
 }
 function canHBond(el){
-  return el.Z===1 || el.Z===7 || el.Z===8 || el.Z===9;
+  // Traditional H-bond donor/acceptor set: H itself, and highly-EN F, O, N.
+  // (S, Cl form very weak "quasi" H-bonds — kept out to stay accurate.)
+  return el.Z === 1 || el.Z === 7 || el.Z === 8 || el.Z === 9;
 }
 
 /* ----- Nucleus animation ----- */

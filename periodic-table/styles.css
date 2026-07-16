@@ -211,7 +211,9 @@ html[lang="zh-CN"] .cell .nm{font-size:12px;font-weight:500;color:#fff;margin-to
 .mol3d-shape{position:absolute;top:8px;right:10px;color:var(--accent2);font-size:10px;text-transform:uppercase;letter-spacing:1px;pointer-events:none}
 
 .bond-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
-.bond-card{background:rgba(0,0,0,0.3);border:1px solid var(--panel-b);border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:6px}
+.bond-card{background:rgba(0,0,0,0.3);border:1px solid var(--panel-b);border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:6px;transition:opacity .15s}
+.bond-card-off{opacity:0.55}
+.bond-card-off .bond-name{color:var(--dim)}
 .bond-name{font-size:14px;font-weight:600;color:#fff}
 .bond-desc{font-size:12px;color:var(--dim);line-height:1.5}
 .bond-yes{color:#7ee8c5}

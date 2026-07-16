@@ -825,36 +825,87 @@ function renderSignatureColors(el){
 /* ----- Bond types matrix ----- */
 function drawBonds(el){
   const grid = document.getElementById('dBonds');
-  // Determine which bonds this element typically forms
+  // Determine which bond kinds this element typically participates in.
   const bonds = {
-    ionic:    isIonic(el),
-    covalent: isCovalent(el),
-    metallic: isMetal(el),
-    hydrogen: canHBond(el),
-    vdw:      true  // everyone has vdW
+    ionic:      isIonic(el),
+    covalent:   isCovalent(el),
+    sigma:      canFormSigma(el),
+    pi:         canFormPi(el),
+    aromatic:   canFormAromatic(el),
+    coordinate: canFormCoordinate(el),
+    metallic:   isMetal(el),
+    hydrogen:   canHBond(el),
+    vdw:        true  // every atom has van der Waals interactions
   };
-  grid.innerHTML = ['ionic','covalent','metallic','hydrogen','vdw'].map(b=>{
+  const order = ['ionic','covalent','sigma','pi','aromatic','coordinate','metallic','hydrogen','vdw'];
+  grid.innerHTML = order.map(b=>{
     const yes = bonds[b];
     return `
-      <div class="bond-card">
+      <div class="bond-card${yes?'':' bond-card-off'}">
         <div class="bond-name">${t('bond.'+b+'.name')} <span class="${yes?'bond-yes':'bond-no'}" style="font-size:11px;margin-left:6px;">● ${yes?t('bond.forms'):t('bond.rarely')}</span></div>
         <div class="bond-desc">${t('bond.'+b+'.desc')}</div>
       </div>
     `;
   }).join('');
 }
+
+/* -------- Bond-capability heuristics -------- */
 function isMetal(el){
   return ['alkali','alkaline','transition','posttransition','lanthanide','actinide'].includes(el.category);
 }
 function isIonic(el){
-  // Highly EN diff — alkalis, alkaline earths, halogens, and O commonly form ionic
-  return ['alkali','alkaline','halogen'].includes(el.category) || el.Z===8;
+  // Ionic bonding = large EN difference. Alkali/alkaline-earth metals,
+  // halogens, chalcogens (O, S), and most lanthanides/actinides commonly form them.
+  return ['alkali','alkaline','halogen','lanthanide','actinide'].includes(el.category)
+      || [8,16,34,52].includes(el.Z);
 }
 function isCovalent(el){
-  return ['nonmetal','metalloid','halogen'].includes(el.category);
+  // Covalent bonding is characteristic of non-metals, metalloids, and halogens.
+  // Post-transition and transition metals form some covalent character in
+  // organometallic / complex chemistry, but ionic dominates for pure metals.
+  return ['nonmetal','metalloid','halogen','noble'].includes(el.category)
+      && el.Z !== 2 && el.Z !== 10; // He, Ne truly inert
+}
+/* A σ bond is the primary covalent bond: any element that can share electrons
+   in a head-on overlap. Effectively any element that can be part of a covalent
+   bond. Even metals form σ-type covalent bonds inside complexes / organometallics. */
+function canFormSigma(el){
+  if(el.Z===2 || el.Z===10) return false;                 // He, Ne
+  return el.category !== 'noble' || el.Z >= 36;           // Kr, Xe, Rn hybridize
+}
+/* π bonds require unhybridized p (or d) orbitals — mostly second/third-period
+   non-metals and many transition metals. Alkali & alkaline-earth metals
+   very rarely engage in π bonding under normal conditions. */
+function canFormPi(el){
+  if(el.Z <= 2) return false;                             // H, He: no p available
+  if(['alkali','alkaline'].includes(el.category)) return false;
+  if(el.category === 'noble') return false;
+  return true;
+}
+/* Aromatic (delocalized π) bonding — realistic mainly for period-2 non-metals
+   (C, N, O), some metalloids (B, Si), and a few transition metals in
+   sandwich complexes (Fe in ferrocene, Cr in bis-benzene-chromium). */
+function canFormAromatic(el){
+  if([5,6,7,8].includes(el.Z)) return true;               // B, C, N, O
+  if([14,15,16].includes(el.Z)) return true;              // Si, P, S
+  if(el.category === 'transition') return true;           // sandwich complexes
+  return false;
+}
+/* Coordinate (dative) bond — the donor atom supplies both electrons.
+   Common when the atom has a lone pair (N, O, P, S, halogens) OR is a
+   Lewis-acid transition metal that accepts a pair. */
+function canFormCoordinate(el){
+  if([7,8,15,16].includes(el.Z)) return true;             // N, O, P, S donors
+  if(el.category === 'halogen') return true;              // lone pairs
+  if(el.category === 'transition') return true;           // acceptors
+  if(el.category === 'lanthanide' || el.category === 'actinide') return true;
+  if(el.Z === 5) return true;                             // Boron (BH₃ + NH₃)
+  return false;
 }
 function canHBond(el){
-  return el.Z===1 || el.Z===7 || el.Z===8 || el.Z===9;
+  // Traditional H-bond donor/acceptor set: H itself, and highly-EN F, O, N.
+  // (S, Cl form very weak "quasi" H-bonds — kept out to stay accurate.)
+  return el.Z === 1 || el.Z === 7 || el.Z === 8 || el.Z === 9;
 }
 
 /* ----- Nucleus animation ----- */
