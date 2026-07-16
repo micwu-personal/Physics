@@ -1438,12 +1438,21 @@ function rerenderGrid(){
     speak.className = 'row-speak';
     speak.innerHTML = '🔊';
     speak.title = (lang==='zh-CN' ? '朗读第 ' : 'Read period ') + (rowIdx+1);
-    const rowZs = row.filter(c=>typeof c === 'number');
+    // Expand La-Lu / Ac-Lr placeholders into their actual Z ranges so
+    // period 6 reads all 32 elements (Cs..Ba, La..Lu, Hf..Rn) and
+    // period 7 reads Fr..Ra, Ac..Lr, Rf..Og.
+    const rowZs = [];
+    row.forEach(cell=>{
+      if(cell === 'La-Lu'){ for(let z=57; z<=71; z++) rowZs.push(z); }
+      else if(cell === 'Ac-Lr'){ for(let z=89; z<=103; z++) rowZs.push(z); }
+      else if(typeof cell === 'number'){ rowZs.push(cell); }
+    });
     speak.addEventListener('click', (e)=>{
       e.stopPropagation();
       speakSequence(rowZs, lang);
       speak.classList.add('playing');
-      setTimeout(()=>speak.classList.remove('playing'), rowZs.length*900 + 500);
+      const est = rowZs.length * (lang==='zh-CN' ? 700 : 900) + 500;
+      setTimeout(()=>speak.classList.remove('playing'), est);
     });
     rowDiv.appendChild(speak);
     row.forEach(cell=>{
@@ -1475,7 +1484,8 @@ function rerenderGrid(){
       e.stopPropagation();
       speakSequence(row, lang);
       speak.classList.add('playing');
-      setTimeout(()=>speak.classList.remove('playing'), row.length*900 + 500);
+      const est = row.length * (lang==='zh-CN' ? 700 : 900) + 500;
+      setTimeout(()=>speak.classList.remove('playing'), est);
     });
     rowDiv.appendChild(speak);
     row.forEach(z=>rowDiv.appendChild(makeCell(z,lang)));
@@ -2981,41 +2991,60 @@ async function speak(text, langHint){
   if(!('speechSynthesis' in window)){
     alert(t('tts.unavailable')); return;
   }
-  speechSynthesis.cancel();
+  // Do NOT call speechSynthesis.cancel() here — that aborts prior
+  // items in the queue and truncates the last utterance. The caller
+  // (speakSequence / TTS button) handles cancellation.
   const voices = await ensureVoices();
   const u = new SpeechSynthesisUtterance(text);
   u.lang = langHint;
   const match = voices.find(v=>v.lang.toLowerCase().startsWith(langHint.toLowerCase().slice(0,2)));
   if(match) u.voice = match;
-  u.rate = 0.9;
+  u.rate = 1.05;
   return new Promise(resolve=>{
-    u.onend = resolve;
-    u.onerror = resolve;
+    let done = false;
+    const finish = ()=>{ if(!done){ done=true; resolve(); } };
+    u.onend = finish;
+    u.onerror = finish;
     speechSynthesis.speak(u);
+    // Watchdog: if the browser never fires onend (a real Chrome/Edge
+    // bug on long queues), force-resolve after a generous timeout.
+    const wordCount = Math.max(1, (text || '').trim().length);
+    const guardMs = Math.min(8000, 800 + wordCount * 300);
+    setTimeout(finish, guardMs);
   });
 }
 
 /* Read a sequence of elements (by Z) in the current language. */
+let _rowSpeakId = 0;
 async function speakSequence(zList, lang){
   if(!('speechSynthesis' in window)){ alert(t('tts.unavailable')); return; }
+  const myId = ++_rowSpeakId;
   speechSynthesis.cancel();
+  // Wait briefly so the browser's speech queue is truly clear
+  await new Promise(r=>setTimeout(r, 60));
   const langHint = lang==='zh-CN' ? 'zh-CN' : 'en-US';
   for(const z of zList){
+    if(myId !== _rowSpeakId) return; // superseded by newer click
     const el = ELEMENTS[z]; if(!el) continue;
     const name = lang==='zh-CN' ? el.name_zh : el.name_en;
     await speak(name, langHint);
-    // small pause between names
-    await new Promise(r=>setTimeout(r, 150));
+    if(myId !== _rowSpeakId) return;
+    // tiny pause between names
+    await new Promise(r=>setTimeout(r, 30));
   }
 }
 document.getElementById('ttsEn').addEventListener('click',(e)=>{
   if(!currentZ) return;
+  _rowSpeakId++;                          // cancel any ongoing row-read
+  speechSynthesis.cancel();
   e.currentTarget.classList.add('playing');
   speak(ELEMENTS[currentZ].name_en, 'en-US');
   setTimeout(()=>e.currentTarget.classList.remove('playing'), 2000);
 });
 document.getElementById('ttsZh').addEventListener('click',(e)=>{
   if(!currentZ) return;
+  _rowSpeakId++;
+  speechSynthesis.cancel();
   e.currentTarget.classList.add('playing');
   speak(ELEMENTS[currentZ].name_zh, 'zh-CN');
   setTimeout(()=>e.currentTarget.classList.remove('playing'), 2000);
