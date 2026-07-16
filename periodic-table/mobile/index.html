@@ -1075,6 +1075,7 @@ function makeCell(z, lang){
 
 /* ----- Detail panel ----- */
 function openDetail(z){
+  cancelAnimationFrame(rxRAF); clearTimeout(rxReplayTimer);
   currentZ = z;
   currentHybrid = null;
   document.querySelectorAll('.cell').forEach(c=>c.classList.toggle('active', +c.dataset.z===z));
@@ -1092,6 +1093,7 @@ function openDetail(z){
 }
 document.getElementById('detailClose').addEventListener('click',()=>{
   detailEl.classList.add('hidden'); currentZ=null;
+  cancelAnimationFrame(rxRAF); clearTimeout(rxReplayTimer);
   document.querySelectorAll('.cell').forEach(c=>c.classList.remove('active'));
 });
 
@@ -1516,84 +1518,427 @@ function drawNucleus(protons, neutrons){
   frame();
 }
 
-/* ----- Reaction animation ----- */
+/* ================ REACTION ANIMATION ================
+   Real 4-phase animation:
+     Phase 1 (0-25%):   approach  — reactant molecules drift toward center
+     Phase 2 (25-50%):  collide   — bonds break, atoms scatter
+     Phase 3 (50-80%):  reform    — atoms regroup into product molecules
+     Phase 4 (80-100%): separate  — products drift apart
+
+   Steps:
+     1. Parse "aA + bB -> cC + dD" into groups of {coef, formula}
+     2. Expand each formula into a molecule template with 2D atom positions
+     3. Enumerate atoms on each side; match same-symbol atoms between
+        LHS and RHS (Hungarian-ish, but greedy is fine here)
+     4. Animate each atom along a spline between its LHS position and
+        its RHS position
+==================================================== */
 let rxRAF=null;
+let rxReplayTimer=null;
+
+/* ---- 1. equation parser ---- */
+
+/* ---- 1. equation parser ---- */
+const SUBSCRIPTS = {'₀':'0','₁':'1','₂':'2','₃':'3','₄':'4','₅':'5','₆':'6','₇':'7','₈':'8','₉':'9'};
+const SUPERSCRIPTS = {'⁰':'','¹':'','²':'','³':'','⁴':'','⁵':'','⁶':'','⁷':'','⁸':'','⁹':'','⁺':'','⁻':''};
+function normalizeFormula(s){
+  return String(s)
+    .replace(/[₀-₉]/g, ch => SUBSCRIPTS[ch] || ch)
+    .replace(/[⁰-⁹⁺⁻]/g, ch => SUPERSCRIPTS[ch] || '')
+    .replace(/[↑↓]/g,'')
+    .trim();
+}
+function parseEquation(eq){
+  const [lhsRaw, rhsRaw] = eq.split(/[→⇌=]/).map(s=>(s||'').trim());
+  const parseSide = s => s.split(/\s*\+\s*/).map(term=>{
+    const norm = normalizeFormula(term);
+    const m = norm.match(/^(\d+)?\s*(.+?)$/);
+    const coef = m[1] ? +m[1] : 1;
+    return { coef, formula: m[2] };
+  });
+  return { lhs: parseSide(lhsRaw), rhs: parseSide(rhsRaw || lhsRaw) };
+}
+
+/* ---- 2. formula -> atom list with 2D positions inside molecule ----
+   Very lightweight: recognize a handful of common shapes.
+   Fallback: chain atoms in a horizontal line.
+*/
+const D = 22; // bond length in px (scaled later)
+
+function moleculeShape(formula){
+  // return { atoms:[{sym,x,y}], bonds:[[i,j,order]] }
+  const F = formula;
+  // Diatomics
+  if(/^([A-Z][a-z]?)2$/.test(F)){
+    const sym = F.match(/^([A-Z][a-z]?)2$/)[1];
+    return { atoms:[ {sym,x:-D/2,y:0}, {sym,x:D/2,y:0} ], bonds:[[0,1,1]] };
+  }
+  // H2O
+  if(F==='H2O') return {
+    atoms:[{sym:'O',x:0,y:0},{sym:'H',x:-D*0.9,y:D*0.5},{sym:'H',x:D*0.9,y:D*0.5}],
+    bonds:[[0,1,1],[0,2,1]]
+  };
+  // H2O2
+  if(F==='H2O2') return {
+    atoms:[{sym:'O',x:-D/2,y:0},{sym:'O',x:D/2,y:0},{sym:'H',x:-D*1.2,y:-D*0.6},{sym:'H',x:D*1.2,y:-D*0.6}],
+    bonds:[[0,1,1],[0,2,1],[1,3,1]]
+  };
+  // CO2 O=C=O
+  if(F==='CO2') return {
+    atoms:[{sym:'O',x:-D*1.2,y:0},{sym:'C',x:0,y:0},{sym:'O',x:D*1.2,y:0}],
+    bonds:[[0,1,2],[1,2,2]]
+  };
+  // CO
+  if(F==='CO') return { atoms:[{sym:'C',x:-D/2,y:0},{sym:'O',x:D/2,y:0}], bonds:[[0,1,3]] };
+  // NH3 (pyramidal, drawn 2D)
+  if(F==='NH3') return {
+    atoms:[{sym:'N',x:0,y:0},{sym:'H',x:-D,y:D*0.6},{sym:'H',x:D,y:D*0.6},{sym:'H',x:0,y:-D}],
+    bonds:[[0,1,1],[0,2,1],[0,3,1]]
+  };
+  // CH4
+  if(F==='CH4') return {
+    atoms:[{sym:'C',x:0,y:0},{sym:'H',x:D,y:D},{sym:'H',x:-D,y:D},{sym:'H',x:D,y:-D},{sym:'H',x:-D,y:-D}],
+    bonds:[[0,1,1],[0,2,1],[0,3,1],[0,4,1]]
+  };
+  // HCl, HF, HBr, HI, HAt, HTs
+  const hx = F.match(/^H(F|Cl|Br|I|At|Ts)$/);
+  if(hx) return { atoms:[{sym:'H',x:-D/2,y:0},{sym:hx[1],x:D/2,y:0}], bonds:[[0,1,1]] };
+  // Simple binary salt M X : e.g. NaCl, KBr, LiI
+  const salt = F.match(/^([A-Z][a-z]?)([A-Z][a-z]?)$/);
+  if(salt && salt[1]!==salt[2]){
+    return { atoms:[{sym:salt[1],x:-D/2,y:0},{sym:salt[2],x:D/2,y:0}], bonds:[[0,1,1]] };
+  }
+  // MX2 (e.g. MgCl2, CaCl2, FeCl2)
+  const mx2 = F.match(/^([A-Z][a-z]?)([A-Z][a-z]?)2$/);
+  if(mx2) return {
+    atoms:[{sym:mx2[1],x:0,y:0},{sym:mx2[2],x:-D*1.1,y:0},{sym:mx2[2],x:D*1.1,y:0}],
+    bonds:[[0,1,1],[0,2,1]]
+  };
+  // MX3 (trigonal)
+  const mx3 = F.match(/^([A-Z][a-z]?)([A-Z][a-z]?)3$/);
+  if(mx3) return {
+    atoms:[{sym:mx3[1],x:0,y:0},{sym:mx3[2],x:D,y:0},{sym:mx3[2],x:-D*0.5,y:D*0.87},{sym:mx3[2],x:-D*0.5,y:-D*0.87}],
+    bonds:[[0,1,1],[0,2,1],[0,3,1]]
+  };
+  // M2O (alkali oxide)
+  const m2o = F.match(/^([A-Z][a-z]?)2O$/);
+  if(m2o) return {
+    atoms:[{sym:'O',x:0,y:0},{sym:m2o[1],x:-D*1.1,y:0},{sym:m2o[1],x:D*1.1,y:0}],
+    bonds:[[0,1,1],[0,2,1]]
+  };
+  // MO (transition oxide)
+  const mo = F.match(/^([A-Z][a-z]?)O$/);
+  if(mo) return { atoms:[{sym:mo[1],x:-D/2,y:0},{sym:'O',x:D/2,y:0}], bonds:[[0,1,2]] };
+  // M2O3
+  const m2o3 = F.match(/^([A-Z][a-z]?)2O3$/);
+  if(m2o3) return {
+    atoms:[
+      {sym:m2o3[1],x:-D*1.3,y:0},{sym:m2o3[1],x:D*1.3,y:0},
+      {sym:'O',x:0,y:-D*0.9},{sym:'O',x:0,y:D*0.9},{sym:'O',x:0,y:0}
+    ],
+    bonds:[[0,4,1],[1,4,1],[0,2,1],[1,3,1]]
+  };
+  // MOH (metal hydroxide)
+  const moh = F.match(/^([A-Z][a-z]?)OH$/);
+  if(moh) return {
+    atoms:[{sym:moh[1],x:-D,y:0},{sym:'O',x:0,y:0},{sym:'H',x:D,y:0}],
+    bonds:[[0,1,1],[1,2,1]]
+  };
+  // M(OH)2
+  const moh2 = F.match(/^([A-Z][a-z]?)\(OH\)2$/);
+  if(moh2) return {
+    atoms:[
+      {sym:moh2[1],x:0,y:0},
+      {sym:'O',x:-D*1.1,y:0},{sym:'H',x:-D*2.1,y:0},
+      {sym:'O',x:D*1.1,y:0},{sym:'H',x:D*2.1,y:0}
+    ],
+    bonds:[[0,1,1],[1,2,1],[0,3,1],[3,4,1]]
+  };
+  // Fe2O3
+  if(F==='Fe2O3') return {
+    atoms:[
+      {sym:'Fe',x:-D*1.3,y:0},{sym:'Fe',x:D*1.3,y:0},
+      {sym:'O',x:0,y:-D*0.9},{sym:'O',x:0,y:D*0.9},{sym:'O',x:0,y:0}
+    ],
+    bonds:[[0,4,1],[1,4,1],[0,2,1],[1,3,1]]
+  };
+  // Fallback: chain the atoms horizontally
+  return chainMolecule(F);
+}
+function chainMolecule(formula){
+  // Very rough tokenization: match Symbol then optional digit
+  const re = /([A-Z][a-z]?)(\d*)/g;
+  const atoms = [];
+  let m;
+  while((m = re.exec(formula))!==null){
+    const sym = m[1]; const n = m[2] ? +m[2] : 1;
+    for(let k=0;k<Math.min(n,4);k++) atoms.push({sym});
+  }
+  if(!atoms.length) return { atoms:[], bonds:[] };
+  const bonds = [];
+  atoms.forEach((a,i)=>{
+    a.x = (i-(atoms.length-1)/2)*D;
+    a.y = 0;
+    if(i>0) bonds.push([i-1,i,1]);
+  });
+  return { atoms, bonds };
+}
+
+/* ---- 3. build all atoms on each side, with initial positions ---- */
+function buildSide(groups, sideX, W, H){
+  // Cluster molecules vertically within their column
+  const nMolecules = groups.reduce((s,g)=>s+g.coef, 0);
+  const molecules = [];
+  groups.forEach(g=>{
+    for(let k=0;k<g.coef;k++){
+      molecules.push(moleculeShape(g.formula));
+    }
+  });
+  // Layout molecules in a vertical stack around center
+  const spacing = Math.min(90, (H-40)/Math.max(1,nMolecules));
+  molecules.forEach((mol,mi)=>{
+    const cy = H/2 + (mi - (nMolecules-1)/2)*spacing;
+    mol.atoms.forEach(a=>{
+      a.gx = sideX + a.x;
+      a.gy = cy + a.y;
+    });
+  });
+  // Flatten to atoms list with molecule index
+  const atoms = [];
+  molecules.forEach((m,mi)=>{
+    m.atoms.forEach((a,ai)=>atoms.push({
+      sym:a.sym, mi, ai, gx:a.gx, gy:a.gy
+    }));
+  });
+  return { molecules, atoms };
+}
+
+/* ---- 4. pair LHS atoms to RHS atoms of the same symbol ---- */
+function pairAtoms(left, right){
+  // Greedy nearest-neighbor by symbol
+  const rightAvail = right.map((r,i)=>({i, ...r, taken:false}));
+  const pairs = [];
+  left.forEach(l=>{
+    let best=-1, bestD=Infinity;
+    rightAvail.forEach((r,i)=>{
+      if(r.taken || r.sym!==l.sym) return;
+      const d = (r.gx-l.gx)**2 + (r.gy-l.gy)**2;
+      if(d<bestD){ bestD=d; best=i; }
+    });
+    if(best>=0){
+      rightAvail[best].taken=true;
+      pairs.push({ from:l, to:rightAvail[best] });
+    } else {
+      // No RHS partner (unbalanced eq); fade this atom out
+      pairs.push({ from:l, to:null });
+    }
+  });
+  // Any RHS atom with no LHS partner appears from thin air
+  const orphanRight = rightAvail.filter(r=>!r.taken).map(r=>({ from:null, to:r }));
+  return pairs.concat(orphanRight);
+}
+
+/* ---- 5. main animate ---- */
 function animateReaction(eq){
   const box = document.getElementById('rxAnimBox');
   box.classList.add('on');
   const canvas = document.getElementById('rxAnimCanvas');
   const ctx = canvas.getContext('2d');
   const rct = canvas.getBoundingClientRect();
+  if(rct.width<20 || rct.height<20) {
+    // re-try after layout
+    requestAnimationFrame(()=>animateReaction(eq));
+    return;
+  }
   canvas.width = rct.width*devicePixelRatio;
   canvas.height = rct.height*devicePixelRatio;
   ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);
   const W=rct.width, H=rct.height;
   cancelAnimationFrame(rxRAF);
+  clearTimeout(rxReplayTimer);
 
-  // Parse LHS and RHS very roughly for a visualization
-  const [lhs, rhs] = eq.split(/[→⇌]/).map(s=>s.trim());
-  // Extract atoms as tokens (very basic)
-  const leftAtoms = tokensToAtoms(lhs);
-  const rightAtoms = tokensToAtoms(rhs || lhs);
+  const parsed = parseEquation(eq);
+  // Reserve top strip for equation text
+  const topPad = 24, bottomPad = 24;
+  const inner = { top: topPad, bottom: H-bottomPad, h: H-topPad-bottomPad };
+  const drawH = inner.h;
+
+  const leftX  = W*0.20;
+  const rightX = W*0.80;
+
+  const leftSide  = buildSide(parsed.lhs, leftX,  W, drawH);
+  const rightSide = buildSide(parsed.rhs, rightX, W, drawH);
+  // shift y by topPad
+  leftSide.atoms.forEach(a=>a.gy += inner.top);
+  rightSide.atoms.forEach(a=>a.gy += inner.top);
+  leftSide.molecules.forEach(m=>m.atoms.forEach(a=>a.gy += inner.top));
+  rightSide.molecules.forEach(m=>m.atoms.forEach(a=>a.gy += inner.top));
+
+  const pairs = pairAtoms(leftSide.atoms, rightSide.atoms);
 
   const start = performance.now();
-  const dur = 4000;
+  const dur = 5500;
+
   function frame(){
     const p = Math.min(1, (performance.now()-start)/dur);
     ctx.clearRect(0,0,W,H);
-    // Draw left atoms migrating to right
-    const cyMid = H/2;
-    leftAtoms.forEach((a,i)=>{
-      const startX = 40 + (W-80)*0.15*(i/Math.max(1,leftAtoms.length-1));
-      const endX   = W - 40 - (W-80)*0.15*(i/Math.max(1,leftAtoms.length-1));
-      const x = startX + (endX-startX)*ease(p);
-      const y = cyMid + Math.sin(p*Math.PI*2 + i)*15*(1-p);
-      drawAtom(ctx, x, y, a);
+
+    // Determine phase
+    // 0.00 - 0.20 : approach   (reactants intact, drifting slightly)
+    // 0.20 - 0.45 : collide    (atoms move to a shared central cloud)
+    // 0.45 - 0.75 : reform     (atoms flow to their product positions)
+    // 0.75 - 1.00 : separate   (products drift apart to final layout)
+    // We build compound spline: LHS position → jitter-center → RHS position
+    const cx = W/2;
+    const cyC = H/2;
+    const scatterR = Math.min(W,H)*0.14;
+
+    // Draw bonds first (per side, with fade)
+    // LHS bonds fade out during 0.15-0.35
+    const lhsBondAlpha = 1 - smoothstep(0.15, 0.35, p);
+    if(lhsBondAlpha>0.02) drawSideBonds(ctx, leftSide, lhsBondAlpha, 0);
+    // RHS bonds fade in during 0.65-0.85
+    const rhsBondAlpha = smoothstep(0.65, 0.85, p);
+    if(rhsBondAlpha>0.02) drawSideBonds(ctx, rightSide, rhsBondAlpha, 1);
+
+    // Draw atoms with interpolated positions + collision flash
+    pairs.forEach((pair,idx)=>{
+      const from = pair.from, to = pair.to;
+      let x, y, sym, alpha = 1;
+      if(from && to){
+        sym = from.sym;
+        // 3-segment spline: from.gxy -> center-scatter -> to.gxy
+        const scatterAngle = (idx*2.399963); // golden angle for even spread
+        const scx = cx + Math.cos(scatterAngle)*scatterR;
+        const scy = cyC + Math.sin(scatterAngle)*scatterR;
+        if(p<0.45){
+          const local = smoothstep(0, 0.45, p);
+          x = lerp(from.gx, scx, local);
+          y = lerp(from.gy, scy, local);
+        } else {
+          const local = smoothstep(0.45, 1, p);
+          x = lerp(scx, to.gx, local);
+          y = lerp(scy, to.gy, local);
+        }
+        // Wobble during collision phase
+        if(p>0.35 && p<0.6){
+          const jitter = (1 - Math.abs(p-0.475)/0.125);
+          x += Math.sin(performance.now()/60 + idx)*3*jitter;
+          y += Math.cos(performance.now()/70 + idx*1.7)*3*jitter;
+        }
+      } else if(from){
+        // Fading out
+        sym = from.sym;
+        x = from.gx; y = from.gy;
+        alpha = 1 - smoothstep(0.3, 0.6, p);
+      } else {
+        // Fading in
+        sym = to.sym;
+        x = to.gx; y = to.gy;
+        alpha = smoothstep(0.5, 0.8, p);
+      }
+      drawAtom(ctx, x, y, sym, alpha);
     });
-    // Draw arrow
-    ctx.strokeStyle='rgba(0,212,255,0.5)';
-    ctx.lineWidth=2;
-    ctx.beginPath(); ctx.moveTo(W*0.45, cyMid); ctx.lineTo(W*0.55, cyMid); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(W*0.55, cyMid); ctx.lineTo(W*0.53, cyMid-4); ctx.lineTo(W*0.53, cyMid+4); ctx.closePath();
-    ctx.fillStyle='rgba(0,212,255,0.5)'; ctx.fill();
-    // Equation text
-    ctx.fillStyle='#fff';
-    ctx.font='bold 14px JetBrains Mono, monospace';
+
+    // Central collision flash
+    if(p>0.4 && p<0.55){
+      const flashA = (0.5 - Math.abs(p-0.475))*4;
+      const g = ctx.createRadialGradient(cx,cyC,0,cx,cyC,scatterR*2);
+      g.addColorStop(0, `rgba(255,255,200,${flashA*0.7})`);
+      g.addColorStop(1, 'rgba(255,255,200,0)');
+      ctx.fillStyle=g;
+      ctx.beginPath(); ctx.arc(cx,cyC,scatterR*2,0,Math.PI*2); ctx.fill();
+    }
+
+    // Arrow (always visible, brightens during middle)
+    const arrowA = 0.4 + Math.sin(p*Math.PI)*0.4;
+    ctx.strokeStyle = `rgba(0,212,255,${arrowA})`;
+    ctx.fillStyle   = `rgba(0,212,255,${arrowA})`;
+    ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(W*0.46, cyC); ctx.lineTo(W*0.54, cyC); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(W*0.54, cyC); ctx.lineTo(W*0.52, cyC-5); ctx.lineTo(W*0.52, cyC+5); ctx.closePath(); ctx.fill();
+
+    // Equation label at top
+    ctx.fillStyle='rgba(255,255,255,0.9)';
+    ctx.font='bold 13px JetBrains Mono, monospace';
     ctx.textAlign='center';
-    ctx.fillText(eq, W/2, H-20);
+    ctx.fillText(eq, W/2, 16);
+
+    // Phase label at bottom
+    const phaseName = p<0.2 ? (window.CURRENT_LANG==='zh-CN'?'反应物接近':'reactants approach')
+                    : p<0.5 ? (window.CURRENT_LANG==='zh-CN'?'键断裂':'bonds break')
+                    : p<0.8 ? (window.CURRENT_LANG==='zh-CN'?'键重组':'bonds re-form')
+                    :         (window.CURRENT_LANG==='zh-CN'?'生成物分离':'products separate');
+    ctx.fillStyle='rgba(0,212,255,0.7)';
+    ctx.font='10px JetBrains Mono, monospace';
+    ctx.textAlign='center';
+    ctx.fillText(phaseName, W/2, H-8);
+
     if(p<1) rxRAF = requestAnimationFrame(frame);
+    else {
+      // Freeze on final product state, replay after 1.5 s
+      rxReplayTimer = setTimeout(()=>animateReaction(eq), 1500);
+    }
   }
   frame();
 }
-function ease(t){ return t<0.5 ? 2*t*t : 1-Math.pow(-2*t+2,2)/2; }
-function tokensToAtoms(s){
-  // Extract element symbols (uppercase+lowercase?)
-  const re = /([A-Z][a-z]?)(\d*)/g;
-  const out = [];
-  let m;
-  while((m=re.exec(s))!==null){
-    const sym = m[1];
-    const count = m[2] ? +m[2] : 1;
-    for(let i=0;i<Math.min(count,3);i++) out.push(sym);
-    if(out.length>8) break;
-  }
-  return out;
+
+function lerp(a,b,t){ return a + (b-a)*t; }
+function smoothstep(a,b,t){
+  const x = Math.max(0, Math.min(1, (t-a)/(b-a)));
+  return x*x*(3-2*x);
 }
-function drawAtom(ctx, x, y, sym){
+function drawSideBonds(ctx, side, alpha, sideMarker){
+  side.molecules.forEach(mol=>{
+    mol.bonds.forEach(([i,j,order])=>{
+      const a = mol.atoms[i], b = mol.atoms[j];
+      ctx.strokeStyle = `rgba(255,255,255,${0.5*alpha})`;
+      ctx.lineWidth = 1.5;
+      if(order===1){
+        line(ctx, a.gx, a.gy, b.gx, b.gy);
+      } else if(order===2){
+        // parallel double lines
+        const dx = b.gy-a.gy, dy = -(b.gx-a.gx);
+        const L = Math.hypot(dx,dy) || 1;
+        const ox = dx/L*3, oy = dy/L*3;
+        line(ctx, a.gx+ox, a.gy+oy, b.gx+ox, b.gy+oy);
+        line(ctx, a.gx-ox, a.gy-oy, b.gx-ox, b.gy-oy);
+      } else {
+        // triple
+        const dx = b.gy-a.gy, dy = -(b.gx-a.gx);
+        const L = Math.hypot(dx,dy) || 1;
+        const ox = dx/L*3, oy = dy/L*3;
+        line(ctx, a.gx, a.gy, b.gx, b.gy);
+        line(ctx, a.gx+ox, a.gy+oy, b.gx+ox, b.gy+oy);
+        line(ctx, a.gx-ox, a.gy-oy, b.gx-ox, b.gy-oy);
+      }
+    });
+  });
+}
+function line(ctx, x1,y1,x2,y2){ ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke(); }
+
+function drawAtom(ctx, x, y, sym, alpha=1){
   const cat = symToCategory(sym);
   const color = CATEGORY_COLORS[cat] || '#7fe3ff';
-  const g = ctx.createRadialGradient(x,y,0,x,y,22);
+  ctx.save();
+  ctx.globalAlpha = alpha;
+  const g = ctx.createRadialGradient(x,y,0,x,y,20);
   g.addColorStop(0, color);
   g.addColorStop(1, color+'00');
   ctx.fillStyle=g;
-  ctx.beginPath(); ctx.arc(x,y,22,0,Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(x,y,20,0,Math.PI*2); ctx.fill();
   ctx.fillStyle=color;
-  ctx.beginPath(); ctx.arc(x,y,12,0,Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(x,y,11,0,Math.PI*2); ctx.fill();
+  // white outline for contrast
+  ctx.strokeStyle='rgba(255,255,255,0.35)';
+  ctx.lineWidth=1;
+  ctx.beginPath(); ctx.arc(x,y,11,0,Math.PI*2); ctx.stroke();
   ctx.fillStyle='#fff';
-  ctx.font='bold 11px JetBrains Mono, monospace';
+  ctx.font='bold 10px JetBrains Mono, monospace';
   ctx.textAlign='center'; ctx.textBaseline='middle';
   ctx.fillText(sym, x, y);
   ctx.textBaseline='alphabetic';
+  ctx.restore();
 }
 function symToCategory(sym){
   for(const z in ELEMENTS) if(ELEMENTS[z].symbol===sym) return ELEMENTS[z].category;
