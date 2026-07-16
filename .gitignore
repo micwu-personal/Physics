@@ -25,3 +25,9 @@ __pycache__/
 *.py[cod]
 .venv/
 venv/
+
+# Private / local-only files (prompt logs, notes, drafts)
+.prompts.md
+.prompts/
+.notes.md
+.private/
