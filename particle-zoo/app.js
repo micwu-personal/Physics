@@ -967,3 +967,595 @@ const browserLang = (navigator.language||'').toLowerCase();
 const initLang = savedLang || (browserLang.startsWith('zh') ? 'zh-CN' : 'en');
 applyI18n(initLang);
 showParticle('electron');
+
+/* ================ FORCES TAB: animated interaction diagrams ================ */
+/* Each diagram is an SVG. We build a stable structure of static "shape" paths
+   (fermion arrows, vertices, labels) and animated "carrier" paths (photon/
+   gluon/W/Z wiggles). Carrier paths get their `d` attribute rewritten each
+   frame with a phase-shifted waveform so the mediator visibly propagates. */
+
+const IX_W = 320, IX_H = 110;              // SVG viewbox
+const IX_PAD_X = 22, IX_PAD_Y = 14;
+
+// ---- waveform helpers (return SVG path `d` strings) ----
+function ixWavy(x1,y1,x2,y2,phase,amp=6,freq=6){
+  // sine wiggle perpendicular to the segment (photon)
+  const dx=x2-x1, dy=y2-y1, L=Math.hypot(dx,dy);
+  const ux=dx/L, uy=dy/L, nx=-uy, ny=ux;
+  const N=Math.max(24, Math.round(L/4));
+  let d='';
+  for(let i=0;i<=N;i++){
+    const t=i/N;
+    const s=Math.sin(t*freq*Math.PI*2 + phase)*amp;
+    const px=x1+ux*L*t + nx*s;
+    const py=y1+uy*L*t + ny*s;
+    d += (i?'L':'M') + px.toFixed(2) + ' ' + py.toFixed(2) + ' ';
+  }
+  return d;
+}
+function ixCurly(x1,y1,x2,y2,phase,amp=7,freq=7){
+  // helical/curly (gluon): two orthogonal sinusoids
+  const dx=x2-x1, dy=y2-y1, L=Math.hypot(dx,dy);
+  const ux=dx/L, uy=dy/L, nx=-uy, ny=ux;
+  const N=Math.max(28, Math.round(L/3));
+  let d='';
+  for(let i=0;i<=N;i++){
+    const t=i/N;
+    const ang=t*freq*Math.PI*2 + phase;
+    const s=Math.sin(ang)*amp;
+    const c=Math.cos(ang)*amp*0.55;
+    const px=x1+ux*(L*t + c) + nx*s;
+    const py=y1+uy*(L*t + c) + ny*s;
+    d += (i?'L':'M') + px.toFixed(2) + ' ' + py.toFixed(2) + ' ';
+  }
+  return d;
+}
+function ixDashPhase(el, phase){ el.setAttribute('stroke-dashoffset', String(-phase*12)); }
+
+// ---- primitive shape builders (return SVG element strings) ----
+function ixArrow(x1,y1,x2,y2,color,label,labelAt='mid',anti=false){
+  // draws a fermion line with a small arrowhead (reversed if antiparticle)
+  const mx=(x1+x2)/2, my=(y1+y2)/2;
+  const dx=x2-x1, dy=y2-y1, L=Math.hypot(dx,dy)||1;
+  const ux=dx/L, uy=dy/L;
+  const dir = anti ? -1 : 1;
+  const ax=mx - ux*6*dir, ay=my - uy*6*dir;
+  const bx=mx + ux*6*dir, by=my + uy*6*dir;
+  const nx=-uy, ny=ux;
+  const head = `M${bx} ${by} L${ax + nx*4} ${ay + ny*4} L${ax - nx*4} ${ay - ny*4} Z`;
+  let lx, ly, anchor='middle';
+  if(labelAt==='start'){ lx=x1-4; ly=y1-4; anchor='end'; }
+  else if(labelAt==='end'){ lx=x2+4; ly=y2-4; anchor='start'; }
+  else { lx=mx + nx*12; ly=my + ny*12 + 4; }
+  return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${color}" stroke-width="1.6"/>`
+       + `<path d="${head}" fill="${color}"/>`
+       + (label?`<text x="${lx}" y="${ly}" text-anchor="${anchor}" fill="${color}" font-size="11" font-family="JetBrains Mono, monospace">${label}</text>`:'');
+}
+function ixVertex(x,y,color='#fff'){
+  return `<circle cx="${x}" cy="${y}" r="2.6" fill="${color}"/>`;
+}
+function ixNucleus(x,y,label='N'){
+  return `<circle cx="${x}" cy="${y}" r="10" fill="rgba(255,255,255,0.06)" stroke="#8fa" stroke-dasharray="2 2"/>`
+       + `<text x="${x}" y="${y+4}" text-anchor="middle" fill="#8fa" font-size="10" font-family="JetBrains Mono, monospace">${label}</text>`;
+}
+
+// ---- interaction definitions ----
+// Each entry has: id, group, tag, i18nTitle, i18nNote, equation, render(svg, phase)
+// render() returns an object { staticSvg, animate(t) } — we call render once
+// per tile at build time; animate() mutates specific child nodes each frame.
+
+const IX_DEFS = [
+  // ========== COMMON ==========
+  { id:'beta', group:'common', tag:'weak', tagKey:'ix.tag.weak',
+    title:'ix.beta', note:'ix.beta.note',
+    eq:'d → u + W⁻ → u + e⁻ + ν̄ₑ',
+    build(){
+      // neutron (d,u,d) on left, proton (u,u,d) on right; one d emits W⁻ → e⁻ + ν̄
+      // vertical layout: three quark lines going L→R, middle one kinks at vertex.
+      const y1=25,y2=55,y3=85, xL=IX_PAD_X, xR=IX_W-IX_PAD_X, xV=140;
+      let s='';
+      s += ixArrow(xL,y1,xR,y1,'#ff6b9d','u','end');            // u stays u
+      s += ixArrow(xL,y3,xR,y3,'#ff6b9d','d','end');            // d stays d
+      // middle quark kinks: d (LEFT segment) then u (RIGHT segment)
+      s += ixArrow(xL,y2,xV,y2,'#ff6b9d','d','start');
+      s += ixArrow(xV,y2,xR,y2,'#ff6b9d','u','end');
+      s += ixVertex(xV,y2);
+      // W⁻ boson: dashed line up-right to a second vertex; then decays to e⁻, ν̄
+      const xW=210, yW=35;
+      s += `<path class="ix-w" d="M${xV} ${y2} L${xW} ${yW}" stroke="#7ee8c5" stroke-width="1.6" stroke-dasharray="5 3" fill="none"/>`;
+      s += `<text x="${(xV+xW)/2+6}" y="${(y2+yW)/2}" fill="#7ee8c5" font-size="11" font-family="JetBrains Mono, monospace">W⁻</text>`;
+      s += ixVertex(xW,yW,'#7ee8c5');
+      s += ixArrow(xW,yW,xR,15,'#ffd166','e⁻','end');
+      s += ixArrow(xW,yW,xR,55,'#c8cff0','ν̄ₑ','end',true);
+      // proton bracket right, neutron bracket left
+      s += `<text x="${xL-6}" y="60" text-anchor="end" fill="#8fa" font-size="10">n</text>`;
+      s += `<text x="${xR+6}" y="60" text-anchor="start" fill="#8fa" font-size="10">p</text>`;
+      return { svg:s, anim(el,t){ const w=el.querySelector('.ix-w'); if(w) ixDashPhase(w,t*2); } };
+    }
+  },
+
+  { id:'annih', group:'common', tag:'em', tagKey:'ix.tag.em',
+    title:'ix.annih', note:'ix.annih.note',
+    eq:'e⁻ + e⁺ → γ + γ',
+    build(){
+      const xV=IX_W/2, yV=IX_H/2;
+      let s='';
+      s += ixArrow(IX_PAD_X,25,xV,yV,'#ffd166','e⁻','start');
+      s += ixArrow(IX_PAD_X,85,xV,yV,'#ffd166','e⁺','start',true);
+      s += ixVertex(xV,yV);
+      s += `<path class="ix-ph1" d="" stroke="#ffd166" stroke-width="1.6" fill="none"/>`;
+      s += `<path class="ix-ph2" d="" stroke="#ffd166" stroke-width="1.6" fill="none"/>`;
+      s += `<text x="${IX_W-IX_PAD_X+2}" y="28" fill="#ffd166" font-size="11" font-family="JetBrains Mono, monospace">γ</text>`;
+      s += `<text x="${IX_W-IX_PAD_X+2}" y="90" fill="#ffd166" font-size="11" font-family="JetBrains Mono, monospace">γ</text>`;
+      return { svg:s, anim(el,t){
+        const p1=el.querySelector('.ix-ph1'), p2=el.querySelector('.ix-ph2');
+        if(p1) p1.setAttribute('d', ixWavy(xV,yV,IX_W-IX_PAD_X,25,-t*4));
+        if(p2) p2.setAttribute('d', ixWavy(xV,yV,IX_W-IX_PAD_X,85,-t*4));
+      }};
+    }
+  },
+
+  { id:'pair', group:'common', tag:'em', tagKey:'ix.tag.em',
+    title:'ix.pair', note:'ix.pair.note',
+    eq:'γ → e⁻ + e⁺  (near nucleus)',
+    build(){
+      const xV=IX_W/2, yV=IX_H/2;
+      let s='';
+      s += ixNucleus(xV+10, yV+30, 'N');
+      s += `<path class="ix-ph" d="" stroke="#ffd166" stroke-width="1.6" fill="none"/>`;
+      s += `<text x="${IX_PAD_X-2}" y="${yV-4}" text-anchor="end" fill="#ffd166" font-size="11" font-family="JetBrains Mono, monospace">γ</text>`;
+      s += ixVertex(xV,yV);
+      s += ixArrow(xV,yV,IX_W-IX_PAD_X,25,'#ffd166','e⁻','end');
+      s += ixArrow(xV,yV,IX_W-IX_PAD_X,85,'#ffd166','e⁺','end',true);
+      return { svg:s, anim(el,t){
+        const p=el.querySelector('.ix-ph');
+        if(p) p.setAttribute('d', ixWavy(IX_PAD_X,yV,xV,yV,-t*4));
+      }};
+    }
+  },
+
+  { id:'fusion', group:'common', tag:'weak', tagKey:'ix.tag.weak',
+    title:'ix.fusion', note:'ix.fusion.note',
+    eq:'p + p → ²H + e⁺ + νₑ',
+    build(){
+      const xV=140, yV=IX_H/2;
+      let s='';
+      s += ixArrow(IX_PAD_X,25,xV,40,'#ff6b9d','p','start');
+      s += ixArrow(IX_PAD_X,85,xV,70,'#ff6b9d','p','start');
+      s += ixVertex(xV,55);
+      // fused ²H going right
+      s += ixArrow(xV,55,IX_W-IX_PAD_X,55,'#8fa','²H','end');
+      // W⁺ up to positron + nu
+      const xW=210, yW=25;
+      s += `<path class="ix-w" d="M${xV} ${yV} L${xW} ${yW}" stroke="#7ee8c5" stroke-width="1.6" stroke-dasharray="5 3" fill="none"/>`;
+      s += `<text x="${(xV+xW)/2}" y="${(yV+yW)/2-2}" fill="#7ee8c5" font-size="11" font-family="JetBrains Mono, monospace">W⁺</text>`;
+      s += ixVertex(xW,yW,'#7ee8c5');
+      s += ixArrow(xW,yW,IX_W-IX_PAD_X,12,'#ffd166','e⁺','end',true);
+      s += ixArrow(xW,yW,IX_W-IX_PAD_X,32,'#c8cff0','νₑ','end');
+      return { svg:s, anim(el,t){ const w=el.querySelector('.ix-w'); if(w) ixDashPhase(w,t*2); } };
+    }
+  },
+
+  { id:'higgs', group:'common', tag:'higgs', tagKey:'ix.tag.higgs',
+    title:'ix.higgs', note:'ix.higgs.note',
+    eq:'H → (t or W loop) → γ + γ',
+    build(){
+      const xL=IX_PAD_X, xLoop=130, xR=IX_W-IX_PAD_X, yC=IX_H/2;
+      let s='';
+      s += `<path class="ix-h" d="M${xL} ${yC} L${xLoop} ${yC}" stroke="#c39bff" stroke-width="1.8" stroke-dasharray="6 4" fill="none"/>`;
+      s += `<text x="${xL-2}" y="${yC-6}" text-anchor="end" fill="#c39bff" font-size="11" font-family="JetBrains Mono, monospace">H</text>`;
+      // loop (t or W)
+      s += `<ellipse cx="${xLoop+14}" cy="${yC}" rx="14" ry="12" fill="none" stroke="#ff6b9d" stroke-width="1.4"/>`;
+      s += `<text x="${xLoop+14}" y="${yC+3}" text-anchor="middle" fill="#ff6b9d" font-size="9" font-family="JetBrains Mono, monospace">t/W</text>`;
+      // two photons
+      s += `<path class="ix-ph1" d="" stroke="#ffd166" stroke-width="1.6" fill="none"/>`;
+      s += `<path class="ix-ph2" d="" stroke="#ffd166" stroke-width="1.6" fill="none"/>`;
+      s += `<text x="${xR+2}" y="28" fill="#ffd166" font-size="11" font-family="JetBrains Mono, monospace">γ</text>`;
+      s += `<text x="${xR+2}" y="90" fill="#ffd166" font-size="11" font-family="JetBrains Mono, monospace">γ</text>`;
+      const vx=xLoop+28;
+      return { svg:s, anim(el,t){
+        const h=el.querySelector('.ix-h'); if(h) ixDashPhase(h,t*2);
+        const p1=el.querySelector('.ix-ph1'), p2=el.querySelector('.ix-ph2');
+        if(p1) p1.setAttribute('d', ixWavy(vx,yC-8,xR,25,-t*4));
+        if(p2) p2.setAttribute('d', ixWavy(vx,yC+8,xR,85,-t*4));
+      }};
+    }
+  },
+
+  { id:'gluon', group:'common', tag:'strong', tagKey:'ix.tag.strong',
+    title:'ix.gluon', note:'ix.gluon.note',
+    eq:'q + q → q + q  (via g)',
+    build(){
+      const xL=IX_PAD_X, xR=IX_W-IX_PAD_X;
+      const vT_x=IX_W/2, vT_y=32;
+      const vB_x=IX_W/2, vB_y=78;
+      let s='';
+      s += ixArrow(xL,vT_y,vT_x,vT_y,'#ff6b9d','q','start');
+      s += ixArrow(vT_x,vT_y,xR,vT_y,'#ff6b9d','q','end');
+      s += ixArrow(xL,vB_y,vB_x,vB_y,'#ff6b9d','q','start');
+      s += ixArrow(vB_x,vB_y,xR,vB_y,'#ff6b9d','q','end');
+      s += ixVertex(vT_x,vT_y); s += ixVertex(vB_x,vB_y);
+      s += `<path class="ix-g" d="" stroke="#ff6b9d" stroke-width="1.6" fill="none"/>`;
+      s += `<text x="${vT_x+8}" y="${(vT_y+vB_y)/2+4}" fill="#ff6b9d" font-size="11" font-family="JetBrains Mono, monospace">g</text>`;
+      return { svg:s, anim(el,t){
+        const g=el.querySelector('.ix-g');
+        if(g) g.setAttribute('d', ixCurly(vT_x,vT_y,vB_x,vB_y,t*4));
+      }};
+    }
+  },
+
+  // ========== FORCE CARRIER EXCHANGE ==========
+  { id:'ex-strong', group:'exchange', tag:'strong', tagKey:'ix.tag.strong',
+    title:'ix.ex.strong', note:'ix.ex.strong.note',
+    eq:'q ⇄ q  via g',
+    build(){
+      const xL=IX_PAD_X, xR=IX_W-IX_PAD_X;
+      const vT=[IX_W/2,32], vB=[IX_W/2,78];
+      let s='';
+      s += ixArrow(xL,vT[1],vT[0],vT[1],'#ff6b9d','q₁','start');
+      s += ixArrow(vT[0],vT[1],xR,vT[1],'#ff6b9d','q₁','end');
+      s += ixArrow(xL,vB[1],vB[0],vB[1],'#ff6b9d','q₂','start');
+      s += ixArrow(vB[0],vB[1],xR,vB[1],'#ff6b9d','q₂','end');
+      s += ixVertex(vT[0],vT[1]); s += ixVertex(vB[0],vB[1]);
+      s += `<path class="ix-g" d="" stroke="#ff6b9d" stroke-width="1.6" fill="none"/>`;
+      s += `<text x="${vT[0]+8}" y="55" fill="#ff6b9d" font-size="11" font-family="JetBrains Mono, monospace">g</text>`;
+      return { svg:s, anim(el,t){
+        const g=el.querySelector('.ix-g');
+        if(g) g.setAttribute('d', ixCurly(vT[0],vT[1],vB[0],vB[1],t*4));
+      }};
+    }
+  },
+
+  { id:'ex-em', group:'exchange', tag:'em', tagKey:'ix.tag.em',
+    title:'ix.ex.em', note:'ix.ex.em.note',
+    eq:'e⁻ + e⁻ → e⁻ + e⁻  via γ',
+    build(){
+      const xL=IX_PAD_X, xR=IX_W-IX_PAD_X;
+      const vT=[IX_W/2,32], vB=[IX_W/2,78];
+      let s='';
+      s += ixArrow(xL,vT[1],vT[0],vT[1],'#ffd166','e⁻','start');
+      s += ixArrow(vT[0],vT[1],xR,vT[1],'#ffd166','e⁻','end');
+      s += ixArrow(xL,vB[1],vB[0],vB[1],'#ffd166','e⁻','start');
+      s += ixArrow(vB[0],vB[1],xR,vB[1],'#ffd166','e⁻','end');
+      s += ixVertex(vT[0],vT[1]); s += ixVertex(vB[0],vB[1]);
+      s += `<path class="ix-ph" d="" stroke="#ffd166" stroke-width="1.6" fill="none"/>`;
+      s += `<text x="${vT[0]+8}" y="55" fill="#ffd166" font-size="11" font-family="JetBrains Mono, monospace">γ</text>`;
+      return { svg:s, anim(el,t){
+        const p=el.querySelector('.ix-ph');
+        if(p) p.setAttribute('d', ixWavy(vT[0],vT[1],vB[0],vB[1],t*4));
+      }};
+    }
+  },
+
+  { id:'ex-weak', group:'exchange', tag:'weak', tagKey:'ix.tag.weak',
+    title:'ix.ex.weak', note:'ix.ex.weak.note',
+    eq:'νₑ + n → e⁻ + p  via W',
+    build(){
+      const xL=IX_PAD_X, xR=IX_W-IX_PAD_X;
+      const vT=[IX_W/2,32], vB=[IX_W/2,78];
+      let s='';
+      s += ixArrow(xL,vT[1],vT[0],vT[1],'#c8cff0','νₑ','start');
+      s += ixArrow(vT[0],vT[1],xR,vT[1],'#ffd166','e⁻','end');
+      s += ixArrow(xL,vB[1],vB[0],vB[1],'#ff6b9d','d','start');
+      s += ixArrow(vB[0],vB[1],xR,vB[1],'#ff6b9d','u','end');
+      s += ixVertex(vT[0],vT[1]); s += ixVertex(vB[0],vB[1]);
+      s += `<path class="ix-w" d="M${vT[0]} ${vT[1]} L${vB[0]} ${vB[1]}" stroke="#7ee8c5" stroke-width="1.6" stroke-dasharray="5 3" fill="none"/>`;
+      s += `<text x="${vT[0]+8}" y="55" fill="#7ee8c5" font-size="11" font-family="JetBrains Mono, monospace">W⁻</text>`;
+      return { svg:s, anim(el,t){ const w=el.querySelector('.ix-w'); if(w) ixDashPhase(w,t*2); } };
+    }
+  },
+
+  { id:'ex-grav', group:'exchange', tag:'grav', tagKey:'ix.tag.grav',
+    title:'ix.ex.grav', note:'ix.ex.grav.note',
+    eq:'M + M  via graviton?',
+    build(){
+      const xL=IX_PAD_X, xR=IX_W-IX_PAD_X;
+      const vT=[IX_W/2,32], vB=[IX_W/2,78];
+      let s='';
+      s += `<circle cx="${xL+8}" cy="${vT[1]}" r="6" fill="#7c5cff"/>`;
+      s += `<circle cx="${xR-8}" cy="${vT[1]}" r="6" fill="#7c5cff"/>`;
+      s += `<circle cx="${xL+8}" cy="${vB[1]}" r="6" fill="#7c5cff"/>`;
+      s += `<circle cx="${xR-8}" cy="${vB[1]}" r="6" fill="#7c5cff"/>`;
+      s += `<line x1="${xL+14}" y1="${vT[1]}" x2="${vT[0]}" y2="${vT[1]}" stroke="#7c5cff" stroke-width="1.4"/>`;
+      s += `<line x1="${vT[0]}" y1="${vT[1]}" x2="${xR-14}" y2="${vT[1]}" stroke="#7c5cff" stroke-width="1.4"/>`;
+      s += `<line x1="${xL+14}" y1="${vB[1]}" x2="${vB[0]}" y2="${vB[1]}" stroke="#7c5cff" stroke-width="1.4"/>`;
+      s += `<line x1="${vB[0]}" y1="${vB[1]}" x2="${xR-14}" y2="${vB[1]}" stroke="#7c5cff" stroke-width="1.4"/>`;
+      s += ixVertex(vT[0],vT[1],'#7c5cff'); s += ixVertex(vB[0],vB[1],'#7c5cff');
+      // graviton: double wavy line (spin 2 hint)
+      s += `<path class="ix-gr1" d="" stroke="#7c5cff" stroke-width="1.4" fill="none" opacity="0.9"/>`;
+      s += `<path class="ix-gr2" d="" stroke="#7c5cff" stroke-width="1.4" fill="none" opacity="0.6"/>`;
+      s += `<text x="${vT[0]+10}" y="55" fill="#7c5cff" font-size="11" font-family="JetBrains Mono, monospace">G?</text>`;
+      return { svg:s, anim(el,t){
+        const g1=el.querySelector('.ix-gr1'), g2=el.querySelector('.ix-gr2');
+        if(g1) g1.setAttribute('d', ixWavy(vT[0]-3,vT[1],vB[0]-3,vB[1],t*3,4,4));
+        if(g2) g2.setAttribute('d', ixWavy(vT[0]+3,vT[1],vB[0]+3,vB[1],t*3+Math.PI,4,4));
+      }};
+    }
+  },
+
+  { id:'ex-higgs', group:'exchange', tag:'higgs', tagKey:'ix.tag.higgs',
+    title:'ix.ex.higgs', note:'ix.ex.higgs.note',
+    eq:'f + H → f  (mass coupling)',
+    build(){
+      const xL=IX_PAD_X, xR=IX_W-IX_PAD_X, yC=IX_H/2;
+      const xV=IX_W/2;
+      let s='';
+      s += ixArrow(xL,yC,xV,yC,'#ffd166','f','start');
+      s += ixArrow(xV,yC,xR,yC,'#ffd166','f','end');
+      s += ixVertex(xV,yC);
+      s += `<path class="ix-h" d="M${xV} ${yC} L${xV} 20" stroke="#c39bff" stroke-width="1.8" stroke-dasharray="6 4" fill="none"/>`;
+      s += `<text x="${xV+6}" y="20" fill="#c39bff" font-size="11" font-family="JetBrains Mono, monospace">H</text>`;
+      // background: subtle Higgs field dots
+      for(let i=0;i<10;i++){
+        const cx=xL+10+Math.random()*(xR-xL-20);
+        const cy=yC+22+Math.random()*20;
+        s += `<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="1" fill="#c39bff" opacity="0.35"/>`;
+      }
+      return { svg:s, anim(el,t){ const h=el.querySelector('.ix-h'); if(h) ixDashPhase(h,t*2); } };
+    }
+  },
+
+  // ========== RARE / HIGH-ENERGY ==========
+  { id:'compton', group:'rare', tag:'em', tagKey:'ix.tag.em',
+    title:'ix.compton', note:'ix.compton.note',
+    eq:'γ + e⁻ → γ + e⁻',
+    build(){
+      const xL=IX_PAD_X, xR=IX_W-IX_PAD_X;
+      const v1=[IX_W*0.42, 55], v2=[IX_W*0.58, 55];
+      let s='';
+      s += ixArrow(xL,80,v1[0],v1[1],'#ffd166','e⁻','start');
+      s += ixArrow(v2[0],v2[1],xR,80,'#ffd166','e⁻','end');
+      s += `<line x1="${v1[0]}" y1="${v1[1]}" x2="${v2[0]}" y2="${v2[1]}" stroke="#ffd166" stroke-width="1.6"/>`;
+      s += ixVertex(v1[0],v1[1]); s += ixVertex(v2[0],v2[1]);
+      s += `<path class="ix-ph1" d="" stroke="#ffd166" stroke-width="1.6" fill="none"/>`;
+      s += `<path class="ix-ph2" d="" stroke="#ffd166" stroke-width="1.6" fill="none"/>`;
+      s += `<text x="${xL-2}" y="26" text-anchor="end" fill="#ffd166" font-size="11" font-family="JetBrains Mono, monospace">γ</text>`;
+      s += `<text x="${xR+2}" y="26" fill="#ffd166" font-size="11" font-family="JetBrains Mono, monospace">γ</text>`;
+      return { svg:s, anim(el,t){
+        const p1=el.querySelector('.ix-ph1'), p2=el.querySelector('.ix-ph2');
+        if(p1) p1.setAttribute('d', ixWavy(xL,30,v1[0],v1[1],-t*4));
+        if(p2) p2.setAttribute('d', ixWavy(v2[0],v2[1],xR,30,-t*4));
+      }};
+    }
+  },
+
+  { id:'moller', group:'rare', tag:'em', tagKey:'ix.tag.em',
+    title:'ix.moller', note:'ix.moller.note',
+    eq:'e⁻ + e⁻ → e⁻ + e⁻',
+    build(){
+      const xL=IX_PAD_X, xR=IX_W-IX_PAD_X;
+      const vT=[IX_W/2,32], vB=[IX_W/2,78];
+      let s='';
+      s += ixArrow(xL,vT[1],vT[0],vT[1],'#ffd166','e⁻','start');
+      s += ixArrow(vT[0],vT[1],xR,vT[1],'#ffd166','e⁻','end');
+      s += ixArrow(xL,vB[1],vB[0],vB[1],'#ffd166','e⁻','start');
+      s += ixArrow(vB[0],vB[1],xR,vB[1],'#ffd166','e⁻','end');
+      s += ixVertex(vT[0],vT[1]); s += ixVertex(vB[0],vB[1]);
+      s += `<path class="ix-ph" d="" stroke="#ffd166" stroke-width="1.6" fill="none"/>`;
+      s += `<text x="${vT[0]+8}" y="55" fill="#ffd166" font-size="11" font-family="JetBrains Mono, monospace">γ*</text>`;
+      return { svg:s, anim(el,t){
+        const p=el.querySelector('.ix-ph');
+        if(p) p.setAttribute('d', ixWavy(vT[0],vT[1],vB[0],vB[1],t*4));
+      }};
+    }
+  },
+
+  { id:'bhabha', group:'rare', tag:'em', tagKey:'ix.tag.em',
+    title:'ix.bhabha', note:'ix.bhabha.note',
+    eq:'e⁻ + e⁺ → e⁻ + e⁺',
+    build(){
+      const xL=IX_PAD_X, xR=IX_W-IX_PAD_X;
+      const vT=[IX_W/2,32], vB=[IX_W/2,78];
+      let s='';
+      s += ixArrow(xL,vT[1],vT[0],vT[1],'#ffd166','e⁻','start');
+      s += ixArrow(vT[0],vT[1],xR,vT[1],'#ffd166','e⁻','end');
+      s += ixArrow(xL,vB[1],vB[0],vB[1],'#ffd166','e⁺','start',true);
+      s += ixArrow(vB[0],vB[1],xR,vB[1],'#ffd166','e⁺','end',true);
+      s += ixVertex(vT[0],vT[1]); s += ixVertex(vB[0],vB[1]);
+      s += `<path class="ix-ph" d="" stroke="#ffd166" stroke-width="1.6" fill="none"/>`;
+      s += `<text x="${vT[0]+8}" y="55" fill="#ffd166" font-size="11" font-family="JetBrains Mono, monospace">γ*</text>`;
+      return { svg:s, anim(el,t){
+        const p=el.querySelector('.ix-ph');
+        if(p) p.setAttribute('d', ixWavy(vT[0],vT[1],vB[0],vB[1],t*4));
+      }};
+    }
+  },
+
+  { id:'bremss', group:'rare', tag:'em', tagKey:'ix.tag.em',
+    title:'ix.bremss', note:'ix.bremss.note',
+    eq:'e⁻ + N → e⁻ + N + γ',
+    build(){
+      const xL=IX_PAD_X, xR=IX_W-IX_PAD_X, yC=IX_H/2;
+      const xV=IX_W*0.55;
+      let s='';
+      s += ixArrow(xL,yC,xV,yC,'#ffd166','e⁻','start');
+      s += ixArrow(xV,yC,xR,80,'#ffd166','e⁻','end');
+      s += ixVertex(xV,yC);
+      s += ixNucleus(xV, 92, 'N');
+      s += `<line x1="${xV}" y1="${yC}" x2="${xV}" y2="88" stroke="#8fa" stroke-width="1.2" stroke-dasharray="2 2"/>`;
+      s += `<path class="ix-ph" d="" stroke="#ffd166" stroke-width="1.6" fill="none"/>`;
+      s += `<text x="${xR+2}" y="28" fill="#ffd166" font-size="11" font-family="JetBrains Mono, monospace">γ</text>`;
+      return { svg:s, anim(el,t){
+        const p=el.querySelector('.ix-ph');
+        if(p) p.setAttribute('d', ixWavy(xV,yC,xR,25,-t*4));
+      }};
+    }
+  },
+
+  { id:'neutron', group:'rare', tag:'weak', tagKey:'ix.tag.weak',
+    title:'ix.neutron', note:'ix.neutron.note',
+    eq:'n → p + e⁻ + ν̄ₑ',
+    build(){
+      const xL=IX_PAD_X, xR=IX_W-IX_PAD_X, yC=IX_H/2;
+      const xV=IX_W*0.5;
+      let s='';
+      s += ixArrow(xL,yC,xV,yC,'#8fa','n','start');
+      s += ixArrow(xV,yC,xR,yC,'#8fa','p','end');
+      s += ixVertex(xV,yC);
+      const xW=IX_W*0.72, yW=30;
+      s += `<path class="ix-w" d="M${xV} ${yC} L${xW} ${yW}" stroke="#7ee8c5" stroke-width="1.6" stroke-dasharray="5 3" fill="none"/>`;
+      s += `<text x="${(xV+xW)/2-4}" y="${(yC+yW)/2}" fill="#7ee8c5" font-size="11" font-family="JetBrains Mono, monospace">W⁻</text>`;
+      s += ixVertex(xW,yW,'#7ee8c5');
+      s += ixArrow(xW,yW,xR,12,'#ffd166','e⁻','end');
+      s += ixArrow(xW,yW,xR,45,'#c8cff0','ν̄ₑ','end',true);
+      return { svg:s, anim(el,t){ const w=el.querySelector('.ix-w'); if(w) ixDashPhase(w,t*2); } };
+    }
+  },
+
+  { id:'muon', group:'rare', tag:'weak', tagKey:'ix.tag.weak',
+    title:'ix.muon', note:'ix.muon.note',
+    eq:'μ⁻ → e⁻ + ν̄ₑ + νμ',
+    build(){
+      const xL=IX_PAD_X, xR=IX_W-IX_PAD_X, yC=IX_H/2;
+      const xV=IX_W*0.42;
+      let s='';
+      s += ixArrow(xL,yC,xV,yC,'#ffd166','μ⁻','start');
+      s += ixArrow(xV,yC,xR,yC,'#c8cff0','νμ','end');
+      s += ixVertex(xV,yC);
+      const xW=IX_W*0.66, yW=32;
+      s += `<path class="ix-w" d="M${xV} ${yC} L${xW} ${yW}" stroke="#7ee8c5" stroke-width="1.6" stroke-dasharray="5 3" fill="none"/>`;
+      s += `<text x="${(xV+xW)/2-4}" y="${(yC+yW)/2}" fill="#7ee8c5" font-size="11" font-family="JetBrains Mono, monospace">W⁻</text>`;
+      s += ixVertex(xW,yW,'#7ee8c5');
+      s += ixArrow(xW,yW,xR,15,'#ffd166','e⁻','end');
+      s += ixArrow(xW,yW,xR,45,'#c8cff0','ν̄ₑ','end',true);
+      return { svg:s, anim(el,t){ const w=el.querySelector('.ix-w'); if(w) ixDashPhase(w,t*2); } };
+    }
+  },
+
+  { id:'pion', group:'rare', tag:'weak', tagKey:'ix.tag.weak',
+    title:'ix.pion', note:'ix.pion.note',
+    eq:'π⁺ → μ⁺ + νμ',
+    build(){
+      const xL=IX_PAD_X, xR=IX_W-IX_PAD_X, yC=IX_H/2;
+      const xV=IX_W*0.5;
+      let s='';
+      s += ixArrow(xL,yC,xV,yC,'#c39bff','π⁺','start');
+      s += ixVertex(xV,yC);
+      s += `<path class="ix-w" d="M${xV} ${yC} L${xV+30} ${yC}" stroke="#7ee8c5" stroke-width="1.6" stroke-dasharray="5 3" fill="none"/>`;
+      s += `<text x="${xV+8}" y="${yC-4}" fill="#7ee8c5" font-size="11" font-family="JetBrains Mono, monospace">W⁺</text>`;
+      s += ixVertex(xV+30,yC,'#7ee8c5');
+      s += ixArrow(xV+30,yC,xR,25,'#ffd166','μ⁺','end',true);
+      s += ixArrow(xV+30,yC,xR,85,'#c8cff0','νμ','end');
+      return { svg:s, anim(el,t){ const w=el.querySelector('.ix-w'); if(w) ixDashPhase(w,t*2); } };
+    }
+  },
+
+  { id:'dis', group:'rare', tag:'em', tagKey:'ix.tag.em',
+    title:'ix.dis', note:'ix.dis.note',
+    eq:'e⁻ + p → e⁻ + X',
+    build(){
+      const xL=IX_PAD_X, xR=IX_W-IX_PAD_X;
+      const vT=[IX_W*0.45,28], vB=[IX_W*0.45,82];
+      let s='';
+      s += ixArrow(xL,vT[1],vT[0],vT[1],'#ffd166','e⁻','start');
+      s += ixArrow(vT[0],vT[1],xR,vT[1],'#ffd166','e⁻','end');
+      // proton blob with quark line
+      s += `<ellipse cx="${xL+18}" cy="${vB[1]}" rx="12" ry="10" fill="rgba(255,107,157,0.15)" stroke="#ff6b9d" stroke-dasharray="2 2"/>`;
+      s += `<text x="${xL+18}" y="${vB[1]+3}" text-anchor="middle" fill="#ff6b9d" font-size="10">p</text>`;
+      s += ixArrow(xL+30,vB[1],vB[0],vB[1],'#ff6b9d','q','start');
+      s += ixArrow(vB[0],vB[1],xR,vB[1]-8,'#ff6b9d','q','end');
+      s += ixArrow(vB[0],vB[1],xR,vB[1]+8,'#ff6b9d','X','end');
+      s += ixVertex(vT[0],vT[1]); s += ixVertex(vB[0],vB[1]);
+      s += `<path class="ix-ph" d="" stroke="#ffd166" stroke-width="1.6" fill="none"/>`;
+      s += `<text x="${vT[0]+8}" y="55" fill="#ffd166" font-size="11" font-family="JetBrains Mono, monospace">γ*</text>`;
+      return { svg:s, anim(el,t){
+        const p=el.querySelector('.ix-ph');
+        if(p) p.setAttribute('d', ixWavy(vT[0],vT[1],vB[0],vB[1],t*4));
+      }};
+    }
+  },
+
+  { id:'zprod', group:'rare', tag:'weak', tagKey:'ix.tag.weak',
+    title:'ix.zprod', note:'ix.zprod.note',
+    eq:'e⁻ + e⁺ → Z⁰ → f + f̄',
+    build(){
+      const xL=IX_PAD_X, xR=IX_W-IX_PAD_X;
+      const v1=[IX_W*0.4,IX_H/2], v2=[IX_W*0.6,IX_H/2];
+      let s='';
+      s += ixArrow(xL,25,v1[0],v1[1],'#ffd166','e⁻','start');
+      s += ixArrow(xL,85,v1[0],v1[1],'#ffd166','e⁺','start',true);
+      s += `<path class="ix-w" d="M${v1[0]} ${v1[1]} L${v2[0]} ${v2[1]}" stroke="#7ee8c5" stroke-width="1.8" stroke-dasharray="5 3" fill="none"/>`;
+      s += `<text x="${(v1[0]+v2[0])/2}" y="${v1[1]-4}" text-anchor="middle" fill="#7ee8c5" font-size="11" font-family="JetBrains Mono, monospace">Z⁰</text>`;
+      s += ixVertex(v1[0],v1[1]); s += ixVertex(v2[0],v2[1]);
+      s += ixArrow(v2[0],v2[1],xR,25,'#c8cff0','f','end');
+      s += ixArrow(v2[0],v2[1],xR,85,'#c8cff0','f̄','end',true);
+      return { svg:s, anim(el,t){ const w=el.querySelector('.ix-w'); if(w) ixDashPhase(w,t*2); } };
+    }
+  },
+
+  { id:'gravwave', group:'rare', tag:'grav', tagKey:'ix.tag.grav',
+    title:'ix.gravwave', note:'ix.gravwave.note',
+    eq:'M + M → M + M + G',
+    build(){
+      const yC=IX_H/2;
+      let s='';
+      s += `<circle cx="30" cy="${yC-15}" r="8" fill="#7c5cff"/>`;
+      s += `<circle cx="30" cy="${yC+15}" r="8" fill="#7c5cff"/>`;
+      s += `<circle cx="${IX_W-30}" cy="${yC-15}" r="8" fill="#7c5cff" opacity="0.6"/>`;
+      s += `<circle cx="${IX_W-30}" cy="${yC+15}" r="8" fill="#7c5cff" opacity="0.6"/>`;
+      // orbit hints
+      s += `<ellipse cx="30" cy="${yC}" rx="14" ry="20" fill="none" stroke="#7c5cff" stroke-width="0.6" opacity="0.4"/>`;
+      s += `<ellipse cx="${IX_W-30}" cy="${yC}" rx="14" ry="20" fill="none" stroke="#7c5cff" stroke-width="0.6" opacity="0.4"/>`;
+      // graviton double wavy
+      s += `<path class="ix-gr1" d="" stroke="#7c5cff" stroke-width="1.4" fill="none"/>`;
+      s += `<path class="ix-gr2" d="" stroke="#7c5cff" stroke-width="1.4" fill="none" opacity="0.65"/>`;
+      s += `<text x="${IX_W/2}" y="${yC-22}" text-anchor="middle" fill="#7c5cff" font-size="11" font-family="JetBrains Mono, monospace">G (spin 2)</text>`;
+      return { svg:s, anim(el,t){
+        const g1=el.querySelector('.ix-gr1'), g2=el.querySelector('.ix-gr2');
+        if(g1) g1.setAttribute('d', ixWavy(46,yC-2,IX_W-46,yC-2,-t*3,4,5));
+        if(g2) g2.setAttribute('d', ixWavy(46,yC+2,IX_W-46,yC+2,-t*3+Math.PI,4,5));
+      }};
+    }
+  },
+];
+
+// ---- build tiles into their respective group containers ----
+const IX_INSTANCES = [];
+function buildInteractionTiles(){
+  document.querySelectorAll('.ix-anim').forEach(container=>{
+    const group = container.dataset.group;
+    container.innerHTML = '';
+    IX_DEFS.filter(d=>d.group===group).forEach(def=>{
+      const built = def.build();
+      const card = document.createElement('div');
+      card.className = 'ix-card';
+      const tagLabel = (typeof t==='function' ? t(def.tagKey) : def.tag);
+      card.innerHTML =
+        `<div class="ix-head">`+
+          `<span class="ix-title" data-i18n="${def.title}">${def.title}</span>`+
+          `<span class="ix-tag t-${def.tag}" data-i18n="${def.tagKey}">${tagLabel}</span>`+
+        `</div>`+
+        `<svg viewBox="0 0 ${IX_W} ${IX_H}" preserveAspectRatio="none">${built.svg}</svg>`+
+        `<div class="ix-eq">${def.eq}</div>`+
+        `<div class="ix-note" data-i18n="${def.note}">${def.note}</div>`;
+      container.appendChild(card);
+      IX_INSTANCES.push({ el: card.querySelector('svg'), anim: built.anim });
+    });
+  });
+  // Re-run i18n so the freshly-inserted data-i18n nodes get translated.
+  try {
+    const lang = (localStorage.getItem('pz-lang')) ||
+      ((navigator.language||'').toLowerCase().startsWith('zh') ? 'zh-CN' : 'en');
+    if(typeof applyI18n==='function') applyI18n(lang);
+  } catch(_){}
+}
+
+let ixRAF=null, ixT=0;
+function ixLoop(){
+  ixT += 0.05;
+  for(const inst of IX_INSTANCES) inst.anim(inst.el, ixT);
+  ixRAF = requestAnimationFrame(ixLoop);
+}
+function ixStart(){ if(ixRAF==null) ixLoop(); }
+function ixStop(){ if(ixRAF!=null){ cancelAnimationFrame(ixRAF); ixRAF=null; } }
+
+// Hook into tab switching: start when 'forces' tab is shown, stop otherwise.
+document.querySelectorAll('.tab').forEach(t=>{
+  t.addEventListener('click',()=>{
+    if(t.dataset.tab==='forces') ixStart(); else ixStop();
+  });
+});
+
+buildInteractionTiles();
+// If forces is the initial tab, start immediately; otherwise start on demand.
+if(document.querySelector('.tab.active')?.dataset.tab === 'forces') ixStart();

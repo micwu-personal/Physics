@@ -226,16 +226,18 @@
         </div>
       </div>
 
-      <div class="interactions">
+      <div class="interactions" id="interactionsRoot">
         <h3 data-i18n="ix.h3">Common Interactions</h3>
-        <div class="i-list">
-          <div class="ix"><b data-i18n="ix.beta">β⁻ decay:</b> <span class="mono">n → p + e⁻ + ν̄ₑ</span> <em data-i18n="ix.beta.note">(weak force)</em></div>
-          <div class="ix"><b data-i18n="ix.pair">Pair production:</b> <span class="mono">γ → e⁻ + e⁺</span> <em data-i18n="ix.pair.note">(EM near a nucleus)</em></div>
-          <div class="ix"><b data-i18n="ix.annih">Annihilation:</b> <span class="mono">e⁻ + e⁺ → γ + γ</span> <em data-i18n="ix.annih.note">(EM)</em></div>
-          <div class="ix"><b data-i18n="ix.fusion">Fusion:</b> <span class="mono">p + p → ²H + e⁺ + νₑ</span> <em data-i18n="ix.fusion.note">(weak — powers the Sun)</em></div>
-          <div class="ix"><b data-i18n="ix.higgs">Higgs decay:</b> <span class="mono">H → γ + γ</span> <em data-i18n="ix.higgs.note">(observed at LHC)</em></div>
-          <div class="ix"><b data-i18n="ix.gluon">Gluon exchange:</b> <span class="mono">q ↔ q (via g)</span> <em data-i18n="ix.gluon.note">(strong — binds nucleons)</em></div>
-        </div>
+        <p class="ix-hint" data-i18n="ix.hint">Time flows left → right. Straight lines are fermions, wavy lines are photons, curly lines are gluons, dashed lines are W/Z/Higgs.</p>
+        <div class="i-list ix-anim" data-group="common"></div>
+
+        <h3 style="margin-top:28px" data-i18n="ix.h3b">Force Carrier Exchange</h3>
+        <p class="ix-hint" data-i18n="ix.hint2">How each fundamental force is transmitted between particles by its mediator.</p>
+        <div class="i-list ix-anim" data-group="exchange"></div>
+
+        <h3 style="margin-top:28px" data-i18n="ix.h3c">Less Common / High-Energy</h3>
+        <p class="ix-hint" data-i18n="ix.hint3">Rarer processes seen in colliders, cosmic rays, or the early universe.</p>
+        <div class="i-list ix-anim" data-group="rare"></div>
       </div>
     </section>
 
