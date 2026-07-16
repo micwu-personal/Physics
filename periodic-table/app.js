@@ -177,6 +177,9 @@ function refreshDetail(){
     oxEl.innerHTML = `<span style="color:var(--dim);font-size:13px">—</span>`;
   }
 
+  // Signature colors
+  renderSignatureColors(el);
+
   // Bonds
   drawBonds(el);
 
@@ -424,6 +427,37 @@ function shapesForHybrid(h){
     {kind:'lobe', a:Math.PI/2, color:c3}
   ];
   return [{kind:'sphere', a:0, color:c1}];
+}
+
+/* ----- Signature colors ----- */
+function renderSignatureColors(el){
+  const grid = document.getElementById('dColors');
+  const lang = window.CURRENT_LANG || 'en';
+  const colors = SIGNATURE_COLORS[el.Z];
+  if(!colors || !colors.length){
+    grid.innerHTML = `<div class="color-empty">${t('detail.colors.none')}</div>`;
+    return;
+  }
+  const stateLabel = {
+    '0':      lang==='zh-CN' ? '单质' : 'pure',
+    'flame':  lang==='zh-CN' ? '焰色' : 'flame',
+    'discharge': lang==='zh-CN' ? '放电' : 'discharge',
+    'oxide':  lang==='zh-CN' ? '氧化物/其他' : 'oxide / other',
+    'nano':   lang==='zh-CN' ? '纳米' : 'nano'
+  };
+  grid.innerHTML = colors.map(c=>{
+    const label = lang==='zh-CN' ? (c.label_zh||c.label_en) : (c.label_en||c.label_zh);
+    const st = stateLabel[c.state] || c.state;
+    return `
+      <div class="color-swatch">
+        <div class="color-chip" style="background:${c.hex}"></div>
+        <div class="color-info">
+          <div class="color-state">${st}</div>
+          <div class="color-label">${label}</div>
+          <div class="color-hex">${c.hex.toUpperCase()}</div>
+        </div>
+      </div>`;
+  }).join('');
 }
 
 /* ----- Bond types matrix ----- */

@@ -253,6 +253,157 @@ const CATEGORY_COLORS = {
   unknown:        '#888'
 };
 
+/* ================ SIGNATURE COLORS ================
+   Per element, a list of visually distinctive appearances:
+     - metal / gas / crystal in its pure form (state "0")
+     - common oxidation-state compounds (state "+1", "+2", …)
+     - flame test color (state "flame") for the classic ones
+   Each entry: {state, hex, label_en, label_zh, note_en?, note_zh?}
+==================================================== */
+const SIGNATURE_COLORS = {
+  1:  [ // Hydrogen
+    {state:'0', hex:'#e6f2ff', label_en:'colorless gas', label_zh:'无色气体'},
+    {state:'flame', hex:'#a8c9ff', label_en:'pale blue flame', label_zh:'淡蓝色火焰'}
+  ],
+  2:  [ {state:'0', hex:'#f4f6ff', label_en:'colorless gas', label_zh:'无色气体'} ],
+  3:  [ // Li
+    {state:'0', hex:'#c8ccd0', label_en:'silvery metal', label_zh:'银白色金属'},
+    {state:'flame', hex:'#e64545', label_en:'crimson red flame', label_zh:'深红色火焰'}
+  ],
+  4:  [ {state:'0', hex:'#b8bcc0', label_en:'steel-grey metal', label_zh:'钢灰色金属'} ],
+  5:  [ {state:'0', hex:'#3a3a3a', label_en:'dark black powder / brown crystal', label_zh:'黑色粉末/棕色晶体'} ],
+  6:  [ // C
+    {state:'0', hex:'#1a1a1a', label_en:'graphite / coal (black)', label_zh:'石墨/煤炭(黑色)'},
+    {state:'0', hex:'#e6f0ff', label_en:'diamond (colorless)', label_zh:'金刚石(无色)'},
+    {state:'0', hex:'#3b2a20', label_en:'fullerene / soot (brown-black)', label_zh:'富勒烯/烟炱(棕黑)'}
+  ],
+  7:  [ // N
+    {state:'0', hex:'#eef5ff', label_en:'colorless gas', label_zh:'无色气体'},
+    {state:'+4', hex:'#b8531c', label_en:'NO₂ — reddish-brown gas', label_zh:'NO₂ 红棕色气体'}
+  ],
+  8:  [ // O
+    {state:'0', hex:'#eef5ff', label_en:'O₂ colorless gas', label_zh:'O₂ 无色气体'},
+    {state:'0', hex:'#94e3ff', label_en:'liquid O₂ pale blue', label_zh:'液态氧 淡蓝色'},
+    {state:'0', hex:'#7fe6ff', label_en:'O₃ ozone (pale blue gas)', label_zh:'O₃ 臭氧(淡蓝色气体)'}
+  ],
+  9:  [ {state:'0', hex:'#d9ecb8', label_en:'F₂ pale yellow gas', label_zh:'F₂ 淡黄色气体'} ],
+  10: [ {state:'0', hex:'#f4f6ff', label_en:'colorless gas', label_zh:'无色气体'},
+        {state:'discharge', hex:'#ff5040', label_en:'orange-red discharge (neon sign)', label_zh:'橙红色放电(霓虹灯)'} ],
+  11: [ // Na
+    {state:'0', hex:'#d5d8de', label_en:'silvery metal', label_zh:'银白色金属'},
+    {state:'flame', hex:'#ffb830', label_en:'bright yellow flame', label_zh:'明黄色火焰'}
+  ],
+  12: [ {state:'0', hex:'#c8ccd0', label_en:'silvery-white metal', label_zh:'银白色金属'},
+        {state:'flame', hex:'#ffffff', label_en:'brilliant white flame', label_zh:'耀眼的白色火焰'} ],
+  13: [ {state:'0', hex:'#c8ccd0', label_en:'silvery-white metal', label_zh:'银白色金属'} ],
+  14: [ {state:'0', hex:'#4a4d55', label_en:'dark grey lustre', label_zh:'暗灰色带金属光泽'} ],
+  15: [ // P
+    {state:'0', hex:'#e6d060', label_en:'white/yellow phosphorus (yellow)', label_zh:'白/黄磷(黄色)'},
+    {state:'0', hex:'#8a3a1a', label_en:'red phosphorus (red-brown)', label_zh:'红磷(红棕色)'}
+  ],
+  16: [ {state:'0', hex:'#ffd45c', label_en:'yellow crystals', label_zh:'黄色晶体'} ],
+  17: [ // Cl
+    {state:'0', hex:'#a5d858', label_en:'Cl₂ yellow-green gas', label_zh:'Cl₂ 黄绿色气体'},
+    {state:'−1', hex:'#e6f0ff', label_en:'chloride — colorless in solution', label_zh:'氯化物 — 溶液中无色'}
+  ],
+  18: [ {state:'0', hex:'#f4f6ff', label_en:'colorless gas', label_zh:'无色气体'},
+        {state:'discharge', hex:'#a06bff', label_en:'lilac-violet discharge', label_zh:'淡紫色放电'} ],
+  19: [ // K
+    {state:'0', hex:'#d5d8de', label_en:'silvery metal', label_zh:'银白色金属'},
+    {state:'flame', hex:'#a05fff', label_en:'violet-lilac flame', label_zh:'紫色火焰'}
+  ],
+  20: [ {state:'0', hex:'#d0d4da', label_en:'silvery-white metal', label_zh:'银白色金属'},
+        {state:'flame', hex:'#ff6a3d', label_en:'brick-red flame', label_zh:'砖红色火焰'} ],
+  21: [ {state:'0', hex:'#c8ccd0', label_en:'silvery-white metal', label_zh:'银白色金属'},
+        {state:'+3', hex:'#f4f6ff', label_en:'Sc³⁺ colorless in solution', label_zh:'Sc³⁺ 溶液中无色'} ],
+  22: [ {state:'0', hex:'#c0c4cc', label_en:'silvery metal', label_zh:'银白色金属'},
+        {state:'+3', hex:'#7b3b8f', label_en:'Ti³⁺ violet', label_zh:'Ti³⁺ 紫色'},
+        {state:'+4', hex:'#f4f6ff', label_en:'TiO₂ white pigment', label_zh:'TiO₂ 白色颜料'} ],
+  23: [ // V — famous "vanadium rainbow"
+    {state:'0', hex:'#c0c4cc', label_en:'silvery metal', label_zh:'银白色金属'},
+    {state:'+2', hex:'#8f6bff', label_en:'V²⁺ violet', label_zh:'V²⁺ 紫色'},
+    {state:'+3', hex:'#2f8f4a', label_en:'V³⁺ green', label_zh:'V³⁺ 绿色'},
+    {state:'+4', hex:'#3a8fff', label_en:'VO²⁺ blue', label_zh:'VO²⁺ 蓝色'},
+    {state:'+5', hex:'#ffcf3a', label_en:'VO₂⁺ yellow', label_zh:'VO₂⁺ 黄色'}
+  ],
+  24: [ // Cr
+    {state:'0', hex:'#c8ccd0', label_en:'silvery-blue metal', label_zh:'银蓝色金属'},
+    {state:'+2', hex:'#4a8fff', label_en:'Cr²⁺ blue', label_zh:'Cr²⁺ 蓝色'},
+    {state:'+3', hex:'#2fa070', label_en:'Cr³⁺ green', label_zh:'Cr³⁺ 绿色'},
+    {state:'+6', hex:'#ff9a3d', label_en:'CrO₃ / Cr₂O₇²⁻ orange', label_zh:'CrO₃ / Cr₂O₇²⁻ 橙色'},
+    {state:'+6', hex:'#ffde3d', label_en:'CrO₄²⁻ yellow', label_zh:'CrO₄²⁻ 黄色'}
+  ],
+  25: [ // Mn — the classic MnO4- purple
+    {state:'0', hex:'#b8b8b8', label_en:'silvery-grey metal', label_zh:'银灰色金属'},
+    {state:'+2', hex:'#ffbfd0', label_en:'Mn²⁺ pale pink', label_zh:'Mn²⁺ 淡粉色'},
+    {state:'+4', hex:'#3a2a20', label_en:'MnO₂ dark brown/black', label_zh:'MnO₂ 深棕/黑色'},
+    {state:'+6', hex:'#2fa070', label_en:'MnO₄²⁻ green', label_zh:'MnO₄²⁻ 绿色'},
+    {state:'+7', hex:'#8a2fbf', label_en:'MnO₄⁻ deep purple', label_zh:'MnO₄⁻ 深紫色'}
+  ],
+  26: [ // Fe
+    {state:'0', hex:'#7a7c85', label_en:'grey metal (steel)', label_zh:'灰色金属(钢铁)'},
+    {state:'+2', hex:'#4a9a5a', label_en:'Fe²⁺ pale green', label_zh:'Fe²⁺ 浅绿色'},
+    {state:'+3', hex:'#c47a2f', label_en:'Fe³⁺ yellow-brown', label_zh:'Fe³⁺ 黄棕色'},
+    {state:'oxide', hex:'#a83c1a', label_en:'Fe₂O₃ rust (red-brown)', label_zh:'Fe₂O₃ 铁锈(红棕色)'}
+  ],
+  27: [ // Co — famous cobalt blue
+    {state:'0', hex:'#a2a8b0', label_en:'silvery-grey metal', label_zh:'银灰色金属'},
+    {state:'+2', hex:'#e05a95', label_en:'Co²⁺ pink (aqueous)', label_zh:'Co²⁺ 粉红色(水合)'},
+    {state:'+2', hex:'#2b56d8', label_en:'CoCl₂ (anhydrous) blue', label_zh:'CoCl₂ (无水) 蓝色'},
+    {state:'+3', hex:'#3a5aa5', label_en:'Co³⁺ blue-green', label_zh:'Co³⁺ 蓝绿色'}
+  ],
+  28: [ // Ni
+    {state:'0', hex:'#c0c4cc', label_en:'silvery metal', label_zh:'银白色金属'},
+    {state:'+2', hex:'#2fa070', label_en:'Ni²⁺ green (aqueous)', label_zh:'Ni²⁺ 绿色(水合)'}
+  ],
+  29: [ // Cu — THE example
+    {state:'0', hex:'#c9762f', label_en:'red-orange metal', label_zh:'红橙色金属'},
+    {state:'oxide', hex:'#5cbe5a', label_en:'patina / verdigris (green)', label_zh:'铜绿(绿色)'},
+    {state:'+1', hex:'#c8451f', label_en:'Cu₂O red-brown', label_zh:'Cu₂O 红棕色'},
+    {state:'+2', hex:'#2a8fff', label_en:'Cu²⁺ blue (aqueous)', label_zh:'Cu²⁺ 蓝色(水合)'},
+    {state:'+2', hex:'#2f8560', label_en:'CuCl₂ green', label_zh:'CuCl₂ 绿色'},
+    {state:'flame', hex:'#3fdc7f', label_en:'green flame test', label_zh:'焰色反应 绿色'}
+  ],
+  30: [ {state:'0', hex:'#b8bec8', label_en:'bluish-white metal', label_zh:'蓝白色金属'} ],
+  33: [ {state:'0', hex:'#5a5f6a', label_en:'grey metallic (α-As)', label_zh:'灰色金属(α-砷)'},
+        {state:'0', hex:'#e6d060', label_en:'yellow As₄', label_zh:'黄砷 As₄'} ],
+  35: [ {state:'0', hex:'#a83c1a', label_en:'Br₂ deep red-brown liquid', label_zh:'Br₂ 深红棕色液体'} ],
+  37: [ {state:'0', hex:'#c8ccd0', label_en:'silvery metal', label_zh:'银白色金属'},
+        {state:'flame', hex:'#8a2fbf', label_en:'red-violet flame', label_zh:'红紫色火焰'} ],
+  38: [ {state:'flame', hex:'#e6002a', label_en:'crimson red flame', label_zh:'深红色火焰(用于烟花)'} ],
+  47: [ // Ag
+    {state:'0', hex:'#d8dce0', label_en:'silvery-white lustrous metal', label_zh:'银白色带金属光泽'},
+    {state:'+1', hex:'#c0c4cc', label_en:'AgCl white → grey (photo)', label_zh:'AgCl 白色→变灰(感光)'}
+  ],
+  53: [ // I — solid violet crystals, brown in solution
+    {state:'0', hex:'#4a2a5a', label_en:'I₂ dark violet crystals', label_zh:'I₂ 深紫色晶体'},
+    {state:'0', hex:'#7a3a8f', label_en:'I₂ vapor purple', label_zh:'I₂ 蒸气紫色'},
+    {state:'0', hex:'#a86020', label_en:'I₂ in water brown', label_zh:'I₂ 水溶液棕色'}
+  ],
+  55: [ {state:'flame', hex:'#6b8fff', label_en:'blue-violet flame', label_zh:'蓝紫色火焰'} ],
+  56: [ {state:'flame', hex:'#7fdc4a', label_en:'apple-green flame', label_zh:'黄绿色火焰'} ],
+  57: [ {state:'+3', hex:'#f4f6ff', label_en:'La³⁺ colorless', label_zh:'La³⁺ 无色'} ],
+  58: [ {state:'+3', hex:'#f4f6ff', label_en:'Ce³⁺ colorless', label_zh:'Ce³⁺ 无色'},
+        {state:'+4', hex:'#ffcf3a', label_en:'Ce⁴⁺ yellow-orange (strong oxidizer)', label_zh:'Ce⁴⁺ 黄橙色(强氧化剂)'} ],
+  59: [ {state:'+3', hex:'#7fdc4a', label_en:'Pr³⁺ yellow-green', label_zh:'Pr³⁺ 黄绿色'} ],
+  60: [ {state:'+3', hex:'#e05a95', label_en:'Nd³⁺ pink-lavender', label_zh:'Nd³⁺ 粉紫色'} ],
+  63: [ {state:'+3', hex:'#ffbfd0', label_en:'Eu³⁺ pale pink', label_zh:'Eu³⁺ 淡粉色'} ],
+  67: [ {state:'+3', hex:'#c47a2f', label_en:'Ho³⁺ yellow-brown', label_zh:'Ho³⁺ 黄棕色'} ],
+  68: [ {state:'+3', hex:'#ff5a95', label_en:'Er³⁺ pink', label_zh:'Er³⁺ 粉红色'} ],
+  77: [ {state:'0', hex:'#e6e8ec', label_en:'silvery-white lustrous', label_zh:'银白色带金属光泽'} ],
+  78: [ {state:'0', hex:'#e6e8ec', label_en:'silvery-white lustrous', label_zh:'银白色带金属光泽'} ],
+  79: [ // Au
+    {state:'0', hex:'#ffd23f', label_en:'yellow metallic gold', label_zh:'黄色金属'},
+    {state:'+3', hex:'#ffdc3f', label_en:'AuCl₄⁻ yellow', label_zh:'AuCl₄⁻ 黄色'},
+    {state:'nano', hex:'#e63a5a', label_en:'nanogold — red colloid (stained glass)', label_zh:'金纳米颗粒 — 红色胶体(彩色玻璃)'}
+  ],
+  80: [ {state:'0', hex:'#c0c4cc', label_en:'silvery liquid metal', label_zh:'银白色液态金属'} ],
+  82: [ {state:'0', hex:'#6a6d75', label_en:'dull grey metal', label_zh:'暗灰色金属'} ],
+  83: [ {state:'0', hex:'#c48fbf', label_en:'pinkish-white lustre (iridescent oxide)', label_zh:'带粉色的白色(氧化层呈彩虹色)'} ],
+  92: [ {state:'0', hex:'#8a8c94', label_en:'silvery-grey metal', label_zh:'银灰色金属'},
+        {state:'+6', hex:'#ffdc3f', label_en:'UO₂²⁺ yellow (uranyl)', label_zh:'UO₂²⁺ 黄色(铀酰)'} ]
+};
+
 const CATEGORY_I18N = {
   en: {
     alkali:'Alkali metal', alkaline:'Alkaline-earth metal', transition:'Transition metal',
