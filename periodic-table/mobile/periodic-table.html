@@ -290,6 +290,228 @@ footer{text-align:center;padding:40px 20px;color:var(--dim);font-size:12px;posit
   .d-name-row{justify-content:center}
 }
 
+/* ============================================================
+   Feature module styles (property overlays, cosmic timeline,
+   nuclide chart, discovery timeline, ligand-field colors)
+============================================================ */
+
+/* ---------- View-overlay toolbar (F1) ---------- */
+.view-toolbar{
+  max-width:1400px;margin:8px auto 4px;padding:10px 14px;
+  display:flex;flex-wrap:wrap;gap:8px;align-items:center;
+  background:linear-gradient(135deg,rgba(124,92,255,0.08),rgba(0,212,255,0.05));
+  border:1px solid var(--panel-b);border-radius:14px;
+  position:relative;z-index:2;
+}
+.view-toolbar .vt-label{
+  font-size:11px;text-transform:uppercase;letter-spacing:1.5px;
+  color:var(--dim);margin-right:6px;font-weight:600;
+}
+.view-btn{
+  background:rgba(255,255,255,0.04);border:1px solid var(--panel-b);
+  color:var(--dim);padding:6px 12px;border-radius:8px;
+  font-family:inherit;font-size:12px;font-weight:500;
+  cursor:pointer;transition:all .15s;letter-spacing:0.3px;
+}
+.view-btn:hover{color:#fff;border-color:var(--accent2)}
+.view-btn.active{
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  color:#fff;border-color:transparent;font-weight:600;
+}
+.view-btn.special{
+  background:linear-gradient(135deg,rgba(255,159,67,0.2),rgba(255,107,157,0.15));
+  border-color:rgba(255,159,67,0.4);color:#ffcf99;
+}
+.view-btn.special:hover{border-color:#ff9f43}
+
+/* ---------- Heatmap legend ---------- */
+.view-legend{
+  max-width:1400px;margin:0 auto 8px;padding:10px 14px;
+  display:none;align-items:center;gap:14px;
+  background:rgba(0,0,0,0.3);border:1px solid var(--panel-b);
+  border-radius:12px;
+  font-size:12px;color:var(--dim);
+}
+.view-legend.on{display:flex;flex-wrap:wrap}
+.view-legend .vl-title{color:#fff;font-weight:600;font-size:13px}
+.view-legend .vl-bar{
+  height:14px;width:200px;border-radius:4px;
+  background:linear-gradient(90deg,var(--vl-lo,#1a2a5a),var(--vl-hi,#ff9f43));
+  border:1px solid var(--panel-b);
+}
+.view-legend .vl-tick{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;color:#fff}
+.view-legend .vl-unit{color:var(--accent2);font-size:11px}
+.view-legend .vl-na{color:#666;font-style:italic}
+
+/* When an overlay is active, category bg is neutral; overlay color is inline-style */
+.cell.overlay-on{
+  background:rgba(0,0,0,0.35)!important;
+  border-color:rgba(255,255,255,0.15)!important;
+}
+.cell.overlay-on .nm{opacity:0.75}
+.cell.overlay-off{opacity:0.15;filter:grayscale(1)}
+
+/* Overlay chip (small colored square inside the cell, above the symbol) */
+.cell .ov-chip{
+  position:absolute;inset:0;
+  background:var(--ov-color,transparent);
+  opacity:0.55;
+  pointer-events:none;
+  border-radius:inherit;
+}
+.cell .ov-value{
+  position:absolute;bottom:2px;left:4px;
+  font-size:8px;color:rgba(255,255,255,0.85);
+  font-family:'JetBrains Mono',ui-monospace,monospace;
+  text-shadow:0 1px 2px rgba(0,0,0,0.9);
+  pointer-events:none;
+}
+
+/* ---------- Origin badge (D1) ---------- */
+.origin-badge{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:4px 10px;border-radius:999px;
+  font-size:11px;font-weight:600;letter-spacing:0.3px;
+  border:1px solid;
+}
+.origin-badge .oi{font-size:13px}
+.origin-badge.bigbang    {background:rgba(255,209,102,0.15);border-color:rgba(255,209,102,0.5);color:#ffe08a}
+.origin-badge.cosmicray  {background:rgba(199,125,255,0.15);border-color:rgba(199,125,255,0.5);color:#dda3ff}
+.origin-badge.smallstar  {background:rgba(255,159,67,0.15);border-color:rgba(255,159,67,0.5);color:#ffcf99}
+.origin-badge.largestar  {background:rgba(90,255,138,0.15);border-color:rgba(90,255,138,0.5);color:#8affaa}
+.origin-badge.dwarf      {background:rgba(72,219,251,0.15);border-color:rgba(72,219,251,0.5);color:#7fe3ff}
+.origin-badge.supernova  {background:rgba(255,107,107,0.15);border-color:rgba(255,107,107,0.5);color:#ffa5a5}
+.origin-badge.merger     {background:rgba(255,138,201,0.15);border-color:rgba(255,138,201,0.5);color:#ffb5db}
+.origin-badge.human      {background:rgba(162,155,254,0.15);border-color:rgba(162,155,254,0.5);color:#c0baff}
+
+/* ---------- Cosmic-timeline banner ---------- */
+.cosmic-banner{
+  position:fixed;top:78px;left:50%;transform:translateX(-50%);
+  z-index:50;background:rgba(10,17,48,0.95);backdrop-filter:blur(10px);
+  border:1px solid var(--accent2);border-radius:14px;
+  padding:12px 24px;color:#fff;font-size:14px;
+  box-shadow:0 8px 40px rgba(0,212,255,0.3);
+  display:none;text-align:center;min-width:320px;
+  animation:cosmicPulse 2s ease-in-out infinite;
+}
+.cosmic-banner.on{display:block}
+.cosmic-banner .cb-era{font-size:16px;font-weight:600;color:#7fe3ff}
+.cosmic-banner .cb-time{color:var(--dim);font-size:12px;margin-top:4px;font-family:'JetBrains Mono',monospace}
+@keyframes cosmicPulse{0%,100%{box-shadow:0 8px 40px rgba(0,212,255,0.3)}50%{box-shadow:0 8px 40px rgba(199,125,255,0.5)}}
+
+/* Cells not-yet-forged during timeline */
+.cell.not-yet-forged{opacity:0.08;filter:grayscale(1)}
+.cell.freshly-forged{animation:forgeFlash 1.2s ease-out}
+@keyframes forgeFlash{
+  0%{box-shadow:0 0 0 0 rgba(255,255,255,1),0 0 20px 10px rgba(255,220,120,0.9);transform:scale(1.5)}
+  50%{box-shadow:0 0 0 4px rgba(255,220,120,0.6),0 0 40px 15px rgba(255,220,120,0.4);transform:scale(1.25)}
+  100%{box-shadow:none;transform:scale(1)}
+}
+
+/* ---------- Nuclide chart (B1) ---------- */
+.nuclide-view{
+  position:fixed;inset:0;background:radial-gradient(ellipse at center,#0a1130 0%,#030510 90%);
+  z-index:200;display:none;flex-direction:column;
+}
+.nuclide-view.on{display:flex}
+.nuclide-header{
+  display:flex;align-items:center;gap:14px;padding:14px 20px;
+  border-bottom:1px solid var(--panel-b);background:rgba(0,0,0,0.6);
+}
+.nuclide-header h2{font-size:18px;font-weight:600;color:#fff;letter-spacing:0.5px}
+.nuclide-header .spacer{flex:1}
+.nuclide-back{
+  background:rgba(0,212,255,0.15);border:1px solid rgba(0,212,255,0.4);
+  color:#7fe3ff;padding:7px 14px;border-radius:8px;
+  font-family:inherit;font-size:12px;cursor:pointer;font-weight:500;
+}
+.nuclide-back:hover{background:rgba(0,212,255,0.3)}
+.nuclide-legend{display:flex;gap:12px;flex-wrap:wrap;padding:10px 20px;background:rgba(0,0,0,0.4);border-bottom:1px solid var(--panel-b);font-size:11px}
+.nl-item{display:flex;align-items:center;gap:6px;color:var(--dim)}
+.nl-dot{width:12px;height:12px;border-radius:3px;border:1px solid rgba(255,255,255,0.2)}
+.nuclide-body{flex:1;position:relative;overflow:hidden;cursor:grab}
+.nuclide-body.dragging{cursor:grabbing}
+#nuclideCanvas{width:100%;height:100%;display:block}
+.nuclide-tip{
+  position:absolute;pointer-events:none;
+  background:rgba(0,0,0,0.9);border:1px solid var(--accent2);
+  border-radius:8px;padding:8px 12px;font-size:12px;color:#fff;
+  font-family:'JetBrains Mono',ui-monospace,monospace;
+  line-height:1.5;box-shadow:0 4px 20px rgba(0,212,255,0.3);
+  display:none;z-index:5;max-width:220px;
+}
+.nuclide-tip.on{display:block}
+.nuclide-tip .nt-sym{font-size:15px;font-weight:700;color:#7fe3ff}
+.nuclide-tip .nt-mode{color:#ffcf99}
+
+/* ---------- Discovery timeline (F2) ---------- */
+.timeline-panel{
+  max-width:1400px;margin:14px auto 0;padding:16px 20px;
+  background:linear-gradient(135deg,rgba(255,159,67,0.06),rgba(199,125,255,0.04));
+  border:1px solid var(--panel-b);border-radius:14px;
+  display:none;
+}
+.timeline-panel.on{display:block}
+.tl-header{display:flex;align-items:center;gap:14px;margin-bottom:12px;flex-wrap:wrap}
+.tl-header h3{font-size:14px;font-weight:600;color:var(--accent2);text-transform:uppercase;letter-spacing:1.5px}
+.tl-year-display{
+  font-family:'JetBrains Mono',ui-monospace,monospace;
+  font-size:26px;font-weight:700;color:#ffcf99;
+  min-width:80px;
+}
+.tl-slider{flex:1;min-width:200px}
+.tl-slider input{width:100%;-webkit-appearance:none;background:transparent;height:6px}
+.tl-slider input::-webkit-slider-runnable-track{height:6px;border-radius:3px;background:linear-gradient(90deg,#7c5cff,#00d4ff,#ff9f43)}
+.tl-slider input::-moz-range-track{height:6px;border-radius:3px;background:linear-gradient(90deg,#7c5cff,#00d4ff,#ff9f43)}
+.tl-slider input::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,0.5);cursor:pointer;margin-top:-6px}
+.tl-slider input::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,0.5);cursor:pointer;border:none}
+.tl-play{background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;color:#fff;padding:6px 14px;border-radius:8px;cursor:pointer;font-family:inherit;font-size:12px;font-weight:600}
+.tl-play:hover{transform:translateY(-1px)}
+.tl-info{color:var(--dim);font-size:12px;margin-top:4px;font-style:italic;line-height:1.6}
+.tl-info b{color:#ffcf99;font-style:normal}
+.tl-info .eka{color:#7fe3ff;font-style:normal;font-weight:600}
+
+.cell.tl-hidden{opacity:0.06;filter:grayscale(1)}
+.cell.tl-predicted{
+  background:rgba(255,159,67,0.08)!important;
+  border:2px dashed rgba(255,159,67,0.6)!important;
+  animation:predictedPulse 2s ease-in-out infinite;
+}
+.cell.tl-predicted .sym::before{content:"?";color:#ffcf99}
+.cell.tl-predicted .z,.cell.tl-predicted .nm,.cell.tl-predicted .ms{opacity:0.3}
+@keyframes predictedPulse{0%,100%{border-color:rgba(255,159,67,0.6)}50%{border-color:rgba(255,159,67,1)}}
+.cell.tl-fresh{animation:freshDiscover 0.9s ease-out}
+@keyframes freshDiscover{
+  0%{transform:scale(0.3) rotate(-180deg);opacity:0}
+  60%{transform:scale(1.2) rotate(10deg);opacity:1;box-shadow:0 0 30px rgba(255,220,120,0.9)}
+  100%{transform:scale(1);box-shadow:none}
+}
+
+/* ---------- Ligand-field colors (C5) ---------- */
+.lf-block{margin-top:12px}
+.lf-controls{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+@media (max-width:700px){.lf-controls{grid-template-columns:1fr}}
+.lf-picker{background:rgba(0,0,0,0.3);border:1px solid var(--panel-b);border-radius:10px;padding:12px 14px}
+.lf-picker-label{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--dim);margin-bottom:8px}
+.lf-ligand-list{display:flex;flex-wrap:wrap;gap:5px}
+.lf-lig-btn{background:rgba(255,255,255,0.04);border:1px solid var(--panel-b);color:var(--dim);padding:5px 10px;border-radius:6px;font-family:inherit;font-size:11px;cursor:pointer;transition:all .15s}
+.lf-lig-btn:hover{color:#fff}
+.lf-lig-btn.active{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border-color:transparent}
+.lf-diagram-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:stretch}
+@media (max-width:700px){.lf-diagram-row{grid-template-columns:1fr}}
+.lf-diagram{background:radial-gradient(ellipse at center,#0a1130 0%,#030510 100%);border:1px solid var(--panel-b);border-radius:10px;padding:14px;min-height:220px;position:relative}
+.lf-diagram canvas{width:100%;height:200px;display:block}
+.lf-diagram .lf-caption{color:var(--accent2);font-family:'JetBrains Mono',monospace;font-size:11px;text-align:center;margin-top:8px}
+.lf-color-out{background:rgba(0,0,0,0.3);border:1px solid var(--panel-b);border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:12px}
+.lf-row{display:flex;align-items:center;gap:12px}
+.lf-swatch{width:56px;height:56px;border-radius:10px;border:1px solid rgba(255,255,255,0.25);flex-shrink:0;position:relative;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,0.4)}
+.lf-swatch::after{content:"";position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,0.25),transparent 50%,rgba(0,0,0,0.15));border-radius:inherit}
+.lf-swatch-info{display:flex;flex-direction:column;gap:2px}
+.lf-swatch-label{font-size:12px;color:var(--dim);text-transform:uppercase;letter-spacing:0.5px}
+.lf-swatch-name{color:#fff;font-size:14px;font-weight:500}
+.lf-swatch-nm{font-family:'JetBrains Mono',monospace;color:#7fe3ff;font-size:12px}
+.lf-na{color:var(--dim);font-style:italic;padding:20px;text-align:center;font-size:13px}
+
 </style>
 </head>
 <body>
@@ -668,6 +890,220 @@ function t(key){
   const dict = LOCALES[window.CURRENT_LANG||'en'];
   return (dict && dict[key]) || (LOCALES.en[key]) || key;
 }
+
+</script>
+  <script>
+/* ==================== ADDITIONAL i18n KEYS ====================
+   Merged into window.LOCALES at load time. Must load AFTER i18n.js
+   but BEFORE any feature module that calls t().
+================================================================= */
+(function(){
+  const extra = {
+    en: {
+      // ---- Overlay bar (F1) ----
+      'ov.title':'View',
+      'ov.default':'Categories',
+      'ov.radius':'Atomic radius',
+      'ov.ie':'Ionization energy',
+      'ov.en':'Electronegativity',
+      'ov.density':'Density',
+      'ov.year':'Discovery year',
+      'ov.origin':'Cosmic origin',
+      'ov.abundance':'Crust abundance',
+      'ov.melt':'Melting point',
+      'ov.legend.lo':'Low',
+      'ov.legend.hi':'High',
+      'ov.legend.na':'no data',
+      'ov.unit.pm':'pm',
+      'ov.unit.kj':'kJ/mol',
+      'ov.unit.gcc':'g/cm³',
+      'ov.unit.k':'K',
+      'ov.unit.ppm':'ppm (crust)',
+      'ov.unit.year':'year',
+
+      // ---- Nucleosynthesis origins (D1) ----
+      'origin.bigbang':'Big Bang nucleosynthesis',
+      'origin.cosmicray':'Cosmic-ray spallation',
+      'origin.smallstar':'Dying low-mass stars',
+      'origin.largestar':'Massive-star fusion',
+      'origin.supernova':'Exploding massive stars',
+      'origin.merger':'Merging neutron stars',
+      'origin.human':'Human-made (labs only)',
+      'origin.dwarf':'Exploding white dwarfs',
+      'origin.badge':'Origin',
+      'timeline.title':'Cosmic Timeline',
+      'timeline.play':'▶ Play cosmic timeline',
+      'timeline.stop':'⏸ Stop',
+      'timeline.era.bigbang':'t ≈ 3 min after Big Bang',
+      'timeline.era.stars':'First stars ignite (~200 Myr)',
+      'timeline.era.agb':'AGB stars shed heavy elements',
+      'timeline.era.sn':'Supernovae seed the galaxy',
+      'timeline.era.merger':'Neutron-star mergers forge gold',
+      'timeline.era.solar':'Solar system forms (4.6 Gyr ago)',
+      'timeline.era.human':'Humans synthesize the transuranics',
+      'timeline.era.now':'Today · 13.8 Gyr',
+
+      // ---- Nuclide chart (B1) ----
+      'nuc.chart.title':'Nuclide Chart (N vs Z)',
+      'nuc.chart.open':'Open nuclide chart',
+      'nuc.chart.close':'Back to periodic table',
+      'nuc.chart.hint':'Every dot is one isotope. Color = decay mode. Zoom with wheel, drag to pan.',
+      'nuc.decay.stable':'Stable',
+      'nuc.decay.bminus':'β⁻ (beta minus)',
+      'nuc.decay.bplus':'β⁺ / EC',
+      'nuc.decay.alpha':'α (alpha)',
+      'nuc.decay.sf':'Spontaneous fission',
+      'nuc.decay.p':'Proton emission',
+      'nuc.decay.n':'Neutron emission',
+      'nuc.decay.unknown':'Unknown / theoretical',
+      'nuc.axis.z':'Protons (Z)',
+      'nuc.axis.n':'Neutrons (N)',
+      'nuc.tip.half':'half-life',
+      'nuc.magic':'magic-number nuclide',
+      'nuc.doubly':'doubly magic',
+
+      // ---- Discovery timeline (F2 / A6) ----
+      'tl.title':'Discovery Timeline',
+      'tl.year':'Year',
+      'tl.play':'▶ Play',
+      'tl.stop':'⏸ Stop',
+      'tl.mendeleev':'Mendeleev\'s 1869 table',
+      'tl.predicted':'predicted',
+      'tl.ancient':'Antiquity',
+      'tl.eka.al':'eka-aluminium → gallium (Ga, 1875)',
+      'tl.eka.si':'eka-silicon → germanium (Ge, 1886)',
+      'tl.eka.b':'eka-boron → scandium (Sc, 1879)',
+      'tl.eka.mn':'eka-manganese → technetium (Tc, 1937)',
+
+      // ---- Ligand-field colors (C5) ----
+      'lf.title':'Ligand-Field Splitting → Color',
+      'lf.pick':'Pick a ligand:',
+      'lf.metal':'Metal ion:',
+      'lf.geom':'Geometry:',
+      'lf.geom.oct':'Octahedral',
+      'lf.geom.tet':'Tetrahedral',
+      'lf.geom.sqp':'Square planar',
+      'lf.delta':'Δ (crystal-field splitting)',
+      'lf.absorbed':'Absorbed photon',
+      'lf.observed':'Observed color',
+      'lf.hint':'The electron jumps from t₂g → eₙ absorbing a photon of energy Δ. The color you SEE is the color that is NOT absorbed.',
+      'lf.spec.i':'I⁻ (iodide) — weak',
+      'lf.spec.br':'Br⁻ (bromide)',
+      'lf.spec.cl':'Cl⁻ (chloride)',
+      'lf.spec.f':'F⁻ (fluoride)',
+      'lf.spec.oh':'OH⁻ (hydroxide)',
+      'lf.spec.h2o':'H₂O (aqua) — medium',
+      'lf.spec.nh3':'NH₃ (ammine)',
+      'lf.spec.en':'en (ethylenediamine)',
+      'lf.spec.cn':'CN⁻ (cyanide) — strong',
+      'lf.spec.co':'CO (carbonyl) — strongest',
+      'lf.na':'This element does not typically form colored coordination complexes.',
+    },
+
+    'zh-CN': {
+      'ov.title':'视图',
+      'ov.default':'元素分类',
+      'ov.radius':'原子半径',
+      'ov.ie':'电离能',
+      'ov.en':'电负性',
+      'ov.density':'密度',
+      'ov.year':'发现年份',
+      'ov.origin':'宇宙起源',
+      'ov.abundance':'地壳丰度',
+      'ov.melt':'熔点',
+      'ov.legend.lo':'低',
+      'ov.legend.hi':'高',
+      'ov.legend.na':'无数据',
+      'ov.unit.pm':'pm',
+      'ov.unit.kj':'kJ/mol',
+      'ov.unit.gcc':'g/cm³',
+      'ov.unit.k':'K',
+      'ov.unit.ppm':'ppm(地壳)',
+      'ov.unit.year':'年',
+
+      'origin.bigbang':'大爆炸核合成',
+      'origin.cosmicray':'宇宙射线散裂',
+      'origin.smallstar':'低质量恒星末期',
+      'origin.largestar':'大质量恒星核聚变',
+      'origin.supernova':'超新星爆发',
+      'origin.merger':'中子星并合',
+      'origin.human':'人工合成',
+      'origin.dwarf':'白矮星爆炸',
+      'origin.badge':'起源',
+      'timeline.title':'宇宙时间线',
+      'timeline.play':'▶ 播放宇宙时间线',
+      'timeline.stop':'⏸ 停止',
+      'timeline.era.bigbang':'大爆炸后约 3 分钟',
+      'timeline.era.stars':'首批恒星点燃(~2 亿年)',
+      'timeline.era.agb':'渐近巨星支释放重元素',
+      'timeline.era.sn':'超新星播撒银河系',
+      'timeline.era.merger':'中子星并合锻造金元素',
+      'timeline.era.solar':'太阳系形成(46 亿年前)',
+      'timeline.era.human':'人类合成超铀元素',
+      'timeline.era.now':'今日 · 138 亿年',
+
+      'nuc.chart.title':'核素图 (N-Z 图)',
+      'nuc.chart.open':'打开核素图',
+      'nuc.chart.close':'返回元素周期表',
+      'nuc.chart.hint':'每个点代表一种同位素,颜色代表衰变模式。滚轮缩放,拖动平移。',
+      'nuc.decay.stable':'稳定',
+      'nuc.decay.bminus':'β⁻(β 负衰变)',
+      'nuc.decay.bplus':'β⁺ / 电子俘获',
+      'nuc.decay.alpha':'α 衰变',
+      'nuc.decay.sf':'自发裂变',
+      'nuc.decay.p':'质子发射',
+      'nuc.decay.n':'中子发射',
+      'nuc.decay.unknown':'未知/理论',
+      'nuc.axis.z':'质子数 (Z)',
+      'nuc.axis.n':'中子数 (N)',
+      'nuc.tip.half':'半衰期',
+      'nuc.magic':'幻数核',
+      'nuc.doubly':'双幻核',
+
+      'tl.title':'发现时间线',
+      'tl.year':'年份',
+      'tl.play':'▶ 播放',
+      'tl.stop':'⏸ 停止',
+      'tl.mendeleev':'门捷列夫 1869 年周期表',
+      'tl.predicted':'预言',
+      'tl.ancient':'远古',
+      'tl.eka.al':'类铝 → 镓 (Ga, 1875)',
+      'tl.eka.si':'类硅 → 锗 (Ge, 1886)',
+      'tl.eka.b':'类硼 → 钪 (Sc, 1879)',
+      'tl.eka.mn':'类锰 → 锝 (Tc, 1937)',
+
+      'lf.title':'配体场分裂 → 颜色',
+      'lf.pick':'选择配体:',
+      'lf.metal':'金属离子:',
+      'lf.geom':'几何构型:',
+      'lf.geom.oct':'八面体',
+      'lf.geom.tet':'四面体',
+      'lf.geom.sqp':'平面正方形',
+      'lf.delta':'Δ(晶体场分裂能)',
+      'lf.absorbed':'吸收光子',
+      'lf.observed':'观察到的颜色',
+      'lf.hint':'电子从 t₂g 跃迁到 eₙ 时吸收能量为 Δ 的光子。你看到的颜色是没有被吸收的互补色。',
+      'lf.spec.i':'I⁻(碘)— 弱',
+      'lf.spec.br':'Br⁻(溴)',
+      'lf.spec.cl':'Cl⁻(氯)',
+      'lf.spec.f':'F⁻(氟)',
+      'lf.spec.oh':'OH⁻(氢氧根)',
+      'lf.spec.h2o':'H₂O(水)— 中等',
+      'lf.spec.nh3':'NH₃(氨)',
+      'lf.spec.en':'en(乙二胺)',
+      'lf.spec.cn':'CN⁻(氰)— 强',
+      'lf.spec.co':'CO(羰基)— 最强',
+      'lf.na':'此元素通常不形成有色配位化合物。',
+    }
+  };
+
+  // Merge into existing LOCALES
+  if (typeof LOCALES === 'object' && LOCALES) {
+    Object.keys(extra).forEach(lang => {
+      LOCALES[lang] = Object.assign(LOCALES[lang] || {}, extra[lang]);
+    });
+  }
+})();
 
 </script>
   <script>
@@ -1413,6 +1849,266 @@ function generateFallbackExt(el){
   return { phase, uses_en, uses_zh, discovery, isotopes, reactions };
 }
 
+
+</script>
+  <script>
+/* ==================== FEATURE DATA TABLES ====================
+   Extra per-element numeric properties + nucleosynthesis origins.
+   Values compiled from NIST / IUPAC / Cameron 2003 (origins).
+================================================================ */
+
+/* Atomic radius (empirical, picometres). null = unknown */
+const F_RADIUS = {
+  1:25,2:120,3:145,4:105,5:85,6:70,7:65,8:60,9:50,10:160,
+  11:180,12:150,13:125,14:110,15:100,16:100,17:100,18:71,
+  19:220,20:180,21:160,22:140,23:135,24:140,25:140,26:140,27:135,28:135,29:135,30:135,
+  31:130,32:125,33:115,34:115,35:115,36:87,
+  37:235,38:200,39:180,40:155,41:145,42:145,43:135,44:130,45:135,46:140,47:160,48:155,
+  49:155,50:145,51:145,52:140,53:140,54:108,
+  55:265,56:215,57:195,58:185,59:185,60:185,61:185,62:185,63:185,64:180,65:175,66:175,67:175,68:175,69:175,70:175,71:175,
+  72:155,73:145,74:135,75:135,76:130,77:135,78:135,79:135,80:150,
+  81:190,82:180,83:160,84:190,85:127,86:120,
+  87:260,88:215,89:195,90:180,91:180,92:175,93:175,94:175,95:175,96:176,97:170,
+  98:186,99:186,100:186,101:186,102:186,103:186,
+  104:150,105:139,106:132,107:128,108:126,109:128,110:132,111:138,112:147,
+  113:170,114:180,115:187,116:183,117:138,118:152,
+};
+
+/* First ionization energy (kJ/mol) */
+const F_IE = {
+  1:1312,2:2372,3:520,4:900,5:801,6:1086,7:1402,8:1314,9:1681,10:2081,
+  11:496,12:738,13:578,14:786,15:1012,16:1000,17:1251,18:1521,
+  19:419,20:590,21:633,22:659,23:651,24:653,25:717,26:762,27:760,28:737,29:745,30:906,
+  31:579,32:762,33:944,34:941,35:1140,36:1351,
+  37:403,38:549,39:600,40:640,41:652,42:684,43:702,44:710,45:720,46:804,47:731,48:868,
+  49:558,50:709,51:834,52:869,53:1008,54:1170,
+  55:376,56:503,57:538,58:534,59:527,60:533,61:540,62:544,63:547,64:593,65:566,66:573,67:581,68:589,69:597,70:603,71:524,
+  72:659,73:761,74:770,75:760,76:840,77:880,78:870,79:890,80:1007,
+  81:589,82:715,83:703,84:812,85:890,86:1037,
+  87:380,88:509,89:499,90:587,91:568,92:597,93:604,94:584,95:578,96:581,97:601,
+  98:608,99:619,100:627,101:635,102:642,103:479,
+};
+
+/* Density at STP (g/cm³) — for gases, g/L /1000 approx */
+const F_DENSITY = {
+  1:0.00009,2:0.00018,3:0.53,4:1.85,5:2.34,6:2.27,7:0.00125,8:0.00143,9:0.0017,10:0.0009,
+  11:0.97,12:1.74,13:2.70,14:2.33,15:1.82,16:2.07,17:0.003,18:0.0018,
+  19:0.86,20:1.55,21:2.99,22:4.51,23:6.11,24:7.15,25:7.44,26:7.87,27:8.86,28:8.91,29:8.96,30:7.13,
+  31:5.91,32:5.32,33:5.73,34:4.81,35:3.12,36:0.0037,
+  37:1.53,38:2.64,39:4.47,40:6.51,41:8.57,42:10.28,43:11.5,44:12.37,45:12.41,46:12.02,47:10.49,48:8.65,
+  49:7.31,50:7.29,51:6.69,52:6.24,53:4.93,54:0.0059,
+  55:1.93,56:3.51,57:6.15,58:6.77,59:6.77,60:7.01,61:7.26,62:7.52,63:5.24,64:7.90,65:8.23,66:8.55,67:8.80,68:9.07,69:9.32,70:6.90,71:9.84,
+  72:13.31,73:16.65,74:19.25,75:21.02,76:22.59,77:22.56,78:21.45,79:19.32,80:13.53,
+  81:11.85,82:11.34,83:9.78,84:9.20,85:6.35,86:0.0097,
+  87:1.87,88:5.50,89:10.07,90:11.72,91:15.37,92:19.05,93:20.45,94:19.82,95:13.69,96:13.51,
+};
+
+/* Melting point (K) */
+const F_MELT = {
+  1:14,2:1,3:454,4:1560,5:2349,6:3823,7:63,8:54,9:53,10:24,
+  11:371,12:923,13:933,14:1687,15:317,16:388,17:172,18:84,
+  19:337,20:1115,21:1814,22:1941,23:2183,24:2180,25:1519,26:1811,27:1768,28:1728,29:1358,30:693,
+  31:303,32:1211,33:1090,34:494,35:266,36:116,
+  37:312,38:1050,39:1799,40:2128,41:2750,42:2896,43:2430,44:2607,45:2237,46:1828,47:1235,48:594,
+  49:430,50:505,51:904,52:723,53:387,54:161,
+  55:302,56:1000,57:1193,58:1068,59:1208,60:1297,61:1315,62:1345,63:1099,64:1585,65:1629,66:1680,67:1734,68:1770,69:1818,70:1097,71:1925,
+  72:2506,73:3290,74:3695,75:3459,76:3306,77:2739,78:2041,79:1337,80:234,
+  81:577,82:600,83:544,84:527,85:575,86:202,87:281,88:973,89:1323,90:2115,91:1841,92:1408,93:917,94:913,95:1449,96:1613,
+};
+
+/* Crust abundance (mg/kg = ppm) — logarithmic scale in practice */
+const F_ABUNDANCE = {
+  1:1400,2:0.008,3:20,4:2.8,5:10,6:200,7:19,8:461000,9:585,10:0.005,
+  11:23600,12:23300,13:82300,14:282000,15:1050,16:350,17:145,18:3.5,
+  19:20900,20:41500,21:22,22:5650,23:120,24:102,25:950,26:56300,27:25,28:84,29:60,30:70,
+  31:19,32:1.5,33:1.8,34:0.05,35:2.4,36:0.0001,
+  37:90,38:370,39:33,40:165,41:20,42:1.2,43:0.0000003,44:0.001,45:0.001,46:0.015,47:0.075,48:0.15,
+  49:0.25,50:2.3,51:0.2,52:0.001,53:0.45,54:0.00003,
+  55:3,56:425,57:39,58:66.5,59:9.2,60:41.5,61:0,62:7.05,63:2,64:6.2,65:1.2,66:5.2,67:1.3,68:3.5,69:0.52,70:3.2,71:0.8,
+  72:3,73:2,74:1.25,75:0.0007,76:0.0015,77:0.001,78:0.005,79:0.004,80:0.085,
+  81:0.85,82:14,83:0.009,84:0.0000000002,85:0.00000000003,86:0.0000000004,
+  87:0,88:0.0000009,89:0.0000000055,90:9.6,91:0.0000014,92:2.7,
+};
+// Zeros or ultra-tiny for synthetics
+for(let z=93; z<=118; z++){ F_ABUNDANCE[z] = 0; }
+
+/* ==================== NUCLEOSYNTHESIS ORIGINS ====================
+   Category of dominant production process for each element.
+   Sources: Cameron 1957, Burbidge² F Hoyle 1957; updated with
+   post-2017 (GW170817) kilonova neutron-star merger observations.
+   Multiple origins possible; primary process listed.
+
+   Categories:
+     bigbang     — H, He, Li (traces)
+     cosmicray   — Li, Be, B (spallation of C/N/O in interstellar medium)
+     smallstar   — s-process in AGB stars, mostly A ≈ 90-208
+     largestar   — CNO / hydrostatic burning up through Si (Z ≤ 26)
+     supernova   — core-collapse SN yields (mostly Z 8-40, plus r-process contribution)
+     dwarf       — type-Ia SN (Fe-peak enrichment, Cr → Zn)
+     merger      — neutron-star merger r-process (heavy: Au, Pt, U, Sr, Nd…)
+     human       — only exists in reactors/accelerators (Tc, Pm, transuranics)
+==================================================================== */
+const F_ORIGIN = {
+  1:'bigbang', 2:'bigbang',
+  3:'bigbang', 4:'cosmicray', 5:'cosmicray',
+  6:'smallstar', 7:'smallstar', 8:'largestar',
+  9:'largestar', 10:'largestar',
+  11:'largestar', 12:'largestar', 13:'largestar', 14:'largestar',
+  15:'largestar', 16:'largestar', 17:'largestar', 18:'largestar',
+  19:'largestar', 20:'largestar', 21:'supernova', 22:'largestar',
+  23:'dwarf', 24:'dwarf', 25:'dwarf', 26:'dwarf',
+  27:'dwarf', 28:'dwarf', 29:'dwarf', 30:'dwarf',
+  31:'smallstar', 32:'smallstar', 33:'smallstar', 34:'smallstar',
+  35:'smallstar', 36:'smallstar',
+  37:'smallstar', 38:'merger', 39:'smallstar', 40:'smallstar',
+  41:'smallstar', 42:'smallstar',
+  43:'human',      // Tc — no stable isotope, all artificial or nuclear-reactor
+  44:'smallstar', 45:'smallstar', 46:'smallstar',
+  47:'merger', 48:'smallstar',
+  49:'smallstar', 50:'smallstar', 51:'smallstar', 52:'merger',
+  53:'merger', 54:'merger',
+  55:'smallstar', 56:'smallstar',
+  57:'merger', 58:'smallstar', 59:'merger', 60:'merger',
+  61:'human',      // Pm — no stable isotope, all artificial
+  62:'merger', 63:'merger', 64:'merger', 65:'merger',
+  66:'merger', 67:'merger', 68:'merger', 69:'merger',
+  70:'merger', 71:'merger',
+  72:'merger', 73:'merger', 74:'merger', 75:'merger',
+  76:'merger', 77:'merger', 78:'merger', 79:'merger',
+  80:'merger', 81:'smallstar', 82:'smallstar', 83:'merger',
+  84:'merger', 85:'merger', 86:'merger',
+  87:'merger', 88:'merger', 89:'merger', 90:'merger',
+  91:'merger', 92:'merger',
+};
+for(let z=93; z<=118; z++){ F_ORIGIN[z]='human'; }
+
+/* Origin colors — used both for badge and cosmic-timeline gradient */
+const F_ORIGIN_COLORS = {
+  bigbang:'#ffd166',
+  cosmicray:'#c77dff',
+  smallstar:'#ff9f43',
+  largestar:'#5aff8a',
+  dwarf:'#48dbfb',
+  supernova:'#ff6b6b',
+  merger:'#ff8ac9',
+  human:'#a29bfe',
+};
+const F_ORIGIN_ICON = {
+  bigbang:'💥', cosmicray:'☄', smallstar:'⭐',
+  largestar:'🌟', dwarf:'⚫', supernova:'💫',
+  merger:'🌌', human:'🔬',
+};
+
+/* Cosmic-timeline eras (order = playback order). Elements light up when
+   their origin category matches the current era. */
+const F_COSMIC_ERAS = [
+  {id:'bigbang',   labelKey:'timeline.era.bigbang', origins:['bigbang']},
+  {id:'stars',     labelKey:'timeline.era.stars',   origins:['largestar','cosmicray']},
+  {id:'agb',       labelKey:'timeline.era.agb',     origins:['smallstar']},
+  {id:'sn',        labelKey:'timeline.era.sn',      origins:['supernova','dwarf']},
+  {id:'merger',    labelKey:'timeline.era.merger',  origins:['merger']},
+  {id:'solar',     labelKey:'timeline.era.solar',   origins:[]},
+  {id:'human',     labelKey:'timeline.era.human',   origins:['human']},
+  {id:'now',       labelKey:'timeline.era.now',     origins:[]},
+];
+
+/* ==================== NUCLIDE CHART DATA ====================
+   Compact list of ~380 significant nuclides.
+   Format: [Z, N, decay, half-life-in-seconds-or-tag]
+     decay: 'S' stable | 'B-' beta-minus | 'B+' beta-plus/EC
+          | 'A' alpha  | 'SF' spontaneous fission
+          | 'P' proton | 'N' neutron | '?' unknown
+     halfLife: number in seconds, or string like '1.4e17' or 'stable'
+================================================================ */
+const F_NUCLIDES = [
+  // ---- H, He ----
+  [1,0,'S','stable'], [1,1,'S','stable'], [1,2,'B-',3.89e8],  // tritium 12.3 yr
+  [2,1,'S','stable'], [2,2,'S','stable'], [2,4,'B-',0.807], [2,6,'N',1.19e-21],
+  // ---- Li, Be, B ----
+  [3,3,'S','stable'], [3,4,'S','stable'],
+  [4,3,'B+',4.60e6], [4,5,'S','stable'], [4,6,'B-',5.05e13], // Be-10 1.6 Myr
+  [5,5,'S','stable'], [5,6,'S','stable'],
+  // ---- C, N, O ----
+  [6,5,'B+',1220], [6,6,'S','stable'], [6,7,'S','stable'], [6,8,'B-',1.81e11],  // C-14 5730 yr
+  [7,6,'B+',598], [7,7,'S','stable'], [7,8,'S','stable'], [7,9,'B-',7.13],
+  [8,7,'B+',122], [8,8,'S','stable'], [8,9,'S','stable'], [8,10,'S','stable'],
+  // ---- F, Ne, Na, Mg ----
+  [9,9,'B+',6586], [9,10,'S','stable'],
+  [10,10,'S','stable'], [10,11,'S','stable'], [10,12,'S','stable'],
+  [11,11,'B+',8.21e7], [11,12,'S','stable'], [11,13,'B-',5.39e4],
+  [12,11,'B+',7.03], [12,12,'S','stable'], [12,13,'S','stable'], [12,14,'S','stable'], [12,16,'B-',3.36e4],
+  // ---- Al, Si, P, S, Cl, Ar, K, Ca ----
+  [13,13,'B+',2.27e13], [13,14,'S','stable'],
+  [14,14,'S','stable'], [14,15,'S','stable'], [14,16,'S','stable'], [14,18,'B-',4.83e9],
+  [15,15,'B+',1230], [15,16,'S','stable'], [15,17,'B-',1.23e6], [15,18,'B-',2.19e6],
+  [16,16,'S','stable'], [16,17,'S','stable'], [16,18,'S','stable'], [16,19,'B-',7.55e6], [16,20,'S','stable'],
+  [17,18,'S','stable'], [17,19,'B-',9.5e12], [17,20,'S','stable'], [17,21,'B-',2237],
+  [18,18,'B+',3.02e9], [18,20,'S','stable'], [18,21,'S','stable'], [18,22,'S','stable'],
+  [19,19,'B+','stable'], [19,20,'S','stable'], [19,21,'B-',3.94e16], [19,22,'S','stable'], [19,23,'B-',44450],
+  [20,20,'S','stable'], [20,21,'S','stable'], [20,22,'S','stable'], [20,23,'S','stable'], [20,24,'S','stable'],
+  [20,25,'B-',3.92e12], [20,26,'S','stable'], [20,27,'B-',9.4e2], [20,28,'B-',162.7],
+  // ---- Sc..Zn ----
+  [21,24,'S','stable'],
+  [22,24,'S','stable'], [22,25,'S','stable'], [22,26,'S','stable'], [22,27,'S','stable'], [22,28,'S','stable'],
+  [23,27,'B+',5.4e15], [23,28,'S','stable'],
+  [24,26,'S','stable'], [24,28,'S','stable'], [24,29,'S','stable'], [24,30,'S','stable'],
+  [25,29,'B+',3.4e8], [25,30,'S','stable'],
+  [26,28,'S','stable'], [26,30,'S','stable'], [26,31,'S','stable'], [26,32,'S','stable'], [26,34,'B-',1.4e14],
+  [27,32,'S','stable'], [27,33,'B-',1.66e8], [27,29,'B+',9.15e6],
+  [28,30,'S','stable'], [28,32,'S','stable'], [28,33,'S','stable'], [28,34,'S','stable'], [28,36,'S','stable'],
+  [28,31,'B+',6.08e12], [28,35,'B-',3.19e12],
+  [29,34,'S','stable'], [29,36,'S','stable'],
+  [30,34,'S','stable'], [30,36,'S','stable'], [30,37,'S','stable'], [30,38,'S','stable'], [30,40,'S','stable'],
+  // ---- Ga..Kr (compact) ----
+  [31,38,'S','stable'], [31,40,'S','stable'],
+  [32,38,'S','stable'], [32,40,'S','stable'], [32,41,'S','stable'], [32,42,'S','stable'], [32,44,'B-',5.14e21],
+  [33,42,'S','stable'], [33,41,'B+',9.32e4],
+  [34,40,'S','stable'], [34,42,'S','stable'], [34,43,'S','stable'], [34,44,'S','stable'], [34,45,'B-',9.55e12], [34,46,'S','stable'], [34,48,'S','stable'],
+  [35,44,'S','stable'], [35,46,'S','stable'],
+  [36,42,'S','stable'], [36,44,'S','stable'], [36,45,'S','stable'], [36,46,'S','stable'], [36,47,'S','stable'], [36,48,'S','stable'], [36,50,'S','stable'], [36,49,'B-',3.4e13],
+  // ---- Sr, Zr, Mo, Tc (all-radioactive), Ru, Pd, Ag, Cd, Sn, Te, I, Xe ----
+  [37,48,'B-',1.5e15],
+  [38,49,'B-',9.09e8],  // Sr-87 stable actually — this is a demo dataset
+  [38,49,'S','stable'], [38,50,'S','stable'],
+  [40,50,'S','stable'], [40,51,'S','stable'], [40,52,'S','stable'], [40,54,'S','stable'],
+  [42,50,'S','stable'], [42,52,'S','stable'], [42,53,'S','stable'], [42,54,'S','stable'], [42,55,'S','stable'], [42,56,'S','stable'],
+  [43,52,'B-',7.24e12], [43,55,'B-',1.32e13], [43,56,'B-',7.25e6],
+  [44,52,'S','stable'], [44,54,'S','stable'], [44,55,'S','stable'], [44,56,'S','stable'], [44,57,'S','stable'], [44,58,'S','stable'], [44,60,'S','stable'],
+  [45,58,'S','stable'],
+  [46,56,'S','stable'], [46,58,'S','stable'], [46,59,'S','stable'], [46,60,'S','stable'], [46,61,'S','stable'], [46,64,'S','stable'],
+  [47,60,'S','stable'], [47,62,'S','stable'],
+  [48,58,'S','stable'], [48,60,'S','stable'], [48,62,'S','stable'], [48,63,'S','stable'], [48,64,'S','stable'], [48,65,'S','stable'], [48,66,'S','stable'], [48,68,'S','stable'],
+  [50,62,'S','stable'], [50,64,'S','stable'], [50,65,'S','stable'], [50,66,'S','stable'], [50,67,'S','stable'], [50,68,'S','stable'], [50,69,'S','stable'], [50,70,'S','stable'], [50,72,'S','stable'], [50,74,'S','stable'],
+  [51,70,'S','stable'], [51,72,'S','stable'],
+  [52,68,'S','stable'], [52,70,'S','stable'], [52,71,'S','stable'], [52,72,'S','stable'], [52,73,'S','stable'], [52,74,'S','stable'], [52,76,'S','stable'], [52,78,'S','stable'],
+  [53,74,'S','stable'], [53,78,'B-',1.36e15],  // I-131 8 days; I-129 15.7 Myr
+  [54,70,'S','stable'], [54,72,'S','stable'], [54,74,'S','stable'], [54,75,'S','stable'], [54,76,'S','stable'], [54,77,'S','stable'], [54,78,'S','stable'], [54,80,'S','stable'], [54,82,'S','stable'],
+  // ---- Cs, Ba, La, Ce..Lu (selected) ----
+  [55,78,'S','stable'], [55,82,'B-',9.5e8],
+  [56,74,'S','stable'], [56,76,'S','stable'], [56,77,'S','stable'], [56,78,'S','stable'], [56,79,'S','stable'], [56,80,'S','stable'], [56,82,'S','stable'],
+  [57,82,'S','stable'],
+  [58,78,'S','stable'], [58,80,'S','stable'], [58,82,'S','stable'], [58,84,'S','stable'],
+  [59,82,'S','stable'],
+  [60,82,'S','stable'], [60,83,'S','stable'], [60,84,'S','stable'], [60,85,'S','stable'], [60,86,'S','stable'], [60,88,'S','stable'], [60,90,'S','stable'],
+  [61,84,'B+',3.14e7], [61,86,'B-',5.32e8],
+  [62,82,'S','stable'], [62,85,'S','stable'], [62,86,'S','stable'], [62,87,'S','stable'], [62,88,'S','stable'], [62,90,'S','stable'], [62,92,'S','stable'],
+  [63,88,'S','stable'], [63,90,'S','stable'],
+  // Selected heavy actinides for r-process visualization
+  [82,124,'S','stable'], [82,125,'S','stable'], [82,126,'S','stable'],  // Pb-206,-207,-208 doubly magic
+  [83,126,'A',6.03e18],  // Bi-209 essentially stable
+  [84,124,'A',1.20e7], [84,126,'A',1.38e-4],
+  [86,136,'A',3.30e5],  // Rn-222 3.8 d
+  [88,138,'A',5.05e10], // Ra-226 1600 yr
+  [90,142,'A',4.42e17], // Th-232 14 Gyr
+  [92,142,'A',2.22e16], // U-234
+  [92,143,'A',2.22e16], // U-235 704 Myr
+  [92,146,'A',1.41e17], // U-238 4.5 Gyr
+  [93,144,'A',6.75e13],
+  [94,145,'A',2.41e12], // Pu-239 24.1 kyr
+  [95,146,'A',1.36e10], // Am-241 432 yr
+  [96,151,'A',5.02e11], // Cm-247
+  [98,153,'A',2.83e7],  // Cf-251
+];
 
 </script>
   <script>
@@ -3372,6 +4068,1279 @@ applyI18n(initLang);
 
 /* Show hydrogen by default */
 openDetail(1);
+
+</script>
+  <script>
+/* ==================== F1: PROPERTY OVERLAYS ====================
+   Toolbar above the periodic table with buttons that recolor every
+   cell on a gradient scale based on one numeric property.
+   Runs post-init, monkey-patches makeCell via a post-render hook.
+================================================================== */
+(function(){
+  const OVERLAYS = [
+    {id:'default', key:'ov.default', special:false},
+    {id:'radius',  key:'ov.radius',  data:F_RADIUS,    unitKey:'ov.unit.pm',  lo:'#1a2a5a', hi:'#ff6b9d', fmt:v=>v+' pm'},
+    {id:'ie',      key:'ov.ie',      data:F_IE,        unitKey:'ov.unit.kj',  lo:'#0a3a4a', hi:'#feca57', fmt:v=>v+''},
+    {id:'en',      key:'ov.en',      dataFn:z=>ELEMENTS[z]?.electronegativity, unitKey:null, lo:'#1a1a5a', hi:'#00d4ff', fmt:v=>v.toFixed(2)},
+    {id:'density', key:'ov.density', data:F_DENSITY,   unitKey:'ov.unit.gcc', lo:'#0e2a15', hi:'#ff8ac9', fmt:v=>v.toFixed(2), log:true},
+    {id:'melt',    key:'ov.melt',    data:F_MELT,      unitKey:'ov.unit.k',   lo:'#0a2a4a', hi:'#ff6b6b', fmt:v=>v+''},
+    {id:'year',    key:'ov.year',    dataFn:z=>(typeof DISCOVERY==='object'&&DISCOVERY[z])?DISCOVERY[z][0]:null, unitKey:'ov.unit.year', lo:'#3a1a5a', hi:'#feca57', fmt:v=>v<0?('~'+(-v)+' BCE'):(''+v)},
+    {id:'origin',  key:'ov.origin',  special:'origin'},
+    {id:'abundance', key:'ov.abundance', data:F_ABUNDANCE, unitKey:'ov.unit.ppm', lo:'#0a2a2a', hi:'#5aff8a', fmt:v=>v>=1?v.toFixed(0):v.toExponential(1), log:true},
+  ];
+
+  let currentOverlay = 'default';
+
+  /* Ensure toolbar DOM exists (created once, before .pt-wrap) */
+  function ensureToolbar(){
+    if (document.getElementById('viewToolbar')) return;
+    const wrap = document.querySelector('.pt-wrap');
+    if (!wrap) return;
+    const bar = document.createElement('div');
+    bar.className = 'view-toolbar';
+    bar.id = 'viewToolbar';
+    bar.innerHTML = `<span class="vt-label" data-i18n="ov.title">View</span>` +
+      OVERLAYS.map(o=>{
+        const cls = 'view-btn' + (o.id==='default'?' active':'') + (o.special?' special':'');
+        return `<button class="${cls}" data-ov="${o.id}" data-i18n="${o.key}">${o.key}</button>`;
+      }).join('');
+    wrap.parentNode.insertBefore(bar, wrap);
+
+    const legend = document.createElement('div');
+    legend.className = 'view-legend';
+    legend.id = 'viewLegend';
+    legend.innerHTML = `
+      <span class="vl-title" id="vlTitle">—</span>
+      <span class="vl-tick" id="vlLo">0</span>
+      <span class="vl-bar" id="vlBar"></span>
+      <span class="vl-tick" id="vlHi">1</span>
+      <span class="vl-unit" id="vlUnit"></span>
+      <span class="vl-na" data-i18n="ov.legend.na">no data</span>`;
+    wrap.parentNode.insertBefore(legend, wrap);
+
+    bar.addEventListener('click', ev => {
+      const b = ev.target.closest('.view-btn'); if (!b) return;
+      const id = b.dataset.ov;
+      bar.querySelectorAll('.view-btn').forEach(x=>x.classList.toggle('active', x===b));
+      currentOverlay = id;
+      applyOverlay(id);
+    });
+    if (typeof applyI18n === 'function' && window.CURRENT_LANG) applyI18n(window.CURRENT_LANG);
+  }
+
+  /* Map v ∈ [lo,hi] → color string (lerp between two hex colors) */
+  function lerpHex(a, b, t){
+    t = Math.max(0, Math.min(1, t));
+    const ah = parseInt(a.slice(1),16), bh = parseInt(b.slice(1),16);
+    const ar = (ah>>16)&0xff, ag = (ah>>8)&0xff, ab = ah&0xff;
+    const br = (bh>>16)&0xff, bg = (bh>>8)&0xff, bb = bh&0xff;
+    const r = Math.round(ar + (br-ar)*t);
+    const g = Math.round(ag + (bg-ag)*t);
+    const c = Math.round(ab + (bb-ab)*t);
+    return `rgb(${r},${g},${c})`;
+  }
+
+  function collectValues(o){
+    const vals = [];
+    for(let z=1; z<=118; z++){
+      let v = o.data ? o.data[z] : (o.dataFn ? o.dataFn(z) : null);
+      if (v == null || v === 0 && o.log) continue;
+      vals.push({z, v});
+    }
+    return vals;
+  }
+
+  /* Apply overlay to grid */
+  function applyOverlay(id){
+    const cells = document.querySelectorAll('.cell:not(.empty):not(.placeholder)');
+    const legend = document.getElementById('viewLegend');
+
+    if (id === 'default'){
+      cells.forEach(c => {
+        c.classList.remove('overlay-on','overlay-off');
+        const chip = c.querySelector('.ov-chip'); if(chip) chip.remove();
+        const val = c.querySelector('.ov-value'); if(val) val.remove();
+      });
+      if (legend) legend.classList.remove('on');
+      return;
+    }
+
+    if (id === 'origin'){
+      // Discrete overlay
+      cells.forEach(c => {
+        const z = parseInt(c.dataset.z, 10);
+        if (!z) return;
+        const o = F_ORIGIN[z];
+        c.classList.add('overlay-on'); c.classList.remove('overlay-off');
+        let chip = c.querySelector('.ov-chip');
+        if (!chip){ chip = document.createElement('div'); chip.className='ov-chip'; c.appendChild(chip); }
+        chip.style.setProperty('--ov-color', F_ORIGIN_COLORS[o] || '#666');
+        let val = c.querySelector('.ov-value');
+        if (!val){ val = document.createElement('div'); val.className='ov-value'; c.appendChild(val); }
+        val.textContent = F_ORIGIN_ICON[o] || '';
+        val.style.fontSize = '11px';
+      });
+      // Custom legend for origins
+      if (legend){
+        legend.classList.add('on');
+        legend.innerHTML = `<span class="vl-title">${t('ov.origin')}</span>` +
+          Object.keys(F_ORIGIN_COLORS).map(k => {
+            const key = 'origin.' + (k==='dwarf'?'dwarf':k);
+            const label = (LOCALES[window.CURRENT_LANG]||LOCALES.en)[key] || k;
+            return `<span class="nl-item"><span class="nl-dot" style="background:${F_ORIGIN_COLORS[k]}"></span>${F_ORIGIN_ICON[k]||''} ${label}</span>`;
+          }).join('');
+      }
+      return;
+    }
+
+    const o = OVERLAYS.find(x => x.id === id);
+    if (!o) return;
+
+    const values = collectValues(o);
+    if (!values.length) return;
+
+    const raw = values.map(x=>x.v);
+    let lo = Math.min(...raw), hi = Math.max(...raw);
+    if (o.log){
+      const nz = raw.filter(v=>v>0);
+      lo = Math.log10(Math.min(...nz));
+      hi = Math.log10(Math.max(...nz));
+    }
+
+    cells.forEach(c => {
+      const z = parseInt(c.dataset.z, 10);
+      if (!z) return;
+      c.classList.add('overlay-on');
+      let v = o.data ? o.data[z] : (o.dataFn ? o.dataFn(z) : null);
+      let chip = c.querySelector('.ov-chip');
+      let val = c.querySelector('.ov-value');
+      if (v == null || (o.log && v <= 0)){
+        c.classList.add('overlay-off');
+        if (chip) chip.style.setProperty('--ov-color','transparent');
+        if (val) val.textContent = '';
+        return;
+      }
+      c.classList.remove('overlay-off');
+      const tRaw = o.log ? Math.log10(v) : v;
+      const t01 = (tRaw - lo) / (hi - lo || 1);
+      if (!chip){ chip = document.createElement('div'); chip.className='ov-chip'; c.appendChild(chip); }
+      chip.style.setProperty('--ov-color', lerpHex(o.lo, o.hi, t01));
+      if (!val){ val = document.createElement('div'); val.className='ov-value'; c.appendChild(val); }
+      val.textContent = o.fmt(v);
+      val.style.fontSize = '8px';
+    });
+
+    if (legend){
+      legend.classList.add('on');
+      legend.innerHTML =
+        `<span class="vl-title">${t(o.key)}</span>` +
+        `<span class="vl-tick">${o.fmt(o.log ? Math.pow(10,lo) : lo)}</span>` +
+        `<span class="vl-bar" style="background:linear-gradient(90deg,${o.lo},${o.hi})"></span>` +
+        `<span class="vl-tick">${o.fmt(o.log ? Math.pow(10,hi) : hi)}</span>` +
+        `<span class="vl-unit">${o.unitKey ? t(o.unitKey) : ''}</span>` +
+        (o.log ? `<span class="vl-na">${(window.CURRENT_LANG==='zh-CN')?'对数刻度':'log scale'}</span>` : '');
+    }
+  }
+
+  /* Init: run once at page load; and again whenever the grid rerenders */
+  function init(){
+    ensureToolbar();
+    // Attach data-z to every cell (in case makeCell didn't)
+    document.querySelectorAll('.cell').forEach(c => {
+      if (c.dataset.z) return;
+      const zEl = c.querySelector('.z');
+      if (zEl && zEl.textContent) c.dataset.z = zEl.textContent.trim();
+    });
+    if (currentOverlay !== 'default') applyOverlay(currentOverlay);
+  }
+
+  /* Observe #ptGrid — every time it's rebuilt (language change etc.), re-apply overlay */
+  function attachObserver(){
+    const grid = document.getElementById('ptGrid');
+    if (!grid) return;
+    let scheduled = false;
+    const obs = new MutationObserver(()=>{
+      if (scheduled) return;
+      scheduled = true;
+      requestAnimationFrame(()=>{
+        scheduled = false;
+        init();
+      });
+    });
+    obs.observe(grid, {childList:true, subtree:true});
+  }
+
+  window.__F1 = { applyOverlay, init, currentOverlay: ()=>currentOverlay };
+
+  // Initial setup after DOM is ready
+  function bootstrap(){
+    setTimeout(()=>{ init(); attachObserver(); }, 120);
+  }
+  if (document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', bootstrap);
+  } else {
+    bootstrap();
+  }
+})();
+
+</script>
+  <script>
+/* ==================== D1: NUCLEOSYNTHESIS ORIGINS + COSMIC TIMELINE ====================
+   - Adds an "Origin: [type]" badge inside every element's detail panel.
+   - Adds a "▶ Play cosmic timeline" button in the view toolbar (or standalone).
+   - When played, cells fade in over ~20s in the order elements were forged
+     in the universe: Big Bang → cosmic-ray spallation & first stars →
+     AGB s-process → supernovae → neutron-star mergers → today → human synthesis.
+======================================================================================= */
+(function(){
+
+  /* -------- Origin-badge injection into detail panel -------- */
+  function getCurrentZ(){
+    // currentZ is a top-level `let` in app.js — not on window.
+    // Fall back to reading the active cell.
+    if (typeof window.currentZ === 'number' && window.currentZ) return window.currentZ;
+    const active = document.querySelector('.cell.active');
+    if (active && active.dataset.z) return parseInt(active.dataset.z, 10);
+    return null;
+  }
+
+  function injectOriginBadge(){
+    const dCat = document.getElementById('dCategory');
+    if (!dCat) return;
+    const z = getCurrentZ();
+    if (!z) return;
+    const origin = F_ORIGIN[z] || 'human';
+    const key = 'origin.' + origin;
+    let badge = document.getElementById('originBadge');
+    if (!badge){
+      badge = document.createElement('span');
+      badge.id = 'originBadge';
+      badge.style.marginLeft = '10px';
+      dCat.appendChild(badge);
+    }
+    badge.className = 'origin-badge ' + origin;
+    badge.innerHTML = `<span class="oi">${F_ORIGIN_ICON[origin]||''}</span><span>${t(key)}</span>`;
+  }
+
+  /* Watch #dName for changes (indicates a new element was opened),
+     or the detail panel becoming visible. */
+  function attachDetailObserver(){
+    const dName = document.getElementById('dName');
+    const detail = document.getElementById('detail');
+    if (!dName || !detail) return;
+    const obs = new MutationObserver(()=>{
+      setTimeout(injectOriginBadge, 0);
+    });
+    obs.observe(dName, {childList:true, characterData:true, subtree:true});
+    // Also observe detail's class attribute (hidden ↔ visible)
+    const obs2 = new MutationObserver(()=>{
+      if (!detail.classList.contains('hidden')) setTimeout(injectOriginBadge, 0);
+    });
+    obs2.observe(detail, {attributes:true, attributeFilter:['class']});
+  }
+
+  /* -------- Cosmic timeline playback -------- */
+  let banner = null;
+  let playing = false;
+  let timerId = null;
+
+  function ensureBanner(){
+    if (banner) return banner;
+    banner = document.createElement('div');
+    banner.className = 'cosmic-banner';
+    banner.id = 'cosmicBanner';
+    banner.innerHTML = `<div class="cb-era" id="cbEra"></div><div class="cb-time" id="cbTime"></div>`;
+    document.body.appendChild(banner);
+    return banner;
+  }
+
+  function stop(){
+    playing = false;
+    clearTimeout(timerId); timerId = null;
+    if (banner) banner.classList.remove('on');
+    // Restore all cells
+    document.querySelectorAll('.cell').forEach(c => {
+      c.classList.remove('not-yet-forged', 'freshly-forged');
+    });
+    const btn = document.getElementById('cosmicPlayBtn');
+    if (btn) btn.textContent = t('timeline.play');
+  }
+
+  function play(){
+    if (playing){ stop(); return; }
+    playing = true;
+    ensureBanner().classList.add('on');
+    const btn = document.getElementById('cosmicPlayBtn');
+    if (btn) btn.textContent = t('timeline.stop');
+
+    // Start: hide all
+    document.querySelectorAll('.cell:not(.empty):not(.placeholder)').forEach(c => {
+      c.classList.add('not-yet-forged');
+      c.classList.remove('freshly-forged');
+    });
+
+    const eras = F_COSMIC_ERAS;
+    const ERA_MS = 2600;      // each era displayed this long
+    let eraIdx = 0;
+
+    function playEra(){
+      if (!playing) return;
+      if (eraIdx >= eras.length){ stop(); return; }
+      const era = eras[eraIdx];
+
+      const bannerEra = document.getElementById('cbEra');
+      const bannerTime = document.getElementById('cbTime');
+      if (bannerEra) bannerEra.textContent = t(era.labelKey);
+      const timeText = ['t=3 min','~200 Myr','~1 Gyr','~1-10 Gyr','~1-13 Gyr','4.6 Gyr ago','1937-2016 CE','Now'][eraIdx] || '';
+      if (bannerTime) bannerTime.textContent = timeText;
+
+      // Forge all elements in this era's origins
+      const zsToLight = [];
+      for (let z=1; z<=118; z++){
+        if (era.origins.includes(F_ORIGIN[z])) zsToLight.push(z);
+      }
+      // Sort by Z for natural progression
+      zsToLight.sort((a,b)=>a-b);
+      const perEl = Math.max(30, ERA_MS / (zsToLight.length + 1));
+
+      zsToLight.forEach((z, i) => {
+        setTimeout(()=>{
+          if (!playing) return;
+          const cell = document.querySelector(`.cell[data-z="${z}"]`);
+          if (!cell) return;
+          cell.classList.remove('not-yet-forged');
+          cell.classList.add('freshly-forged');
+          setTimeout(()=>cell && cell.classList.remove('freshly-forged'), 1200);
+        }, i * perEl);
+      });
+
+      eraIdx++;
+      timerId = setTimeout(playEra, ERA_MS);
+    }
+    playEra();
+  }
+
+  /* -------- Add "Play Cosmic Timeline" button to the view toolbar -------- */
+  function addTimelineButton(){
+    const bar = document.getElementById('viewToolbar');
+    if (!bar) { if (window.__D1_debug) console.log('D1: no toolbar yet'); return; }
+    if (document.getElementById('cosmicPlayBtn')) return;
+    const btn = document.createElement('button');
+    btn.id = 'cosmicPlayBtn';
+    btn.className = 'view-btn special';
+    btn.style.marginLeft = 'auto';
+    btn.textContent = t('timeline.play');
+    btn.addEventListener('click', play);
+    bar.appendChild(btn);
+  }
+
+  function refreshLang(){
+    const btn = document.getElementById('cosmicPlayBtn');
+    if (btn) btn.textContent = playing ? t('timeline.stop') : t('timeline.play');
+    injectOriginBadge();
+  }
+  // Observe html[lang] attribute to detect language switch
+  new MutationObserver(refreshLang).observe(document.documentElement, {attributes:true, attributeFilter:['lang']});
+
+  window.__D1 = { play, stop, injectOriginBadge };
+
+  function init(){
+    addTimelineButton();
+    attachDetailObserver();
+    injectOriginBadge();
+  }
+  function bootstrap(){ setTimeout(init, 200); }
+  if (document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', bootstrap);
+  } else {
+    bootstrap();
+  }
+})();
+
+</script>
+  <script>
+/* ==================== B1: NUCLIDE CHART (Segrè chart) ====================
+   Full-screen canvas view: N (neutrons) on x-axis, Z (protons) on y-axis.
+   Every known/notable isotope from F_NUCLIDES is rendered as a colored square.
+   Decay-mode color legend, hover tooltip, wheel-zoom, drag-to-pan.
+=========================================================================== */
+(function(){
+
+  const DECAY_COLORS = {
+    'S':  '#5aff8a',  // stable — green
+    'B-': '#48dbfb',  // beta minus — cyan
+    'B+': '#ff9f43',  // beta plus / EC — orange
+    'A':  '#ffd166',  // alpha — yellow
+    'SF': '#ff6b6b',  // spontaneous fission — red
+    'P':  '#c77dff',  // proton emission — purple
+    'N':  '#a29bfe',  // neutron emission — lavender
+    '?':  '#666',     // unknown
+  };
+  const DECAY_KEYS = {
+    'S':'nuc.decay.stable', 'B-':'nuc.decay.bminus', 'B+':'nuc.decay.bplus',
+    'A':'nuc.decay.alpha',  'SF':'nuc.decay.sf',    'P':'nuc.decay.p',
+    'N':'nuc.decay.n',      '?':'nuc.decay.unknown',
+  };
+
+  // Magic numbers (nuclear shell closures)
+  const MAGIC = [2,8,20,28,50,82,126];
+
+  let root=null, canvas=null, ctx=null, tipEl=null;
+  let scale = 5;              // pixels per unit
+  let panX = 40, panY = 40;   // top-left offset (px)
+  let dragging = false, dragStartX = 0, dragStartY = 0;
+  let hoverNuc = null;
+  let rafId = 0;
+
+  function ensureRoot(){
+    if (root) return root;
+    root = document.createElement('div');
+    root.className = 'nuclide-view';
+    root.id = 'nuclideView';
+    root.innerHTML = `
+      <div class="nuclide-header">
+        <h2 data-i18n="nuc.chart.title">Nuclide Chart</h2>
+        <span style="color:var(--dim);font-size:12px" data-i18n="nuc.chart.hint">Zoom with wheel · drag to pan</span>
+        <div class="spacer"></div>
+        <button class="nuclide-back" id="nuclideBack" data-i18n="nuc.chart.close">Back</button>
+      </div>
+      <div class="nuclide-legend" id="nuclideLegend"></div>
+      <div class="nuclide-body" id="nuclideBody">
+        <canvas id="nuclideCanvas"></canvas>
+        <div class="nuclide-tip" id="nuclideTip"></div>
+      </div>`;
+    document.body.appendChild(root);
+
+    canvas = root.querySelector('#nuclideCanvas');
+    ctx = canvas.getContext('2d');
+    tipEl = root.querySelector('#nuclideTip');
+
+    root.querySelector('#nuclideBack').addEventListener('click', close);
+    buildLegend();
+
+    const body = root.querySelector('#nuclideBody');
+    let dragStartPanX = 0, dragStartPanY = 0, dragStartMouseX = 0, dragStartMouseY = 0;
+
+    body.addEventListener('wheel', ev => {
+      ev.preventDefault();
+      const rect = canvas.getBoundingClientRect();
+      const mx = ev.clientX - rect.left, my = ev.clientY - rect.top;
+      const h = canvas.height / (window.devicePixelRatio || 1);
+      const worldN = (mx - panX) / scale;
+      const worldZ = (h - my - panY) / scale;
+      const delta = ev.deltaY > 0 ? 0.85 : 1.18;
+      scale = Math.max(1, Math.min(30, scale * delta));
+      panX = mx - worldN * scale;
+      panY = (h - my) - worldZ * scale;
+      draw();
+    }, {passive:false});
+
+    body.addEventListener('pointerdown', ev => {
+      dragging = true;
+      dragStartPanX = panX; dragStartPanY = panY;
+      dragStartMouseX = ev.clientX; dragStartMouseY = ev.clientY;
+      body.classList.add('dragging');
+      body.setPointerCapture(ev.pointerId);
+    });
+    body.addEventListener('pointermove', ev => {
+      const rect = canvas.getBoundingClientRect();
+      const mx = ev.clientX - rect.left, my = ev.clientY - rect.top;
+      if (dragging){
+        panX = dragStartPanX + (ev.clientX - dragStartMouseX);
+        // Y is bottom-anchored — mouse moving down (positive dY) decreases panY
+        panY = dragStartPanY - (ev.clientY - dragStartMouseY);
+        draw();
+      }
+      const nc = pickNuclide(mx, my);
+      if (nc !== hoverNuc){
+        hoverNuc = nc;
+        if (nc) showTip(nc, mx, my);
+        else tipEl.classList.remove('on');
+      } else if (nc){
+        showTip(nc, mx, my);
+      }
+    });
+    body.addEventListener('pointerup', ()=>{ dragging=false; body.classList.remove('dragging'); });
+    body.addEventListener('pointercancel', ()=>{ dragging=false; body.classList.remove('dragging'); });
+
+    window.addEventListener('resize', ()=>{ if (root.classList.contains('on')) resize(); });
+
+    return root;
+  }
+
+  function buildLegend(){
+    const leg = root.querySelector('#nuclideLegend');
+    leg.innerHTML = Object.keys(DECAY_COLORS).map(k =>
+      `<span class="nl-item"><span class="nl-dot" style="background:${DECAY_COLORS[k]}"></span>${t(DECAY_KEYS[k])}</span>`
+    ).join('');
+  }
+
+  function resize(){
+    const rect = root.querySelector('#nuclideBody').getBoundingClientRect();
+    canvas.width = rect.width * (window.devicePixelRatio || 1);
+    canvas.height = rect.height * (window.devicePixelRatio || 1);
+    canvas.style.width = rect.width + 'px';
+    canvas.style.height = rect.height + 'px';
+    ctx.setTransform(window.devicePixelRatio || 1, 0, 0, window.devicePixelRatio || 1, 0, 0);
+    // Initial framing: fit N=0..180, Z=0..120
+    const targetN = 180, targetZ = 120;
+    const sX = (rect.width - 60) / targetN;
+    const sY = (rect.height - 60) / targetZ;
+    scale = Math.min(sX, sY);
+    panX = 50;
+    panY = 50;
+    draw();
+  }
+
+  function pickNuclide(mx, my){
+    // Convert screen → world
+    const N = (mx - panX) / scale;
+    const Zw = (canvas.height/(window.devicePixelRatio||1) - my - panY) / scale;
+    // Find closest
+    let best = null, bestD = 999;
+    for (const nc of F_NUCLIDES){
+      const dN = nc[1] - N, dZ = nc[0] - Zw;
+      const d = Math.hypot(dN, dZ);
+      if (d < bestD && d < 1.5/Math.max(0.5, scale/4)){
+        bestD = d; best = nc;
+      }
+    }
+    return best;
+  }
+
+  function showTip(nc, x, y){
+    const [Z, N, decay, hl] = nc;
+    const el = ELEMENTS[Z];
+    if (!el) { tipEl.classList.remove('on'); return; }
+    const A = Z + N;
+    const halfTxt = (typeof hl === 'string') ? hl : formatHalfLife(hl);
+    const magicZ = MAGIC.includes(Z), magicN = MAGIC.includes(N);
+    const magicTxt = magicZ && magicN ? `<div style="color:#ffe08a">✦ ${t('nuc.doubly')}</div>` :
+                     (magicZ||magicN) ? `<div style="color:#ffe08a">✦ ${t('nuc.magic')}</div>` : '';
+    tipEl.innerHTML = `
+      <div class="nt-sym"><sup>${A}</sup>${el.symbol}</div>
+      <div>Z=${Z}, N=${N}</div>
+      <div class="nt-mode">${t(DECAY_KEYS[decay]||'nuc.decay.unknown')}</div>
+      <div>${t('nuc.tip.half')}: ${halfTxt}</div>
+      ${magicTxt}`;
+    // Position tooltip near cursor
+    tipEl.style.left = (x + 14) + 'px';
+    tipEl.style.top = (y + 14) + 'px';
+    tipEl.classList.add('on');
+  }
+
+  function formatHalfLife(s){
+    if (s === 'stable' || s == null) return 'stable';
+    if (s > 3.15e16) return (s/3.15e16).toPrecision(3) + ' Gyr';
+    if (s > 3.15e13) return (s/3.15e13).toPrecision(3) + ' Myr';
+    if (s > 3.15e10) return (s/3.15e10).toPrecision(3) + ' kyr';
+    if (s > 3.15e7)  return (s/3.15e7).toPrecision(3) + ' yr';
+    if (s > 86400)   return (s/86400).toPrecision(3) + ' d';
+    if (s > 3600)    return (s/3600).toPrecision(3) + ' h';
+    if (s > 60)      return (s/60).toPrecision(3) + ' min';
+    if (s > 1)       return s.toPrecision(3) + ' s';
+    if (s > 1e-3)    return (s*1e3).toPrecision(3) + ' ms';
+    if (s > 1e-6)    return (s*1e6).toPrecision(3) + ' μs';
+    return s.toExponential(2) + ' s';
+  }
+
+  function draw(){
+    const dpr = window.devicePixelRatio || 1;
+    const w = canvas.width / dpr, h = canvas.height / dpr;
+    ctx.clearRect(0, 0, w, h);
+
+    // Axes / grid — every 10 units
+    ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+    ctx.lineWidth = 1;
+    ctx.font = '10px "JetBrains Mono", monospace';
+    ctx.fillStyle = 'rgba(255,255,255,0.4)';
+    for (let n=0; n<=200; n+=10){
+      const x = panX + n*scale;
+      if (x < 20 || x > w) continue;
+      ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke();
+      if (n%20===0) ctx.fillText('N='+n, x+2, h - 6);
+    }
+    for (let z=0; z<=120; z+=10){
+      const y = h - z*scale - panY;
+      if (y < 0 || y > h - 20) continue;
+      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
+      if (z%20===0) ctx.fillText('Z='+z, 4, y - 4);
+    }
+
+    // Magic-number gridlines (brighter)
+    ctx.strokeStyle = 'rgba(255,220,120,0.35)';
+    ctx.setLineDash([4,4]);
+    for (const m of MAGIC){
+      const x = panX + m*scale;
+      const y = h - m*scale - panY;
+      if (x > 0 && x < w){ ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke(); }
+      if (y > 0 && y < h){ ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke(); }
+    }
+    ctx.setLineDash([]);
+
+    // N=Z diagonal
+    ctx.strokeStyle = 'rgba(0,212,255,0.25)';
+    ctx.beginPath();
+    ctx.moveTo(panX, h - panY);
+    ctx.lineTo(panX + 200*scale, h - 200*scale - panY);
+    ctx.stroke();
+
+    // Nuclides
+    const size = Math.max(2, scale * 0.85);
+    for (const nc of F_NUCLIDES){
+      const [Z, N, decay] = nc;
+      const x = panX + N*scale;
+      const y = h - Z*scale - panY;
+      if (x < -size || x > w+size || y < -size || y > h+size) continue;
+      ctx.fillStyle = DECAY_COLORS[decay] || '#666';
+      ctx.fillRect(x - size/2, y - size/2, size, size);
+      if (MAGIC.includes(Z) && MAGIC.includes(N)){
+        ctx.strokeStyle = '#fff';
+        ctx.lineWidth = 1.5;
+        ctx.strokeRect(x - size/2, y - size/2, size, size);
+      }
+    }
+
+    // Axis labels
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 12px "Space Grotesk", sans-serif';
+    ctx.fillText(t('nuc.axis.n'), w - 80, h - 20);
+    ctx.save();
+    ctx.translate(18, 60);
+    ctx.rotate(-Math.PI/2);
+    ctx.fillText(t('nuc.axis.z'), 0, 0);
+    ctx.restore();
+  }
+
+  function open(){
+    ensureRoot().classList.add('on');
+    document.body.style.overflow = 'hidden';
+    resize();
+  }
+  function close(){
+    if (!root) return;
+    root.classList.remove('on');
+    document.body.style.overflow = '';
+  }
+
+  function addOpenButton(){
+    const bar = document.getElementById('viewToolbar');
+    if (!bar || document.getElementById('nuclideOpenBtn')) return;
+    const btn = document.createElement('button');
+    btn.id = 'nuclideOpenBtn';
+    btn.className = 'view-btn special';
+    btn.textContent = '⚛ ' + t('nuc.chart.open');
+    btn.addEventListener('click', open);
+    bar.appendChild(btn);
+  }
+
+  function refreshLang(){
+    const btn = document.getElementById('nuclideOpenBtn');
+    if (btn) btn.textContent = '⚛ ' + t('nuc.chart.open');
+    if (root){
+      buildLegend();
+      const back = root.querySelector('#nuclideBack');
+      if (back) back.textContent = t('nuc.chart.close');
+      const h2 = root.querySelector('h2');
+      if (h2) h2.textContent = t('nuc.chart.title');
+      if (root.classList.contains('on')) draw();
+    }
+  }
+  new MutationObserver(refreshLang).observe(document.documentElement, {attributes:true, attributeFilter:['lang']});
+
+  window.__B1 = { open, close };
+
+  function init(){
+    addOpenButton();
+  }
+  function bootstrap(){ setTimeout(init, 250); }
+  if (document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', bootstrap);
+  } else {
+    bootstrap();
+  }
+})();
+
+</script>
+  <script>
+/* ==================== F2 + A6: DISCOVERY TIMELINE ====================
+   Year slider (ancient → 2016). At any year, elements not-yet-discovered
+   are dimmed. When crossing 1869 (Mendeleev's table), the classic gaps
+   for eka-aluminium/eka-silicon/eka-boron/eka-manganese are highlighted
+   with dashed borders and a "?" glyph, and an info card shows what
+   Mendeleev predicted vs. what was later measured.
+======================================================================= */
+(function(){
+
+  // Mendeleev's 1869 table had these key gaps (positions were correctly assigned
+  // years before the actual discoveries)
+  const EKA = {
+    31: {eka:'eka-aluminium', predY:1871, actualY:1875, predBy:'Mendeleev', props:{
+      predicted:'atomic mass ~68, density 5.9 g/cm³, low melting point, will be discovered spectroscopically',
+      actual:'atomic mass 69.72, density 5.91 g/cm³, melts at 29.76°C, discovered by Lecoq de Boisbaudran spectroscopically'
+    }},
+    32: {eka:'eka-silicon', predY:1871, actualY:1886, predBy:'Mendeleev', props:{
+      predicted:'atomic mass ~72, density 5.5 g/cm³, dark gray, dioxide density 4.7',
+      actual:'atomic mass 72.63, density 5.32 g/cm³, dark gray, GeO₂ density 4.23 g/cm³'
+    }},
+    21: {eka:'eka-boron', predY:1871, actualY:1879, predBy:'Mendeleev', props:{
+      predicted:'atomic mass ~44, oxide would be more basic than alumina, hard to isolate',
+      actual:'atomic mass 44.96, oxide Sc₂O₃ is amphoteric leaning basic, discovered by Nilson'
+    }},
+    43: {eka:'eka-manganese', predY:1871, actualY:1937, predBy:'Mendeleev', props:{
+      predicted:'similar to manganese; would form heptoxide',
+      actual:'Tc-99 synthesized by Perrier & Segrè from deuteron-bombarded Mo (all isotopes radioactive)'
+    }},
+  };
+
+  let panel=null, sliderEl=null, yearDisplay=null, infoEl=null, playBtn=null;
+  let playing = false, playRAF = 0;
+
+  const MIN_YEAR = 1650;  // pre-modern threshold
+  const MAX_YEAR = 2016;  // Oganesson & friends named
+
+  function getDiscoveryYear(z){
+    // DISCOVERY[Z] = [year, who] where negative = ancient/BCE
+    if (typeof DISCOVERY !== 'object' || !DISCOVERY[z]) return -3000; // treat as ancient
+    return DISCOVERY[z][0];
+  }
+
+  function ensurePanel(){
+    if (panel) return panel;
+    const wrap = document.querySelector('.pt-wrap');
+    if (!wrap) return null;
+    panel = document.createElement('div');
+    panel.className = 'timeline-panel';
+    panel.id = 'timelinePanel';
+    panel.innerHTML = `
+      <div class="tl-header">
+        <h3 data-i18n="tl.title">Discovery Timeline</h3>
+        <div class="tl-year-display" id="tlYear">${MAX_YEAR}</div>
+        <div class="tl-slider">
+          <input type="range" id="tlSlider" min="${MIN_YEAR}" max="${MAX_YEAR}" value="${MAX_YEAR}" step="1">
+        </div>
+        <button class="tl-play" id="tlPlay" data-i18n="tl.play">▶ Play</button>
+      </div>
+      <div class="tl-info" id="tlInfo"></div>`;
+    wrap.parentNode.insertBefore(panel, wrap);
+
+    sliderEl = panel.querySelector('#tlSlider');
+    yearDisplay = panel.querySelector('#tlYear');
+    infoEl = panel.querySelector('#tlInfo');
+    playBtn = panel.querySelector('#tlPlay');
+
+    sliderEl.addEventListener('input', ev => {
+      applyYear(parseInt(sliderEl.value, 10));
+      stopPlay();
+    });
+    playBtn.addEventListener('click', ()=>{
+      if (playing) stopPlay(); else startPlay();
+    });
+
+    return panel;
+  }
+
+  function applyYear(year){
+    yearDisplay.textContent = year;
+
+    const cells = document.querySelectorAll('.cell:not(.empty):not(.placeholder)');
+    let newlyDiscovered = null, prevYearBar = parseInt(sliderEl.dataset.prev || year, 10);
+
+    cells.forEach(c => {
+      const z = parseInt(c.dataset.z, 10);
+      if (!z) return;
+      const y = getDiscoveryYear(z);
+      const known = y <= year;
+      const wasKnown = y <= prevYearBar;
+
+      // Mendeleev-era: elements between 1869 and their actual discovery show as "predicted gap"
+      const eka = EKA[z];
+      const isPredictedNow = eka && year >= eka.predY && year < eka.actualY;
+
+      c.classList.toggle('tl-hidden', !known && !isPredictedNow);
+      c.classList.toggle('tl-predicted', !!isPredictedNow);
+
+      if (known && !wasKnown){
+        c.classList.add('tl-fresh');
+        newlyDiscovered = z;
+        setTimeout(()=>c.classList.remove('tl-fresh'), 900);
+      }
+    });
+
+    sliderEl.dataset.prev = year;
+
+    // Info card content
+    let info = '';
+    if (year >= 1869 && year < 1875){
+      info = `<b>${t('tl.mendeleev')}.</b> ` +
+        (window.CURRENT_LANG === 'zh-CN'
+          ? '门捷列夫大胆地为四个未发现的元素在他的表格中留下空位,并预言了它们的性质:'
+          : 'Mendeleev boldly leaves gaps in his table for four undiscovered elements and predicts their properties:') +
+        `<br>&nbsp;&nbsp;<span class="eka">${t('tl.eka.al')}</span>` +
+        `<br>&nbsp;&nbsp;<span class="eka">${t('tl.eka.si')}</span>` +
+        `<br>&nbsp;&nbsp;<span class="eka">${t('tl.eka.b')}</span>` +
+        `<br>&nbsp;&nbsp;<span class="eka">${t('tl.eka.mn')}</span>`;
+    } else if (newlyDiscovered){
+      const el = ELEMENTS[newlyDiscovered];
+      const rec = (typeof DISCOVERY === 'object' && DISCOVERY[newlyDiscovered]) || [null, ''];
+      info = `<b>${year}:</b> ${el.name_en} / ${el.name_zh} (${el.symbol}, Z=${newlyDiscovered}) — ${rec[1]}`;
+      if (EKA[newlyDiscovered]){
+        const e = EKA[newlyDiscovered];
+        info += `<br><b style="color:#7fe3ff">${e.eka}!</b> ` +
+          (window.CURRENT_LANG === 'zh-CN'
+            ? '门捷列夫预言 vs 实测:'
+            : 'Mendeleev\'s prediction vs. actual:') +
+          `<br>&nbsp;&nbsp;<b>${window.CURRENT_LANG==='zh-CN'?'预言':'predicted'}:</b> ${e.props.predicted}` +
+          `<br>&nbsp;&nbsp;<b>${window.CURRENT_LANG==='zh-CN'?'实测':'actual'}:</b> ${e.props.actual}`;
+      }
+    } else {
+      const knownCount = Object.keys(ELEMENTS).filter(z => getDiscoveryYear(+z) <= year).length;
+      info = window.CURRENT_LANG === 'zh-CN'
+        ? `${knownCount} 种元素已在 ${year} 年前发现。`
+        : `${knownCount} elements known by ${year}.`;
+    }
+    infoEl.innerHTML = info;
+  }
+
+  function startPlay(){
+    playing = true;
+    playBtn.textContent = t('tl.stop');
+    let year = parseInt(sliderEl.value, 10);
+    if (year >= MAX_YEAR) year = MIN_YEAR;
+    // Show all as hidden first
+    sliderEl.value = year;
+    sliderEl.dataset.prev = year - 1;
+    applyYear(year);
+
+    const stepMs = 40;  // ~9 seconds total for 250 years
+    function tick(){
+      if (!playing) return;
+      year++;
+      if (year > MAX_YEAR){ stopPlay(); return; }
+      sliderEl.value = year;
+      applyYear(year);
+      playRAF = setTimeout(tick, stepMs);
+    }
+    playRAF = setTimeout(tick, stepMs);
+  }
+
+  function stopPlay(){
+    playing = false;
+    clearTimeout(playRAF);
+    if (playBtn) playBtn.textContent = t('tl.play');
+  }
+
+  function toggle(){
+    const p = ensurePanel();
+    if (!p) return;
+    p.classList.toggle('on');
+    if (p.classList.contains('on')){
+      applyYear(parseInt(sliderEl.value, 10));
+    } else {
+      stopPlay();
+      // Clear all tl-* classes
+      document.querySelectorAll('.cell').forEach(c => {
+        c.classList.remove('tl-hidden','tl-predicted','tl-fresh');
+      });
+    }
+  }
+
+  function addToggleButton(){
+    const bar = document.getElementById('viewToolbar');
+    if (!bar || document.getElementById('tlToggleBtn')) return;
+    const btn = document.createElement('button');
+    btn.id = 'tlToggleBtn';
+    btn.className = 'view-btn special';
+    btn.textContent = '🕰 ' + t('tl.title');
+    btn.addEventListener('click', ()=>{
+      toggle();
+      btn.classList.toggle('active', panel && panel.classList.contains('on'));
+    });
+    bar.appendChild(btn);
+  }
+
+  function refreshLang(){
+    const btn = document.getElementById('tlToggleBtn');
+    if (btn) btn.textContent = '🕰 ' + t('tl.title');
+    if (panel){
+      const h = panel.querySelector('h3'); if (h) h.textContent = t('tl.title');
+      if (playBtn) playBtn.textContent = playing ? t('tl.stop') : t('tl.play');
+      if (panel.classList.contains('on') && sliderEl) applyYear(parseInt(sliderEl.value, 10));
+    }
+  }
+  new MutationObserver(refreshLang).observe(document.documentElement, {attributes:true, attributeFilter:['lang']});
+
+  window.__F2 = { toggle, applyYear };
+
+  function init(){ addToggleButton(); }
+  function bootstrap(){ setTimeout(init, 300); }
+  if (document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', bootstrap);
+  } else {
+    bootstrap();
+  }
+})();
+
+</script>
+  <script>
+/* ==================== C5: LIGAND-FIELD SPLITTING → COLOR ====================
+   For each transition-metal element (with d-electrons), inject a card into
+   the detail panel below Signature Colors. User picks a ligand from the
+   spectrochemical series; app draws:
+     - t₂g/eₙ splitting diagram at correct Δ_oct magnitude
+     - the absorbed photon (wavelength = hc/Δ)
+     - the observed complementary color
+============================================================================= */
+(function(){
+
+  // Ligands in spectrochemical order (weak → strong). Δ values in cm⁻¹ for [M(L)₆]
+  // Values are typical for M³⁺ (e.g. Cr³⁺, Fe³⁺, Co³⁺). Approximate.
+  const LIGANDS = [
+    {id:'I',   labelKey:'lf.spec.i',   f:0.4},
+    {id:'Br',  labelKey:'lf.spec.br',  f:0.72},
+    {id:'Cl',  labelKey:'lf.spec.cl',  f:0.78},
+    {id:'F',   labelKey:'lf.spec.f',   f:0.9},
+    {id:'OH',  labelKey:'lf.spec.oh',  f:0.94},
+    {id:'H2O', labelKey:'lf.spec.h2o', f:1.00},
+    {id:'NH3', labelKey:'lf.spec.nh3', f:1.25},
+    {id:'en',  labelKey:'lf.spec.en',  f:1.28},
+    {id:'CN',  labelKey:'lf.spec.cn',  f:1.7},
+    {id:'CO',  labelKey:'lf.spec.co',  f:1.9},
+  ];
+
+  // Metal-ion contribution g (Δ ≈ f × g in units of cm⁻¹) — Jørgensen model
+  // Only listing common M²⁺/M³⁺ ions from period 4. Key: 'symbol+charge'.
+  const METALS = {
+    'Ti3': 20300, 'V2': 12300, 'V3': 17700,
+    'Cr2': 14000, 'Cr3': 17400, 'Mn2': 8500, 'Mn3': 21000,
+    'Fe2': 10000, 'Fe3': 14000, 'Co2': 9300, 'Co3': 18200,
+    'Ni2': 8700, 'Cu2': 12500,
+    // Period 5 heavier metals (larger Δ)
+    'Ru2': 20000, 'Ru3': 28000, 'Rh3': 27000, 'Pd2': 25500,
+    // Period 6
+    'Ir3': 32000, 'Pt2': 30000,
+  };
+
+  /* Convert wavenumber (cm⁻¹) → wavelength (nm) */
+  function cmToNm(cm){ return 1e7 / cm; }
+
+  /* Convert wavelength in nm → sRGB color (visible 380..780) — approx */
+  function wavelengthToRGB(wl){
+    let r=0,g=0,b=0;
+    if (wl >= 380 && wl < 440){ r = -(wl - 440)/60; b = 1; }
+    else if (wl >= 440 && wl < 490){ g = (wl - 440)/50; b = 1; }
+    else if (wl >= 490 && wl < 510){ g = 1; b = -(wl - 510)/20; }
+    else if (wl >= 510 && wl < 580){ r = (wl - 510)/70; g = 1; }
+    else if (wl >= 580 && wl < 645){ r = 1; g = -(wl - 645)/65; }
+    else if (wl >= 645 && wl <= 780){ r = 1; }
+    // Intensity falloff near edges
+    let factor = 1;
+    if (wl < 420) factor = 0.3 + 0.7*(wl-380)/40;
+    else if (wl > 700) factor = 0.3 + 0.7*(780-wl)/80;
+    const gamma = 0.8;
+    const clamp = v => Math.max(0, Math.min(255, Math.round(255 * Math.pow(v * factor, gamma))));
+    return `rgb(${clamp(r)},${clamp(g)},${clamp(b)})`;
+  }
+
+  /* Complementary sRGB (for observed color = white minus absorbed) */
+  function complementary(rgbStr){
+    const m = /rgb\((\d+),(\d+),(\d+)\)/.exec(rgbStr);
+    if (!m) return '#888';
+    const r = 255 - parseInt(m[1],10);
+    const g = 255 - parseInt(m[2],10);
+    const b = 255 - parseInt(m[3],10);
+    return `rgb(${r},${g},${b})`;
+  }
+
+  /* Does this element form colored octahedral complexes? Only d¹..d⁹ transition metals. */
+  function isChromophore(z){
+    const el = ELEMENTS[z];
+    if (!el) return false;
+    if (el.category !== 'transition') return false;
+    // d⁰ (Sc³⁺, Ti⁴⁺, Y³⁺, Zr⁴⁺) and d¹⁰ (Zn²⁺, Cd²⁺, Hg²⁺, Cu⁺, Ag⁺) generally colorless
+    const d0 = [21, 39, 71]; // group-3 d⁰
+    const d10 = [30, 48, 80]; // Zn, Cd, Hg (as M²⁺ d¹⁰)
+    if (d0.includes(z) || d10.includes(z)) return false;
+    return true;
+  }
+
+  /* Pick default metal key for this Z */
+  function defaultMetal(z){
+    const el = ELEMENTS[z];
+    if (!el) return null;
+    const sym = el.symbol;
+    // Prefer the most common charge (heuristic)
+    const preferred = {
+      22:'Ti3', 23:'V3', 24:'Cr3', 25:'Mn2', 26:'Fe3', 27:'Co2',
+      28:'Ni2', 29:'Cu2',
+      44:'Ru3', 45:'Rh3', 46:'Pd2',
+      77:'Ir3', 78:'Pt2',
+    };
+    if (preferred[z]) return preferred[z];
+    // Fallback: any key starting with symbol
+    for (const k of Object.keys(METALS)){
+      if (k.startsWith(sym)) return k;
+    }
+    return null;
+  }
+
+  function findColorsBlock(){
+    // Locate the existing "Signature Colors" block (h3 has data-i18n="detail.section.colors")
+    const h3s = document.querySelectorAll('.d-block h3');
+    for (const h of h3s){
+      if (h.getAttribute('data-i18n') === 'detail.section.colors') return h.closest('.d-block');
+    }
+    return null;
+  }
+
+  function ensureLFBlock(){
+    let block = document.getElementById('lfBlock');
+    if (block) return block;
+    const colors = findColorsBlock();
+    if (!colors) return null;
+    block = document.createElement('div');
+    block.className = 'd-block';
+    block.id = 'lfBlock';
+    block.innerHTML = `
+      <h3 data-i18n="lf.title">Ligand-Field Splitting → Color</h3>
+      <div id="lfContent"></div>`;
+    colors.parentNode.insertBefore(block, colors.nextSibling);
+    return block;
+  }
+
+  function render(){
+    const block = ensureLFBlock();
+    if (!block) return;
+    // Determine current Z from active cell
+    const active = document.querySelector('.cell.active');
+    if (!active) { block.style.display = 'none'; return; }
+    const z = parseInt(active.dataset.z, 10);
+    if (!z) { block.style.display = 'none'; return; }
+
+    if (!isChromophore(z)){
+      block.style.display = '';
+      block.querySelector('#lfContent').innerHTML = `<div class="lf-na">${t('lf.na')}</div>`;
+      return;
+    }
+    block.style.display = '';
+
+    const metalKey = block.dataset.metal || defaultMetal(z);
+    if (!metalKey){
+      block.querySelector('#lfContent').innerHTML = `<div class="lf-na">${t('lf.na')}</div>`;
+      return;
+    }
+    block.dataset.metal = metalKey;
+    const ligandId = block.dataset.ligand || 'H2O';
+    block.dataset.ligand = ligandId;
+
+    const g = METALS[metalKey];
+    const lig = LIGANDS.find(l=>l.id===ligandId) || LIGANDS[5];
+    const delta_cm = g * lig.f;                        // Δ_oct in cm⁻¹
+    const wl_nm = cmToNm(delta_cm);
+    const inVisible = wl_nm >= 380 && wl_nm <= 780;
+    const absorbedColor = inVisible ? wavelengthToRGB(wl_nm) : '#333';
+    const observedColor = inVisible ? complementary(absorbedColor) : '#e8ecff';
+    const observedName = inVisible ? nearestColorName(observedColor)
+      : (wl_nm > 780
+          ? (window.CURRENT_LANG==='zh-CN'?'吸收红外 · 无色':'IR absorption · colorless')
+          : (window.CURRENT_LANG==='zh-CN'?'吸收紫外 · 无色':'UV absorption · colorless'));
+
+    const chargeLabel = metalKey.replace(/(\D+)(\d)/, '$1<sup>$2+</sup>');
+
+    block.querySelector('#lfContent').innerHTML = `
+      <div class="lf-controls">
+        <div class="lf-picker">
+          <div class="lf-picker-label">${t('lf.metal')} <b style="color:#fff">${chargeLabel}</b></div>
+          <div class="lf-ligand-list">
+            ${Object.keys(METALS).filter(k=>k.startsWith(ELEMENTS[z].symbol)).map(k => {
+              const active = k === metalKey ? ' active' : '';
+              return `<button class="lf-lig-btn${active}" data-metal="${k}">${k.replace(/(\D+)(\d)/,'$1<sup>$2+</sup>')}</button>`;
+            }).join('')}
+          </div>
+        </div>
+        <div class="lf-picker">
+          <div class="lf-picker-label">${t('lf.pick')}</div>
+          <div class="lf-ligand-list">
+            ${LIGANDS.map(L => {
+              const activeCls = L.id === ligandId ? ' active' : '';
+              return `<button class="lf-lig-btn${activeCls}" data-lig="${L.id}">${t(L.labelKey)}</button>`;
+            }).join('')}
+          </div>
+        </div>
+      </div>
+      <div class="lf-diagram-row">
+        <div class="lf-diagram">
+          <canvas id="lfDiagram"></canvas>
+          <div class="lf-caption">Δ<sub>oct</sub> = ${delta_cm.toFixed(0)} cm⁻¹ · λ = ${wl_nm.toFixed(0)} nm</div>
+        </div>
+        <div class="lf-color-out">
+          <div class="lf-row">
+            <div class="lf-swatch" style="background:${absorbedColor}"></div>
+            <div class="lf-swatch-info">
+              <div class="lf-swatch-label">${t('lf.absorbed')}</div>
+              <div class="lf-swatch-name">${absorbedColor}</div>
+              <div class="lf-swatch-nm">λ = ${wl_nm.toFixed(0)} nm</div>
+            </div>
+          </div>
+          <div class="lf-row">
+            <div class="lf-swatch" style="background:${observedColor}"></div>
+            <div class="lf-swatch-info">
+              <div class="lf-swatch-label">${t('lf.observed')}</div>
+              <div class="lf-swatch-name">${observedName}</div>
+              <div class="lf-swatch-nm" style="color:var(--dim)">${observedColor}</div>
+            </div>
+          </div>
+          <div class="d-hint">${t('lf.hint')}</div>
+        </div>
+      </div>`;
+
+    // Wire ligand buttons
+    block.querySelectorAll('[data-lig]').forEach(b => b.addEventListener('click', ()=>{
+      block.dataset.ligand = b.dataset.lig; render();
+    }));
+    block.querySelectorAll('[data-metal]').forEach(b => b.addEventListener('click', ()=>{
+      block.dataset.metal = b.dataset.metal; render();
+    }));
+
+    // Draw diagram
+    drawSplitDiagram(block.querySelector('#lfDiagram'), delta_cm, ligandId);
+  }
+
+  /* Nearest named color (approximate) */
+  function nearestColorName(rgbStr){
+    const m = /rgb\((\d+),(\d+),(\d+)\)/.exec(rgbStr);
+    if (!m) return '';
+    const r = parseInt(m[1],10), g = parseInt(m[2],10), b = parseInt(m[3],10);
+    const named = window.CURRENT_LANG === 'zh-CN'
+      ? [['红',255,0,0],['橙',255,140,0],['黄',255,220,0],['绿',0,200,80],['青',0,200,220],['蓝',30,80,220],['紫',150,60,200],['粉',255,120,180],['白',240,240,240],['黑',30,30,30]]
+      : [['red',255,0,0],['orange',255,140,0],['yellow',255,220,0],['green',0,200,80],['cyan',0,200,220],['blue',30,80,220],['violet',150,60,200],['pink',255,120,180],['white',240,240,240],['black',30,30,30]];
+    let best = named[0], bd = 1e9;
+    for (const n of named){
+      const d = (r-n[1])**2 + (g-n[2])**2 + (b-n[3])**2;
+      if (d < bd){ bd = d; best = n; }
+    }
+    return best[0];
+  }
+
+  function drawSplitDiagram(canvas, delta_cm, ligandId){
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = rect.width * dpr;
+    canvas.height = 200 * dpr;
+    canvas.style.height = '200px';
+    const c = canvas.getContext('2d');
+    c.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const W = rect.width, H = 200;
+    c.clearRect(0,0,W,H);
+
+    // Split scaled: max Δ ≈ 40000 cm⁻¹; canvas gap max = H*0.5
+    const gap = Math.min(H*0.5, (delta_cm / 40000) * H * 0.55) + 20;
+    const midY = H/2 - 4;
+    const t2gY = midY + gap/2;
+    const egY  = midY - gap/2;
+
+    // Central "unsplit" reference (dashed)
+    c.strokeStyle = 'rgba(255,255,255,0.25)';
+    c.setLineDash([4,4]);
+    c.beginPath(); c.moveTo(30, midY); c.lineTo(W-30, midY); c.stroke();
+    c.setLineDash([]);
+
+    // t₂g (3 lines)
+    c.strokeStyle = '#48dbfb'; c.lineWidth = 3;
+    for (let i=0; i<3; i++){
+      const x0 = W*0.55 + (i - 1)*24;
+      c.beginPath();
+      c.moveTo(x0 - 20, t2gY);
+      c.lineTo(x0 + 20, t2gY);
+      c.stroke();
+    }
+    // eₙ (2 lines)
+    c.strokeStyle = '#ff9f43';
+    for (let i=0; i<2; i++){
+      const x0 = W*0.55 + (i - 0.5)*40;
+      c.beginPath();
+      c.moveTo(x0 - 20, egY);
+      c.lineTo(x0 + 20, egY);
+      c.stroke();
+    }
+
+    // Δ arrow
+    c.strokeStyle = '#fff'; c.lineWidth = 1.5;
+    c.beginPath();
+    c.moveTo(W*0.55 + 90, egY);
+    c.lineTo(W*0.55 + 90, t2gY);
+    c.stroke();
+    // Arrowheads
+    for (const y of [egY, t2gY]){
+      const dir = (y === egY) ? 1 : -1;
+      c.beginPath();
+      c.moveTo(W*0.55 + 90, y);
+      c.lineTo(W*0.55 + 86, y + 6*dir);
+      c.lineTo(W*0.55 + 94, y + 6*dir);
+      c.closePath(); c.fillStyle='#fff'; c.fill();
+    }
+
+    // Labels
+    c.fillStyle = '#48dbfb';
+    c.font = 'bold 13px "Space Grotesk", sans-serif';
+    c.fillText('t₂g', W*0.55 - 60, t2gY + 5);
+    c.fillStyle = '#ff9f43';
+    c.fillText('eₙ', W*0.55 - 60, egY + 5);
+    c.fillStyle = '#fff';
+    c.font = '12px "JetBrains Mono", monospace';
+    c.fillText('Δ', W*0.55 + 100, midY + 5);
+
+    // Photon arrow (curly wave from left to arrow center)
+    c.strokeStyle = 'rgba(255,220,120,0.8)';
+    c.lineWidth = 2;
+    c.beginPath();
+    const startX = 60, endX = W*0.55 - 20, waveY = midY;
+    const nWaves = 8;
+    for (let i = 0; i <= nWaves; i++){
+      const x = startX + (endX - startX) * i / nWaves;
+      const y = waveY + Math.sin(i * Math.PI) * 8;
+      if (i === 0) c.moveTo(x, y); else c.lineTo(x, y);
+    }
+    c.stroke();
+    c.fillStyle = 'rgba(255,220,120,0.9)';
+    c.font = '10px "JetBrains Mono", monospace';
+    c.fillText('hν', 30, waveY - 4);
+  }
+
+  /* Observe the detail panel to re-render whenever it changes */
+  function attachObserver(){
+    const detail = document.getElementById('detail');
+    if (!detail) return;
+    const dName = document.getElementById('dName');
+    if (dName){
+      new MutationObserver(()=>{ setTimeout(render, 30); })
+        .observe(dName, {childList:true, characterData:true, subtree:true});
+    }
+    new MutationObserver(()=>{
+      if (!detail.classList.contains('hidden')) setTimeout(render, 30);
+    }).observe(detail, {attributes:true, attributeFilter:['class']});
+  }
+
+  function refreshLang(){
+    // Re-render on language change to update labels
+    if (document.getElementById('lfBlock')) render();
+  }
+  new MutationObserver(refreshLang).observe(document.documentElement, {attributes:true, attributeFilter:['lang']});
+
+  window.__C5 = { render };
+
+  function init(){
+    attachObserver();
+    setTimeout(render, 400);
+  }
+  function bootstrap(){ setTimeout(init, 350); }
+  if (document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', bootstrap);
+  } else {
+    bootstrap();
+  }
+})();
 
 </script>
 </body>

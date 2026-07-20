@@ -118,12 +118,66 @@ Bilingual "what this element is used for" text and the discovery year + discover
 
 ---
 
+### 4. Advanced views & interactive features
+
+Beyond the per-element detail panel, the app has five higher-level modes activated from a toolbar above the periodic grid.
+
+#### 4.1 Property overlays
+Toggle bar with 9 buttons: **default categories · atomic radius · ionization energy · electronegativity · density · melting point · discovery year · cosmic origin · crust abundance**. Click any of them and every cell recolors on a two-stop gradient (blue→red, purple→yellow, etc., customized per property). A legend strip below the toolbar shows the actual numeric range and unit. Log scale is auto-applied for density and abundance to keep the ~9-order-of-magnitude range readable. The "cosmic origin" overlay is discrete — cells are painted by *how* that element was made (see §4.2).
+
+Data comes from `features-data.js`: `F_RADIUS`, `F_IE`, `F_DENSITY`, `F_MELT`, `F_ABUNDANCE` — hand-curated from NIST / IUPAC. Compact numeric readout in each cell.
+
+#### 4.2 Nucleosynthesis origins + cosmic timeline
+Every element carries a "cosmic-origin" classification (`F_ORIGIN`): **Big Bang · cosmic-ray spallation · small-star s-process · large-star fusion · type-Ia SN dwarfs · core-collapse supernovae · neutron-star mergers · human synthesis**. A color-coded badge appears in the element detail header. Post-2017 (GW170817 kilonova) neutron-star merger contribution is reflected for the r-process elements.
+
+A "▶ Play cosmic timeline" button on the toolbar plays a ~20-second animation across 8 eras:
+
+1. `t ≈ 3 min after Big Bang` — H, He light up
+2. `First stars ignite (~200 Myr)` — Li/Be/B from spallation and C/N/O from stellar burning
+3. `AGB stars shed heavy elements` — s-process peaks
+4. `Supernovae seed the galaxy` — iron-peak (Sc–Zn) plus intermediate metals
+5. `Neutron-star mergers forge gold` — Au, Pt, U, all lanthanides and actinides
+6. `Solar system forms (4.6 Gyr ago)` — banner-only pause
+7. `Humans synthesize the transuranics` — Tc, Pm, and everything 93–118
+8. `Today · 13.8 Gyr` — final state
+
+Each element flashes gold as it's forged. Emotionally staggering when you see the r-process elements — including the gold in a wedding ring — all appear in a single flash during the neutron-star-merger era.
+
+#### 4.3 Nuclide chart (Segrè chart)
+A "⚛ Open nuclide chart" button flips into a full-screen canvas view with N (neutrons) on the x-axis and Z (protons) on the y-axis. About 380 significant isotopes are plotted as color-coded squares:
+
+- Green = stable · Cyan = β⁻ · Orange = β⁺/EC · Yellow = α · Red = spontaneous fission · Purple = proton emission · Lavender = neutron emission
+
+**Magic-number gridlines** (2, 8, 20, 28, 50, 82, 126) drawn in dashed gold — the nuclear shell closures. **Doubly-magic nuclides** (⁴He, ¹⁶O, ⁴⁰Ca, ⁴⁸Ca, ¹⁰⁰Sn, ²⁰⁸Pb) get a white outline. The N=Z diagonal is drawn in cyan. Wheel to zoom, drag to pan. Hovering any isotope pops a tooltip showing its formatted half-life (auto-scaled from picoseconds to gigayears), decay mode, and magic-number tags.
+
+#### 4.4 Discovery timeline (Mendeleev time-machine)
+A "🕰 Discovery Timeline" button reveals a year slider (1650–2016) below the toolbar. Drag to scrub through history — cells fade in at their `DISCOVERY[Z][0]` year. As you cross 1869, the four classic Mendeleev gaps appear as dashed-orange placeholders with "?" glyphs — exactly as they sat in his 1869 sketch. An info card explains each prediction:
+
+- **eka-aluminium** → gallium (Ga, 1875) — Mendeleev predicted mass ~68, density 5.9; actual: 69.72 & 5.91
+- **eka-silicon** → germanium (Ge, 1886) — predicted mass ~72; actual 72.63
+- **eka-boron** → scandium (Sc, 1879)
+- **eka-manganese** → technetium (Tc, 1937) — the last of his gaps, filled 68 years after his death
+
+▶ Play scrubs 250 years automatically in ~10 seconds. Newly-discovered elements pop with a rotate-in "fresh discovery" flash.
+
+#### 4.5 Ligand-field crystal-field color derivation
+For every d¹..d⁹ transition metal (excluding colorless d⁰ Sc/Ti⁴⁺/Y/Zr⁴⁺ and d¹⁰ Zn/Cd/Hg/Cu⁺/Ag⁺), a new detail-panel block appears with two picker rows:
+
+- **Metal ion** — Ti³⁺, V²⁺/V³⁺, Cr²⁺/Cr³⁺, Mn²⁺/Mn³⁺, Fe²⁺/Fe³⁺, Co²⁺/Co³⁺, Ni²⁺, Cu²⁺, Ru²⁺/Ru³⁺, Rh³⁺, Pd²⁺, Ir³⁺, Pt²⁺ (Jørgensen g values in cm⁻¹)
+- **Ligand** — I⁻ → Br⁻ → Cl⁻ → F⁻ → OH⁻ → H₂O → NH₃ → en → CN⁻ → CO, from the spectrochemical series (Jørgensen f values)
+
+A canvas draws the octahedral splitting diagram (three t₂g levels below, two eₙ above) at the correct Δ_oct magnitude (Δ = f · g), with a squiggly photon arrow indicating the electronic transition. On the right, two color swatches show the **absorbed wavelength** (computed via λ = hc/Δ, converted from cm⁻¹ to nm) and the **observed color** (its sRGB complement) — because the color you *see* is the light that is *not absorbed*.
+
+This is where the "why is copper sulfate blue" question finally gets a physically correct answer: Cu²⁺ (g ≈ 12,500) with H₂O (f = 1.00) → Δ = 12,500 cm⁻¹ → absorption at ~800 nm (red-orange) → observed color = its complement = cyan-blue. Try switching the ligand to NH₃ (f = 1.25) and watch the color shift to the deep royal blue of tetraammine copper.
+
+---
+
 ## File map
 
 ```
 periodic-table/
 ├── index.html          Multi-file entry point (use this in dev)
-├── styles.css          All styles
+├── styles.css          All base styles
 ├── i18n.js             LOCALES dictionary + applyI18n() switcher
 ├── data.js             ELEMENTS, EXTENDED, DISCOVERY, SIGNATURE_COLORS,
 │                       MOLECULE_3D, CATEGORY_USES / _REACTIONS,
@@ -132,15 +186,25 @@ periodic-table/
 ├── app.js              Grid rendering, detail panel, orbital renderer,
 │                       reaction animator, 3-D molecule viewer, TTS,
 │                       Bohr / nucleus canvas, event wiring
-├── build.js            Bundles the 5 source files into mobile/*.html
+├── features/           Advanced-view add-on modules (see §4)
+│   ├── features.css    All new styles
+│   ├── features-i18n.js  Extra i18n keys merged into LOCALES
+│   ├── features-data.js  F_RADIUS / F_IE / F_DENSITY / F_MELT /
+│   │                     F_ABUNDANCE / F_ORIGIN / F_COSMIC_ERAS /
+│   │                     F_NUCLIDES
+│   ├── overlays.js     F1: property heatmaps
+│   ├── origins.js      D1: origin badges + cosmic timeline
+│   ├── nuclide.js      B1: Segrè chart view
+│   ├── timeline.js     F2+A6: discovery slider & Mendeleev gaps
+│   └── ligand.js       C5: crystal-field color derivation
+├── build.js            Bundles all 13 source files into mobile/*.html
 │                       and strips Google Fonts <link> tags
 ├── package.json        Just: "build": "node build.js"
 ├── mobile/
-│   ├── index.html          Single-file offline build
+│   ├── index.html          Single-file offline build (~250 KB)
 │   └── periodic-table.html Same file, alternate name
 ├── README.md           This file
-└── node_modules/       Only jsdom (dev-only, for offline testing;
-                        gitignored)
+└── node_modules/       Only jsdom (dev-only, gitignored)
 ```
 
 ## Building the single-file version
@@ -164,6 +228,10 @@ Adding a new element characteristic is intended to be a one-line edit:
 - **Reaction template for a category** — append to `CATEGORY_REACTIONS['<cat>']`.
 - **New bond type** — add to the `bonds` object in `drawBonds()` plus a `canFormX(el)` helper plus i18n keys `bond.X.name` / `bond.X.desc`.
 - **Discovery year** — append to `DISCOVERY[Z]`.
+- **New numeric overlay** — append to `OVERLAYS` in `features/overlays.js` plus a data table in `features/features-data.js`.
+- **Cosmic origin re-classification** — edit `F_ORIGIN[Z]` in `features/features-data.js`.
+- **Additional nuclide** — append to `F_NUCLIDES` as `[Z, N, decay, halfLifeSeconds]`.
+- **New coordination ligand** — append to the `LIGANDS` array in `features/ligand.js` with a Jørgensen `f` value.
 
 Everything then flows through `applyI18n()` and the render pipeline automatically.
 

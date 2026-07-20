@@ -16,11 +16,30 @@ const i18nJs = fs.readFileSync(path.join(ROOT, 'i18n.js'), 'utf8');
 const dataJs = fs.readFileSync(path.join(ROOT, 'data.js'), 'utf8');
 const appJs  = fs.readFileSync(path.join(ROOT, 'app.js'), 'utf8');
 
+// Feature module sources (F1 overlays, D1 origins, B1 nuclide chart,
+// F2 discovery timeline, C5 ligand-field colors)
+const featCss   = fs.readFileSync(path.join(ROOT, 'features/features.css'), 'utf8');
+const featI18n  = fs.readFileSync(path.join(ROOT, 'features/features-i18n.js'), 'utf8');
+const featData  = fs.readFileSync(path.join(ROOT, 'features/features-data.js'), 'utf8');
+const featOverlays = fs.readFileSync(path.join(ROOT, 'features/overlays.js'), 'utf8');
+const featOrigins  = fs.readFileSync(path.join(ROOT, 'features/origins.js'), 'utf8');
+const featNuclide  = fs.readFileSync(path.join(ROOT, 'features/nuclide.js'), 'utf8');
+const featTimeline = fs.readFileSync(path.join(ROOT, 'features/timeline.js'), 'utf8');
+const featLigand   = fs.readFileSync(path.join(ROOT, 'features/ligand.js'), 'utf8');
+
 let out = html
-  .replace(/<link\s+rel="stylesheet"\s+href="styles\.css"\s*\/?>/,     `<style>\n${css}\n</style>`)
+  .replace(/<link\s+rel="stylesheet"\s+href="styles\.css"\s*\/?>/,     `<style>\n${css}\n${featCss}\n</style>`)
+  .replace(/<link\s+rel="stylesheet"\s+href="features\/features\.css"\s*\/?>\s*/, '')
   .replace(/<script\s+src="i18n\.js"><\/script>/, `<script>\n${i18nJs}\n</script>`)
+  .replace(/<script\s+src="features\/features-i18n\.js"><\/script>/, `<script>\n${featI18n}\n</script>`)
   .replace(/<script\s+src="data\.js"><\/script>/, `<script>\n${dataJs}\n</script>`)
-  .replace(/<script\s+src="app\.js"><\/script>/,  `<script>\n${appJs}\n</script>`);
+  .replace(/<script\s+src="features\/features-data\.js"><\/script>/, `<script>\n${featData}\n</script>`)
+  .replace(/<script\s+src="app\.js"><\/script>/,  `<script>\n${appJs}\n</script>`)
+  .replace(/<script\s+src="features\/overlays\.js"><\/script>/, `<script>\n${featOverlays}\n</script>`)
+  .replace(/<script\s+src="features\/origins\.js"><\/script>/,  `<script>\n${featOrigins}\n</script>`)
+  .replace(/<script\s+src="features\/nuclide\.js"><\/script>/,  `<script>\n${featNuclide}\n</script>`)
+  .replace(/<script\s+src="features\/timeline\.js"><\/script>/, `<script>\n${featTimeline}\n</script>`)
+  .replace(/<script\s+src="features\/ligand\.js"><\/script>/,   `<script>\n${featLigand}\n</script>`);
 
 // Strip external CDN links (Google Fonts) for offline / self-contained use.
 // CSS already falls back to system fonts.
