@@ -1815,7 +1815,7 @@ if(document.querySelector('.tab.active')?.dataset.tab === 'forces') ixStart();
    All share a single rAF loop that runs only while the Lab tab is active. */
 
 let labRAF=null, labT=0;
-const LAB = {}; // per-demo state
+var LAB = {}; // per-demo state (var so it's hoisted above the initial applyI18n() call)
 
 // ---- shared canvas helper ----
 function labSizeCanvas(c){
@@ -2435,12 +2435,630 @@ function labDrawHiggs(){
   ctx.fillText(`${t('lab.higgs.yukawa')} ≈ ${P.coupling.toFixed(2)}`, 12, h-10);
 }
 
+/* ---------- Demo 4: Feynman diagram builder ---------- */
+// Vertex types. Each has: allowed particles on the 3 legs, coupling, rule key.
+var FEYN_VERTICES = {
+  qed: { color:'#ffd166', boson:'photon', legs:['f','γ','f̄'], ruleKey:'lab.feyn.rule.qed', label:'√α',   nameKey:'lab.feyn.vtx.qed' },
+  qcd: { color:'#5aa8ff', boson:'gluon',  legs:['q','g','q̄'], ruleKey:'lab.feyn.rule.qcd', label:'√α_s', nameKey:'lab.feyn.vtx.qcd' },
+  wcc: { color:'#ff6b9d', boson:'W',      legs:['ℓ','W','ν'], ruleKey:'lab.feyn.rule.wcc', label:'g_W',  nameKey:'lab.feyn.vtx.wcc' },
+  wnc: { color:'#7ee8c5', boson:'Z',      legs:['f','Z','f̄'], ruleKey:'lab.feyn.rule.wnc', label:'g_Z',  nameKey:'lab.feyn.vtx.wnc' },
+};
+function labInitFeyn(){
+  const c = document.getElementById('feynCanvas'); if(!c) return;
+  const { ctx, w, h } = labSizeCanvas(c);
+  const prev = LAB.feyn || {};
+  LAB.feyn = { ctx, w, h, canvas:c, current:prev.current||'qed', vertices:prev.vertices||[], edges:prev.edges||[] };
+  // click to place vertex
+  c.onclick = (ev)=>{
+    const r = c.getBoundingClientRect();
+    const x = ev.clientX - r.left, y = ev.clientY - r.top;
+    const V = LAB.feyn;
+    const vId = V.vertices.length;
+    V.vertices.push({ id:vId, type:V.current, x, y });
+    // auto-connect: if there is a previous vertex of a *compatible* type, add a boson propagator
+    if(V.vertices.length>=2){
+      const prev = V.vertices[V.vertices.length-2];
+      // same-boson: internal boson propagator connects them; otherwise no auto-edge
+      if(FEYN_VERTICES[prev.type].boson === FEYN_VERTICES[V.current].boson){
+        V.edges.push({ a:prev.id, b:vId, kind:'boson', boson:FEYN_VERTICES[V.current].boson });
+      }
+    }
+  };
+  labRebuildFeynPicker();
+  const clr = document.getElementById('feynClear');
+  if(clr) clr.onclick = ()=>{ LAB.feyn.vertices = []; LAB.feyn.edges = []; };
+  const ex = document.getElementById('feynExample');
+  if(ex) ex.onclick = ()=>{
+    // e-e+ → γ → μ-μ+ : two QED vertices connected by a photon propagator
+    LAB.feyn.current = 'qed';
+    LAB.feyn.vertices = [
+      { id:0, type:'qed', x:w*0.30, y:h*0.55 },
+      { id:1, type:'qed', x:w*0.70, y:h*0.55 },
+    ];
+    LAB.feyn.edges = [ { a:0, b:1, kind:'boson', boson:'photon' } ];
+    labRebuildFeynPicker();
+  };
+}
+function labRebuildFeynPicker(){
+  if(!LAB || !LAB.feyn) return;
+  const dict = LOCALES[window.CURRENT_LANG||'en'] || LOCALES.en;
+  const t = (k)=> dict[k] || LOCALES.en[k] || k;
+  const picker = document.getElementById('feynPicker');
+  if(picker){
+    picker.innerHTML = '';
+    Object.keys(FEYN_VERTICES).forEach(k=>{
+      const V = FEYN_VERTICES[k];
+      const b = document.createElement('button');
+      b.innerHTML = `<b style="color:${V.color}">${V.label}</b> · ${t(V.nameKey)}`;
+      if(k===LAB.feyn.current) b.classList.add('active');
+      b.onclick = ()=>{
+        LAB.feyn.current = k;
+        picker.querySelectorAll('button').forEach(x=>x.classList.remove('active'));
+        b.classList.add('active');
+      };
+      picker.appendChild(b);
+    });
+  }
+  const leg = document.getElementById('feynLegend');
+  if(leg){
+    leg.innerHTML = `
+      <span class="ll-item"><i class="bar" style="background:#c8cff0;color:#c8cff0"></i>${t('lab.feyn.legend.fermion')}</span>
+      <span class="ll-item"><i class="bar" style="background:#ffd166;color:#ffd166"></i>${t('lab.feyn.legend.photon')}</span>
+      <span class="ll-item"><i class="bar" style="background:#5aa8ff;color:#5aa8ff"></i>${t('lab.feyn.legend.gluon')}</span>
+      <span class="ll-item"><i class="bar" style="background:#ff6b9d;color:#ff6b9d"></i>${t('lab.feyn.legend.wz')}</span>`;
+  }
+}
+function drawWavy(ctx, x1,y1,x2,y2, color){
+  const dx=x2-x1, dy=y2-y1, L=Math.hypot(dx,dy);
+  const N = Math.max(6, Math.floor(L/8));
+  const amp = 4;
+  ctx.strokeStyle=color; ctx.lineWidth=1.6;
+  ctx.beginPath();
+  for(let i=0;i<=N;i++){
+    const s = i/N;
+    const px = x1+dx*s, py=y1+dy*s;
+    const nx = -dy/L, ny = dx/L;
+    const off = Math.sin(s*Math.PI*8) * amp;
+    if(i===0) ctx.moveTo(px+nx*off, py+ny*off);
+    else ctx.lineTo(px+nx*off, py+ny*off);
+  }
+  ctx.stroke();
+}
+function drawSpiral(ctx, x1,y1,x2,y2, color){
+  const dx=x2-x1, dy=y2-y1, L=Math.hypot(dx,dy);
+  const N = Math.max(20, Math.floor(L/4));
+  const amp = 5;
+  ctx.strokeStyle=color; ctx.lineWidth=1.4;
+  ctx.beginPath();
+  for(let i=0;i<=N;i++){
+    const s = i/N;
+    const px = x1+dx*s, py=y1+dy*s;
+    const nx = -dy/L, ny = dx/L;
+    const phase = s*Math.PI*14;
+    const ox = Math.cos(phase)*amp, oy = Math.sin(phase)*amp;
+    // spiral: displace along both normal and tangent
+    if(i===0) ctx.moveTo(px+nx*ox, py+ny*ox + oy*0.3);
+    else ctx.lineTo(px+nx*ox, py+ny*ox + oy*0.3);
+  }
+  ctx.stroke();
+}
+function drawDashed(ctx, x1,y1,x2,y2, color){
+  ctx.strokeStyle=color; ctx.lineWidth=1.6; ctx.setLineDash([6,4]);
+  ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke(); ctx.setLineDash([]);
+}
+function drawFermionArrow(ctx, x1,y1,x2,y2, color){
+  ctx.strokeStyle=color; ctx.lineWidth=1.6;
+  ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
+  // arrowhead at midpoint
+  const mx=(x1+x2)/2, my=(y1+y2)/2;
+  const a = Math.atan2(y2-y1, x2-x1);
+  ctx.fillStyle=color;
+  ctx.beginPath();
+  ctx.moveTo(mx+Math.cos(a)*6, my+Math.sin(a)*6);
+  ctx.lineTo(mx+Math.cos(a+2.6)*6, my+Math.sin(a+2.6)*6);
+  ctx.lineTo(mx+Math.cos(a-2.6)*6, my+Math.sin(a-2.6)*6);
+  ctx.closePath(); ctx.fill();
+}
+function labDrawFeyn(){
+  const S = LAB.feyn; if(!S) return;
+  const { ctx, w, h } = S;
+  const dict = LOCALES[window.CURRENT_LANG||'en'] || LOCALES.en;
+  const t = (k)=> dict[k] || LOCALES.en[k] || k;
+  ctx.clearRect(0,0,w,h);
+  // dim graph paper background
+  ctx.strokeStyle='rgba(78,168,255,0.05)'; ctx.lineWidth=1;
+  for(let x=0;x<w;x+=24){ ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,h); ctx.stroke(); }
+  for(let y=0;y<h;y+=24){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(w,y); ctx.stroke(); }
+
+  // time axis label (left→right by convention)
+  ctx.fillStyle='#8b93b3'; ctx.font='10px JetBrains Mono, monospace';
+  ctx.textAlign='left'; ctx.fillText('time →', 8, h-8);
+
+  // Boson propagators between vertices
+  S.edges.forEach(e=>{
+    const A = S.vertices[e.a], B = S.vertices[e.b];
+    if(!A||!B) return;
+    if(e.boson==='photon') drawWavy(ctx, A.x,A.y, B.x,B.y, '#ffd166');
+    else if(e.boson==='gluon') drawSpiral(ctx, A.x,A.y, B.x,B.y, '#5aa8ff');
+    else drawDashed(ctx, A.x,A.y, B.x,B.y, '#ff6b9d');
+  });
+
+  // External fermion lines out of each vertex (2 per QED/QCD/Z, 2 for W)
+  S.vertices.forEach(V=>{
+    const spec = FEYN_VERTICES[V.type];
+    // Two external fermion stubs, up-left and down-left (or right if last vertex)
+    const isLast = S.vertices[S.vertices.length-1] === V;
+    const dx = isLast ? 50 : -50;
+    drawFermionArrow(ctx, V.x+dx, V.y-40, V.x, V.y, '#c8cff0');
+    drawFermionArrow(ctx, V.x, V.y, V.x+dx, V.y+40, '#c8cff0');
+    // vertex dot
+    ctx.fillStyle = spec.color;
+    ctx.beginPath(); ctx.arc(V.x, V.y, 5, 0, Math.PI*2); ctx.fill();
+    // vertex coupling label
+    ctx.fillStyle = spec.color; ctx.font='bold 11px JetBrains Mono, monospace';
+    ctx.textAlign='center'; ctx.fillText(spec.label, V.x, V.y-10);
+  });
+
+  // Header + rules panel
+  const cur = FEYN_VERTICES[S.current];
+  ctx.fillStyle='#e8ecff'; ctx.font='bold 13px Space Grotesk, sans-serif'; ctx.textAlign='left';
+  ctx.fillText(t(cur.nameKey), 10, 20);
+  ctx.fillStyle='#c8cff0'; ctx.font='11px Space Grotesk, sans-serif';
+  wrapText(ctx, t(cur.ruleKey), 10, 38, w-20, 14);
+  // vertex count
+  ctx.fillStyle='#8b93b3'; ctx.font='10px JetBrains Mono, monospace'; ctx.textAlign='right';
+  ctx.fillText(t('lab.feyn.count').replace('{n}', S.vertices.length), w-10, h-8);
+}
+
+/* ---------- Demo 5: Decay chain sandbox ---------- */
+// Simplified PDG-ish decay table. Each key → list of channels with br (branching ratio)
+// and lifetime τ in seconds (used for scheduling animation).
+// Daughters listed by symbol; those with an entry decay further, else are stable.
+var DECAY_TABLE = {
+  'μ⁻': { tau: 2.2e-6, channels:[
+    { br:1.00, daughters:['e⁻','ν̄_e','ν_μ'] }
+  ]},
+  'τ⁻': { tau: 2.9e-13, channels:[
+    { br:0.17, daughters:['e⁻','ν̄_e','ν_τ'] },
+    { br:0.17, daughters:['μ⁻','ν̄_μ','ν_τ'] },
+    { br:0.25, daughters:['π⁻','ν_τ'] },
+    { br:0.41, daughters:['π⁻','π⁰','ν_τ'] },
+  ]},
+  'π⁺': { tau: 2.6e-8, channels:[
+    { br:1.00, daughters:['μ⁺','ν_μ'] }
+  ]},
+  'π⁻': { tau: 2.6e-8, channels:[
+    { br:1.00, daughters:['μ⁻','ν̄_μ'] }
+  ]},
+  'π⁰': { tau: 8.5e-17, channels:[
+    { br:0.99, daughters:['γ','γ'] },
+    { br:0.01, daughters:['e⁻','e⁺','γ'] },
+  ]},
+  'K⁺': { tau: 1.24e-8, channels:[
+    { br:0.64, daughters:['μ⁺','ν_μ'] },
+    { br:0.21, daughters:['π⁺','π⁰'] },
+    { br:0.06, daughters:['π⁺','π⁺','π⁻'] },
+    { br:0.09, daughters:['π⁰','e⁺','ν_e'] },
+  ]},
+  'n':  { tau: 880, channels:[
+    { br:1.00, daughters:['p','e⁻','ν̄_e'] }
+  ]},
+  'μ⁺': { tau: 2.2e-6, channels:[{ br:1.00, daughters:['e⁺','ν_e','ν̄_μ'] }]},
+  'μ⁺-alias':{ tau:2.2e-6, channels:[]}, // avoid future collisions
+  'Z':  { tau: 2.6e-25, channels:[
+    { br:0.20, daughters:['e⁻','e⁺'] },
+    { br:0.20, daughters:['μ⁻','μ⁺'] },
+    { br:0.20, daughters:['τ⁻','τ⁺'] },
+    { br:0.40, daughters:['q','q̄'] },
+  ]},
+  'τ⁺': { tau: 2.9e-13, channels:[
+    { br:0.35, daughters:['μ⁺','ν_μ','ν̄_τ'] },
+    { br:0.65, daughters:['π⁺','π⁰','ν̄_τ'] }
+  ]},
+};
+var DECAY_COLORS = {
+  'e⁻':'#4ea8ff','e⁺':'#4ea8ff','μ⁻':'#7ee8c5','μ⁺':'#7ee8c5','τ⁻':'#c39bff','τ⁺':'#c39bff',
+  'ν_e':'#8fa8ff','ν̄_e':'#8fa8ff','ν_μ':'#8fa8ff','ν̄_μ':'#8fa8ff','ν_τ':'#8fa8ff','ν̄_τ':'#8fa8ff',
+  'γ':'#ffd166','π⁺':'#ff6b9d','π⁻':'#ff6b9d','π⁰':'#ffb0cf','K⁺':'#ff5c8a',
+  'p':'#c8cff0','n':'#c8cff0','q':'#5aa8ff','q̄':'#5aa8ff','Z':'#ff6b9d'
+};
+var DECAY_STARTERS = ['τ⁻','K⁺','π⁺','μ⁻','π⁰','n','Z'];
+function pickChannel(name){
+  const T = DECAY_TABLE[name]; if(!T) return null;
+  const r = Math.random(); let acc = 0;
+  for(const c of T.channels){ acc += c.br; if(r<=acc) return c; }
+  return T.channels[T.channels.length-1];
+}
+function labInitDecay(){
+  const c = document.getElementById('decayCanvas'); if(!c) return;
+  const { ctx, w, h } = labSizeCanvas(c);
+  const prev = LAB.decay || {};
+  LAB.decay = { ctx, w, h, canvas:c, current: prev.current || 'τ⁻', tree:null, speed:1 };
+  labRebuildDecayPicker();
+  const btn = document.getElementById('decayRestart');
+  if(btn) btn.onclick = ()=> labDecayStart();
+  const spd = document.getElementById('decaySpeed');
+  if(spd){ spd.oninput = ()=>{ LAB.decay.speed = parseFloat(spd.value); }; LAB.decay.speed = parseFloat(spd.value)||1; }
+  const leg = document.getElementById('decayLegend');
+  if(leg){
+    const dict = LOCALES[window.CURRENT_LANG||'en']||LOCALES.en;
+    leg.textContent = dict['lab.decay.legend']||'';
+  }
+  labDecayStart();
+}
+function labRebuildDecayPicker(){
+  if(!LAB || !LAB.decay) return;
+  const picker = document.getElementById('decayPicker');
+  if(!picker) return;
+  picker.innerHTML='';
+  DECAY_STARTERS.forEach(k=>{
+    const b = document.createElement('button');
+    b.innerHTML = `<b style="color:${DECAY_COLORS[k]||'#fff'}">${k}</b>`;
+    if(k===LAB.decay.current) b.classList.add('active');
+    b.onclick = ()=>{
+      LAB.decay.current = k;
+      picker.querySelectorAll('button').forEach(x=>x.classList.remove('active'));
+      b.classList.add('active');
+      labDecayStart();
+    };
+    picker.appendChild(b);
+  });
+  const leg = document.getElementById('decayLegend');
+  if(leg){
+    const dict = LOCALES[window.CURRENT_LANG||'en']||LOCALES.en;
+    leg.textContent = dict['lab.decay.legend']||'';
+  }
+}
+function labDecayStart(){
+  if(!LAB.decay) return;
+  // Build the tree eagerly, then reveal nodes progressively during draw.
+  const now = performance.now();
+  const root = { name: LAB.decay.current, born: now, revealAt: now, parent:null, children:[], depth:0 };
+  const buildChildren = (node)=>{
+    const T = DECAY_TABLE[node.name]; if(!T) return;
+    const ch = pickChannel(node.name); if(!ch) return;
+    // reveal delay compressed: log(τ) mapped into [400, 1400] ms
+    const logTau = Math.log10(T.tau);
+    const compressed = Math.max(300, Math.min(1600, 800 + logTau*80));
+    ch.daughters.forEach((d,i)=>{
+      const kid = { name:d, born:node.revealAt + compressed, revealAt: node.revealAt + compressed, parent:node, children:[], depth:node.depth+1, nBody: ch.daughters.length };
+      node.children.push(kid);
+      buildChildren(kid);
+    });
+  };
+  buildChildren(root);
+  LAB.decay.tree = root;
+  LAB.decay.startTime = now;
+}
+function labDrawDecay(){
+  const S = LAB.decay; if(!S||!S.tree) return;
+  const { ctx, w, h } = S;
+  ctx.clearRect(0,0,w,h);
+  ctx.fillStyle='#050815'; ctx.fillRect(0,0,w,h);
+
+  // layout: compute max revealed depth so far
+  const now = performance.now();
+  const elapsed = (now - S.startTime) * (S.speed||1);
+  const virtualNow = S.startTime + elapsed;
+
+  // collect visible nodes; assign x by depth, y by in-order-of-siblings across the tree
+  const byDepth = [];
+  const walk = (n)=>{
+    if(virtualNow < n.revealAt) return;
+    byDepth[n.depth] = byDepth[n.depth]||[];
+    n._idx = byDepth[n.depth].length;
+    byDepth[n.depth].push(n);
+    n.children.forEach(walk);
+  };
+  walk(S.tree);
+
+  const nCols = byDepth.length;
+  const colW = w / Math.max(nCols, 5);
+  byDepth.forEach((col, depth)=>{
+    const cx = colW * (depth + 0.5);
+    col.forEach((n, i)=>{
+      const cy = h*(i+1)/(col.length+1);
+      n._x = cx; n._y = cy;
+    });
+  });
+
+  // Edges
+  const walkEdges = (n)=>{
+    if(virtualNow < n.revealAt) return;
+    n.children.forEach(k=>{
+      if(virtualNow >= k.revealAt){
+        const dashed = (k.nBody===2);
+        ctx.strokeStyle = 'rgba(139,147,179,0.6)';
+        ctx.lineWidth = 1.3;
+        if(dashed){ ctx.setLineDash([4,4]); } else ctx.setLineDash([]);
+        ctx.beginPath();
+        ctx.moveTo(n._x, n._y); ctx.lineTo(k._x, k._y);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        walkEdges(k);
+      }
+    });
+  };
+  walkEdges(S.tree);
+
+  // Nodes
+  const walkNodes = (n)=>{
+    if(virtualNow < n.revealAt) return;
+    // Node age since reveal
+    const age = (virtualNow - n.revealAt) / 400; // 0..1 grow-in
+    const g = Math.min(1, age);
+    const T = DECAY_TABLE[n.name];
+    const stable = !T;
+    const c = DECAY_COLORS[n.name] || '#c8cff0';
+    // node glow
+    const gr = ctx.createRadialGradient(n._x, n._y, 0, n._x, n._y, 22*g);
+    gr.addColorStop(0, c); gr.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle=gr; ctx.beginPath(); ctx.arc(n._x, n._y, 22*g, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle=c;
+    ctx.beginPath(); ctx.arc(n._x, n._y, 8*g, 0, Math.PI*2); ctx.fill();
+    // label
+    ctx.fillStyle='#fff'; ctx.font='bold 11px JetBrains Mono, monospace';
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(n.name, n._x, n._y);
+    ctx.textBaseline='alphabetic';
+    // stability marker
+    if(stable){
+      const dict = LOCALES[window.CURRENT_LANG||'en']||LOCALES.en;
+      ctx.fillStyle='#8b93b3'; ctx.font='9px JetBrains Mono, monospace';
+      ctx.fillText(dict['lab.decay.stable']||'(stable)', n._x, n._y+18);
+    }
+    n.children.forEach(walkNodes);
+  };
+  walkNodes(S.tree);
+
+  // Header
+  ctx.fillStyle='#e8ecff'; ctx.font='bold 13px Space Grotesk, sans-serif';
+  ctx.textAlign='left'; ctx.textBaseline='alphabetic';
+  const T0 = DECAY_TABLE[S.current];
+  const tau = T0 ? `τ ≈ ${T0.tau.toExponential(1)} s` : '';
+  ctx.fillText(`${S.current}  ${tau}`, 12, 20);
+}
+
+/* ---------- Demo 6: Neutrino oscillation (3-flavour PMNS) ---------- */
+// Approximate best-fit PMNS values (normal ordering, NuFit 5.x style).
+// Angles in radians.
+var OSC = {
+  th12: 33.4 * Math.PI/180,
+  th23: 49.2 * Math.PI/180,
+  th13: 8.57 * Math.PI/180,
+  dm21: 7.42e-5, // eV^2
+  dm31: 2.51e-3, // eV^2
+  logLE: 3.0,    // log10(L/E) with L in km, E in GeV
+  source: 0,     // 0=e, 1=μ, 2=τ
+};
+function labInitOsc(){
+  const c = document.getElementById('oscCanvas'); if(!c) return;
+  const { ctx, w, h } = labSizeCanvas(c);
+  LAB.osc = { ctx, w, h, canvas:c };
+  const ctrls = document.getElementById('oscControls');
+  if(ctrls && !ctrls.dataset.built){
+    ctrls.dataset.built = '1';
+    ctrls.innerHTML = `
+      <div class="lab-slider"><label>θ₁₂ <span id="oscTh12v">${(OSC.th12*180/Math.PI).toFixed(1)}°</span></label><input type="range" id="oscTh12" min="0" max="90" step="0.1" value="${(OSC.th12*180/Math.PI).toFixed(1)}"></div>
+      <div class="lab-slider"><label>θ₂₃ <span id="oscTh23v">${(OSC.th23*180/Math.PI).toFixed(1)}°</span></label><input type="range" id="oscTh23" min="0" max="90" step="0.1" value="${(OSC.th23*180/Math.PI).toFixed(1)}"></div>
+      <div class="lab-slider"><label>θ₁₃ <span id="oscTh13v">${(OSC.th13*180/Math.PI).toFixed(1)}°</span></label><input type="range" id="oscTh13" min="0" max="45" step="0.1" value="${(OSC.th13*180/Math.PI).toFixed(1)}"></div>
+      <div class="lab-slider"><label>Δm²₂₁ <span id="oscDm21v">${OSC.dm21.toExponential(1)}</span></label><input type="range" id="oscDm21" min="0.1" max="30" step="0.1" value="${(OSC.dm21*1e5).toFixed(1)}"></div>
+      <div class="lab-slider"><label>Δm²₃₁ <span id="oscDm31v">${OSC.dm31.toExponential(1)}</span></label><input type="range" id="oscDm31" min="0.1" max="10" step="0.05" value="${(OSC.dm31*1e3).toFixed(2)}"></div>`;
+    const bind = (id, fn)=>{ const el=document.getElementById(id); if(el) el.oninput=fn; };
+    bind('oscTh12', e=>{ OSC.th12 = parseFloat(e.target.value)*Math.PI/180; document.getElementById('oscTh12v').textContent = parseFloat(e.target.value).toFixed(1)+'°'; });
+    bind('oscTh23', e=>{ OSC.th23 = parseFloat(e.target.value)*Math.PI/180; document.getElementById('oscTh23v').textContent = parseFloat(e.target.value).toFixed(1)+'°'; });
+    bind('oscTh13', e=>{ OSC.th13 = parseFloat(e.target.value)*Math.PI/180; document.getElementById('oscTh13v').textContent = parseFloat(e.target.value).toFixed(1)+'°'; });
+    bind('oscDm21', e=>{ OSC.dm21 = parseFloat(e.target.value)*1e-5; document.getElementById('oscDm21v').textContent = OSC.dm21.toExponential(1); });
+    bind('oscDm31', e=>{ OSC.dm31 = parseFloat(e.target.value)*1e-3; document.getElementById('oscDm31v').textContent = OSC.dm31.toExponential(1); });
+  }
+  labRebuildOscLegend();
+}
+function labRebuildOscLegend(){
+  const leg = document.getElementById('oscLegend'); if(!leg) return;
+  if(typeof OSC === 'undefined' || !OSC) return;
+  const dict = LOCALES[window.CURRENT_LANG||'en']||LOCALES.en;
+  const src = ['ν_e','ν_μ','ν_τ'][OSC.source];
+  leg.innerHTML = `
+    <span class="ll-item"><i class="bar" style="background:#4ea8ff;color:#4ea8ff"></i>P(${src}→ν_e)</span>
+    <span class="ll-item"><i class="bar" style="background:#7ee8c5;color:#7ee8c5"></i>P(${src}→ν_μ)</span>
+    <span class="ll-item"><i class="bar" style="background:#c39bff;color:#c39bff"></i>P(${src}→ν_τ)</span>
+    <span class="ll-item" style="cursor:pointer" id="oscSrcToggle">🔄 ${dict['lab.osc.source']||'source flavour'}: ${src}</span>
+    <div style="flex-basis:100%;color:#8b93b3;font-size:11px;margin-top:6px">${dict['lab.osc.legend']||''}</div>`;
+  const tog = document.getElementById('oscSrcToggle');
+  if(tog) tog.onclick = ()=>{ OSC.source = (OSC.source+1)%3; labRebuildOscLegend(); };
+}
+// Build PMNS matrix U (3x3, real, ignore CP phase for simplicity)
+function pmns(){
+  const c12=Math.cos(OSC.th12), s12=Math.sin(OSC.th12);
+  const c23=Math.cos(OSC.th23), s23=Math.sin(OSC.th23);
+  const c13=Math.cos(OSC.th13), s13=Math.sin(OSC.th13);
+  return [
+    [ c12*c13,          s12*c13,          s13 ],
+    [ -s12*c23-c12*s23*s13, c12*c23-s12*s23*s13, s23*c13 ],
+    [ s12*s23-c12*c23*s13, -c12*s23-s12*c23*s13, c23*c13 ]
+  ];
+}
+// P(ν_α → ν_β) as a function of L/E (km/GeV) using standard vacuum formula:
+// P = δ_αβ − 4 Σ_{i>j} U_αi U_βi U_αj U_βj sin²(1.27 Δm²_ij L/E)
+function oscProb(alpha, beta, LoverE){
+  const U = pmns();
+  let P = (alpha===beta) ? 1 : 0;
+  const dm = [ [0,OSC.dm21,OSC.dm31], [-OSC.dm21,0,OSC.dm31-OSC.dm21], [-OSC.dm31,-(OSC.dm31-OSC.dm21),0] ];
+  for(let i=0;i<3;i++){
+    for(let j=0;j<i;j++){
+      const s = Math.sin(1.27 * dm[i][j] * LoverE);
+      P -= 4 * U[alpha][i]*U[beta][i]*U[alpha][j]*U[beta][j] * s*s;
+    }
+  }
+  return Math.max(0, Math.min(1, P));
+}
+function labDrawOsc(){
+  const S = LAB.osc; if(!S) return;
+  const { ctx, w, h } = S;
+  ctx.clearRect(0,0,w,h);
+  // axes area
+  const padL=48, padR=12, padT=28, padB=32;
+  const plotW = w-padL-padR, plotH = h-padT-padB;
+  // background
+  ctx.fillStyle='#050815'; ctx.fillRect(padL,padT,plotW,plotH);
+  ctx.strokeStyle='rgba(255,255,255,0.1)'; ctx.lineWidth=1;
+  ctx.strokeRect(padL,padT,plotW,plotH);
+  // x scale: log10(L/E) from 0 to 5 (i.e. L/E in 1..1e5 km/GeV)
+  const xMin=0, xMax=5;
+  const xToPx = (x)=> padL + (x-xMin)/(xMax-xMin) * plotW;
+  const yToPx = (p)=> padT + (1-p)*plotH;
+  // gridlines + labels
+  ctx.fillStyle='#8b93b3'; ctx.font='10px JetBrains Mono, monospace'; ctx.textAlign='center';
+  for(let x=0;x<=5;x++){
+    const px = xToPx(x);
+    ctx.strokeStyle='rgba(255,255,255,0.06)';
+    ctx.beginPath(); ctx.moveTo(px,padT); ctx.lineTo(px,padT+plotH); ctx.stroke();
+    ctx.fillStyle='#8b93b3';
+    ctx.fillText(`10^${x}`, px, padT+plotH+14);
+  }
+  ctx.textAlign='right';
+  for(let p=0;p<=1;p+=0.25){
+    const py = yToPx(p);
+    ctx.strokeStyle='rgba(255,255,255,0.06)';
+    ctx.beginPath(); ctx.moveTo(padL,py); ctx.lineTo(padL+plotW,py); ctx.stroke();
+    ctx.fillStyle='#8b93b3';
+    ctx.fillText(p.toFixed(2), padL-4, py+3);
+  }
+  // axis labels
+  ctx.fillStyle='#c8cff0'; ctx.font='11px Space Grotesk, sans-serif';
+  ctx.textAlign='center';
+  ctx.fillText('L / E   [km / GeV]', padL+plotW/2, h-6);
+  ctx.save();
+  ctx.translate(12, padT+plotH/2); ctx.rotate(-Math.PI/2);
+  ctx.fillText('P(oscillation)', 0, 0);
+  ctx.restore();
+  // Curves for e, μ, τ  appearance from OSC.source
+  const colors = ['#4ea8ff','#7ee8c5','#c39bff'];
+  for(let beta=0;beta<3;beta++){
+    ctx.strokeStyle = colors[beta]; ctx.lineWidth=1.8;
+    ctx.beginPath();
+    for(let px=0; px<=plotW; px++){
+      const xLog = xMin + px/plotW*(xMax-xMin);
+      const LE = Math.pow(10, xLog);
+      const P = oscProb(OSC.source, beta, LE);
+      const py = yToPx(P);
+      if(px===0) ctx.moveTo(padL+px, py); else ctx.lineTo(padL+px, py);
+    }
+    ctx.stroke();
+  }
+  // Header
+  const src = ['ν_e','ν_μ','ν_τ'][OSC.source];
+  ctx.fillStyle='#e8ecff'; ctx.font='bold 13px Space Grotesk, sans-serif';
+  ctx.textAlign='left'; ctx.fillText(`source: ${src}`, padL, 18);
+}
+
+/* ---------- Demo 7: Parton distribution functions ---------- */
+var PDF = { logQ2: 1.0, showGluon: true }; // Q² = 10 GeV² default
+function labInitPDF(){
+  const c = document.getElementById('pdfCanvas'); if(!c) return;
+  const { ctx, w, h } = labSizeCanvas(c);
+  LAB.pdf = { ctx, w, h, canvas:c };
+  const ctrls = document.getElementById('pdfControls');
+  if(ctrls && !ctrls.dataset.built){
+    ctrls.dataset.built='1';
+    ctrls.innerHTML = `
+      <div class="lab-slider"><label>log₁₀ Q² <span id="pdfQ2v">${PDF.logQ2.toFixed(2)}</span></label><input type="range" id="pdfQ2" min="0" max="4" step="0.05" value="${PDF.logQ2}"></div>
+      <label class="switch"><input type="checkbox" id="pdfShowG" ${PDF.showGluon?'checked':''}><span data-i18n="lab.pdf.showg">show gluon (÷10)</span></label>`;
+    document.getElementById('pdfQ2').oninput = (e)=>{ PDF.logQ2 = parseFloat(e.target.value); document.getElementById('pdfQ2v').textContent = PDF.logQ2.toFixed(2); };
+    document.getElementById('pdfShowG').onchange = (e)=>{ PDF.showGluon = e.target.checked; };
+  }
+  labRebuildPDFLegend();
+}
+function labRebuildPDFLegend(){
+  const leg = document.getElementById('pdfLegend'); if(!leg) return;
+  const dict = LOCALES[window.CURRENT_LANG||'en']||LOCALES.en;
+  leg.innerHTML = `
+    <span class="ll-item"><i class="bar" style="background:#ff6b9d;color:#ff6b9d"></i>u_v (valence)</span>
+    <span class="ll-item"><i class="bar" style="background:#4ea8ff;color:#4ea8ff"></i>d_v (valence)</span>
+    <span class="ll-item"><i class="bar" style="background:#c39bff;color:#c39bff"></i>sea (ū+d̄+s+s̄)</span>
+    <span class="ll-item"><i class="bar" style="background:#ffd166;color:#ffd166"></i>gluon g/10</span>
+    <div style="flex-basis:100%;color:#8b93b3;font-size:11px;margin-top:6px">${dict['lab.pdf.legend']||''}</div>`;
+}
+// Toy parameterisation. x·f(x) at Q²:
+//   x·u_v = A(Q²) · x^0.5 · (1-x)^3
+//   x·d_v = 0.5 · x·u_v (roughly)
+//   x·sea = S(Q²) · x^(-0.2) · (1-x)^7  (grows with Q²)
+//   x·g   = G(Q²) · x^(-0.3) · (1-x)^5   (grows fastest at small x)
+function pdfXf(name, x, logQ2){
+  const q = logQ2;
+  if(name==='uv'){ const A = 1.8 - 0.15*q; return Math.max(0, A) * Math.pow(x,0.5) * Math.pow(1-x,3); }
+  if(name==='dv'){ const A = 0.9 - 0.10*q; return Math.max(0, A) * Math.pow(x,0.5) * Math.pow(1-x,4); }
+  if(name==='sea'){ const S = 0.15 + 0.35*q; return S * Math.pow(x,-0.2) * Math.pow(1-x,7); }
+  if(name==='g'){ const G = 0.6 + 1.2*q; return G * Math.pow(x,-0.3) * Math.pow(1-x,5); }
+  return 0;
+}
+function labDrawPDF(){
+  const S = LAB.pdf; if(!S) return;
+  const { ctx, w, h } = S;
+  ctx.clearRect(0,0,w,h);
+  const padL=52, padR=16, padT=28, padB=32;
+  const plotW = w-padL-padR, plotH = h-padT-padB;
+  ctx.fillStyle='#050815'; ctx.fillRect(padL,padT,plotW,plotH);
+  ctx.strokeStyle='rgba(255,255,255,0.1)'; ctx.strokeRect(padL,padT,plotW,plotH);
+  // x on log scale: 1e-4 .. 1
+  const xMinLog = -4, xMaxLog = 0;
+  const yMax = 2.5;
+  const xToPx = (lx)=> padL + (lx-xMinLog)/(xMaxLog-xMinLog)*plotW;
+  const yToPx = (v)=> padT + (1 - Math.min(v,yMax)/yMax)*plotH;
+  // grid + labels
+  ctx.fillStyle='#8b93b3'; ctx.font='10px JetBrains Mono, monospace'; ctx.textAlign='center';
+  for(let lx=xMinLog; lx<=xMaxLog; lx++){
+    const px = xToPx(lx);
+    ctx.strokeStyle='rgba(255,255,255,0.06)';
+    ctx.beginPath(); ctx.moveTo(px,padT); ctx.lineTo(px,padT+plotH); ctx.stroke();
+    ctx.fillStyle='#8b93b3';
+    ctx.fillText(`10^${lx}`, px, padT+plotH+14);
+  }
+  ctx.textAlign='right';
+  for(let v=0; v<=yMax; v+=0.5){
+    const py=yToPx(v);
+    ctx.strokeStyle='rgba(255,255,255,0.06)';
+    ctx.beginPath(); ctx.moveTo(padL,py); ctx.lineTo(padL+plotW,py); ctx.stroke();
+    ctx.fillStyle='#8b93b3';
+    ctx.fillText(v.toFixed(1), padL-4, py+3);
+  }
+  // Axis labels
+  ctx.fillStyle='#c8cff0'; ctx.font='11px Space Grotesk, sans-serif';
+  ctx.textAlign='center'; ctx.fillText('x (momentum fraction)', padL+plotW/2, h-6);
+  ctx.save(); ctx.translate(14, padT+plotH/2); ctx.rotate(-Math.PI/2);
+  ctx.fillText('x · f(x, Q²)', 0, 0); ctx.restore();
+  // Curves
+  const drawCurve = (name, color, div)=>{
+    ctx.strokeStyle=color; ctx.lineWidth=1.9;
+    ctx.beginPath();
+    for(let px=0; px<=plotW; px++){
+      const lx = xMinLog + px/plotW*(xMaxLog-xMinLog);
+      const x = Math.pow(10, lx);
+      const v = pdfXf(name, x, PDF.logQ2) / (div||1);
+      const py = yToPx(v);
+      if(px===0) ctx.moveTo(padL+px, py); else ctx.lineTo(padL+px, py);
+    }
+    ctx.stroke();
+  };
+  drawCurve('uv','#ff6b9d',1);
+  drawCurve('dv','#4ea8ff',1);
+  drawCurve('sea','#c39bff',1);
+  if(PDF.showGluon) drawCurve('g','#ffd166',10);
+  // Header
+  ctx.fillStyle='#e8ecff'; ctx.font='bold 13px Space Grotesk, sans-serif';
+  ctx.textAlign='left'; ctx.fillText(`Q² = ${Math.pow(10, PDF.logQ2).toFixed(1)} GeV²`, padL, 18);
+}
+
 /* ---------- Lab loop + tab hook ---------- */
 function labLoop(){
   labT += 0.016;
   labDrawConfinement();
   labDrawDetector();
   labDrawHiggs();
+  labDrawFeyn();
+  labDrawDecay();
+  labDrawOsc();
+  labDrawPDF();
   labRAF = requestAnimationFrame(labLoop);
 }
 function labStart(){
@@ -2449,6 +3067,10 @@ function labStart(){
   labInitConfinement();
   labInitDetector();
   labInitHiggs();
+  labInitFeyn();
+  labInitDecay();
+  labInitOsc();
+  labInitPDF();
   labLoop();
 }
 function labStop(){ if(labRAF!=null){ cancelAnimationFrame(labRAF); labRAF=null; } }
@@ -2456,6 +3078,18 @@ function labStop(){ if(labRAF!=null){ cancelAnimationFrame(labRAF); labRAF=null;
 document.querySelectorAll('.tab').forEach(t=>{
   t.addEventListener('click',()=>{
     if(t.dataset.tab==='lab') labStart(); else labStop();
+  });
+});
+// Lab sub-tabs (basics vs advanced)
+document.querySelectorAll('.lab-subtab').forEach(b=>{
+  b.addEventListener('click', ()=>{
+    const key = b.dataset.labSub;
+    document.querySelectorAll('.lab-subtab').forEach(x=>x.classList.toggle('active', x===b));
+    document.querySelectorAll('[data-lab-sub-panel]').forEach(p=>{
+      p.classList.toggle('active', p.dataset.labSubPanel===key);
+    });
+    // canvases in the newly-shown panel need a re-size (getBoundingClientRect is 0 while hidden)
+    if(labRAF!=null){ labStop(); labStart(); }
   });
 });
 window.addEventListener('resize', ()=>{ if(labRAF!=null){ labStop(); labStart(); } });

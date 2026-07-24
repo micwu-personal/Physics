@@ -387,7 +387,48 @@ const LOCALES = {
 
     // Physics Lab tab
     'lab.h2': 'Physics Lab',
-    'lab.desc': 'Three hands-on visualisations that make the deepest ideas of the Standard Model tangible.',
+    'lab.desc': 'Seven hands-on visualisations that make the deepest ideas of the Standard Model tangible.',
+    'lab.sub.basics': 'Standard Model basics',
+    'lab.sub.advanced': 'Advanced topics',
+    // Demo 4 — Feynman
+    'lab.feyn.h': '4 · Feynman diagram builder',
+    'lab.feyn.tag': 'interaction vertices',
+    'lab.feyn.p': 'Every Standard-Model interaction is built from a handful of allowed vertices. Pick a vertex type, then click on the canvas to place it. Each vertex is labelled with the coupling constant it uses (√α, √α_s, g_W). The panel below lists the Feynman rules being applied.',
+    'lab.feyn.clear': 'Clear',
+    'lab.feyn.example': 'Load: e⁻e⁺ → γ → μ⁻μ⁺',
+    'lab.feyn.vtx.qed': 'QED vertex (γ - f - f̄)',
+    'lab.feyn.vtx.qcd': 'QCD vertex (g - q - q̄)',
+    'lab.feyn.vtx.wcc': 'Weak CC (W - ℓ - ν)',
+    'lab.feyn.vtx.wnc': 'Weak NC (Z - f - f̄)',
+    'lab.feyn.rule.qed': 'QED: photon couples to any charged fermion. Coupling ∝ √α ≈ 1/12. Conserves charge, flavour, parity.',
+    'lab.feyn.rule.qcd': 'QCD: gluon couples to quarks (colour). Coupling ∝ √α_s ≈ 0.3. Gluons themselves also carry colour → 3-gluon and 4-gluon vertices exist.',
+    'lab.feyn.rule.wcc': 'Weak charged current: W± converts a charged lepton to its neutrino (or up-type quark ↔ down-type). Only vertex that changes flavour.',
+    'lab.feyn.rule.wnc': 'Weak neutral current: Z couples to every fermion (including neutrinos). Conserves flavour.',
+    'lab.feyn.legend.fermion': 'fermion (arrow = particle direction)',
+    'lab.feyn.legend.photon': 'photon γ (wavy)',
+    'lab.feyn.legend.gluon': 'gluon g (spiral)',
+    'lab.feyn.legend.wz': 'W / Z (dashed)',
+    'lab.feyn.count': 'vertices: {n} · order: α^{n}',
+    // Demo 5 — Decay
+    'lab.decay.h': '5 · Decay chain sandbox',
+    'lab.decay.tag': 'branching ratios',
+    'lab.decay.p': 'Unstable particles decay stochastically. Their lifetime sets when, and their branching ratios set into what. Pick a starter particle and watch a random decay tree unfold in real time. Multiple runs give different trees — that is the quantum nature of decays.',
+    'lab.decay.restart': 'Re-run',
+    'lab.decay.speed': 'speed',
+    'lab.decay.stable': '(stable)',
+    'lab.decay.legend': 'Branching ratios are drawn from measured PDG values. Grey lines connect a parent to each daughter; dashed = 2-body, solid = ≥3-body decay.',
+    // Demo 6 — Oscillation
+    'lab.osc.h': '6 · Neutrino oscillation',
+    'lab.osc.tag': 'PMNS mixing',
+    'lab.osc.p': 'Neutrinos are produced as flavour states (ν_e, ν_μ, ν_τ) but propagate as mass states. Because these differ, a beam starting as ν_μ can arrive as ν_e — a purely quantum-mechanical interference effect that proves neutrinos have mass. Drag L/E, the mixing angles, and Δm² to see how the probabilities change.',
+    'lab.osc.source': 'source flavour',
+    'lab.osc.legend': 'Two-flavour approximation: P(ν_α → ν_β) = sin²(2θ) · sin²(1.27 · Δm² · L / E). Curves show all three appearance/survival probabilities using the full 3-flavour PMNS matrix.',
+    // Demo 7 — PDFs
+    'lab.pdf.h': '7 · Inside the proton (PDFs)',
+    'lab.pdf.tag': 'parton distributions',
+    'lab.pdf.p': 'A proton is not just uud. At high resolution (large Q²) you see a churning sea of quarks, antiquarks, and gluons. A parton distribution function f(x, Q²) gives the probability of finding a parton carrying momentum fraction x of the proton. Drag the Q² slider to see the sea grow with resolution.',
+    'lab.pdf.legend': 'Curves are toy parameterisations tuned to reproduce the qualitative behaviour of CT18/MSHT20 global fits. At low Q², valence quarks dominate at moderate x; at high Q², gluons and sea quarks blow up at small x.',
+    'lab.pdf.showg': 'show gluon (÷10)',
     'lab.conf.h': '1 · Colour confinement',
     'lab.conf.tag': 'strong force',
     'lab.conf.p': 'Drag the antiquark away from the quark. The gluon field between them behaves like a stretched rubber band — its energy grows with distance until a new q q̄ pair pops out of the vacuum. That is why you can never isolate a single quark.',
@@ -823,6 +864,47 @@ const LOCALES = {
     // 物理实验室
     'lab.h2': '物理实验室',
     'lab.desc': '七个可动手的可视化演示,让标准模型中最深奥的思想变得直观可见。',
+    'lab.sub.basics': '标准模型基础',
+    'lab.sub.advanced': '进阶专题',
+    // Demo 4
+    'lab.feyn.h': '4 · 费曼图搭建器',
+    'lab.feyn.tag': '相互作用顶点',
+    'lab.feyn.p': '标准模型中的每一次相互作用都由几种被允许的"顶点"拼装而成。选择一种顶点,然后在画布上点击放置。每个顶点会标注它所使用的耦合常数(√α、√α_s、g_W),下方面板会列出被应用的费曼规则。',
+    'lab.feyn.clear': '清空',
+    'lab.feyn.example': '示例:e⁻e⁺ → γ → μ⁻μ⁺',
+    'lab.feyn.vtx.qed': 'QED 顶点 (γ - f - f̄)',
+    'lab.feyn.vtx.qcd': 'QCD 顶点 (g - q - q̄)',
+    'lab.feyn.vtx.wcc': '弱带电流 (W - ℓ - ν)',
+    'lab.feyn.vtx.wnc': '弱中性流 (Z - f - f̄)',
+    'lab.feyn.rule.qed': 'QED:光子与任何带电费米子耦合,耦合强度 ∝ √α ≈ 1/12。守恒电荷、味、宇称。',
+    'lab.feyn.rule.qcd': 'QCD:胶子与夸克(色荷)耦合,耦合 ∝ √α_s ≈ 0.3。胶子自身也带色荷,因此存在三胶子/四胶子顶点。',
+    'lab.feyn.rule.wcc': '弱带电流:W± 把带电轻子变成对应的中微子(或上型夸克 ↔ 下型夸克)。是唯一能改变味的顶点。',
+    'lab.feyn.rule.wnc': '弱中性流:Z 与所有费米子(含中微子)耦合,守恒味。',
+    'lab.feyn.legend.fermion': '费米子(箭头 = 粒子方向)',
+    'lab.feyn.legend.photon': '光子 γ(波浪线)',
+    'lab.feyn.legend.gluon': '胶子 g(螺旋线)',
+    'lab.feyn.legend.wz': 'W / Z(虚线)',
+    'lab.feyn.count': '顶点数:{n} · 阶次:α^{n}',
+    // Demo 5
+    'lab.decay.h': '5 · 衰变链沙盒',
+    'lab.decay.tag': '分支比',
+    'lab.decay.p': '不稳定粒子会随机衰变。它们的寿命决定"什么时候",分支比决定"衰成什么"。选一个起始粒子,实时看一棵随机的衰变树展开。多跑几次会得到不同的树——这就是衰变的量子本性。',
+    'lab.decay.restart': '重新运行',
+    'lab.decay.speed': '速度',
+    'lab.decay.stable': '(稳定)',
+    'lab.decay.legend': '分支比取自 PDG 实验测量值。灰色连线连接母粒子与每个子粒子;虚线 = 两体衰变,实线 = ≥ 3 体衰变。',
+    // Demo 6
+    'lab.osc.h': '6 · 中微子振荡',
+    'lab.osc.tag': 'PMNS 混合',
+    'lab.osc.p': '中微子以味本征态 (ν_e, ν_μ, ν_τ) 产生,却以质量本征态传播。由于两组本征态不同,一束原本是 ν_μ 的束流在飞行一段距离后可能变成 ν_e——这是纯量子力学的干涉效应,也是中微子有质量的直接证据。拖动 L/E、混合角、Δm² 观察概率变化。',
+    'lab.osc.source': '源味',
+    'lab.osc.legend': '两味近似:P(ν_α → ν_β) = sin²(2θ) · sin²(1.27 · Δm² · L / E)。图中曲线由完整的 3 味 PMNS 矩阵计算得到。',
+    // Demo 7
+    'lab.pdf.h': '7 · 走进质子内部 (PDF)',
+    'lab.pdf.tag': '部分子分布函数',
+    'lab.pdf.p': '质子并不"只是 uud"。在高分辨率(大 Q²)下,你会看到夸克、反夸克、胶子构成的动态"海"。部分子分布函数 f(x, Q²) 表示在质子内找到携带动量分数 x 的部分子的概率密度。拖动 Q² 观察海的增长。',
+    'lab.pdf.legend': '曲线为定性参数化,复现 CT18/MSHT20 全局拟合的形状。低 Q² 下价夸克在中等 x 主导;高 Q² 下胶子与海夸克在小 x 处急剧增长。',
+    'lab.pdf.showg': '显示胶子(÷10)',
     'ix.eq.tW_loop': '(t 或 W 圈图)',
     'lab.conf.h': '1 · 色禁闭',
     'lab.conf.tag': '强相互作用',
@@ -1000,6 +1082,10 @@ function applyI18n(lang){
   // Physics Lab: rebuild dynamic pickers so their labels get translated too.
   if(typeof labRebuildDetectorPicker==='function') labRebuildDetectorPicker();
   if(typeof labRebuildHiggsPicker==='function') labRebuildHiggsPicker();
+  if(typeof labRebuildFeynPicker==='function') labRebuildFeynPicker();
+  if(typeof labRebuildDecayPicker==='function') labRebuildDecayPicker();
+  if(typeof labRebuildOscLegend==='function') labRebuildOscLegend();
+  if(typeof labRebuildPDFLegend==='function') labRebuildPDFLegend();
   // Fix the Big Bang link based on where we're actually served from.
   if(typeof fixBigBangLink==='function') fixBigBangLink();
 }

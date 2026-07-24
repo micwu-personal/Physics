@@ -258,9 +258,16 @@
     <section id="tab-lab" class="tab-panel">
       <div class="section-head">
         <h2 data-i18n="lab.h2">Physics Lab</h2>
-        <p data-i18n="lab.desc">Three hands-on visualisations that make the deepest ideas of the Standard Model tangible.</p>
+        <p data-i18n="lab.desc">Seven hands-on visualisations that make the deepest ideas of the Standard Model tangible.</p>
       </div>
 
+      <!-- Sub-tab strip: Basics vs Advanced -->
+      <div class="lab-subtabs" role="tablist">
+        <button class="lab-subtab active" data-lab-sub="basics" data-i18n="lab.sub.basics">Standard Model basics</button>
+        <button class="lab-subtab" data-lab-sub="advanced" data-i18n="lab.sub.advanced">Advanced topics</button>
+      </div>
+
+      <div class="lab-sub-panel active" data-lab-sub-panel="basics">
       <!-- Demo 1: Confinement / flux tube -->
       <div class="lab-card">
         <div class="lab-head">
@@ -308,6 +315,74 @@
           <div class="higgs-picker" id="higgsPicker"></div>
         </div>
       </div>
+      </div><!-- /basics -->
+
+      <div class="lab-sub-panel" data-lab-sub-panel="advanced">
+      <!-- Demo 4: Feynman diagram builder -->
+      <div class="lab-card">
+        <div class="lab-head">
+          <h3 data-i18n="lab.feyn.h">4 · Feynman diagram builder</h3>
+          <span class="lab-tag t-em" data-i18n="lab.feyn.tag">interaction vertices</span>
+        </div>
+        <p data-i18n="lab.feyn.p">Every Standard-Model interaction is built from a handful of allowed vertices. Pick a vertex type, then click on the canvas to place it. External lines auto-attach to nearby vertices; each vertex is labelled with the coupling constant it uses (α, α_s, g_W). The panel on the right lists the Feynman rules being applied.</p>
+        <div class="lab-viz">
+          <canvas id="feynCanvas"></canvas>
+          <div class="det-picker" id="feynPicker"></div>
+        </div>
+        <div class="lab-controls">
+          <button class="btn" id="feynClear" data-i18n="lab.feyn.clear">Clear</button>
+          <button class="btn" id="feynExample" data-i18n="lab.feyn.example">Load: Bhabha e⁺e⁻ → e⁺e⁻</button>
+        </div>
+        <div class="lab-legend" id="feynLegend"></div>
+      </div>
+
+      <!-- Demo 5: Decay chain sandbox -->
+      <div class="lab-card">
+        <div class="lab-head">
+          <h3 data-i18n="lab.decay.h">5 · Decay chain sandbox</h3>
+          <span class="lab-tag t-strong" data-i18n="lab.decay.tag">branching ratios</span>
+        </div>
+        <p data-i18n="lab.decay.p">Unstable particles decay stochastically. Their <b>lifetime</b> sets when, and their <b>branching ratios</b> set into what. Pick a starter particle and watch a random decay tree unfold in real time. Multiple runs give different trees — that is the quantum nature of decays.</p>
+        <div class="lab-viz">
+          <canvas id="decayCanvas"></canvas>
+          <div class="det-picker" id="decayPicker"></div>
+        </div>
+        <div class="lab-controls">
+          <button class="btn" id="decayRestart" data-i18n="lab.decay.restart">Re-run</button>
+          <label class="switch"><input type="range" id="decaySpeed" min="0.2" max="5" step="0.1" value="1" style="width:120px"><span data-i18n="lab.decay.speed">speed</span></label>
+        </div>
+        <div class="lab-legend" id="decayLegend"></div>
+      </div>
+
+      <!-- Demo 6: Neutrino oscillation -->
+      <div class="lab-card">
+        <div class="lab-head">
+          <h3 data-i18n="lab.osc.h">6 · Neutrino oscillation</h3>
+          <span class="lab-tag t-higgs" data-i18n="lab.osc.tag">PMNS mixing</span>
+        </div>
+        <p data-i18n="lab.osc.p">Neutrinos are produced as flavour states (ν_e, ν_μ, ν_τ) but propagate as mass states. Because these differ, a beam starting as ν_μ can arrive as ν_e — a purely quantum-mechanical interference effect that proves neutrinos have mass. Drag L/E, the mixing angles, and Δm² to see how the probabilities change.</p>
+        <div class="lab-viz">
+          <canvas id="oscCanvas"></canvas>
+        </div>
+        <div class="lab-controls" id="oscControls"></div>
+        <div class="lab-legend" id="oscLegend"></div>
+      </div>
+
+      <!-- Demo 7: Parton distributions -->
+      <div class="lab-card">
+        <div class="lab-head">
+          <h3 data-i18n="lab.pdf.h">7 · Inside the proton (PDFs)</h3>
+          <span class="lab-tag t-em" data-i18n="lab.pdf.tag">parton distributions</span>
+        </div>
+        <p data-i18n="lab.pdf.p">A proton is not just uud. At high resolution (large Q²) you see a churning sea of quarks, antiquarks, and gluons. A <b>parton distribution function</b> f(x, Q²) gives the probability of finding a parton carrying momentum fraction x of the proton. Drag the Q² slider to see the sea grow with resolution.</p>
+        <div class="lab-viz">
+          <canvas id="pdfCanvas"></canvas>
+        </div>
+        <div class="lab-controls" id="pdfControls"></div>
+        <div class="lab-legend" id="pdfLegend"></div>
+      </div>
+      </div><!-- /advanced -->
+
       <!-- Cross-link to big-bang app -->
       <div class="lab-card cross-link">
         <div class="lab-head">

@@ -252,6 +252,15 @@ main{position:relative;z-index:1;max-width:1400px;margin:0 auto;padding:40px 24p
 
 /* ---------- Physics Lab tab ---------- */
 .lab-card{max-width:1200px;margin:0 auto 24px;background:var(--panel);border:1px solid var(--panel-b);border-radius:16px;padding:24px;backdrop-filter:blur(12px)}
+.lab-subtabs{max-width:1200px;margin:0 auto 20px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.lab-subtab{padding:8px 18px;background:rgba(0,0,0,0.35);border:1px solid var(--panel-b);color:var(--dim);border-radius:999px;cursor:pointer;font-size:13px;font-weight:600;transition:all .15s}
+.lab-subtab:hover{color:var(--text);border-color:var(--accent2)}
+.lab-subtab.active{background:rgba(255,107,157,0.15);border-color:var(--accent);color:#fff}
+.lab-sub-panel{display:none}
+.lab-sub-panel.active{display:block}
+.lab-slider{display:flex;flex-direction:column;gap:4px;font-size:11px;color:var(--dim);min-width:160px}
+.lab-slider label{display:flex;justify-content:space-between;gap:8px;font-family:'JetBrains Mono',ui-monospace,monospace}
+.lab-slider input[type=range]{width:100%}
 .lab-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px;flex-wrap:wrap}
 .lab-head h3{font-size:20px;font-weight:600;margin:0}
 .lab-card>p{color:#c8cff0;line-height:1.6;font-size:14px;margin:8px 0 16px}
