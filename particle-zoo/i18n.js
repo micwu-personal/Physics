@@ -429,6 +429,39 @@ const LOCALES = {
     'lab.pdf.p': 'A proton is not just uud. At high resolution (large Q²) you see a churning sea of quarks, antiquarks, and gluons. A parton distribution function f(x, Q²) gives the probability of finding a parton carrying momentum fraction x of the proton. Drag the Q² slider to see the sea grow with resolution.',
     'lab.pdf.legend': 'Curves are toy parameterisations tuned to reproduce the qualitative behaviour of CT18/MSHT20 global fits. At low Q², valence quarks dominate at moderate x; at high Q², gluons and sea quarks blow up at small x.',
     'lab.pdf.showg': 'show gluon (÷10)',
+    // Canvas overlay strings (hard-coded before)
+    'lab.conf.overlay.sep': 'separation ≈ {L} px',
+    'lab.conf.overlay.energy': 'stored energy ≈ {E} MeV (linear!)',
+    'lab.conf.overlay.newq':  'new q',
+    'lab.conf.overlay.newqbar': 'new q̄',
+    'lab.conf.overlay.mesons': '→ 2 mesons (never 1 free quark)',
+    'lab.feyn.overlay.time': 'time →',
+    'lab.osc.axis.x': 'L / E   [km / GeV]',
+    'lab.osc.axis.y': 'P(oscillation)',
+    'lab.osc.source.label': 'source:',
+    'lab.pdf.axis.x': 'x (momentum fraction)',
+    'lab.pdf.axis.y': 'x · f(x, Q²)',
+    'lab.pdf.leg.uv': 'u_v (valence)',
+    'lab.pdf.leg.dv': 'd_v (valence)',
+    'lab.pdf.leg.sea': 'sea (ū+d̄+s+s̄)',
+    'lab.pdf.leg.g':  'gluon g/10',
+    // Tray parts
+    'part.up':'up','part.down':'down','part.anti_up':'anti-up','part.anti_down':'anti-down',
+    'part.strange':'strange','part.anti_strange':'anti-strange','part.charm':'charm','part.anti_charm':'anti-charm',
+    'part.bottom':'bottom','part.anti_bottom':'anti-bottom','part.electron':'electron',
+    'part.photon':'photon','part.muon':'muon','part.tau':'tau','part.wboson':'W boson','part.top':'top quark',
+    // Interaction equation snippets
+    'ix.eq.near_nucleus': '(near nucleus)',
+    'ix.eq.tW_loop': '(t or W loop)',
+    'ix.eq.via_g': '(via g)',
+    'ix.eq.via_gamma': 'via γ',
+    'ix.eq.via_W': 'via W',
+    'ix.eq.via_graviton': 'M + M  via graviton?',
+    'ix.eq.mass_coupling': '(mass coupling)',
+    'ix.svg.spin2': 'G (spin 2)',
+    // Standard model chart meta
+    'sm.meta.massless': 'massless',
+    'sm.meta.color_anticolor': '*color-anticolor',
     'lab.conf.h': '1 · Colour confinement',
     'lab.conf.tag': 'strong force',
     'lab.conf.p': 'Drag the antiquark away from the quark. The gluon field between them behaves like a stretched rubber band — its energy grows with distance until a new q q̄ pair pops out of the vacuum. That is why you can never isolate a single quark.',
@@ -595,7 +628,7 @@ const LOCALES = {
     'builder.desc': '把夸克和电子拖进组合区,观察质子、中子和原子如何诞生。',
     'builder.parts': '零件',
     'builder.clear': '清空',
-    'builder.tip': '提示: 2 个 up + 1 个 down = 质子 · 1 个 up + 2 个 down = 中子 · 质子 + 电子 = 氢原子',
+    'builder.tip': '提示: 2 个上夸克 + 1 个下夸克 = 质子 · 1 个上夸克 + 2 个下夸克 = 中子 · 质子 + 电子 = 氢原子',
     'builder.hint': '把零件拖到此处 — 观察各种相互作用与复合粒子的形成',
     'builder.legend.strong': '强相互作用(胶子)',
     'builder.legend.emattract': '电磁吸引(光子)',
@@ -905,7 +938,39 @@ const LOCALES = {
     'lab.pdf.p': '质子并不"只是 uud"。在高分辨率(大 Q²)下,你会看到夸克、反夸克、胶子构成的动态"海"。部分子分布函数 f(x, Q²) 表示在质子内找到携带动量分数 x 的部分子的概率密度。拖动 Q² 观察海的增长。',
     'lab.pdf.legend': '曲线为定性参数化,复现 CT18/MSHT20 全局拟合的形状。低 Q² 下价夸克在中等 x 主导;高 Q² 下胶子与海夸克在小 x 处急剧增长。',
     'lab.pdf.showg': '显示胶子(÷10)',
+    // 画布覆盖文字
+    'lab.conf.overlay.sep': '间距 ≈ {L} 像素',
+    'lab.conf.overlay.energy': '存储能量 ≈ {E} MeV(线性!)',
+    'lab.conf.overlay.newq':  '新 q',
+    'lab.conf.overlay.newqbar': '新 q̄',
+    'lab.conf.overlay.mesons': '→ 两个介子(永不会有单个自由夸克)',
+    'lab.feyn.overlay.time': '时间 →',
+    'lab.osc.axis.x': 'L / E   [公里 / GeV]',
+    'lab.osc.axis.y': 'P(振荡概率)',
+    'lab.osc.source.label': '源味:',
+    'lab.pdf.axis.x': 'x (动量分数)',
+    'lab.pdf.axis.y': 'x · f(x, Q²)',
+    'lab.pdf.leg.uv': 'u_v(价夸克)',
+    'lab.pdf.leg.dv': 'd_v(价夸克)',
+    'lab.pdf.leg.sea': '海夸克 (ū+d̄+s+s̄)',
+    'lab.pdf.leg.g':  '胶子 g/10',
+    // 托盘粒子
+    'part.up':'上夸克','part.down':'下夸克','part.anti_up':'反上夸克','part.anti_down':'反下夸克',
+    'part.strange':'奇夸克','part.anti_strange':'反奇夸克','part.charm':'粲夸克','part.anti_charm':'反粲夸克',
+    'part.bottom':'底夸克','part.anti_bottom':'反底夸克','part.electron':'电子',
+    'part.photon':'光子','part.muon':'μ 子','part.tau':'τ 子','part.wboson':'W 玻色子','part.top':'顶夸克',
+    // 相互作用等式片段
+    'ix.eq.near_nucleus': '(在原子核附近)',
     'ix.eq.tW_loop': '(t 或 W 圈图)',
+    'ix.eq.via_g': '(通过 g)',
+    'ix.eq.via_gamma': '通过 γ',
+    'ix.eq.via_W': '通过 W',
+    'ix.eq.via_graviton': 'M + M 通过引力子?',
+    'ix.eq.mass_coupling': '(质量耦合)',
+    'ix.svg.spin2': 'G(自旋 2)',
+    // 标准模型元数据
+    'sm.meta.massless': '无质量',
+    'sm.meta.color_anticolor': '*色—反色',
     'lab.conf.h': '1 · 色禁闭',
     'lab.conf.tag': '强相互作用',
     'lab.conf.p': '把反夸克从夸克旁边拉开。两者之间的胶子场像一根被拉伸的橡皮筋——储存的能量随距离线性增长,直到从真空中蹦出一对新的 q q̄ 对。这就是为什么你永远无法分离出一个孤立的夸克。',
@@ -1049,6 +1114,13 @@ const PARTICLES_I18N = {
 };
 
 /* ================= applyI18n(lang) ================= */
+// Global translator: usable from any module (canvas draw code, dynamic HTML, etc.)
+function t(key){
+  const lang = window.CURRENT_LANG || 'en';
+  const dict = LOCALES[lang] || LOCALES.en;
+  return (dict && dict[key] != null) ? dict[key] : (LOCALES.en[key] != null ? LOCALES.en[key] : key);
+}
+
 function applyI18n(lang){
   const dict = LOCALES[lang] || LOCALES.en;
   document.documentElement.lang = (lang==='zh-CN' ? 'zh-CN' : 'en');
@@ -1086,6 +1158,8 @@ function applyI18n(lang){
   if(typeof labRebuildDecayPicker==='function') labRebuildDecayPicker();
   if(typeof labRebuildOscLegend==='function') labRebuildOscLegend();
   if(typeof labRebuildPDFLegend==='function') labRebuildPDFLegend();
+  // Re-render interaction tiles so localizeEq picks the new language.
+  if(typeof buildInteractionTiles==='function') buildInteractionTiles();
   // Fix the Big Bang link based on where we're actually served from.
   if(typeof fixBigBangLink==='function') fixBigBangLink();
 }

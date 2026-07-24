@@ -211,7 +211,7 @@ function rebuildStandardModelTiles(){
       const name = shortName(id, lang);
       let meta;
       if(group==='selfanti'){
-        meta = id==='photon' ? 'γ = γ̄' : id==='zboson' ? 'Z = Z̄' : id==='higgs' ? 'H = H̄' : '*color-anticolor';
+        meta = id==='photon' ? 'γ = γ̄' : id==='zboson' ? 'Z = Z̄' : id==='higgs' ? 'H = H̄' : t('sm.meta.color_anticolor');
       } else {
         meta = `${massShort(p.mass)} · ${chargeShort(p)}`;
       }
@@ -1294,7 +1294,7 @@ function ixNucleus(x,y,label='N'){
 // render() returns an object { staticSvg, animate(t) } — we call render once
 // per tile at build time; animate() mutates specific child nodes each frame.
 
-const IX_DEFS = [
+var IX_DEFS = [
   // ========== COMMON ==========
   { id:'beta', group:'common', tag:'weak', tagKey:'ix.tag.weak',
     title:'ix.beta', note:'ix.beta.note',
@@ -1749,7 +1749,7 @@ const IX_DEFS = [
       // graviton double wavy
       s += `<path class="ix-gr1" d="" stroke="#7c5cff" stroke-width="1.4" fill="none"/>`;
       s += `<path class="ix-gr2" d="" stroke="#7c5cff" stroke-width="1.4" fill="none" opacity="0.65"/>`;
-      s += `<text x="${IX_W/2}" y="${yC-22}" text-anchor="middle" fill="#7c5cff" font-size="11" font-family="JetBrains Mono, monospace">G (spin 2)</text>`;
+      s += `<text x="${IX_W/2}" y="${yC-22}" text-anchor="middle" fill="#7c5cff" font-size="11" font-family="JetBrains Mono, monospace">${t('ix.svg.spin2')}</text>`;
       return { svg:s, anim(el,t){
         const g1=el.querySelector('.ix-gr1'), g2=el.querySelector('.ix-gr2');
         if(g1) g1.setAttribute('d', ixWavy(46,yC-2,IX_W-46,yC-2,-t*3,4,5));
@@ -1759,9 +1759,22 @@ const IX_DEFS = [
   },
 ];
 
+// Swap English fragments inside interaction equations for their localized versions.
+function localizeEq(eq){
+  return eq
+    .replace('(near nucleus)', t('ix.eq.near_nucleus'))
+    .replace('(t or W loop)', t('ix.eq.tW_loop'))
+    .replace('(via g)', t('ix.eq.via_g'))
+    .replace('via γ', t('ix.eq.via_gamma'))
+    .replace('via W', t('ix.eq.via_W'))
+    .replace('M + M  via graviton?', t('ix.eq.via_graviton'))
+    .replace('(mass coupling)', t('ix.eq.mass_coupling'));
+}
+
 // ---- build tiles into their respective group containers ----
 const IX_INSTANCES = [];
 function buildInteractionTiles(){
+  if(typeof IX_DEFS === 'undefined' || !IX_DEFS) return;
   document.querySelectorAll('.ix-anim').forEach(container=>{
     const group = container.dataset.group;
     container.innerHTML = '';
@@ -1776,7 +1789,7 @@ function buildInteractionTiles(){
           `<span class="ix-tag t-${def.tag}" data-i18n="${def.tagKey}">${tagLabel}</span>`+
         `</div>`+
         `<svg viewBox="0 0 ${IX_W} ${IX_H}" preserveAspectRatio="none">${built.svg}</svg>`+
-        `<div class="ix-eq">${def.eq}</div>`+
+        `<div class="ix-eq">${localizeEq(def.eq)}</div>`+
         `<div class="ix-note" data-i18n="${def.note}">${def.note}</div>`;
       container.appendChild(card);
       IX_INSTANCES.push({ el: card.querySelector('svg'), anim: built.anim });
@@ -1925,8 +1938,8 @@ function labDrawConfinement(){
     ctx.fillStyle='#8b93b3';
     ctx.font='11px JetBrains Mono, monospace';
     ctx.textAlign='left';
-    ctx.fillText(`separation ≈ ${L.toFixed(0)} px`, 12, h-24);
-    ctx.fillText(`stored energy ≈ ${(L*0.6).toFixed(1)} MeV (linear!)`, 12, h-10);
+    ctx.fillText(t('lab.conf.overlay.sep').replace('{L}', L.toFixed(0)), 12, h-24);
+    ctx.fillText(t('lab.conf.overlay.energy').replace('{E}', (L*0.6).toFixed(1)), 12, h-10);
 
     // Snap!
     if(stretch >= SNAP){
@@ -1954,10 +1967,10 @@ function labDrawConfinement(){
     ctx.beginPath(); ctx.moveTo(q2.x,q2.y); ctx.lineTo(aq.x,aq.y); ctx.stroke();
     // label
     ctx.fillStyle='#7ee8c5'; ctx.font='bold 11px JetBrains Mono, monospace'; ctx.textAlign='center';
-    ctx.fillText('new q̄', aq2.x, aq2.y-14);
-    ctx.fillText('new q',  q2.x,  q2.y-14);
+    ctx.fillText(t('lab.conf.overlay.newqbar'), aq2.x, aq2.y-14);
+    ctx.fillText(t('lab.conf.overlay.newq'),  q2.x,  q2.y-14);
     ctx.fillStyle='#ffd166'; ctx.font='11px Space Grotesk, sans-serif';
-    ctx.fillText('→ 2 mesons (never 1 free quark)', S.snapPos.x, S.snapPos.y+50);
+    ctx.fillText(t('lab.conf.overlay.mesons'), S.snapPos.x, S.snapPos.y+50);
     if(p>=1){
       // reset for next cycle
       setTimeout(()=>{
@@ -2307,12 +2320,12 @@ function wrapText(ctx, text, x, y, maxW, lineH){
 // The vacuum is a lattice of oscillators; particles fly through and "drag" the field.
 // Coupling strength (proxy for mass) sets how much each particle disturbs the lattice.
 const HIGGS_PARTICLES = [
-  { id:'photon', label:'γ (photon)',    role:'lab.higgs.role.photon', color:'#ffd166', coupling:0.0,   mass:'0',    note:'lab.higgs.note.photon' },
-  { id:'electron', label:'e⁻ (electron)',    role:'lab.higgs.role.electron', color:'#4ea8ff', coupling:0.05,   mass:'0.511 MeV',    note:'lab.higgs.note.electron' },
-  { id:'muon', label:'μ⁻ (muon)',    role:'lab.higgs.role.muon', color:'#7ee8c5', coupling:0.35,   mass:'106 MeV',    note:'lab.higgs.note.muon' },
-  { id:'tau', label:'τ⁻ (tau)',    role:'lab.higgs.role.tau', color:'#c39bff', coupling:0.6,   mass:'1.78 GeV',    note:'lab.higgs.note.tau' },
-  { id:'W', label:'W± (W boson)',    role:'lab.higgs.role.W', color:'#5aa8ff', coupling:0.85,   mass:'80.4 GeV',    note:'lab.higgs.note.W' },
-  { id:'top', label:'t (top quark)',    role:'lab.higgs.role.top', color:'#ff5c8a', coupling:1.0,   mass:'173 GeV',    note:'lab.higgs.note.top' },
+  { id:'photon',   sym:'γ',   nameKey:'part.photon',   role:'lab.higgs.role.photon',   color:'#ffd166', coupling:0.0,   mass:'0',            note:'lab.higgs.note.photon' },
+  { id:'electron', sym:'e⁻',  nameKey:'part.electron', role:'lab.higgs.role.electron', color:'#4ea8ff', coupling:0.05,  mass:'0.511 MeV',    note:'lab.higgs.note.electron' },
+  { id:'muon',     sym:'μ⁻',  nameKey:'part.muon',     role:'lab.higgs.role.muon',     color:'#7ee8c5', coupling:0.35,  mass:'106 MeV',      note:'lab.higgs.note.muon' },
+  { id:'tau',      sym:'τ⁻',  nameKey:'part.tau',      role:'lab.higgs.role.tau',      color:'#c39bff', coupling:0.6,   mass:'1.78 GeV',     note:'lab.higgs.note.tau' },
+  { id:'W',        sym:'W±',  nameKey:'part.wboson',   role:'lab.higgs.role.W',        color:'#5aa8ff', coupling:0.85,  mass:'80.4 GeV',     note:'lab.higgs.note.W' },
+  { id:'top',      sym:'t',   nameKey:'part.top',      role:'lab.higgs.role.top',      color:'#ff5c8a', coupling:1.0,   mass:'173 GeV',      note:'lab.higgs.note.top' },
 ];
 function labInitHiggs(){
   const c = document.getElementById('higgsCanvas'); if(!c) return;
@@ -2341,7 +2354,7 @@ function labRebuildHiggsPicker(){
   picker.innerHTML = '';
   HIGGS_PARTICLES.forEach(P=>{
     const b = document.createElement('button');
-    b.innerHTML = `<b style="color:${P.color}">${P.label}</b> · ${P.mass}`;
+    b.innerHTML = `<b style="color:${P.color}">${P.sym}</b> (${t(P.nameKey)}) · ${P.mass}`;
     if(P.id===LAB.higgs.current) b.classList.add('active');
     b.onclick = ()=>{
       LAB.higgs.current = P.id;
@@ -2422,13 +2435,13 @@ function labDrawHiggs(){
     ctx.fillStyle=g; ctx.beginPath(); ctx.arc(f.x,f.y,14,0,Math.PI*2); ctx.fill();
     ctx.fillStyle='#fff'; ctx.font='bold 11px JetBrains Mono, monospace';
     ctx.textAlign='center'; ctx.textBaseline='middle';
-    ctx.fillText(f.P.label.split(' ')[0], f.x, f.y);
+    ctx.fillText(f.P.sym, f.x, f.y);
     ctx.textBaseline='alphabetic';
   });
 
   const P = HIGGS_PARTICLES.find(p=>p.id===S.current);
   ctx.fillStyle='#e8ecff'; ctx.font='bold 13px Space Grotesk, sans-serif'; ctx.textAlign='left';
-  ctx.fillText(`${P.label}  ·  ${t('lab.higgs.mass')}: ${P.mass}`, 12, 20);
+  ctx.fillText(`${P.sym} (${t(P.nameKey)})  ·  ${t('lab.higgs.mass')}: ${P.mass}`, 12, 20);
   ctx.fillStyle='#c8cff0'; ctx.font='11px Space Grotesk, sans-serif';
   wrapText(ctx, t(P.note), 12, 38, w-24, 14);
   ctx.fillStyle='#8b93b3'; ctx.font='11px JetBrains Mono, monospace';
@@ -2572,7 +2585,7 @@ function labDrawFeyn(){
 
   // time axis label (left→right by convention)
   ctx.fillStyle='#8b93b3'; ctx.font='10px JetBrains Mono, monospace';
-  ctx.textAlign='left'; ctx.fillText('time →', 8, h-8);
+  ctx.textAlign='left'; ctx.fillText(t('lab.feyn.overlay.time'), 8, h-8);
 
   // Boson propagators between vertices
   S.edges.forEach(e=>{
@@ -2927,10 +2940,10 @@ function labDrawOsc(){
   // axis labels
   ctx.fillStyle='#c8cff0'; ctx.font='11px Space Grotesk, sans-serif';
   ctx.textAlign='center';
-  ctx.fillText('L / E   [km / GeV]', padL+plotW/2, h-6);
+  ctx.fillText(t('lab.osc.axis.x'), padL+plotW/2, h-6);
   ctx.save();
   ctx.translate(12, padT+plotH/2); ctx.rotate(-Math.PI/2);
-  ctx.fillText('P(oscillation)', 0, 0);
+  ctx.fillText(t('lab.osc.axis.y'), 0, 0);
   ctx.restore();
   // Curves for e, μ, τ  appearance from OSC.source
   const colors = ['#4ea8ff','#7ee8c5','#c39bff'];
@@ -2949,7 +2962,7 @@ function labDrawOsc(){
   // Header
   const src = ['ν_e','ν_μ','ν_τ'][OSC.source];
   ctx.fillStyle='#e8ecff'; ctx.font='bold 13px Space Grotesk, sans-serif';
-  ctx.textAlign='left'; ctx.fillText(`source: ${src}`, padL, 18);
+  ctx.textAlign='left'; ctx.fillText(`${t('lab.osc.source.label')} ${src}`, padL, 18);
 }
 
 /* ---------- Demo 7: Parton distribution functions ---------- */
@@ -2973,10 +2986,10 @@ function labRebuildPDFLegend(){
   const leg = document.getElementById('pdfLegend'); if(!leg) return;
   const dict = LOCALES[window.CURRENT_LANG||'en']||LOCALES.en;
   leg.innerHTML = `
-    <span class="ll-item"><i class="bar" style="background:#ff6b9d;color:#ff6b9d"></i>u_v (valence)</span>
-    <span class="ll-item"><i class="bar" style="background:#4ea8ff;color:#4ea8ff"></i>d_v (valence)</span>
-    <span class="ll-item"><i class="bar" style="background:#c39bff;color:#c39bff"></i>sea (ū+d̄+s+s̄)</span>
-    <span class="ll-item"><i class="bar" style="background:#ffd166;color:#ffd166"></i>gluon g/10</span>
+    <span class="ll-item"><i class="bar" style="background:#ff6b9d;color:#ff6b9d"></i>${t('lab.pdf.leg.uv')}</span>
+    <span class="ll-item"><i class="bar" style="background:#4ea8ff;color:#4ea8ff"></i>${t('lab.pdf.leg.dv')}</span>
+    <span class="ll-item"><i class="bar" style="background:#c39bff;color:#c39bff"></i>${t('lab.pdf.leg.sea')}</span>
+    <span class="ll-item"><i class="bar" style="background:#ffd166;color:#ffd166"></i>${t('lab.pdf.leg.g')}</span>
     <div style="flex-basis:100%;color:#8b93b3;font-size:11px;margin-top:6px">${dict['lab.pdf.legend']||''}</div>`;
 }
 // Toy parameterisation. x·f(x) at Q²:
@@ -3024,9 +3037,9 @@ function labDrawPDF(){
   }
   // Axis labels
   ctx.fillStyle='#c8cff0'; ctx.font='11px Space Grotesk, sans-serif';
-  ctx.textAlign='center'; ctx.fillText('x (momentum fraction)', padL+plotW/2, h-6);
+  ctx.textAlign='center'; ctx.fillText(t('lab.pdf.axis.x'), padL+plotW/2, h-6);
   ctx.save(); ctx.translate(14, padT+plotH/2); ctx.rotate(-Math.PI/2);
-  ctx.fillText('x · f(x, Q²)', 0, 0); ctx.restore();
+  ctx.fillText(t('lab.pdf.axis.y'), 0, 0); ctx.restore();
   // Curves
   const drawCurve = (name, color, div)=>{
     ctx.strokeStyle=color; ctx.lineWidth=1.9;

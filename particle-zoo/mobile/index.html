@@ -537,19 +537,19 @@ footer{text-align:center;padding:40px 20px;color:var(--dim);font-size:12px;posit
         <div class="parts-tray">
           <h3 data-i18n="builder.parts">Parts</h3>
           <div class="tray-group" data-i18n="builder.parts.g1">Gen I quarks</div>
-          <div class="tray-part" draggable="true" data-part="u">u <span>up · +⅔</span></div>
-          <div class="tray-part" draggable="true" data-part="d">d <span>down · −⅓</span></div>
-          <div class="tray-part anti" draggable="true" data-part="ubar">ū <span>anti-up · −⅔</span></div>
-          <div class="tray-part anti" draggable="true" data-part="dbar">d̄ <span>anti-down · +⅓</span></div>
+          <div class="tray-part" draggable="true" data-part="u">u <span><span data-i18n="part.up">up</span> · +⅔</span></div>
+          <div class="tray-part" draggable="true" data-part="d">d <span><span data-i18n="part.down">down</span> · −⅓</span></div>
+          <div class="tray-part anti" draggable="true" data-part="ubar">ū <span><span data-i18n="part.anti_up">anti-up</span> · −⅔</span></div>
+          <div class="tray-part anti" draggable="true" data-part="dbar">d̄ <span><span data-i18n="part.anti_down">anti-down</span> · +⅓</span></div>
           <div class="tray-group" data-i18n="builder.parts.g23">Heavy quarks</div>
-          <div class="tray-part" draggable="true" data-part="s">s <span>strange · −⅓</span></div>
-          <div class="tray-part anti" draggable="true" data-part="sbar">s̄ <span>anti-s · +⅓</span></div>
-          <div class="tray-part" draggable="true" data-part="c">c <span>charm · +⅔</span></div>
-          <div class="tray-part anti" draggable="true" data-part="cbar">c̄ <span>anti-c · −⅔</span></div>
-          <div class="tray-part" draggable="true" data-part="b">b <span>bottom · −⅓</span></div>
-          <div class="tray-part anti" draggable="true" data-part="bbar">b̄ <span>anti-b · +⅓</span></div>
+          <div class="tray-part" draggable="true" data-part="s">s <span><span data-i18n="part.strange">strange</span> · −⅓</span></div>
+          <div class="tray-part anti" draggable="true" data-part="sbar">s̄ <span><span data-i18n="part.anti_strange">anti-s</span> · +⅓</span></div>
+          <div class="tray-part" draggable="true" data-part="c">c <span><span data-i18n="part.charm">charm</span> · +⅔</span></div>
+          <div class="tray-part anti" draggable="true" data-part="cbar">c̄ <span><span data-i18n="part.anti_charm">anti-c</span> · −⅔</span></div>
+          <div class="tray-part" draggable="true" data-part="b">b <span><span data-i18n="part.bottom">bottom</span> · −⅓</span></div>
+          <div class="tray-part anti" draggable="true" data-part="bbar">b̄ <span><span data-i18n="part.anti_bottom">anti-b</span> · +⅓</span></div>
           <div class="tray-group" data-i18n="builder.parts.lept">Leptons</div>
-          <div class="tray-part" draggable="true" data-part="e">e⁻ <span>electron · −1</span></div>
+          <div class="tray-part" draggable="true" data-part="e">e⁻ <span><span data-i18n="part.electron">electron</span> · −1</span></div>
           <button id="clearBuild" class="btn ghost" data-i18n="builder.clear">Clear</button>
           <div class="hint2" data-i18n="builder.tip">Tip: 2u+1d = proton · 1u+2d = neutron · qq̄ = meson (π, K, J/ψ…) · proton+e⁻ = hydrogen</div>
         </div>
@@ -1453,6 +1453,39 @@ const LOCALES = {
     'lab.pdf.p': 'A proton is not just uud. At high resolution (large Q²) you see a churning sea of quarks, antiquarks, and gluons. A parton distribution function f(x, Q²) gives the probability of finding a parton carrying momentum fraction x of the proton. Drag the Q² slider to see the sea grow with resolution.',
     'lab.pdf.legend': 'Curves are toy parameterisations tuned to reproduce the qualitative behaviour of CT18/MSHT20 global fits. At low Q², valence quarks dominate at moderate x; at high Q², gluons and sea quarks blow up at small x.',
     'lab.pdf.showg': 'show gluon (÷10)',
+    // Canvas overlay strings (hard-coded before)
+    'lab.conf.overlay.sep': 'separation ≈ {L} px',
+    'lab.conf.overlay.energy': 'stored energy ≈ {E} MeV (linear!)',
+    'lab.conf.overlay.newq':  'new q',
+    'lab.conf.overlay.newqbar': 'new q̄',
+    'lab.conf.overlay.mesons': '→ 2 mesons (never 1 free quark)',
+    'lab.feyn.overlay.time': 'time →',
+    'lab.osc.axis.x': 'L / E   [km / GeV]',
+    'lab.osc.axis.y': 'P(oscillation)',
+    'lab.osc.source.label': 'source:',
+    'lab.pdf.axis.x': 'x (momentum fraction)',
+    'lab.pdf.axis.y': 'x · f(x, Q²)',
+    'lab.pdf.leg.uv': 'u_v (valence)',
+    'lab.pdf.leg.dv': 'd_v (valence)',
+    'lab.pdf.leg.sea': 'sea (ū+d̄+s+s̄)',
+    'lab.pdf.leg.g':  'gluon g/10',
+    // Tray parts
+    'part.up':'up','part.down':'down','part.anti_up':'anti-up','part.anti_down':'anti-down',
+    'part.strange':'strange','part.anti_strange':'anti-strange','part.charm':'charm','part.anti_charm':'anti-charm',
+    'part.bottom':'bottom','part.anti_bottom':'anti-bottom','part.electron':'electron',
+    'part.photon':'photon','part.muon':'muon','part.tau':'tau','part.wboson':'W boson','part.top':'top quark',
+    // Interaction equation snippets
+    'ix.eq.near_nucleus': '(near nucleus)',
+    'ix.eq.tW_loop': '(t or W loop)',
+    'ix.eq.via_g': '(via g)',
+    'ix.eq.via_gamma': 'via γ',
+    'ix.eq.via_W': 'via W',
+    'ix.eq.via_graviton': 'M + M  via graviton?',
+    'ix.eq.mass_coupling': '(mass coupling)',
+    'ix.svg.spin2': 'G (spin 2)',
+    // Standard model chart meta
+    'sm.meta.massless': 'massless',
+    'sm.meta.color_anticolor': '*color-anticolor',
     'lab.conf.h': '1 · Colour confinement',
     'lab.conf.tag': 'strong force',
     'lab.conf.p': 'Drag the antiquark away from the quark. The gluon field between them behaves like a stretched rubber band — its energy grows with distance until a new q q̄ pair pops out of the vacuum. That is why you can never isolate a single quark.',
@@ -1619,7 +1652,7 @@ const LOCALES = {
     'builder.desc': '把夸克和电子拖进组合区,观察质子、中子和原子如何诞生。',
     'builder.parts': '零件',
     'builder.clear': '清空',
-    'builder.tip': '提示: 2 个 up + 1 个 down = 质子 · 1 个 up + 2 个 down = 中子 · 质子 + 电子 = 氢原子',
+    'builder.tip': '提示: 2 个上夸克 + 1 个下夸克 = 质子 · 1 个上夸克 + 2 个下夸克 = 中子 · 质子 + 电子 = 氢原子',
     'builder.hint': '把零件拖到此处 — 观察各种相互作用与复合粒子的形成',
     'builder.legend.strong': '强相互作用(胶子)',
     'builder.legend.emattract': '电磁吸引(光子)',
@@ -1929,7 +1962,39 @@ const LOCALES = {
     'lab.pdf.p': '质子并不"只是 uud"。在高分辨率(大 Q²)下,你会看到夸克、反夸克、胶子构成的动态"海"。部分子分布函数 f(x, Q²) 表示在质子内找到携带动量分数 x 的部分子的概率密度。拖动 Q² 观察海的增长。',
     'lab.pdf.legend': '曲线为定性参数化,复现 CT18/MSHT20 全局拟合的形状。低 Q² 下价夸克在中等 x 主导;高 Q² 下胶子与海夸克在小 x 处急剧增长。',
     'lab.pdf.showg': '显示胶子(÷10)',
+    // 画布覆盖文字
+    'lab.conf.overlay.sep': '间距 ≈ {L} 像素',
+    'lab.conf.overlay.energy': '存储能量 ≈ {E} MeV(线性!)',
+    'lab.conf.overlay.newq':  '新 q',
+    'lab.conf.overlay.newqbar': '新 q̄',
+    'lab.conf.overlay.mesons': '→ 两个介子(永不会有单个自由夸克)',
+    'lab.feyn.overlay.time': '时间 →',
+    'lab.osc.axis.x': 'L / E   [公里 / GeV]',
+    'lab.osc.axis.y': 'P(振荡概率)',
+    'lab.osc.source.label': '源味:',
+    'lab.pdf.axis.x': 'x (动量分数)',
+    'lab.pdf.axis.y': 'x · f(x, Q²)',
+    'lab.pdf.leg.uv': 'u_v(价夸克)',
+    'lab.pdf.leg.dv': 'd_v(价夸克)',
+    'lab.pdf.leg.sea': '海夸克 (ū+d̄+s+s̄)',
+    'lab.pdf.leg.g':  '胶子 g/10',
+    // 托盘粒子
+    'part.up':'上夸克','part.down':'下夸克','part.anti_up':'反上夸克','part.anti_down':'反下夸克',
+    'part.strange':'奇夸克','part.anti_strange':'反奇夸克','part.charm':'粲夸克','part.anti_charm':'反粲夸克',
+    'part.bottom':'底夸克','part.anti_bottom':'反底夸克','part.electron':'电子',
+    'part.photon':'光子','part.muon':'μ 子','part.tau':'τ 子','part.wboson':'W 玻色子','part.top':'顶夸克',
+    // 相互作用等式片段
+    'ix.eq.near_nucleus': '(在原子核附近)',
     'ix.eq.tW_loop': '(t 或 W 圈图)',
+    'ix.eq.via_g': '(通过 g)',
+    'ix.eq.via_gamma': '通过 γ',
+    'ix.eq.via_W': '通过 W',
+    'ix.eq.via_graviton': 'M + M 通过引力子?',
+    'ix.eq.mass_coupling': '(质量耦合)',
+    'ix.svg.spin2': 'G(自旋 2)',
+    // 标准模型元数据
+    'sm.meta.massless': '无质量',
+    'sm.meta.color_anticolor': '*色—反色',
     'lab.conf.h': '1 · 色禁闭',
     'lab.conf.tag': '强相互作用',
     'lab.conf.p': '把反夸克从夸克旁边拉开。两者之间的胶子场像一根被拉伸的橡皮筋——储存的能量随距离线性增长,直到从真空中蹦出一对新的 q q̄ 对。这就是为什么你永远无法分离出一个孤立的夸克。',
@@ -2073,6 +2138,13 @@ const PARTICLES_I18N = {
 };
 
 /* ================= applyI18n(lang) ================= */
+// Global translator: usable from any module (canvas draw code, dynamic HTML, etc.)
+function t(key){
+  const lang = window.CURRENT_LANG || 'en';
+  const dict = LOCALES[lang] || LOCALES.en;
+  return (dict && dict[key] != null) ? dict[key] : (LOCALES.en[key] != null ? LOCALES.en[key] : key);
+}
+
 function applyI18n(lang){
   const dict = LOCALES[lang] || LOCALES.en;
   document.documentElement.lang = (lang==='zh-CN' ? 'zh-CN' : 'en');
@@ -2110,6 +2182,8 @@ function applyI18n(lang){
   if(typeof labRebuildDecayPicker==='function') labRebuildDecayPicker();
   if(typeof labRebuildOscLegend==='function') labRebuildOscLegend();
   if(typeof labRebuildPDFLegend==='function') labRebuildPDFLegend();
+  // Re-render interaction tiles so localizeEq picks the new language.
+  if(typeof buildInteractionTiles==='function') buildInteractionTiles();
   // Fix the Big Bang link based on where we're actually served from.
   if(typeof fixBigBangLink==='function') fixBigBangLink();
 }
@@ -2349,7 +2423,7 @@ function rebuildStandardModelTiles(){
       const name = shortName(id, lang);
       let meta;
       if(group==='selfanti'){
-        meta = id==='photon' ? 'γ = γ̄' : id==='zboson' ? 'Z = Z̄' : id==='higgs' ? 'H = H̄' : '*color-anticolor';
+        meta = id==='photon' ? 'γ = γ̄' : id==='zboson' ? 'Z = Z̄' : id==='higgs' ? 'H = H̄' : t('sm.meta.color_anticolor');
       } else {
         meta = `${massShort(p.mass)} · ${chargeShort(p)}`;
       }
@@ -3432,7 +3506,7 @@ function ixNucleus(x,y,label='N'){
 // render() returns an object { staticSvg, animate(t) } — we call render once
 // per tile at build time; animate() mutates specific child nodes each frame.
 
-const IX_DEFS = [
+var IX_DEFS = [
   // ========== COMMON ==========
   { id:'beta', group:'common', tag:'weak', tagKey:'ix.tag.weak',
     title:'ix.beta', note:'ix.beta.note',
@@ -3887,7 +3961,7 @@ const IX_DEFS = [
       // graviton double wavy
       s += `<path class="ix-gr1" d="" stroke="#7c5cff" stroke-width="1.4" fill="none"/>`;
       s += `<path class="ix-gr2" d="" stroke="#7c5cff" stroke-width="1.4" fill="none" opacity="0.65"/>`;
-      s += `<text x="${IX_W/2}" y="${yC-22}" text-anchor="middle" fill="#7c5cff" font-size="11" font-family="JetBrains Mono, monospace">G (spin 2)</text>`;
+      s += `<text x="${IX_W/2}" y="${yC-22}" text-anchor="middle" fill="#7c5cff" font-size="11" font-family="JetBrains Mono, monospace">${t('ix.svg.spin2')}</text>`;
       return { svg:s, anim(el,t){
         const g1=el.querySelector('.ix-gr1'), g2=el.querySelector('.ix-gr2');
         if(g1) g1.setAttribute('d', ixWavy(46,yC-2,IX_W-46,yC-2,-t*3,4,5));
@@ -3897,9 +3971,22 @@ const IX_DEFS = [
   },
 ];
 
+// Swap English fragments inside interaction equations for their localized versions.
+function localizeEq(eq){
+  return eq
+    .replace('(near nucleus)', t('ix.eq.near_nucleus'))
+    .replace('(t or W loop)', t('ix.eq.tW_loop'))
+    .replace('(via g)', t('ix.eq.via_g'))
+    .replace('via γ', t('ix.eq.via_gamma'))
+    .replace('via W', t('ix.eq.via_W'))
+    .replace('M + M  via graviton?', t('ix.eq.via_graviton'))
+    .replace('(mass coupling)', t('ix.eq.mass_coupling'));
+}
+
 // ---- build tiles into their respective group containers ----
 const IX_INSTANCES = [];
 function buildInteractionTiles(){
+  if(typeof IX_DEFS === 'undefined' || !IX_DEFS) return;
   document.querySelectorAll('.ix-anim').forEach(container=>{
     const group = container.dataset.group;
     container.innerHTML = '';
@@ -3914,7 +4001,7 @@ function buildInteractionTiles(){
           `<span class="ix-tag t-${def.tag}" data-i18n="${def.tagKey}">${tagLabel}</span>`+
         `</div>`+
         `<svg viewBox="0 0 ${IX_W} ${IX_H}" preserveAspectRatio="none">${built.svg}</svg>`+
-        `<div class="ix-eq">${def.eq}</div>`+
+        `<div class="ix-eq">${localizeEq(def.eq)}</div>`+
         `<div class="ix-note" data-i18n="${def.note}">${def.note}</div>`;
       container.appendChild(card);
       IX_INSTANCES.push({ el: card.querySelector('svg'), anim: built.anim });
@@ -4063,8 +4150,8 @@ function labDrawConfinement(){
     ctx.fillStyle='#8b93b3';
     ctx.font='11px JetBrains Mono, monospace';
     ctx.textAlign='left';
-    ctx.fillText(`separation ≈ ${L.toFixed(0)} px`, 12, h-24);
-    ctx.fillText(`stored energy ≈ ${(L*0.6).toFixed(1)} MeV (linear!)`, 12, h-10);
+    ctx.fillText(t('lab.conf.overlay.sep').replace('{L}', L.toFixed(0)), 12, h-24);
+    ctx.fillText(t('lab.conf.overlay.energy').replace('{E}', (L*0.6).toFixed(1)), 12, h-10);
 
     // Snap!
     if(stretch >= SNAP){
@@ -4092,10 +4179,10 @@ function labDrawConfinement(){
     ctx.beginPath(); ctx.moveTo(q2.x,q2.y); ctx.lineTo(aq.x,aq.y); ctx.stroke();
     // label
     ctx.fillStyle='#7ee8c5'; ctx.font='bold 11px JetBrains Mono, monospace'; ctx.textAlign='center';
-    ctx.fillText('new q̄', aq2.x, aq2.y-14);
-    ctx.fillText('new q',  q2.x,  q2.y-14);
+    ctx.fillText(t('lab.conf.overlay.newqbar'), aq2.x, aq2.y-14);
+    ctx.fillText(t('lab.conf.overlay.newq'),  q2.x,  q2.y-14);
     ctx.fillStyle='#ffd166'; ctx.font='11px Space Grotesk, sans-serif';
-    ctx.fillText('→ 2 mesons (never 1 free quark)', S.snapPos.x, S.snapPos.y+50);
+    ctx.fillText(t('lab.conf.overlay.mesons'), S.snapPos.x, S.snapPos.y+50);
     if(p>=1){
       // reset for next cycle
       setTimeout(()=>{
@@ -4445,12 +4532,12 @@ function wrapText(ctx, text, x, y, maxW, lineH){
 // The vacuum is a lattice of oscillators; particles fly through and "drag" the field.
 // Coupling strength (proxy for mass) sets how much each particle disturbs the lattice.
 const HIGGS_PARTICLES = [
-  { id:'photon', label:'γ (photon)',    role:'lab.higgs.role.photon', color:'#ffd166', coupling:0.0,   mass:'0',    note:'lab.higgs.note.photon' },
-  { id:'electron', label:'e⁻ (electron)',    role:'lab.higgs.role.electron', color:'#4ea8ff', coupling:0.05,   mass:'0.511 MeV',    note:'lab.higgs.note.electron' },
-  { id:'muon', label:'μ⁻ (muon)',    role:'lab.higgs.role.muon', color:'#7ee8c5', coupling:0.35,   mass:'106 MeV',    note:'lab.higgs.note.muon' },
-  { id:'tau', label:'τ⁻ (tau)',    role:'lab.higgs.role.tau', color:'#c39bff', coupling:0.6,   mass:'1.78 GeV',    note:'lab.higgs.note.tau' },
-  { id:'W', label:'W± (W boson)',    role:'lab.higgs.role.W', color:'#5aa8ff', coupling:0.85,   mass:'80.4 GeV',    note:'lab.higgs.note.W' },
-  { id:'top', label:'t (top quark)',    role:'lab.higgs.role.top', color:'#ff5c8a', coupling:1.0,   mass:'173 GeV',    note:'lab.higgs.note.top' },
+  { id:'photon',   sym:'γ',   nameKey:'part.photon',   role:'lab.higgs.role.photon',   color:'#ffd166', coupling:0.0,   mass:'0',            note:'lab.higgs.note.photon' },
+  { id:'electron', sym:'e⁻',  nameKey:'part.electron', role:'lab.higgs.role.electron', color:'#4ea8ff', coupling:0.05,  mass:'0.511 MeV',    note:'lab.higgs.note.electron' },
+  { id:'muon',     sym:'μ⁻',  nameKey:'part.muon',     role:'lab.higgs.role.muon',     color:'#7ee8c5', coupling:0.35,  mass:'106 MeV',      note:'lab.higgs.note.muon' },
+  { id:'tau',      sym:'τ⁻',  nameKey:'part.tau',      role:'lab.higgs.role.tau',      color:'#c39bff', coupling:0.6,   mass:'1.78 GeV',     note:'lab.higgs.note.tau' },
+  { id:'W',        sym:'W±',  nameKey:'part.wboson',   role:'lab.higgs.role.W',        color:'#5aa8ff', coupling:0.85,  mass:'80.4 GeV',     note:'lab.higgs.note.W' },
+  { id:'top',      sym:'t',   nameKey:'part.top',      role:'lab.higgs.role.top',      color:'#ff5c8a', coupling:1.0,   mass:'173 GeV',      note:'lab.higgs.note.top' },
 ];
 function labInitHiggs(){
   const c = document.getElementById('higgsCanvas'); if(!c) return;
@@ -4479,7 +4566,7 @@ function labRebuildHiggsPicker(){
   picker.innerHTML = '';
   HIGGS_PARTICLES.forEach(P=>{
     const b = document.createElement('button');
-    b.innerHTML = `<b style="color:${P.color}">${P.label}</b> · ${P.mass}`;
+    b.innerHTML = `<b style="color:${P.color}">${P.sym}</b> (${t(P.nameKey)}) · ${P.mass}`;
     if(P.id===LAB.higgs.current) b.classList.add('active');
     b.onclick = ()=>{
       LAB.higgs.current = P.id;
@@ -4560,13 +4647,13 @@ function labDrawHiggs(){
     ctx.fillStyle=g; ctx.beginPath(); ctx.arc(f.x,f.y,14,0,Math.PI*2); ctx.fill();
     ctx.fillStyle='#fff'; ctx.font='bold 11px JetBrains Mono, monospace';
     ctx.textAlign='center'; ctx.textBaseline='middle';
-    ctx.fillText(f.P.label.split(' ')[0], f.x, f.y);
+    ctx.fillText(f.P.sym, f.x, f.y);
     ctx.textBaseline='alphabetic';
   });
 
   const P = HIGGS_PARTICLES.find(p=>p.id===S.current);
   ctx.fillStyle='#e8ecff'; ctx.font='bold 13px Space Grotesk, sans-serif'; ctx.textAlign='left';
-  ctx.fillText(`${P.label}  ·  ${t('lab.higgs.mass')}: ${P.mass}`, 12, 20);
+  ctx.fillText(`${P.sym} (${t(P.nameKey)})  ·  ${t('lab.higgs.mass')}: ${P.mass}`, 12, 20);
   ctx.fillStyle='#c8cff0'; ctx.font='11px Space Grotesk, sans-serif';
   wrapText(ctx, t(P.note), 12, 38, w-24, 14);
   ctx.fillStyle='#8b93b3'; ctx.font='11px JetBrains Mono, monospace';
@@ -4710,7 +4797,7 @@ function labDrawFeyn(){
 
   // time axis label (left→right by convention)
   ctx.fillStyle='#8b93b3'; ctx.font='10px JetBrains Mono, monospace';
-  ctx.textAlign='left'; ctx.fillText('time →', 8, h-8);
+  ctx.textAlign='left'; ctx.fillText(t('lab.feyn.overlay.time'), 8, h-8);
 
   // Boson propagators between vertices
   S.edges.forEach(e=>{
@@ -5065,10 +5152,10 @@ function labDrawOsc(){
   // axis labels
   ctx.fillStyle='#c8cff0'; ctx.font='11px Space Grotesk, sans-serif';
   ctx.textAlign='center';
-  ctx.fillText('L / E   [km / GeV]', padL+plotW/2, h-6);
+  ctx.fillText(t('lab.osc.axis.x'), padL+plotW/2, h-6);
   ctx.save();
   ctx.translate(12, padT+plotH/2); ctx.rotate(-Math.PI/2);
-  ctx.fillText('P(oscillation)', 0, 0);
+  ctx.fillText(t('lab.osc.axis.y'), 0, 0);
   ctx.restore();
   // Curves for e, μ, τ  appearance from OSC.source
   const colors = ['#4ea8ff','#7ee8c5','#c39bff'];
@@ -5087,7 +5174,7 @@ function labDrawOsc(){
   // Header
   const src = ['ν_e','ν_μ','ν_τ'][OSC.source];
   ctx.fillStyle='#e8ecff'; ctx.font='bold 13px Space Grotesk, sans-serif';
-  ctx.textAlign='left'; ctx.fillText(`source: ${src}`, padL, 18);
+  ctx.textAlign='left'; ctx.fillText(`${t('lab.osc.source.label')} ${src}`, padL, 18);
 }
 
 /* ---------- Demo 7: Parton distribution functions ---------- */
@@ -5111,10 +5198,10 @@ function labRebuildPDFLegend(){
   const leg = document.getElementById('pdfLegend'); if(!leg) return;
   const dict = LOCALES[window.CURRENT_LANG||'en']||LOCALES.en;
   leg.innerHTML = `
-    <span class="ll-item"><i class="bar" style="background:#ff6b9d;color:#ff6b9d"></i>u_v (valence)</span>
-    <span class="ll-item"><i class="bar" style="background:#4ea8ff;color:#4ea8ff"></i>d_v (valence)</span>
-    <span class="ll-item"><i class="bar" style="background:#c39bff;color:#c39bff"></i>sea (ū+d̄+s+s̄)</span>
-    <span class="ll-item"><i class="bar" style="background:#ffd166;color:#ffd166"></i>gluon g/10</span>
+    <span class="ll-item"><i class="bar" style="background:#ff6b9d;color:#ff6b9d"></i>${t('lab.pdf.leg.uv')}</span>
+    <span class="ll-item"><i class="bar" style="background:#4ea8ff;color:#4ea8ff"></i>${t('lab.pdf.leg.dv')}</span>
+    <span class="ll-item"><i class="bar" style="background:#c39bff;color:#c39bff"></i>${t('lab.pdf.leg.sea')}</span>
+    <span class="ll-item"><i class="bar" style="background:#ffd166;color:#ffd166"></i>${t('lab.pdf.leg.g')}</span>
     <div style="flex-basis:100%;color:#8b93b3;font-size:11px;margin-top:6px">${dict['lab.pdf.legend']||''}</div>`;
 }
 // Toy parameterisation. x·f(x) at Q²:
@@ -5162,9 +5249,9 @@ function labDrawPDF(){
   }
   // Axis labels
   ctx.fillStyle='#c8cff0'; ctx.font='11px Space Grotesk, sans-serif';
-  ctx.textAlign='center'; ctx.fillText('x (momentum fraction)', padL+plotW/2, h-6);
+  ctx.textAlign='center'; ctx.fillText(t('lab.pdf.axis.x'), padL+plotW/2, h-6);
   ctx.save(); ctx.translate(14, padT+plotH/2); ctx.rotate(-Math.PI/2);
-  ctx.fillText('x · f(x, Q²)', 0, 0); ctx.restore();
+  ctx.fillText(t('lab.pdf.axis.y'), 0, 0); ctx.restore();
   // Curves
   const drawCurve = (name, color, div)=>{
     ctx.strokeStyle=color; ctx.lineWidth=1.9;
