@@ -628,7 +628,7 @@ footer{text-align:center;padding:40px 20px;color:var(--dim);font-size:12px;posit
     <section id="tab-lab" class="tab-panel">
       <div class="section-head">
         <h2 data-i18n="lab.h2">Physics Lab</h2>
-        <p data-i18n="lab.desc">Four hands-on visualisations that make the deepest ideas of the Standard Model tangible.</p>
+        <p data-i18n="lab.desc">Three hands-on visualisations that make the deepest ideas of the Standard Model tangible.</p>
       </div>
 
       <!-- Demo 1: Confinement / flux tube -->
@@ -678,14 +678,13 @@ footer{text-align:center;padding:40px 20px;color:var(--dim);font-size:12px;posit
           <div class="higgs-picker" id="higgsPicker"></div>
         </div>
       </div>
-
       <!-- Cross-link to big-bang app -->
       <div class="lab-card cross-link">
         <div class="lab-head">
           <h3 data-i18n="lab.xlink.h">See also</h3>
         </div>
         <p data-i18n="lab.xlink.p">Curious how these particles emerged from the early universe? Our companion app <b>Big Bang</b> walks through the cosmic timeline from 10⁻⁴³ s to today.</p>
-        <p><a class="btn" href="../big-bang/index.html" data-i18n="lab.xlink.go">Open Big Bang →</a></p>
+        <p><a class="btn" id="bigBangLink" href="../big-bang/index.html" data-i18n="lab.xlink.go">Open Big Bang →</a></p>
       </div>
     </section>
 
@@ -1328,7 +1327,7 @@ const LOCALES = {
 
     // Physics Lab tab
     'lab.h2': 'Physics Lab',
-    'lab.desc': 'Four hands-on visualisations that make the deepest ideas of the Standard Model tangible.',
+    'lab.desc': 'Three hands-on visualisations that make the deepest ideas of the Standard Model tangible.',
     'lab.conf.h': '1 · Colour confinement',
     'lab.conf.tag': 'strong force',
     'lab.conf.p': 'Drag the antiquark away from the quark. The gluon field between them behaves like a stretched rubber band — its energy grows with distance until a new q q̄ pair pops out of the vacuum. That is why you can never isolate a single quark.',
@@ -1345,7 +1344,53 @@ const LOCALES = {
     'lab.higgs.p': 'The vacuum is filled with the Higgs field — imagined here as a lattice of tiny oscillators. Different particles couple to it with different strengths: photons ignore it (mass 0), electrons barely feel it, the top quark drags heavily. Click a particle to fire it through the field.',
     'lab.xlink.h': 'See also',
     'lab.xlink.p': 'Curious how these particles emerged from the early universe? Our companion app Big Bang walks through the cosmic timeline from 10⁻⁴³ s to today.',
-    'lab.xlink.go': 'Open Big Bang →'
+    'lab.xlink.go': 'Open Big Bang →',
+
+    // Physics Lab — Detector layer names
+    'lab.det.layer.beam': 'Beam pipe',
+    'lab.det.layer.trk':  'Tracker (silicon)',
+    'lab.det.layer.ecal': 'ECAL (EM calorimeter)',
+    'lab.det.layer.hcal': 'HCAL (hadronic calorimeter)',
+    'lab.det.layer.sol':  'Solenoid magnet',
+    'lab.det.layer.muon': 'Muon chambers',
+    'lab.det.bfield':     'magnetic field bends charged tracks',
+    'lab.det.hit.em':     'EM shower (dumps all energy)',
+    'lab.det.hit.had':    'hadronic shower (wider, deeper)',
+    'lab.det.hit.muon':   'muon hits — punches through everything',
+    'lab.det.missing':    'missing E_T (invisible)',
+    'lab.det.jet.cone':   'jet cone (many hadrons together)',
+
+    // Detector particle roles + descriptions
+    'lab.det.role.electron': 'charged lepton, light',
+    'lab.det.role.photon':   'photon of light',
+    'lab.det.role.muon':     'heavy cousin of the electron',
+    'lab.det.role.pion':     'lightest meson, charged hadron',
+    'lab.det.role.neutron':  'neutral hadron (n⁰)',
+    'lab.det.role.neutrino': 'nearly massless, no charge',
+    'lab.det.role.jet':      'spray of hadrons from one quark or gluon',
+    'lab.det.desc.electron': 'Charged, so bends in the magnetic field and lights up silicon pixels in the tracker. Dumps ALL its energy in the ECAL as a narrow electromagnetic shower.',
+    'lab.det.desc.photon':   'Neutral, so leaves NO track in the tracker. First interaction is in the ECAL, where it converts to e⁺e⁻ and starts an electromagnetic shower.',
+    'lab.det.desc.muon':     'Charged, so a curved track in the tracker. Ignores both calorimeters (only tiny "minimum-ionising" hits) and punches straight through to fire the outer muon chambers. Muon = only particle that reaches the last layer.',
+    'lab.det.desc.pion':     'Charged hadron: curved track in the tracker, minimal hit in the ECAL, then a deep, spread-out hadronic shower in the HCAL. Does NOT reach the muon chambers.',
+    'lab.det.desc.neutron':  'Neutral, so no tracker hits. Sails past the ECAL and starts a hadronic shower deep in the HCAL — that is how neutrons are detected.',
+    'lab.det.desc.neutrino': 'Interacts only via the weak force — effectively invisible. We infer it from the "missing transverse energy": momentum that fails to add up on the other side of the event.',
+    'lab.det.desc.jet':      'When a quark or gluon is knocked out of a proton, colour confinement forces it to fragment into many hadrons flying in nearly the same direction. This narrow "jet" leaves a cone-shaped mix of tracker hits, ECAL cells, and HCAL cells.',
+
+    // Higgs roles + notes + labels
+    'lab.higgs.mass':       'mass',
+    'lab.higgs.yukawa':     'Yukawa coupling (strength of interaction with the Higgs field)',
+    'lab.higgs.role.photon':   'massless',
+    'lab.higgs.role.electron': 'the lightest charged particle in atoms',
+    'lab.higgs.role.muon':     'heavier cousin of the electron',
+    'lab.higgs.role.tau':      'heaviest lepton',
+    'lab.higgs.role.W':        'weak force carrier',
+    'lab.higgs.role.top':      'heaviest known elementary particle',
+    'lab.higgs.note.photon':   'The photon does not couple to the Higgs field at all — that is why it is exactly massless and always travels at the speed of light.',
+    'lab.higgs.note.electron': 'A very small coupling. The lattice barely notices the electron passing through; its mass is only 0.5 MeV.',
+    'lab.higgs.note.muon':     'The muon has the same charge as the electron but ~200× more mass — because its Yukawa coupling to the Higgs is ~200× stronger.',
+    'lab.higgs.note.tau':      'Same story as the muon, but heavier still. Same interactions, different coupling → different mass.',
+    'lab.higgs.note.W':        'Unlike fermions, the W (and Z) bosons acquire mass via the Higgs vacuum expectation value directly — this is what "electroweak symmetry breaking" means.',
+    'lab.higgs.note.top':      'The strongest known Yukawa coupling (~1). The top quark drags heavily through the Higgs field — hence its huge 173 GeV mass, close to a whole gold atom.'
   },
 
   'zh-CN': {
@@ -1717,7 +1762,8 @@ const LOCALES = {
 
     // 物理实验室
     'lab.h2': '物理实验室',
-    'lab.desc': '四个可动手的可视化演示,让标准模型中最深奥的思想变得直观可见。',
+    'lab.desc': '七个可动手的可视化演示,让标准模型中最深奥的思想变得直观可见。',
+    'ix.eq.tW_loop': '(t 或 W 圈图)',
     'lab.conf.h': '1 · 色禁闭',
     'lab.conf.tag': '强相互作用',
     'lab.conf.p': '把反夸克从夸克旁边拉开。两者之间的胶子场像一根被拉伸的橡皮筋——储存的能量随距离线性增长,直到从真空中蹦出一对新的 q q̄ 对。这就是为什么你永远无法分离出一个孤立的夸克。',
@@ -1734,7 +1780,53 @@ const LOCALES = {
     'lab.higgs.p': '真空中充满了希格斯场——这里想象为一格格微小振子的晶格。不同粒子与它的耦合强弱不同:光子完全不理它(质量 0),电子几乎不感觉它,顶夸克则被它重重拖拽。点击一个粒子,让它穿过这片场。',
     'lab.xlink.h': '延伸阅读',
     'lab.xlink.p': '想了解这些粒子如何从早期宇宙中诞生?我们的姊妹项目 Big Bang 从 10⁻⁴³ 秒开始一路讲到今天。',
-    'lab.xlink.go': '打开 Big Bang →'
+    'lab.xlink.go': '打开 Big Bang →',
+
+    // 探测器层名
+    'lab.det.layer.beam': '束流管',
+    'lab.det.layer.trk':  '径迹室(硅像素/条)',
+    'lab.det.layer.ecal': '电磁量能器 (ECAL)',
+    'lab.det.layer.hcal': '强子量能器 (HCAL)',
+    'lab.det.layer.sol':  '螺线管超导磁体',
+    'lab.det.layer.muon': 'μ 子室',
+    'lab.det.bfield':     '磁场使带电径迹弯曲',
+    'lab.det.hit.em':     '电磁簇射(能量全部沉积)',
+    'lab.det.hit.had':    '强子簇射(更宽、更深)',
+    'lab.det.hit.muon':   'μ 子击中——穿过所有其他层',
+    'lab.det.missing':    '横向缺失能量(不可见)',
+    'lab.det.jet.cone':   '喷注锥(许多强子聚在一起)',
+
+    // 探测器粒子简介
+    'lab.det.role.electron': '带电轻子,质量小',
+    'lab.det.role.photon':   '光的量子',
+    'lab.det.role.muon':     '电子的重表亲',
+    'lab.det.role.pion':     '最轻的介子,带电强子',
+    'lab.det.role.neutron':  '中性强子 (n⁰)',
+    'lab.det.role.neutrino': '几乎无质量,不带电',
+    'lab.det.role.jet':      '一个夸克或胶子产生的强子喷注',
+    'lab.det.desc.electron': '带电,所以在磁场中会弯曲,在硅径迹室里留下一串命中点。在 ECAL 中会把全部能量沉积成一个狭窄的电磁簇射。',
+    'lab.det.desc.photon':   '中性,径迹室里不留任何径迹。第一次相互作用发生在 ECAL 中——转化为 e⁺e⁻ 对,并发展成电磁簇射。',
+    'lab.det.desc.muon':     '带电,径迹室里留下一条弯曲的径迹。它几乎不与两个量能器作用(只有微弱的最小电离信号),而是直接穿过所有层去点亮最外面的 μ 子室——μ 子是唯一能抵达最外层的粒子。',
+    'lab.det.desc.pion':     '带电强子:径迹室里一条弯曲径迹,在 ECAL 里只留下微弱信号,然后在 HCAL 里产生又深又散的强子簇射。到不了 μ 子室。',
+    'lab.det.desc.neutron':  '中性,径迹室里没有信号。它一路穿过 ECAL,直到在 HCAL 深处发生强子簇射——这就是探测中子的方式。',
+    'lab.det.desc.neutrino': '只通过弱相互作用与物质作用,几乎完全不可见。人们通过"横向缺失能量"——事件另一侧动量对不上——来间接推断中微子的存在。',
+    'lab.det.desc.jet':      '当一个夸克或胶子从质子里被打出时,色禁闭要求它必须"碎裂"成许多几乎沿同一方向飞行的强子。这条狭窄的"喷注"在径迹室、ECAL、HCAL 中都会留下一个锥形的信号混合。',
+
+    // 希格斯粒子说明
+    'lab.higgs.mass':       '质量',
+    'lab.higgs.yukawa':     '汤川耦合(与希格斯场相互作用的强度)',
+    'lab.higgs.role.photon':   '无质量',
+    'lab.higgs.role.electron': '原子中最轻的带电粒子',
+    'lab.higgs.role.muon':     '电子的较重表亲',
+    'lab.higgs.role.tau':      '最重的轻子',
+    'lab.higgs.role.W':        '弱相互作用媒介粒子',
+    'lab.higgs.role.top':      '已知质量最大的基本粒子',
+    'lab.higgs.note.photon':   '光子完全不与希格斯场耦合——这正是它精确地无质量,并且始终以光速传播的原因。',
+    'lab.higgs.note.electron': '耦合非常小。晶格几乎察觉不到电子的经过;它的质量只有 0.5 MeV。',
+    'lab.higgs.note.muon':     'μ 子和电子带同样的电荷,但质量约为 200 倍——因为它与希格斯的汤川耦合约强 200 倍。',
+    'lab.higgs.note.tau':      '与 μ 子的故事一样,只是更重。相同的相互作用、不同的耦合 → 不同的质量。',
+    'lab.higgs.note.W':        '与费米子不同,W(以及 Z)玻色子是通过希格斯的真空期望值直接获得质量——这就是所谓的"电弱对称性自发破缺"。',
+    'lab.higgs.note.top':      '已知最强的汤川耦合(约为 1)。顶夸克在希格斯场中"拖曳"很重,因此拥有 173 GeV 这么大的质量,接近一整个金原子的质量。'
   }
 };
 
@@ -1845,6 +1937,11 @@ function applyI18n(lang){
   const active = document.querySelector('.pl-item.active')?.dataset.id;
   if(active && typeof showParticle==='function') showParticle(active);
   if(typeof analyze==='function') analyze();
+  // Physics Lab: rebuild dynamic pickers so their labels get translated too.
+  if(typeof labRebuildDetectorPicker==='function') labRebuildDetectorPicker();
+  if(typeof labRebuildHiggsPicker==='function') labRebuildHiggsPicker();
+  // Fix the Big Bang link based on where we're actually served from.
+  if(typeof fixBigBangLink==='function') fixBigBangLink();
 }
 
 /* Return localized particle data (falls back to English) */
@@ -2036,7 +2133,8 @@ function chargeShort(p){
 }
 function massShort(m){
   if(!m) return '';
-  return m.replace(/\/c²$/, '').replace(/ MeV/,' MeV').replace(/ GeV/,' GeV').replace(/ eV/,' eV');
+  return m.replace(/\/c²$/, '').replace(/ MeV/,' MeV').replace(/ GeV/,' GeV').replace(/ eV/,' eV')
+          .replace('(massless)', '('+t('sm.meta.massless')+')');
 }
 function symbolFor(id){
   // Symbol for the big tile display
@@ -3690,11 +3788,12 @@ const LAB = {}; // per-demo state
 // ---- shared canvas helper ----
 function labSizeCanvas(c){
   const r = c.getBoundingClientRect();
-  c.width  = r.width * devicePixelRatio;
-  c.height = r.height * devicePixelRatio;
+  const W = Math.max(1, r.width), H = Math.max(1, r.height);
+  c.width  = W * devicePixelRatio;
+  c.height = H * devicePixelRatio;
   const ctx = c.getContext('2d');
   ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);
-  return { ctx, w:r.width, h:r.height };
+  return { ctx, w:W, h:H, visible: r.width>1 && r.height>1 };
 }
 
 /* ---------- Demo 1: Confinement / flux tube ---------- */
@@ -3856,58 +3955,84 @@ function drawLabQuark(ctx, x, y, color, label){
 /* ---------- Demo 2: Detector cross-section ---------- */
 // Layers (inside → out): beam pipe, tracker, ECAL, HCAL, solenoid, muon chambers.
 // Each particle lights up specific layers with a colour trace and a "hit" pattern.
+// Layer i18n keys let us translate the on-canvas labels.
 const DET_LAYERS = [
-  { name:'Beam pipe',      r0:0,   r1:22,  fill:'rgba(255,255,255,0.03)', ring:'rgba(255,255,255,0.15)' },
-  { name:'Tracker',        r0:22,  r1:70,  fill:'rgba(78,168,255,0.06)',  ring:'rgba(78,168,255,0.35)' },
-  { name:'ECAL',           r0:70,  r1:100, fill:'rgba(255,209,102,0.08)', ring:'rgba(255,209,102,0.4)' },
-  { name:'HCAL',           r0:100, r1:140, fill:'rgba(255,107,157,0.08)', ring:'rgba(255,107,157,0.4)' },
-  { name:'Solenoid',       r0:140, r1:150, fill:'rgba(255,255,255,0.05)', ring:'rgba(255,255,255,0.2)' },
-  { name:'Muon chambers',  r0:150, r1:195, fill:'rgba(126,232,197,0.06)', ring:'rgba(126,232,197,0.4)' },
+  { id:'beam',   r0:0,   r1:22,  fill:'rgba(255,255,255,0.03)', ring:'rgba(255,255,255,0.15)', i18n:'lab.det.layer.beam' },
+  { id:'trk',    r0:22,  r1:70,  fill:'rgba(78,168,255,0.06)',  ring:'rgba(78,168,255,0.35)',  i18n:'lab.det.layer.trk' },
+  { id:'ecal',   r0:70,  r1:100, fill:'rgba(255,209,102,0.08)', ring:'rgba(255,209,102,0.4)',  i18n:'lab.det.layer.ecal' },
+  { id:'hcal',   r0:100, r1:140, fill:'rgba(255,107,157,0.08)', ring:'rgba(255,107,157,0.4)',  i18n:'lab.det.layer.hcal' },
+  { id:'sol',    r0:140, r1:150, fill:'rgba(255,255,255,0.05)', ring:'rgba(255,255,255,0.2)',  i18n:'lab.det.layer.sol' },
+  { id:'muon',   r0:150, r1:195, fill:'rgba(126,232,197,0.06)', ring:'rgba(126,232,197,0.4)',  i18n:'lab.det.layer.muon' },
 ];
-// signature[layer] = 'curve' | 'hit' | 'shower' | 'jet' | 'miss'
+// A particle's signature per layer is a small array of drawing directives.
+// track='curve' | 'straight' | 'miss', shower='em' | 'had' | 'none', muon='hit'|'miss', jet=true/false
 const DET_PARTICLES = {
-  electron: { label:'e⁻', color:'#4ea8ff', sig:{ tracker:'curve', ECAL:'shower', HCAL:'miss', muon:'miss' } },
-  photon:   { label:'γ',  color:'#ffd166', sig:{ tracker:'miss',  ECAL:'shower', HCAL:'miss', muon:'miss' } },
-  muon:     { label:'μ⁻', color:'#7ee8c5', sig:{ tracker:'curve', ECAL:'miss',   HCAL:'miss', muon:'hit' } },
-  pion:     { label:'π⁺', color:'#ff6b9d', sig:{ tracker:'curve', ECAL:'miss',   HCAL:'shower', muon:'miss' } },
-  neutron:  { label:'n⁰', color:'#c8cff0', sig:{ tracker:'miss',  ECAL:'miss',   HCAL:'shower', muon:'miss' } },
-  neutrino: { label:'ν',  color:'#8fa8ff', sig:{ tracker:'miss',  ECAL:'miss',   HCAL:'miss',   muon:'miss' } },
-  jet:      { label:'jet',color:'#c39bff', sig:{ tracker:'jet',   ECAL:'shower', HCAL:'shower', muon:'miss' } },
+  electron: { label:'e⁻', role:'lab.det.role.electron', color:'#4ea8ff',
+              charged:true,  ecalShower:'em', hcalShower:'none', muon:'miss', jet:false,
+              desc:'lab.det.desc.electron' },
+  photon:   { label:'γ',  role:'lab.det.role.photon',   color:'#ffd166',
+              charged:false, ecalShower:'em', hcalShower:'none', muon:'miss', jet:false,
+              desc:'lab.det.desc.photon' },
+  muon:     { label:'μ⁻', role:'lab.det.role.muon',     color:'#7ee8c5',
+              charged:true,  ecalShower:'mip', hcalShower:'mip',  muon:'hit',  jet:false,
+              desc:'lab.det.desc.muon' },
+  pion:     { label:'π⁺', role:'lab.det.role.pion',     color:'#ff6b9d',
+              charged:true,  ecalShower:'mip', hcalShower:'had',  muon:'miss', jet:false,
+              desc:'lab.det.desc.pion' },
+  neutron:  { label:'n⁰', role:'lab.det.role.neutron',  color:'#c8cff0',
+              charged:false, ecalShower:'none', hcalShower:'had', muon:'miss', jet:false,
+              desc:'lab.det.desc.neutron' },
+  neutrino: { label:'ν',  role:'lab.det.role.neutrino', color:'#8fa8ff',
+              charged:false, ecalShower:'none', hcalShower:'none', muon:'miss', jet:false,
+              desc:'lab.det.desc.neutrino' },
+  jet:      { label:'jet', role:'lab.det.role.jet',      color:'#c39bff',
+              charged:true,  ecalShower:'em', hcalShower:'had',  muon:'miss', jet:true,
+              desc:'lab.det.desc.jet' },
 };
 function labInitDetector(){
   const c = document.getElementById('detCanvas'); if(!c) return;
   const { ctx, w, h } = labSizeCanvas(c);
-  LAB.det = { ctx, w, h, canvas:c, current:'electron' };
-  // picker buttons
+  LAB.det = { ctx, w, h, canvas:c, current: (LAB.det && LAB.det.current) || 'electron' };
+  labRebuildDetectorPicker();
+}
+function labRebuildDetectorPicker(){
+  if(!LAB || !LAB.det) return;
+  const dict = LOCALES[window.CURRENT_LANG||'en'] || LOCALES.en;
+  const t = (k)=> dict[k] || LOCALES.en[k] || k;
   const picker = document.getElementById('detPicker');
-  picker.innerHTML = '';
-  Object.keys(DET_PARTICLES).forEach(k=>{
-    const b = document.createElement('button');
-    b.textContent = DET_PARTICLES[k].label + ' · ' + k;
-    b.style.color = DET_PARTICLES[k].color;
-    if(k===LAB.det.current) b.classList.add('active');
-    b.onclick = ()=>{
-      LAB.det.current = k;
-      picker.querySelectorAll('button').forEach(x=>x.classList.remove('active'));
-      b.classList.add('active');
-    };
-    picker.appendChild(b);
-  });
-  // legend
+  if(picker){
+    picker.innerHTML = '';
+    Object.keys(DET_PARTICLES).forEach(k=>{
+      const P = DET_PARTICLES[k];
+      const b = document.createElement('button');
+      b.innerHTML = `<b style="color:${P.color}">${P.label}</b> · ${t(P.role)}`;
+      if(k===LAB.det.current) b.classList.add('active');
+      b.onclick = ()=>{
+        LAB.det.current = k;
+        picker.querySelectorAll('button').forEach(x=>x.classList.remove('active'));
+        b.classList.add('active');
+      };
+      picker.appendChild(b);
+    });
+  }
   const leg = document.getElementById('detLegend');
-  leg.innerHTML = DET_LAYERS.map(L=>
-    `<span class="ll-item"><i class="bar" style="background:${L.ring};color:${L.ring}"></i>${L.name}</span>`
-  ).join('');
+  if(leg){
+    leg.innerHTML = DET_LAYERS.map(L=>
+      `<span class="ll-item"><i class="bar" style="background:${L.ring};color:${L.ring}"></i>${t(L.i18n)}</span>`
+    ).join('');
+  }
 }
 function labDrawDetector(){
   const S = LAB.det; if(!S) return;
   const { ctx, w, h } = S;
+  const dict = LOCALES[window.CURRENT_LANG||'en'] || LOCALES.en;
+  const t = (k)=> dict[k] || LOCALES.en[k] || k;
   ctx.clearRect(0,0,w,h);
   const cx = w/2, cy = h/2;
-  const maxR = Math.min(w,h)/2 - 10;
-  // Scale layers to canvas size
+  const maxR = Math.max(30, Math.min(w,h)/2 - 12);
   const scale = maxR / 195;
-  // 1) draw layers
+
+  // 1) draw layers (fills + rings)
   for(let i=DET_LAYERS.length-1;i>=0;i--){
     const L = DET_LAYERS[i];
     ctx.fillStyle = L.fill;
@@ -3917,121 +4042,251 @@ function labDrawDetector(){
     ctx.strokeStyle = L.ring; ctx.lineWidth = 1.2;
     ctx.beginPath(); ctx.arc(cx,cy,L.r1*scale,0,Math.PI*2); ctx.stroke();
   });
-  // Layer labels (top)
-  ctx.fillStyle='#8b93b3'; ctx.font='9px JetBrains Mono, monospace';
-  ctx.textAlign='center';
+  // Layer name labels (top arc)
+  ctx.fillStyle='#8b93b3'; ctx.font='9px JetBrains Mono, monospace'; ctx.textAlign='center';
   DET_LAYERS.forEach(L=>{
     const rMid=(L.r0+L.r1)/2*scale;
-    if(rMid>10) ctx.fillText(L.name, cx, cy - rMid);
+    if(rMid>10) ctx.fillText(t(L.i18n), cx, cy - rMid + 3);
   });
 
-  // 2) collision point
+  // 2) magnetic-field indicator (⊙ = out of page)
+  ctx.fillStyle='rgba(255,255,255,0.35)';
+  ctx.font='10px JetBrains Mono, monospace'; ctx.textAlign='left';
+  ctx.fillText('B ⊙  '+t('lab.det.bfield'), 10, h-10);
+
+  // 3) collision point
   ctx.fillStyle='#fff';
   ctx.beginPath(); ctx.arc(cx,cy,3,0,Math.PI*2); ctx.fill();
 
-  // 3) draw the particle signature
+  // 4) draw particle signature
   const P = DET_PARTICLES[S.current];
-  const th = (labT*0.6) % (Math.PI*2); // slowly rotating direction — one particle emerging
-  const angles = P.label==='jet' ? [th-0.15, th, th+0.15, th+0.3] : [th];
+  const baseAng = (labT*0.35) % (Math.PI*2);
+  // Jets: 5 collimated constituents inside a narrow ΔR≈0.4 cone.
+  // Non-jets: single particle at baseAng.
+  const jetHalfCone = 0.22; // ~13°, matches typical anti-kT jet radius
+  const angles = P.jet
+    ? [-1, -0.5, 0, 0.5, 1].map(k => baseAng + k * jetHalfCone * 0.75)
+    : [baseAng];
+  // Per-constituent color variation for readability
+  const jetShades = ['#c39bff','#a97fe8','#d9b6ff','#8f66d6','#e0c8ff'];
+
   angles.forEach((ang, ai)=>{
-    const dir = { x: Math.cos(ang), y: Math.sin(ang) };
-    // Tracker: helical curve (bent by magnetic field)
-    const trkSig = P.sig.tracker;
-    if(trkSig==='curve' || trkSig==='jet'){
-      ctx.strokeStyle = P.color; ctx.lineWidth = 1.8;
+    // For jets, each constituent gets its own shade + much narrower shower footprint
+    const trkColor = P.jet ? jetShades[ai % jetShades.length] : P.color;
+    const ecalHW = P.jet ? 0.055 : 0.28;
+    const hcalHW = P.jet ? 0.075 : 0.45;
+    const ecalCols = P.jet ? 3 : 7;
+    const hcalCols = P.jet ? 3 : 9;
+    // ---- TRACKER: helical curve (charged only, bent by B-field) ----
+    if(P.charged){
+      const R0 = 24*scale, R1 = 70*scale;
+      const bend = P.jet ? (0.25 + (ai-2)*0.06) : 0.5; // slightly different curvature per constituent
+      ctx.strokeStyle = trkColor; ctx.lineWidth = P.jet ? 1.3 : 1.8;
       ctx.beginPath();
-      const R = 22*scale, R1 = 70*scale;
-      // simulate curved track
-      const bend = 0.4; // bending radius per length
-      for(let t=0;t<=1;t+=0.02){
-        const r = R + (R1-R)*t;
-        const ang2 = ang + bend*t;
+      let lastX, lastY, lastAng2;
+      for(let tt=0; tt<=1; tt+=0.02){
+        const r = R0 + (R1-R0)*tt;
+        const ang2 = ang + bend*tt;
         const x = cx + Math.cos(ang2)*r;
         const y = cy + Math.sin(ang2)*r;
-        if(t===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+        if(tt===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+        lastX=x; lastY=y; lastAng2=ang2;
       }
       ctx.stroke();
+      // hit dots along the tracker (silicon strips fire)
+      ctx.fillStyle = trkColor;
+      for(let tt=0.15; tt<=1; tt+=0.2){
+        const r = R0 + (R1-R0)*tt;
+        const ang2 = ang + bend*tt;
+        ctx.beginPath(); ctx.arc(cx+Math.cos(ang2)*r, cy+Math.sin(ang2)*r, P.jet?1.4:2, 0, Math.PI*2); ctx.fill();
+      }
+      // arrowhead showing exit direction from tracker
+      if(ai===0 && !P.jet){
+        const tanAng = lastAng2 + Math.PI/2;
+        ctx.beginPath();
+        ctx.moveTo(lastX + Math.cos(lastAng2)*6, lastY + Math.sin(lastAng2)*6);
+        ctx.lineTo(lastX - Math.cos(lastAng2)*3 + Math.cos(tanAng)*4, lastY - Math.sin(lastAng2)*3 + Math.sin(tanAng)*4);
+        ctx.lineTo(lastX - Math.cos(lastAng2)*3 - Math.cos(tanAng)*4, lastY - Math.sin(lastAng2)*3 - Math.sin(tanAng)*4);
+        ctx.closePath(); ctx.fillStyle=P.color; ctx.fill();
+      }
     }
-    // ECAL: bright shower blob
-    const ecSig = P.sig.ECAL;
-    if(ecSig==='shower'){
-      const angLine = ang + 0.4;
-      const r0 = 70*scale, r1 = 100*scale, mid = (r0+r1)/2;
-      const bx = cx + Math.cos(angLine)*mid, by = cy + Math.sin(angLine)*mid;
-      const g = ctx.createRadialGradient(bx,by,0,bx,by,20*scale);
-      g.addColorStop(0, P.color); g.addColorStop(1, 'rgba(0,0,0,0)');
-      ctx.fillStyle=g;
-      ctx.beginPath(); ctx.arc(bx,by,20*scale,0,Math.PI*2); ctx.fill();
-      // labelled hit
-      ctx.fillStyle=P.color; ctx.font='9px JetBrains Mono, monospace'; ctx.textAlign='center';
-      ctx.fillText('shower', bx, by + 26);
-    }
-    // HCAL: wider hadronic shower
-    const hSig = P.sig.HCAL;
-    if(hSig==='shower' || hSig==='jet'){
-      const angLine = ang + 0.6;
-      const r0 = 100*scale, r1 = 140*scale, mid = (r0+r1)/2;
-      const bx = cx + Math.cos(angLine)*mid, by = cy + Math.sin(angLine)*mid;
-      const g = ctx.createRadialGradient(bx,by,0,bx,by,26*scale);
-      g.addColorStop(0, P.color); g.addColorStop(1, 'rgba(0,0,0,0)');
-      ctx.fillStyle=g;
-      ctx.beginPath(); ctx.arc(bx,by,26*scale,0,Math.PI*2); ctx.fill();
-      ctx.fillStyle=P.color; ctx.font='9px JetBrains Mono, monospace'; ctx.textAlign='center';
-      ctx.fillText('hadronic shower', bx, by + 30);
-    }
-    // Muon chambers: outgoing straight track past everything
-    const mSig = P.sig.muon;
-    if(mSig==='hit'){
-      ctx.strokeStyle=P.color; ctx.lineWidth=2; ctx.setLineDash([]);
+    // Neutrals leave a dashed "invisible" line in the tracker
+    if(!P.charged && P.ecalShower==='none' && P.hcalShower==='none'){
+      // pure neutrino
+      ctx.strokeStyle = P.color; ctx.lineWidth=1.3; ctx.setLineDash([4,4]);
       ctx.beginPath();
-      ctx.moveTo(cx + dir.x*140*scale, cy + dir.y*140*scale);
-      ctx.lineTo(cx + dir.x*195*scale, cy + dir.y*195*scale);
+      ctx.moveTo(cx + Math.cos(ang)*8, cy + Math.sin(ang)*8);
+      ctx.lineTo(cx + Math.cos(ang)*195*scale, cy + Math.sin(ang)*195*scale);
       ctx.stroke();
-      // hit stars in muon chambers
-      const hx = cx + dir.x*170*scale, hy = cy + dir.y*170*scale;
-      ctx.fillStyle=P.color;
-      ctx.beginPath(); ctx.arc(hx,hy,4,0,Math.PI*2); ctx.fill();
+      ctx.setLineDash([]);
+    } else if(!P.charged){
+      // photon or neutron: straight dashed line only to their absorbing calorimeter
+      ctx.strokeStyle = P.color; ctx.lineWidth=1.2; ctx.setLineDash([3,3]);
+      const rEnd = P.hcalShower==='had' ? 140*scale : 100*scale;
+      ctx.beginPath();
+      ctx.moveTo(cx + Math.cos(ang)*8, cy + Math.sin(ang)*8);
+      ctx.lineTo(cx + Math.cos(ang)*rEnd, cy + Math.sin(ang)*rEnd);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+
+    // ---- ECAL: draw as segmented cells that get "hit" ----
+    const angOut = ang + (P.charged ? (P.jet ? 0.25 : 0.5) : 0);
+    const ecR0 = 70*scale, ecR1 = 100*scale;
+    if(P.ecalShower === 'em'){
+      drawCalCells(ctx, cx, cy, ecR0, ecR1, angOut, ecalHW, trkColor, 'em', ecalCols);
+      if(!P.jet) labelHit(ctx, cx, cy, (ecR0+ecR1)/2 + 18, angOut, P.color, t('lab.det.hit.em'));
+    } else if(P.ecalShower === 'mip'){
+      drawCalCells(ctx, cx, cy, ecR0, ecR1, angOut, 0.06, trkColor, 'mip', 2);
+    }
+
+    // ---- HCAL: hadronic shower is broader + deeper ----
+    const hcR0 = 100*scale, hcR1 = 140*scale;
+    const angH = ang + (P.charged ? (P.jet ? 0.35 : 0.7) : 0);
+    if(P.hcalShower === 'had'){
+      drawCalCells(ctx, cx, cy, hcR0, hcR1, angH, hcalHW, trkColor, 'had', hcalCols);
+      if(!P.jet) labelHit(ctx, cx, cy, (hcR0+hcR1)/2 + 22, angH, P.color, t('lab.det.hit.had'));
+    } else if(P.hcalShower === 'mip'){
+      drawCalCells(ctx, cx, cy, hcR0, hcR1, angH, 0.06, trkColor, 'mip', 2);
+    }
+
+    // ---- MUON CHAMBERS ----
+    if(P.muon === 'hit'){
+      const angM = ang + (P.charged ? 0.9 : 0);
+      // straight extension of the track (muons barely bend at outer radii due to return field)
+      ctx.strokeStyle = P.color; ctx.lineWidth=2;
+      ctx.beginPath();
+      ctx.moveTo(cx + Math.cos(angM)*150*scale, cy + Math.sin(angM)*150*scale);
+      ctx.lineTo(cx + Math.cos(angM)*195*scale, cy + Math.sin(angM)*195*scale);
+      ctx.stroke();
+      // Two "hits" in muon stations
+      [165, 185].forEach(rr=>{
+        const hx = cx + Math.cos(angM)*rr*scale;
+        const hy = cy + Math.sin(angM)*rr*scale;
+        ctx.fillStyle = P.color;
+        ctx.beginPath(); ctx.arc(hx,hy,3,0,Math.PI*2); ctx.fill();
+        ctx.strokeStyle = P.color; ctx.lineWidth=1;
+        ctx.beginPath(); ctx.arc(hx,hy,6,0,Math.PI*2); ctx.stroke();
+      });
+      labelHit(ctx, cx, cy, 200*scale, angM, P.color, t('lab.det.hit.muon'));
     }
   });
 
-  // 4) "missing energy" callout for neutrino
+  // ---- Special: neutrino → missing energy indicator on the opposite side ----
   if(S.current==='neutrino'){
-    ctx.strokeStyle='#8fa8ff'; ctx.lineWidth=1.4; ctx.setLineDash([4,4]);
+    const oppAng = baseAng + Math.PI;
+    ctx.strokeStyle='#8fa8ff'; ctx.lineWidth=1.4; ctx.setLineDash([2,4]);
     ctx.beginPath();
     ctx.moveTo(cx, cy);
-    ctx.lineTo(cx + Math.cos(th)*195*scale, cy + Math.sin(th)*195*scale);
-    ctx.stroke();
-    ctx.setLineDash([]);
-    ctx.fillStyle='#8fa8ff'; ctx.font='11px JetBrains Mono, monospace';
-    ctx.textAlign='center';
-    ctx.fillText('missing E_T (invisible)', cx, cy - maxR - 6);
+    ctx.lineTo(cx + Math.cos(oppAng)*maxR*0.5, cy + Math.sin(oppAng)*maxR*0.5);
+    ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle='#8fa8ff'; ctx.font='11px JetBrains Mono, monospace'; ctx.textAlign='center';
+    ctx.fillText(t('lab.det.missing'), cx + Math.cos(oppAng)*maxR*0.55, cy + Math.sin(oppAng)*maxR*0.55);
   }
 
-  // 5) headline caption
-  ctx.fillStyle='#e8ecff'; ctx.font='13px JetBrains Mono, monospace';
+  // ---- Jet cone: draw as a wedge outline that hugs the calorimeters ----
+  if(P.jet){
+    const midAng = baseAng;
+    const innerR = 22*scale;
+    const outerR = 140*scale;
+    // two radial edges of the cone
+    ctx.strokeStyle = 'rgba(195,155,255,0.55)'; ctx.setLineDash([3,3]); ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(cx + Math.cos(midAng-jetHalfCone)*innerR, cy + Math.sin(midAng-jetHalfCone)*innerR);
+    ctx.lineTo(cx + Math.cos(midAng-jetHalfCone)*outerR, cy + Math.sin(midAng-jetHalfCone)*outerR);
+    ctx.moveTo(cx + Math.cos(midAng+jetHalfCone)*innerR, cy + Math.sin(midAng+jetHalfCone)*innerR);
+    ctx.lineTo(cx + Math.cos(midAng+jetHalfCone)*outerR, cy + Math.sin(midAng+jetHalfCone)*outerR);
+    ctx.stroke();
+    // closing arc at the outer radius
+    ctx.beginPath();
+    ctx.arc(cx, cy, outerR + 4, midAng - jetHalfCone, midAng + jetHalfCone);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    // single label outside the cone
+    const labR = maxR + 4;
+    ctx.fillStyle = '#c39bff'; ctx.font = 'bold 11px JetBrains Mono, monospace';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText(t('lab.det.jet.cone'), cx + Math.cos(midAng)*labR, cy + Math.sin(midAng)*labR);
+    ctx.textBaseline = 'alphabetic';
+  }
+
+  // ---- Headline caption + description ----
+  ctx.fillStyle='#e8ecff'; ctx.font='bold 13px Space Grotesk, sans-serif';
   ctx.textAlign='left';
-  ctx.fillText(`Signature of ${S.current}:`, 12, 20);
-  ctx.fillStyle=P.color;
-  const sigWords = Object.keys(P.sig).map(k=>`${k}=${P.sig[k]}`).join('  ');
-  ctx.font='11px JetBrains Mono, monospace';
-  ctx.fillText(sigWords, 12, 36);
+  ctx.fillText(`${P.label}  ·  ${t(P.role)}`, 12, 20);
+  ctx.fillStyle='#c8cff0'; ctx.font='11px Space Grotesk, sans-serif';
+  wrapText(ctx, t(P.desc), 12, 38, w-24, 14);
+}
+// Draw ~N segmented calorimeter cells that light up in an arc; density controls
+// how "hot" (many cells) vs "cool" (few cells) the shower is.
+function drawCalCells(ctx, cx, cy, r0, r1, ang, halfWidth, color, kind, colsOverride){
+  const cellRad = kind==='had' ? 6 : 5;
+  const rows = kind==='mip' ? 1 : 3;
+  const cols = colsOverride != null ? colsOverride : (kind==='mip' ? 2 : (kind==='had' ? 9 : 7));
+  const angSpread = halfWidth*2;
+  for(let iRow=0; iRow<rows; iRow++){
+    const r = r0 + ((iRow+0.5)/rows)*(r1-r0);
+    for(let iCol=0; iCol<cols; iCol++){
+      // Intensity — brighter toward the shower centre
+      const centrality = 1 - Math.abs((iCol/(cols-1||1))-0.5)*2;
+      const rowFactor = 1 - iRow/rows*0.4;
+      const alpha = (kind==='mip' ? 0.4 : 0.35 + centrality*0.55) * rowFactor;
+      const angC = ang - halfWidth + (iCol/(cols-1||1))*angSpread;
+      const x = cx + Math.cos(angC)*r;
+      const y = cy + Math.sin(angC)*r;
+      // cell rectangle rotated to face outward
+      ctx.save();
+      ctx.translate(x,y);
+      ctx.rotate(angC + Math.PI/2);
+      ctx.fillStyle = color;
+      ctx.globalAlpha = alpha;
+      ctx.fillRect(-cellRad, -cellRad*0.7, cellRad*2, cellRad*1.4);
+      ctx.globalAlpha = 1;
+      ctx.strokeStyle = 'rgba(255,255,255,0.35)';
+      ctx.lineWidth = 0.6;
+      ctx.strokeRect(-cellRad, -cellRad*0.7, cellRad*2, cellRad*1.4);
+      ctx.restore();
+    }
+  }
+}
+function labelHit(ctx, cx, cy, r, ang, color, txt){
+  const x = cx + Math.cos(ang)*r, y = cy + Math.sin(ang)*r;
+  ctx.fillStyle = color;
+  ctx.font = '10px JetBrains Mono, monospace';
+  // put label away from centre so it doesn't overlap the shower
+  const outward = ang;
+  ctx.textAlign = Math.cos(outward) >= 0 ? 'left' : 'right';
+  ctx.fillText(txt, x + Math.cos(outward)*3, y + Math.sin(outward)*3);
+  ctx.textAlign = 'left';
+}
+function wrapText(ctx, text, x, y, maxW, lineH){
+  const words = String(text).split(/\s+/);
+  let line = '', ly = y;
+  for(const w of words){
+    const test = line ? line+' '+w : w;
+    if(ctx.measureText(test).width > maxW && line){
+      ctx.fillText(line, x, ly); line = w; ly += lineH;
+    } else line = test;
+  }
+  if(line) ctx.fillText(line, x, ly);
 }
 
 /* ---------- Demo 3: Higgs field lattice ---------- */
 // The vacuum is a lattice of oscillators; particles fly through and "drag" the field.
 // Coupling strength (proxy for mass) sets how much each particle disturbs the lattice.
 const HIGGS_PARTICLES = [
-  { id:'photon',   label:'γ',    color:'#ffd166', coupling:0.0,   mass:'0',            note:'no coupling → massless' },
-  { id:'electron', label:'e⁻',   color:'#4ea8ff', coupling:0.05,  mass:'0.511 MeV',    note:'tiny coupling → very light' },
-  { id:'muon',     label:'μ⁻',   color:'#7ee8c5', coupling:0.35,  mass:'106 MeV',      note:'heavier lepton' },
-  { id:'tau',      label:'τ⁻',   color:'#c39bff', coupling:0.6,   mass:'1.78 GeV',     note:'heaviest lepton' },
-  { id:'W',        label:'W±',   color:'#5aa8ff', coupling:0.85,  mass:'80.4 GeV',     note:'gets mass from Higgs (electroweak)' },
-  { id:'top',      label:'t',    color:'#ff5c8a', coupling:1.0,   mass:'173 GeV',      note:'strongest Yukawa coupling known' },
+  { id:'photon', label:'γ (photon)',    role:'lab.higgs.role.photon', color:'#ffd166', coupling:0.0,   mass:'0',    note:'lab.higgs.note.photon' },
+  { id:'electron', label:'e⁻ (electron)',    role:'lab.higgs.role.electron', color:'#4ea8ff', coupling:0.05,   mass:'0.511 MeV',    note:'lab.higgs.note.electron' },
+  { id:'muon', label:'μ⁻ (muon)',    role:'lab.higgs.role.muon', color:'#7ee8c5', coupling:0.35,   mass:'106 MeV',    note:'lab.higgs.note.muon' },
+  { id:'tau', label:'τ⁻ (tau)',    role:'lab.higgs.role.tau', color:'#c39bff', coupling:0.6,   mass:'1.78 GeV',    note:'lab.higgs.note.tau' },
+  { id:'W', label:'W± (W boson)',    role:'lab.higgs.role.W', color:'#5aa8ff', coupling:0.85,   mass:'80.4 GeV',    note:'lab.higgs.note.W' },
+  { id:'top', label:'t (top quark)',    role:'lab.higgs.role.top', color:'#ff5c8a', coupling:1.0,   mass:'173 GeV',    note:'lab.higgs.note.top' },
 ];
 function labInitHiggs(){
   const c = document.getElementById('higgsCanvas'); if(!c) return;
   const { ctx, w, h } = labSizeCanvas(c);
-  LAB.higgs = { ctx, w, h, canvas:c, current:'electron', fires:[] };
+  const keep = (LAB.higgs && LAB.higgs.current) || 'electron';
+  LAB.higgs = { ctx, w, h, canvas:c, current:keep, fires:[] };
   // lattice offsets (persistent per site) — for the "drag" effect
   const cols = 40, rows = 14;
   const gridX = w/cols, gridY = h/rows;
@@ -4042,29 +4297,34 @@ function labInitHiggs(){
   LAB.higgs.sites = sites;
   LAB.higgs.gridX = gridX; LAB.higgs.gridY = gridY;
 
+  labRebuildHiggsPicker();
+  // Auto-fire the first one so users see motion immediately
+  const P0 = HIGGS_PARTICLES.find(p=>p.id===LAB.higgs.current);
+  LAB.higgs.fires.push({ P:P0, x:-20, y:h/2, t:0 });
+}
+function labRebuildHiggsPicker(){
+  if(!LAB || !LAB.higgs) return;
   const picker = document.getElementById('higgsPicker');
+  if(!picker) return;
   picker.innerHTML = '';
   HIGGS_PARTICLES.forEach(P=>{
     const b = document.createElement('button');
-    b.textContent = `${P.label} · ${P.mass}`;
-    b.style.color = P.color;
+    b.innerHTML = `<b style="color:${P.color}">${P.label}</b> · ${P.mass}`;
     if(P.id===LAB.higgs.current) b.classList.add('active');
     b.onclick = ()=>{
       LAB.higgs.current = P.id;
       picker.querySelectorAll('button').forEach(x=>x.classList.remove('active'));
       b.classList.add('active');
-      // fire a particle from left to right
-      LAB.higgs.fires.push({ P, x:-20, y:h/2 + (Math.random()-0.5)*40, t:0 });
+      LAB.higgs.fires.push({ P, x:-20, y:LAB.higgs.h/2 + (Math.random()-0.5)*40, t:0 });
     };
     picker.appendChild(b);
   });
-  // Auto-fire the first one so users see motion immediately
-  const P0 = HIGGS_PARTICLES.find(p=>p.id===LAB.higgs.current);
-  LAB.higgs.fires.push({ P:P0, x:-20, y:h/2, t:0 });
 }
 function labDrawHiggs(){
   const S = LAB.higgs; if(!S) return;
   const { ctx, w, h, sites } = S;
+  const dict = LOCALES[window.CURRENT_LANG||'en'] || LOCALES.en;
+  const t = (k)=> dict[k] || LOCALES.en[k] || k;
   ctx.clearRect(0,0,w,h);
   // dim purple background
   const bg = ctx.createRadialGradient(w/2,h/2,0,w/2,h/2,Math.max(w,h)/1.4);
@@ -4074,16 +4334,13 @@ function labDrawHiggs(){
 
   // Update lattice: each site oscillates and gets pushed by any nearby particle proportional to coupling.
   sites.forEach(s=>{
-    // spring back to rest
     s.ox *= 0.88; s.oy *= 0.88;
-    // gentle vacuum jitter
     s.ox += Math.cos(labT*2 + s.phase)*0.05;
     s.oy += Math.sin(labT*2 + s.phase)*0.05;
   });
-  // Advance every firing particle and push nearby sites
   for(let i=S.fires.length-1;i>=0;i--){
     const f = S.fires[i];
-    const speed = f.P.coupling===0 ? 6 : 6 - f.P.coupling*3.5; // heavy = slower
+    const speed = f.P.coupling===0 ? 6 : 6 - f.P.coupling*3.5;
     f.x += speed; f.t += 0.016;
     if(f.P.coupling > 0){
       sites.forEach(s=>{
@@ -4100,7 +4357,6 @@ function labDrawHiggs(){
     if(f.x > w+30) S.fires.splice(i,1);
   }
 
-  // Draw the lattice: connect neighbours (in original grid) using displaced positions.
   ctx.strokeStyle='rgba(195,155,255,0.20)';
   ctx.lineWidth = 0.6;
   const cols = Math.round(w / S.gridX);
@@ -4116,15 +4372,12 @@ function labDrawHiggs(){
     }
   }
   ctx.stroke();
-  // dots at lattice sites
   ctx.fillStyle='rgba(195,155,255,0.55)';
   sites.forEach(s=>{
     ctx.beginPath(); ctx.arc(s.x+s.ox, s.y+s.oy, 1.2, 0, Math.PI*2); ctx.fill();
   });
 
-  // Draw firing particles with wake
   S.fires.forEach(f=>{
-    // wake / trail (only if coupling > 0)
     if(f.P.coupling>0){
       const wakeGrad = ctx.createLinearGradient(f.x-60, f.y, f.x, f.y);
       wakeGrad.addColorStop(0, 'rgba(0,0,0,0)');
@@ -4137,18 +4390,17 @@ function labDrawHiggs(){
     ctx.fillStyle=g; ctx.beginPath(); ctx.arc(f.x,f.y,14,0,Math.PI*2); ctx.fill();
     ctx.fillStyle='#fff'; ctx.font='bold 11px JetBrains Mono, monospace';
     ctx.textAlign='center'; ctx.textBaseline='middle';
-    ctx.fillText(f.P.label, f.x, f.y);
+    ctx.fillText(f.P.label.split(' ')[0], f.x, f.y);
     ctx.textBaseline='alphabetic';
   });
 
-  // Caption
   const P = HIGGS_PARTICLES.find(p=>p.id===S.current);
-  ctx.fillStyle='#e8ecff'; ctx.font='13px JetBrains Mono, monospace'; ctx.textAlign='left';
-  ctx.fillText(`${P.label} · mass = ${P.mass}`, 12, 20);
-  ctx.fillStyle='#c39bff'; ctx.font='11px Space Grotesk, sans-serif';
-  ctx.fillText(P.note, 12, 36);
+  ctx.fillStyle='#e8ecff'; ctx.font='bold 13px Space Grotesk, sans-serif'; ctx.textAlign='left';
+  ctx.fillText(`${P.label}  ·  ${t('lab.higgs.mass')}: ${P.mass}`, 12, 20);
+  ctx.fillStyle='#c8cff0'; ctx.font='11px Space Grotesk, sans-serif';
+  wrapText(ctx, t(P.note), 12, 38, w-24, 14);
   ctx.fillStyle='#8b93b3'; ctx.font='11px JetBrains Mono, monospace';
-  ctx.fillText(`Yukawa coupling ≈ ${P.coupling.toFixed(2)}`, 12, h-10);
+  ctx.fillText(`${t('lab.higgs.yukawa')} ≈ ${P.coupling.toFixed(2)}`, 12, h-10);
 }
 
 /* ---------- Lab loop + tab hook ---------- */
@@ -4178,6 +4430,16 @@ window.addEventListener('resize', ()=>{ if(labRAF!=null){ labStop(); labStart();
 
 // If lab is the initial tab (unlikely), start it.
 if(document.querySelector('.tab.active')?.dataset.tab === 'lab') labStart();
+
+/* ---- Fix Big Bang cross-link.  When served from particle-zoo/index.html,
+   ../big-bang/index.html works.  When served from particle-zoo/mobile/
+   (the built single-file bundle), we need ../../big-bang/index.html. */
+function fixBigBangLink(){
+  const a = document.getElementById('bigBangLink'); if(!a) return;
+  const inMobile = /\/mobile\/(?:[^/]*)?$/i.test(location.pathname);
+  a.setAttribute('href', inMobile ? '../../big-bang/index.html' : '../big-bang/index.html');
+}
+fixBigBangLink();
 
 </script>
 </body>

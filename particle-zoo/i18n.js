@@ -387,7 +387,7 @@ const LOCALES = {
 
     // Physics Lab tab
     'lab.h2': 'Physics Lab',
-    'lab.desc': 'Four hands-on visualisations that make the deepest ideas of the Standard Model tangible.',
+    'lab.desc': 'Three hands-on visualisations that make the deepest ideas of the Standard Model tangible.',
     'lab.conf.h': '1 · Colour confinement',
     'lab.conf.tag': 'strong force',
     'lab.conf.p': 'Drag the antiquark away from the quark. The gluon field between them behaves like a stretched rubber band — its energy grows with distance until a new q q̄ pair pops out of the vacuum. That is why you can never isolate a single quark.',
@@ -404,7 +404,53 @@ const LOCALES = {
     'lab.higgs.p': 'The vacuum is filled with the Higgs field — imagined here as a lattice of tiny oscillators. Different particles couple to it with different strengths: photons ignore it (mass 0), electrons barely feel it, the top quark drags heavily. Click a particle to fire it through the field.',
     'lab.xlink.h': 'See also',
     'lab.xlink.p': 'Curious how these particles emerged from the early universe? Our companion app Big Bang walks through the cosmic timeline from 10⁻⁴³ s to today.',
-    'lab.xlink.go': 'Open Big Bang →'
+    'lab.xlink.go': 'Open Big Bang →',
+
+    // Physics Lab — Detector layer names
+    'lab.det.layer.beam': 'Beam pipe',
+    'lab.det.layer.trk':  'Tracker (silicon)',
+    'lab.det.layer.ecal': 'ECAL (EM calorimeter)',
+    'lab.det.layer.hcal': 'HCAL (hadronic calorimeter)',
+    'lab.det.layer.sol':  'Solenoid magnet',
+    'lab.det.layer.muon': 'Muon chambers',
+    'lab.det.bfield':     'magnetic field bends charged tracks',
+    'lab.det.hit.em':     'EM shower (dumps all energy)',
+    'lab.det.hit.had':    'hadronic shower (wider, deeper)',
+    'lab.det.hit.muon':   'muon hits — punches through everything',
+    'lab.det.missing':    'missing E_T (invisible)',
+    'lab.det.jet.cone':   'jet cone (many hadrons together)',
+
+    // Detector particle roles + descriptions
+    'lab.det.role.electron': 'charged lepton, light',
+    'lab.det.role.photon':   'photon of light',
+    'lab.det.role.muon':     'heavy cousin of the electron',
+    'lab.det.role.pion':     'lightest meson, charged hadron',
+    'lab.det.role.neutron':  'neutral hadron (n⁰)',
+    'lab.det.role.neutrino': 'nearly massless, no charge',
+    'lab.det.role.jet':      'spray of hadrons from one quark or gluon',
+    'lab.det.desc.electron': 'Charged, so bends in the magnetic field and lights up silicon pixels in the tracker. Dumps ALL its energy in the ECAL as a narrow electromagnetic shower.',
+    'lab.det.desc.photon':   'Neutral, so leaves NO track in the tracker. First interaction is in the ECAL, where it converts to e⁺e⁻ and starts an electromagnetic shower.',
+    'lab.det.desc.muon':     'Charged, so a curved track in the tracker. Ignores both calorimeters (only tiny "minimum-ionising" hits) and punches straight through to fire the outer muon chambers. Muon = only particle that reaches the last layer.',
+    'lab.det.desc.pion':     'Charged hadron: curved track in the tracker, minimal hit in the ECAL, then a deep, spread-out hadronic shower in the HCAL. Does NOT reach the muon chambers.',
+    'lab.det.desc.neutron':  'Neutral, so no tracker hits. Sails past the ECAL and starts a hadronic shower deep in the HCAL — that is how neutrons are detected.',
+    'lab.det.desc.neutrino': 'Interacts only via the weak force — effectively invisible. We infer it from the "missing transverse energy": momentum that fails to add up on the other side of the event.',
+    'lab.det.desc.jet':      'When a quark or gluon is knocked out of a proton, colour confinement forces it to fragment into many hadrons flying in nearly the same direction. This narrow "jet" leaves a cone-shaped mix of tracker hits, ECAL cells, and HCAL cells.',
+
+    // Higgs roles + notes + labels
+    'lab.higgs.mass':       'mass',
+    'lab.higgs.yukawa':     'Yukawa coupling (strength of interaction with the Higgs field)',
+    'lab.higgs.role.photon':   'massless',
+    'lab.higgs.role.electron': 'the lightest charged particle in atoms',
+    'lab.higgs.role.muon':     'heavier cousin of the electron',
+    'lab.higgs.role.tau':      'heaviest lepton',
+    'lab.higgs.role.W':        'weak force carrier',
+    'lab.higgs.role.top':      'heaviest known elementary particle',
+    'lab.higgs.note.photon':   'The photon does not couple to the Higgs field at all — that is why it is exactly massless and always travels at the speed of light.',
+    'lab.higgs.note.electron': 'A very small coupling. The lattice barely notices the electron passing through; its mass is only 0.5 MeV.',
+    'lab.higgs.note.muon':     'The muon has the same charge as the electron but ~200× more mass — because its Yukawa coupling to the Higgs is ~200× stronger.',
+    'lab.higgs.note.tau':      'Same story as the muon, but heavier still. Same interactions, different coupling → different mass.',
+    'lab.higgs.note.W':        'Unlike fermions, the W (and Z) bosons acquire mass via the Higgs vacuum expectation value directly — this is what "electroweak symmetry breaking" means.',
+    'lab.higgs.note.top':      'The strongest known Yukawa coupling (~1). The top quark drags heavily through the Higgs field — hence its huge 173 GeV mass, close to a whole gold atom.'
   },
 
   'zh-CN': {
@@ -776,7 +822,8 @@ const LOCALES = {
 
     // 物理实验室
     'lab.h2': '物理实验室',
-    'lab.desc': '四个可动手的可视化演示,让标准模型中最深奥的思想变得直观可见。',
+    'lab.desc': '七个可动手的可视化演示,让标准模型中最深奥的思想变得直观可见。',
+    'ix.eq.tW_loop': '(t 或 W 圈图)',
     'lab.conf.h': '1 · 色禁闭',
     'lab.conf.tag': '强相互作用',
     'lab.conf.p': '把反夸克从夸克旁边拉开。两者之间的胶子场像一根被拉伸的橡皮筋——储存的能量随距离线性增长,直到从真空中蹦出一对新的 q q̄ 对。这就是为什么你永远无法分离出一个孤立的夸克。',
@@ -793,7 +840,53 @@ const LOCALES = {
     'lab.higgs.p': '真空中充满了希格斯场——这里想象为一格格微小振子的晶格。不同粒子与它的耦合强弱不同:光子完全不理它(质量 0),电子几乎不感觉它,顶夸克则被它重重拖拽。点击一个粒子,让它穿过这片场。',
     'lab.xlink.h': '延伸阅读',
     'lab.xlink.p': '想了解这些粒子如何从早期宇宙中诞生?我们的姊妹项目 Big Bang 从 10⁻⁴³ 秒开始一路讲到今天。',
-    'lab.xlink.go': '打开 Big Bang →'
+    'lab.xlink.go': '打开 Big Bang →',
+
+    // 探测器层名
+    'lab.det.layer.beam': '束流管',
+    'lab.det.layer.trk':  '径迹室(硅像素/条)',
+    'lab.det.layer.ecal': '电磁量能器 (ECAL)',
+    'lab.det.layer.hcal': '强子量能器 (HCAL)',
+    'lab.det.layer.sol':  '螺线管超导磁体',
+    'lab.det.layer.muon': 'μ 子室',
+    'lab.det.bfield':     '磁场使带电径迹弯曲',
+    'lab.det.hit.em':     '电磁簇射(能量全部沉积)',
+    'lab.det.hit.had':    '强子簇射(更宽、更深)',
+    'lab.det.hit.muon':   'μ 子击中——穿过所有其他层',
+    'lab.det.missing':    '横向缺失能量(不可见)',
+    'lab.det.jet.cone':   '喷注锥(许多强子聚在一起)',
+
+    // 探测器粒子简介
+    'lab.det.role.electron': '带电轻子,质量小',
+    'lab.det.role.photon':   '光的量子',
+    'lab.det.role.muon':     '电子的重表亲',
+    'lab.det.role.pion':     '最轻的介子,带电强子',
+    'lab.det.role.neutron':  '中性强子 (n⁰)',
+    'lab.det.role.neutrino': '几乎无质量,不带电',
+    'lab.det.role.jet':      '一个夸克或胶子产生的强子喷注',
+    'lab.det.desc.electron': '带电,所以在磁场中会弯曲,在硅径迹室里留下一串命中点。在 ECAL 中会把全部能量沉积成一个狭窄的电磁簇射。',
+    'lab.det.desc.photon':   '中性,径迹室里不留任何径迹。第一次相互作用发生在 ECAL 中——转化为 e⁺e⁻ 对,并发展成电磁簇射。',
+    'lab.det.desc.muon':     '带电,径迹室里留下一条弯曲的径迹。它几乎不与两个量能器作用(只有微弱的最小电离信号),而是直接穿过所有层去点亮最外面的 μ 子室——μ 子是唯一能抵达最外层的粒子。',
+    'lab.det.desc.pion':     '带电强子:径迹室里一条弯曲径迹,在 ECAL 里只留下微弱信号,然后在 HCAL 里产生又深又散的强子簇射。到不了 μ 子室。',
+    'lab.det.desc.neutron':  '中性,径迹室里没有信号。它一路穿过 ECAL,直到在 HCAL 深处发生强子簇射——这就是探测中子的方式。',
+    'lab.det.desc.neutrino': '只通过弱相互作用与物质作用,几乎完全不可见。人们通过"横向缺失能量"——事件另一侧动量对不上——来间接推断中微子的存在。',
+    'lab.det.desc.jet':      '当一个夸克或胶子从质子里被打出时,色禁闭要求它必须"碎裂"成许多几乎沿同一方向飞行的强子。这条狭窄的"喷注"在径迹室、ECAL、HCAL 中都会留下一个锥形的信号混合。',
+
+    // 希格斯粒子说明
+    'lab.higgs.mass':       '质量',
+    'lab.higgs.yukawa':     '汤川耦合(与希格斯场相互作用的强度)',
+    'lab.higgs.role.photon':   '无质量',
+    'lab.higgs.role.electron': '原子中最轻的带电粒子',
+    'lab.higgs.role.muon':     '电子的较重表亲',
+    'lab.higgs.role.tau':      '最重的轻子',
+    'lab.higgs.role.W':        '弱相互作用媒介粒子',
+    'lab.higgs.role.top':      '已知质量最大的基本粒子',
+    'lab.higgs.note.photon':   '光子完全不与希格斯场耦合——这正是它精确地无质量,并且始终以光速传播的原因。',
+    'lab.higgs.note.electron': '耦合非常小。晶格几乎察觉不到电子的经过;它的质量只有 0.5 MeV。',
+    'lab.higgs.note.muon':     'μ 子和电子带同样的电荷,但质量约为 200 倍——因为它与希格斯的汤川耦合约强 200 倍。',
+    'lab.higgs.note.tau':      '与 μ 子的故事一样,只是更重。相同的相互作用、不同的耦合 → 不同的质量。',
+    'lab.higgs.note.W':        '与费米子不同,W(以及 Z)玻色子是通过希格斯的真空期望值直接获得质量——这就是所谓的"电弱对称性自发破缺"。',
+    'lab.higgs.note.top':      '已知最强的汤川耦合(约为 1)。顶夸克在希格斯场中"拖曳"很重,因此拥有 173 GeV 这么大的质量,接近一整个金原子的质量。'
   }
 };
 
@@ -904,6 +997,11 @@ function applyI18n(lang){
   const active = document.querySelector('.pl-item.active')?.dataset.id;
   if(active && typeof showParticle==='function') showParticle(active);
   if(typeof analyze==='function') analyze();
+  // Physics Lab: rebuild dynamic pickers so their labels get translated too.
+  if(typeof labRebuildDetectorPicker==='function') labRebuildDetectorPicker();
+  if(typeof labRebuildHiggsPicker==='function') labRebuildHiggsPicker();
+  // Fix the Big Bang link based on where we're actually served from.
+  if(typeof fixBigBangLink==='function') fixBigBangLink();
 }
 
 /* Return localized particle data (falls back to English) */
