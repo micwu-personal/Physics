@@ -258,7 +258,7 @@
     <section id="tab-lab" class="tab-panel">
       <div class="section-head">
         <h2 data-i18n="lab.h2">Physics Lab</h2>
-        <p data-i18n="lab.desc">Seven hands-on visualisations that make the deepest ideas of the Standard Model tangible.</p>
+        <p data-i18n="lab.desc">Ten hands-on visualisations that make the deepest ideas of the Standard Model tangible.</p>
       </div>
 
       <!-- Sub-tab strip: Basics vs Advanced -->
@@ -380,6 +380,49 @@
         </div>
         <div class="lab-controls" id="pdfControls"></div>
         <div class="lab-legend" id="pdfLegend"></div>
+      </div>
+
+      <!-- Demo 8: Interactive collider event display -->
+      <div class="lab-card">
+        <div class="lab-head">
+          <h3 data-i18n="lab.evd.h">8 · Interactive collider event</h3>
+          <span class="lab-tag t-em" data-i18n="lab.evd.tag">event display</span>
+        </div>
+        <p data-i18n="lab.evd.p">A real collider event, projected into the transverse plane of an ATLAS/CMS-style detector. Each track carries measured (pT, η, φ, ID). Pick an event, hover a track for details, toggle detector layers, or rotate the view.</p>
+        <div class="lab-viz">
+          <canvas id="evdCanvas"></canvas>
+          <div class="det-picker" id="evdPicker"></div>
+        </div>
+        <div class="lab-controls" id="evdControls"></div>
+        <div class="lab-legend" id="evdLegend"></div>
+      </div>
+
+      <!-- Demo 9: Conservation-law checker -->
+      <div class="lab-card">
+        <div class="lab-head">
+          <h3 data-i18n="lab.cons.h">9 · Conservation-law checker</h3>
+          <span class="lab-tag t-strong" data-i18n="lab.cons.tag">selection rules</span>
+        </div>
+        <p data-i18n="lab.cons.p">Every particle process must conserve certain quantities. Drag reactants and products into the two panels; the checker verifies electric charge, baryon number, lepton flavour numbers (Lₑ/L_μ/L_τ), strangeness, colour, and 4-momentum, then reports which force (if any) can mediate the process — or which law it violates.</p>
+        <div class="lab-viz">
+          <canvas id="consCanvas"></canvas>
+        </div>
+        <div class="lab-controls" id="consControls"></div>
+        <div class="lab-legend" id="consLegend"></div>
+      </div>
+
+      <!-- Demo 10: Running couplings -->
+      <div class="lab-card">
+        <div class="lab-head">
+          <h3 data-i18n="lab.run.h">10 · Running couplings</h3>
+          <span class="lab-tag t-higgs" data-i18n="lab.run.tag">RGE evolution</span>
+        </div>
+        <p data-i18n="lab.run.p">In quantum field theory, coupling constants aren't constant — they run with the energy scale μ. Plotted here: α_em, α_s (strong), and sin²θ_W from 1 GeV to 10¹⁹ GeV, evolved with 1-loop β-functions. Toggle "MSSM particle content" to see the couplings nearly unify around 10¹⁶ GeV — the classic Grand Unification hint.</p>
+        <div class="lab-viz">
+          <canvas id="runCanvas"></canvas>
+        </div>
+        <div class="lab-controls" id="runControls"></div>
+        <div class="lab-legend" id="runLegend"></div>
       </div>
       </div><!-- /advanced -->
 

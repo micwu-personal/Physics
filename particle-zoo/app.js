@@ -3062,6 +3062,612 @@ function labDrawPDF(){
   ctx.textAlign='left'; ctx.fillText(`Q² = ${Math.pow(10, PDF.logQ2).toFixed(1)} GeV²`, padL, 18);
 }
 
+/* ---------- Demo 8: Interactive collider event display ---------- */
+// Real-ish LHC-style events in the transverse (x-y) plane. Each event is a
+// list of tracks with (pT, phi, eta, id). Detector layers (tracker/ECAL/HCAL/
+// muon) are radial rings. User can rotate the view, hover a track for details,
+// toggle layers on/off.
+var EVD_LAYERS = [
+  { id:'trk',   r0:22,  r1:70,  color:'rgba(78,168,255,0.35)',  fill:'rgba(78,168,255,0.05)',  key:'lab.evd.tracker' },
+  { id:'ecal',  r0:70,  r1:100, color:'rgba(255,209,102,0.40)', fill:'rgba(255,209,102,0.06)', key:'lab.evd.ecal' },
+  { id:'hcal',  r0:100, r1:140, color:'rgba(255,107,157,0.40)', fill:'rgba(255,107,157,0.06)', key:'lab.evd.hcal' },
+  { id:'muon',  r0:150, r1:195, color:'rgba(126,232,197,0.40)', fill:'rgba(126,232,197,0.06)', key:'lab.evd.muon' },
+];
+// Particle ID → colour + shower kind for the event display.
+var EVD_PID = {
+  'e-':   { color:'#4ea8ff', shower:'em',  muon:false, dashed:false, charged:true  },
+  'e+':   { color:'#4ea8ff', shower:'em',  muon:false, dashed:false, charged:true  },
+  'mu-':  { color:'#7ee8c5', shower:'mip', muon:true,  dashed:false, charged:true  },
+  'mu+':  { color:'#7ee8c5', shower:'mip', muon:true,  dashed:false, charged:true  },
+  'gamma':{ color:'#ffd166', shower:'em',  muon:false, dashed:true,  charged:false },
+  'jet':  { color:'#c39bff', shower:'had', muon:false, dashed:false, charged:true  },
+  'bjet': { color:'#ff5c8a', shower:'had', muon:false, dashed:false, charged:true  }, // b-tagged jet: pink
+  'MET':  { color:'#8fa8ff', shower:'none',muon:false, dashed:true,  charged:false },
+};
+// Pre-scripted events. pT in GeV; phi in radians. eta ignored in 2D view.
+var EVD_EVENTS = {
+  zmumu: { key:'lab.evd.ev.zmumu', tracks:[
+    { id:'mu-',  pT: 45.2, phi:  0.42, eta: 0.31 },
+    { id:'mu+',  pT: 44.7, phi:  0.42 + Math.PI, eta:-0.35 },
+  ]},
+  hgg: { key:'lab.evd.ev.hgg', tracks:[
+    { id:'gamma', pT: 62.5, phi:  0.9, eta: 0.14 },
+    { id:'gamma', pT: 60.1, phi:  0.9 + Math.PI - 0.05, eta:-0.20 },
+  ]},
+  ttbar: { key:'lab.evd.ev.ttbar', tracks:[
+    { id:'bjet', pT: 92.0, phi:  0.30, eta: 0.55 },
+    { id:'bjet', pT: 78.4, phi:  2.20, eta:-0.42 },
+    { id:'jet',  pT: 55.1, phi:  3.80, eta: 0.11 },
+    { id:'jet',  pT: 41.8, phi:  4.55, eta: 0.88 },
+    { id:'mu-',  pT: 34.6, phi:  5.35, eta: 0.24 },
+    { id:'MET',  pT: 32.0, phi:  5.35 + Math.PI, eta: 0    },
+  ]},
+  ttH: { key:'lab.evd.ev.ttH', tracks:[
+    { id:'bjet', pT: 88.3, phi:  0.20, eta: 0.31 },
+    { id:'bjet', pT: 82.7, phi:  1.65, eta:-0.28 },
+    { id:'bjet', pT: 61.4, phi:  2.90, eta: 0.44 }, // H → bb
+    { id:'bjet', pT: 55.9, phi:  3.50, eta:-0.13 },
+    { id:'jet',  pT: 47.2, phi:  4.30, eta: 0.65 },
+    { id:'jet',  pT: 39.5, phi:  5.10, eta:-0.55 },
+    { id:'e+',   pT: 28.7, phi:  5.90, eta: 0.10 },
+    { id:'MET',  pT: 25.0, phi:  5.90 + Math.PI, eta: 0    },
+  ]},
+  zbb: { key:'lab.evd.ev.zbb', tracks:[
+    { id:'bjet', pT: 48.9, phi: 1.10, eta: 0.20 },
+    { id:'bjet', pT: 46.2, phi: 1.10 + Math.PI, eta:-0.18 },
+  ]},
+};
+function labInitEVD(){
+  const c = document.getElementById('evdCanvas'); if(!c) return;
+  const { ctx, w, h } = labSizeCanvas(c);
+  const prev = LAB.evd || {};
+  LAB.evd = {
+    ctx, w, h, canvas:c,
+    current: prev.current || 'zmumu',
+    layers: prev.layers || { trk:true, ecal:true, hcal:true, muon:true },
+    rot: prev.rot || 0,
+    hover: null,
+  };
+  labRebuildEVDPicker();
+  // Mouse hover for track info
+  c.onmousemove = (ev)=>{
+    const r = c.getBoundingClientRect();
+    LAB.evd._mx = ev.clientX - r.left;
+    LAB.evd._my = ev.clientY - r.top;
+  };
+  c.onmouseleave = ()=>{ LAB.evd._mx = null; LAB.evd._my = null; LAB.evd.hover=null; };
+  // Controls: rotate slider + layer toggles
+  const ctrls = document.getElementById('evdControls');
+  if(ctrls && !ctrls.dataset.built){
+    ctrls.dataset.built='1';
+    ctrls.innerHTML = `
+      <div class="lab-slider"><label>${t('lab.evd.rotate')} <span id="evdRotV">0°</span></label>
+        <input type="range" id="evdRot" min="0" max="360" step="1" value="0"></div>
+      <label class="switch"><input type="checkbox" id="evdL_trk" checked><span data-i18n="lab.evd.tracker">tracker</span></label>
+      <label class="switch"><input type="checkbox" id="evdL_ecal" checked><span data-i18n="lab.evd.ecal">ECAL</span></label>
+      <label class="switch"><input type="checkbox" id="evdL_hcal" checked><span data-i18n="lab.evd.hcal">HCAL</span></label>
+      <label class="switch"><input type="checkbox" id="evdL_muon" checked><span data-i18n="lab.evd.muon">muon</span></label>`;
+    document.getElementById('evdRot').oninput = (e)=>{
+      LAB.evd.rot = parseFloat(e.target.value) * Math.PI / 180;
+      document.getElementById('evdRotV').textContent = parseFloat(e.target.value).toFixed(0) + '°';
+    };
+    ['trk','ecal','hcal','muon'].forEach(k=>{
+      document.getElementById('evdL_'+k).onchange = (e)=>{ LAB.evd.layers[k] = e.target.checked; };
+    });
+  }
+  const leg = document.getElementById('evdLegend');
+  if(leg){
+    leg.innerHTML = `
+      <span class="ll-item"><i class="dot" style="background:#4ea8ff"></i>e±</span>
+      <span class="ll-item"><i class="dot" style="background:#7ee8c5"></i>μ±</span>
+      <span class="ll-item"><i class="dot" style="background:#ffd166"></i>γ</span>
+      <span class="ll-item"><i class="dot" style="background:#c39bff"></i>${t('lab.det.role.jet')}</span>
+      <span class="ll-item"><i class="dot" style="background:#ff5c8a"></i>b-${t('lab.det.role.jet')}</span>
+      <span class="ll-item"><i class="dot" style="background:#8fa8ff"></i>${t('lab.evd.met')}</span>
+      <div style="flex-basis:100%;color:#8b93b3;font-size:11px;margin-top:6px">${t('lab.evd.hover')}</div>`;
+  }
+}
+function labRebuildEVDPicker(){
+  if(!LAB || !LAB.evd) return;
+  const picker = document.getElementById('evdPicker');
+  if(!picker) return;
+  picker.innerHTML = '';
+  Object.keys(EVD_EVENTS).forEach(k=>{
+    const E = EVD_EVENTS[k];
+    const b = document.createElement('button');
+    b.textContent = t(E.key);
+    if(k===LAB.evd.current) b.classList.add('active');
+    b.onclick = ()=>{
+      LAB.evd.current = k;
+      picker.querySelectorAll('button').forEach(x=>x.classList.remove('active'));
+      b.classList.add('active');
+    };
+    picker.appendChild(b);
+  });
+}
+function labDrawEVD(){
+  const S = LAB.evd; if(!S) return;
+  const { ctx, w, h } = S;
+  ctx.clearRect(0,0,w,h);
+  const cx = w/2, cy = h/2;
+  const maxR = Math.max(30, Math.min(w,h)/2 - 14);
+  const scale = maxR / 195;
+  // 1) layers (respecting toggles)
+  for(let i=EVD_LAYERS.length-1;i>=0;i--){
+    const L = EVD_LAYERS[i];
+    if(!S.layers[L.id]) continue;
+    ctx.fillStyle = L.fill;
+    ctx.beginPath(); ctx.arc(cx,cy,L.r1*scale,0,Math.PI*2); ctx.fill();
+  }
+  EVD_LAYERS.forEach(L=>{
+    if(!S.layers[L.id]) return;
+    ctx.strokeStyle = L.color; ctx.lineWidth = 1.2;
+    ctx.beginPath(); ctx.arc(cx,cy,L.r1*scale,0,Math.PI*2); ctx.stroke();
+    // label at top
+    ctx.fillStyle='#8b93b3'; ctx.font='9px JetBrains Mono, monospace'; ctx.textAlign='center';
+    ctx.fillText(t(L.key), cx, cy - (L.r0+L.r1)/2*scale + 3);
+  });
+  // collision point
+  ctx.fillStyle='#fff'; ctx.beginPath(); ctx.arc(cx,cy,3,0,Math.PI*2); ctx.fill();
+  // 2) tracks
+  const E = EVD_EVENTS[S.current];
+  const pxOfPT = (pt)=> Math.min(1, pt/100); // heuristic thickness scaler
+  let hoveredTrack = null;
+  E.tracks.forEach((tr, idx)=>{
+    const pid = EVD_PID[tr.id] || { color:'#fff', shower:'none', muon:false, dashed:false, charged:false };
+    const phi = tr.phi + S.rot;
+    // helical curve for charged, straight for neutral
+    let x1=cx, y1=cy, x2, y2;
+    const rEnd = pid.shower==='had' ? 140*scale : pid.shower==='em' ? 100*scale : (pid.muon?195*scale:140*scale);
+    if(pid.charged && pid.shower!=='none'){
+      // bend proportional to 1/pT (soft tracks bend more)
+      const bend = 30 / Math.max(5, tr.pT);
+      const steps = 40;
+      ctx.strokeStyle = pid.color;
+      ctx.lineWidth = 1.2 + pxOfPT(tr.pT)*2.5;
+      ctx.beginPath();
+      let lastX=cx, lastY=cy;
+      for(let s=0; s<=steps; s++){
+        const t01 = s/steps;
+        const r = t01 * rEnd;
+        const a = phi + bend * t01;
+        const x = cx + Math.cos(a)*r, y = cy + Math.sin(a)*r;
+        if(s===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+        lastX=x; lastY=y;
+      }
+      ctx.stroke();
+      x2=lastX; y2=lastY;
+    } else {
+      ctx.strokeStyle = pid.color;
+      ctx.lineWidth = 1.2 + pxOfPT(tr.pT)*2;
+      if(pid.dashed) ctx.setLineDash([4,4]);
+      x2 = cx + Math.cos(phi)*rEnd;
+      y2 = cy + Math.sin(phi)*rEnd;
+      ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(x2, y2); ctx.stroke();
+      ctx.setLineDash([]);
+    }
+    // shower "hit" cluster
+    if(pid.shower === 'em' && S.layers.ecal){
+      drawCalCells(ctx, cx, cy, 70*scale, 100*scale, phi + (pid.charged?0.05:0), 0.08, pid.color, 'em', 4);
+    } else if(pid.shower === 'had' && S.layers.hcal){
+      // Draw both ECAL and HCAL for hadronic (real jets deposit in both)
+      if(S.layers.ecal) drawCalCells(ctx, cx, cy, 70*scale, 100*scale, phi + 0.05, 0.10, pid.color, 'em', 4);
+      drawCalCells(ctx, cx, cy, 100*scale, 140*scale, phi + 0.08, 0.14, pid.color, 'had', 5);
+    }
+    // muon hits
+    if(pid.muon && S.layers.muon){
+      const rA = 165*scale, rB = 185*scale;
+      const angM = phi + (pid.charged ? 0.12 : 0);
+      [rA,rB].forEach(rr=>{
+        const hx = cx + Math.cos(angM)*rr, hy = cy + Math.sin(angM)*rr;
+        ctx.fillStyle = pid.color;
+        ctx.beginPath(); ctx.arc(hx,hy,3,0,Math.PI*2); ctx.fill();
+      });
+    }
+    // hover hit-test: if mouse is close to any point on the track, mark it
+    if(S._mx!=null && S._my!=null && !hoveredTrack){
+      const dxm = S._mx - x2, dym = S._my - y2;
+      // rough: distance from cursor to endpoint or midpoint
+      const midX = (cx+x2)/2, midY=(cy+y2)/2;
+      const d1 = Math.hypot(dxm, dym);
+      const d2 = Math.hypot(S._mx-midX, S._my-midY);
+      if(Math.min(d1,d2) < 16) hoveredTrack = { ...tr, x2, y2 };
+    }
+  });
+  // hovered track panel
+  if(hoveredTrack){
+    S.hover = hoveredTrack;
+    const pid = EVD_PID[hoveredTrack.id];
+    ctx.fillStyle = 'rgba(3,5,16,0.85)';
+    ctx.strokeStyle = pid.color; ctx.lineWidth = 1;
+    const bw = 200, bh = 60;
+    let bx = S._mx + 12, by = S._my + 12;
+    if(bx+bw > w) bx = S._mx - bw - 12;
+    if(by+bh > h) by = S._my - bh - 12;
+    ctx.fillRect(bx, by, bw, bh); ctx.strokeRect(bx, by, bw, bh);
+    ctx.fillStyle = pid.color; ctx.font='bold 12px JetBrains Mono, monospace';
+    ctx.textAlign='left'; ctx.textBaseline='top';
+    ctx.fillText(hoveredTrack.id, bx+8, by+6);
+    ctx.fillStyle = '#c8cff0'; ctx.font='11px JetBrains Mono, monospace';
+    ctx.fillText(`pT = ${hoveredTrack.pT.toFixed(1)} GeV`, bx+8, by+22);
+    ctx.fillText(`η = ${hoveredTrack.eta.toFixed(2)}    φ = ${hoveredTrack.phi.toFixed(2)}`, bx+8, by+38);
+    ctx.textBaseline='alphabetic';
+  }
+  // Header
+  ctx.fillStyle='#e8ecff'; ctx.font='bold 13px Space Grotesk, sans-serif';
+  ctx.textAlign='left';
+  ctx.fillText(t(E.key), 12, 20);
+  ctx.fillStyle='#8b93b3'; ctx.font='10px JetBrains Mono, monospace';
+  ctx.fillText(`${E.tracks.length} tracks · √s = 13 TeV`, 12, 36);
+}
+
+/* ---------- Demo 9: Conservation-law checker ---------- */
+// Particle database with quantum numbers. Q=charge, B=baryon,
+// Le/Lmu/Ltau=lepton flavour, S=strangeness. Antiparticles flip all signs
+// except S which flips too. Naming follows PDG.
+var CONS_PARTICLES = {
+  //          Q     B    Le   Lmu Ltau  S    color
+  'p':      { Q: 1, B: 1, Le:0, Lmu:0, Ltau:0, S:0,   c:'#c8cff0', hadron:true },
+  'p̄':      { Q:-1, B:-1, Le:0, Lmu:0, Ltau:0, S:0,   c:'#c8cff0', hadron:true },
+  'n':      { Q: 0, B: 1, Le:0, Lmu:0, Ltau:0, S:0,   c:'#c8cff0', hadron:true },
+  'n̄':      { Q: 0, B:-1, Le:0, Lmu:0, Ltau:0, S:0,   c:'#c8cff0', hadron:true },
+  'π⁺':     { Q: 1, B: 0, Le:0, Lmu:0, Ltau:0, S:0,   c:'#ff6b9d', hadron:true },
+  'π⁻':     { Q:-1, B: 0, Le:0, Lmu:0, Ltau:0, S:0,   c:'#ff6b9d', hadron:true },
+  'π⁰':     { Q: 0, B: 0, Le:0, Lmu:0, Ltau:0, S:0,   c:'#ffb0cf', hadron:true },
+  'K⁺':     { Q: 1, B: 0, Le:0, Lmu:0, Ltau:0, S: 1,  c:'#ff5c8a', hadron:true },
+  'K⁻':     { Q:-1, B: 0, Le:0, Lmu:0, Ltau:0, S:-1,  c:'#ff5c8a', hadron:true },
+  'K⁰':     { Q: 0, B: 0, Le:0, Lmu:0, Ltau:0, S: 1,  c:'#ff5c8a', hadron:true },
+  'Λ':      { Q: 0, B: 1, Le:0, Lmu:0, Ltau:0, S:-1,  c:'#c39bff', hadron:true },
+  'Σ⁺':     { Q: 1, B: 1, Le:0, Lmu:0, Ltau:0, S:-1,  c:'#c39bff', hadron:true },
+  'e⁻':     { Q:-1, B: 0, Le: 1, Lmu:0, Ltau:0, S:0,  c:'#4ea8ff', hadron:false },
+  'e⁺':     { Q: 1, B: 0, Le:-1, Lmu:0, Ltau:0, S:0,  c:'#4ea8ff', hadron:false },
+  'μ⁻':     { Q:-1, B: 0, Le:0, Lmu: 1, Ltau:0, S:0,  c:'#7ee8c5', hadron:false },
+  'μ⁺':     { Q: 1, B: 0, Le:0, Lmu:-1, Ltau:0, S:0,  c:'#7ee8c5', hadron:false },
+  'τ⁻':     { Q:-1, B: 0, Le:0, Lmu:0, Ltau: 1, S:0,  c:'#c39bff', hadron:false },
+  'τ⁺':     { Q: 1, B: 0, Le:0, Lmu:0, Ltau:-1, S:0,  c:'#c39bff', hadron:false },
+  'ν_e':    { Q: 0, B: 0, Le: 1, Lmu:0, Ltau:0, S:0,  c:'#8fa8ff', hadron:false },
+  'ν̄_e':    { Q: 0, B: 0, Le:-1, Lmu:0, Ltau:0, S:0,  c:'#8fa8ff', hadron:false },
+  'ν_μ':    { Q: 0, B: 0, Le:0, Lmu: 1, Ltau:0, S:0,  c:'#8fa8ff', hadron:false },
+  'ν̄_μ':    { Q: 0, B: 0, Le:0, Lmu:-1, Ltau:0, S:0,  c:'#8fa8ff', hadron:false },
+  'ν_τ':    { Q: 0, B: 0, Le:0, Lmu:0, Ltau: 1, S:0,  c:'#8fa8ff', hadron:false },
+  'ν̄_τ':    { Q: 0, B: 0, Le:0, Lmu:0, Ltau:-1, S:0,  c:'#8fa8ff', hadron:false },
+  'γ':      { Q: 0, B: 0, Le:0, Lmu:0, Ltau:0, S:0,   c:'#ffd166', hadron:false, boson:true },
+};
+var CONS_EXAMPLES = [
+  { name:'β⁻ decay:  n → p + e⁻ + ν̄_e',       reactants:['n'],       products:['p','e⁻','ν̄_e'] },
+  { name:'π⁺ decay:  π⁺ → μ⁺ + ν_μ',            reactants:['π⁺'],      products:['μ⁺','ν_μ'] },
+  { name:'μ⁻ decay:  μ⁻ → e⁻ + ν̄_e + ν_μ',     reactants:['μ⁻'],      products:['e⁻','ν̄_e','ν_μ'] },
+  { name:'Λ decay:   Λ → p + π⁻',              reactants:['Λ'],       products:['p','π⁻'] },
+  { name:'Forbidden: μ⁻ → e⁻ + γ  (violates L_μ / L_e)',
+                                                  reactants:['μ⁻'],      products:['e⁻','γ'] },
+  { name:'Forbidden: p → e⁺ + γ    (violates B)',
+                                                  reactants:['p'],       products:['e⁺','γ'] },
+  { name:'K⁺ decay:  K⁺ → μ⁺ + ν_μ  (ΔS=1 weak)',
+                                                  reactants:['K⁺'],      products:['μ⁺','ν_μ'] },
+];
+function labInitCons(){
+  const c = document.getElementById('consCanvas'); if(!c) return;
+  const { ctx, w, h } = labSizeCanvas(c);
+  const prev = LAB.cons || {};
+  LAB.cons = { ctx, w, h, canvas:c, R:prev.R||[], P:prev.P||[], example:prev.example||0 };
+  // Build controls: palette + reactant/product pads + example dropdown
+  const ctrls = document.getElementById('consControls');
+  if(ctrls && !ctrls.dataset.built){
+    ctrls.dataset.built='1';
+    const palette = Object.keys(CONS_PARTICLES).map(k=>{
+      const P = CONS_PARTICLES[k];
+      return `<button class="cons-chip" data-cp="${k}" style="border-color:${P.c};color:${P.c}">${k}</button>`;
+    }).join('');
+    ctrls.innerHTML = `
+      <div class="cons-pane" style="flex-basis:100%">
+        <div style="font-size:11px;color:var(--dim);margin-bottom:4px" data-i18n="lab.cons.tray">palette</div>
+        <div class="cons-palette">${palette}</div>
+      </div>
+      <button class="btn" id="consClear" data-i18n="lab.cons.clear">Clear both sides</button>
+      <select id="consExample" style="padding:6px 10px;background:rgba(0,0,0,0.35);color:var(--text);border:1px solid var(--panel-b);border-radius:6px;font-family:JetBrains Mono,monospace;font-size:12px"></select>
+      <button class="btn" id="consLoadExample" data-i18n="lab.cons.example">Load example</button>`;
+    ctrls.querySelectorAll('.cons-chip').forEach(b=>{
+      b.onclick = ()=>{
+        // Click to add to whichever side has fewer particles (usually products)
+        const side = (LAB.cons.R.length <= LAB.cons.P.length) ? 'R' : 'P';
+        LAB.cons[side].push(b.dataset.cp);
+      };
+      // Right-click removes last of that particle from either side
+      b.oncontextmenu = (e)=>{ e.preventDefault();
+        const removeFrom = (arr)=>{ const i=arr.lastIndexOf(b.dataset.cp); if(i>=0) arr.splice(i,1); return i>=0; };
+        if(!removeFrom(LAB.cons.P)) removeFrom(LAB.cons.R);
+      };
+    });
+    document.getElementById('consClear').onclick = ()=>{ LAB.cons.R=[]; LAB.cons.P=[]; };
+    const sel = document.getElementById('consExample');
+    sel.innerHTML = CONS_EXAMPLES.map((e,i)=>`<option value="${i}">${e.name}</option>`).join('');
+    sel.onchange = ()=>{ LAB.cons.example = parseInt(sel.value)||0; };
+    document.getElementById('consLoadExample').onclick = ()=>{
+      const E = CONS_EXAMPLES[LAB.cons.example];
+      LAB.cons.R = [...E.reactants]; LAB.cons.P = [...E.products];
+    };
+  }
+  const leg = document.getElementById('consLegend');
+  if(leg){
+    leg.innerHTML = `
+      <div style="flex-basis:100%;color:#8b93b3;font-size:11px">${t('lab.cons.legend')}</div>
+      <div style="flex-basis:100%;color:#8b93b3;font-size:10px;margin-top:4px">${'Click chip → add. Right-click → remove.'}</div>`;
+  }
+  // Canvas click: also allow clicking on a particle in either pad to remove it
+  c.onclick = (ev)=>{
+    const S = LAB.cons; if(!S) return;
+    const r = c.getBoundingClientRect();
+    const mx = ev.clientX - r.left, my = ev.clientY - r.top;
+    // check both pads
+    S._rects && S._rects.forEach(rect=>{
+      if(mx>=rect.x && mx<=rect.x+rect.w && my>=rect.y && my<=rect.y+rect.h){
+        const arr = rect.side==='R' ? S.R : S.P;
+        arr.splice(rect.idx,1);
+      }
+    });
+  };
+}
+function sumCharges(arr){
+  const acc = {Q:0,B:0,Le:0,Lmu:0,Ltau:0,S:0};
+  arr.forEach(k=>{ const p = CONS_PARTICLES[k]; if(!p) return;
+    acc.Q += p.Q; acc.B += p.B; acc.Le += p.Le; acc.Lmu += p.Lmu; acc.Ltau += p.Ltau; acc.S += p.S;
+  });
+  return acc;
+}
+function classifyProcess(R, P){
+  const l = sumCharges(R), r = sumCharges(P);
+  const viol = [];
+  const keys = ['Q','B','Le','Lmu','Ltau','S'];
+  const dS = r.S - l.S;
+  for(const k of keys){
+    if(k==='S') continue;
+    if(l[k] !== r[k]) viol.push(k);
+  }
+  // Strangeness: strong/EM require ΔS=0; weak allows |ΔS|≤1
+  const strangenessOK = (Math.abs(dS) <= 1);
+  if(!strangenessOK) viol.push('S');
+  // Force verdict: only meaningful if the strict laws (Q,B,L_x) hold
+  let force = 'none';
+  if(viol.length===0){
+    // If it involves a neutrino, must be weak. If ΔS≠0, must be weak.
+    const hasNu = [...R,...P].some(k=>k.includes('ν'));
+    if(hasNu || dS !== 0) force = 'weak';
+    else {
+      // If only leptons+photons, EM. Else check if hadrons are involved.
+      const anyHadron = [...R,...P].some(k=>CONS_PARTICLES[k]?.hadron);
+      const hasGamma = [...R,...P].includes('γ');
+      if(hasGamma && !anyHadron) force = 'em';
+      else if(anyHadron) force = 'strong'; // best guess; strong preserves everything
+      else force = 'em';
+    }
+  }
+  return { viol, dS, force, l, r };
+}
+function labDrawCons(){
+  const S = LAB.cons; if(!S) return;
+  const { ctx, w, h } = S;
+  ctx.clearRect(0,0,w,h);
+  ctx.fillStyle='#050815'; ctx.fillRect(0,0,w,h);
+
+  const cls = classifyProcess(S.R, S.P);
+  const ok = cls.viol.length === 0;
+
+  // Layout: two panes with header, arrow between, verdict at bottom.
+  const padX = 16, padY = 30;
+  const paneW = (w - 3*padX) / 2, paneH = h - padY - 96;
+  const paneY = padY;
+  const rectR = { x: padX, y: paneY, w: paneW, h: paneH };
+  const rectP = { x: padX*2 + paneW, y: paneY, w: paneW, h: paneH };
+  const drawPane = (rect, arr, side, titleKey)=>{
+    ctx.strokeStyle='rgba(255,255,255,0.15)'; ctx.lineWidth=1;
+    ctx.strokeRect(rect.x, rect.y, rect.w, rect.h);
+    ctx.fillStyle='#c8cff0'; ctx.font='bold 12px Space Grotesk, sans-serif';
+    ctx.textAlign='left'; ctx.fillText(t(titleKey), rect.x+8, rect.y-8);
+    // draw particles as chips
+    const chipH = 24, gap = 6;
+    S._rects = S._rects || [];
+    arr.forEach((k, i)=>{
+      const P = CONS_PARTICLES[k]; if(!P) return;
+      const chipW = 10 + ctx.measureText(k).width + 10;
+      const cols = Math.max(1, Math.floor((rect.w - 12) / (chipW+gap)));
+      const row = Math.floor(i/cols), col = i%cols;
+      const cxc = rect.x + 8 + col*(chipW+gap);
+      const cyc = rect.y + 12 + row*(chipH+gap);
+      ctx.fillStyle = P.c + '22'; ctx.strokeStyle = P.c; ctx.lineWidth=1;
+      ctx.beginPath();
+      const rc = 6;
+      ctx.moveTo(cxc+rc,cyc);
+      ctx.lineTo(cxc+chipW-rc,cyc);
+      ctx.quadraticCurveTo(cxc+chipW,cyc, cxc+chipW,cyc+rc);
+      ctx.lineTo(cxc+chipW,cyc+chipH-rc);
+      ctx.quadraticCurveTo(cxc+chipW,cyc+chipH, cxc+chipW-rc,cyc+chipH);
+      ctx.lineTo(cxc+rc,cyc+chipH);
+      ctx.quadraticCurveTo(cxc,cyc+chipH, cxc,cyc+chipH-rc);
+      ctx.lineTo(cxc,cyc+rc);
+      ctx.quadraticCurveTo(cxc,cyc, cxc+rc,cyc);
+      ctx.closePath();
+      ctx.fill(); ctx.stroke();
+      ctx.fillStyle = P.c; ctx.font='bold 12px JetBrains Mono, monospace';
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText(k, cxc+chipW/2, cyc+chipH/2);
+      ctx.textBaseline='alphabetic';
+      S._rects.push({x:cxc, y:cyc, w:chipW, h:chipH, side, idx:i});
+    });
+    // sums under the pane
+    const sums = sumCharges(arr);
+    ctx.fillStyle='#8b93b3'; ctx.font='10px JetBrains Mono, monospace'; ctx.textAlign='left';
+    const summary = `Q=${sums.Q}  B=${sums.B}  Lₑ=${sums.Le}  L_μ=${sums.Lmu}  L_τ=${sums.Ltau}  S=${sums.S}`;
+    ctx.fillText(summary, rect.x+4, rect.y+rect.h - 6);
+  };
+  S._rects = [];
+  drawPane(rectR, S.R, 'R', 'lab.cons.reactants');
+  drawPane(rectP, S.P, 'P', 'lab.cons.products');
+  // Arrow between
+  ctx.strokeStyle='#c8cff0'; ctx.lineWidth=2;
+  const ay = paneY + paneH/2;
+  ctx.beginPath();
+  ctx.moveTo(rectR.x+rectR.w+4, ay); ctx.lineTo(rectP.x-4, ay);
+  ctx.stroke();
+  const ah = 8;
+  ctx.fillStyle='#c8cff0';
+  ctx.beginPath();
+  ctx.moveTo(rectP.x-4, ay); ctx.lineTo(rectP.x-4-ah, ay-ah/2); ctx.lineTo(rectP.x-4-ah, ay+ah/2);
+  ctx.closePath(); ctx.fill();
+
+  // Verdict block
+  const vy = paneY + paneH + 12;
+  ctx.fillStyle = ok ? '#7ee8c5' : '#ff6b9d';
+  ctx.font = 'bold 14px Space Grotesk, sans-serif';
+  ctx.textAlign='left';
+  ctx.fillText(ok ? t('lab.cons.ok') : t('lab.cons.bad'), padX, vy);
+  ctx.font = '11px JetBrains Mono, monospace';
+  ctx.fillStyle = '#c8cff0';
+  if(ok){
+    const forceKey = 'lab.cons.force.' + cls.force;
+    ctx.fillText(`${t('lab.cons.force')}: ${t(forceKey)}`, padX, vy+18);
+    if(cls.dS !== 0) ctx.fillText(`ΔS = ${cls.dS}  →  weak decay`, padX, vy+34);
+  } else {
+    const map = {Q:'lab.cons.rule.Q', B:'lab.cons.rule.B', Le:'lab.cons.rule.Le', Lmu:'lab.cons.rule.Lmu', Ltau:'lab.cons.rule.Ltau', S:'lab.cons.rule.S'};
+    ctx.fillStyle='#ff6b9d';
+    ctx.fillText('× ' + cls.viol.map(k=>t(map[k])).join(', '), padX, vy+18);
+    ctx.fillStyle='#8b93b3';
+    ctx.fillText(`Δ: Q=${cls.r.Q - cls.l.Q}, B=${cls.r.B - cls.l.B}, Lₑ=${cls.r.Le - cls.l.Le}, L_μ=${cls.r.Lmu - cls.l.Lmu}, L_τ=${cls.r.Ltau - cls.l.Ltau}, S=${cls.dS}`, padX, vy+36);
+  }
+}
+
+/* ---------- Demo 10: Running couplings (1-loop RGEs) ---------- */
+// Boundary values at M_Z = 91.1876 GeV:
+//   α₁(M_Z) = 5/3 · α_em(M_Z) / cos²θ_W   (GUT-normalised hypercharge coupling)
+//   α₂(M_Z) = α_em(M_Z) / sin²θ_W
+//   α₃(M_Z) = 0.1179  (PDG 2024)
+// 1-loop β coefficients: dα_i/dt = b_i/(2π) · α_i² where t = ln(μ/M_Z)
+// SM:   b = (41/10, -19/6, -7)
+// MSSM: b = (33/5,  1,    -3)   above M_SUSY
+var RUN = { mssm:false, mSUSY: 3 };  // log10(M_SUSY/GeV) = 3
+function labInitRun(){
+  const c = document.getElementById('runCanvas'); if(!c) return;
+  const { ctx, w, h } = labSizeCanvas(c);
+  LAB.run = { ctx, w, h, canvas:c };
+  const ctrls = document.getElementById('runControls');
+  if(ctrls && !ctrls.dataset.built){
+    ctrls.dataset.built='1';
+    ctrls.innerHTML = `
+      <label class="switch"><input type="checkbox" id="runMSSM"><span data-i18n="lab.run.mssm">MSSM particle content</span></label>
+      <div class="lab-slider"><label>log₁₀(M_SUSY/GeV) <span id="runMv">${RUN.mSUSY.toFixed(1)}</span></label>
+        <input type="range" id="runM" min="2" max="5" step="0.1" value="${RUN.mSUSY}"></div>`;
+    document.getElementById('runMSSM').onchange = (e)=>{ RUN.mssm = e.target.checked; };
+    document.getElementById('runM').oninput = (e)=>{ RUN.mSUSY = parseFloat(e.target.value); document.getElementById('runMv').textContent = RUN.mSUSY.toFixed(1); };
+  }
+  labRebuildRunLegend();
+}
+function labRebuildRunLegend(){
+  const leg = document.getElementById('runLegend'); if(!leg) return;
+  leg.innerHTML = `
+    <span class="ll-item"><i class="bar" style="background:#4ea8ff;color:#4ea8ff"></i>${t('lab.run.show1')}</span>
+    <span class="ll-item"><i class="bar" style="background:#7ee8c5;color:#7ee8c5"></i>${t('lab.run.show2')}</span>
+    <span class="ll-item"><i class="bar" style="background:#ff6b9d;color:#ff6b9d"></i>${t('lab.run.show3')}</span>
+    <div style="flex-basis:100%;color:#8b93b3;font-size:11px;margin-top:6px">${t('lab.run.legend')}</div>`;
+}
+// Analytic 1-loop solution: 1/α_i(μ) = 1/α_i(μ₀) - (b_i / 2π) · ln(μ/μ₀)
+function runInvAlpha(i, logMu){
+  // Boundary: values at M_Z (log10(M_Z) ≈ 1.96)
+  const alphaEm = 1/127.94;    // at M_Z
+  const sin2W  = 0.23122;
+  const cos2W  = 1 - sin2W;
+  const alpha1_MZ = (5/3) * alphaEm / cos2W;
+  const alpha2_MZ = alphaEm / sin2W;
+  const alpha3_MZ = 0.1179;
+  const inv0 = [1/alpha1_MZ, 1/alpha2_MZ, 1/alpha3_MZ][i];
+  const bSM   = [41/10, -19/6, -7];
+  const bMSSM = [33/5,   1,    -3];
+  const t0 = Math.log(10) * (Math.log10(91.1876));
+  const tE = Math.log(10) * logMu;
+  const dt = tE - t0;
+  if(!RUN.mssm) return inv0 - (bSM[i]/(2*Math.PI)) * dt;
+  // MSSM: from M_Z up to M_SUSY use SM, then MSSM
+  const tS = Math.log(10) * RUN.mSUSY;
+  if(tE <= tS) return inv0 - (bSM[i]/(2*Math.PI)) * dt;
+  const invAtMS = inv0 - (bSM[i]/(2*Math.PI)) * (tS - t0);
+  return invAtMS - (bMSSM[i]/(2*Math.PI)) * (tE - tS);
+}
+function labDrawRun(){
+  const S = LAB.run; if(!S) return;
+  const { ctx, w, h } = S;
+  ctx.clearRect(0,0,w,h);
+  const padL=52, padR=16, padT=28, padB=32;
+  const plotW = w-padL-padR, plotH = h-padT-padB;
+  ctx.fillStyle='#050815'; ctx.fillRect(padL,padT,plotW,plotH);
+  ctx.strokeStyle='rgba(255,255,255,0.1)'; ctx.strokeRect(padL,padT,plotW,plotH);
+  // x: log10(μ/GeV) from 0 to 19; y: 1/α_i from 0 to 65
+  const xMin=0, xMax=19;
+  const yMin=0, yMax=65;
+  const xToPx = (x)=> padL + (x-xMin)/(xMax-xMin)*plotW;
+  const yToPx = (y)=> padT + (1 - (y-yMin)/(yMax-yMin))*plotH;
+  // grid
+  ctx.fillStyle='#8b93b3'; ctx.font='10px JetBrains Mono, monospace'; ctx.textAlign='center';
+  for(let x=0; x<=19; x+=2){
+    const px = xToPx(x);
+    ctx.strokeStyle='rgba(255,255,255,0.06)';
+    ctx.beginPath(); ctx.moveTo(px,padT); ctx.lineTo(px,padT+plotH); ctx.stroke();
+    ctx.fillStyle='#8b93b3'; ctx.fillText(`10^${x}`, px, padT+plotH+14);
+  }
+  ctx.textAlign='right';
+  for(let y=0; y<=yMax; y+=10){
+    const py = yToPx(y);
+    ctx.strokeStyle='rgba(255,255,255,0.06)';
+    ctx.beginPath(); ctx.moveTo(padL,py); ctx.lineTo(padL+plotW,py); ctx.stroke();
+    ctx.fillStyle='#8b93b3'; ctx.fillText(y.toString(), padL-4, py+3);
+  }
+  // Axes
+  ctx.fillStyle='#c8cff0'; ctx.font='11px Space Grotesk, sans-serif';
+  ctx.textAlign='center';
+  ctx.fillText(t('lab.run.axisx'), padL+plotW/2, h-6);
+  ctx.save(); ctx.translate(12, padT+plotH/2); ctx.rotate(-Math.PI/2);
+  ctx.fillText(t('lab.run.axisy'), 0, 0); ctx.restore();
+  // Show M_Z, M_SUSY, M_GUT reference lines
+  const drawXMark = (xLog, label, col)=>{
+    const px = xToPx(xLog);
+    ctx.strokeStyle = col; ctx.setLineDash([3,3]); ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(px,padT); ctx.lineTo(px,padT+plotH); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle=col; ctx.font='10px JetBrains Mono, monospace'; ctx.textAlign='center';
+    ctx.fillText(label, px, padT-4);
+  };
+  drawXMark(Math.log10(91.1876), 'M_Z', 'rgba(139,147,179,0.7)');
+  if(RUN.mssm) drawXMark(RUN.mSUSY, 'M_SUSY', 'rgba(255,209,102,0.8)');
+  drawXMark(16.3, 'M_GUT', 'rgba(126,232,197,0.7)');
+  // Curves
+  const cols = ['#4ea8ff','#7ee8c5','#ff6b9d'];
+  const drawCurve = (i, dashed)=>{
+    ctx.strokeStyle = cols[i]; ctx.lineWidth = 1.8;
+    if(dashed) ctx.setLineDash([4,4]); else ctx.setLineDash([]);
+    ctx.beginPath();
+    for(let px=0; px<=plotW; px++){
+      const xLog = xMin + px/plotW*(xMax-xMin);
+      const inv = runInvAlpha(i, xLog);
+      const py = yToPx(inv);
+      if(px===0) ctx.moveTo(padL+px, py); else ctx.lineTo(padL+px, py);
+    }
+    ctx.stroke(); ctx.setLineDash([]);
+  };
+  // Draw both SM (dashed) and current-mode (solid). If SM mode, only solid.
+  // Solid = current mode; dashed reference = SM
+  if(RUN.mssm){
+    // Draw SM reference dashed first
+    const savedMode = RUN.mssm;
+    RUN.mssm = false;
+    for(let i=0;i<3;i++) drawCurve(i, true);
+    RUN.mssm = savedMode;
+    for(let i=0;i<3;i++) drawCurve(i, false);
+  } else {
+    for(let i=0;i<3;i++) drawCurve(i, false);
+  }
+  // Header
+  ctx.fillStyle='#e8ecff'; ctx.font='bold 13px Space Grotesk, sans-serif';
+  ctx.textAlign='left';
+  ctx.fillText(RUN.mssm ? 'MSSM (solid) vs SM (dashed)' : 'Standard Model, 1-loop', padL, 18);
+}
+
 /* ---------- Lab loop + tab hook ---------- */
 function labLoop(){
   labT += 0.016;
@@ -3072,6 +3678,9 @@ function labLoop(){
   labDrawDecay();
   labDrawOsc();
   labDrawPDF();
+  labDrawEVD();
+  labDrawCons();
+  labDrawRun();
   labRAF = requestAnimationFrame(labLoop);
 }
 function labStart(){
@@ -3084,6 +3693,9 @@ function labStart(){
   labInitDecay();
   labInitOsc();
   labInitPDF();
+  labInitEVD();
+  labInitCons();
+  labInitRun();
   labLoop();
 }
 function labStop(){ if(labRAF!=null){ cancelAnimationFrame(labRAF); labRAF=null; } }
