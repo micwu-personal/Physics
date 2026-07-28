@@ -317,6 +317,12 @@ var BigBangCore = (function(){
     return `<div class="item-refs"><span>${escapeHtml(label)}:</span>${links}</div>`;
   }
 
+  function renderReferencePanel(element, sources, label){
+    element.innerHTML = Object.keys(sources)
+      .map(id=>buildReferenceLinks([id], sources, label))
+      .join('');
+  }
+
   function createAnimationController(options){
     let frameId = null;
     let documentVisible = true;
@@ -377,11 +383,12 @@ var BigBangCore = (function(){
     }
   }
 
-  return {advanceStarfield, buildReferenceLinks, createAnimationController, escapeHtml};
+  return {advanceStarfield, buildReferenceLinks, createAnimationController, escapeHtml, renderReferencePanel};
 })();
 var buildReferenceLinks = BigBangCore.buildReferenceLinks;
 var createAnimationController = BigBangCore.createAnimationController;
 var advanceStarfield = BigBangCore.advanceStarfield;
+var renderReferencePanel = BigBangCore.renderReferencePanel;
 
 </script>
   <script>
@@ -847,6 +854,7 @@ function applyI18n(lang){
   if(typeof renderFates==='function')     renderFates();
   if(typeof renderMysteries==='function') renderMysteries();
   if(typeof renderComposition==='function') renderComposition();
+  if(typeof renderSourceLinks==='function') renderSourceLinks(lang);
   if(typeof updateMachine==='function')   updateMachine();
 }
 function getEpoch(id){
@@ -1147,6 +1155,10 @@ function renderMysteries(){
   });
 }
 
+function renderSourceLinks(lang){
+  renderReferencePanel(document.getElementById('sourceLinks'), SOURCES, LOCALES[lang]['refs.label']);
+}
+
 /* ================ Background canvas — expanding starfield ================ */
 const bgCanvas = document.getElementById('bgCanvas');
 const bgCtx = bgCanvas.getContext('2d');
@@ -1210,10 +1222,6 @@ const browserLang = (navigator.language||'').toLowerCase();
 const initLang = savedLang || (browserLang.startsWith('zh') ? 'zh-CN' : 'en');
 applyI18n(initLang);
 renderScale();
-const sourceLinks = document.getElementById('sourceLinks');
-sourceLinks.innerHTML = Object.keys(SOURCES)
-  .map(id=>buildReferenceLinks([id], SOURCES, LOCALES[initLang]['refs.label']))
-  .join('');
 
 </script>
 </body>

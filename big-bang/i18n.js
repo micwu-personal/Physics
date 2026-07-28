@@ -460,6 +460,7 @@ function applyI18n(lang){
   if(typeof renderFates==='function')     renderFates();
   if(typeof renderMysteries==='function') renderMysteries();
   if(typeof renderComposition==='function') renderComposition();
+  if(typeof renderSourceLinks==='function') renderSourceLinks(lang);
   if(typeof updateMachine==='function')   updateMachine();
 }
 function getEpoch(id){

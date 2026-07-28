@@ -28,6 +28,22 @@ test('buildReferenceLinks creates safe links and rejects incomplete metadata', (
   assert.throws(()=>api.buildReferenceLinks(['missing'], {}, 'References'), /Unknown scientific reference/);
 });
 
+test('source panel rerenders its label when language changes', () => {
+  const panel = {innerHTML:''};
+  const sources = {
+    first:{label:'First paper', url:'https://example.test/first'},
+    second:{label:'Second paper', url:'https://example.test/second'}
+  };
+
+  api.renderReferencePanel(panel, sources, 'References');
+  assert.match(panel.innerHTML, />References:</);
+  assert.equal((panel.innerHTML.match(/target="_blank"/g)||[]).length, 2);
+
+  api.renderReferencePanel(panel, sources, '参考资料');
+  assert.match(panel.innerHTML, />参考资料:</);
+  assert.doesNotMatch(panel.innerHTML, />References:</);
+});
+
 test('animation controller schedules one frame and pauses for every guard', () => {
   let nextId = 1;
   let draws = 0;

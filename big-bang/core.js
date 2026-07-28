@@ -20,6 +20,12 @@ var BigBangCore = (function(){
     return `<div class="item-refs"><span>${escapeHtml(label)}:</span>${links}</div>`;
   }
 
+  function renderReferencePanel(element, sources, label){
+    element.innerHTML = Object.keys(sources)
+      .map(id=>buildReferenceLinks([id], sources, label))
+      .join('');
+  }
+
   function createAnimationController(options){
     let frameId = null;
     let documentVisible = true;
@@ -80,8 +86,9 @@ var BigBangCore = (function(){
     }
   }
 
-  return {advanceStarfield, buildReferenceLinks, createAnimationController, escapeHtml};
+  return {advanceStarfield, buildReferenceLinks, createAnimationController, escapeHtml, renderReferencePanel};
 })();
 var buildReferenceLinks = BigBangCore.buildReferenceLinks;
 var createAnimationController = BigBangCore.createAnimationController;
 var advanceStarfield = BigBangCore.advanceStarfield;
+var renderReferencePanel = BigBangCore.renderReferencePanel;

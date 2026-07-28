@@ -94,9 +94,22 @@ assert(!i18nSource.includes("{k:'radiation',v:85}"), 'BBN composition must not s
 assert.strictEqual(SOURCES.sawala2025.url, 'https://doi.org/10.1038/s41550-025-02563-1', 'Sawala et al. primary source must be registered');
 assert(htmlSource.indexOf('core.js') < htmlSource.indexOf('i18n.js'), 'Testable core must load before app data and rendering');
 assert(coreSource.includes('rel="noopener noreferrer"'), 'Reference links must protect opener context');
+assert(i18nSource.includes("if(typeof renderSourceLinks==='function') renderSourceLinks(lang)"), 'Language updates must rerender the global source panel');
 for(const [id, source] of Object.entries(SOURCES)){
   assert(/^https:\/\//.test(source.url), `Source ${id} must use HTTPS`);
   assert(!/wikipedia/i.test(source.url), `Source ${id} must not cite Wikipedia`);
 }
+
+let renderedSourceLanguage = null;
+context.window = {};
+context.document = {
+  documentElement:{lang:''},
+  querySelectorAll(){ return []; },
+  querySelector(){ return null; }
+};
+context.renderSourceLinks = lang=>{ renderedSourceLanguage = lang; };
+context.applyI18n('zh-CN');
+assert.strictEqual(renderedSourceLanguage, 'zh-CN', 'Changing language must rerender the source panel in Chinese');
+assert.strictEqual(context.document.documentElement.lang, 'zh-CN');
 
 console.log(`Validated ${EPOCHS.length} epochs, ${Object.keys(LOCALES.en).length} locale keys, ${scaleRows.length} scale rows, and ${Object.keys(SOURCES).length} primary sources.`);

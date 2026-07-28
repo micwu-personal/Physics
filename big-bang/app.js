@@ -286,6 +286,10 @@ function renderMysteries(){
   });
 }
 
+function renderSourceLinks(lang){
+  renderReferencePanel(document.getElementById('sourceLinks'), SOURCES, LOCALES[lang]['refs.label']);
+}
+
 /* ================ Background canvas — expanding starfield ================ */
 const bgCanvas = document.getElementById('bgCanvas');
 const bgCtx = bgCanvas.getContext('2d');
@@ -349,7 +353,3 @@ const browserLang = (navigator.language||'').toLowerCase();
 const initLang = savedLang || (browserLang.startsWith('zh') ? 'zh-CN' : 'en');
 applyI18n(initLang);
 renderScale();
-const sourceLinks = document.getElementById('sourceLinks');
-sourceLinks.innerHTML = Object.keys(SOURCES)
-  .map(id=>buildReferenceLinks([id], SOURCES, LOCALES[initLang]['refs.label']))
-  .join('');
