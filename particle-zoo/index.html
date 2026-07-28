@@ -130,7 +130,7 @@
           <div class="cd-item"><div class="qball col-r">u</div><div class="qball col-g">u</div><div class="qball col-b">d</div><div class="cd-lbl" data-i18n="color.demo.proton">Proton (colorless: R+G+B)</div></div>
           <div class="cd-item"><div class="qball col-r">u</div><div class="qball col-ar">d̄</div><div class="cd-lbl" data-i18n="color.demo.pion">π⁺ meson (color+anticolor)</div></div>
         </div>
-        <p class="hint2" style="border:none;padding-top:8px"><span data-i18n="color.p2.a">Gluons carry a color</span> <em data-i18n="color.p2.b">and</em> <span data-i18n="color.p2.c">an anticolor at once — giving</span> <b data-i18n="color.p2.d">8</b> <span data-i18n="color.p2.e">independent gluons (not 9, because one combination is forbidden by SU(3) symmetry). This is why gluons interact with each other and cause quark</span> <b data-i18n="color.p2.f">confinement</b><span data-i18n="color.p2.g">.</span></p>
+        <p class="hint2" style="border:none;padding-top:8px"><span data-i18n="color.p2.a">Gluons carry a color</span> <em data-i18n="color.p2.b">and</em> <span data-i18n="color.p2.c">an anticolor at once — giving</span> <b data-i18n="color.p2.d">8</b> <span data-i18n="color.p2.e">octet gluon states; the ninth color-anticolor combination is a separate singlet, not part of the QCD gauge field. Gluon color charge causes self-interaction and quark</span> <b data-i18n="color.p2.f">confinement</b><span data-i18n="color.p2.g">.</span></p>
       </div>
     </section>
 
@@ -274,7 +274,7 @@
           <h3 data-i18n="lab.conf.h">1 · Colour confinement</h3>
           <span class="lab-tag t-strong" data-i18n="lab.conf.tag">strong force</span>
         </div>
-        <p data-i18n="lab.conf.p">Drag the antiquark away from the quark. The gluon field between them behaves like a stretched rubber band — its energy grows with distance until a new q q̄ pair pops out of the vacuum. That's why you can never isolate a single quark.</p>
+        <p data-i18n="lab.conf.p">A qualitative string-breaking analogy; pixel distances and displayed energies are not a lattice-QCD calculation.</p>
         <div class="lab-viz">
           <canvas id="confCanvas"></canvas>
           <div class="lab-controls">
@@ -295,7 +295,7 @@
           <h3 data-i18n="lab.det.h">2 · Inside a collider detector</h3>
           <span class="lab-tag t-em" data-i18n="lab.det.tag">ATLAS / CMS style</span>
         </div>
-        <p data-i18n="lab.det.p">A modern collider detector is an onion of specialised layers. Each particle type leaves a unique signature. Click a particle to see what the detector sees.</p>
+        <p data-i18n="lab.det.p">A simplified detector cross-section showing typical signatures rather than full detector response.</p>
         <div class="lab-viz">
           <canvas id="detCanvas"></canvas>
           <div class="det-picker" id="detPicker"></div>
@@ -309,7 +309,7 @@
           <h3 data-i18n="lab.higgs.h">3 · The Higgs field: why mass exists</h3>
           <span class="lab-tag t-higgs" data-i18n="lab.higgs.tag">Higgs mechanism</span>
         </div>
-        <p data-i18n="lab.higgs.p">The vacuum is filled with the Higgs field — imagined here as a lattice of tiny oscillators. Different particles couple to it with different strengths: photons ignore it (mass 0), electrons barely feel it, the top quark drags heavily. Click a particle to fire it through the field.</p>
+        <p data-i18n="lab.higgs.p">An educational coupling analogy, not a microscopic simulation of the Higgs field.</p>
         <div class="lab-viz">
           <canvas id="higgsCanvas"></canvas>
           <div class="higgs-picker" id="higgsPicker"></div>
@@ -324,7 +324,7 @@
           <h3 data-i18n="lab.feyn.h">4 · Feynman diagram builder</h3>
           <span class="lab-tag t-em" data-i18n="lab.feyn.tag">interaction vertices</span>
         </div>
-        <p data-i18n="lab.feyn.p">Every Standard-Model interaction is built from a handful of allowed vertices. Pick a vertex type, then click on the canvas to place it. External lines auto-attach to nearby vertices; each vertex is labelled with the coupling constant it uses (α, α_s, g_W). The panel on the right lists the Feynman rules being applied.</p>
+        <p data-i18n="lab.feyn.p">Schematic perturbative diagrams encode fields and couplings, not literal trajectories or calculated amplitudes.</p>
         <div class="lab-viz">
           <canvas id="feynCanvas"></canvas>
           <div class="det-picker" id="feynPicker"></div>
@@ -342,7 +342,7 @@
           <h3 data-i18n="lab.decay.h">5 · Decay chain sandbox</h3>
           <span class="lab-tag t-strong" data-i18n="lab.decay.tag">branching ratios</span>
         </div>
-        <p data-i18n="lab.decay.p">Unstable particles decay stochastically. Their <b>lifetime</b> sets when, and their <b>branching ratios</b> set into what. Pick a starter particle and watch a random decay tree unfold in real time. Multiple runs give different trees — that is the quantum nature of decays.</p>
+        <p data-i18n="lab.decay.p">Rounded PDG branching fractions are sampled stochastically; explicit other channels complete each distribution and animation time is compressed.</p>
         <div class="lab-viz">
           <canvas id="decayCanvas"></canvas>
           <div class="det-picker" id="decayPicker"></div>
@@ -360,7 +360,7 @@
           <h3 data-i18n="lab.osc.h">6 · Neutrino oscillation</h3>
           <span class="lab-tag t-higgs" data-i18n="lab.osc.tag">PMNS mixing</span>
         </div>
-        <p data-i18n="lab.osc.p">Neutrinos are produced as flavour states (ν_e, ν_μ, ν_τ) but propagate as mass states. Because these differ, a beam starting as ν_μ can arrive as ν_e — a purely quantum-mechanical interference effect that proves neutrinos have mass. Drag L/E, the mixing angles, and Δm² to see how the probabilities change.</p>
+        <p data-i18n="lab.osc.p">Flavor states are superpositions of mass eigenstates. This vacuum approximation omits matter effects and CP violation and does not determine absolute masses.</p>
         <div class="lab-viz">
           <canvas id="oscCanvas"></canvas>
         </div>
@@ -374,7 +374,7 @@
           <h3 data-i18n="lab.pdf.h">7 · Inside the proton (PDFs)</h3>
           <span class="lab-tag t-em" data-i18n="lab.pdf.tag">parton distributions</span>
         </div>
-        <p data-i18n="lab.pdf.p">A proton is not just uud. At high resolution (large Q²) you see a churning sea of quarks, antiquarks, and gluons. A <b>parton distribution function</b> f(x, Q²) gives the probability of finding a parton carrying momentum fraction x of the proton. Drag the Q² slider to see the sea grow with resolution.</p>
+        <p data-i18n="lab.pdf.p">Toy parton-distribution curves illustrate qualitative scale evolution; they are not a global-fit data product.</p>
         <div class="lab-viz">
           <canvas id="pdfCanvas"></canvas>
         </div>
@@ -388,7 +388,7 @@
           <h3 data-i18n="lab.evd.h">8 · Interactive collider event</h3>
           <span class="lab-tag t-em" data-i18n="lab.evd.tag">event display</span>
         </div>
-        <p data-i18n="lab.evd.p">A real collider event, projected into the transverse plane of an ATLAS/CMS-style detector. Each track carries measured (pT, η, φ, ID). Pick an event, hover a track for details, toggle detector layers, or rotate the view.</p>
+        <p data-i18n="lab.evd.p">A scripted detector-inspired event display with illustrative—not measured—kinematics.</p>
         <div class="lab-viz">
           <canvas id="evdCanvas"></canvas>
           <div class="det-picker" id="evdPicker"></div>
@@ -403,7 +403,7 @@
           <h3 data-i18n="lab.cons.h">9 · Conservation-law checker</h3>
           <span class="lab-tag t-strong" data-i18n="lab.cons.tag">selection rules</span>
         </div>
-        <p data-i18n="lab.cons.p">Every particle process must conserve certain quantities. Drag reactants and products into the two panels; the checker verifies electric charge, baryon number, lepton flavour numbers (Lₑ/L_μ/L_τ), strangeness, colour, and 4-momentum, then reports which force (if any) can mediate the process — or which law it violates.</p>
+        <p data-i18n="lab.cons.p">A limited selection-rule checker; it does not test energy-momentum, angular momentum, color flow, or amplitudes.</p>
         <div class="lab-viz">
           <canvas id="consCanvas"></canvas>
         </div>
@@ -417,7 +417,7 @@
           <h3 data-i18n="lab.run.h">10 · Running couplings</h3>
           <span class="lab-tag t-higgs" data-i18n="lab.run.tag">RGE evolution</span>
         </div>
-        <p data-i18n="lab.run.p">In quantum field theory, coupling constants aren't constant — they run with the energy scale μ. Plotted here: α_em, α_s (strong), and sin²θ_W from 1 GeV to 10¹⁹ GeV, evolved with 1-loop β-functions. Toggle "MSSM particle content" to see the couplings nearly unify around 10¹⁶ GeV — the classic Grand Unification hint.</p>
+        <p data-i18n="lab.run.p">One-loop toy evolution of α₁, α₂, and α₃; thresholds and higher orders are omitted, and MSSM near-unification is model dependent.</p>
         <div class="lab-viz">
           <canvas id="runCanvas"></canvas>
         </div>
@@ -444,15 +444,15 @@
       </div>
 
       <div class="bsm-grid">
-        <div class="bsm-card confirmed">
-          <div class="bsm-flag flag-ok" data-i18n="flag.ok">CONFIRMED</div>
+        <div class="bsm-card theoretical">
+          <div class="bsm-flag flag-hypo" data-i18n="flag.hypo">HYPOTHETICAL</div>
           <div class="bsm-head"><h3 data-i18n="bsm.majorana.h">Majorana Fermion?</h3><span class="bsm-sub" data-i18n="bsm.majorana.sub">a fermion that is its own antiparticle</span></div>
           <div class="bsm-props">
             <div class="pkey" data-i18n="pkey.predicted">Predicted</div><div data-i18n="bsm.majorana.pred">1937 (Ettore Majorana)</div>
-            <div class="pkey" data-i18n="pkey.status">Status</div><div data-i18n="bsm.majorana.stat">Neutrinos might be — searches ongoing</div>
+            <div class="pkey" data-i18n="pkey.status">Status</div><div data-i18n="bsm.majorana.stat">Not confirmed for neutrinos or solid-state zero modes</div>
           </div>
           <p data-i18n="bsm.majorana.p">Ettore Majorana proposed that a neutral spin-½ fermion could be identical to its own antiparticle. Neutrinos are the only Standard-Model fermions where this is still possible. Experiments looking for neutrinoless double-beta decay (0νββ) — KamLAND-Zen, CUORE, LEGEND — would prove it. If true, the seesaw mechanism would explain why neutrinos have such tiny masses.</p>
-          <div class="bsm-tag" data-i18n="bsm.majorana.tag">Also emerges as "Majorana zero modes" in topological superconductors — used in Microsoft's 2025 Majorana-1 quantum chip.</div>
+          <div class="bsm-tag" data-i18n="bsm.majorana.tag">Majorana zero modes remain unconfirmed; the Majorana-1 Nature paper says its measurements do not establish topology by themselves.</div>
         </div>
 
         <div class="bsm-card confirmed">
@@ -478,10 +478,10 @@
 
         <div class="bsm-card theoretical">
           <div class="bsm-flag flag-hypo" data-i18n="flag.hypo">HYPOTHETICAL</div>
-          <div class="bsm-head"><h3 data-i18n="bsm.sterile.h">Sterile Neutrino (ν<sub>s</sub>)</h3><span class="bsm-sub" data-i18n="bsm.sterile.sub">right-handed, no weak force</span></div>
+          <div class="bsm-head"><h3 data-i18n="bsm.sterile.h">Sterile Neutrino (ν<sub>s</sub>)</h3><span class="bsm-sub" data-i18n="bsm.sterile.sub">gauge-singlet neutrino; often modeled as right-handed</span></div>
           <div class="bsm-props">
             <div class="pkey" data-i18n="pkey.predicted">Predicted</div><div data-i18n="bsm.sterile.pred">1970s</div>
-            <div class="pkey" data-i18n="pkey.status">Status</div><div data-i18n="bsm.sterile.stat">Anomalies at LSND/MiniBooNE, unconfirmed</div>
+            <div class="pkey" data-i18n="pkey.status">Status</div><div data-i18n="bsm.sterile.stat">LSND/MiniBooNE anomalies unconfirmed; MicroBooNE found no νe excess signal</div>
           </div>
           <p data-i18n="bsm.sterile.p">A neutrino that doesn't feel any Standard-Model force except gravity. Could be dark matter, could explain neutrino masses. Fermilab's Short-Baseline Neutrino program is hunting for it now.</p>
         </div>
@@ -491,7 +491,7 @@
           <div class="bsm-head"><h3 data-i18n="bsm.axion.h">Axion</h3><span class="bsm-sub" data-i18n="bsm.axion.sub">dark matter candidate</span></div>
           <div class="bsm-props">
             <div class="pkey" data-i18n="pkey.predicted">Predicted</div><div data-i18n="bsm.axion.pred">1977 (Peccei-Quinn)</div>
-            <div class="pkey" data-i18n="pkey.mass">Mass</div><div data-i18n="bsm.axion.mass">~μeV to meV (ultra-light)</div>
+            <div class="pkey" data-i18n="pkey.mass">Mass</div><div data-i18n="bsm.axion.mass">Model-dependent; many dark-matter searches target neV–meV</div>
             <div class="pkey" data-i18n="pkey.status">Status</div><div data-i18n="bsm.axion.stat">Actively searched (ADMX, HAYSTAC, ABRACADABRA)</div>
           </div>
           <p data-i18n="bsm.axion.p">Invented to solve the "strong CP problem" (why the strong force doesn't violate CP-symmetry). Turned out to also be a great dark-matter candidate — ultra-light, extremely weakly coupled, forming a cosmic wave filling the galaxy.</p>
@@ -505,17 +505,17 @@
             <div class="pkey" data-i18n="pkey.mass">Mass</div><div data-i18n="bsm.wimp.mass">10 GeV – TeV</div>
             <div class="pkey" data-i18n="pkey.status">Status</div><div data-i18n="bsm.wimp.stat">Not found; parameter space shrinking rapidly</div>
           </div>
-          <p data-i18n="bsm.wimp.p">Once the leading dark matter candidate. Experiments like XENONnT, LZ, and PandaX have ruled out huge swaths of parameter space. Still viable, but axions and sterile neutrinos are gaining favor.</p>
+          <p data-i18n="bsm.wimp.p">WIMPs are a broad model-dependent class. No signal is confirmed; benchmark interactions are strongly constrained.</p>
         </div>
 
         <div class="bsm-card theoretical">
           <div class="bsm-flag flag-hypo" data-i18n="flag.hypo">HYPOTHETICAL</div>
           <div class="bsm-head"><h3 data-i18n="bsm.susy.h">SUSY Partners</h3><span class="bsm-sub" data-i18n="bsm.susy.sub">selectron, squark, gluino, neutralino, …</span></div>
           <div class="bsm-props">
-            <div class="pkey" data-i18n="pkey.predicted">Predicted</div><div data-i18n="bsm.susy.pred">1970s (Gelfand, Wess, Zumino)</div>
+            <div class="pkey" data-i18n="pkey.predicted">Predicted</div><div data-i18n="bsm.susy.pred">1971–74 (Gol'fand–Likhtman; Wess–Zumino)</div>
             <div class="pkey" data-i18n="pkey.status">Status</div><div data-i18n="bsm.susy.stat">None found up to ~2 TeV at LHC</div>
           </div>
-          <p data-i18n="bsm.susy.p">Supersymmetry doubles the particle count — every fermion gets a "s-" partner boson (selectron, squark), every boson gets a "-ino" partner fermion (photino, gluino, higgsino). Would unify forces &amp; provide dark matter (lightest neutralino). The simplest SUSY models are now excluded.</p>
+          <p data-i18n="bsm.susy.p">No superpartner is known. Collider limits are model and decay dependent and do not exclude supersymmetry as a whole.</p>
         </div>
 
         <div class="bsm-card theoretical">
@@ -535,7 +535,7 @@
             <div class="pkey" data-i18n="pkey.predicted">Predicted</div><div data-i18n="bsm.anyon.pred">1977 (Leinaas &amp; Myrheim), 1982 (Wilczek)</div>
             <div class="pkey" data-i18n="pkey.discovered">Discovered</div><div data-i18n="bsm.anyon.disc">2020 (fractional quantum Hall systems)</div>
           </div>
-          <p data-i18n="bsm.anyon.p">In 2D, particles can be neither bosons nor fermions — swapping two gives an arbitrary phase (hence "any"-ons). Non-abelian anyons are the basis of topological quantum computing.</p>
+          <p data-i18n="bsm.anyon.p">Fractional Abelian statistics has strong evidence; conclusive non-Abelian braiding remains an active goal.</p>
         </div>
 
         <div class="bsm-card exotic">
@@ -543,9 +543,9 @@
           <div class="bsm-head"><h3 data-i18n="bsm.tetra.h">Tetraquarks &amp; Pentaquarks</h3><span class="bsm-sub" data-i18n="bsm.tetra.sub">exotic hadrons</span></div>
           <div class="bsm-props">
             <div class="pkey" data-i18n="pkey.discovered">Discovered</div><div data-i18n="bsm.tetra.disc">2003 (X(3872)), 2015 (LHCb pentaquarks)</div>
-            <div class="pkey" data-i18n="pkey.status">Status</div><div data-i18n="bsm.tetra.stat">Confirmed — dozens known</div>
+            <div class="pkey" data-i18n="pkey.status">Status</div><div data-i18n="bsm.tetra.stat">Exotic hadrons confirmed; internal structures often unresolved</div>
           </div>
-          <p data-i18n="bsm.tetra.p">QCD allows more than just 3-quark baryons and 2-quark mesons. LHCb keeps finding new tetraquarks (Tcc⁺, 2021) and pentaquarks that push the limits of hadronic physics.</p>
+          <p data-i18n="bsm.tetra.p">Exotic hadrons are established, but the internal structure of states such as X(3872) remains unsettled.</p>
         </div>
 
         <div class="bsm-card exotic">
@@ -555,7 +555,7 @@
             <div class="pkey" data-i18n="pkey.predicted">Predicted</div><div data-i18n="bsm.glueball.pred">1972 (QCD)</div>
             <div class="pkey" data-i18n="pkey.status">Status</div><div data-i18n="bsm.glueball.stat">Candidates (f₀(1710)) — 2024 BESIII strong evidence</div>
           </div>
-          <p data-i18n="bsm.glueball.p">Because gluons carry color charge themselves, they can bind into pure-glue particles. Very hard to distinguish from ordinary mesons — but the BESIII experiment has strong evidence.</p>
+          <p data-i18n="bsm.glueball.p">QCD predicts glueballs, but no pure state is confirmed; BESIII results provide lattice-compatible candidates.</p>
         </div>
 
         <div class="bsm-card theoretical">
@@ -591,7 +591,7 @@
           <div class="phen-icon">⚡</div>
           <h3 data-i18n="phen.super.h">Superconductivity &amp; Cooper Pairs</h3>
           <div class="phen-sub" data-i18n="phen.super.sub">Discovered 1911 (Kamerlingh Onnes) · Explained 1957 (BCS)</div>
-          <p data-i18n="phen.super.p">Below a critical temperature, electrons pair up into Cooper pairs. Two electrons (fermions) form a composite boson, which then Bose-condense and flow with zero resistance.</p>
+          <p data-i18n="phen.super.p">BCS superconductivity is a coherent condensate of large, overlapping Cooper pairs—not simply pointlike bosons undergoing BEC.</p>
           <div class="phen-key" data-i18n="phen.super.key">Cooper pairs = fermion-to-boson metamorphosis. Related to BEC but occurring inside a metal lattice.</div>
           <div class="phen-example" data-i18n="phen.super.ex">MRI magnets, particle accelerators, and superconducting qubits (IBM, Google) all use this.</div>
         </div>
@@ -600,23 +600,23 @@
           <div class="phen-icon">💧</div>
           <h3 data-i18n="phen.superfluid.h">Superfluidity</h3>
           <div class="phen-sub" data-i18n="phen.superfluid.sub">Discovered 1937 (Kapitsa, Allen &amp; Misener) · Nobel 1978</div>
-          <p data-i18n="phen.superfluid.p">Liquid ⁴He below 2.17 K flows without any viscosity, climbs container walls, and passes through microscopic pores. ⁴He nuclei are bosons (spin-0), so they Bose-condense.</p>
-          <div class="phen-key" data-i18n="phen.superfluid.key">⁴He = 12 fermions total → integer spin → boson. ³He is fermionic and needs Cooper pairs to become superfluid (at millikelvin temperatures).</div>
+          <p data-i18n="phen.superfluid.p">Liquid ⁴He is a strongly interacting superfluid of composite spin-0 atoms, not an ideal-gas BEC.</p>
+          <div class="phen-key" data-i18n="phen.superfluid.key">The nucleus has 12 valence quarks; the neutral atom also has two electrons. The complete atom has integer spin.</div>
         </div>
 
         <div class="phen-card">
           <div class="phen-icon">🌌</div>
           <h3 data-i18n="phen.qgp.h">Quark-Gluon Plasma</h3>
-          <div class="phen-sub" data-i18n="phen.qgp.sub">Created 2000 (RHIC), 2010 (LHC ALICE)</div>
+          <div class="phen-sub" data-i18n="phen.qgp.sub">SPS evidence 2000 · strongly coupled QGP at RHIC 2005 · LHC 2010</div>
           <p data-i18n="phen.qgp.p">Heat ordinary matter above ~2 trillion K and quarks become "deconfined" — the strong force loses grip; quarks and gluons flow as a nearly-perfect liquid. This is what the universe looked like ~10 microseconds after the Big Bang.</p>
-          <div class="phen-key" data-i18n="phen.qgp.key">The only state where free quarks briefly exist. Cools back into hadrons in less than 10⁻²³ seconds.</div>
+          <div class="phen-key" data-i18n="phen.qgp.key">Deconfined quarks and gluons remain strongly correlated; they are not isolated, noninteracting free particles.</div>
         </div>
 
         <div class="phen-card">
           <div class="phen-icon">🔀</div>
           <h3 data-i18n="phen.entangle.h">Quantum Entanglement</h3>
           <div class="phen-sub" data-i18n="phen.entangle.sub">EPR paradox 1935 · Bell 1964 · Nobel 2022 (Aspect, Clauser, Zeilinger)</div>
-          <p data-i18n="phen.entangle.p">Two particles can share a single quantum state — measuring one instantly determines the other, even light-years apart. Not "spooky communication" but a genuine feature of quantum mechanics.</p>
+          <p data-i18n="phen.entangle.p">Shared quantum states produce Bell-inequality-violating correlations, but cannot transmit controllable messages faster than light.</p>
           <div class="phen-example" data-i18n="phen.entangle.ex">Basis of quantum cryptography (BB84), quantum teleportation, and quantum computing.</div>
         </div>
 
@@ -625,22 +625,22 @@
           <h3 data-i18n="phen.pauli.h">Pauli Exclusion &amp; Degeneracy Pressure</h3>
           <div class="phen-sub" data-i18n="phen.pauli.sub">Pauli, 1925 · Nobel 1945</div>
           <p data-i18n="phen.pauli.p">Two fermions can't occupy the same quantum state. This is why atoms have shells, why the periodic table works, and why white dwarf stars don't collapse — the pressure of packed electrons holds them up.</p>
-          <div class="phen-key" data-i18n="phen.pauli.key">Above the Chandrasekhar limit (1.4 M☉), even electron pressure fails and the star becomes a neutron star, held up by neutron degeneracy pressure.</div>
+          <div class="phen-key" data-i18n="phen.pauli.key">Above a composition-dependent mass near 1.4 M☉, electron degeneracy fails; neutron stars rely on degeneracy and strong-interaction pressure.</div>
         </div>
 
         <div class="phen-card">
           <div class="phen-icon">🔮</div>
           <h3 data-i18n="phen.topo.h">Topological Matter</h3>
           <div class="phen-sub" data-i18n="phen.topo.sub">Nobel 2016 (Thouless, Haldane, Kosterlitz)</div>
-          <p data-i18n="phen.topo.p">Some materials host quasi-particles that behave like massless Dirac fermions — or even Majorana zero modes. These are the frontier of quantum computing.</p>
-          <div class="phen-example" data-i18n="phen.topo.ex">Topological insulators, Weyl semimetals, and Microsoft's Majorana-1 chip (Feb 2025) — the first claim of a topological qubit.</div>
+          <p data-i18n="phen.topo.p">Topological phases are established, but unambiguous Majorana zero modes and non-Abelian braiding are not.</p>
+          <div class="phen-example" data-i18n="phen.topo.ex">The Majorana-1 Nature paper says its parity measurements alone do not establish topology.</div>
         </div>
 
         <div class="phen-card">
           <div class="phen-icon">🎇</div>
           <h3 data-i18n="phen.hawking.h">Hawking Radiation</h3>
           <div class="phen-sub" data-i18n="phen.hawking.sub">Predicted 1974 (Hawking)</div>
-          <p data-i18n="phen.hawking.p">Quantum field fluctuations near a black hole horizon produce virtual particle pairs; one falls in, one escapes as radiation. Never directly observed astronomically but seen in analog systems (sonic black holes, 2019).</p>
+          <p data-i18n="phen.hawking.p">Curved-spacetime quantum field theory predicts a thermal flux; virtual-pair splitting is only a heuristic. Astronomical Hawking radiation is unobserved.</p>
         </div>
 
         <div class="phen-card">
@@ -685,6 +685,8 @@
     <span data-i18n="footer">Built for curiosity · data from the Particle Data Group</span>
   </footer>
 
+  <script src="physics-core.js"></script>
+  <script src="references.js"></script>
   <script src="i18n.js"></script>
   <script src="app.js"></script>
 </body>

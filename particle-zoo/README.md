@@ -39,7 +39,11 @@ particle-zoo/
 ├── styles.css         Layout, dark theme, force colour palette, animations
 ├── app.js             All logic: PARTICLES data, tab wiring, builder canvas,
 │                      playground physics, Feynman-diagram engine
+├── physics-core.js    Testable decay, conservation, kinematics, and lifecycle rules
+├── references.js      Item-level official/primary citation registry and renderer
 ├── i18n.js            LOCALES for 'en' and 'zh-CN' + particle field translations
+├── validate.js        Locale, science-data, citation, and generated-bundle checks
+├── test/              Dependency-free Node unit/component tests
 ├── build.js           Inlines CSS + JS into a single-file mobile bundle
 ├── package.json       npm run build → node build.js
 ├── README.md          (this file)
@@ -59,7 +63,7 @@ particle-zoo/
 | 2 | Particle Detail    | Searchable card view: mass, charge, spin, discovery, forces, description    |
 | 3 | Builder            | Drag quarks/electrons on a canvas; auto-recognises nucleons, nuclei, atoms  |
 | 4 | Forces & Interactions | Four fundamental forces + 21 animated Feynman diagrams in 3 groups        |
-| 5 | Beyond the SM      | 14 cards: dark matter, SUSY, axions, monopoles, preons, Majorana modes…     |
+| 5 | Beyond the SM      | 12 cards: dark matter, SUSY, axions, monopoles, preons, Majorana modes…     |
 | 6 | Quantum Phenomena  | 9 cards: BEC, superconductivity, entanglement, QGP, Hawking radiation…      |
 | 7 | Playground         | Real-time 2-D sandbox: spawn particles, watch Coulomb forces & annihilation |
 
@@ -112,8 +116,10 @@ entanglement, Pauli exclusion / degeneracy pressure, topological matter,
 Hawking radiation, fermionic condensate.
 
 ### Playground tab
-Sandbox with e⁻, e⁺, p⁺, n⁰, γ; live Coulomb forces, wall bounce with
-damping, optional trails, e⁻e⁺ annihilation → 2 γ.
+Qualitative sandbox with e⁻, e⁺, p⁺, n⁰, γ; toy Coulomb forces, wall bounce
+with damping, optional trails, and centre-of-momentum e⁻e⁺ → 2γ annihilation.
+The photons are emitted exactly back-to-back; particle sizes, speeds, forces,
+and boundaries are explicitly not to scale.
 
 ---
 
@@ -124,9 +130,16 @@ damping, optional trails, e⁻e⁺ annihilation → 2 γ.
 # When ready to ship a mobile bundle:
 node build.js         # or:  npm run build
 # → mobile/index.html and mobile/particle-zoo.html get regenerated.
+
+npm test              # Node unit tests + enforced 100% coverage for pure modules
+npm run validate      # locale/data/citation/bundle invariants
 ```
 
 Language preference persists in `localStorage` under the key `pz-lang`.
+
+Animations run only for the active tab and visible canvas, stop when the page
+is hidden or offscreen, and respect `prefers-reduced-motion`. In the browser
+console, `PZ_PERF.snapshot()` exposes per-loop frame and draw counters.
 
 ### Adding a new interaction diagram
 
@@ -151,11 +164,11 @@ Language preference persists in `localStorage` under the key `pz-lang`.
 
 ## Credits & references
 
-Built collaboratively as an educational demo. Content is drawn from
-standard undergraduate references — Griffiths' *Introduction to Elementary
-Particles*, Thomson's *Modern Particle Physics*, the Particle Data Group's
-*Review of Particle Physics* — and recent experimental results (LHC, LIGO,
-Super-Kamiokande, XENONnT, LZ, BESIII, LHCb).
+Every particle detail, interaction diagram, lab, BSM card, phenomenon card,
+and major approximation displays item-specific links from `references.js`.
+The registry uses PDG, CERN, Nobel, LIGO, experiment collaborations, and
+peer-reviewed primary papers; validation rejects missing entries, insecure
+links, and Wikipedia as a final authority.
 
 See `PROMPTS.md` for the human-in-the-loop history that generated this
 codebase.

@@ -15,6 +15,8 @@ if (!fs.existsSync(OUT_DIR)) fs.mkdirSync(OUT_DIR, { recursive: true });
 
 const html   = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
 const css    = fs.readFileSync(path.join(ROOT, 'styles.css'), 'utf8');
+const coreJs = fs.readFileSync(path.join(ROOT, 'physics-core.js'), 'utf8');
+const refsJs = fs.readFileSync(path.join(ROOT, 'references.js'), 'utf8');
 const i18nJs = fs.readFileSync(path.join(ROOT, 'i18n.js'), 'utf8');
 const appJs  = fs.readFileSync(path.join(ROOT, 'app.js'), 'utf8');
 
@@ -30,7 +32,15 @@ out = out.replace(/<link\s+rel="preconnect"[^>]*>\s*/g, '');
 out = out.replace(/<link\s+href="https:\/\/fonts\.googleapis\.com[^"]*"\s+rel="stylesheet"[^>]*>\s*/g, '');
 out = out.replace(/<link\s+rel="stylesheet"\s+href="https:\/\/fonts\.googleapis\.com[^"]*"[^>]*>\s*/g, '');
 
-// 2) replace <script src="i18n.js"></script> and <script src="app.js"></script>
+// 2) inline source modules in browser execution order.
+out = out.replace(
+  /<script\s+src="physics-core\.js"><\/script>/,
+  `<script>\n${coreJs}\n</script>`
+);
+out = out.replace(
+  /<script\s+src="references\.js"><\/script>/,
+  `<script>\n${refsJs}\n</script>`
+);
 out = out.replace(
   /<script\s+src="i18n\.js"><\/script>/,
   `<script>\n${i18nJs}\n</script>`

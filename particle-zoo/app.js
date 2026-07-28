@@ -1,4 +1,62 @@
 /* ================ PARTICLE DATA ================ */
+const DECAY_TABLE = PhysicsCore.DECAY_TABLE;
+const CONS_PARTICLES = PhysicsCore.CONS_PARTICLES;
+const CONS_EXAMPLES = PhysicsCore.CONS_EXAMPLES;
+
+function contentReferences(group, id){
+  const ids = ParticleZooReferences.CONTENT_REFERENCES[group]?.[id];
+  return ids ? ParticleZooReferences.render(ids, t('refs.label')) : '';
+}
+
+const PZ_PERF = {
+  frames:{builder:0,playground:0,interactions:0,lab:0},
+  draws:{},
+  startedAt:performance.now(),
+  snapshot(){
+    return {
+      elapsedMs:performance.now()-this.startedAt,
+      frames:Object.assign({},this.frames),
+      draws:Object.assign({},this.draws),
+    };
+  },
+  reset(){
+    Object.keys(this.frames).forEach(key=>{ this.frames[key]=0; });
+    this.draws={};
+    this.startedAt=performance.now();
+  }
+};
+window.PZ_PERF = PZ_PERF;
+
+const reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+const viewportVisibility = new WeakMap();
+const viewportObserver = 'IntersectionObserver' in window ? new IntersectionObserver(entries=>{
+  entries.forEach(entry=>viewportVisibility.set(entry.target, entry.isIntersecting));
+  if(typeof labStaticDirty!=='undefined') labStaticDirty=true;
+  syncAnimationLoops();
+}, {rootMargin:'80px'}) : null;
+
+function observeAnimationTarget(element){
+  if(element && viewportObserver) viewportObserver.observe(element);
+}
+function elementIsVisible(element){
+  if(!element) return false;
+  if(viewportVisibility.has(element)) return viewportVisibility.get(element);
+  const rect = element.getBoundingClientRect();
+  return rect.width>0 && rect.height>0 && rect.bottom>=0 && rect.top<=innerHeight;
+}
+function tabIsActive(tab){
+  return document.querySelector(`.tab[data-tab="${tab}"]`)?.classList.contains('active') === true;
+}
+function canAnimate(tab, element){
+  return PhysicsCore.shouldAnimate({
+    active:tabIsActive(tab),
+    documentVisible:!document.hidden,
+    elementVisible:elementIsVisible(element),
+    reducedMotion:reducedMotionQuery.matches,
+  });
+}
+function recordDraw(id){ PZ_PERF.draws[id]=(PZ_PERF.draws[id]||0)+1; }
+
 const PARTICLES = {
   up:      {sym:'u', name:'Up quark',       cls:'Quark (Gen I)',   mass:'2.2 MeV/c²',    charge:'+2/3 e', spin:'1/2', color:'quark',    antiparticle:'ū (anti-up)',      forces:['Strong','EM','Weak','Gravity'], discovered:'1968 (SLAC)',
     desc:'A first-generation quark and one of the two building blocks of every proton and neutron in your body. Up quarks feel every fundamental force.',
@@ -15,12 +73,12 @@ const PARTICLES = {
     facts:['~600× heavier than an up quark','Forms exotic particles like J/ψ (cc̄)','Decays via the weak force in ~10⁻¹² s'],
     fun:'The J/ψ meson was discovered simultaneously by two teams; they had to share the Nobel Prize.'
   },
-  strange: {sym:'s', name:'Strange quark',  cls:'Quark (Gen II)',  mass:'95 MeV/c²',     charge:'−1/3 e', spin:'1/2', color:'quark',    antiparticle:'s̄',                forces:['Strong','EM','Weak','Gravity'], discovered:'1947 (in cosmic rays)',
+  strange: {sym:'s', name:'Strange quark',  cls:'Quark (Gen II)',  mass:'93.5 MeV/c²',   charge:'−1/3 e', spin:'1/2', color:'quark',    antiparticle:'s̄',                forces:['Strong','EM','Weak','Gravity'], discovered:'1947 (in cosmic rays)',
     desc:'Discovered inside "strange" long-lived particles from cosmic rays that broke the rules of ordinary matter.',
     facts:['Found in kaons and lambda baryons','Neutron stars may contain "strange matter"','Its slow weak decay is why strange particles last so long'],
     fun:'Called "strange" because its particles seemed weirdly slow to decay.'
   },
-  top:     {sym:'t', name:'Top quark',      cls:'Quark (Gen III)', mass:'173 GeV/c²',    charge:'+2/3 e', spin:'1/2', color:'quark',    antiparticle:'t̄',                forces:['Strong','EM','Weak','Gravity'], discovered:'1995 (Fermilab)',
+  top:     {sym:'t', name:'Top quark',      cls:'Quark (Gen III)', mass:'172.7 GeV/c²',  charge:'+2/3 e', spin:'1/2', color:'quark',    antiparticle:'t̄',                forces:['Strong','EM','Weak','Gravity'], discovered:'1995 (Fermilab)',
     desc:'The heaviest known elementary particle — as massive as a gold atom, packed into a point. It decays in 5×10⁻²⁵ seconds, too fast to form any bound state.',
     facts:['The only quark that never forms a hadron','Decays almost 100% to bottom + W boson','Its huge mass suggests a special relationship with the Higgs'],
     fun:'A single top quark weighs about the same as an entire tungsten atom.'
@@ -32,9 +90,9 @@ const PARTICLES = {
   },
 
   electron:{sym:'e⁻',name:'Electron',       cls:'Lepton (Gen I)',  mass:'0.511 MeV/c²',  charge:'−1 e',   spin:'1/2', color:'lepton',   antiparticle:'e⁺ (positron)',    forces:['EM','Weak','Gravity'],          discovered:'1897 (J.J. Thomson)',
-    desc:'The lightest charged particle — and the one that does all the chemistry. Every electric current, every chemical bond, every photon of visible light involves electrons.',
+    desc:'The lightest charged lepton. Electron quantum states govern atomic structure, chemical bonding, and electric currents.',
     facts:['Orbits nuclei in atomic shells','Its charge defines "1 elementary charge"','Stable: never observed to decay','Responsible for essentially all of chemistry'],
-    fun:'The screen you\'re reading this on is glowing because electrons are jumping between energy levels.'
+    fun:'Electronic transitions and currents underlie LEDs, lasers, displays, and almost all modern electronics.'
   },
   muon:    {sym:'μ⁻',name:'Muon',           cls:'Lepton (Gen II)', mass:'105.7 MeV/c²',  charge:'−1 e',   spin:'1/2', color:'lepton',   antiparticle:'μ⁺',                forces:['EM','Weak','Gravity'],          discovered:'1936 (cosmic rays)',
     desc:'A heavy cousin of the electron — 207× more massive. It rains down on you constantly from cosmic rays.',
@@ -44,47 +102,47 @@ const PARTICLES = {
   tau:     {sym:'τ⁻',name:'Tau',            cls:'Lepton (Gen III)',mass:'1.777 GeV/c²',  charge:'−1 e',   spin:'1/2', color:'lepton',   antiparticle:'τ⁺',                forces:['EM','Weak','Gravity'],          discovered:'1975 (SLAC)',
     desc:'The heaviest lepton. Massive enough to decay into hadrons (quarks) — a lepton acting like a quark factory.',
     facts:['Lives only 2.9×10⁻¹³ s','Can decay into pions, kaons, and other quark-based particles','Almost twice the mass of a proton'],
-    fun:'Its short lifetime means it travels less than a millimeter before decaying, even at near light speed.'
+    fun:'Its proper decay length is only about 87 μm, although relativistic time dilation lets highly boosted taus travel farther.'
   },
-  nu_e:    {sym:'νₑ',name:'Electron neutrino',cls:'Lepton (Gen I)',mass:'<2 eV/c²',      charge:'0',      spin:'1/2', color:'neutrino', antiparticle:'ν̄ₑ',              forces:['Weak','Gravity'],               discovered:'1956 (Cowan-Reines)',
-    desc:'A ghostly, nearly massless particle that barely interacts with anything. 65 billion neutrinos from the Sun pass through every square centimeter of you every second.',
-    facts:['Only interacts via the weak force','Can travel through a light-year of lead with a 50% chance of not interacting','Comes in three flavors — and oscillates between them!'],
+  nu_e:    {sym:'νₑ',name:'Electron neutrino',cls:'Lepton flavor state (Gen I)',mass:'mβ <0.45 eV/c² (90% CL)', charge:'0', spin:'1/2', color:'neutrino', antiparticle:'ν̄ₑ', forces:['Weak','Gravity'], discovered:'1956 (Cowan-Reines)',
+    desc:'The electron-neutrino flavor state is produced and detected in electron-type weak interactions. It is a quantum superposition of mass eigenstates ν₁, ν₂, and ν₃, not a state with one definite mass.',
+    facts:['KATRIN directly limits the effective beta-decay mass mβ to <0.45 eV/c² (90% CL)','Oscillations measure mass-squared differences, not the absolute masses','Cosmological mass-sum limits can be tighter but depend on the cosmological model and data combination'],
     fun:'The 1987 supernova was detected via 24 neutrinos hours before the light arrived.'
   },
-  nu_mu:   {sym:'ν_μ',name:'Muon neutrino',  cls:'Lepton (Gen II)',mass:'<0.19 MeV/c²',  charge:'0',      spin:'1/2', color:'neutrino', antiparticle:'ν̄_μ',             forces:['Weak','Gravity'],               discovered:'1962 (Brookhaven)',
-    desc:'Paired with the muon in weak interactions. Its discovery proved neutrinos come in flavors.',
-    facts:['Produced in π⁺ → μ⁺ + ν_μ decays','Oscillates into other flavors mid-flight','Studied by giant detectors like Super-Kamiokande'],
+  nu_mu:   {sym:'ν_μ',name:'Muon neutrino',  cls:'Lepton flavor state (Gen II)',mass:'effective m(νμ) <0.19 MeV/c²', charge:'0', spin:'1/2', color:'neutrino', antiparticle:'ν̄_μ', forces:['Weak','Gravity'], discovered:'1962 (Brookhaven)',
+    desc:'The muon-neutrino flavor state is produced with muons in weak interactions. Like every flavor state, it is a superposition of ν₁, ν₂, and ν₃ and therefore has no single definite mass.',
+    facts:['Produced in π⁺ → μ⁺ + ν_μ decays','Oscillation experiments measure Δm²₂₁ and |Δm²₃ℓ|, not an absolute flavor mass','The quoted direct kinematic limit is much weaker than oscillation and model-dependent cosmological constraints'],
     fun:'Neutrino oscillation proved neutrinos have (tiny) mass — a first crack in the Standard Model.'
   },
-  nu_tau:  {sym:'ν_τ',name:'Tau neutrino',   cls:'Lepton (Gen III)',mass:'<18.2 MeV/c²', charge:'0',      spin:'1/2', color:'neutrino', antiparticle:'ν̄_τ',             forces:['Weak','Gravity'],               discovered:'2000 (Fermilab DONUT)',
-    desc:'The last fermion to be directly detected. Extremely hard to spot because tau leptons themselves are hard to make.',
-    facts:['Only ~15 confirmed direct detections when discovered','Completes the three-generation pattern','Interacts even more rarely than other neutrinos'],
+  nu_tau:  {sym:'ν_τ',name:'Tau neutrino',   cls:'Lepton flavor state (Gen III)',mass:'effective m(ντ) <18.2 MeV/c²', charge:'0', spin:'1/2', color:'neutrino', antiparticle:'ν̄_τ', forces:['Weak','Gravity'], discovered:'2000 (Fermilab DONUT)',
+    desc:'The tau-neutrino flavor state is identified through tau production in weak interactions. It is a superposition of the same three light mass eigenstates as νₑ and ν_μ.',
+    facts:['DONUT directly established ντ charged-current interactions','The quoted direct kinematic bound is not the mass of a separate definite-mass flavor particle','Oscillation splittings show at least two mass eigenstates are nonzero; their absolute scale remains unknown'],
     fun:'DONUT (Direct Observation of the NU Tau) needed years to see a handful of them.'
   },
 
   photon:  {sym:'γ', name:'Photon',          cls:'Gauge Boson',    mass:'0 (massless)',  charge:'0',      spin:'1',   color:'boson',    antiparticle:'γ (its own)',      forces:['Mediates EM'],                  discovered:'1905 (Einstein)',
-    desc:'A quantum of light — and the messenger of the electromagnetic force. Every time two charged particles push or pull each other, they\'re trading photons.',
-    facts:['Always travels at exactly c (speed of light)','Carries energy E = hf','Its own antiparticle','From radio waves to gamma rays — all the same particle at different energies'],
+    desc:'The quantum of the electromagnetic field. Real photons make electromagnetic radiation; virtual-photon language is a perturbative way to calculate interactions, not literal little projectiles exchanged between charges.',
+    facts:['A real photon travels at c in vacuum','Carries energy E = hν','Its own antiparticle','Radio through gamma radiation are excitations of the same field at different frequencies'],
     fun:'The photons hitting your eye right now left the sun about 8 minutes ago.'
   },
-  gluon:   {sym:'g', name:'Gluon',           cls:'Gauge Boson',    mass:'0 (massless)',  charge:'0',      spin:'1',   color:'boson',    antiparticle:'(self, in a sense)',forces:['Mediates Strong'],              discovered:'1979 (DESY PETRA)',
+  gluon:   {sym:'g', name:'Gluon',           cls:'Gauge Boson',    mass:'0 (massless)',  charge:'0',      spin:'1',   color:'boson',    antiparticle:'the color octet is self-conjugate',forces:['Mediates Strong'], discovered:'1979 (DESY PETRA)',
     desc:'The glue of the nucleus. Gluons carry color charge — so unlike photons, they interact with each other, making the strong force behave in bizarre ways.',
-    facts:['8 different gluons (color-anticolor combinations)','Confined: never seen in isolation','Cause "asymptotic freedom" — quarks act free at short distances','Bind quarks into protons and protons+neutrons into nuclei'],
-    fun:'99% of a proton\'s mass comes from the energy of gluons whizzing around inside it.'
+    facts:['Eight gluon states form a self-conjugate SU(3) color octet','An individual color-basis gluon generally maps to another octet state under charge conjugation; there is no separate ant gluon species','Confined: never observed in isolation','Gluon self-interactions drive asymptotic freedom and confinement'],
+    fun:'Most proton mass is QCD energy from quark and gluon motion, interactions, and the trace anomaly—not simply the sum of quark masses.'
   },
-  wboson:  {sym:'W±',name:'W boson',         cls:'Gauge Boson',    mass:'80.4 GeV/c²',   charge:'±1 e',   spin:'1',   color:'boson',    antiparticle:'W∓',               forces:['Mediates Weak'],                discovered:'1983 (CERN UA1)',
+  wboson:  {sym:'W±',name:'W boson',         cls:'Gauge Boson',    mass:'80.369 GeV/c²', charge:'±1 e',   spin:'1',   color:'boson',    antiparticle:'W∓',               forces:['Mediates Weak'],                discovered:'1983 (CERN UA1/UA2)',
     desc:'A very heavy charged boson that can change one type of quark or lepton into another. It\'s what makes radioactivity happen.',
     facts:['~85× more massive than a proton','Changes flavor: d → u, or μ → ν_μ','Its huge mass is why the weak force is so short-ranged','Powers the Sun by turning protons into neutrons'],
     fun:'Without the W boson, the Sun couldn\'t fuse hydrogen and life would be impossible.'
   },
-  zboson:  {sym:'Z⁰',name:'Z boson',         cls:'Gauge Boson',    mass:'91.2 GeV/c²',   charge:'0',      spin:'1',   color:'boson',    antiparticle:'Z⁰ (its own)',     forces:['Mediates Weak'],                discovered:'1983 (CERN UA1)',
+  zboson:  {sym:'Z⁰',name:'Z boson',         cls:'Gauge Boson',    mass:'91.188 GeV/c²', charge:'0',      spin:'1',   color:'boson',    antiparticle:'Z⁰ (its own)',     forces:['Mediates Weak'],                discovered:'1983 (CERN UA1/UA2)',
     desc:'The neutral partner of the W boson. It mediates weak interactions that don\'t change particle identity — like a neutrino bouncing off an electron.',
     facts:['Slightly heavier than the W','Neutral: doesn\'t change flavor','Discovered together with the W at CERN','Its precise mass tests the Standard Model to extraordinary precision'],
     fun:'Millions of Z bosons were manufactured at LEP to measure exactly three neutrino generations.'
   },
-  higgs:   {sym:'H', name:'Higgs boson',     cls:'Scalar Boson',   mass:'125 GeV/c²',    charge:'0',      spin:'0',   color:'higgs',    antiparticle:'H (its own)',      forces:['Couples to mass'],              discovered:'2012 (CERN ATLAS/CMS)',
-    desc:'The particle behind mass itself. The Higgs field permeates all of space; particles that interact with it strongly (like the top quark) become heavy, while photons don\'t feel it at all and stay massless.',
-    facts:['Predicted in 1964, found in 2012','The only known fundamental scalar (spin-0) particle','Decays in ~10⁻²² s to pairs like γγ, bb̄, ZZ, WW','Confirms the origin of mass for W, Z, and fermions'],
+  higgs:   {sym:'H', name:'Higgs boson',     cls:'Scalar Boson',   mass:'125.20 GeV/c²', charge:'0',      spin:'0',   color:'higgs',    antiparticle:'H (its own)',      forces:['Couples to mass'],              discovered:'2012 (CERN ATLAS/CMS)',
+    desc:'The quantum excitation of the Higgs field. Electroweak symmetry breaking gives W and Z bosons mass, while Yukawa couplings generate fermion masses. Most proton and nuclear mass instead comes from QCD binding energy.',
+    facts:['Predicted in 1964, found in 2012','The only known fundamental scalar (spin-0) particle','At 125 GeV it decays mostly to bb̄ and WW*; γγ is rare but experimentally clean','Confirms the electroweak mass mechanism for W and Z and the measured Yukawa couplings'],
     fun:'Discovering it took the world\'s largest machine (LHC) and 40+ years — Peter Higgs won the Nobel the next year.'
   },
 
@@ -95,10 +153,10 @@ const PARTICLES = {
     desc:'Antimatter partner of the down quark. Two anti-downs and an anti-up make an antineutron; two anti-ups and an anti-down make an antiproton.', facts:['π⁺ = u d̄','Antiproton = ū ū d̄','Annihilates with a down quark'], fun:'Antimatter hydrogen (antiproton + positron) has been made and confirmed to fall down under gravity — 2023.'},
   anti_charm:   {sym:'c̄',  name:'Anti-charm quark',   cls:'Antiquark (Gen II)',  mass:'1.27 GeV/c²',  charge:'−2/3 e', spin:'1/2', color:'quark',    antiparticle:'c (charm)',        forces:['Strong','EM','Weak','Gravity'], discovered:'1974',
     desc:'The antiparticle of the charm quark.', facts:['J/ψ meson = c c̄','Studied at BaBar & Belle experiments'], fun:'Charmonium (cc̄) behaves like a "hydrogen atom" for quarks — its energy levels are precisely calculable.'},
-  anti_strange: {sym:'s̄',  name:'Anti-strange quark', cls:'Antiquark (Gen II)',  mass:'95 MeV/c²',    charge:'+1/3 e', spin:'1/2', color:'quark',    antiparticle:'s (strange)',      forces:['Strong','EM','Weak','Gravity'], discovered:'1947',
+  anti_strange: {sym:'s̄',  name:'Anti-strange quark', cls:'Antiquark (Gen II)',  mass:'93.5 MeV/c²',  charge:'+1/3 e', spin:'1/2', color:'quark',    antiparticle:'s (strange)',      forces:['Strong','EM','Weak','Gravity'], discovered:'1947',
     desc:'The antiparticle of the strange quark. Appears in kaons and other strange mesons.', facts:['K⁺ = u s̄','Involved in classic CP-violation experiments'], fun:'Anti-strange quarks helped prove that matter and antimatter don\'t behave identically.'},
-  anti_top:     {sym:'t̄',  name:'Anti-top quark',     cls:'Antiquark (Gen III)', mass:'173 GeV/c²',   charge:'−2/3 e', spin:'1/2', color:'quark',    antiparticle:'t (top)',          forces:['Strong','EM','Weak','Gravity'], discovered:'1995 (Fermilab)',
-    desc:'Antimatter partner of the top quark. Made in top/anti-top pairs at colliders.', facts:['Always produced with a top: t t̄ pair','Decays before forming bound states'], fun:'A t t̄ pair costs about 350 GeV to create — a lot even by LHC standards.'},
+  anti_top:     {sym:'t̄',  name:'Anti-top quark',     cls:'Antiquark (Gen III)', mass:'172.7 GeV/c²', charge:'−2/3 e', spin:'1/2', color:'quark',    antiparticle:'t (top)',          forces:['Strong','EM','Weak','Gravity'], discovered:'1995 (Fermilab)',
+    desc:'Antimatter partner of the top quark, produced in both tt̄ pairs and single-antitop electroweak processes.', facts:['Often studied in t t̄ events','Also produced singly through the weak interaction','Decays before forming bound states'], fun:'A t t̄ pair requires at least about 345 GeV of centre-of-mass energy.'},
   anti_bottom:  {sym:'b̄',  name:'Anti-bottom quark',  cls:'Antiquark (Gen III)', mass:'4.18 GeV/c²',  charge:'+1/3 e', spin:'1/2', color:'quark',    antiparticle:'b (bottom)',       forces:['Strong','EM','Weak','Gravity'], discovered:'1977',
     desc:'Antimatter partner of the bottom quark. Extensively studied for matter-antimatter asymmetry.', facts:['B⁰ = d b̄; B̄⁰ = d̄ b','B mesons oscillate into their own antiparticle'], fun:'LHCb was built specifically to study b̄ physics.'},
 
@@ -108,11 +166,11 @@ const PARTICLES = {
     desc:'The heavier antimatter partner of the electron.', facts:['Rains down from cosmic rays','Decays μ⁺ → e⁺ + νₑ + ν̄_μ','Central to precision g−2 measurements'], fun:'Muons (both charges) at Fermilab hinted at physics beyond the Standard Model in 2021.'},
   anti_tau:  {sym:'τ⁺', name:'Anti-tau',           cls:'Anti-lepton (Gen III)', mass:'1.777 GeV/c²', charge:'+1 e',   spin:'1/2', color:'lepton',   antiparticle:'τ⁻ (tau)',         forces:['EM','Weak','Gravity'],          discovered:'1975',
     desc:'The heaviest anti-lepton.', facts:['Decays to hadrons or lighter leptons','Studied at B factories'], fun:'Tau anti-neutrinos have almost never been directly detected.'},
-  anti_nu_e:   {sym:'ν̄ₑ',  name:'Electron antineutrino', cls:'Anti-lepton (Gen I)',   mass:'<2 eV/c²',     charge:'0', spin:'1/2', color:'neutrino', antiparticle:'νₑ',               forces:['Weak','Gravity'], discovered:'1956 (Cowan-Reines)',
+  anti_nu_e:   {sym:'ν̄ₑ',  name:'Electron antineutrino', cls:'Anti-lepton flavor state (Gen I)', mass:'mβ <0.45 eV/c² (90% CL)', charge:'0', spin:'1/2', color:'neutrino', antiparticle:'νₑ', forces:['Weak','Gravity'], discovered:'1956 (Cowan-Reines)',
     desc:'The antiparticle of the electron neutrino. Produced in normal β⁻ decay of neutrons.', facts:['n → p + e⁻ + ν̄ₑ','Detected via inverse β decay: ν̄ₑ + p → n + e⁺','Nuclear reactors are the brightest man-made source'], fun:'The first neutrino ever detected (1956) was actually an antineutrino from a reactor.'},
-  anti_nu_mu:  {sym:'ν̄_μ', name:'Muon antineutrino',     cls:'Anti-lepton (Gen II)',  mass:'<0.19 MeV/c²', charge:'0', spin:'1/2', color:'neutrino', antiparticle:'ν_μ',              forces:['Weak','Gravity'], discovered:'1962',
+  anti_nu_mu:  {sym:'ν̄_μ', name:'Muon antineutrino',     cls:'Anti-lepton flavor state (Gen II)', mass:'effective m(νμ) <0.19 MeV/c²', charge:'0', spin:'1/2', color:'neutrino', antiparticle:'ν_μ', forces:['Weak','Gravity'], discovered:'1962',
     desc:'The muon\'s antineutrino partner.', facts:['Produced in μ⁻ decay','Oscillates with ν̄_e and ν̄_τ'], fun:'Neutrino oscillation experiments treat ν and ν̄ separately to search for CP violation.'},
-  anti_nu_tau: {sym:'ν̄_τ', name:'Tau antineutrino',      cls:'Anti-lepton (Gen III)', mass:'<18.2 MeV/c²', charge:'0', spin:'1/2', color:'neutrino', antiparticle:'ν_τ',              forces:['Weak','Gravity'], discovered:'2000',
+  anti_nu_tau: {sym:'ν̄_τ', name:'Tau antineutrino',      cls:'Anti-lepton flavor state (Gen III)', mass:'effective m(ντ) <18.2 MeV/c²', charge:'0', spin:'1/2', color:'neutrino', antiparticle:'ν_τ', forces:['Weak','Gravity'], discovered:'2000',
     desc:'The rarest, hardest-to-detect antiparticle in the Standard Model.', facts:['Only a handful directly detected in history','Completes the anti-lepton set'], fun:'Whether neutrinos and antineutrinos are actually the same particle (Majorana) is an open question.'}
 };
 
@@ -136,7 +194,7 @@ const TILE_GROUPS = {
   'antiquarks-bot':      ['anti_down','anti_strange','anti_bottom'],
   'antileptons-charged': ['positron','anti_muon','anti_tau'],
   'antileptons-neutrinos':['anti_nu_e','anti_nu_mu','anti_nu_tau'],
-  'selfanti':            ['photon','zboson','higgs','gluon']
+  'selfanti':            ['photon','zboson','higgs']
 };
 
 function tileClassFor(id){
@@ -252,6 +310,7 @@ document.querySelectorAll('.tab').forEach(t=>{
     document.getElementById('tab-'+t.dataset.tab).classList.add('active');
     if(t.dataset.tab==='playground') resizeCanvas();
     if(t.dataset.tab==='builder') { resizeBuild(); buildComposites(); }
+    syncAnimationLoops();
   });
 });
 
@@ -341,7 +400,37 @@ function showParticle(id){
       <ul>${p.facts.map(f=>`<li>${f}</li>`).join('')}</ul>
     </div>
     <div class="d-fun">✦ ${p.fun}</div>
+    ${contentReferences('particle', id)}
   `;
+}
+
+function replaceReferences(element, ids){
+  if(!element || !ids) return;
+  element.querySelector(':scope > .content-refs')?.remove();
+  element.insertAdjacentHTML('beforeend', ParticleZooReferences.render(ids, t('refs.label')));
+}
+
+function renderContentReferences(){
+  const refs = ParticleZooReferences.CONTENT_REFERENCES;
+  const forceCards = {'.f-strong':'strong','.f-em':'em','.f-weak':'weak','.f-grav':'gravity'};
+  Object.entries(forceCards).forEach(([selector,id])=>replaceReferences(document.querySelector(selector), refs.force[id]));
+  document.querySelectorAll('.bsm-card').forEach(card=>{
+    const key = card.querySelector('h3[data-i18n]')?.dataset.i18n.match(/^bsm\.([^.]+)\.h$/)?.[1];
+    if(key) replaceReferences(card, refs.bsm[key]);
+  });
+  document.querySelectorAll('.phen-card').forEach(card=>{
+    const key = card.querySelector('h3[data-i18n]')?.dataset.i18n.match(/^phen\.([^.]+)\.h$/)?.[1];
+    if(key) replaceReferences(card, refs.phenomenon[key]);
+  });
+  document.querySelectorAll('.lab-card').forEach(card=>{
+    const key = card.querySelector('h3[data-i18n]')?.dataset.i18n.match(/^lab\.([^.]+)\.h$/)?.[1];
+    if(key && refs.lab[key]) replaceReferences(card, refs.lab[key]);
+  });
+  replaceReferences(document.querySelector('#tab-chart > .section-head'), refs.section.chart);
+  replaceReferences(document.querySelector('#tab-chart .color-panel'), refs.section.color);
+  replaceReferences(document.querySelectorAll('#tab-chart > .section-head')[1], refs.section.antimatter);
+  replaceReferences(document.querySelector('#tab-builder > .section-head'), refs.section.builder);
+  replaceReferences(document.querySelector('#tab-playground > .section-head'), refs.section.playground);
 }
 
 /* ================ BUILDER (canvas visualization) ================ */
@@ -351,15 +440,17 @@ const bctx = buildCanvas.getContext('2d');
 const buildResult = document.getElementById('buildResult');
 const buildStats = document.getElementById('buildStats');
 let BW=0, BH=0;
+let buildLastTimestamp=0;
 
 function resizeBuild(){
   const r = buildCanvas.getBoundingClientRect();
+  if(r.width<1 || r.height<1) return;
   buildCanvas.width = r.width * devicePixelRatio;
   buildCanvas.height = r.height * devicePixelRatio;
   bctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);
   BW = r.width; BH = r.height;
 }
-window.addEventListener('resize',resizeBuild);
+window.addEventListener('resize',()=>{ if(tabIsActive('builder')) resizeBuild(); });
 setTimeout(resizeBuild, 60);
 
 document.querySelectorAll('.tray-part').forEach(el=>{
@@ -373,7 +464,7 @@ zone.addEventListener('drop',e=>{
   const part = e.dataTransfer.getData('text/plain');
   if(part) addPart(part);
 });
-document.getElementById('clearBuild').onclick = ()=>{ parts=[]; buildComposites(); };
+document.getElementById('clearBuild').onclick = ()=>{ parts=[]; buildComposites(); buildStop(); drawBuild(); };
 
 // Click canvas to remove nearest particle
 buildCanvas.addEventListener('click',e=>{
@@ -395,6 +486,7 @@ function addPart(p){
   if(parts.length >= 24) return;
   parts.push(p);
   buildComposites();
+  buildStart();
 }
 
 /* ---- Build composite structures from raw parts ----
@@ -684,7 +776,11 @@ function analyze(){
 /* ---- Animation loop for builder canvas ---- */
 let bt = 0;
 function drawBuild(){
-  bt += 0.016;
+  recordDraw('builder');
+  const now=performance.now();
+  const buildDt=buildLastTimestamp ? Math.min(0.05,(now-buildLastTimestamp)/1000) : 0.016;
+  buildLastTimestamp=now;
+  bt += buildDt;
   bctx.clearRect(0,0,BW,BH);
 
   // background subtle grid
@@ -838,7 +934,7 @@ function drawBuild(){
   if(decayFX && decayFX.length){
     for(let i=decayFX.length-1;i>=0;i--){
       const f = decayFX[i];
-      f.t += 0.016;
+      f.t += buildDt;
       const p = f.t / f.dur;
       if(p>=1){ decayFX.splice(i,1); continue; }
       const ex = f.x + f.vx * p * 400;
@@ -858,7 +954,6 @@ function drawBuild(){
     }
   }
 
-  requestAnimationFrame(drawBuild);
 }
 let decayFX = [];
 
@@ -1022,6 +1117,25 @@ function drawWavyLine(x1,y1,x2,y2,color,amp,t){
   }
   bctx.stroke();
 }
+let buildRAF=null;
+function buildLoop(){
+  if(!canAnimate('builder', buildCanvas)){ buildRAF=null; return; }
+  if(parts.length===0 && decayFX.length===0){ drawBuild(); buildRAF=null; return; }
+  PZ_PERF.frames.builder++;
+  drawBuild();
+  buildRAF=requestAnimationFrame(buildLoop);
+}
+function buildStart(){
+  if(buildRAF!=null) return;
+  if(canAnimate('builder', buildCanvas) && (parts.length>0 || decayFX.length>0)) buildRAF=requestAnimationFrame(buildLoop);
+  else drawBuild();
+}
+function buildStop(){
+  if(buildRAF!=null) cancelAnimationFrame(buildRAF);
+  buildRAF=null;
+  buildLastTimestamp=0;
+}
+observeAnimationTarget(buildCanvas);
 drawBuild();
 buildComposites();
 
@@ -1031,12 +1145,13 @@ const ctx = canvas.getContext('2d');
 let W=0, H=0;
 function resizeCanvas(){
   const r = canvas.getBoundingClientRect();
+  if(r.width<1 || r.height<1) return;
   canvas.width = r.width * devicePixelRatio;
   canvas.height = r.height * devicePixelRatio;
   ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);
   W = r.width; H = r.height;
 }
-window.addEventListener('resize',resizeCanvas);
+window.addEventListener('resize',()=>{ if(tabIsActive('playground')) resizeCanvas(); });
 setTimeout(resizeCanvas, 50);
 
 const PG_TYPES = {
@@ -1050,7 +1165,7 @@ const PG_TYPES = {
 let pgParts = [];
 let trails = true;
 document.getElementById('pgTrails').onchange = e=>trails=e.target.checked;
-document.getElementById('pgClear').onclick = ()=>pgParts=[];
+document.getElementById('pgClear').onclick = ()=>{ pgParts=[]; flashes=[]; pgStop(); step(); };
 
 document.querySelectorAll('[data-spawn]').forEach(b=>{
   b.onclick = ()=>spawn(b.dataset.spawn);
@@ -1077,9 +1192,11 @@ function spawn(type, x, y){
     trail: []
   });
   if(pgParts.length>150) pgParts.shift();
+  if(tabIsActive('playground')) pgStart();
 }
 
-function step(){
+function step(dt=1){
+  recordDraw('playground');
   // background fade for trails
   ctx.fillStyle = trails ? 'rgba(3,5,16,0.15)' : 'rgba(3,5,16,1)';
   ctx.fillRect(0,0,W,H);
@@ -1101,16 +1218,17 @@ function step(){
         fx += f * dx/d;
         fy += f * dy/d;
       }
-      a.vx += fx / a.mass * 50;
-      a.vy += fy / a.mass * 50;
+      a.vx += fx / a.mass * 50 * dt;
+      a.vy += fy / a.mass * 50 * dt;
       // damping
-      a.vx *= 0.995; a.vy *= 0.995;
+      const damping=Math.pow(0.995,dt);
+      a.vx *= damping; a.vy *= damping;
       // speed clamp
       const s = Math.hypot(a.vx,a.vy);
       if(s>3){ a.vx = a.vx/s*3; a.vy = a.vy/s*3; }
     }
 
-    a.x += a.vx; a.y += a.vy;
+    a.x += a.vx*dt; a.y += a.vy*dt;
     // wall bounce
     if(a.x<a.r){a.x=a.r;a.vx*=-0.8}
     if(a.x>W-a.r){a.x=W-a.r;a.vx*=-0.8}
@@ -1122,7 +1240,7 @@ function step(){
       if(a.trail.length>15) a.trail.shift();
     }
 
-    if(a.life!==Infinity){ a.life--; }
+    if(a.life!==Infinity){ a.life-=dt; }
   }
 
   // annihilation: electron + positron -> 2 photons
@@ -1140,10 +1258,12 @@ function step(){
         if((a.type==='electron'&&b.type==='positron')||(a.type==='positron'&&b.type==='electron')){
           toRemove.add(i); toRemove.add(j);
           const cx=(a.x+b.x)/2, cy=(a.y+b.y)/2;
-          for(let k=0;k<2;k++){
-            const ang = Math.random()*Math.PI*2;
-            toAdd.push({type:'photon',...PG_TYPES.photon,x:cx,y:cy,vx:Math.cos(ang)*4,vy:Math.sin(ang)*4,life:200,trail:[],flash:1});
-          }
+          // This toy collision is evaluated in the pair centre-of-momentum frame.
+          const pair = PhysicsCore.photonPair(Math.random()*Math.PI*2);
+          pair.forEach(momentum=>{
+            toAdd.push({type:'photon',...PG_TYPES.photon,x:cx,y:cy,
+              vx:momentum.vx,vy:momentum.vy,life:200,trail:[],flash:1});
+          });
           // flash
           flashes.push({x:cx,y:cy,r:0,life:20});
         }
@@ -1187,13 +1307,33 @@ function step(){
     ctx.strokeStyle = `rgba(255,255,200,${f.life/20})`;
     ctx.lineWidth = 2;
     ctx.beginPath(); ctx.arc(f.x,f.y,f.r,0,Math.PI*2); ctx.stroke();
-    f.r += 3; f.life--;
+    f.r += 3*dt; f.life-=dt;
   }
   for(let i=flashes.length-1;i>=0;i--) if(flashes[i].life<=0) flashes.splice(i,1);
 
-  requestAnimationFrame(step);
 }
 let flashes = [];
+let pgRAF=null, pgLastTimestamp=0;
+function pgLoop(timestamp){
+  if(!canAnimate('playground', canvas)){ pgRAF=null; return; }
+  if(pgParts.length===0 && flashes.length===0){ step(); pgRAF=null; return; }
+  const dt=pgLastTimestamp ? Math.min(3,(timestamp-pgLastTimestamp)/(1000/60)) : 1;
+  pgLastTimestamp=timestamp;
+  PZ_PERF.frames.playground++;
+  step(dt);
+  pgRAF=requestAnimationFrame(pgLoop);
+}
+function pgStart(){
+  if(pgRAF!=null) return;
+  if(canAnimate('playground', canvas) && (pgParts.length>0 || flashes.length>0)) pgRAF=requestAnimationFrame(pgLoop);
+  else if(tabIsActive('playground')) step();
+}
+function pgStop(){
+  if(pgRAF!=null) cancelAnimationFrame(pgRAF);
+  pgRAF=null;
+  pgLastTimestamp=0;
+}
+observeAnimationTarget(canvas);
 step();
 
 // seed some particles for fun
@@ -1735,7 +1875,7 @@ var IX_DEFS = [
 
   { id:'gravwave', group:'rare', tag:'grav', tagKey:'ix.tag.grav',
     title:'ix.gravwave', note:'ix.gravwave.note',
-    eq:'M + M → M + M + G',
+    eq:'M + M → M + M + h  (classical gravitational wave)',
     build(){
       const yC=IX_H/2;
       let s='';
@@ -1746,10 +1886,10 @@ var IX_DEFS = [
       // orbit hints
       s += `<ellipse cx="30" cy="${yC}" rx="14" ry="20" fill="none" stroke="#7c5cff" stroke-width="0.6" opacity="0.4"/>`;
       s += `<ellipse cx="${IX_W-30}" cy="${yC}" rx="14" ry="20" fill="none" stroke="#7c5cff" stroke-width="0.6" opacity="0.4"/>`;
-      // graviton double wavy
+      // Classical gravitational-wave strain, drawn as two tensor-polarization hints.
       s += `<path class="ix-gr1" d="" stroke="#7c5cff" stroke-width="1.4" fill="none"/>`;
       s += `<path class="ix-gr2" d="" stroke="#7c5cff" stroke-width="1.4" fill="none" opacity="0.65"/>`;
-      s += `<text x="${IX_W/2}" y="${yC-22}" text-anchor="middle" fill="#7c5cff" font-size="11" font-family="JetBrains Mono, monospace">${t('ix.svg.spin2')}</text>`;
+      s += `<text x="${IX_W/2}" y="${yC-22}" text-anchor="middle" fill="#7c5cff" font-size="11" font-family="JetBrains Mono, monospace">${t('ix.svg.gw')}</text>`;
       return { svg:s, anim(el,t){
         const g1=el.querySelector('.ix-gr1'), g2=el.querySelector('.ix-gr2');
         if(g1) g1.setAttribute('d', ixWavy(46,yC-2,IX_W-46,yC-2,-t*3,4,5));
@@ -1775,6 +1915,7 @@ function localizeEq(eq){
 const IX_INSTANCES = [];
 function buildInteractionTiles(){
   if(typeof IX_DEFS === 'undefined' || !IX_DEFS) return;
+  IX_INSTANCES.length = 0;
   document.querySelectorAll('.ix-anim').forEach(container=>{
     const group = container.dataset.group;
     container.innerHTML = '';
@@ -1785,32 +1926,45 @@ function buildInteractionTiles(){
       const tagLabel = (typeof t==='function' ? t(def.tagKey) : def.tag);
       card.innerHTML =
         `<div class="ix-head">`+
-          `<span class="ix-title" data-i18n="${def.title}">${def.title}</span>`+
+          `<span class="ix-title" data-i18n="${def.title}">${t(def.title)}</span>`+
           `<span class="ix-tag t-${def.tag}" data-i18n="${def.tagKey}">${tagLabel}</span>`+
         `</div>`+
         `<svg viewBox="0 0 ${IX_W} ${IX_H}" preserveAspectRatio="none">${built.svg}</svg>`+
         `<div class="ix-eq">${localizeEq(def.eq)}</div>`+
-        `<div class="ix-note" data-i18n="${def.note}">${def.note}</div>`;
+        `<div class="ix-note" data-i18n="${def.note}">${t(def.note)}</div>`+
+        contentReferences('interaction', def.id);
+      card.dataset.contentId = def.id;
       container.appendChild(card);
-      IX_INSTANCES.push({ el: card.querySelector('svg'), anim: built.anim });
+      observeAnimationTarget(card);
+      IX_INSTANCES.push({ card, el: card.querySelector('svg'), anim: built.anim });
     });
   });
-  // Re-run i18n so the freshly-inserted data-i18n nodes get translated.
-  try {
-    const lang = (localStorage.getItem('pz-lang')) ||
-      ((navigator.language||'').toLowerCase().startsWith('zh') ? 'zh-CN' : 'en');
-    if(typeof applyI18n==='function') applyI18n(lang);
-  } catch(_){}
 }
 
-let ixRAF=null, ixT=0;
-function ixLoop(){
-  ixT += 0.05;
-  for(const inst of IX_INSTANCES) inst.anim(inst.el, ixT);
+let ixRAF=null, ixT=0, ixLastTimestamp=0;
+function ixLoop(timestamp){
+  const activeInstances = IX_INSTANCES.filter(inst=>canAnimate('forces', inst.card));
+  if(activeInstances.length===0){ ixRAF=null; return; }
+  PZ_PERF.frames.interactions++;
+  const dt=ixLastTimestamp ? Math.min(0.05,(timestamp-ixLastTimestamp)/1000) : 1/60;
+  ixLastTimestamp=timestamp;
+  ixT += dt*3;
+  for(const inst of activeInstances){ inst.anim(inst.el, ixT); recordDraw(`interaction:${inst.card.dataset.contentId}`); }
   ixRAF = requestAnimationFrame(ixLoop);
 }
-function ixStart(){ if(ixRAF==null) ixLoop(); }
-function ixStop(){ if(ixRAF!=null){ cancelAnimationFrame(ixRAF); ixRAF=null; } }
+function ixStart(){
+  if(ixRAF!=null) return;
+  if(reducedMotionQuery.matches){
+    IX_INSTANCES.forEach(inst=>inst.anim(inst.el, ixT));
+    return;
+  }
+  ixRAF=requestAnimationFrame(ixLoop);
+}
+function ixStop(){
+  if(ixRAF!=null) cancelAnimationFrame(ixRAF);
+  ixRAF=null;
+  ixLastTimestamp=0;
+}
 
 // Hook into tab switching: start when 'forces' tab is shown, stop otherwise.
 document.querySelectorAll('.tab').forEach(t=>{
@@ -1855,31 +2009,34 @@ function labInitConfinement(){
     return d1<d2 ? 'q' : 'aq';
   };
   const local = (e)=>{ const r=c.getBoundingClientRect(); return { x:e.clientX-r.left, y:e.clientY-r.top }; };
-  c.addEventListener('mousedown', e=>{ const p=local(e); LAB.conf.dragging = pick(p.x,p.y); });
-  c.addEventListener('mousemove', e=>{
-    if(!LAB.conf.dragging) return;
-    const p = local(e);
-    const target = LAB.conf.dragging==='q' ? LAB.conf.q : LAB.conf.aq;
-    target.x = Math.max(20, Math.min(LAB.conf.w-20, p.x));
-    target.y = Math.max(30, Math.min(LAB.conf.h-30, p.y));
-  });
-  window.addEventListener('mouseup', ()=>{ LAB.conf.dragging=null; });
-  // Touch
-  c.addEventListener('touchstart', e=>{ const r=c.getBoundingClientRect(); const t=e.touches[0]; LAB.conf.dragging = pick(t.clientX-r.left, t.clientY-r.top); e.preventDefault(); }, {passive:false});
-  c.addEventListener('touchmove', e=>{
-    if(!LAB.conf.dragging) return;
-    const r=c.getBoundingClientRect(); const t=e.touches[0];
-    const target = LAB.conf.dragging==='q' ? LAB.conf.q : LAB.conf.aq;
-    target.x = Math.max(20, Math.min(LAB.conf.w-20, t.clientX-r.left));
-    target.y = Math.max(30, Math.min(LAB.conf.h-30, t.clientY-r.top));
-    e.preventDefault();
-  }, {passive:false});
-  c.addEventListener('touchend', ()=>{ LAB.conf.dragging=null; });
+  if(!c.dataset.inputBound){
+    c.dataset.inputBound='1';
+    c.addEventListener('mousedown', e=>{ const p=local(e); LAB.conf.dragging = pick(p.x,p.y); });
+    c.addEventListener('mousemove', e=>{
+      if(!LAB.conf.dragging) return;
+      const p = local(e);
+      const target = LAB.conf.dragging==='q' ? LAB.conf.q : LAB.conf.aq;
+      target.x = Math.max(20, Math.min(LAB.conf.w-20, p.x));
+      target.y = Math.max(30, Math.min(LAB.conf.h-30, p.y));
+    });
+    window.addEventListener('mouseup', ()=>{ if(LAB.conf) LAB.conf.dragging=null; });
+    c.addEventListener('touchstart', e=>{ const r=c.getBoundingClientRect(); const touch=e.touches[0]; LAB.conf.dragging = pick(touch.clientX-r.left, touch.clientY-r.top); e.preventDefault(); }, {passive:false});
+    c.addEventListener('touchmove', e=>{
+      if(!LAB.conf.dragging) return;
+      const r=c.getBoundingClientRect(); const touch=e.touches[0];
+      const target = LAB.conf.dragging==='q' ? LAB.conf.q : LAB.conf.aq;
+      target.x = Math.max(20, Math.min(LAB.conf.w-20, touch.clientX-r.left));
+      target.y = Math.max(30, Math.min(LAB.conf.h-30, touch.clientY-r.top));
+      e.preventDefault();
+    }, {passive:false});
+    c.addEventListener('touchend', ()=>{ if(LAB.conf) LAB.conf.dragging=null; });
+  }
 
   document.getElementById('confReset').onclick = ()=>{
-    LAB.conf.q  = {x:w*0.4, y:h/2};
-    LAB.conf.aq = {x:w*0.6, y:h/2};
-    LAB.conf.snapPop = 0; LAB.conf.snapPos=null; LAB.conf.snapPair=null;
+    const state=LAB.conf;
+    state.q={x:state.w*0.4,y:state.h/2};
+    state.aq={x:state.w*0.6,y:state.h/2};
+    state.snapPop=0; state.snapPos=null; state.snapPair=null;
   };
 }
 function labDrawConfinement(){
@@ -2320,12 +2477,12 @@ function wrapText(ctx, text, x, y, maxW, lineH){
 // The vacuum is a lattice of oscillators; particles fly through and "drag" the field.
 // Coupling strength (proxy for mass) sets how much each particle disturbs the lattice.
 const HIGGS_PARTICLES = [
-  { id:'photon',   sym:'γ',   nameKey:'part.photon',   role:'lab.higgs.role.photon',   color:'#ffd166', coupling:0.0,   mass:'0',            note:'lab.higgs.note.photon' },
-  { id:'electron', sym:'e⁻',  nameKey:'part.electron', role:'lab.higgs.role.electron', color:'#4ea8ff', coupling:0.05,  mass:'0.511 MeV',    note:'lab.higgs.note.electron' },
-  { id:'muon',     sym:'μ⁻',  nameKey:'part.muon',     role:'lab.higgs.role.muon',     color:'#7ee8c5', coupling:0.35,  mass:'106 MeV',      note:'lab.higgs.note.muon' },
-  { id:'tau',      sym:'τ⁻',  nameKey:'part.tau',      role:'lab.higgs.role.tau',      color:'#c39bff', coupling:0.6,   mass:'1.78 GeV',     note:'lab.higgs.note.tau' },
-  { id:'W',        sym:'W±',  nameKey:'part.wboson',   role:'lab.higgs.role.W',        color:'#5aa8ff', coupling:0.85,  mass:'80.4 GeV',     note:'lab.higgs.note.W' },
-  { id:'top',      sym:'t',   nameKey:'part.top',      role:'lab.higgs.role.top',      color:'#ff5c8a', coupling:1.0,   mass:'173 GeV',      note:'lab.higgs.note.top' },
+  { id:'photon',   sym:'γ',   nameKey:'part.photon',   role:'lab.higgs.role.photon',   color:'#ffd166', visual:0.0,  couplingText:'0',          mass:'0',          note:'lab.higgs.note.photon' },
+  { id:'electron', sym:'e⁻',  nameKey:'part.electron', role:'lab.higgs.role.electron', color:'#4ea8ff', visual:0.05, couplingText:'yₑ≈2.9×10⁻⁶', mass:'0.511 MeV',  note:'lab.higgs.note.electron' },
+  { id:'muon',     sym:'μ⁻',  nameKey:'part.muon',     role:'lab.higgs.role.muon',     color:'#7ee8c5', visual:0.35, couplingText:'yμ≈6.1×10⁻⁴', mass:'105.7 MeV',  note:'lab.higgs.note.muon' },
+  { id:'tau',      sym:'τ⁻',  nameKey:'part.tau',      role:'lab.higgs.role.tau',      color:'#c39bff', visual:0.6,  couplingText:'yτ≈1.0×10⁻²', mass:'1.777 GeV',  note:'lab.higgs.note.tau' },
+  { id:'W',        sym:'W±',  nameKey:'part.wboson',   role:'lab.higgs.role.W',        color:'#5aa8ff', visual:0.85, couplingText:'g≈0.65',      mass:'80.369 GeV', note:'lab.higgs.note.W' },
+  { id:'top',      sym:'t',   nameKey:'part.top',      role:'lab.higgs.role.top',      color:'#ff5c8a', visual:1.0,  couplingText:'yt≈0.99',     mass:'172.7 GeV',  note:'lab.higgs.note.top' },
 ];
 function labInitHiggs(){
   const c = document.getElementById('higgsCanvas'); if(!c) return;
@@ -2385,15 +2542,15 @@ function labDrawHiggs(){
   });
   for(let i=S.fires.length-1;i>=0;i--){
     const f = S.fires[i];
-    const speed = f.P.coupling===0 ? 6 : 6 - f.P.coupling*3.5;
+    const speed = f.P.visual===0 ? 6 : 6 - f.P.visual*3.5;
     f.x += speed; f.t += 0.016;
-    if(f.P.coupling > 0){
+    if(f.P.visual > 0){
       sites.forEach(s=>{
         const dx = s.x - f.x, dy = s.y - f.y;
         const d2 = dx*dx + dy*dy;
         if(d2 < 3600){
           const d = Math.sqrt(d2)+0.1;
-          const push = (f.P.coupling * 12) / d;
+          const push = (f.P.visual * 12) / d;
           s.ox += (dx/d) * push * 0.15;
           s.oy += (dy/d) * push * 0.15;
         }
@@ -2423,11 +2580,11 @@ function labDrawHiggs(){
   });
 
   S.fires.forEach(f=>{
-    if(f.P.coupling>0){
+    if(f.P.visual>0){
       const wakeGrad = ctx.createLinearGradient(f.x-60, f.y, f.x, f.y);
       wakeGrad.addColorStop(0, 'rgba(0,0,0,0)');
       wakeGrad.addColorStop(1, f.P.color + '80');
-      ctx.strokeStyle = wakeGrad; ctx.lineWidth = 2 + f.P.coupling*6;
+      ctx.strokeStyle = wakeGrad; ctx.lineWidth = 2 + f.P.visual*6;
       ctx.beginPath(); ctx.moveTo(f.x-60, f.y); ctx.lineTo(f.x, f.y); ctx.stroke();
     }
     const g = ctx.createRadialGradient(f.x,f.y,0,f.x,f.y,14);
@@ -2445,7 +2602,7 @@ function labDrawHiggs(){
   ctx.fillStyle='#c8cff0'; ctx.font='11px Space Grotesk, sans-serif';
   wrapText(ctx, t(P.note), 12, 38, w-24, 14);
   ctx.fillStyle='#8b93b3'; ctx.font='11px JetBrains Mono, monospace';
-  ctx.fillText(`${t('lab.higgs.yukawa')} ≈ ${P.coupling.toFixed(2)}`, 12, h-10);
+  ctx.fillText(`${t('lab.higgs.yukawa')}: ${P.couplingText}`, 12, h-10);
 }
 
 /* ---------- Demo 4: Feynman diagram builder ---------- */
@@ -2624,63 +2781,18 @@ function labDrawFeyn(){
 }
 
 /* ---------- Demo 5: Decay chain sandbox ---------- */
-// Simplified PDG-ish decay table. Each key → list of channels with br (branching ratio)
-// and lifetime τ in seconds (used for scheduling animation).
-// Daughters listed by symbol; those with an entry decay further, else are stable.
-var DECAY_TABLE = {
-  'μ⁻': { tau: 2.2e-6, channels:[
-    { br:1.00, daughters:['e⁻','ν̄_e','ν_μ'] }
-  ]},
-  'τ⁻': { tau: 2.9e-13, channels:[
-    { br:0.17, daughters:['e⁻','ν̄_e','ν_τ'] },
-    { br:0.17, daughters:['μ⁻','ν̄_μ','ν_τ'] },
-    { br:0.25, daughters:['π⁻','ν_τ'] },
-    { br:0.41, daughters:['π⁻','π⁰','ν_τ'] },
-  ]},
-  'π⁺': { tau: 2.6e-8, channels:[
-    { br:1.00, daughters:['μ⁺','ν_μ'] }
-  ]},
-  'π⁻': { tau: 2.6e-8, channels:[
-    { br:1.00, daughters:['μ⁻','ν̄_μ'] }
-  ]},
-  'π⁰': { tau: 8.5e-17, channels:[
-    { br:0.99, daughters:['γ','γ'] },
-    { br:0.01, daughters:['e⁻','e⁺','γ'] },
-  ]},
-  'K⁺': { tau: 1.24e-8, channels:[
-    { br:0.64, daughters:['μ⁺','ν_μ'] },
-    { br:0.21, daughters:['π⁺','π⁰'] },
-    { br:0.06, daughters:['π⁺','π⁺','π⁻'] },
-    { br:0.09, daughters:['π⁰','e⁺','ν_e'] },
-  ]},
-  'n':  { tau: 880, channels:[
-    { br:1.00, daughters:['p','e⁻','ν̄_e'] }
-  ]},
-  'μ⁺': { tau: 2.2e-6, channels:[{ br:1.00, daughters:['e⁺','ν_e','ν̄_μ'] }]},
-  'μ⁺-alias':{ tau:2.2e-6, channels:[]}, // avoid future collisions
-  'Z':  { tau: 2.6e-25, channels:[
-    { br:0.20, daughters:['e⁻','e⁺'] },
-    { br:0.20, daughters:['μ⁻','μ⁺'] },
-    { br:0.20, daughters:['τ⁻','τ⁺'] },
-    { br:0.40, daughters:['q','q̄'] },
-  ]},
-  'τ⁺': { tau: 2.9e-13, channels:[
-    { br:0.35, daughters:['μ⁺','ν_μ','ν̄_τ'] },
-    { br:0.65, daughters:['π⁺','π⁰','ν̄_τ'] }
-  ]},
-};
+// Measured branching fractions are maintained in physics-core.js and validated in Node.
 var DECAY_COLORS = {
   'e⁻':'#4ea8ff','e⁺':'#4ea8ff','μ⁻':'#7ee8c5','μ⁺':'#7ee8c5','τ⁻':'#c39bff','τ⁺':'#c39bff',
   'ν_e':'#8fa8ff','ν̄_e':'#8fa8ff','ν_μ':'#8fa8ff','ν̄_μ':'#8fa8ff','ν_τ':'#8fa8ff','ν̄_τ':'#8fa8ff',
   'γ':'#ffd166','π⁺':'#ff6b9d','π⁻':'#ff6b9d','π⁰':'#ffb0cf','K⁺':'#ff5c8a',
-  'p':'#c8cff0','n':'#c8cff0','q':'#5aa8ff','q̄':'#5aa8ff','Z':'#ff6b9d'
+  'p':'#c8cff0','n':'#c8cff0','q':'#5aa8ff','q̄':'#5aa8ff','Z':'#ff6b9d',
+  'ν':'#8fa8ff','ν̄':'#8fa8ff','other':'#8b93b3'
 };
 var DECAY_STARTERS = ['τ⁻','K⁺','π⁺','μ⁻','π⁰','n','Z'];
 function pickChannel(name){
   const T = DECAY_TABLE[name]; if(!T) return null;
-  const r = Math.random(); let acc = 0;
-  for(const c of T.channels){ acc += c.br; if(r<=acc) return c; }
-  return T.channels[T.channels.length-1];
+  return PhysicsCore.pickDecayChannel(T, Math.random());
 }
 function labInitDecay(){
   const c = document.getElementById('decayCanvas'); if(!c) return;
@@ -3305,46 +3417,6 @@ function labDrawEVD(){
 // Particle database with quantum numbers. Q=charge, B=baryon,
 // Le/Lmu/Ltau=lepton flavour, S=strangeness. Antiparticles flip all signs
 // except S which flips too. Naming follows PDG.
-var CONS_PARTICLES = {
-  //          Q     B    Le   Lmu Ltau  S    color
-  'p':      { Q: 1, B: 1, Le:0, Lmu:0, Ltau:0, S:0,   c:'#c8cff0', hadron:true },
-  'p̄':      { Q:-1, B:-1, Le:0, Lmu:0, Ltau:0, S:0,   c:'#c8cff0', hadron:true },
-  'n':      { Q: 0, B: 1, Le:0, Lmu:0, Ltau:0, S:0,   c:'#c8cff0', hadron:true },
-  'n̄':      { Q: 0, B:-1, Le:0, Lmu:0, Ltau:0, S:0,   c:'#c8cff0', hadron:true },
-  'π⁺':     { Q: 1, B: 0, Le:0, Lmu:0, Ltau:0, S:0,   c:'#ff6b9d', hadron:true },
-  'π⁻':     { Q:-1, B: 0, Le:0, Lmu:0, Ltau:0, S:0,   c:'#ff6b9d', hadron:true },
-  'π⁰':     { Q: 0, B: 0, Le:0, Lmu:0, Ltau:0, S:0,   c:'#ffb0cf', hadron:true },
-  'K⁺':     { Q: 1, B: 0, Le:0, Lmu:0, Ltau:0, S: 1,  c:'#ff5c8a', hadron:true },
-  'K⁻':     { Q:-1, B: 0, Le:0, Lmu:0, Ltau:0, S:-1,  c:'#ff5c8a', hadron:true },
-  'K⁰':     { Q: 0, B: 0, Le:0, Lmu:0, Ltau:0, S: 1,  c:'#ff5c8a', hadron:true },
-  'Λ':      { Q: 0, B: 1, Le:0, Lmu:0, Ltau:0, S:-1,  c:'#c39bff', hadron:true },
-  'Σ⁺':     { Q: 1, B: 1, Le:0, Lmu:0, Ltau:0, S:-1,  c:'#c39bff', hadron:true },
-  'e⁻':     { Q:-1, B: 0, Le: 1, Lmu:0, Ltau:0, S:0,  c:'#4ea8ff', hadron:false },
-  'e⁺':     { Q: 1, B: 0, Le:-1, Lmu:0, Ltau:0, S:0,  c:'#4ea8ff', hadron:false },
-  'μ⁻':     { Q:-1, B: 0, Le:0, Lmu: 1, Ltau:0, S:0,  c:'#7ee8c5', hadron:false },
-  'μ⁺':     { Q: 1, B: 0, Le:0, Lmu:-1, Ltau:0, S:0,  c:'#7ee8c5', hadron:false },
-  'τ⁻':     { Q:-1, B: 0, Le:0, Lmu:0, Ltau: 1, S:0,  c:'#c39bff', hadron:false },
-  'τ⁺':     { Q: 1, B: 0, Le:0, Lmu:0, Ltau:-1, S:0,  c:'#c39bff', hadron:false },
-  'ν_e':    { Q: 0, B: 0, Le: 1, Lmu:0, Ltau:0, S:0,  c:'#8fa8ff', hadron:false },
-  'ν̄_e':    { Q: 0, B: 0, Le:-1, Lmu:0, Ltau:0, S:0,  c:'#8fa8ff', hadron:false },
-  'ν_μ':    { Q: 0, B: 0, Le:0, Lmu: 1, Ltau:0, S:0,  c:'#8fa8ff', hadron:false },
-  'ν̄_μ':    { Q: 0, B: 0, Le:0, Lmu:-1, Ltau:0, S:0,  c:'#8fa8ff', hadron:false },
-  'ν_τ':    { Q: 0, B: 0, Le:0, Lmu:0, Ltau: 1, S:0,  c:'#8fa8ff', hadron:false },
-  'ν̄_τ':    { Q: 0, B: 0, Le:0, Lmu:0, Ltau:-1, S:0,  c:'#8fa8ff', hadron:false },
-  'γ':      { Q: 0, B: 0, Le:0, Lmu:0, Ltau:0, S:0,   c:'#ffd166', hadron:false, boson:true },
-};
-var CONS_EXAMPLES = [
-  { name:'β⁻ decay:  n → p + e⁻ + ν̄_e',       reactants:['n'],       products:['p','e⁻','ν̄_e'] },
-  { name:'π⁺ decay:  π⁺ → μ⁺ + ν_μ',            reactants:['π⁺'],      products:['μ⁺','ν_μ'] },
-  { name:'μ⁻ decay:  μ⁻ → e⁻ + ν̄_e + ν_μ',     reactants:['μ⁻'],      products:['e⁻','ν̄_e','ν_μ'] },
-  { name:'Λ decay:   Λ → p + π⁻',              reactants:['Λ'],       products:['p','π⁻'] },
-  { name:'Forbidden: μ⁻ → e⁻ + γ  (violates L_μ / L_e)',
-                                                  reactants:['μ⁻'],      products:['e⁻','γ'] },
-  { name:'Forbidden: p → e⁺ + γ    (violates B)',
-                                                  reactants:['p'],       products:['e⁺','γ'] },
-  { name:'K⁺ decay:  K⁺ → μ⁺ + ν_μ  (ΔS=1 weak)',
-                                                  reactants:['K⁺'],      products:['μ⁺','ν_μ'] },
-];
 function labInitCons(){
   const c = document.getElementById('consCanvas'); if(!c) return;
   const { ctx, w, h } = labSizeCanvas(c);
@@ -3408,40 +3480,10 @@ function labInitCons(){
   };
 }
 function sumCharges(arr){
-  const acc = {Q:0,B:0,Le:0,Lmu:0,Ltau:0,S:0};
-  arr.forEach(k=>{ const p = CONS_PARTICLES[k]; if(!p) return;
-    acc.Q += p.Q; acc.B += p.B; acc.Le += p.Le; acc.Lmu += p.Lmu; acc.Ltau += p.Ltau; acc.S += p.S;
-  });
-  return acc;
+  return PhysicsCore.sumCharges(arr);
 }
 function classifyProcess(R, P){
-  const l = sumCharges(R), r = sumCharges(P);
-  const viol = [];
-  const keys = ['Q','B','Le','Lmu','Ltau','S'];
-  const dS = r.S - l.S;
-  for(const k of keys){
-    if(k==='S') continue;
-    if(l[k] !== r[k]) viol.push(k);
-  }
-  // Strangeness: strong/EM require ΔS=0; weak allows |ΔS|≤1
-  const strangenessOK = (Math.abs(dS) <= 1);
-  if(!strangenessOK) viol.push('S');
-  // Force verdict: only meaningful if the strict laws (Q,B,L_x) hold
-  let force = 'none';
-  if(viol.length===0){
-    // If it involves a neutrino, must be weak. If ΔS≠0, must be weak.
-    const hasNu = [...R,...P].some(k=>k.includes('ν'));
-    if(hasNu || dS !== 0) force = 'weak';
-    else {
-      // If only leptons+photons, EM. Else check if hadrons are involved.
-      const anyHadron = [...R,...P].some(k=>CONS_PARTICLES[k]?.hadron);
-      const hasGamma = [...R,...P].includes('γ');
-      if(hasGamma && !anyHadron) force = 'em';
-      else if(anyHadron) force = 'strong'; // best guess; strong preserves everything
-      else force = 'em';
-    }
-  }
-  return { viol, dS, force, l, r };
+  return PhysicsCore.classifyProcess(R, P);
 }
 function labDrawCons(){
   const S = LAB.cons; if(!S) return;
@@ -3669,36 +3711,77 @@ function labDrawRun(){
 }
 
 /* ---------- Lab loop + tab hook ---------- */
-function labLoop(){
-  labT += 0.016;
-  labDrawConfinement();
-  labDrawDetector();
-  labDrawHiggs();
-  labDrawFeyn();
-  labDrawDecay();
-  labDrawOsc();
-  labDrawPDF();
-  labDrawEVD();
-  labDrawCons();
-  labDrawRun();
-  labRAF = requestAnimationFrame(labLoop);
+const LAB_DEMOS = [
+  {id:'conf',canvas:'confCanvas',sub:'basics',animated:true,init:labInitConfinement,draw:labDrawConfinement},
+  {id:'det',canvas:'detCanvas',sub:'basics',animated:false,init:labInitDetector,draw:labDrawDetector},
+  {id:'higgs',canvas:'higgsCanvas',sub:'basics',animated:true,init:labInitHiggs,draw:labDrawHiggs},
+  {id:'feyn',canvas:'feynCanvas',sub:'advanced',animated:false,init:labInitFeyn,draw:labDrawFeyn},
+  {id:'decay',canvas:'decayCanvas',sub:'advanced',animated:true,init:labInitDecay,draw:labDrawDecay},
+  {id:'osc',canvas:'oscCanvas',sub:'advanced',animated:false,init:labInitOsc,draw:labDrawOsc},
+  {id:'pdf',canvas:'pdfCanvas',sub:'advanced',animated:false,init:labInitPDF,draw:labDrawPDF},
+  {id:'evd',canvas:'evdCanvas',sub:'advanced',animated:false,init:labInitEVD,draw:labDrawEVD},
+  {id:'cons',canvas:'consCanvas',sub:'advanced',animated:false,init:labInitCons,draw:labDrawCons},
+  {id:'run',canvas:'runCanvas',sub:'advanced',animated:false,init:labInitRun,draw:labDrawRun},
+];
+const initializedLabSubs = new Set();
+let labStaticDirty=true, labLastTimestamp=0;
+LAB_DEMOS.forEach(demo=>observeAnimationTarget(document.getElementById(demo.canvas)));
+
+function activeLabSub(){
+  return document.querySelector('.lab-subtab.active')?.dataset.labSub || 'basics';
+}
+function initActiveLabDemos(){
+  const sub=activeLabSub();
+  if(initializedLabSubs.has(sub)) return;
+  LAB_DEMOS.filter(demo=>demo.sub===sub).forEach(demo=>demo.init());
+  initializedLabSubs.add(sub);
+  labStaticDirty=true;
+}
+function drawActiveLabDemos(advanceAnimations){
+  const sub=activeLabSub();
+  let visibleCount=0;
+  LAB_DEMOS.filter(demo=>demo.sub===sub).forEach(demo=>{
+    const canvas=document.getElementById(demo.canvas);
+    if(!elementIsVisible(canvas)) return;
+    visibleCount++;
+    if((demo.animated && advanceAnimations) || labStaticDirty || reducedMotionQuery.matches){
+      demo.draw();
+      recordDraw(`lab:${demo.id}`);
+    }
+  });
+  labStaticDirty=false;
+  return visibleCount;
+}
+function labLoop(timestamp){
+  if(!tabIsActive('lab') || document.hidden || reducedMotionQuery.matches){ labRAF=null; return; }
+  const visibleDemos=LAB_DEMOS.filter(demo=>demo.sub===activeLabSub() && elementIsVisible(document.getElementById(demo.canvas)));
+  const hasAnimatedDemo=visibleDemos.some(demo=>demo.animated);
+  if(visibleDemos.length===0 || (!hasAnimatedDemo && !labStaticDirty)){ labRAF=null; return; }
+  const dt=labLastTimestamp ? Math.min(0.05,(timestamp-labLastTimestamp)/1000) : 0.016;
+  labLastTimestamp=timestamp;
+  labT+=dt;
+  PZ_PERF.frames.lab++;
+  drawActiveLabDemos(true);
+  labRAF=hasAnimatedDemo ? requestAnimationFrame(labLoop) : null;
 }
 function labStart(){
   if(labRAF!=null) return;
-  // (Re-)initialise every time we enter the tab to get proper sizes.
-  labInitConfinement();
-  labInitDetector();
-  labInitHiggs();
-  labInitFeyn();
-  labInitDecay();
-  labInitOsc();
-  labInitPDF();
-  labInitEVD();
-  labInitCons();
-  labInitRun();
-  labLoop();
+  if(!tabIsActive('lab')) return;
+  initActiveLabDemos();
+  drawActiveLabDemos(false);
+  if(!document.hidden && !reducedMotionQuery.matches) labRAF=requestAnimationFrame(labLoop);
 }
-function labStop(){ if(labRAF!=null){ cancelAnimationFrame(labRAF); labRAF=null; } }
+function labStop(){
+  if(labRAF!=null) cancelAnimationFrame(labRAF);
+  labRAF=null;
+  labLastTimestamp=0;
+}
+function markLabDirty(){
+  labStaticDirty=true;
+  if(!tabIsActive('lab')) return;
+  if(reducedMotionQuery.matches) drawActiveLabDemos(false);
+  else if(labRAF==null) labStart();
+}
 
 document.querySelectorAll('.tab').forEach(t=>{
   t.addEventListener('click',()=>{
@@ -3713,14 +3796,34 @@ document.querySelectorAll('.lab-subtab').forEach(b=>{
     document.querySelectorAll('[data-lab-sub-panel]').forEach(p=>{
       p.classList.toggle('active', p.dataset.labSubPanel===key);
     });
-    // canvases in the newly-shown panel need a re-size (getBoundingClientRect is 0 while hidden)
-    if(labRAF!=null){ labStop(); labStart(); }
+    labStop();
+    initActiveLabDemos();
+    labStaticDirty=true;
+    labStart();
   });
 });
-window.addEventListener('resize', ()=>{ if(labRAF!=null){ labStop(); labStart(); } });
+document.getElementById('tab-lab').addEventListener('input',markLabDirty);
+document.getElementById('tab-lab').addEventListener('change',markLabDirty);
+document.getElementById('tab-lab').addEventListener('click',markLabDirty);
+document.getElementById('evdCanvas').addEventListener('mousemove',markLabDirty);
+window.addEventListener('resize', ()=>{
+  initializedLabSubs.delete(activeLabSub());
+  labStop();
+  syncAnimationLoops();
+});
+
+function syncAnimationLoops(){
+  if(canAnimate('builder',buildCanvas)) buildStart(); else buildStop();
+  if(canAnimate('playground',canvas)) pgStart(); else pgStop();
+  if(tabIsActive('forces') && !document.hidden && !reducedMotionQuery.matches) ixStart(); else ixStop();
+  if(tabIsActive('lab') && !document.hidden) labStart(); else labStop();
+}
+document.addEventListener('visibilitychange',syncAnimationLoops);
+reducedMotionQuery.addEventListener('change',syncAnimationLoops);
 
 // If lab is the initial tab (unlikely), start it.
 if(document.querySelector('.tab.active')?.dataset.tab === 'lab') labStart();
+syncAnimationLoops();
 
 /* ---- Fix Big Bang cross-link.  When served from particle-zoo/index.html,
    ../big-bang/index.html works.  When served from particle-zoo/mobile/

@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "description": "Interactive Standard Model of particle physics.",
   "scripts": {
-    "build": "node build.js"
+    "build": "node build.js",
+    "test": "node --test --experimental-test-coverage --test-coverage-include=physics-core.js --test-coverage-include=references.js --test-coverage-lines=100 --test-coverage-functions=100 --test-coverage-branches=100",
+    "validate": "node validate.js"
   },
   "private": true
 }
