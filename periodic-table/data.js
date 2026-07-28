@@ -419,11 +419,6 @@ const CATEGORY_I18N = {
   }
 };
 
-const PHASE_I18N = {
-  en: {solid:'Solid', liquid:'Liquid', gas:'Gas'},
-  'zh-CN': {solid:'固态', liquid:'液态', gas:'气态'}
-};
-
 /* ================ DISCOVERY YEARS ================
    Compact table: Z -> [year, discoverer]. year<0 = ancient.
 ================================================== */

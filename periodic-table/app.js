@@ -216,7 +216,7 @@ function refreshDetail(){
   const propsEl = document.getElementById('dProps');
   const shells = shellCounts(el.Z);
   const phaseKey = ext.phase || (el.category==='noble'?'gas':(el.category==='halogen' && el.Z<=17 ? (el.Z===9||el.Z===17?'gas':'liquid'):'solid'));
-  const phaseBase = PHASE_I18N[lang][phaseKey] || phaseKey;
+  const phaseBase = resolvePhaseLabel(phaseKey);
   const phaseNote = lang==='zh-CN' ? ext.phaseNote_zh : ext.phaseNote_en;
   const phaseTxt = phaseNote ? `${phaseBase} — ${phaseNote}` : phaseBase;
   const radioTxt = t(`radio.${el.radioactivity}`);

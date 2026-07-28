@@ -18,12 +18,12 @@ function loadData(){
   vm.runInContext(`${features}\nglobalThis.__features={F_RADIUS,F_IE,F_DENSITY,F_MELT,F_ABUNDANCE,F_ORIGIN,F_NUCLIDES};`, context);
   const i18n = fs.readFileSync(path.join(ROOT, 'i18n.js'), 'utf8');
   const featureI18n = fs.readFileSync(path.join(ROOT, 'features', 'features-i18n.js'), 'utf8');
-  vm.runInContext(`${i18n}\n${featureI18n}\nglobalThis.__locales=LOCALES;`, context);
-  return {core:context.__core, features:context.__features, locales:context.__locales};
+  vm.runInContext(`${i18n}\n${featureI18n}\nglobalThis.__localeApi={LOCALES,resolvePhaseLabel};`, context);
+  return {core:context.__core, features:context.__features, locales:context.__localeApi.LOCALES, localeApi:context.__localeApi, context};
 }
 
 function validate(){
-  const {core, features, locales} = loadData();
+  const {core, features, locales, localeApi, context} = loadData();
   const elements = Object.values(core.ELEMENTS);
   assert.equal(elements.length, 118, 'exactly 118 elements');
   assert.deepEqual(elements.map(el=>el.Z), Array.from({length:118}, (_, index)=>index+1));
@@ -135,6 +135,10 @@ function validate(){
   ['radio.trace','radio.synthetic','phase.unknown','detail.iso.none','origin.caveat','ov.caveat'].forEach(key => {
     assert.ok(locales.en[key] && locales['zh-CN'][key], `localized key ${key}`);
   });
+  context.window.CURRENT_LANG = 'en';
+  assert.equal(localeApi.resolvePhaseLabel('unknown'), 'Unknown', 'runtime unknown phase in English');
+  context.window.CURRENT_LANG = 'zh-CN';
+  assert.equal(localeApi.resolvePhaseLabel('unknown'), '未知', 'runtime unknown phase in Simplified Chinese');
 
   Sources.REQUIRED_GROUPS.forEach(group => {
     assert.ok(Sources.sourcesFor(group, 1).length > 0, `source coverage for ${group}`);

@@ -914,6 +914,12 @@ function t(key){
   return (dict && dict[key]) || (LOCALES.en[key]) || key;
 }
 
+function resolvePhaseLabel(phaseKey){
+  const key = `phase.${phaseKey}`;
+  const label = t(key);
+  return label === key ? phaseKey : label;
+}
+
 </script>
   <script>
 /* ==================== ADDITIONAL i18n KEYS ====================
@@ -1819,11 +1825,6 @@ const CATEGORY_I18N = {
   }
 };
 
-const PHASE_I18N = {
-  en: {solid:'Solid', liquid:'Liquid', gas:'Gas'},
-  'zh-CN': {solid:'固态', liquid:'液态', gas:'气态'}
-};
-
 /* ================ DISCOVERY YEARS ================
    Compact table: Z -> [year, discoverer]. year<0 = ancient.
 ================================================== */
@@ -2593,7 +2594,7 @@ function refreshDetail(){
   const propsEl = document.getElementById('dProps');
   const shells = shellCounts(el.Z);
   const phaseKey = ext.phase || (el.category==='noble'?'gas':(el.category==='halogen' && el.Z<=17 ? (el.Z===9||el.Z===17?'gas':'liquid'):'solid'));
-  const phaseBase = PHASE_I18N[lang][phaseKey] || phaseKey;
+  const phaseBase = resolvePhaseLabel(phaseKey);
   const phaseNote = lang==='zh-CN' ? ext.phaseNote_zh : ext.phaseNote_en;
   const phaseTxt = phaseNote ? `${phaseBase} — ${phaseNote}` : phaseBase;
   const radioTxt = t(`radio.${el.radioactivity}`);

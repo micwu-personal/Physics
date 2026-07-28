@@ -236,3 +236,9 @@ function t(key){
   const dict = LOCALES[window.CURRENT_LANG||'en'];
   return (dict && dict[key]) || (LOCALES.en[key]) || key;
 }
+
+function resolvePhaseLabel(phaseKey){
+  const key = `phase.${phaseKey}`;
+  const label = t(key);
+  return label === key ? phaseKey : label;
+}
