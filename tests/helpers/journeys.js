@@ -40,6 +40,42 @@ export async function exerciseBigBang(page) {
   }
 }
 
+export async function assertBigBangSourceLinksRerender(page) {
+  const panel = page.locator('#sourceLinks');
+  const links = panel.locator('a[href]');
+  const readLinks = () => links.evaluateAll(anchors => anchors.map(anchor => ({
+    href: anchor.href,
+    label: anchor.textContent.trim(),
+    rel: anchor.rel,
+    target: anchor.target
+  })));
+  const areValidLinks = sourceLinks => sourceLinks.every(link =>
+    link.href.startsWith('https://') &&
+    link.label.length > 0 &&
+    link.target === '_blank' &&
+    link.rel.split(/\s+/).includes('noopener') &&
+    link.rel.split(/\s+/).includes('noreferrer')
+  );
+
+  await expect(panel).toBeVisible();
+  await expect(panel.getByText('References:', { exact: true })).toHaveCount(1);
+  await expect(panel.getByText('参考资料:', { exact: true })).toHaveCount(0);
+
+  const englishLinks = await readLinks();
+  expect(englishLinks.length).toBeGreaterThan(0);
+  expect(areValidLinks(englishLinks)).toBe(true);
+  expect(new Set(englishLinks.map(link => link.href)).size).toBe(englishLinks.length);
+
+  await page.locator('.lang-pill[data-lang="zh-CN"]').click();
+  await expect(page.locator('html')).toHaveAttribute('lang', 'zh-CN');
+  await expect(panel.getByText('参考资料:', { exact: true })).toHaveCount(1);
+  await expect(panel.getByText('References:', { exact: true })).toHaveCount(0);
+
+  const chineseLinks = await readLinks();
+  expect(areValidLinks(chineseLinks)).toBe(true);
+  expect(chineseLinks.map(link => link.href)).toEqual(englishLinks.map(link => link.href));
+}
+
 export async function exercisePeriodicTable(page) {
   await expect(page.locator('.cell:not(.empty):not(.placeholder)')).toHaveCount(118);
   await page.waitForSelector('#viewToolbar');

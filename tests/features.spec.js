@@ -1,6 +1,11 @@
 import { test } from '@playwright/test';
 import { assertNoErrors, watchPage } from './helpers/assertions.js';
-import { exerciseBigBang, exerciseParticleZoo, exercisePeriodicTable } from './helpers/journeys.js';
+import {
+  assertBigBangSourceLinksRerender,
+  exerciseBigBang,
+  exerciseParticleZoo,
+  exercisePeriodicTable
+} from './helpers/journeys.js';
 import { locales } from './helpers/matrix.js';
 import { preparePage } from './helpers/runtime.js';
 
@@ -19,4 +24,16 @@ for (const journey of journeys) {
       await assertNoErrors(errors);
     });
   }
+}
+
+for (const entry of [
+  { name: 'canonical', path: '/big-bang/' },
+  { name: 'mobile', path: '/big-bang/mobile/index.html' }
+]) {
+  test(`Big Bang ${entry.name} source links rerender once when switching to zh-CN`, async ({ page }) => {
+    const errors = watchPage(page);
+    await preparePage(page, entry.path, 'en');
+    await assertBigBangSourceLinksRerender(page);
+    await assertNoErrors(errors);
+  });
 }
