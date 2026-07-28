@@ -59,9 +59,7 @@ main{position:relative;z-index:1;max-width:1400px;margin:0 auto;padding:40px 24p
 .section-head{text-align:center;margin-bottom:32px}
 .section-head h2{font-size:36px;font-weight:600;letter-spacing:-1px;margin-bottom:8px}
 .section-head p{color:var(--dim);font-size:16px}
-.sm-grid,.count-summary,.color-panel{content-visibility:auto;contain-intrinsic-block-size:auto 520px}
-.pl-item{content-visibility:auto;contain-intrinsic-block-size:auto 40px}
-.ix-card,.lab-card,.bsm-card,.phen-card{content-visibility:auto;contain-intrinsic-block-size:auto 280px}
+.render-pending,.render-booting #tab-chart .sm-grid,.render-booting #tab-chart .count-summary,.render-booting #tab-chart .color-panel{content-visibility:hidden}
 
 /* ---------- Standard Model chart ---------- */
 .sm-grid{display:grid;grid-template-columns:2fr 2fr 1fr;grid-template-rows:auto auto;gap:16px;max-width:1300px;margin:0 auto;align-items:stretch}
@@ -381,6 +379,5 @@ footer{text-align:center;padding:40px 20px;color:var(--dim);font-size:12px;posit
 .lang-pill.active{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff}
 @media(prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.001ms!important}
-  .sm-grid,.count-summary,.color-panel,.pl-item,.ix-card,.lab-card,.bsm-card,.phen-card{content-visibility:visible}
   #bg-stars{animation:none}
 }

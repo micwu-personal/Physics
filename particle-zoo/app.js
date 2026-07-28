@@ -29,6 +29,8 @@ window.PZ_PERF = PZ_PERF;
 
 const reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
 const viewportVisibility = new WeakMap();
+const stagedPanels = new Set();
+const panelRenderQueues = new Map();
 const viewportObserver = 'IntersectionObserver' in window ? new IntersectionObserver(entries=>{
   entries.forEach(entry=>viewportVisibility.set(entry.target, entry.isIntersecting));
   if(typeof labStaticDirty!=='undefined') labStaticDirty=true;
@@ -59,6 +61,47 @@ function canAnimate(tab, element){
   });
 }
 function recordDraw(id){ PZ_PERF.draws[id]=(PZ_PERF.draws[id]||0)+1; }
+
+function stagePanelRender(tab){
+  if(stagedPanels.has(tab) || reducedMotionQuery.matches) return;
+  const panel=document.getElementById(`tab-${tab}`);
+  const selectors={
+    chart:'.sm-grid,.count-summary,.color-panel',
+    detail:'.pl-item,#pDetail',
+    builder:'.parts-tray,.assembly,.build-out',
+    forces:'.force-card,.ix-card',
+    lab:'.lab-card',
+    bsm:'.bsm-card',
+    phenomena:'.phen-card',
+  };
+  const selector=selectors[tab];
+  if(!panel || !selector){ stagedPanels.add(tab); return; }
+  let pending=panelRenderQueues.get(tab);
+  if(!pending){
+    pending=Array.from(panel.querySelectorAll(selector));
+    if(pending.length<2){ stagedPanels.add(tab); return; }
+    pending.forEach(element=>element.classList.add('render-pending'));
+    panelRenderQueues.set(tab,pending);
+  }
+  const batchSize=2;
+  function revealBatch(){
+    if(!tabIsActive(tab)) return;
+    pending.splice(0,batchSize).forEach(element=>element.classList.remove('render-pending'));
+    if(pending.length) requestAnimationFrame(revealBatch);
+    else {
+      panelRenderQueues.delete(tab);
+      stagedPanels.add(tab);
+    }
+  }
+  revealBatch();
+}
+function finishStagedPanelRendering(){
+  panelRenderQueues.forEach((pending,tab)=>{
+    pending.forEach(element=>element.classList.remove('render-pending'));
+    stagedPanels.add(tab);
+  });
+  panelRenderQueues.clear();
+}
 
 const PARTICLES = {
   up:      {sym:'u', name:'Up quark',       cls:'Quark (Gen I)',   mass:'2.2 MeV/c²',    charge:'+2/3 e', spin:'1/2', color:'quark',    antiparticle:'ū (anti-up)',      forces:['Strong','EM','Weak','Gravity'], discovered:'1968 (SLAC)',
@@ -321,6 +364,7 @@ document.querySelectorAll('.tab').forEach(t=>{
     }
     if(tab==='builder') { resizeBuild(); buildComposites(); }
     syncAnimationLoops();
+    stagePanelRender(tab);
   });
 });
 
@@ -1387,6 +1431,8 @@ const initLang = savedLang || (browserLang.startsWith('zh') ? 'zh-CN' : 'en');
 applyI18n(initLang);
 ensureContentReferences('chart');
 showParticle('electron');
+stagePanelRender('chart');
+document.body.classList.remove('render-booting');
 
 /* ================ FORCES TAB: animated interaction diagrams ================ */
 /* Each diagram is an SVG. We build a stable structure of static "shape" paths
@@ -3850,6 +3896,7 @@ window.addEventListener('resize', ()=>{
 });
 
 function syncAnimationLoops(){
+  if(reducedMotionQuery.matches) finishStagedPanelRendering();
   if(canAnimate('builder',buildCanvas)) buildStart(); else buildStop();
   if(canAnimate('playground',canvas)) pgStart(); else pgStop();
   if(reducedMotionQuery.matches && interactionTilesReady) IX_INSTANCES.forEach(inst=>inst.anim(inst.el,ixT));

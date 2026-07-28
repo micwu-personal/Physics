@@ -40,6 +40,7 @@ for (const entry of [
 
 test('Particle Zoo keeps large paints cached or compositor-only', async ({ page }) => {
   await preparePage(page, '/particle-zoo/', 'en');
+  await expect(page.locator('#tab-chart .render-pending')).toHaveCount(0);
   await expect(page.locator('.ix-card')).toHaveCount(0);
   await expect(page.locator('.bsm-card .content-refs')).toHaveCount(0);
   const initialPerf = await page.evaluate(() => window.PZ_PERF.snapshot());
