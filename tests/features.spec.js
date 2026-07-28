@@ -105,3 +105,67 @@ test('Particle Zoo keeps large paints cached or compositor-only', async ({ page 
   await page.locator('.tab[data-tab="bsm"]').click();
   await expect(page.locator('.bsm-card .content-refs')).toHaveCount(12);
 });
+
+test('Particle Zoo visible simulations animate and honor reduced motion', async ({ page }) => {
+  const errors = watchPage(page);
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  await preparePage(page, '/particle-zoo/', 'en');
+
+  const fingerprint = id => page.locator(`#${id}`).evaluate(canvas => {
+    const pixels = canvas.getContext('2d').getImageData(0, 0, canvas.width, canvas.height).data;
+    let hash = 2166136261;
+    for (let index = 0; index < pixels.length; index += 97) {
+      hash = Math.imul(hash ^ pixels[index], 16777619) >>> 0;
+    }
+    return hash;
+  });
+  const expectCanvasToAdvance = async id => {
+    await page.locator(`#${id}`).scrollIntoViewIfNeeded();
+    await page.waitForTimeout(120);
+    const before = await fingerprint(id);
+    await page.waitForTimeout(350);
+    expect(await fingerprint(id), `${id} should visibly advance`).not.toBe(before);
+  };
+
+  await page.locator('.tab[data-tab="builder"]').click();
+  for (const part of ['u', 'u', 'd', 'e']) {
+    await page.locator(`.tray-part[data-part="${part}"]`).click();
+  }
+  await expectCanvasToAdvance('buildCanvas');
+
+  await page.locator('.tab[data-tab="forces"]').click();
+  await page.locator('.ix-card').first().scrollIntoViewIfNeeded();
+  await page.waitForTimeout(120);
+  const pathsBefore = await page.locator('.ix-card path').evaluateAll(paths =>
+    paths.map(path => path.getAttribute('d'))
+  );
+  const interactionFrames = await page.evaluate(() => window.PZ_PERF.snapshot().frames.interactions);
+  await page.waitForTimeout(350);
+  const pathsAfter = await page.locator('.ix-card path').evaluateAll(paths =>
+    paths.map(path => path.getAttribute('d'))
+  );
+  expect(pathsAfter.some((path, index) => path !== pathsBefore[index])).toBe(true);
+  expect(await page.evaluate(() => window.PZ_PERF.snapshot().frames.interactions))
+    .toBeGreaterThan(interactionFrames);
+
+  await page.locator('.tab[data-tab="lab"]').click();
+  for (const id of ['confCanvas', 'detCanvas', 'higgsCanvas']) {
+    await expectCanvasToAdvance(id);
+  }
+  await page.locator('.lab-subtab[data-lab-sub="advanced"]').click();
+  await page.locator('#decayRestart').click();
+  await expectCanvasToAdvance('decayCanvas');
+
+  await page.locator('.tab[data-tab="playground"]').click();
+  await expectCanvasToAdvance('pgCanvas');
+
+  await page.locator('.tab[data-tab="lab"]').click();
+  await page.locator('.lab-subtab[data-lab-sub="basics"]').click();
+  await page.locator('#detCanvas').scrollIntoViewIfNeeded();
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.waitForTimeout(120);
+  const reducedBefore = await fingerprint('detCanvas');
+  await page.waitForTimeout(350);
+  expect(await fingerprint('detCanvas'), 'reduced motion should pause the detector').toBe(reducedBefore);
+  await assertNoErrors(errors);
+});
