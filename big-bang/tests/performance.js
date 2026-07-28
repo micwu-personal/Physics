@@ -10,10 +10,15 @@ const source = fs.readFileSync(corePath, 'utf8');
 const styles = fs.readFileSync(stylesPath, 'utf8');
 const api = vm.runInThisContext(`${source}\n;BigBangCore`, {filename:corePath});
 
-const starLayer = styles.match(/#bg-stars\{[\s\S]*?\n\}/)?.[0];
-assert(starLayer, 'The ambient star layer must exist');
-assert.doesNotMatch(starLayer, /animation:|will-change:/, 'The tiled star layer must remain static');
-assert.doesNotMatch(styles, /@keyframes drift|background-position/, 'Star tiles must not schedule viewport repaints');
+const starLayerRules = [...styles.matchAll(/#bg-stars\s*\{([^}]*)\}/g)].map(match => match[1]);
+assert(starLayerRules.length > 0, 'The ambient star layer must exist');
+for(const rule of starLayerRules){
+  assert.doesNotMatch(
+    rule,
+    /(?:^|[;\s])animation(?:-[a-z-]+)?\s*:|will-change\s*:|background-position(?:-[xy])?\s*:/,
+    'Every tiled star-layer rule must remain static'
+  );
+}
 
 let scheduled = 0;
 const controller = api.createAnimationController({
