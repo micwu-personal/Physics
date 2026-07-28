@@ -69,6 +69,47 @@ test.describe('deterministic scientific renderers', () => {
     }
 
     for (const language of locales) {
+      test(`noble-gas atomic orbitals render without hybridization in ${language}`, async ({ page }) => {
+        await prepareRenderingPage(page, '/periodic-table/', language);
+        await expect(page.locator('#viewToolbar')).toBeVisible();
+        await page.locator('.cell[data-z="2"]').click();
+        await expect(page.locator('#detail')).not.toHaveClass(/hidden/);
+        await expect(page.locator('#orbitalTabs button')).toHaveCount(1);
+        await expect(page.locator('#orbitalTabs button')).toHaveText('s');
+        const expected = language === 'zh-CN'
+          ? '该元素通常不涉及杂化轨道'
+          : 'No hybridization typically shown for this element';
+        await expect(page.locator('#orbitalTabs')).toContainText(expected);
+        await expect(page.locator('#dHybridText')).not.toContainText('undefined');
+        await expect(page.locator('#dHybridText')).not.toBeEmpty();
+        expect(await page.evaluate(() => currentHybrid)).toBe('s');
+        await expectCanvasRendered(page.locator('#orbitalCanvas'));
+        await captureRendering(
+          page.locator('#orbitalCanvas').locator('xpath=ancestor::div[contains(@class,"d-viz-card")][1]'),
+          `periodic-noble-atomic-only-${language}.png`
+        );
+        await page.locator('.cell[data-z="26"]').click();
+        expect(await page.locator('#orbitalTabs button').count()).toBeGreaterThan(1);
+        expect(await page.evaluate(() => currentHybrid)).not.toBeNull();
+        await expect(page.locator('#dHybridText')).not.toContainText('undefined');
+      });
+    }
+
+    test('generated mobile bundle renders noble-gas atomic orbitals without hybridization', async ({ page }) => {
+      await page.setViewportSize({ width: 390, height: 844 });
+      await prepareRenderingPage(page, '/periodic-table/mobile/index.html', 'zh-CN');
+      await page.locator('.cell[data-z="2"]').click();
+      await expect(page.locator('#orbitalTabs button')).toHaveCount(1);
+      await expect(page.locator('#orbitalTabs')).toContainText('该元素通常不涉及杂化轨道');
+      expect(await page.evaluate(() => currentHybrid)).toBe('s');
+      await expectCanvasRendered(page.locator('#orbitalCanvas'));
+      await captureRendering(
+        page.locator('#orbitalCanvas').locator('xpath=ancestor::div[contains(@class,"d-viz-card")][1]'),
+        'periodic-mobile-noble-atomic-zh-CN.png'
+      );
+    });
+
+    for (const language of locales) {
       test(`atomic, molecular, ligand, and nuclide renderers in ${language}`, async ({ page }) => {
         await openIron(page, '/periodic-table/', language);
 

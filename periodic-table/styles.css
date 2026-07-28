@@ -176,6 +176,7 @@ html[lang="zh-CN"] .cell .nm{font-size:12px;font-weight:500;color:#fff;margin-to
 .orb-body b{color:#fff}
 .orb-body em{color:#ffcf7f;font-style:italic}
 .orbital-tabs{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap}
+.orbital-note{align-self:center;color:var(--dim);font-size:12px;line-height:1.5}
 .orbital-tabs button{background:rgba(255,255,255,0.05);border:1px solid var(--panel-b);color:var(--dim);padding:5px 12px;border-radius:6px;cursor:pointer;font-family:inherit;font-size:11px;font-weight:600;letter-spacing:0.5px;transition:all .15s}
 .orbital-tabs button:hover{color:#fff}
 .orbital-tabs button.active{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border-color:transparent}

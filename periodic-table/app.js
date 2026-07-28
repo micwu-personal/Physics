@@ -244,7 +244,10 @@ function refreshDetail(){
   // Orbital / hybridization
   const orbTabs = document.getElementById('orbitalTabs');
   const availHybrids = inferHybrids(el);
-  orbTabs.innerHTML = availHybrids.map(h=>`<button data-h="${h}">${labelForHybrid(h)}</button>`).join('');
+  const noDisplayedHybridization = el.category==='noble' && el.Z<36;
+  orbTabs.innerHTML =
+    availHybrids.map(h=>`<button data-h="${h}">${labelForHybrid(h)}</button>`).join('') +
+    (noDisplayedHybridization ? `<span class="orbital-note">${t('hybrid.none')}</span>` : '');
   if(!availHybrids.includes(currentHybrid)) currentHybrid = availHybrids[0];
   orbTabs.querySelectorAll('button').forEach(b=>{
     b.classList.toggle('active', b.dataset.h===currentHybrid);
