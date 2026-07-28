@@ -36,7 +36,10 @@ const viewportObserver = 'IntersectionObserver' in window ? new IntersectionObse
 }, {rootMargin:'80px'}) : null;
 
 function observeAnimationTarget(element){
-  if(element && viewportObserver) viewportObserver.observe(element);
+  if(element && viewportObserver){
+    viewportVisibility.set(element,false);
+    viewportObserver.observe(element);
+  }
 }
 function elementIsVisible(element){
   if(!element) return false;
@@ -304,13 +307,18 @@ function rebuildStandardModelTiles(){
 /* ================ TABS ================ */
 document.querySelectorAll('.tab').forEach(t=>{
   t.addEventListener('click',()=>{
+    if(t.classList.contains('active')) return;
     document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
     document.querySelectorAll('.tab-panel').forEach(x=>x.classList.remove('active'));
     t.classList.add('active');
     const tab=t.dataset.tab;
     document.getElementById('tab-'+tab).classList.add('active');
     ensureContentReferences(tab);
-    if(tab==='playground') resizeCanvas();
+    if(tab==='playground'){
+      resizeCanvas();
+      seedPlayground();
+      step();
+    }
     if(tab==='builder') { resizeBuild(); buildComposites(); }
     syncAnimationLoops();
   });
@@ -471,7 +479,6 @@ function resizeBuild(){
   BW = r.width; BH = r.height;
 }
 window.addEventListener('resize',()=>{ if(tabIsActive('builder')) resizeBuild(); });
-setTimeout(resizeBuild, 60);
 
 document.querySelectorAll('.tray-part').forEach(el=>{
   el.addEventListener('dragstart',e=>{ e.dataTransfer.setData('text/plain', el.dataset.part); });
@@ -1156,8 +1163,6 @@ function buildStop(){
   buildLastTimestamp=0;
 }
 observeAnimationTarget(buildCanvas);
-drawBuild();
-buildComposites();
 
 /* ================ PLAYGROUND (canvas simulation) ================ */
 const canvas = document.getElementById('pgCanvas');
@@ -1172,7 +1177,6 @@ function resizeCanvas(){
   W = r.width; H = r.height;
 }
 window.addEventListener('resize',()=>{ if(tabIsActive('playground')) resizeCanvas(); });
-setTimeout(resizeCanvas, 50);
 
 const PG_TYPES = {
   electron:{c:'#4ea8ff', r:6,  q:-1, mass:1,    kind:'matter', name:'e⁻'},
@@ -1196,7 +1200,7 @@ canvas.addEventListener('click',e=>{
   spawn('electron', x, y);
 });
 
-function spawn(type, x, y){
+function spawn(type, x, y, startLoop=true){
   const t = PG_TYPES[type];
   if(!t) return;
   const isPhoton = type==='photon';
@@ -1212,7 +1216,7 @@ function spawn(type, x, y){
     trail: []
   });
   if(pgParts.length>150) pgParts.shift();
-  if(tabIsActive('playground')) pgStart();
+  if(startLoop && tabIsActive('playground')) pgStart();
 }
 
 function step(dt=1){
@@ -1334,6 +1338,16 @@ function step(dt=1){
 }
 let flashes = [];
 let pgRAF=null, pgLastTimestamp=0;
+let playgroundSeeded=false;
+function seedPlayground(){
+  if(playgroundSeeded) return;
+  playgroundSeeded=true;
+  spawn('electron',undefined,undefined,false);
+  spawn('electron',undefined,undefined,false);
+  spawn('proton',undefined,undefined,false);
+  spawn('proton',undefined,undefined,false);
+  spawn('positron',undefined,undefined,false);
+}
 function pgLoop(timestamp){
   if(!canAnimate('playground', canvas)){ pgRAF=null; return; }
   if(pgParts.length===0 && flashes.length===0){ step(); pgRAF=null; return; }
@@ -1345,6 +1359,7 @@ function pgLoop(timestamp){
 }
 function pgStart(){
   if(pgRAF!=null) return;
+  seedPlayground();
   if(canAnimate('playground', canvas) && (pgParts.length>0 || flashes.length>0)) pgRAF=requestAnimationFrame(pgLoop);
   else if(tabIsActive('playground')) step();
 }
@@ -1354,12 +1369,6 @@ function pgStop(){
   pgLastTimestamp=0;
 }
 observeAnimationTarget(canvas);
-step();
-
-// seed some particles for fun
-setTimeout(()=>{
-  spawn('electron'); spawn('electron'); spawn('proton'); spawn('proton'); spawn('positron');
-},400);
 
 /* Show hydrogen as default in detail */
 // (deferred until after applyI18n)

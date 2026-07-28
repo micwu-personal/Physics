@@ -42,6 +42,9 @@ test('Particle Zoo keeps large paints cached or compositor-only', async ({ page 
   await preparePage(page, '/particle-zoo/', 'en');
   await expect(page.locator('.ix-card')).toHaveCount(0);
   await expect(page.locator('.bsm-card .content-refs')).toHaveCount(0);
+  const initialPerf = await page.evaluate(() => window.PZ_PERF.snapshot());
+  expect(initialPerf.draws.builder || 0).toBe(0);
+  expect(initialPerf.draws.playground || 0).toBe(0);
   await page.locator('.lang-pill[data-lang="zh-CN"]').click();
   await expect(page.locator('.ix-card')).toHaveCount(0);
   await page.locator('.lang-pill[data-lang="en"]').click();
@@ -73,6 +76,8 @@ test('Particle Zoo keeps large paints cached or compositor-only', async ({ page 
       ].map(selector => style(selector).backdropFilter),
       pageGlowBackground: pageGlow.backgroundImage,
       pageGlowPosition: pageGlow.position,
+      activePanelVisibility: style('#tab-forces').contentVisibility,
+      inactivePanelVisibility: style('#tab-detail').contentVisibility,
       starAnimation: stars.animationName,
       starWillChange: stars.willChange,
       tabAnimation: style('.tab-panel').animationName
@@ -82,6 +87,8 @@ test('Particle Zoo keeps large paints cached or compositor-only', async ({ page 
   expect(rendering.bodyBackground).toBe('none');
   expect(rendering.pageGlowPosition).toBe('fixed');
   expect(rendering.pageGlowBackground).not.toBe('none');
+  expect(rendering.activePanelVisibility).toBe('visible');
+  expect(rendering.inactivePanelVisibility).toBe('hidden');
   expect(rendering.starAnimation).toBe('drift-transform');
   expect(rendering.starWillChange).toContain('transform');
   expect(rendering.tabAnimation).toBe('none');
@@ -92,6 +99,8 @@ test('Particle Zoo keeps large paints cached or compositor-only', async ({ page 
   await expect(page.locator('.ix-gr1').last()).not.toHaveAttribute('d', '');
   await page.locator('.lang-pill[data-lang="zh-CN"]').click();
   await expect(page.locator('.ix-ph').first()).not.toHaveAttribute('d', '');
+  await page.locator('.tab[data-tab="playground"]').click();
+  expect(await page.evaluate(() => window.PZ_PERF.snapshot().draws.playground)).toBeGreaterThan(0);
   await page.locator('.tab[data-tab="bsm"]').click();
   await expect(page.locator('.bsm-card .content-refs')).toHaveCount(12);
 });

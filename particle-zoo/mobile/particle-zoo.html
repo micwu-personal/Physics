@@ -68,12 +68,15 @@ h1{font-size:clamp(48px,8vw,96px);font-weight:700;letter-spacing:-3px;margin:16p
 .tab.active{color:#fff;background:linear-gradient(135deg,rgba(124,92,255,0.25),rgba(0,212,255,0.15));border-color:rgba(124,92,255,0.4)}
 
 main{position:relative;z-index:1;max-width:1400px;margin:0 auto;padding:40px 24px 80px}
-.tab-panel{display:none}
-.tab-panel.active{display:block}
+.tab-panel{content-visibility:hidden}
+.tab-panel.active{content-visibility:visible}
 
 .section-head{text-align:center;margin-bottom:32px}
 .section-head h2{font-size:36px;font-weight:600;letter-spacing:-1px;margin-bottom:8px}
 .section-head p{color:var(--dim);font-size:16px}
+.sm-grid,.count-summary,.color-panel{content-visibility:auto;contain-intrinsic-block-size:auto 520px}
+.pl-item{content-visibility:auto;contain-intrinsic-block-size:auto 40px}
+.ix-card,.lab-card,.bsm-card,.phen-card{content-visibility:auto;contain-intrinsic-block-size:auto 280px}
 
 /* ---------- Standard Model chart ---------- */
 .sm-grid{display:grid;grid-template-columns:2fr 2fr 1fr;grid-template-rows:auto auto;gap:16px;max-width:1300px;margin:0 auto;align-items:stretch}
@@ -393,6 +396,7 @@ footer{text-align:center;padding:40px 20px;color:var(--dim);font-size:12px;posit
 .lang-pill.active{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff}
 @media(prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.001ms!important}
+  .sm-grid,.count-summary,.color-panel,.pl-item,.ix-card,.lab-card,.bsm-card,.phen-card{content-visibility:visible}
   #bg-stars{animation:none}
 }
 
@@ -2740,7 +2744,10 @@ const viewportObserver = 'IntersectionObserver' in window ? new IntersectionObse
 }, {rootMargin:'80px'}) : null;
 
 function observeAnimationTarget(element){
-  if(element && viewportObserver) viewportObserver.observe(element);
+  if(element && viewportObserver){
+    viewportVisibility.set(element,false);
+    viewportObserver.observe(element);
+  }
 }
 function elementIsVisible(element){
   if(!element) return false;
@@ -3008,13 +3015,18 @@ function rebuildStandardModelTiles(){
 /* ================ TABS ================ */
 document.querySelectorAll('.tab').forEach(t=>{
   t.addEventListener('click',()=>{
+    if(t.classList.contains('active')) return;
     document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
     document.querySelectorAll('.tab-panel').forEach(x=>x.classList.remove('active'));
     t.classList.add('active');
     const tab=t.dataset.tab;
     document.getElementById('tab-'+tab).classList.add('active');
     ensureContentReferences(tab);
-    if(tab==='playground') resizeCanvas();
+    if(tab==='playground'){
+      resizeCanvas();
+      seedPlayground();
+      step();
+    }
     if(tab==='builder') { resizeBuild(); buildComposites(); }
     syncAnimationLoops();
   });
@@ -3175,7 +3187,6 @@ function resizeBuild(){
   BW = r.width; BH = r.height;
 }
 window.addEventListener('resize',()=>{ if(tabIsActive('builder')) resizeBuild(); });
-setTimeout(resizeBuild, 60);
 
 document.querySelectorAll('.tray-part').forEach(el=>{
   el.addEventListener('dragstart',e=>{ e.dataTransfer.setData('text/plain', el.dataset.part); });
@@ -3860,8 +3871,6 @@ function buildStop(){
   buildLastTimestamp=0;
 }
 observeAnimationTarget(buildCanvas);
-drawBuild();
-buildComposites();
 
 /* ================ PLAYGROUND (canvas simulation) ================ */
 const canvas = document.getElementById('pgCanvas');
@@ -3876,7 +3885,6 @@ function resizeCanvas(){
   W = r.width; H = r.height;
 }
 window.addEventListener('resize',()=>{ if(tabIsActive('playground')) resizeCanvas(); });
-setTimeout(resizeCanvas, 50);
 
 const PG_TYPES = {
   electron:{c:'#4ea8ff', r:6,  q:-1, mass:1,    kind:'matter', name:'e⁻'},
@@ -3900,7 +3908,7 @@ canvas.addEventListener('click',e=>{
   spawn('electron', x, y);
 });
 
-function spawn(type, x, y){
+function spawn(type, x, y, startLoop=true){
   const t = PG_TYPES[type];
   if(!t) return;
   const isPhoton = type==='photon';
@@ -3916,7 +3924,7 @@ function spawn(type, x, y){
     trail: []
   });
   if(pgParts.length>150) pgParts.shift();
-  if(tabIsActive('playground')) pgStart();
+  if(startLoop && tabIsActive('playground')) pgStart();
 }
 
 function step(dt=1){
@@ -4038,6 +4046,16 @@ function step(dt=1){
 }
 let flashes = [];
 let pgRAF=null, pgLastTimestamp=0;
+let playgroundSeeded=false;
+function seedPlayground(){
+  if(playgroundSeeded) return;
+  playgroundSeeded=true;
+  spawn('electron',undefined,undefined,false);
+  spawn('electron',undefined,undefined,false);
+  spawn('proton',undefined,undefined,false);
+  spawn('proton',undefined,undefined,false);
+  spawn('positron',undefined,undefined,false);
+}
 function pgLoop(timestamp){
   if(!canAnimate('playground', canvas)){ pgRAF=null; return; }
   if(pgParts.length===0 && flashes.length===0){ step(); pgRAF=null; return; }
@@ -4049,6 +4067,7 @@ function pgLoop(timestamp){
 }
 function pgStart(){
   if(pgRAF!=null) return;
+  seedPlayground();
   if(canAnimate('playground', canvas) && (pgParts.length>0 || flashes.length>0)) pgRAF=requestAnimationFrame(pgLoop);
   else if(tabIsActive('playground')) step();
 }
@@ -4058,12 +4077,6 @@ function pgStop(){
   pgLastTimestamp=0;
 }
 observeAnimationTarget(canvas);
-step();
-
-// seed some particles for fun
-setTimeout(()=>{
-  spawn('electron'); spawn('electron'); spawn('proton'); spawn('proton'); spawn('positron');
-},400);
 
 /* Show hydrogen as default in detail */
 // (deferred until after applyI18n)
