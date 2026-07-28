@@ -65,13 +65,23 @@ export default defineConfig({
     },
     {
       name: 'visual-desktop',
-      testMatch: /visual\.spec\.js/,
+      testMatch: /(?:^|[\\/])visual\.spec\.js$/,
       use: { viewport: { width: 1440, height: 1000 } }
     },
     {
       name: 'visual-mobile',
-      testMatch: /visual\.spec\.js/,
+      testMatch: /(?:^|[\\/])visual\.spec\.js$/,
       use: { ...devices['Pixel 7'], browserName: 'chromium' }
+    },
+    {
+      name: 'rendering-visual',
+      testMatch: /(?:^|[\\/])rendering-visual\.spec\.js$/,
+      workers: 1,
+      use: {
+        browserName: 'chromium',
+        deviceScaleFactor: 1,
+        viewport: { width: 1280, height: 900 }
+      }
     },
     {
       name: 'performance',

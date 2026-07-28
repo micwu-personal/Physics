@@ -29,6 +29,8 @@ window.PZ_PERF = PZ_PERF;
 
 const reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
 const viewportVisibility = new WeakMap();
+const stagedPanels = new Set();
+const panelRenderQueues = new Map();
 const viewportObserver = 'IntersectionObserver' in window ? new IntersectionObserver(entries=>{
   entries.forEach(entry=>viewportVisibility.set(entry.target, entry.isIntersecting));
   if(typeof labStaticDirty!=='undefined') labStaticDirty=true;
@@ -36,7 +38,10 @@ const viewportObserver = 'IntersectionObserver' in window ? new IntersectionObse
 }, {rootMargin:'80px'}) : null;
 
 function observeAnimationTarget(element){
-  if(element && viewportObserver) viewportObserver.observe(element);
+  if(element && viewportObserver){
+    viewportVisibility.set(element,false);
+    viewportObserver.observe(element);
+  }
 }
 function elementIsVisible(element){
   if(!element) return false;
@@ -56,6 +61,47 @@ function canAnimate(tab, element){
   });
 }
 function recordDraw(id){ PZ_PERF.draws[id]=(PZ_PERF.draws[id]||0)+1; }
+
+function stagePanelRender(tab){
+  if(stagedPanels.has(tab) || reducedMotionQuery.matches) return;
+  const panel=document.getElementById(`tab-${tab}`);
+  const selectors={
+    chart:'.sm-grid,.count-summary,.color-panel',
+    detail:'.pl-item,#pDetail',
+    builder:'.parts-tray,.assembly,.build-out',
+    forces:'.force-card,.ix-card',
+    lab:'.lab-card',
+    bsm:'.bsm-card',
+    phenomena:'.phen-card',
+  };
+  const selector=selectors[tab];
+  if(!panel || !selector){ stagedPanels.add(tab); return; }
+  let pending=panelRenderQueues.get(tab);
+  if(!pending){
+    pending=Array.from(panel.querySelectorAll(selector));
+    if(pending.length<2){ stagedPanels.add(tab); return; }
+    pending.forEach(element=>element.classList.add('render-pending'));
+    panelRenderQueues.set(tab,pending);
+  }
+  const batchSize=1;
+  function revealBatch(){
+    if(!tabIsActive(tab)) return;
+    pending.splice(0,batchSize).forEach(element=>element.classList.remove('render-pending'));
+    if(pending.length) setTimeout(revealBatch,0);
+    else {
+      panelRenderQueues.delete(tab);
+      stagedPanels.add(tab);
+    }
+  }
+  revealBatch();
+}
+function finishStagedPanelRendering(){
+  panelRenderQueues.forEach((pending,tab)=>{
+    pending.forEach(element=>element.classList.remove('render-pending'));
+    stagedPanels.add(tab);
+  });
+  panelRenderQueues.clear();
+}
 
 const PARTICLES = {
   up:      {sym:'u', name:'Up quark',       cls:'Quark (Gen I)',   mass:'2.2 MeV/c²',    charge:'+2/3 e', spin:'1/2', color:'quark',    antiparticle:'ū (anti-up)',      forces:['Strong','EM','Weak','Gravity'], discovered:'1968 (SLAC)',
@@ -304,13 +350,21 @@ function rebuildStandardModelTiles(){
 /* ================ TABS ================ */
 document.querySelectorAll('.tab').forEach(t=>{
   t.addEventListener('click',()=>{
+    if(t.classList.contains('active')) return;
     document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
     document.querySelectorAll('.tab-panel').forEach(x=>x.classList.remove('active'));
     t.classList.add('active');
-    document.getElementById('tab-'+t.dataset.tab).classList.add('active');
-    if(t.dataset.tab==='playground') resizeCanvas();
-    if(t.dataset.tab==='builder') { resizeBuild(); buildComposites(); }
+    const tab=t.dataset.tab;
+    document.getElementById('tab-'+tab).classList.add('active');
+    ensureContentReferences(tab);
+    if(tab==='playground'){
+      resizeCanvas();
+      seedPlayground();
+      step();
+    }
+    if(tab==='builder') { resizeBuild(); buildComposites(); }
     syncAnimationLoops();
+    stagePanelRender(tab);
   });
 });
 
@@ -410,27 +464,45 @@ function replaceReferences(element, ids){
   element.insertAdjacentHTML('beforeend', ParticleZooReferences.render(ids, t('refs.label')));
 }
 
-function renderContentReferences(){
+const renderedReferenceTabs=new Set();
+
+function renderContentReferences(tab){
   const refs = ParticleZooReferences.CONTENT_REFERENCES;
-  const forceCards = {'.f-strong':'strong','.f-em':'em','.f-weak':'weak','.f-grav':'gravity'};
-  Object.entries(forceCards).forEach(([selector,id])=>replaceReferences(document.querySelector(selector), refs.force[id]));
-  document.querySelectorAll('.bsm-card').forEach(card=>{
-    const key = card.querySelector('h3[data-i18n]')?.dataset.i18n.match(/^bsm\.([^.]+)\.h$/)?.[1];
-    if(key) replaceReferences(card, refs.bsm[key]);
-  });
-  document.querySelectorAll('.phen-card').forEach(card=>{
-    const key = card.querySelector('h3[data-i18n]')?.dataset.i18n.match(/^phen\.([^.]+)\.h$/)?.[1];
-    if(key) replaceReferences(card, refs.phenomenon[key]);
-  });
-  document.querySelectorAll('.lab-card').forEach(card=>{
-    const key = card.querySelector('h3[data-i18n]')?.dataset.i18n.match(/^lab\.([^.]+)\.h$/)?.[1];
-    if(key && refs.lab[key]) replaceReferences(card, refs.lab[key]);
-  });
-  replaceReferences(document.querySelector('#tab-chart > .section-head'), refs.section.chart);
-  replaceReferences(document.querySelector('#tab-chart .color-panel'), refs.section.color);
-  replaceReferences(document.querySelectorAll('#tab-chart > .section-head')[1], refs.section.antimatter);
-  replaceReferences(document.querySelector('#tab-builder > .section-head'), refs.section.builder);
-  replaceReferences(document.querySelector('#tab-playground > .section-head'), refs.section.playground);
+  if(tab==='forces'){
+    const forceCards = {'.f-strong':'strong','.f-em':'em','.f-weak':'weak','.f-grav':'gravity'};
+    Object.entries(forceCards).forEach(([selector,id])=>replaceReferences(document.querySelector(selector), refs.force[id]));
+  } else if(tab==='bsm'){
+    document.querySelectorAll('.bsm-card').forEach(card=>{
+      const key = card.querySelector('h3[data-i18n]')?.dataset.i18n.match(/^bsm\.([^.]+)\.h$/)?.[1];
+      if(key) replaceReferences(card, refs.bsm[key]);
+    });
+  } else if(tab==='phenomena'){
+    document.querySelectorAll('.phen-card').forEach(card=>{
+      const key = card.querySelector('h3[data-i18n]')?.dataset.i18n.match(/^phen\.([^.]+)\.h$/)?.[1];
+      if(key) replaceReferences(card, refs.phenomenon[key]);
+    });
+  } else if(tab==='lab'){
+    document.querySelectorAll('.lab-card').forEach(card=>{
+      const key = card.querySelector('h3[data-i18n]')?.dataset.i18n.match(/^lab\.([^.]+)\.h$/)?.[1];
+      if(key && refs.lab[key]) replaceReferences(card, refs.lab[key]);
+    });
+  } else if(tab==='chart'){
+    replaceReferences(document.querySelector('#tab-chart > .section-head'), refs.section.chart);
+    replaceReferences(document.querySelector('#tab-chart .color-panel'), refs.section.color);
+    replaceReferences(document.querySelectorAll('#tab-chart > .section-head')[1], refs.section.antimatter);
+  } else if(tab==='builder'){
+    replaceReferences(document.querySelector('#tab-builder > .section-head'), refs.section.builder);
+  } else if(tab==='playground'){
+    replaceReferences(document.querySelector('#tab-playground > .section-head'), refs.section.playground);
+  }
+}
+function ensureContentReferences(tab){
+  if(renderedReferenceTabs.has(tab)) return;
+  renderContentReferences(tab);
+  renderedReferenceTabs.add(tab);
+}
+function refreshContentReferences(){
+  renderedReferenceTabs.forEach(renderContentReferences);
 }
 
 /* ================ BUILDER (canvas visualization) ================ */
@@ -451,7 +523,6 @@ function resizeBuild(){
   BW = r.width; BH = r.height;
 }
 window.addEventListener('resize',()=>{ if(tabIsActive('builder')) resizeBuild(); });
-setTimeout(resizeBuild, 60);
 
 document.querySelectorAll('.tray-part').forEach(el=>{
   el.addEventListener('dragstart',e=>{ e.dataTransfer.setData('text/plain', el.dataset.part); });
@@ -1136,8 +1207,6 @@ function buildStop(){
   buildLastTimestamp=0;
 }
 observeAnimationTarget(buildCanvas);
-drawBuild();
-buildComposites();
 
 /* ================ PLAYGROUND (canvas simulation) ================ */
 const canvas = document.getElementById('pgCanvas');
@@ -1152,7 +1221,6 @@ function resizeCanvas(){
   W = r.width; H = r.height;
 }
 window.addEventListener('resize',()=>{ if(tabIsActive('playground')) resizeCanvas(); });
-setTimeout(resizeCanvas, 50);
 
 const PG_TYPES = {
   electron:{c:'#4ea8ff', r:6,  q:-1, mass:1,    kind:'matter', name:'e⁻'},
@@ -1176,7 +1244,7 @@ canvas.addEventListener('click',e=>{
   spawn('electron', x, y);
 });
 
-function spawn(type, x, y){
+function spawn(type, x, y, startLoop=true){
   const t = PG_TYPES[type];
   if(!t) return;
   const isPhoton = type==='photon';
@@ -1192,7 +1260,7 @@ function spawn(type, x, y){
     trail: []
   });
   if(pgParts.length>150) pgParts.shift();
-  if(tabIsActive('playground')) pgStart();
+  if(startLoop && tabIsActive('playground')) pgStart();
 }
 
 function step(dt=1){
@@ -1314,6 +1382,16 @@ function step(dt=1){
 }
 let flashes = [];
 let pgRAF=null, pgLastTimestamp=0;
+let playgroundSeeded=false;
+function seedPlayground(){
+  if(playgroundSeeded) return;
+  playgroundSeeded=true;
+  spawn('electron',undefined,undefined,false);
+  spawn('electron',undefined,undefined,false);
+  spawn('proton',undefined,undefined,false);
+  spawn('proton',undefined,undefined,false);
+  spawn('positron',undefined,undefined,false);
+}
 function pgLoop(timestamp){
   if(!canAnimate('playground', canvas)){ pgRAF=null; return; }
   if(pgParts.length===0 && flashes.length===0){ step(); pgRAF=null; return; }
@@ -1325,6 +1403,7 @@ function pgLoop(timestamp){
 }
 function pgStart(){
   if(pgRAF!=null) return;
+  seedPlayground();
   if(canAnimate('playground', canvas) && (pgParts.length>0 || flashes.length>0)) pgRAF=requestAnimationFrame(pgLoop);
   else if(tabIsActive('playground')) step();
 }
@@ -1334,12 +1413,6 @@ function pgStop(){
   pgLastTimestamp=0;
 }
 observeAnimationTarget(canvas);
-step();
-
-// seed some particles for fun
-setTimeout(()=>{
-  spawn('electron'); spawn('electron'); spawn('proton'); spawn('proton'); spawn('positron');
-},400);
 
 /* Show hydrogen as default in detail */
 // (deferred until after applyI18n)
@@ -1356,7 +1429,10 @@ const savedLang = (function(){ try { return localStorage.getItem('pz-lang'); } c
 const browserLang = (navigator.language||'').toLowerCase();
 const initLang = savedLang || (browserLang.startsWith('zh') ? 'zh-CN' : 'en');
 applyI18n(initLang);
+ensureContentReferences('chart');
 showParticle('electron');
+stagePanelRender('chart');
+document.body.classList.remove('render-booting');
 
 /* ================ FORCES TAB: animated interaction diagrams ================ */
 /* Each diagram is an SVG. We build a stable structure of static "shape" paths
@@ -1913,6 +1989,7 @@ function localizeEq(eq){
 
 // ---- build tiles into their respective group containers ----
 const IX_INSTANCES = [];
+let interactionTilesReady=false;
 function buildInteractionTiles(){
   if(typeof IX_DEFS === 'undefined' || !IX_DEFS) return;
   IX_INSTANCES.length = 0;
@@ -1939,6 +2016,12 @@ function buildInteractionTiles(){
       IX_INSTANCES.push({ card, el: card.querySelector('svg'), anim: built.anim });
     });
   });
+  if(reducedMotionQuery.matches) IX_INSTANCES.forEach(inst=>inst.anim(inst.el,0));
+  interactionTilesReady=true;
+}
+function refreshInteractionTiles(){
+  if(typeof IX_DEFS === 'undefined' || !IX_DEFS || !interactionTilesReady) return;
+  buildInteractionTiles();
 }
 
 let ixRAF=null, ixT=0, ixLastTimestamp=0;
@@ -1954,6 +2037,7 @@ function ixLoop(timestamp){
 }
 function ixStart(){
   if(ixRAF!=null) return;
+  if(!interactionTilesReady) buildInteractionTiles();
   if(reducedMotionQuery.matches){
     IX_INSTANCES.forEach(inst=>inst.anim(inst.el, ixT));
     return;
@@ -1973,7 +2057,6 @@ document.querySelectorAll('.tab').forEach(t=>{
   });
 });
 
-buildInteractionTiles();
 // If forces is the initial tab, start immediately; otherwise start on demand.
 if(document.querySelector('.tab.active')?.dataset.tab === 'forces') ixStart();
 
@@ -3713,7 +3796,7 @@ function labDrawRun(){
 /* ---------- Lab loop + tab hook ---------- */
 const LAB_DEMOS = [
   {id:'conf',canvas:'confCanvas',sub:'basics',animated:true,init:labInitConfinement,draw:labDrawConfinement},
-  {id:'det',canvas:'detCanvas',sub:'basics',animated:false,init:labInitDetector,draw:labDrawDetector},
+  {id:'det',canvas:'detCanvas',sub:'basics',animated:true,init:labInitDetector,draw:labDrawDetector},
   {id:'higgs',canvas:'higgsCanvas',sub:'basics',animated:true,init:labInitHiggs,draw:labDrawHiggs},
   {id:'feyn',canvas:'feynCanvas',sub:'advanced',animated:false,init:labInitFeyn,draw:labDrawFeyn},
   {id:'decay',canvas:'decayCanvas',sub:'advanced',animated:true,init:labInitDecay,draw:labDrawDecay},
@@ -3724,6 +3807,7 @@ const LAB_DEMOS = [
   {id:'run',canvas:'runCanvas',sub:'advanced',animated:false,init:labInitRun,draw:labDrawRun},
 ];
 const initializedLabSubs = new Set();
+const LAB_FRAME_INTERVAL = 1000 / 30;
 let labStaticDirty=true, labLastTimestamp=0;
 LAB_DEMOS.forEach(demo=>observeAnimationTarget(document.getElementById(demo.canvas)));
 
@@ -3739,24 +3823,25 @@ function initActiveLabDemos(){
 }
 function drawActiveLabDemos(advanceAnimations){
   const sub=activeLabSub();
-  let visibleCount=0;
+  let drawCount=0;
   LAB_DEMOS.filter(demo=>demo.sub===sub).forEach(demo=>{
-    const canvas=document.getElementById(demo.canvas);
-    if(!elementIsVisible(canvas)) return;
-    visibleCount++;
     if((demo.animated && advanceAnimations) || labStaticDirty || reducedMotionQuery.matches){
       demo.draw();
       recordDraw(`lab:${demo.id}`);
+      drawCount++;
     }
   });
   labStaticDirty=false;
-  return visibleCount;
+  return drawCount;
 }
 function labLoop(timestamp){
   if(!tabIsActive('lab') || document.hidden || reducedMotionQuery.matches){ labRAF=null; return; }
-  const visibleDemos=LAB_DEMOS.filter(demo=>demo.sub===activeLabSub() && elementIsVisible(document.getElementById(demo.canvas)));
-  const hasAnimatedDemo=visibleDemos.some(demo=>demo.animated);
-  if(visibleDemos.length===0 || (!hasAnimatedDemo && !labStaticDirty)){ labRAF=null; return; }
+  const hasAnimatedDemo=LAB_DEMOS.some(demo=>demo.sub===activeLabSub() && demo.animated);
+  if(!hasAnimatedDemo && !labStaticDirty){ labRAF=null; return; }
+  if(labLastTimestamp && timestamp-labLastTimestamp<LAB_FRAME_INTERVAL){
+    labRAF=requestAnimationFrame(labLoop);
+    return;
+  }
   const dt=labLastTimestamp ? Math.min(0.05,(timestamp-labLastTimestamp)/1000) : 0.016;
   labLastTimestamp=timestamp;
   labT+=dt;
@@ -3813,8 +3898,10 @@ window.addEventListener('resize', ()=>{
 });
 
 function syncAnimationLoops(){
+  if(reducedMotionQuery.matches) finishStagedPanelRendering();
   if(canAnimate('builder',buildCanvas)) buildStart(); else buildStop();
   if(canAnimate('playground',canvas)) pgStart(); else pgStop();
+  if(reducedMotionQuery.matches && interactionTilesReady) IX_INSTANCES.forEach(inst=>inst.anim(inst.el,ixT));
   if(tabIsActive('forces') && !document.hidden && !reducedMotionQuery.matches) ixStart(); else ixStop();
   if(tabIsActive('lab') && !document.hidden) labStart(); else labStop();
 }

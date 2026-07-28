@@ -32,15 +32,18 @@ test('source panel rerenders its label when language changes', () => {
   const panel = {innerHTML:''};
   const sources = {
     first:{label:'First paper', url:'https://example.test/first'},
-    second:{label:'Second paper', url:'https://example.test/second'}
+    second:{label:'Second paper', url:'https://example.test/second'},
+    duplicate:{label:'Duplicate paper', url:'https://example.test/first'}
   };
 
   api.renderReferencePanel(panel, sources, 'References');
-  assert.match(panel.innerHTML, />References:</);
+  assert.equal((panel.innerHTML.match(/class="item-refs"/g)||[]).length, 1);
+  assert.equal((panel.innerHTML.match(/>References:</g)||[]).length, 1);
   assert.equal((panel.innerHTML.match(/target="_blank"/g)||[]).length, 2);
+  assert.equal((panel.innerHTML.match(/https:\/\/example\.test\/first/g)||[]).length, 1);
 
   api.renderReferencePanel(panel, sources, '参考资料');
-  assert.match(panel.innerHTML, />参考资料:</);
+  assert.equal((panel.innerHTML.match(/>参考资料:</g)||[]).length, 1);
   assert.doesNotMatch(panel.innerHTML, />References:</);
 });
 

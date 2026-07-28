@@ -12,11 +12,18 @@ The harness separates two different completeness goals:
 | `npm run test:apps` | Per-app Node unit tests plus the data/DOM/science invariants in each `validate.js` |
 | `npm run test:e2e` | Route, locale, layout, link, translation, error, and feature journeys |
 | `npm run test:visual` | Desktop and mobile Chromium screenshot regression |
+| `npm run test:rendering` | Deterministic element-level canvas/SVG screenshot and semantic pixel regression |
 | `npm run test:performance` | Load, long-task, interaction, heap, RAF, listener-growth, and responsiveness budgets |
 | `npm run test:coverage` | Merged Node + browser coverage with enforced 100% thresholds |
 | `npm run test:coverage:measure` | Generate the same report without failing, for gap analysis |
 
-Visual baselines are intentionally named for `win32`; CI uses `windows-latest`. Canvas surfaces are exercised by feature tests but hidden in full-page screenshots because continuously animated pixels are not stable visual baselines.
+Visual baselines are intentionally named for `win32`; CI uses `windows-latest`. The 36 route-level full-page baselines remain animation-insensitive and keep canvases hidden. `rendering-visual.spec.js` separately seeds randomness, freezes wall-clock time, controls `requestAnimationFrame`, asserts non-blank pixels and unclipped geometry, and captures deterministic element-level canvas/SVG baselines.
+
+Each worktree automatically derives an isolated static-server port. Set `PHYSICS_TEST_PORT` only to override it explicitly.
+
+The generated narrow Particle Zoo builder canvas is covered by non-blank pixel and unclipped-geometry assertions, while its stable result panel is snapshotted. Its curved gluon strokes exhibit Win32 subpixel raster noise at that width; the equivalent source/desktop builder canvas has exact pixel baselines in both locales.
+
+Element captures repeat their centering scroll until geometry settles so `content-visibility:auto` surfaces are measured and snapshotted after their real dimensions replace intrinsic placeholders.
 
 ## Route / locale / feature matrix semantics
 

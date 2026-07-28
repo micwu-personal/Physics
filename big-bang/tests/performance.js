@@ -5,8 +5,20 @@ const {performance} = require('node:perf_hooks');
 const vm = require('node:vm');
 
 const corePath = path.resolve(__dirname, '..', 'core.js');
+const stylesPath = path.resolve(__dirname, '..', 'styles.css');
 const source = fs.readFileSync(corePath, 'utf8');
+const styles = fs.readFileSync(stylesPath, 'utf8');
 const api = vm.runInThisContext(`${source}\n;BigBangCore`, {filename:corePath});
+
+const starLayerRules = [...styles.matchAll(/#bg-stars\s*\{([^}]*)\}/g)].map(match => match[1]);
+assert(starLayerRules.length > 0, 'The ambient star layer must exist');
+for(const rule of starLayerRules){
+  assert.doesNotMatch(
+    rule,
+    /(?:^|[;\s])animation(?:-[a-z-]+)?\s*:|will-change\s*:|background-position(?:-[xy])?\s*:/,
+    'Every tiled star-layer rule must remain static'
+  );
+}
 
 let scheduled = 0;
 const controller = api.createAnimationController({

@@ -13,6 +13,8 @@
     "test:e2e": "playwright test --project=quality-desktop --project=quality-mobile --project=features",
     "test:visual": "playwright test --project=visual-desktop --project=visual-mobile",
     "test:visual:update": "playwright test --project=visual-desktop --project=visual-mobile --update-snapshots",
+    "test:rendering": "playwright test --project=rendering-visual",
+    "test:rendering:update": "playwright test --project=rendering-visual --update-snapshots",
     "test:performance": "playwright test --project=performance",
     "coverage:clean": "node scripts/coverage-clean.mjs",
     "coverage:node": "node scripts/coverage-node.mjs",
@@ -20,7 +22,7 @@
     "coverage:measure": "node scripts/coverage-report.mjs --report-only",
     "test:coverage": "npm run coverage:clean && npm run coverage:node && playwright test --project=coverage && npm run coverage:report",
     "test:coverage:measure": "npm run coverage:clean && npm run coverage:node && playwright test --project=coverage && npm run coverage:measure",
-    "test:ci": "npm run build:mobile && npm run check:generated && npm run test:apps && npm run test:e2e && npm run test:visual && npm run test:performance && npm run test:coverage"
+    "test:ci": "npm run build:mobile && npm run check:generated && npm run test:apps && npm run test:e2e && npm run test:visual && npm run test:rendering && npm run test:performance && npm run test:coverage"
   },
   "devDependencies": {
     "@playwright/test": "1.61.1",
