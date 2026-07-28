@@ -1,0 +1,68 @@
+name: Browser quality
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  chromium:
+    runs-on: windows-latest
+    timeout-minutes: 45
+    env:
+      CI: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.11.1
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install chromium
+      - run: npm run build:mobile
+      - run: npm run check:generated
+      - run: npm run test:apps
+      - if: always()
+        run: npm run test:e2e
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-results
+          path: |
+            playwright-report/
+            test-results/
+          if-no-files-found: ignore
+      - if: always()
+        run: npm run test:visual
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: visual-results
+          path: |
+            playwright-report/
+            test-results/
+          if-no-files-found: ignore
+      - if: always()
+        run: npm run test:performance
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: performance-results
+          path: |
+            playwright-report/
+            test-results/
+          if-no-files-found: ignore
+      - if: always()
+        run: npm run test:coverage
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-results
+          path: |
+            coverage/
+            playwright-report/
+            test-results/
+          if-no-files-found: ignore

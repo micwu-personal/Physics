@@ -1,0 +1,28 @@
+{
+  "name": "physics-browser-quality",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build:mobile": "npm --prefix big-bang run build && npm --prefix periodic-table run build && npm --prefix particle-zoo run build",
+    "check:generated": "node scripts/check-generated.mjs",
+    "test:apps": "npm --prefix big-bang test --if-present && npm --prefix periodic-table test --if-present && npm --prefix particle-zoo test --if-present",
+    "test:e2e": "playwright test --project=quality-desktop --project=quality-mobile --project=features",
+    "test:visual": "playwright test --project=visual-desktop --project=visual-mobile",
+    "test:visual:update": "playwright test --project=visual-desktop --project=visual-mobile --update-snapshots",
+    "test:performance": "playwright test --project=performance",
+    "coverage:clean": "node scripts/coverage-clean.mjs",
+    "coverage:report": "node scripts/coverage-report.mjs",
+    "coverage:measure": "node scripts/coverage-report.mjs --report-only",
+    "test:coverage": "npm run coverage:clean && playwright test --project=coverage && npm run coverage:report",
+    "test:coverage:measure": "npm run coverage:clean && playwright test --project=coverage && npm run coverage:measure",
+    "test:ci": "npm run build:mobile && npm run check:generated && npm run test:apps && npm run test:e2e && npm run test:visual && npm run test:performance && npm run test:coverage"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.61.1",
+    "monocart-coverage-reports": "2.12.12"
+  }
+}
