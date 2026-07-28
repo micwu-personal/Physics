@@ -307,9 +307,11 @@ document.querySelectorAll('.tab').forEach(t=>{
     document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
     document.querySelectorAll('.tab-panel').forEach(x=>x.classList.remove('active'));
     t.classList.add('active');
-    document.getElementById('tab-'+t.dataset.tab).classList.add('active');
-    if(t.dataset.tab==='playground') resizeCanvas();
-    if(t.dataset.tab==='builder') { resizeBuild(); buildComposites(); }
+    const tab=t.dataset.tab;
+    document.getElementById('tab-'+tab).classList.add('active');
+    ensureContentReferences(tab);
+    if(tab==='playground') resizeCanvas();
+    if(tab==='builder') { resizeBuild(); buildComposites(); }
     syncAnimationLoops();
   });
 });
@@ -410,27 +412,45 @@ function replaceReferences(element, ids){
   element.insertAdjacentHTML('beforeend', ParticleZooReferences.render(ids, t('refs.label')));
 }
 
-function renderContentReferences(){
+const renderedReferenceTabs=new Set();
+
+function renderContentReferences(tab){
   const refs = ParticleZooReferences.CONTENT_REFERENCES;
-  const forceCards = {'.f-strong':'strong','.f-em':'em','.f-weak':'weak','.f-grav':'gravity'};
-  Object.entries(forceCards).forEach(([selector,id])=>replaceReferences(document.querySelector(selector), refs.force[id]));
-  document.querySelectorAll('.bsm-card').forEach(card=>{
-    const key = card.querySelector('h3[data-i18n]')?.dataset.i18n.match(/^bsm\.([^.]+)\.h$/)?.[1];
-    if(key) replaceReferences(card, refs.bsm[key]);
-  });
-  document.querySelectorAll('.phen-card').forEach(card=>{
-    const key = card.querySelector('h3[data-i18n]')?.dataset.i18n.match(/^phen\.([^.]+)\.h$/)?.[1];
-    if(key) replaceReferences(card, refs.phenomenon[key]);
-  });
-  document.querySelectorAll('.lab-card').forEach(card=>{
-    const key = card.querySelector('h3[data-i18n]')?.dataset.i18n.match(/^lab\.([^.]+)\.h$/)?.[1];
-    if(key && refs.lab[key]) replaceReferences(card, refs.lab[key]);
-  });
-  replaceReferences(document.querySelector('#tab-chart > .section-head'), refs.section.chart);
-  replaceReferences(document.querySelector('#tab-chart .color-panel'), refs.section.color);
-  replaceReferences(document.querySelectorAll('#tab-chart > .section-head')[1], refs.section.antimatter);
-  replaceReferences(document.querySelector('#tab-builder > .section-head'), refs.section.builder);
-  replaceReferences(document.querySelector('#tab-playground > .section-head'), refs.section.playground);
+  if(tab==='forces'){
+    const forceCards = {'.f-strong':'strong','.f-em':'em','.f-weak':'weak','.f-grav':'gravity'};
+    Object.entries(forceCards).forEach(([selector,id])=>replaceReferences(document.querySelector(selector), refs.force[id]));
+  } else if(tab==='bsm'){
+    document.querySelectorAll('.bsm-card').forEach(card=>{
+      const key = card.querySelector('h3[data-i18n]')?.dataset.i18n.match(/^bsm\.([^.]+)\.h$/)?.[1];
+      if(key) replaceReferences(card, refs.bsm[key]);
+    });
+  } else if(tab==='phenomena'){
+    document.querySelectorAll('.phen-card').forEach(card=>{
+      const key = card.querySelector('h3[data-i18n]')?.dataset.i18n.match(/^phen\.([^.]+)\.h$/)?.[1];
+      if(key) replaceReferences(card, refs.phenomenon[key]);
+    });
+  } else if(tab==='lab'){
+    document.querySelectorAll('.lab-card').forEach(card=>{
+      const key = card.querySelector('h3[data-i18n]')?.dataset.i18n.match(/^lab\.([^.]+)\.h$/)?.[1];
+      if(key && refs.lab[key]) replaceReferences(card, refs.lab[key]);
+    });
+  } else if(tab==='chart'){
+    replaceReferences(document.querySelector('#tab-chart > .section-head'), refs.section.chart);
+    replaceReferences(document.querySelector('#tab-chart .color-panel'), refs.section.color);
+    replaceReferences(document.querySelectorAll('#tab-chart > .section-head')[1], refs.section.antimatter);
+  } else if(tab==='builder'){
+    replaceReferences(document.querySelector('#tab-builder > .section-head'), refs.section.builder);
+  } else if(tab==='playground'){
+    replaceReferences(document.querySelector('#tab-playground > .section-head'), refs.section.playground);
+  }
+}
+function ensureContentReferences(tab){
+  if(renderedReferenceTabs.has(tab)) return;
+  renderContentReferences(tab);
+  renderedReferenceTabs.add(tab);
+}
+function refreshContentReferences(){
+  renderedReferenceTabs.forEach(renderContentReferences);
 }
 
 /* ================ BUILDER (canvas visualization) ================ */
@@ -1356,6 +1376,7 @@ const savedLang = (function(){ try { return localStorage.getItem('pz-lang'); } c
 const browserLang = (navigator.language||'').toLowerCase();
 const initLang = savedLang || (browserLang.startsWith('zh') ? 'zh-CN' : 'en');
 applyI18n(initLang);
+ensureContentReferences('chart');
 showParticle('electron');
 
 /* ================ FORCES TAB: animated interaction diagrams ================ */
@@ -1913,6 +1934,7 @@ function localizeEq(eq){
 
 // ---- build tiles into their respective group containers ----
 const IX_INSTANCES = [];
+let interactionTilesReady=false;
 function buildInteractionTiles(){
   if(typeof IX_DEFS === 'undefined' || !IX_DEFS) return;
   IX_INSTANCES.length = 0;
@@ -1939,6 +1961,12 @@ function buildInteractionTiles(){
       IX_INSTANCES.push({ card, el: card.querySelector('svg'), anim: built.anim });
     });
   });
+  if(reducedMotionQuery.matches) IX_INSTANCES.forEach(inst=>inst.anim(inst.el,0));
+  interactionTilesReady=true;
+}
+function refreshInteractionTiles(){
+  if(typeof IX_DEFS === 'undefined' || !IX_DEFS || !interactionTilesReady) return;
+  buildInteractionTiles();
 }
 
 let ixRAF=null, ixT=0, ixLastTimestamp=0;
@@ -1954,6 +1982,7 @@ function ixLoop(timestamp){
 }
 function ixStart(){
   if(ixRAF!=null) return;
+  if(!interactionTilesReady) buildInteractionTiles();
   if(reducedMotionQuery.matches){
     IX_INSTANCES.forEach(inst=>inst.anim(inst.el, ixT));
     return;
@@ -1973,7 +2002,6 @@ document.querySelectorAll('.tab').forEach(t=>{
   });
 });
 
-buildInteractionTiles();
 // If forces is the initial tab, start immediately; otherwise start on demand.
 if(document.querySelector('.tab.active')?.dataset.tab === 'forces') ixStart();
 
@@ -3815,6 +3843,7 @@ window.addEventListener('resize', ()=>{
 function syncAnimationLoops(){
   if(canAnimate('builder',buildCanvas)) buildStart(); else buildStop();
   if(canAnimate('playground',canvas)) pgStart(); else pgStop();
+  if(reducedMotionQuery.matches && interactionTilesReady) IX_INSTANCES.forEach(inst=>inst.anim(inst.el,ixT));
   if(tabIsActive('forces') && !document.hidden && !reducedMotionQuery.matches) ixStart(); else ixStop();
   if(tabIsActive('lab') && !document.hidden) labStart(); else labStop();
 }

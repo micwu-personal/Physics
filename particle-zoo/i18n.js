@@ -1301,8 +1301,8 @@ function applyI18n(lang){
   if(typeof labRebuildEVDPicker==='function') labRebuildEVDPicker();
   if(typeof labRebuildRunLegend==='function') labRebuildRunLegend();
   // Re-render interaction tiles so localizeEq picks the new language.
-  if(typeof buildInteractionTiles==='function') buildInteractionTiles();
-  if(typeof renderContentReferences==='function') renderContentReferences();
+  if(typeof refreshInteractionTiles==='function') refreshInteractionTiles();
+  if(typeof refreshContentReferences==='function') refreshContentReferences();
   // Fix the Big Bang link based on where we're actually served from.
   if(typeof fixBigBangLink==='function') fixBigBangLink();
 }
