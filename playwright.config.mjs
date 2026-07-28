@@ -1,6 +1,11 @@
+import { createHash } from 'node:crypto';
 import { defineConfig, devices } from '@playwright/test';
 
-const baseURL = 'http://127.0.0.1:43817';
+const derivedPort = 50_000 + (
+  Number.parseInt(createHash('sha256').update(process.cwd()).digest('hex').slice(0, 8), 16) % 10_000
+);
+const port = Number(process.env.PHYSICS_TEST_PORT || derivedPort);
+const baseURL = `http://127.0.0.1:${port}`;
 
 export default defineConfig({
   testDir: './tests',
@@ -33,8 +38,9 @@ export default defineConfig({
   },
   webServer: {
     command: 'node scripts/static-server.mjs',
+    env: { ...process.env, PORT: String(port) },
     url: `${baseURL}/__health`,
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer: false,
     timeout: 10_000
   },
   projects: [

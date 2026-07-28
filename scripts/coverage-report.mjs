@@ -9,9 +9,17 @@ const report = MCR({
   baseDir: process.cwd(),
   reports: ['v8', 'html', 'json-summary', 'lcovonly', 'console-details'],
   outputFile: 'v8/index.html',
-  entryFilter: entry =>
-    entry.url === 'http://127.0.0.1:43817/' ||
-    /^http:\/\/127\.0\.0\.1:43817\/(big-bang|periodic-table|particle-zoo)\/.*\.js$/.test(entry.url),
+  entryFilter: entry => {
+    try {
+      const url = new URL(entry.url);
+      return url.hostname === '127.0.0.1' && (
+        url.pathname === '/' ||
+        /^\/(big-bang|periodic-table|particle-zoo)\/.*\.js$/.test(url.pathname)
+      );
+    } catch {
+      return false;
+    }
+  },
   v8Ignore: false,
   clean: true,
   cleanCache: true

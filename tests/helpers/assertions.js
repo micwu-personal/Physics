@@ -8,7 +8,7 @@ export function watchPage(page) {
   page.on('pageerror', error => errors.push(`page: ${error.message}`));
   page.on('response', response => {
     const url = new URL(response.url());
-    if (url.origin === 'http://127.0.0.1:43817' && response.status() >= 400) {
+    if (url.hostname === '127.0.0.1' && response.status() >= 400) {
       errors.push(`response ${response.status()}: ${url.pathname}`);
     }
   });
