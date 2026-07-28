@@ -76,21 +76,7 @@ function pickEpoch(tsec){
 
 /* Format time nicely */
 function fmtTime(tsec){
-  const lang = window.CURRENT_LANG || 'en';
-  const zh = lang==='zh-CN';
-  if(tsec < 1e-30) return `10^${Math.round(Math.log10(tsec))} ${zh?'秒':'s'}`;
-  if(tsec < 1e-15) return tsec.toExponential(1)+' '+(zh?'秒':'s');
-  if(tsec < 1)     return tsec.toExponential(2)+' '+(zh?'秒':'s');
-  if(tsec < 60)    return tsec.toFixed(1)+' '+(zh?'秒':'s');
-  if(tsec < 3600)  return (tsec/60).toFixed(1)+' '+(zh?'分钟':'min');
-  if(tsec < 86400) return (tsec/3600).toFixed(1)+' '+(zh?'小时':'hr');
-  const yr = tsec/3.156e7;
-  if(yr < 1)       return (yr*365).toFixed(1)+' '+(zh?'天':'days');
-  if(yr < 1000)    return yr.toFixed(0)+' '+(zh?'年':'yr');
-  if(yr < 1e6)     return (yr/1e3).toFixed(1)+' '+(zh?'千年':'kyr');
-  if(yr < 1e9)     return (yr/1e6).toFixed(1)+' '+(zh?'百万年':'Myr');
-  if(yr < 1e12)    return (yr/1e9).toFixed(2)+' '+(zh?'亿年':'Gyr');
-  return `10^${Math.round(Math.log10(yr))} ${zh?'年':'yr'}`;
+  return formatCosmicTime(tsec, window.CURRENT_LANG || 'en');
 }
 
 function updateMachine(){
@@ -123,8 +109,11 @@ function drawMachine(tsec, ep){
   // Central "universe" visualization — a growing bubble whose look changes with epoch
   const cx = MW/2, cy = MH/2;
   const logT = Math.log10(Math.max(tsec,1e-43));
-  // Map log(t) from -43 → 18 into radius 20 → 190
-  const radius = 20 + ((logT + 43) / (18 + 43)) * 170;
+  const slider = document.getElementById('timeSlider');
+  const minLog = Number(slider.min);
+  const maxLog = Number(slider.max);
+  const normalizedTime = Math.max(0, Math.min(1, (logT - minLog) / (maxLog - minLog)));
+  const radius = 20 + normalizedTime * 170;
 
   // Glow
   const gr = mctx.createRadialGradient(cx,cy,0,cx,cy,radius*2.2);
@@ -172,7 +161,7 @@ function renderComposition(){
   const snapshots = [
     {key:'now',    labelKey:'comp.today',  data: COMPOSITIONS.now},
     {key:'recomb', labelKey:'comp.recomb', data: COMPOSITIONS.recomb},
-    {key:'nucleo', labelKey:'comp.nucleo', data: COMPOSITIONS.nucleo}
+    {key:'nucleo', labelKey:'comp.nucleo', noteKey:'comp.note.nucleo', data: COMPOSITIONS.nucleo}
   ];
   grid.innerHTML = '';
   snapshots.forEach(sn=>{
@@ -186,12 +175,19 @@ function renderComposition(){
         ${sn.data.map(row=>{
           const name = dict['comp.legend.'+row.k] || row.k;
           const col = COMP_COLORS[row.k] || '#fff';
-          return `<div class="cl-row"><div class="cl-dot" style="background:${col}"></div><div class="cl-name">${name}</div><div class="cl-val">${row.v}%</div></div>`;
+          return `<div class="cl-row"><div class="cl-dot" style="background:${col}"></div><div class="cl-name">${name}</div><div class="cl-val">${formatCompositionPercent(row.v)}</div></div>`;
         }).join('')}
       </div>
+      ${sn.noteKey ? `<p class="comp-note">${dict[sn.noteKey]}</p>` : ''}
     `;
     grid.appendChild(c);
   });
+}
+
+function formatCompositionPercent(value){
+  if(value < 0.001) return '<0.001%';
+  if(value > 99.999) return '>99.999%';
+  return `${value}%`;
 }
 
 function buildPieSvg(data){
@@ -215,14 +211,14 @@ function buildPieSvg(data){
 
 /* ================ Scale ================ */
 const SCALE_ROWS = [
-  {t:'10⁻³⁵ s',    tzh:'10⁻³⁵ 秒', size:'10⁻²⁷ m (subatomic)', sizezh:'10⁻²⁷ 米(比原子小)',           frac:0.005, compare:'A billion times smaller than a proton', comparezh:'比质子还小十亿倍'},
-  {t:'10⁻³² s',    tzh:'10⁻³² 秒', size:'a marble (~1 cm)',    sizezh:'一颗弹珠(约 1 cm)',              frac:0.02,  compare:'After cosmic inflation', comparezh:'刚经历宇宙暴胀之后'},
-  {t:'1 s',        tzh:'1 秒',    size:'~2 light-years',      sizezh:'~2 光年',                        frac:0.1,   compare:'Reaches Alpha Centauri', comparezh:'可达半人马座 α 星'},
-  {t:'3 min',      tzh:'3 分钟',   size:'~a few light-years',  sizezh:'~几光年',                        frac:0.15,  compare:'BBN complete', comparezh:'原初核合成结束'},
-  {t:'380,000 yr', tzh:'38 万年', size:'~42 million ly',      sizezh:'~4200 万光年',                   frac:0.28,  compare:'CMB released', comparezh:'CMB 光被释放'},
-  {t:'500 Myr',    tzh:'5 亿年', size:'~5 Gly',                sizezh:'~50 亿光年',                     frac:0.5,   compare:'First stars', comparezh:'第一批恒星'},
-  {t:'9.2 Gyr',    tzh:'92 亿年',size:'~50 Gly',               sizezh:'~500 亿光年',                    frac:0.85,  compare:'Solar system forms', comparezh:'太阳系形成'},
-  {t:'13.8 Gyr',   tzh:'138 亿年',size:'93 billion ly (diam.)',sizezh:'930 亿光年(直径)',              frac:1.0,   compare:'Today', comparezh:'今天'}
+  {t:'10⁻³⁵ s',    tzh:'10⁻³⁵ 秒', size:'illustrative ~10⁻²⁷ m', sizezh:'示意值 ~10⁻²⁷ 米',              frac:0.005, compare:'Model-dependent; ~10¹² times smaller than a proton', comparezh:'依模型而定;比质子小约 10¹² 倍'},
+  {t:'10⁻³² s',    tzh:'10⁻³² 秒', size:'absolute size unknown',  sizezh:'绝对大小未知',                    frac:0.02,  compare:'Inflation requires ≥~10²⁶-fold linear growth', comparezh:'暴胀通常要求线性尺度增长至少约 10²⁶ 倍'},
+  {t:'1 s',        tzh:'1 秒',      size:'~13 ly radius',          sizezh:'半径约 13 光年',                  frac:0.12,  compare:'~25 light-years across', comparezh:'直径约 25 光年'},
+  {t:'3 min',      tzh:'3 分钟',    size:'~127 ly radius',         sizezh:'半径约 127 光年',                 frac:0.18,  compare:'~250 light-years across; BBN under way', comparezh:'直径约 250 光年;原初核合成进行中'},
+  {t:'380,000 yr', tzh:'38 万年',   size:'~42 million ly radius',  sizezh:'半径约 4200 万光年',              frac:0.32,  compare:'CMB released', comparezh:'CMB 光子退耦'},
+  {t:'500 Myr',    tzh:'5 亿年',    size:'~4–5 Gly radius',        sizezh:'半径约 40–50 亿光年',             frac:0.52,  compare:'First stars and galaxies', comparezh:'第一代恒星与早期星系'},
+  {t:'9.2 Gyr',    tzh:'92 亿年',   size:'~33 Gly radius',         sizezh:'半径约 330 亿光年',               frac:0.82,  compare:'Solar System forms', comparezh:'太阳系形成'},
+  {t:'13.8 Gyr',   tzh:'138 亿年',  size:'~46.5 Gly radius',       sizezh:'半径约 465 亿光年',               frac:1.0,   compare:'~93 billion light-years across today', comparezh:'今天直径约 930 亿光年'}
 ];
 function renderScale(){
   const wrap = document.getElementById('scaleWrap');

@@ -40,7 +40,7 @@
     <section id="tab-timeline" class="tab-panel active">
       <div class="section-head">
         <h2 data-i18n="timeline.h2">Cosmic Timeline</h2>
-        <p data-i18n="timeline.desc">Every epoch since t = 0. Click a card to zoom in.</p>
+        <p data-i18n="timeline.desc">A model-based timeline from the earliest times physics can discuss. Click a card to zoom in.</p>
       </div>
       <div id="timelineWrap" class="timeline-wrap"></div>
     </section>
@@ -49,7 +49,7 @@
     <section id="tab-machine" class="tab-panel">
       <div class="section-head">
         <h2 data-i18n="machine.h2">Cosmic Time Machine</h2>
-        <p data-i18n="machine.desc">Drag the slider through 13.8 billion years of cosmic history. Log scale — each step is a factor of 10.</p>
+        <p data-i18n="machine.desc">Drag the logarithmic slider from the early universe into a model-dependent far future.</p>
       </div>
       <div class="machine">
         <canvas id="machineCanvas"></canvas>
@@ -57,15 +57,15 @@
           <div class="mp-time" id="mpTime">3 min</div>
           <div class="mp-epoch" id="mpEpoch">—</div>
           <div class="mp-props">
-            <div class="mp-p"><div class="mp-k" data-i18n="machine.temp">Temperature</div><div class="mp-v" id="mpTemp">—</div></div>
-            <div class="mp-p"><div class="mp-k" data-i18n="machine.size">Observable universe radius</div><div class="mp-v" id="mpSize">—</div></div>
-            <div class="mp-p"><div class="mp-k" data-i18n="machine.density">Energy density</div><div class="mp-v" id="mpDens">—</div></div>
+            <div class="mp-p"><div class="mp-k" data-i18n="machine.temp">Radiation/background temperature</div><div class="mp-v" id="mpTemp">—</div></div>
+            <div class="mp-p"><div class="mp-k" data-i18n="machine.size">Radius of today's observable patch, then</div><div class="mp-v" id="mpSize">—</div></div>
+            <div class="mp-p"><div class="mp-k" data-i18n="machine.density">Mass–energy density (ρ = u/c²)</div><div class="mp-v" id="mpDens">—</div></div>
             <div class="mp-p"><div class="mp-k" data-i18n="machine.dominant">What exists</div><div class="mp-v" id="mpDom">—</div></div>
           </div>
           <div class="mp-event"><div class="mp-ek" data-i18n="machine.event">Key event</div><div class="mp-ev" id="mpEvent">—</div></div>
         </div>
         <div class="slider-wrap">
-          <input type="range" id="timeSlider" min="-43" max="18" step="0.1" value="2.26">
+          <input type="range" id="timeSlider" min="-43" max="107.5" step="0.1" value="2.26">
           <div class="slider-marks" id="sliderMarks"></div>
         </div>
       </div>
@@ -84,7 +84,7 @@
     <section id="tab-scale" class="tab-panel">
       <div class="section-head">
         <h2 data-i18n="scale.h2">How big was the universe?</h2>
-        <p data-i18n="scale.desc">The <b>observable</b> universe grew from smaller than an atom to 93 billion light-years across.</p>
+        <p data-i18n="scale.desc">This compares the physical radius, at each epoch, of the patch that became today's observable universe. It is not the size of the whole universe, which may be infinite.</p>
       </div>
       <div id="scaleWrap" class="scale-wrap"></div>
     </section>
@@ -93,7 +93,7 @@
     <section id="tab-fates" class="tab-panel">
       <div class="section-head">
         <h2 data-i18n="fates.h2">How does it end?</h2>
-        <p data-i18n="fates.desc">The universe's ultimate fate depends on the density of dark energy. Three main scenarios are debated.</p>
+        <p data-i18n="fates.desc">The outcome depends on whether dark energy remains a cosmological constant, evolves, or the vacuum changes.</p>
       </div>
       <div id="fatesGrid" class="fates-grid"></div>
     </section>
@@ -108,7 +108,26 @@
     </section>
   </main>
 
-  <footer><span data-i18n="footer">Values from Planck 2018 (Λ-CDM), NASA/ESA, and PDG.</span></footer>
+  <aside class="sources" aria-labelledby="sourcesHeading">
+    <h2 id="sourcesHeading" data-i18n="sources.h2">Scientific sources</h2>
+    <p data-i18n="sources.desc">Numbers are rounded educational estimates; early-universe sizes and far-future dates are model-dependent.</p>
+    <div class="source-links">
+      <a href="https://doi.org/10.1051/0004-6361/201833910">Planck 2018 VI</a>
+      <a href="https://pdg.lbl.gov/2025/reviews/contents_sports.html">Particle Data Group reviews</a>
+      <a href="https://science.nasa.gov/universe/overview/">NASA Universe</a>
+      <a href="https://www.esa.int/Science_Exploration/Space_Science/Planck">ESA Planck</a>
+      <a href="https://arxiv.org/abs/2303.12500">Klessen &amp; Glover 2023 (first stars)</a>
+      <a href="https://arxiv.org/abs/2108.03699">Bosman et al. 2022 (reionization)</a>
+      <a href="https://arxiv.org/abs/2405.18485">Carniani et al. 2024 (z=14 galaxy)</a>
+      <a href="https://arxiv.org/abs/2408.00064">Sawala et al. 2025 (MW–M31)</a>
+      <a href="https://arxiv.org/abs/2112.04510">Riess et al. 2022 (SH0ES)</a>
+      <a href="https://arxiv.org/abs/2401.04773">Riess et al. 2024 (JWST)</a>
+      <a href="https://arxiv.org/abs/astro-ph/0310808">Davis &amp; Lineweaver 2004 (cosmic scales)</a>
+      <a href="https://arxiv.org/abs/astro-ph/9701131">Adams &amp; Laughlin 1997 (far future)</a>
+    </div>
+  </aside>
+
+  <footer><span data-i18n="footer">Source-backed educational estimates; see the references above.</span></footer>
 
   <script src="i18n.js"></script>
   <script src="app.js"></script>

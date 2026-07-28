@@ -111,6 +111,7 @@ main{position:relative;z-index:1;max-width:1400px;margin:0 auto;padding:40px 24p
 .cl-dot{width:14px;height:14px;border-radius:3px;flex-shrink:0}
 .cl-name{flex:1;color:#c8cff0}
 .cl-val{color:var(--dim);font-family:'JetBrains Mono',monospace;font-size:12px}
+.comp-note{margin-top:14px;color:var(--dim);font-size:12px;line-height:1.55;text-align:left}
 
 /* ---------- Scale ---------- */
 .scale-wrap{max-width:1000px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
@@ -139,7 +140,14 @@ main{position:relative;z-index:1;max-width:1400px;margin:0 auto;padding:40px 24p
 .myst-q{font-size:18px;font-weight:600;margin-bottom:10px;color:#fff}
 .myst-d{color:#c8cff0;font-size:14px;line-height:1.6}
 
-footer{text-align:center;padding:40px 20px;color:var(--dim);font-size:12px;border-top:1px solid var(--panel-b);margin-top:60px;position:relative;z-index:1}
+.sources{position:relative;z-index:1;max-width:1100px;margin:0 auto 60px;padding:28px;background:var(--panel);border:1px solid var(--panel-b);border-radius:16px}
+.sources h2{text-align:center;font-size:24px;margin-bottom:8px}
+.sources p{text-align:center;color:var(--dim);font-size:13px;line-height:1.6;margin:0 auto 20px;max-width:760px}
+.source-links{display:flex;flex-wrap:wrap;justify-content:center;gap:8px}
+.source-links a{color:#dfe4ff;background:rgba(0,0,0,0.25);border:1px solid var(--panel-b);border-radius:999px;padding:7px 12px;font-size:12px;text-decoration:none}
+.source-links a:hover{color:#fff;border-color:var(--accent)}
+
+footer{text-align:center;padding:40px 20px;color:var(--dim);font-size:12px;border-top:1px solid var(--panel-b);position:relative;z-index:1}
 
 @media (max-width:900px){
   h1{font-size:56px}
