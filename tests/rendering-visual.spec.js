@@ -143,6 +143,12 @@ test.describe('deterministic scientific renderers', () => {
       await captureRendering(page.locator('.pt-wrap'), 'periodic-discovery-grid-1871.png');
 
       await page.locator('#tlToggleBtn').click();
+      await page.evaluate(() => {
+        window.setTimeout = (callback, delay = 0, ...args) => {
+          if (delay === 0) callback(...args);
+          return 0;
+        };
+      });
       await page.locator('#cosmicPlayBtn').click();
       await expect(page.locator('#cosmicBanner')).toHaveClass(/on/);
       expect(await page.locator('.cell.not-yet-forged').count()).toBeGreaterThan(50);
@@ -250,8 +256,11 @@ test.describe('deterministic scientific renderers', () => {
     });
 
     test('all ten Physics Lab families including confinement render non-blank states', async ({ page }) => {
+      await page.emulateMedia({ reducedMotion: 'reduce' });
       await openParticleZoo(page, '/particle-zoo/', 'en');
       await page.locator('.tab[data-tab="lab"]').click();
+      await page.locator('#confAuto').uncheck();
+      await page.locator('#confReset').click();
       await stepVisualClock(page);
 
       for (const id of ['conf', 'det', 'higgs']) {
@@ -280,6 +289,7 @@ test.describe('deterministic scientific renderers', () => {
     });
 
     test('Physics Lab labels render in zh-CN', async ({ page }) => {
+      await page.emulateMedia({ reducedMotion: 'reduce' });
       await openParticleZoo(page, '/particle-zoo/', 'zh-CN');
       await page.locator('.tab[data-tab="lab"]').click();
       await page.locator('.lab-subtab[data-lab-sub="advanced"]').click();
@@ -292,6 +302,7 @@ test.describe('deterministic scientific renderers', () => {
 
     test('generated mobile bundle renders builder and RGE canvas on a narrow viewport', async ({ page }) => {
       await page.setViewportSize({ width: 390, height: 844 });
+      await page.emulateMedia({ reducedMotion: 'reduce' });
       await openParticleZoo(page, '/particle-zoo/mobile/index.html', 'en');
       await page.locator('.tab[data-tab="builder"]').click();
       for (const part of ['u', 'u', 'd', 'e']) {

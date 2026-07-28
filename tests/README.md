@@ -22,6 +22,8 @@ Each worktree automatically derives an isolated static-server port. Set `PHYSICS
 
 The generated narrow Particle Zoo builder canvas is covered by non-blank pixel and unclipped-geometry assertions, while its stable result panel is snapshotted. Its curved gluon strokes exhibit Win32 subpixel raster noise at that width; the equivalent source/desktop builder canvas has exact pixel baselines in both locales.
 
+Element captures repeat their centering scroll until geometry settles so `content-visibility:auto` surfaces are measured and snapshotted after their real dimensions replace intrinsic placeholders.
+
 ## Performance budgets
 
 The committed budgets are 5 seconds load, 250 ms p95 tab interaction, 12 MiB post-GC heap growth, no listener growth after a warm tab cycle, at most 180 RAF callbacks per idle second, at most five long tasks, and at most 500 ms total long-task time.

@@ -87,8 +87,29 @@ export async function setRangeValue(locator, value) {
 }
 
 async function scrollIntoStableView(locator) {
-  await locator.evaluate(element => element.scrollIntoView({ block: 'center', inline: 'center' }));
-  await locator.page().waitForTimeout(25);
+  let previous = null;
+  for (let attempt = 0; attempt < 4; attempt++) {
+    await locator.evaluate(element => element.scrollIntoView({ block: 'center', inline: 'center' }));
+    await locator.page().waitForTimeout(50);
+    const current = await locator.evaluate(element => {
+      const rect = element.getBoundingClientRect();
+      return {
+        bottom: rect.bottom,
+        height: rect.height,
+        top: rect.top,
+        viewportHeight: innerHeight,
+        width: rect.width
+      };
+    });
+    const settled = previous &&
+      Math.abs(current.top - previous.top) < 0.5 &&
+      Math.abs(current.width - previous.width) < 0.5 &&
+      Math.abs(current.height - previous.height) < 0.5;
+    const fits = current.height > current.viewportHeight ||
+      (current.top >= -1 && current.bottom <= current.viewportHeight + 1);
+    if (settled && fits) return;
+    previous = current;
+  }
 }
 
 export async function expectNotClipped(locator) {
