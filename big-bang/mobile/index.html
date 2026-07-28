@@ -40,7 +40,7 @@ body{
 }
 #bgCanvas{position:fixed;inset:0;z-index:0;pointer-events:none;width:100vw;height:100vh}
 #bg-stars{
-  position:fixed;inset:-900px 0 0 -900px;pointer-events:none;z-index:0;
+  position:fixed;inset:0;pointer-events:none;z-index:0;
   background-image:
     radial-gradient(1px 1px at 20% 30%, #fff, transparent),
     radial-gradient(1px 1px at 60% 70%, rgba(255,255,255,0.6), transparent),
@@ -49,11 +49,7 @@ body{
     radial-gradient(1px 1px at 15% 60%, rgba(255,255,255,0.7), transparent),
     radial-gradient(1px 1px at 90% 50%, #fff, transparent);
   background-size:900px 900px;opacity:0.4;
-  contain:strict;will-change:transform;
-  animation:drift 180s linear infinite;
 }
-@keyframes drift{from{transform:translate3d(0,0,0)}to{transform:translate3d(900px,900px,0)}}
-@media (prefers-reduced-motion:reduce){#bg-stars{animation:none}}
 
 .hero{position:relative;z-index:1;padding:60px 24px 24px;text-align:center}
 .hero-inner{max-width:900px;margin:0 auto}
