@@ -1172,6 +1172,36 @@ test('particle-zoo collapsed-panel and lifecycle coverage', async ({ page }) => 
     // its partner already consumed, so exactly one particle is left behind.
     await page.locator('.tab[data-tab="playground"]').click();
     await page.locator('#pgClear').click();
+    // A like-charged overlap first: the pair test has to look at both orderings
+    // before deciding that nothing annihilates.
+    await page.evaluate(() => {
+      spawn('electron');
+      spawn('electron');
+      pgParts.forEach((particle, index) => {
+        particle.x = 140 + index * 2;
+        particle.y = 120;
+        particle.vx = 0;
+        particle.vy = 0;
+      });
+    });
+    await page.waitForTimeout(200);
+    expect(await page.evaluate(() => pgParts.filter(p => p.type === 'electron').length),
+      'like charges overlap without annihilating').toBe(2);
+    // An electron-first encounter annihilates on the first ordering.
+    await page.locator('#pgClear').click();
+    await page.evaluate(() => {
+      spawn('electron');
+      spawn('positron');
+      pgParts.forEach((particle, index) => {
+        particle.x = 140 + index * 2;
+        particle.y = 120;
+        particle.vx = 0;
+        particle.vy = 0;
+      });
+    });
+    await expect.poll(() => page.evaluate(() => pgParts.filter(p => p.type !== 'photon').length), { timeout: 10_000 })
+      .toBe(0);
+    await page.locator('#pgClear').click();
     await page.evaluate(() => {
       for (let index = 0; index < 2; index++) {
         spawn('positron');
