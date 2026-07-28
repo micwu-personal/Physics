@@ -5,8 +5,16 @@ const {performance} = require('node:perf_hooks');
 const vm = require('node:vm');
 
 const corePath = path.resolve(__dirname, '..', 'core.js');
+const stylesPath = path.resolve(__dirname, '..', 'styles.css');
 const source = fs.readFileSync(corePath, 'utf8');
+const styles = fs.readFileSync(stylesPath, 'utf8');
 const api = vm.runInThisContext(`${source}\n;BigBangCore`, {filename:corePath});
+
+const driftKeyframes = styles.match(/@keyframes drift\{([^}]|\}(?!\s*@))*\}/)?.[0];
+assert(driftKeyframes, 'The ambient star drift animation must exist');
+assert.match(driftKeyframes, /transform:translate3d\(/, 'Star drift must stay on the compositor');
+assert.doesNotMatch(driftKeyframes, /background-position/, 'Star drift must not repaint the viewport');
+assert.match(styles, /#bg-stars\{[\s\S]*?will-change:transform;/, 'The star layer must remain compositor-promoted');
 
 let scheduled = 0;
 const controller = api.createAnimationController({
