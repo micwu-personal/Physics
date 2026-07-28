@@ -46,6 +46,16 @@ jobs:
             test-results/
           if-no-files-found: ignore
       - if: always()
+        run: npm run test:rendering
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rendering-results
+          path: |
+            playwright-report/
+            test-results/
+          if-no-files-found: ignore
+      - if: always()
         run: npm run test:performance
       - if: always()
         uses: actions/upload-artifact@v4
