@@ -3,7 +3,11 @@
   "version": "1.0.0",
   "description": "Interactive periodic table of the elements.",
   "scripts": {
-    "build": "node build.js"
+    "build": "node build.js",
+    "validate": "node validate.js",
+    "test": "node --test",
+    "coverage": "node --test --experimental-test-coverage --test-coverage-include=science.js --test-coverage-include=source-registry.js --test-coverage-lines=100 --test-coverage-functions=100 --test-coverage-branches=100",
+    "profile": "node profile.js"
   },
   "private": true
 }

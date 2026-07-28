@@ -26,6 +26,59 @@ const detailEl = document.getElementById('detail');
 let currentZ = null;
 let currentHybrid = null;
 
+/* Animation lifecycle: render a static first frame, then run only while visible. */
+const animationVisibility = new WeakMap();
+const pausedAnimationFrames = new Map();
+const reducedMotionQuery = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : null;
+const animationObserver = typeof IntersectionObserver === 'function'
+  ? new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        animationVisibility.set(entry.target, entry.isIntersecting);
+        if (entry.isIntersecting) resumeAnimation(entry.target);
+      });
+    }, {rootMargin:'80px'})
+  : null;
+
+function animationStateFor(element){
+  return {
+    active:element && element.isConnected && !element.closest('.hidden'),
+    documentVisible:!document.hidden,
+    elementVisible:animationVisibility.get(element) !== false,
+    reducedMotion:Boolean(reducedMotionQuery && reducedMotionQuery.matches)
+  };
+}
+function scheduleActiveFrame(element, callback){
+  if (animationObserver && !animationVisibility.has(element)) {
+    animationVisibility.set(element, true);
+    animationObserver.observe(element);
+  }
+  if (!PeriodicScience.isAnimationAllowed(animationStateFor(element))) {
+    pausedAnimationFrames.set(element, callback);
+    return 0;
+  }
+  pausedAnimationFrames.delete(element);
+  return requestAnimationFrame(callback);
+}
+function resumeAnimation(element){
+  const callback = pausedAnimationFrames.get(element);
+  if (!callback || !PeriodicScience.isAnimationAllowed(animationStateFor(element))) return;
+  pausedAnimationFrames.delete(element);
+  requestAnimationFrame(callback);
+}
+function resumeVisibleAnimations(){
+  pausedAnimationFrames.forEach((_, element) => resumeAnimation(element));
+}
+function disposeAnimatedElement(element){
+  if (!element) return;
+  pausedAnimationFrames.delete(element);
+  animationVisibility.delete(element);
+  if (animationObserver) animationObserver.unobserve(element);
+}
+document.addEventListener('visibilitychange', resumeVisibleAnimations);
+if (reducedMotionQuery && reducedMotionQuery.addEventListener) {
+  reducedMotionQuery.addEventListener('change', resumeVisibleAnimations);
+}
+
 /* ----- Rendering the grid ----- */
 function rerenderGrid(){
   const lang = window.CURRENT_LANG || 'en';
@@ -96,14 +149,14 @@ function rerenderGrid(){
 function makeCell(z, lang){
   const el = ELEMENTS[z];
   const d = document.createElement('div');
-  d.className = 'cell ' + el.category + (el.radioactive===2 ? ' radioactive' : '');
+  d.className = 'cell ' + el.category + (el.radioactivity!=='stable' ? ' radioactive' : '');
   d.dataset.z = z;
   const nm = lang==='zh-CN' ? el.name_zh : el.name_en;
   d.innerHTML = `
     <div class="z">${z}</div>
     <div class="sym">${el.symbol}</div>
     <div class="nm">${nm}</div>
-    <div class="ms">${el.mass.toFixed ? el.mass.toFixed(el.mass<10?3:2) : el.mass}</div>
+    <div class="ms">${el.massDisplay}</div>
   `;
   if(currentZ===z) d.classList.add('active');
   d.addEventListener('click',()=>openDetail(z));
@@ -130,7 +183,11 @@ function openDetail(z){
 }
 document.getElementById('detailClose').addEventListener('click',()=>{
   detailEl.classList.add('hidden'); currentZ=null;
-  cancelAnimationFrame(rxRAF); clearTimeout(rxReplayTimer);
+  [bohrRAF, orbRAF, nucRAF, rxRAF].forEach(id=>cancelAnimationFrame(id));
+  clearTimeout(rxReplayTimer);
+  detailEl.querySelectorAll('canvas').forEach(disposeAnimatedElement);
+  molViewers.forEach(state=>cancelAnimationFrame(state.raf));
+  molViewers.clear();
   document.querySelectorAll('.cell').forEach(c=>c.classList.remove('active'));
 });
 
@@ -147,7 +204,7 @@ function refreshDetail(){
   const tile = document.getElementById('dTile');
   tile.style.background = `linear-gradient(135deg, ${catColor}55, ${catColor}22)`;
   tile.style.border = `2px solid ${catColor}88`;
-  tile.innerHTML = `<div class="z">${el.Z}</div><div class="sym" style="color:${catColor}">${el.symbol}</div><div class="mass">${el.mass}</div>`;
+  tile.innerHTML = `<div class="z">${el.Z}</div><div class="sym" style="color:${catColor}">${el.symbol}</div><div class="mass">${el.massDisplay}</div>`;
 
   document.getElementById('dName').innerHTML = `${nm} <span style="color:var(--dim);font-size:20px;font-weight:400;margin-left:8px">${otherName}</span>`;
   const catI = CATEGORY_I18N[lang][el.category];
@@ -159,18 +216,20 @@ function refreshDetail(){
   const propsEl = document.getElementById('dProps');
   const shells = shellCounts(el.Z);
   const phaseKey = ext.phase || (el.category==='noble'?'gas':(el.category==='halogen' && el.Z<=17 ? (el.Z===9||el.Z===17?'gas':'liquid'):'solid'));
-  const phaseTxt = PHASE_I18N[lang][phaseKey] || phaseKey;
-  const radioTxt = ({0:t('radio.stable'),1:t('radio.natural'),2:t('radio.artificial')})[el.radioactive];
+  const phaseBase = PHASE_I18N[lang][phaseKey] || phaseKey;
+  const phaseNote = lang==='zh-CN' ? ext.phaseNote_zh : ext.phaseNote_en;
+  const phaseTxt = phaseNote ? `${phaseBase} — ${phaseNote}` : phaseBase;
+  const radioTxt = t(`radio.${el.radioactivity}`);
   const props = [
     [t('prop.Z'), el.Z],
-    [t('prop.mass'), el.mass],
+    [t('prop.mass'), el.massDisplay],
     [t('prop.group'), el.group==='f' ? (el.category==='lanthanide'?'La (f)':'Ac (f)') : el.group],
     [t('prop.period'), el.period],
     [t('prop.family'), catI],
     [t('prop.config'), el.config],
     [t('prop.shells'), shells.filter(x=>x>0).join(' · ')],
     [t('prop.phase'), phaseTxt],
-    ext.melt!=null && [t('prop.melt'), ext.melt+' K'],
+    ext.melt!=null && [t('prop.melt'), ext.melt+' K' + ((lang==='zh-CN' ? ext.meltNote_zh : ext.meltNote_en) ? ` — ${lang==='zh-CN' ? ext.meltNote_zh : ext.meltNote_en}` : '')],
     ext.boil!=null && [t('prop.boil'), ext.boil+' K'],
     ext.density!=null && [t('prop.density'), ext.density+' g/cm³'],
     el.electronegativity!=null && [t('prop.en'), el.electronegativity]
@@ -250,24 +309,23 @@ function refreshDetail(){
   // Nucleus visualization
   drawNucleus(el.Z, Math.round(el.mass - el.Z));
   document.getElementById('dNucStat').textContent =
-    `${el.Z} ${t('nuc.protons')} · ${Math.round(el.mass - el.Z)} ${t('nuc.neutrons')} — ${el.radioactive===0 ? t('nuc.stable') : t('nuc.decay')}`;
+    `${el.Z} ${t('nuc.protons')} · ${Math.round(el.mass - el.Z)} ${t('nuc.neutrons')} — ${el.radioactivity==='stable' ? t('nuc.stable') : t('nuc.decay')}`;
 
   // Isotopes
   const isoEl = document.getElementById('dIsotopes');
-  const isos = ext.isotopes || [{s:`${Math.round(el.mass)}${el.symbol}`, ab:'—', stable:el.radioactive===0, note:''}];
-  isoEl.innerHTML = isos.map(i=>`
+  const isos = ext.isotopes || [];
+  isoEl.innerHTML = isos.length ? isos.map(i=>`
     <div class="iso-row">
       <div class="iso-sym">${i.s}</div>
       <div>${i.ab}</div>
       <div class="${i.stable?'iso-stable':'iso-unstable'}">${i.stable ? t('iso.stable') : t('iso.unstable')}</div>
       <div class="iso-note">${i.note||''}</div>
     </div>
-  `).join('');
+  `).join('') : `<div class="d-hint">${t('detail.iso.none')}</div>`;
 
   // Radioactivity note
   const rn = document.getElementById('dRadio');
-  const rClass = el.radioactive===0 ? 'stable' : (el.radioactive===1 ? 'natural' : 'artificial');
-  rn.className = 'radio-note ' + rClass;
+  rn.className = 'radio-note ' + el.radioactivity;
   rn.textContent = radioTxt;
 
   // Uses & discovery
@@ -278,6 +336,7 @@ function refreshDetail(){
         ? `${t('discovery.ancient')}${disc.who? ' — '+disc.who:''}`
         : `${t('discovery.year')} ${disc.year} ${t('discovery.by')} ${disc.who}`)
     : '';
+  PeriodicSources.install(detailEl, el.Z, lang);
 }
 
 /* ================ ORBITAL & HYBRIDIZATION ENGINE ================
@@ -343,7 +402,7 @@ const HYBRID_LABELS = {
   p_x:'p_x', p_y:'p_y', p_z:'p_z',
   d_z2:'d_z²', d_x2y2:'d_x²−y²', d_xy:'d_xy', d_xz:'d_xz', d_yz:'d_yz',
   f_z3:'f_z³', f_xyz:'f_xyz',
-  sp:'sp', sp2:'sp²', sp3:'sp³', sp3d:'sp³d', sp3d2:'sp³d²',
+  sp:'sp', sp2:'sp²', sp3:'sp³', sp3d:'TBP (legacy sp³d)', sp3d2:'octahedral (legacy sp³d²)',
   d2sp3:'d²sp³', dsp2:'dsp²'
 };
 
@@ -479,16 +538,16 @@ function descriptionForOrbital(h){
         : 'One s + three p → <b>4</b> equivalent sp³ hybrids pointing to the four vertices of a regular tetrahedron (bond angle 109.5°). Methane (CH₄), diamond, and SiO₄ tetrahedra all belong here. The lobes point to four non-adjacent corners of a cube.'
     },
     sp3d: {
-      title: zh ? 'sp³d 杂化 — 三角双锥 (120°/90°)' : 'sp³d hybridization — trigonal bipyramidal',
+      title: zh ? '三角双锥构型 — 传统 sp³d 模型' : 'Trigonal-bipyramidal geometry — legacy sp³d model',
       body: zh
-        ? '一个 s + 三个 p + 一个 d 轨道 → <b>5 个</b>杂化轨道。三个位于赤道平面内(120°),两个沿轴向(±z,与赤道方向 90°)。例:PCl₅。'
-        : 'One s + three p + one d → <b>5</b> hybrid orbitals: three equatorial (120° apart) plus two axial (±z, 90° to the equator). Example: PCl₅.'
+        ? '图形仅表示五个成键方向：三个位于赤道平面内（120°），两个沿轴向。对 PCl₅ 等超价分子，现代成键理论采用极化/离子共振与三中心四电子键；并无证据支持显著的中心原子 3d 杂化。'
+        : 'This graphic shows five bond directions: three equatorial (120° apart) and two axial. For hypervalent PCl₅, modern bonding descriptions use polarized/ionic resonance and three-center four-electron bonds; substantial central-atom 3d hybridization is not supported.'
     },
     sp3d2: {
-      title: zh ? 'sp³d² 杂化 — 正八面体 (90°)' : 'sp³d² hybridization — octahedral (90°)',
+      title: zh ? '八面体构型 — 传统 sp³d² 模型' : 'Octahedral geometry — legacy sp³d² model',
       body: zh
-        ? '一个 s + 三个 p + 两个 d 轨道 → <b>6 个</b>等价杂化轨道,指向八面体的 6 个顶点(键角 90°)。SF₆、[Fe(H₂O)₆]²⁺ 等经典八面体分子/离子。'
-        : 'One s + three p + two d → <b>6</b> equivalent hybrids pointing at the six vertices of an octahedron (all bond angles 90°). SF₆, [Fe(H₂O)₆]²⁺ and most classical octahedral complexes belong here.'
+        ? '图形表示六个互成 90° 的八面体成键方向。SF₆ 的现代描述不需要硫 3d 杂化，而采用离域、极化及离子共振成键；过渡金属配合物则由配体场/分子轨道理论描述。'
+        : 'This graphic shows six octahedral bond directions at 90°. Modern SF₆ descriptions do not require sulfur 3d hybridization, instead using delocalized, polarized and ionic-resonance bonding; transition-metal complexes are described by ligand-field/molecular-orbital theory.'
     },
     d2sp3: {
       title: zh ? 'd²sp³ 杂化 — 内轨型八面体' : 'd²sp³ hybridization — inner-orbital octahedral',
@@ -568,7 +627,7 @@ function drawBohr(z){
         ctx.beginPath(); ctx.arc(ex,ey,2.5,0,Math.PI*2); ctx.fill();
       }
     });
-    bohrRAF = requestAnimationFrame(frame);
+    bohrRAF = scheduleActiveFrame(canvas, frame);
   }
   frame();
 }
@@ -686,7 +745,7 @@ function drawOrbital(h){
     ctx.fillStyle='rgba(255,255,255,0.5)';
     ctx.fillText(lang==='zh-CN' ? '波函数相位' : 'wavefunction phase', W-120, 34);
 
-    orbRAF = requestAnimationFrame(frame);
+    orbRAF = scheduleActiveFrame(canvas, frame);
   }
   frame();
 }
@@ -956,7 +1015,7 @@ function drawNucleus(protons, neutrons){
       ctx.fillStyle = color;
       ctx.beginPath(); ctx.arc(x,y,nucR,0,Math.PI*2); ctx.fill();
     });
-    nucRAF = requestAnimationFrame(frame);
+    nucRAF = scheduleActiveFrame(canvas, frame);
   }
   frame();
 }
@@ -1499,10 +1558,12 @@ function animateReaction(eq){
     ctx.textAlign='center';
     ctx.fillText(phaseName, W/2, H-8);
 
-    if(p<1) rxRAF = requestAnimationFrame(frame);
+    if(p<1) rxRAF = scheduleActiveFrame(canvas, frame);
     else {
       // Freeze on final product state, replay after 1.5 s
-      rxReplayTimer = setTimeout(()=>animateReaction(eq), 1500);
+      rxReplayTimer = setTimeout(()=>{
+        rxRAF = scheduleActiveFrame(canvas, ()=>animateReaction(eq));
+      }, 1500);
     }
   }
   frame();
@@ -1741,6 +1802,11 @@ function render3DViewers(reactions){
       }
     });
   });
+  molViewers.forEach((state, card)=>{
+    cancelAnimationFrame(state.raf);
+    disposeAnimatedElement(card.querySelector('canvas'));
+  });
+  molViewers.clear();
   if(known.length===0){ block.style.display='none'; grid.innerHTML=''; return; }
   block.style.display='block';
   grid.innerHTML = known.map(f=>{
@@ -1805,7 +1871,7 @@ function initMol3D(card, formula){
 
   function frame(){
     const r = canvas.getBoundingClientRect();
-    if(r.width<20 || r.height<20){ state.raf = requestAnimationFrame(frame); return; }
+    if(r.width<20 || r.height<20){ state.raf = scheduleActiveFrame(canvas, frame); return; }
     if(canvas.width !== r.width*devicePixelRatio){
       canvas.width = r.width*devicePixelRatio;
       canvas.height = r.height*devicePixelRatio;
@@ -1866,7 +1932,7 @@ function initMol3D(card, formula){
       drawAtom3D(ctx, a.sx, a.sy, a.size, a.sym);
     });
 
-    state.raf = requestAnimationFrame(frame);
+    state.raf = scheduleActiveFrame(canvas, frame);
   }
   frame();
   molViewers.set(card, state);

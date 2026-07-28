@@ -3,7 +3,7 @@
    - Adds a "▶ Play cosmic timeline" button in the view toolbar (or standalone).
    - When played, cells fade in over ~20s in the order elements were forged
      in the universe: Big Bang → cosmic-ray spallation & first stars →
-     AGB s-process → supernovae → neutron-star mergers → today → human synthesis.
+     AGB s-process → supernovae → model-dependent r-process sites → today.
 ======================================================================================= */
 (function(){
 
@@ -33,6 +33,17 @@
     }
     badge.className = 'origin-badge ' + origin;
     badge.innerHTML = `<span class="oi">${F_ORIGIN_ICON[origin]||''}</span><span>${t(key)}</span>`;
+    let caveat = document.getElementById('originCaveat');
+    if (!caveat) {
+      caveat = document.createElement('div');
+      caveat.id = 'originCaveat';
+      caveat.className = 'd-hint origin-caveat';
+      dCat.parentNode.appendChild(caveat);
+    }
+    caveat.textContent = t('origin.caveat');
+    caveat.querySelectorAll('.source-links').forEach(node => node.remove());
+    const links = PeriodicSources.render('origins', z, window.CURRENT_LANG, document);
+    if (links) caveat.appendChild(links);
   }
 
   /* Watch #dName for changes (indicates a new element was opened),
@@ -81,6 +92,7 @@
 
   function play(){
     if (playing){ stop(); return; }
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     playing = true;
     ensureBanner().classList.add('on');
     const btn = document.getElementById('cosmicPlayBtn');
@@ -154,6 +166,7 @@
   }
   // Observe html[lang] attribute to detect language switch
   new MutationObserver(refreshLang).observe(document.documentElement, {attributes:true, attributeFilter:['lang']});
+  document.addEventListener('visibilitychange', ()=>{ if (document.hidden) stop(); });
 
   window.__D1 = { play, stop, injectOriginBadge };
 

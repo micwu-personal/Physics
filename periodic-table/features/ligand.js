@@ -2,7 +2,7 @@
    For each transition-metal element (with d-electrons), inject a card into
    the detail panel below Signature Colors. User picks a ligand from the
    spectrochemical series; app draws:
-     - t₂g/eₙ splitting diagram at correct Δ_oct magnitude
+     - t₂g/e_g splitting diagram using an approximate Δ_oct model
      - the absorbed photon (wavelength = hc/Δ)
      - the observed complementary color
 ============================================================================= */
@@ -208,6 +208,8 @@
           <div class="d-hint">${t('lf.hint')}</div>
         </div>
       </div>`;
+    const sourceLinks = PeriodicSources.render('ligand', z, window.CURRENT_LANG, document);
+    if (sourceLinks) block.querySelector('#lfContent').appendChild(sourceLinks);
 
     // Wire ligand buttons
     block.querySelectorAll('[data-lig]').forEach(b => b.addEventListener('click', ()=>{
@@ -270,7 +272,7 @@
       c.lineTo(x0 + 20, t2gY);
       c.stroke();
     }
-    // eₙ (2 lines)
+    // e_g (2 lines)
     c.strokeStyle = '#ff9f43';
     for (let i=0; i<2; i++){
       const x0 = W*0.55 + (i - 0.5)*40;
@@ -301,7 +303,7 @@
     c.font = 'bold 13px "Space Grotesk", sans-serif';
     c.fillText('t₂g', W*0.55 - 60, t2gY + 5);
     c.fillStyle = '#ff9f43';
-    c.fillText('eₙ', W*0.55 - 60, egY + 5);
+    c.fillText('e_g', W*0.55 - 60, egY + 5);
     c.fillStyle = '#fff';
     c.font = '12px "JetBrains Mono", monospace';
     c.fillText('Δ', W*0.55 + 100, midY + 5);

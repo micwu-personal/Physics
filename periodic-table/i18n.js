@@ -29,11 +29,12 @@ const LOCALES = {
     'prop.en':'Electronegativity',
     'prop.radioactive':'Radioactivity',
 
-    'radio.stable':'Stable — all common isotopes are non-radioactive.',
-    'radio.natural':'Naturally radioactive — decays over geological or human timescales.',
-    'radio.artificial':'Fully radioactive — every known isotope decays; most are produced only in reactors or accelerators (artificial).',
+    'radio.stable':'Has one or more observationally stable isotopes.',
+    'radio.natural':'All isotopes are radioactive; this element occurs naturally.',
+    'radio.trace':'All isotopes are radioactive; trace natural occurrence is known, but practical supplies are produced artificially.',
+    'radio.synthetic':'All known isotopes are radioactive; no confirmed natural occurrence, so this element is produced artificially.',
 
-    'phase.solid':'Solid', 'phase.liquid':'Liquid', 'phase.gas':'Gas',
+    'phase.solid':'Solid', 'phase.liquid':'Liquid', 'phase.gas':'Gas', 'phase.unknown':'Unknown',
 
     'main':'main group','sub':'sub-group (transition)','f':'f-block',
 
@@ -52,6 +53,7 @@ const LOCALES = {
     'detail.ox.hint':'These are the charges this element can take in compounds — determining what bonds &amp; reactions it prefers.',
 
     'detail.iso.symbol':'Isotope','detail.iso.ab':'Abundance','detail.iso.stab':'Stability','detail.iso.note':'Notes',
+    'detail.iso.none':'No reviewed isotope-abundance record is included for this element; no value is inferred.',
     'iso.stable':'stable','iso.unstable':'unstable',
 
     'shells.text':'Electrons per shell:',
@@ -60,8 +62,8 @@ const LOCALES = {
     'hybrid.sp':'sp hybridization (linear, 180°). Example: C in acetylene HC≡CH.',
     'hybrid.sp2':'sp² hybridization (trigonal planar, 120°). Example: C in ethylene CH₂=CH₂, or in benzene.',
     'hybrid.sp3':'sp³ hybridization (tetrahedral, 109.5°). Example: C in methane CH₄, N in ammonia NH₃.',
-    'hybrid.sp3d':'sp³d hybridization (trigonal bipyramidal, 90°/120°). Example: PCl₅.',
-    'hybrid.sp3d2':'sp³d² hybridization (octahedral, 90°). Example: SF₆.',
+    'hybrid.sp3d':'Trigonal-bipyramidal geometry (legacy label: sp³d). PCl₅ is better described with polarized/ionic and three-center four-electron bonding; substantial 3d hybridization is not supported.',
+    'hybrid.sp3d2':'Octahedral geometry (legacy label: sp³d²). SF₆ does not require sulfur 3d hybridization; modern descriptions use delocalized, polarized and ionic-resonance bonding.',
     'hybrid.d2sp3':'d²sp³ hybridization (octahedral, inner-orbital). Common in [Fe(CN)₆]³⁻ and similar complexes.',
     'hybrid.dsp2':'dsp² hybridization (square planar). Common in Cu(II) and Pt(II) complexes.',
     'hybrid.f':'f-block electrons participate diffusely; hybridization is complex and rarely simple.',
@@ -130,11 +132,12 @@ const LOCALES = {
     'prop.en':'电负性(鲍林标度)',
     'prop.radioactive':'放射性',
 
-    'radio.stable':'稳定 — 常见同位素都不具有放射性。',
-    'radio.natural':'天然放射性 — 在地质或人类时间尺度上会发生衰变。',
-    'radio.artificial':'完全放射性 — 所有已知同位素都会衰变;大多只能通过反应堆或加速器人工合成。',
+    'radio.stable':'具有一种或多种观测上稳定的同位素。',
+    'radio.natural':'所有同位素都具有放射性；该元素天然存在。',
+    'radio.trace':'所有同位素都具有放射性；已知有痕量天然存在，但实际用量主要来自人工制备。',
+    'radio.synthetic':'所有已知同位素都具有放射性；尚无确认的天然存在，需人工合成。',
 
-    'phase.solid':'固态','phase.liquid':'液态','phase.gas':'气态',
+    'phase.solid':'固态','phase.liquid':'液态','phase.gas':'气态','phase.unknown':'未知',
 
     'main':'主族','sub':'副族(过渡)','f':'f 区',
 
@@ -153,6 +156,7 @@ const LOCALES = {
     'detail.ox.hint':'这些是该元素在化合物中可以呈现的电荷——决定了它偏好的化学键与反应。',
 
     'detail.iso.symbol':'同位素','detail.iso.ab':'丰度','detail.iso.stab':'稳定性','detail.iso.note':'备注',
+    'detail.iso.none':'本应用未收录经审核的同位素丰度记录；不会推算或虚构数值。',
     'iso.stable':'稳定','iso.unstable':'放射性',
 
     'shells.text':'各壳层电子数:',
@@ -161,8 +165,8 @@ const LOCALES = {
     'hybrid.sp':'sp 杂化(直线形,键角 180°)。例:乙炔 HC≡CH 中的碳。',
     'hybrid.sp2':'sp² 杂化(平面三角形,键角 120°)。例:乙烯 CH₂=CH₂、苯中的碳。',
     'hybrid.sp3':'sp³ 杂化(正四面体,键角 109.5°)。例:甲烷 CH₄ 中的碳、氨 NH₃ 中的氮。',
-    'hybrid.sp3d':'sp³d 杂化(三角双锥,键角 90°/120°)。例:PCl₅。',
-    'hybrid.sp3d2':'sp³d² 杂化(正八面体,键角 90°)。例:SF₆。',
+    'hybrid.sp3d':'三角双锥构型（传统标签：sp³d）。PCl₅ 更适合用极化/离子成分与三中心四电子键描述；并无证据支持显著的 3d 杂化。',
+    'hybrid.sp3d2':'八面体构型（传统标签：sp³d²）。SF₆ 的成键不需要硫的 3d 杂化；现代模型采用离域、极化及离子共振描述。',
     'hybrid.d2sp3':'d²sp³ 杂化(内轨型八面体)。常见于 [Fe(CN)₆]³⁻ 等配合物。',
     'hybrid.dsp2':'dsp² 杂化(平面正方形)。常见于 Cu(II) 与 Pt(II) 配合物。',
     'hybrid.f':'f 电子弥散,杂化情况复杂,通常不用简单杂化描述。',
@@ -218,6 +222,9 @@ function applyI18n(lang){
   if(titleKey && dict[titleKey]) document.title = dict[titleKey];
   document.querySelectorAll('.lang-pill').forEach(b=>{
     b.classList.toggle('active', b.dataset.lang===lang);
+  });
+  document.querySelectorAll('.source-label').forEach(label=>{
+    label.textContent = lang==='zh-CN' ? '资料来源：' : 'Sources: ';
   });
   window.CURRENT_LANG = lang;
   // Re-render dynamic content

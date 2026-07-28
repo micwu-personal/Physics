@@ -36,6 +36,7 @@
     root = document.createElement('div');
     root.className = 'nuclide-view';
     root.id = 'nuclideView';
+    root.dataset.sourceGroup = 'nuclides';
     root.innerHTML = `
       <div class="nuclide-header">
         <h2 data-i18n="nuc.chart.title">Nuclide Chart</h2>
@@ -56,6 +57,8 @@
 
     root.querySelector('#nuclideBack').addEventListener('click', close);
     buildLegend();
+    const links = PeriodicSources.render('nuclides', null, window.CURRENT_LANG, document);
+    if (links) root.querySelector('.nuclide-header').appendChild(links);
 
     const body = root.querySelector('#nuclideBody');
     let dragStartPanX = 0, dragStartPanY = 0, dragStartMouseX = 0, dragStartMouseY = 0;
@@ -282,6 +285,9 @@
       if (back) back.textContent = t('nuc.chart.close');
       const h2 = root.querySelector('h2');
       if (h2) h2.textContent = t('nuc.chart.title');
+      root.querySelectorAll('.nuclide-header > .source-links').forEach(node => node.remove());
+      const links = PeriodicSources.render('nuclides', null, window.CURRENT_LANG, document);
+      if (links) root.querySelector('.nuclide-header').appendChild(links);
       if (root.classList.contains('on')) draw();
     }
   }

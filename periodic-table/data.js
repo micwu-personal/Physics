@@ -7,7 +7,7 @@
 
 // [Z, symbol, en-name, zh-name, category, group(1..18 or 'f'), period,
 //  mass, config-short, common-oxidation-states, EN-electroneg or null,
-//  radioactive: 0 none/1 unstable but some stable isotopes/2 fully radioactive]
+//  radioactive legacy flag: normalized below to stable/natural/trace/synthetic]
 const ELEMENT_TABLE = [
   [1,'H','Hydrogen','氢','nonmetal',1,1,1.008,'1s¹','−1,+1',2.20,0],
   [2,'He','Helium','氦','noble',18,1,4.003,'1s²','0',null,0],
@@ -48,10 +48,10 @@ const ELEMENT_TABLE = [
   [37,'Rb','Rubidium','铷','alkali',1,5,85.468,'[Kr] 5s¹','+1',0.82,0],
   [38,'Sr','Strontium','锶','alkaline',2,5,87.62,'[Kr] 5s²','+2',0.95,0],
   [39,'Y','Yttrium','钇','transition',3,5,88.906,'[Kr] 4d¹5s²','+3',1.22,0],
-  [40,'Zr','Zirconium','锆','transition',4,5,91.224,'[Kr] 4d²5s²','+4',1.33,0],
+  [40,'Zr','Zirconium','锆','transition',4,5,91.222,'[Kr] 4d²5s²','+4',1.33,0],
   [41,'Nb','Niobium','铌','transition',5,5,92.906,'[Kr] 4d⁴5s¹','+3,+5',1.6,0],
   [42,'Mo','Molybdenum','钼','transition',6,5,95.95,'[Kr] 4d⁵5s¹','+4,+6',2.16,0],
-  [43,'Tc','Technetium','锝','transition',7,5,98,'[Kr] 4d⁵5s²','+4,+7',1.9,2],
+  [43,'Tc','Technetium','锝','transition',7,5,97,'[Kr] 4d⁵5s²','+4,+7',1.9,2],
   [44,'Ru','Ruthenium','钌','transition',8,5,101.07,'[Kr] 4d⁷5s¹','+3,+4',2.2,0],
   [45,'Rh','Rhodium','铑','transition',9,5,102.91,'[Kr] 4d⁸5s¹','+3',2.28,0],
   [46,'Pd','Palladium','钯','transition',10,5,106.42,'[Kr] 4d¹⁰','+2,+4',2.20,0],
@@ -112,13 +112,13 @@ const ELEMENT_TABLE = [
   [101,'Md','Mendelevium','钔','actinide','f',7,258,'[Rn] 5f¹³7s²','+2,+3',1.3,2],
   [102,'No','Nobelium','锘','actinide','f',7,259,'[Rn] 5f¹⁴7s²','+2,+3',1.3,2],
   [103,'Lr','Lawrencium','铹','actinide','f',7,266,'[Rn] 5f¹⁴7s²7p¹','+3',1.3,2],
-  [104,'Rf','Rutherfordium','鑪','transition',4,7,267,'[Rn] 5f¹⁴6d²7s²','+4',null,2],
-  [105,'Db','Dubnium','𨧀','transition',5,7,268,'[Rn] 5f¹⁴6d³7s²','+5',null,2],
-  [106,'Sg','Seaborgium','𨭎','transition',6,7,269,'[Rn] 5f¹⁴6d⁴7s²','+6',null,2],
-  [107,'Bh','Bohrium','𨨏','transition',7,7,270,'[Rn] 5f¹⁴6d⁵7s²','+7',null,2],
-  [108,'Hs','Hassium','𨭆','transition',8,7,269,'[Rn] 5f¹⁴6d⁶7s²','+8',null,2],
+  [104,'Rf','Rutherfordium','𬬻','transition',4,7,267,'[Rn] 5f¹⁴6d²7s²','+4',null,2],
+  [105,'Db','Dubnium','𬭊','transition',5,7,268,'[Rn] 5f¹⁴6d³7s²','+5',null,2],
+  [106,'Sg','Seaborgium','𬭳','transition',6,7,269,'[Rn] 5f¹⁴6d⁴7s²','+6',null,2],
+  [107,'Bh','Bohrium','𬭛','transition',7,7,270,'[Rn] 5f¹⁴6d⁵7s²','+7',null,2],
+  [108,'Hs','Hassium','𬭶','transition',8,7,277,'[Rn] 5f¹⁴6d⁶7s²','+8',null,2],
   [109,'Mt','Meitnerium','鿏','transition',9,7,278,'[Rn] 5f¹⁴6d⁷7s²','?',null,2],
-  [110,'Ds','Darmstadtium','𨭏','transition',10,7,281,'[Rn] 5f¹⁴6d⁸7s²','?',null,2],
+  [110,'Ds','Darmstadtium','𫟼','transition',10,7,281,'[Rn] 5f¹⁴6d⁸7s²','?',null,2],
   [111,'Rg','Roentgenium','𬬭','transition',11,7,282,'[Rn] 5f¹⁴6d⁹7s²','?',null,2],
   [112,'Cn','Copernicium','鿔','transition',12,7,285,'[Rn] 5f¹⁴6d¹⁰7s²','+2',null,2],
   [113,'Nh','Nihonium','鿭','posttransition',13,7,286,'[Rn] 5f¹⁴6d¹⁰7s²7p¹','?',null,2],
@@ -133,21 +133,20 @@ const ELEMENT_TABLE = [
 const ELEMENTS = {};
 ELEMENT_TABLE.forEach(row=>{
   const [Z,sym,en,zh,cat,group,period,mass,cfg,ox,en_,rad]=row;
-  ELEMENTS[Z] = {Z,symbol:sym,name_en:en,name_zh:zh,category:cat,group,period,mass,config:cfg,oxidation:ox,electronegativity:en_,radioactive:rad};
+  const noStandardWeight = Z===43 || Z===61 || (Z>=84 && ![90,91,92].includes(Z));
+  ELEMENTS[Z] = {
+    Z,symbol:sym,name_en:en,name_zh:zh,category:cat,group,period,mass,
+    massDisplay:noStandardWeight ? `[${mass}]` : String(mass),
+    config:cfg,oxidation:ox,electronegativity:en_,
+    radioactivity:PeriodicScience.radioactivityClass(Z, rad)
+  };
 });
 
 /* Compute electron shells from config */
 function shellCounts(z){
-  // Simple shell-filling table (approx aufbau)
-  const cap=[2,8,18,32,32,18,8]; // K,L,M,N,O,P,Q
-  const shells=[0,0,0,0,0,0,0];
-  let rem=z;
-  for(let i=0;i<shells.length && rem>0;i++){
-    const take=Math.min(cap[i],rem);
-    shells[i]=take; rem-=take;
-  }
-  // Correct for transition elements (outer shell keeps 2 or 1 while d fills)
-  return shells;
+  const element = ELEMENTS[z];
+  if (!element) throw new RangeError(`Unknown atomic number: ${z}`);
+  return PeriodicScience.shellCountsFromConfig(element.config);
 }
 
 /* Extended data for detailed elements */
@@ -159,7 +158,7 @@ const EXTENDED = {
        isotopes:[{s:'¹H',ab:'99.98%',stable:true,note:'protium'},{s:'²H',ab:'0.02%',stable:true,note:'deuterium'},{s:'³H',ab:'trace',stable:false,note:'tritium, β⁻, t½=12.3y'}],
        hybrid:['s'],
        reactions:[{eq:'2H₂ + O₂ → 2H₂O',note_en:'combustion',note_zh:'燃烧生成水'},{eq:'N₂ + 3H₂ ⇌ 2NH₃',note_en:'Haber process',note_zh:'哈伯法合成氨'}]},
-  2:  {phase:'gas', melt:0.95, boil:4.22, density:0.000178,
+  2:  {phase:'gas', melt:0.95, meltNote_en:'only above about 2.5 MPa; helium does not freeze at standard pressure', meltNote_zh:'仅在约 2.5 MPa 以上；氦在标准压力下不会凝固', boil:4.22, density:0.000178,
        discovery:{year:1868, who:'Janssen & Lockyer'},
        uses_en:'Balloons, MRI cryogenics, deep-sea breathing mixes, protective atmosphere.',
        uses_zh:'气球、核磁共振低温冷却、深海呼吸混合气、保护气氛。',
@@ -504,37 +503,16 @@ const CATEGORY_USES = {
   }
 };
 
-/* ================ REACTION TEMPLATES BY CATEGORY ================ */
-const CATEGORY_REACTIONS = {
-  alkali: (sym)=>[
-    {eq:`4${sym} + O₂ → 2${sym}₂O`, note_en:'burns in air', note_zh:'在空气中燃烧'},
-    {eq:`2${sym} + 2H₂O → 2${sym}OH + H₂↑`, note_en:'reacts vigorously with water', note_zh:'与水剧烈反应放氢'},
-    {eq:`2${sym} + Cl₂ → 2${sym}Cl`, note_en:'forms ionic salt', note_zh:'生成离子型盐'}
-  ],
-  alkaline: (sym)=>[
-    {eq:`2${sym} + O₂ → 2${sym}O`, note_en:'oxidation on burning', note_zh:'燃烧生成氧化物'},
-    {eq:`${sym} + 2H₂O → ${sym}(OH)₂ + H₂↑`, note_en:'reacts with water', note_zh:'与水反应放氢'}
-  ],
-  halogen: (sym)=>[
-    {eq:`H₂ + ${sym}₂ → 2H${sym}`, note_en:'forms hydrogen halide', note_zh:'生成卤化氢'},
-    {eq:`2Na + ${sym}₂ → 2Na${sym}`, note_en:'ionic salt formation', note_zh:'生成离子型盐'}
-  ],
-  transition: (sym)=>[
-    {eq:`2${sym} + O₂ → 2${sym}O`, note_en:'typical oxidation', note_zh:'典型的氧化反应'}
-  ],
-  posttransition: (sym)=>[
-    {eq:`4${sym} + 3O₂ → 2${sym}₂O₃`, note_en:'oxidation', note_zh:'氧化反应'}
-  ],
-  nonmetal: (sym)=>[
-    {eq:`${sym} + O₂ → ${sym}O₂`, note_en:'combustion', note_zh:'燃烧'}
-  ],
-  metalloid: (sym)=>[
-    {eq:`${sym} + O₂ → ${sym}O₂`, note_en:'oxidation', note_zh:'氧化反应'}
-  ],
-  lanthanide: (sym)=>[
-    {eq:`4${sym} + 3O₂ → 2${sym}₂O₃`, note_en:'typical +3 oxide', note_zh:'典型的 +3 氧化物'}
-  ],
-  actinide: (sym)=>[]
+/* Element-specific, balanced examples only. Unsupported category-wide claims are omitted. */
+const ELEMENT_REACTIONS = {
+  4:[{eq:'2Be + O₂ → 2BeO', note_en:'forms BeO on strong heating; passivated Be does not react with water', note_zh:'强热时生成 BeO；钝化的铍不与水反应'}],
+  5:[{eq:'4B + 3O₂ → 2B₂O₃', note_en:'oxidation on strong heating', note_zh:'强热时氧化'}],
+  12:[{eq:'Mg + H₂O → MgO + H₂↑', note_en:'reaction with steam; cold-water reaction is very slow', note_zh:'与水蒸气反应；与冷水反应极慢'}],
+  15:[{eq:'P₄ + 5O₂ → P₄O₁₀', note_en:'complete combustion in excess oxygen', note_zh:'在过量氧气中完全燃烧'}],
+  21:[{eq:'4Sc + 3O₂ → 2Sc₂O₃', note_en:'oxidation gives scandium(III) oxide', note_zh:'氧化生成三氧化二钪'}],
+  47:[{eq:'2Ag₂O → 4Ag + O₂', note_en:'silver(I) oxide decomposes on heating; silver does not form AgO by simple air oxidation', note_zh:'氧化银受热分解；银在空气中不会直接生成 AgO'}],
+  50:[{eq:'Sn + O₂ → SnO₂', note_en:'oxidation on heating', note_zh:'加热氧化生成二氧化锡'}],
+  82:[{eq:'2Pb + O₂ → 2PbO', note_en:'oxidation on heating', note_zh:'加热氧化生成氧化铅'}]
 };
 
 /* ================ 3D MOLECULAR STRUCTURES ================
@@ -710,10 +688,14 @@ const MOLECULE_3D = {
 
 /* ================ FALLBACK EXTENDED DATA GENERATOR ================ */
 function generateFallbackExt(el){
-  const lang = window.CURRENT_LANG || 'en';
-  // Phase heuristic
   let phase = 'solid';
-  if(['H','N','O','F','Cl','Ar','Ne','He','Kr','Xe','Rn'].includes(el.symbol)) phase='gas';
+  let phaseNote_en = '';
+  let phaseNote_zh = '';
+  if (el.Z >= 104) {
+    phase = 'unknown';
+    phaseNote_en = 'predicted only; bulk phase has not been measured';
+    phaseNote_zh = '仅为理论预测；尚未测得宏观相态';
+  } else if(['H','N','O','F','Cl','Ar','Ne','He','Kr','Xe','Rn'].includes(el.symbol)) phase='gas';
   else if(['Br','Hg'].includes(el.symbol)) phase='liquid';
 
   // Uses fallback per category
@@ -724,19 +706,9 @@ function generateFallbackExt(el){
   const disc = DISCOVERY[el.Z];
   const discovery = disc ? { year: disc[0], who: disc[1] } : null;
 
-  // Isotopes: one representative
-  const massNum = Math.round(el.mass);
-  const isotopes = [{
-    s: `${massNum}${el.symbol}`,
-    ab: el.radioactive===2 ? '—' : '≈100%',
-    stable: el.radioactive===0,
-    note: el.radioactive===0 ? '' : (el.radioactive===1 ? (lang==='zh-CN'?'具有天然放射性':'naturally radioactive') : (lang==='zh-CN'?'人工合成同位素':'artificially synthesized'))
-  }];
+  // Do not synthesize isotope abundances or category-wide chemistry.
+  const isotopes = [];
+  const reactions = ELEMENT_REACTIONS[el.Z] || [];
 
-  // Reactions by category
-  const rxGen = CATEGORY_REACTIONS[el.category];
-  const reactions = (rxGen && el.radioactive!==2) ? rxGen(el.symbol) : [];
-
-  return { phase, uses_en, uses_zh, discovery, isotopes, reactions };
+  return { phase, phaseNote_en, phaseNote_zh, uses_en, uses_zh, discovery, isotopes, reactions };
 }
-

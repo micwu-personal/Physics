@@ -51,7 +51,7 @@ const F_DENSITY = {
 
 /* Melting point (K) */
 const F_MELT = {
-  1:14,2:1,3:454,4:1560,5:2349,6:3823,7:63,8:54,9:53,10:24,
+  1:14,2:null,3:454,4:1560,5:2349,6:3823,7:63,8:54,9:53,10:24,
   11:371,12:923,13:933,14:1687,15:317,16:388,17:172,18:84,
   19:337,20:1115,21:1814,22:1941,23:2183,24:2180,25:1519,26:1811,27:1768,28:1728,29:1358,30:693,
   31:303,32:1211,33:1090,34:494,35:266,36:116,
@@ -79,10 +79,9 @@ const F_ABUNDANCE = {
 for(let z=93; z<=118; z++){ F_ABUNDANCE[z] = 0; }
 
 /* ==================== NUCLEOSYNTHESIS ORIGINS ====================
-   Category of dominant production process for each element.
-   Sources: Cameron 1957, Burbidge² F Hoyle 1957; updated with
-   post-2017 (GW170817) kilonova neutron-star merger observations.
-   Multiple origins possible; primary process listed.
+   Simplified dominant-contribution model. Most elements have multiple,
+   metallicity-dependent production channels; r-process site weights remain
+   model-dependent. See Johnson 2019 and Kobayashi et al. 2020.
 
    Categories:
      bigbang     — H, He, Li (traces)
@@ -91,8 +90,9 @@ for(let z=93; z<=118; z++){ F_ABUNDANCE[z] = 0; }
      largestar   — CNO / hydrostatic burning up through Si (Z ≤ 26)
      supernova   — core-collapse SN yields (mostly Z 8-40, plus r-process contribution)
      dwarf       — type-Ia SN (Fe-peak enrichment, Cr → Zn)
-     merger      — neutron-star merger r-process (heavy: Au, Pt, U, Sr, Nd…)
-     human       — only exists in reactors/accelerators (Tc, Pm, transuranics)
+     mixed       — substantial s- and r-process contributions
+     merger      — r-process; astrophysical site is model-dependent
+     human       — predominantly produced in reactors/accelerators
 ==================================================================== */
 const F_ORIGIN = {
   1:'bigbang', 2:'bigbang',
@@ -106,22 +106,22 @@ const F_ORIGIN = {
   27:'dwarf', 28:'dwarf', 29:'dwarf', 30:'dwarf',
   31:'smallstar', 32:'smallstar', 33:'smallstar', 34:'smallstar',
   35:'smallstar', 36:'smallstar',
-  37:'smallstar', 38:'merger', 39:'smallstar', 40:'smallstar',
+  37:'smallstar', 38:'smallstar', 39:'smallstar', 40:'smallstar',
   41:'smallstar', 42:'smallstar',
-  43:'human',      // Tc — no stable isotope, all artificial or nuclear-reactor
+  43:'human',      // Tc occurs naturally in traces; practical inventory is produced
   44:'smallstar', 45:'smallstar', 46:'smallstar',
-  47:'merger', 48:'smallstar',
-  49:'smallstar', 50:'smallstar', 51:'smallstar', 52:'merger',
-  53:'merger', 54:'merger',
+  47:'mixed', 48:'smallstar',
+  49:'smallstar', 50:'smallstar', 51:'smallstar', 52:'mixed',
+  53:'mixed', 54:'mixed',
   55:'smallstar', 56:'smallstar',
-  57:'merger', 58:'smallstar', 59:'merger', 60:'merger',
-  61:'human',      // Pm — no stable isotope, all artificial
-  62:'merger', 63:'merger', 64:'merger', 65:'merger',
-  66:'merger', 67:'merger', 68:'merger', 69:'merger',
-  70:'merger', 71:'merger',
-  72:'merger', 73:'merger', 74:'merger', 75:'merger',
-  76:'merger', 77:'merger', 78:'merger', 79:'merger',
-  80:'merger', 81:'smallstar', 82:'smallstar', 83:'merger',
+  57:'smallstar', 58:'mixed', 59:'mixed', 60:'mixed',
+  61:'human',      // Pm occurs naturally in traces; practical inventory is produced
+  62:'mixed', 63:'mixed', 64:'mixed', 65:'mixed',
+  66:'mixed', 67:'mixed', 68:'mixed', 69:'mixed',
+  70:'mixed', 71:'mixed',
+  72:'mixed', 73:'mixed', 74:'mixed', 75:'mixed',
+  76:'mixed', 77:'mixed', 78:'merger', 79:'merger',
+  80:'mixed', 81:'smallstar', 82:'smallstar', 83:'smallstar',
   84:'merger', 85:'merger', 86:'merger',
   87:'merger', 88:'merger', 89:'merger', 90:'merger',
   91:'merger', 92:'merger',
@@ -135,13 +135,14 @@ const F_ORIGIN_COLORS = {
   smallstar:'#ff9f43',
   largestar:'#5aff8a',
   dwarf:'#48dbfb',
+  mixed:'#b8a1ff',
   supernova:'#ff6b6b',
   merger:'#ff8ac9',
   human:'#a29bfe',
 };
 const F_ORIGIN_ICON = {
   bigbang:'💥', cosmicray:'☄', smallstar:'⭐',
-  largestar:'🌟', dwarf:'⚫', supernova:'💫',
+  largestar:'🌟', dwarf:'⚫', supernova:'💫', mixed:'✦',
   merger:'🌌', human:'🔬',
 };
 
@@ -150,7 +151,7 @@ const F_ORIGIN_ICON = {
 const F_COSMIC_ERAS = [
   {id:'bigbang',   labelKey:'timeline.era.bigbang', origins:['bigbang']},
   {id:'stars',     labelKey:'timeline.era.stars',   origins:['largestar','cosmicray']},
-  {id:'agb',       labelKey:'timeline.era.agb',     origins:['smallstar']},
+  {id:'agb',       labelKey:'timeline.era.agb',     origins:['smallstar','mixed']},
   {id:'sn',        labelKey:'timeline.era.sn',      origins:['supernova','dwarf']},
   {id:'merger',    labelKey:'timeline.era.merger',  origins:['merger']},
   {id:'solar',     labelKey:'timeline.era.solar',   origins:[]},
@@ -190,7 +191,7 @@ const F_NUCLIDES = [
   [16,16,'S','stable'], [16,17,'S','stable'], [16,18,'S','stable'], [16,19,'B-',7.55e6], [16,20,'S','stable'],
   [17,18,'S','stable'], [17,19,'B-',9.5e12], [17,20,'S','stable'], [17,21,'B-',2237],
   [18,18,'B+',3.02e9], [18,20,'S','stable'], [18,21,'S','stable'], [18,22,'S','stable'],
-  [19,19,'B+','stable'], [19,20,'S','stable'], [19,21,'B-',3.94e16], [19,22,'S','stable'], [19,23,'B-',44450],
+  [19,19,'B+',459.06], [19,20,'S','stable'], [19,21,'B-',3.94e16], [19,22,'S','stable'], [19,23,'B-',44450],
   [20,20,'S','stable'], [20,21,'S','stable'], [20,22,'S','stable'], [20,23,'S','stable'], [20,24,'S','stable'],
   [20,25,'B-',3.92e12], [20,26,'S','stable'], [20,27,'B-',9.4e2], [20,28,'B-',162.7],
   // ---- Sc..Zn ----
@@ -213,8 +214,7 @@ const F_NUCLIDES = [
   [35,44,'S','stable'], [35,46,'S','stable'],
   [36,42,'S','stable'], [36,44,'S','stable'], [36,45,'S','stable'], [36,46,'S','stable'], [36,47,'S','stable'], [36,48,'S','stable'], [36,50,'S','stable'], [36,49,'B-',3.4e13],
   // ---- Sr, Zr, Mo, Tc (all-radioactive), Ru, Pd, Ag, Cd, Sn, Te, I, Xe ----
-  [37,48,'B-',1.5e15],
-  [38,49,'B-',9.09e8],  // Sr-87 stable actually — this is a demo dataset
+  [37,48,'S','stable'], [37,50,'B-',1.5683792209372224e18],
   [38,49,'S','stable'], [38,50,'S','stable'],
   [40,50,'S','stable'], [40,51,'S','stable'], [40,52,'S','stable'], [40,54,'S','stable'],
   [42,50,'S','stable'], [42,52,'S','stable'], [42,53,'S','stable'], [42,54,'S','stable'], [42,55,'S','stable'], [42,56,'S','stable'],
@@ -227,7 +227,7 @@ const F_NUCLIDES = [
   [50,62,'S','stable'], [50,64,'S','stable'], [50,65,'S','stable'], [50,66,'S','stable'], [50,67,'S','stable'], [50,68,'S','stable'], [50,69,'S','stable'], [50,70,'S','stable'], [50,72,'S','stable'], [50,74,'S','stable'],
   [51,70,'S','stable'], [51,72,'S','stable'],
   [52,68,'S','stable'], [52,70,'S','stable'], [52,71,'S','stable'], [52,72,'S','stable'], [52,73,'S','stable'], [52,74,'S','stable'], [52,76,'S','stable'], [52,78,'S','stable'],
-  [53,74,'S','stable'], [53,78,'B-',1.36e15],  // I-131 8 days; I-129 15.7 Myr
+  [53,74,'S','stable'], [53,76,'B-',4.954437378010944e14], [53,78,'B-',693377.28],
   [54,70,'S','stable'], [54,72,'S','stable'], [54,74,'S','stable'], [54,75,'S','stable'], [54,76,'S','stable'], [54,77,'S','stable'], [54,78,'S','stable'], [54,80,'S','stable'], [54,82,'S','stable'],
   // ---- Cs, Ba, La, Ce..Lu (selected) ----
   [55,78,'S','stable'], [55,82,'B-',9.5e8],
@@ -242,16 +242,16 @@ const F_NUCLIDES = [
   // Selected heavy actinides for r-process visualization
   [82,124,'S','stable'], [82,125,'S','stable'], [82,126,'S','stable'],  // Pb-206,-207,-208 doubly magic
   [83,126,'A',6.03e18],  // Bi-209 essentially stable
-  [84,124,'A',1.20e7], [84,126,'A',1.38e-4],
+  [84,124,'A',91451971.47], [84,126,'A',11955686.4],
   [86,136,'A',3.30e5],  // Rn-222 3.8 d
   [88,138,'A',5.05e10], // Ra-226 1600 yr
   [90,142,'A',4.42e17], // Th-232 14 Gyr
-  [92,142,'A',2.22e16], // U-234
+  [92,142,'A',7747225326762.34], // U-234
   [92,143,'A',2.22e16], // U-235 704 Myr
   [92,146,'A',1.41e17], // U-238 4.5 Gyr
   [93,144,'A',6.75e13],
-  [94,145,'A',2.41e12], // Pu-239 24.1 kyr
+  [94,145,'A',760837485247.41], // Pu-239 24.1 kyr
   [95,146,'A',1.36e10], // Am-241 432 yr
-  [96,151,'A',5.02e11], // Cm-247
-  [98,153,'A',2.83e7],  // Cf-251
+  [96,151,'A',492288045203635.2], // Cm-247
+  [98,153,'A',28338119525.18],  // Cf-251
 ];

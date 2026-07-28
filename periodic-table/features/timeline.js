@@ -11,20 +11,28 @@
   // years before the actual discoveries)
   const EKA = {
     31: {eka:'eka-aluminium', predY:1871, actualY:1875, predBy:'Mendeleev', props:{
-      predicted:'atomic mass ~68, density 5.9 g/cm³, low melting point, will be discovered spectroscopically',
-      actual:'atomic mass 69.72, density 5.91 g/cm³, melts at 29.76°C, discovered by Lecoq de Boisbaudran spectroscopically'
+      predicted_en:'atomic mass ~68, density 5.9 g/cm³, low melting point, detectable by spectroscopy',
+      predicted_zh:'原子量约 68、密度 5.9 g/cm³、熔点低，可用光谱法发现',
+      actual_en:'atomic mass 69.72, density 5.91 g/cm³, melts at 29.76°C; found spectroscopically by Lecoq de Boisbaudran',
+      actual_zh:'原子量 69.72、密度 5.91 g/cm³、熔点 29.76°C；布瓦博德朗用光谱法发现'
     }},
     32: {eka:'eka-silicon', predY:1871, actualY:1886, predBy:'Mendeleev', props:{
-      predicted:'atomic mass ~72, density 5.5 g/cm³, dark gray, dioxide density 4.7',
-      actual:'atomic mass 72.63, density 5.32 g/cm³, dark gray, GeO₂ density 4.23 g/cm³'
+      predicted_en:'atomic mass ~72, density 5.5 g/cm³, dark gray, dioxide density 4.7 g/cm³',
+      predicted_zh:'原子量约 72、密度 5.5 g/cm³、暗灰色，二氧化物密度约 4.7 g/cm³',
+      actual_en:'atomic mass 72.63, density 5.32 g/cm³, dark gray, GeO₂ density 4.23 g/cm³',
+      actual_zh:'原子量 72.63、密度 5.32 g/cm³、暗灰色，GeO₂ 密度 4.23 g/cm³'
     }},
     21: {eka:'eka-boron', predY:1871, actualY:1879, predBy:'Mendeleev', props:{
-      predicted:'atomic mass ~44, oxide would be more basic than alumina, hard to isolate',
-      actual:'atomic mass 44.96, oxide Sc₂O₃ is amphoteric leaning basic, discovered by Nilson'
+      predicted_en:'atomic mass ~44; oxide more basic than alumina; difficult to isolate',
+      predicted_zh:'原子量约 44；氧化物碱性强于氧化铝；难以分离',
+      actual_en:'atomic mass 44.96; Sc₂O₃ is amphoteric with basic character; discovered by Nilson',
+      actual_zh:'原子量 44.96；Sc₂O₃ 为偏碱性的两性氧化物；由尼尔松发现'
     }},
     43: {eka:'eka-manganese', predY:1871, actualY:1937, predBy:'Mendeleev', props:{
-      predicted:'similar to manganese; would form heptoxide',
-      actual:'Tc-99 synthesized by Perrier & Segrè from deuteron-bombarded Mo (all isotopes radioactive)'
+      predicted_en:'similar to manganese; expected to form a heptoxide',
+      predicted_zh:'性质类似锰；预计可形成七氧化物',
+      actual_en:'Perrier and Segrè identified element 43 in cyclotron-irradiated molybdenum; every known isotope is radioactive',
+      actual_zh:'佩里埃和塞格雷在回旋加速器辐照过的钼中确认了 43 号元素；其所有已知同位素均有放射性'
     }},
   };
 
@@ -47,6 +55,7 @@
     panel = document.createElement('div');
     panel.className = 'timeline-panel';
     panel.id = 'timelinePanel';
+    panel.dataset.sourceGroup = 'discovery';
     panel.innerHTML = `
       <div class="tl-header">
         <h3 data-i18n="tl.title">Discovery Timeline</h3>
@@ -58,6 +67,8 @@
       </div>
       <div class="tl-info" id="tlInfo"></div>`;
     wrap.parentNode.insertBefore(panel, wrap);
+    const links = PeriodicSources.render('discovery', null, window.CURRENT_LANG, document);
+    if (links) panel.appendChild(links);
 
     sliderEl = panel.querySelector('#tlSlider');
     yearDisplay = panel.querySelector('#tlYear');
@@ -125,8 +136,8 @@
           (window.CURRENT_LANG === 'zh-CN'
             ? '门捷列夫预言 vs 实测:'
             : 'Mendeleev\'s prediction vs. actual:') +
-          `<br>&nbsp;&nbsp;<b>${window.CURRENT_LANG==='zh-CN'?'预言':'predicted'}:</b> ${e.props.predicted}` +
-          `<br>&nbsp;&nbsp;<b>${window.CURRENT_LANG==='zh-CN'?'实测':'actual'}:</b> ${e.props.actual}`;
+          `<br>&nbsp;&nbsp;<b>${window.CURRENT_LANG==='zh-CN'?'预言':'predicted'}:</b> ${e.props[window.CURRENT_LANG==='zh-CN'?'predicted_zh':'predicted_en']}` +
+          `<br>&nbsp;&nbsp;<b>${window.CURRENT_LANG==='zh-CN'?'实测':'actual'}:</b> ${e.props[window.CURRENT_LANG==='zh-CN'?'actual_zh':'actual_en']}`;
       }
     } else {
       const knownCount = Object.keys(ELEMENTS).filter(z => getDiscoveryYear(+z) <= year).length;
@@ -138,6 +149,7 @@
   }
 
   function startPlay(){
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     playing = true;
     playBtn.textContent = t('tl.stop');
     let year = parseInt(sliderEl.value, 10);
@@ -204,6 +216,7 @@
     }
   }
   new MutationObserver(refreshLang).observe(document.documentElement, {attributes:true, attributeFilter:['lang']});
+  document.addEventListener('visibilitychange', ()=>{ if (document.hidden) stopPlay(); });
 
   window.__F2 = { toggle, applyYear };
 

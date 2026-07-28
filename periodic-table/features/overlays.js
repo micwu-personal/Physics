@@ -26,12 +26,15 @@
     const bar = document.createElement('div');
     bar.className = 'view-toolbar';
     bar.id = 'viewToolbar';
+    bar.dataset.sourceGroup = 'overlays';
     bar.innerHTML = `<span class="vt-label" data-i18n="ov.title">View</span>` +
       OVERLAYS.map(o=>{
         const cls = 'view-btn' + (o.id==='default'?' active':'') + (o.special?' special':'');
         return `<button class="${cls}" data-ov="${o.id}" data-i18n="${o.key}">${o.key}</button>`;
-      }).join('');
+      }).join('') + `<span class="vt-caveat" data-i18n="ov.caveat">${t('ov.caveat')}</span>`;
     wrap.parentNode.insertBefore(bar, wrap);
+    const links = PeriodicSources.render('overlays', null, window.CURRENT_LANG, document);
+    if (links) bar.appendChild(links);
 
     const legend = document.createElement('div');
     legend.className = 'view-legend';
