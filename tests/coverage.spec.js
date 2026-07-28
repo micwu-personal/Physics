@@ -808,19 +808,123 @@ test('periodic-table exhaustive component event coverage', async ({ page }) => {
       await page.addInitScript(() => {
         const nativeGetItem = Storage.prototype.getItem;
         Storage.prototype.getItem = function(key) {
-          if (key === 'pz-lang') throw new DOMException('Storage unavailable', 'SecurityError');
+          // A denied origin refuses every key the app boots from.
+          if (key === 'pz-lang' || key === 'pz-motion') {
+            throw new DOMException('Storage unavailable', 'SecurityError');
+          }
           return nativeGetItem.call(this, key);
         };
       });
       await page.goto('/particle-zoo/');
       await page.waitForLoadState('load');
       await page.waitForTimeout(500);
+      // Booting without readable storage still lands on the system motion mode.
+      expect(await page.locator('#motionToggle').getAttribute('data-state')).toBe('playing');
       await page.evaluate(() => {
         Storage.prototype.setItem = () => {
           throw new DOMException('Storage unavailable', 'QuotaExceededError');
         };
+        Storage.prototype.removeItem = () => {
+          throw new DOMException('Storage unavailable', 'SecurityError');
+        };
       });
       await page.locator('.lang-pill[data-lang="zh-CN"]').click();
+      // Toggling still works when the preference cannot be written back.
+      await page.locator('#motionToggle').click();
+      await expect(page.locator('#motionToggle')).toHaveAttribute('data-state', 'paused');
+      await page.locator('#motionToggle').click();
+      await expect(page.locator('#motionToggle')).toHaveAttribute('data-state', 'playing');
+    });
+  });
+
+  for (const [id, requested, stored, expectedState] of [
+    ['play', 'play', 'pause', 'playing'],
+    ['pause', 'pause', null, 'paused'],
+    ['system', 'system', 'pause', 'playing'],
+    ['invalid', 'sideways', 'pause', 'paused']
+  ]) {
+    test(`particle-zoo motion query ${id} coverage`, async ({ page }) => {
+      await collectCoverage(page, `particle-motion-query-${id}`, async () => {
+        await installDeterminism(page);
+        await setLanguage(page, 'en');
+        await blockExternalAssets(page);
+        await page.addInitScript(saved => {
+          try {
+            if (saved) localStorage.setItem('pz-motion', saved);
+            else localStorage.removeItem('pz-motion');
+          } catch {
+            // Opaque origins deny storage; the navigated document seeds it again.
+          }
+        }, stored);
+        await page.goto(`/particle-zoo/?motion=${requested}`);
+        await page.waitForLoadState('load');
+        await expect(page.locator('#motionToggle')).toHaveAttribute('data-state', expectedState);
+        // An accepted override is persisted for the next visit; 'system' clears it.
+        expect(await page.evaluate(() => localStorage.getItem('pz-motion')))
+          .toBe(requested === 'system' ? null : (['play', 'pause'].includes(requested) ? requested : stored));
+        expect(await page.evaluate(() => document.documentElement.dataset.motion)).toBe(expectedState);
+        await page.locator('.tab[data-tab="lab"]').click();
+        await page.locator('#detCanvas').scrollIntoViewIfNeeded();
+        await page.waitForTimeout(220);
+        const frames = await page.evaluate(() => window.PZ_PERF.snapshot().frames.lab);
+        await page.waitForTimeout(260);
+        const advanced = await page.evaluate(() => window.PZ_PERF.snapshot().frames.lab);
+        if (expectedState === 'playing') expect(advanced).toBeGreaterThan(frames);
+        else expect(advanced).toBe(frames);
+      });
+    });
+  }
+
+  test('particle-zoo persisted motion pause coverage', async ({ page }) => {
+    await collectCoverage(page, 'particle-motion-persisted', async () => {
+      await installDeterminism(page);
+      await setLanguage(page, 'zh-CN');
+      await blockExternalAssets(page);
+      await page.addInitScript(() => {
+        try {
+          localStorage.setItem('pz-motion', 'pause');
+        } catch {
+          // Opaque origins deny storage; the navigated document seeds it again.
+        }
+      });
+      await page.goto('/particle-zoo/');
+      await page.waitForLoadState('load');
+      await expect(page.locator('#motionToggle')).toHaveAttribute('data-state', 'paused');
+      await expect(page.locator('#motionToggle')).toContainText('播放动画');
+      expect(await page.locator('#motionToggle').getAttribute('title')).toBe('');
+      // The forces tab renders its interaction tiles statically while paused.
+      await page.locator('.tab[data-tab="forces"]').click();
+      await expect(page.locator('.ix-card svg').first()).toBeVisible();
+      const paintedFrames = await page.evaluate(() => window.PZ_PERF.snapshot().frames.interactions);
+      await page.waitForTimeout(260);
+      expect(await page.evaluate(() => window.PZ_PERF.snapshot().frames.interactions)).toBe(paintedFrames);
+      // Releasing the stored preference falls back to the system setting.
+      await page.locator('#motionToggle').click();
+      await expect(page.locator('#motionToggle')).toHaveAttribute('data-state', 'playing');
+      expect(await page.evaluate(() => localStorage.getItem('pz-motion'))).toBe('play');
+    });
+  });
+
+  test('particle-zoo system motion follows the platform coverage', async ({ page }) => {
+    await collectCoverage(page, 'particle-motion-system', async () => {
+      await installDeterminism(page);
+      await setLanguage(page, 'zh-CN');
+      await blockExternalAssets(page);
+      await page.emulateMedia({ reducedMotion: 'reduce' });
+      await page.goto('/particle-zoo/?motion=system');
+      await page.waitForLoadState('load');
+      await expect(page.locator('#motionToggle')).toHaveAttribute('data-state', 'paused');
+      expect(await page.locator('#motionToggle').getAttribute('title'))
+        .toBe('系统的“减少动态效果”设置已暂停动画。可用此按钮覆盖该设置。');
+      await page.locator('.lang-pill[data-lang="en"]').click();
+      expect(await page.locator('#motionToggle').getAttribute('title'))
+        .toBe('Your system reduced-motion preference is pausing animations. Use this button to override it.');
+      // The platform preference alone drives the control while the mode is 'system'.
+      await page.emulateMedia({ reducedMotion: 'no-preference' });
+      await expect(page.locator('#motionToggle')).toHaveAttribute('data-state', 'playing');
+      expect(await page.locator('#motionToggle').getAttribute('title')).toBe('');
+      await page.emulateMedia({ reducedMotion: 'reduce' });
+      await expect(page.locator('#motionToggle')).toHaveAttribute('data-state', 'paused');
     });
   });
 
