@@ -23,6 +23,34 @@ async function collectCoverage(page, id, run) {
   await writeFile(`test-results/coverage-raw/${id}.json`, `${JSON.stringify(coverage)}\n`);
 }
 
+// Holds macro-tasks scheduled with a zero delay so the staged renderer's chunk
+// queue can be advanced one task at a time. Only the platform timer is paced;
+// no application function is replaced.
+function installTimerPump() {
+  const nativeSetTimeout = window.setTimeout.bind(window);
+  const queue = [];
+  window.__timerQueue = queue;
+  window.setTimeout = (callback, delay, ...args) => {
+    if (!delay) {
+      queue.push(() => callback(...args));
+      return 0;
+    }
+    return nativeSetTimeout(callback, delay, ...args);
+  };
+  window.__pumpTimer = () => {
+    const task = queue.shift();
+    if (task) task();
+    return queue.length;
+  };
+}
+
+const stagedRenderState = () => ({
+  pending: document.querySelectorAll('.render-pending').length,
+  queues: Object.fromEntries([...panelRenderQueues].map(([tab, list]) => [tab, list.length])),
+  staged: [...stagedPanels],
+  tasks: window.__timerQueue.length
+});
+
 // Simulates a platform that exposes the Web Speech API with installed voices;
 // headless Chromium ships the API but never reports a voice.
 function installSpeechVoices(utteranceMs = 5) {
@@ -57,6 +85,20 @@ function installSpeechVoices(utteranceMs = 5) {
 
 async function sweepComponentEvents(page) {
   await page.evaluate(() => {
+    // A synthetic PointerEvent never carries an active pointer id, so the real
+    // setPointerCapture() rejects it. Keep the platform call in place but let it
+    // behave the way it does for a pointer that is no longer down.
+    if (!window.__pointerCaptureRelaxed) {
+      window.__pointerCaptureRelaxed = true;
+      const nativeSetPointerCapture = Element.prototype.setPointerCapture;
+      Element.prototype.setPointerCapture = function(pointerId) {
+        try {
+          return nativeSetPointerCapture.call(this, pointerId);
+        } catch {
+          return undefined;
+        }
+      };
+    }
     const dispatch = (element, type, init = {}) => {
       try {
         const EventClass =
@@ -191,7 +233,9 @@ test('big-bang offscreen observer coverage', async ({ page }) => {
           this.callback = callback;
         }
         observe(target) {
-          this.callback([{ target, isIntersecting: false }]);
+          // Real IntersectionObserver delivers entries in a later task, never
+          // synchronously inside observe().
+          queueMicrotask(() => this.callback([{ target, isIntersecting: false }]));
         }
       };
     });
@@ -680,7 +724,9 @@ test('periodic-table collapsed-panel rendering coverage', async ({ page }) => {
         ];
         const invoke = (fn, args) => {
           try {
-            fn(...args);
+            const result = fn(...args);
+            // Async boundary failures reject instead of throwing; settle them the same way.
+            if (result && typeof result.then === 'function') result.then(() => {}, () => {});
           } catch {
             // Boundary calls intentionally verify direct failure as well as fallbacks.
           }
@@ -805,7 +851,9 @@ test('periodic-table exhaustive component event coverage', async ({ page }) => {
           }
           disconnect() {}
           observe(target) {
-            this.callback([{ target, isIntersecting: false }]);
+            // Real IntersectionObserver delivers entries in a later task, never
+            // synchronously inside observe().
+            queueMicrotask(() => this.callback([{ target, isIntersecting: false }]));
           }
           unobserve() {}
         };
@@ -891,6 +939,201 @@ test('particle-zoo reduced-motion lab coverage', async ({ page }) => {
   });
 });
 
+test('particle-zoo staged rendering coverage', async ({ page }) => {
+  await collectCoverage(page, 'particle-staged-rendering', async () => {
+    await page.addInitScript(installTimerPump);
+    await preparePage(page, '/particle-zoo/', 'en');
+
+    const readState = () => page.evaluate(stagedRenderState);
+    const pump = () => page.evaluate(() => {
+      const before = document.querySelectorAll('.render-pending').length;
+      window.__pumpTimer();
+      return { before, after: document.querySelectorAll('.render-pending').length };
+    });
+
+    // 1. The boot panel is staged: the first chunk paints, the rest wait.
+    const boot = await readState();
+    expect(boot.pending, 'the chart panel is staged at boot').toBeGreaterThan(0);
+    expect(boot.queues.chart, 'the chart queue holds the remaining chunks').toBe(boot.pending);
+    expect(boot.staged).not.toContain('chart');
+    await expect(page.locator('#tab-chart .render-pending').first()).toHaveClass(/render-pending/);
+
+    // 2. Exactly one chunk is revealed per timer task.
+    let steps = 0;
+    while ((await readState()).queues.chart) {
+      const { before, after } = await pump();
+      expect(after, 'each timer task reveals exactly one chunk').toBe(before - 1);
+      steps++;
+    }
+    expect(steps, 'the boot panel needed several chunk tasks').toBeGreaterThan(0);
+    const afterChart = await readState();
+    expect(afterChart.pending).toBe(0);
+    expect(afterChart.staged).toContain('chart');
+
+    // 3. First activation stages the newly shown panel.
+    await page.locator('.tab[data-tab="forces"]').click();
+    const activated = await readState();
+    expect(activated.queues.forces, 'activating a cold panel stages it').toBeGreaterThan(0);
+    await pump();
+
+    // 4. Re-clicking the active tab is a no-op for the queue.
+    const beforeReclick = await readState();
+    await page.locator('.tab[data-tab="forces"]').click();
+    const afterReclick = await readState();
+    expect(afterReclick.queues.forces, 'an active-tab reclick neither restarts nor duplicates the queue')
+      .toBe(beforeReclick.queues.forces);
+    expect(afterReclick.tasks, 'no extra chunk task is scheduled').toBe(beforeReclick.tasks);
+
+    // 5. Switching away mid-queue preserves the remaining chunks.
+    const beforeSwitch = await readState();
+    await page.locator('.tab[data-tab="bsm"]').click();
+    for (let index = 0; index < 3; index++) await pump();
+    const parked = await readState();
+    expect(parked.queues.forces, 'the hidden panel keeps its remaining queue').toBe(beforeSwitch.queues.forces);
+    expect(await page.locator('#tab-forces .render-pending').count()).toBe(beforeSwitch.queues.forces);
+
+    // 6. Returning resumes the queue and completes it.
+    await page.locator('.tab[data-tab="forces"]').click();
+    let guard = 0;
+    while ((await readState()).queues.forces && guard++ < 200) await pump();
+    const finished = await readState();
+    expect(finished.queues.forces, 'the resumed queue drains').toBeUndefined();
+    expect(finished.staged, 'the panel is marked staged once complete').toContain('forces');
+    await expect(page.locator('#tab-forces .render-pending')).toHaveCount(0);
+
+    // 7. A reduced-motion change flushes whatever is still pending.
+    await page.locator('.tab[data-tab="phenomena"]').click();
+    const staging = await readState();
+    expect(staging.queues.phenomena, 'the phenomena panel stages on first view').toBeGreaterThan(0);
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.waitForTimeout(120);
+    const flushed = await readState();
+    expect(flushed.pending, 'reduced motion reveals every pending chunk').toBe(0);
+    expect(Object.keys(flushed.queues), 'reduced motion clears the queues').toEqual([]);
+    expect(flushed.staged).toContain('phenomena');
+    // Reduced motion also short-circuits staging for panels opened afterwards.
+    await page.emulateMedia({ reducedMotion: 'no-preference' });
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.locator('.tab[data-tab="lab"]').click();
+    await expect(page.locator('.render-pending')).toHaveCount(0);
+  });
+});
+
+test('particle-zoo boot fallback coverage', async ({ page }) => {
+  await collectCoverage(page, 'particle-boot-fallback', async () => {
+    await installDeterminism(page);
+    await setLanguage(page, 'en');
+    await blockExternalAssets(page);
+    // A genuinely stalled application script: the inline boot fallback is the
+    // only thing that can reveal the first panel.
+    await page.route('**/particle-zoo/app.js', async route => {
+      await new Promise(resolve => setTimeout(resolve, 3_000));
+      await route.continue();
+    });
+    await page.goto('/particle-zoo/', { waitUntil: 'commit' });
+    await page.waitForSelector('#tab-chart .sm-grid', { state: 'attached' });
+
+    const stalled = await page.evaluate(() => ({
+      booting: document.body.classList.contains('render-booting'),
+      visibility: getComputedStyle(document.querySelector('#tab-chart .sm-grid')).contentVisibility,
+      appLoaded: typeof window.PZ_PERF !== 'undefined'
+    }));
+    expect(stalled.appLoaded, 'the application script is still stalled').toBe(false);
+    expect(stalled.booting, 'the boot class hides the cold panel').toBe(true);
+    expect(stalled.visibility).toBe('hidden');
+
+    await expect
+      .poll(() => page.evaluate(() => document.body.classList.contains('render-booting')), { timeout: 4_000 })
+      .toBe(false);
+    const revealed = await page.evaluate(() => ({
+      visibility: getComputedStyle(document.querySelector('#tab-chart .sm-grid')).contentVisibility,
+      appLoaded: typeof window.PZ_PERF !== 'undefined'
+    }));
+    expect(revealed.visibility, 'the 2 s fallback reveals the panel without the app').toBe('visible');
+    expect(revealed.appLoaded, 'the fallback fired before the script finished').toBe(false);
+    await page.waitForTimeout(1_500);
+  });
+});
+
+test('particle-zoo collapsed-panel and lifecycle coverage', async ({ page }) => {
+  await collectCoverage(page, 'particle-collapsed-lifecycle', async () => {
+    await preparePage(page, '/particle-zoo/', 'en');
+    // Canvas sizing runs while the owning panel is collapsed and has no box.
+    await page.evaluate(() => {
+      resizeBuild();
+      resizeCanvas();
+    });
+
+    // Two annihilation pairs sharing one encounter: the second positron finds
+    // its partner already consumed, so exactly one particle is left behind.
+    await page.locator('.tab[data-tab="playground"]').click();
+    await page.locator('#pgClear').click();
+    await page.evaluate(() => {
+      for (let index = 0; index < 2; index++) {
+        spawn('positron');
+        spawn('electron');
+      }
+      pgParts.forEach((particle, index) => {
+        particle.x = 140 + index * 2;
+        particle.y = 120;
+        particle.vx = 0;
+        particle.vy = 0;
+      });
+    });
+    await expect.poll(() => page.evaluate(() => pgParts.filter(p => p.type !== 'photon').length), { timeout: 10_000 })
+      .toBe(1);
+    expect(await page.evaluate(() => pgParts.filter(p => p.type === 'photon').length))
+      .toBeGreaterThan(1);
+
+    // An input delivered while the tab is hidden restarts the parked lab loop.
+    await page.locator('.tab[data-tab="lab"]').click();
+    await page.evaluate(() => {
+      Object.defineProperty(document, 'hidden', { configurable: true, get: () => true });
+      document.dispatchEvent(new Event('visibilitychange'));
+    });
+    expect(await page.evaluate(() => labRAF)).toBe(null);
+    await page.evaluate(() => {
+      document.getElementById('tab-lab').dispatchEvent(new Event('input', { bubbles: true }));
+    });
+    await page.evaluate(() => {
+      Object.defineProperty(document, 'hidden', { configurable: true, get: () => false });
+      document.dispatchEvent(new Event('visibilitychange'));
+    });
+    await page.waitForTimeout(120);
+  });
+});
+
+test('particle-zoo higgs and confinement travel coverage', async ({ page }) => {
+  await collectCoverage(page, 'particle-lab-travel', async () => {
+    await preparePage(page, '/particle-zoo/', 'en');
+    // A narrow viewport shortens the lattice so an excitation crosses it quickly.
+    await page.setViewportSize({ width: 560, height: 720 });
+    await page.locator('.tab[data-tab="lab"]').click();
+    await page.locator('.lab-subtab[data-lab-sub="basics"]').click();
+    await page.locator('#higgsCanvas').scrollIntoViewIfNeeded();
+    await page.locator('#higgsPicker button').first().click();
+    await expect
+      .poll(() => page.evaluate(() => LAB.higgs.fires.length), { timeout: 20_000 })
+      .toBe(0);
+
+    // Auto-pull drags the antiquark until it reaches the right-hand clamp.
+    await page.locator('#confCanvas').scrollIntoViewIfNeeded();
+    const antiquark = await page.evaluate(() => {
+      const rect = document.getElementById('confCanvas').getBoundingClientRect();
+      return { x: rect.left + LAB.conf.aq.x, y: rect.top + LAB.conf.aq.y, edge: rect.left + LAB.conf.w - 45 };
+    });
+    await page.mouse.move(antiquark.x, antiquark.y);
+    await page.mouse.down();
+    await page.mouse.move(antiquark.edge, antiquark.y, { steps: 4 });
+    await page.mouse.up();
+    await page.locator('#confAuto').check({ force: true });
+    await expect
+      .poll(() => page.evaluate(() => LAB.conf.aq.x >= LAB.conf.w - 40), { timeout: 10_000 })
+      .toBe(true);
+    await page.setViewportSize({ width: 1440, height: 1000 });
+  });
+});
+
 test('particle-zoo deterministic component boundary coverage', async ({ page }) => {
       await collectCoverage(page, 'particle-component-boundaries', async () => {
         await page.addInitScript(() => {
@@ -922,7 +1165,9 @@ test('particle-zoo deterministic component boundary coverage', async ({ page }) 
           ];
           const invoke = (fn, args) => {
             try {
-              fn(...args);
+              const result = fn(...args);
+              // Async boundary failures reject instead of throwing; settle them the same way.
+              if (result && typeof result.then === 'function') result.then(() => {}, () => {});
             } catch {
               // Boundary calls intentionally verify direct failure as well as fallbacks.
             }
@@ -940,8 +1185,6 @@ test('particle-zoo deterministic component boundary coverage', async ({ page }) 
           fixBigBangLink();
           history.replaceState({}, '', '/particle-zoo/');
           fixBigBangLink();
-          // Required markup is a hard dependency.
-          invoke(requireElement, ['definitely-not-in-the-page']);
           // Neutron-rich isotopes such as tritium offer a β⁻ channel; the
           // greedy nucleon assembler cannot lay them out from the tray yet.
           getDecayModes(1, 2, 1);

@@ -514,7 +514,6 @@ const LOCALES = {
     'ix.svg.gw': 'h (classical spacetime strain)',
     // Standard model chart meta
     'sm.meta.massless': 'massless',
-    'sm.meta.color_anticolor': '*color-anticolor',
     'lab.conf.h': '1 · Colour confinement',
     'lab.conf.tag': 'strong force',
     'lab.conf.p': 'A qualitative string-breaking analogy: drag the antiquark away to increase the modeled flux-tube energy until a new q q̄ pair appears. Pixel distances and the displayed energy are illustrative, not a lattice-QCD calculation.',
@@ -1076,7 +1075,6 @@ const LOCALES = {
     'ix.svg.gw': 'h（经典时空应变）',
     // 标准模型元数据
     'sm.meta.massless': '无质量',
-    'sm.meta.color_anticolor': '*色—反色',
     'lab.conf.h': '1 · 色禁闭',
     'lab.conf.tag': '强相互作用',
     'lab.conf.p': '定性的弦断裂类比:拉开反夸克会增加模型中的色通量管能量,直到产生新的 q q̄ 对。像素距离和显示能量仅供说明,不是格点 QCD 计算。',
@@ -1254,64 +1252,68 @@ const PARTICLE_VALUES_I18N = {
 };
 
 /* ================= applyI18n(lang) ================= */
+// Every renderer assumes a locale is installed, so English is the boot default
+// until applyI18n() resolves the stored or browser-preferred language.
+window.CURRENT_LANG = 'en';
+
 // Global translator: usable from any module (canvas draw code, dynamic HTML, etc.)
 function t(key){
-  const lang = window.CURRENT_LANG || 'en';
-  const dict = LOCALES[lang] || LOCALES.en;
-  return (dict && dict[key] != null) ? dict[key] : (LOCALES.en[key] != null ? LOCALES.en[key] : key);
+  const dict = LOCALES[window.CURRENT_LANG];
+  return dict[key] != null ? dict[key] : key;
 }
 
 function applyI18n(lang){
-  const dict = LOCALES[lang] || LOCALES.en;
+  const dict = LOCALES[lang];
   document.documentElement.lang = (lang==='zh-CN' ? 'zh-CN' : 'en');
 
   // Text content
   document.querySelectorAll('[data-i18n]').forEach(el=>{
     const key = el.getAttribute('data-i18n');
-    if(dict[key] !== undefined) el.innerHTML = dict[key];
+    el.innerHTML = dict[key];
   });
   // placeholder
   document.querySelectorAll('[data-i18n-placeholder]').forEach(el=>{
     const key = el.getAttribute('data-i18n-placeholder');
-    if(dict[key] !== undefined) el.setAttribute('placeholder', dict[key]);
+    el.setAttribute('placeholder', dict[key]);
   });
   // title
-  const titleKey = document.querySelector('title')?.getAttribute('data-i18n');
-  if(titleKey && dict[titleKey]) document.title = dict[titleKey];
+  const titleKey = document.querySelector('title').getAttribute('data-i18n');
+  document.title = dict[titleKey];
 
   // active language pill
   document.querySelectorAll('.lang-pill').forEach(b=>{
     b.classList.toggle('active', b.dataset.lang===lang);
   });
 
-  // Rebuild dynamic sections
-  window.CURRENT_LANG = lang;
-  if(typeof renderList==='function') renderList(document.getElementById('pfilter')?.value || '');
-  if(typeof rebuildStandardModelTiles==='function') rebuildStandardModelTiles();
+  // Rebuild dynamic sections. The selected particle is captured first because
+  // renderList() rebuilds the list and drops the active marker.
   const active = document.querySelector('.pl-item.active')?.dataset.id;
-  if(active && typeof showParticle==='function') showParticle(active);
-  if(typeof analyze==='function') analyze();
+  window.CURRENT_LANG = lang;
+  renderList(document.getElementById('pfilter').value);
+  rebuildStandardModelTiles();
+  if(active) showParticle(active);
+  analyze();
   // Physics Lab: rebuild dynamic pickers so their labels get translated too.
-  if(typeof labRebuildDetectorPicker==='function') labRebuildDetectorPicker();
-  if(typeof labRebuildHiggsPicker==='function') labRebuildHiggsPicker();
-  if(typeof labRebuildFeynPicker==='function') labRebuildFeynPicker();
-  if(typeof labRebuildDecayPicker==='function') labRebuildDecayPicker();
-  if(typeof labRebuildOscLegend==='function') labRebuildOscLegend();
-  if(typeof labRebuildPDFLegend==='function') labRebuildPDFLegend();
-  if(typeof labRebuildEVDPicker==='function') labRebuildEVDPicker();
-  if(typeof labRebuildRunLegend==='function') labRebuildRunLegend();
+  labRebuildDetectorPicker();
+  labRebuildHiggsPicker();
+  labRebuildFeynPicker();
+  labRebuildDecayPicker();
+  labRebuildOscLegend();
+  labRebuildPDFLegend();
+  labRebuildEVDPicker();
+  labRebuildRunLegend();
   // Re-render interaction tiles so localizeEq picks the new language.
-  if(typeof refreshInteractionTiles==='function') refreshInteractionTiles();
-  if(typeof refreshContentReferences==='function') refreshContentReferences();
+  refreshInteractionTiles();
+  refreshContentReferences();
   // Fix the Big Bang link based on where we're actually served from.
-  if(typeof fixBigBangLink==='function') fixBigBangLink();
+  fixBigBangLink();
 }
 
 /* Return localized particle data (falls back to English) */
 function getP(id){
   const base = PARTICLES[id];
   if(!base) return null;
-  const lang = window.CURRENT_LANG || 'en';
+  const lang = window.CURRENT_LANG;
   const over = PARTICLES_I18N[lang]?.[id];
   const values = PARTICLE_VALUES_I18N[lang]?.[id];
   return Object.assign({}, base, over || {}, values || {});
@@ -1321,8 +1323,7 @@ const FORCE_I18N = {
   'zh-CN': {'Strong':'强','EM':'电磁','Weak':'弱','Gravity':'引力','Mediates EM':'电磁作用的媒介','Mediates Strong':'强作用的媒介','Mediates Weak':'弱作用的媒介','Couples to mass':'与质量耦合'}
 };
 function tForces(arr){
-  const lang = window.CURRENT_LANG || 'en';
-  const map = FORCE_I18N[lang];
+  const map = FORCE_I18N[window.CURRENT_LANG];
   if(!map) return arr;
-  return arr.map(f=>map[f] || f);
+  return arr.map(f=>map[f]);
 }

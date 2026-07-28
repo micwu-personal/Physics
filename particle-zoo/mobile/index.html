@@ -1889,7 +1889,6 @@ const LOCALES = {
     'ix.svg.gw': 'h (classical spacetime strain)',
     // Standard model chart meta
     'sm.meta.massless': 'massless',
-    'sm.meta.color_anticolor': '*color-anticolor',
     'lab.conf.h': '1 · Colour confinement',
     'lab.conf.tag': 'strong force',
     'lab.conf.p': 'A qualitative string-breaking analogy: drag the antiquark away to increase the modeled flux-tube energy until a new q q̄ pair appears. Pixel distances and the displayed energy are illustrative, not a lattice-QCD calculation.',
@@ -2451,7 +2450,6 @@ const LOCALES = {
     'ix.svg.gw': 'h（经典时空应变）',
     // 标准模型元数据
     'sm.meta.massless': '无质量',
-    'sm.meta.color_anticolor': '*色—反色',
     'lab.conf.h': '1 · 色禁闭',
     'lab.conf.tag': '强相互作用',
     'lab.conf.p': '定性的弦断裂类比:拉开反夸克会增加模型中的色通量管能量,直到产生新的 q q̄ 对。像素距离和显示能量仅供说明,不是格点 QCD 计算。',
@@ -2629,64 +2627,68 @@ const PARTICLE_VALUES_I18N = {
 };
 
 /* ================= applyI18n(lang) ================= */
+// Every renderer assumes a locale is installed, so English is the boot default
+// until applyI18n() resolves the stored or browser-preferred language.
+window.CURRENT_LANG = 'en';
+
 // Global translator: usable from any module (canvas draw code, dynamic HTML, etc.)
 function t(key){
-  const lang = window.CURRENT_LANG || 'en';
-  const dict = LOCALES[lang] || LOCALES.en;
-  return (dict && dict[key] != null) ? dict[key] : (LOCALES.en[key] != null ? LOCALES.en[key] : key);
+  const dict = LOCALES[window.CURRENT_LANG];
+  return dict[key] != null ? dict[key] : key;
 }
 
 function applyI18n(lang){
-  const dict = LOCALES[lang] || LOCALES.en;
+  const dict = LOCALES[lang];
   document.documentElement.lang = (lang==='zh-CN' ? 'zh-CN' : 'en');
 
   // Text content
   document.querySelectorAll('[data-i18n]').forEach(el=>{
     const key = el.getAttribute('data-i18n');
-    if(dict[key] !== undefined) el.innerHTML = dict[key];
+    el.innerHTML = dict[key];
   });
   // placeholder
   document.querySelectorAll('[data-i18n-placeholder]').forEach(el=>{
     const key = el.getAttribute('data-i18n-placeholder');
-    if(dict[key] !== undefined) el.setAttribute('placeholder', dict[key]);
+    el.setAttribute('placeholder', dict[key]);
   });
   // title
-  const titleKey = document.querySelector('title')?.getAttribute('data-i18n');
-  if(titleKey && dict[titleKey]) document.title = dict[titleKey];
+  const titleKey = document.querySelector('title').getAttribute('data-i18n');
+  document.title = dict[titleKey];
 
   // active language pill
   document.querySelectorAll('.lang-pill').forEach(b=>{
     b.classList.toggle('active', b.dataset.lang===lang);
   });
 
-  // Rebuild dynamic sections
-  window.CURRENT_LANG = lang;
-  if(typeof renderList==='function') renderList(document.getElementById('pfilter')?.value || '');
-  if(typeof rebuildStandardModelTiles==='function') rebuildStandardModelTiles();
+  // Rebuild dynamic sections. The selected particle is captured first because
+  // renderList() rebuilds the list and drops the active marker.
   const active = document.querySelector('.pl-item.active')?.dataset.id;
-  if(active && typeof showParticle==='function') showParticle(active);
-  if(typeof analyze==='function') analyze();
+  window.CURRENT_LANG = lang;
+  renderList(document.getElementById('pfilter').value);
+  rebuildStandardModelTiles();
+  if(active) showParticle(active);
+  analyze();
   // Physics Lab: rebuild dynamic pickers so their labels get translated too.
-  if(typeof labRebuildDetectorPicker==='function') labRebuildDetectorPicker();
-  if(typeof labRebuildHiggsPicker==='function') labRebuildHiggsPicker();
-  if(typeof labRebuildFeynPicker==='function') labRebuildFeynPicker();
-  if(typeof labRebuildDecayPicker==='function') labRebuildDecayPicker();
-  if(typeof labRebuildOscLegend==='function') labRebuildOscLegend();
-  if(typeof labRebuildPDFLegend==='function') labRebuildPDFLegend();
-  if(typeof labRebuildEVDPicker==='function') labRebuildEVDPicker();
-  if(typeof labRebuildRunLegend==='function') labRebuildRunLegend();
+  labRebuildDetectorPicker();
+  labRebuildHiggsPicker();
+  labRebuildFeynPicker();
+  labRebuildDecayPicker();
+  labRebuildOscLegend();
+  labRebuildPDFLegend();
+  labRebuildEVDPicker();
+  labRebuildRunLegend();
   // Re-render interaction tiles so localizeEq picks the new language.
-  if(typeof refreshInteractionTiles==='function') refreshInteractionTiles();
-  if(typeof refreshContentReferences==='function') refreshContentReferences();
+  refreshInteractionTiles();
+  refreshContentReferences();
   // Fix the Big Bang link based on where we're actually served from.
-  if(typeof fixBigBangLink==='function') fixBigBangLink();
+  fixBigBangLink();
 }
 
 /* Return localized particle data (falls back to English) */
 function getP(id){
   const base = PARTICLES[id];
   if(!base) return null;
-  const lang = window.CURRENT_LANG || 'en';
+  const lang = window.CURRENT_LANG;
   const over = PARTICLES_I18N[lang]?.[id];
   const values = PARTICLE_VALUES_I18N[lang]?.[id];
   return Object.assign({}, base, over || {}, values || {});
@@ -2696,10 +2698,9 @@ const FORCE_I18N = {
   'zh-CN': {'Strong':'强','EM':'电磁','Weak':'弱','Gravity':'引力','Mediates EM':'电磁作用的媒介','Mediates Strong':'强作用的媒介','Mediates Weak':'弱作用的媒介','Couples to mass':'与质量耦合'}
 };
 function tForces(arr){
-  const lang = window.CURRENT_LANG || 'en';
-  const map = FORCE_I18N[lang];
+  const map = FORCE_I18N[window.CURRENT_LANG];
   if(!map) return arr;
-  return arr.map(f=>map[f] || f);
+  return arr.map(f=>map[f]);
 }
 
 </script>
@@ -2733,13 +2734,22 @@ const PZ_PERF = {
 };
 window.PZ_PERF = PZ_PERF;
 
+function requireElement(id){
+  const element = document.getElementById(id);
+  if(!element) throw new Error(`Missing required element #${id}`);
+  return element;
+}
+
 const reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
 const viewportVisibility = new WeakMap();
 const stagedPanels = new Set();
 const panelRenderQueues = new Map();
+// Declared before the observer that marks it so the callback can never run in
+// its temporal dead zone; particle-zoo/validate.js pins that order.
+let labStaticDirty=true;
 const viewportObserver = 'IntersectionObserver' in window ? new IntersectionObserver(entries=>{
   entries.forEach(entry=>viewportVisibility.set(entry.target, entry.isIntersecting));
-  if(typeof labStaticDirty!=='undefined') labStaticDirty=true;
+  labStaticDirty=true;
   syncAnimationLoops();
 }, {rootMargin:'80px'}) : null;
 
@@ -2768,24 +2778,26 @@ function canAnimate(tab, element){
 }
 function recordDraw(id){ PZ_PERF.draws[id]=(PZ_PERF.draws[id]||0)+1; }
 
+// Panels are revealed one semantic chunk per timer task. Every listed panel is
+// asserted to own at least two chunks by the feature suite.
+const PANEL_CHUNK_SELECTORS = {
+  chart:'.sm-grid,.count-summary,.color-panel',
+  detail:'.pl-item,#pDetail',
+  builder:'.parts-tray,.assembly,.build-out',
+  forces:'.force-card,.ix-card',
+  lab:'.lab-card',
+  bsm:'.bsm-card',
+  phenomena:'.phen-card',
+};
+
 function stagePanelRender(tab){
   if(stagedPanels.has(tab) || reducedMotionQuery.matches) return;
   const panel=document.getElementById(`tab-${tab}`);
-  const selectors={
-    chart:'.sm-grid,.count-summary,.color-panel',
-    detail:'.pl-item,#pDetail',
-    builder:'.parts-tray,.assembly,.build-out',
-    forces:'.force-card,.ix-card',
-    lab:'.lab-card',
-    bsm:'.bsm-card',
-    phenomena:'.phen-card',
-  };
-  const selector=selectors[tab];
+  const selector=PANEL_CHUNK_SELECTORS[tab];
   if(!panel || !selector){ stagedPanels.add(tab); return; }
   let pending=panelRenderQueues.get(tab);
   if(!pending){
     pending=Array.from(panel.querySelectorAll(selector));
-    if(pending.length<2){ stagedPanels.add(tab); return; }
     pending.forEach(element=>element.classList.add('render-pending'));
     panelRenderQueues.set(tab,pending);
   }
@@ -2978,19 +2990,18 @@ function massShort(m){
   return m.replace(/\/c²$/, '').replace(/ MeV/,' MeV').replace(/ GeV/,' GeV').replace(/ eV/,' eV')
           .replace('(massless)', '('+t('sm.meta.massless')+')');
 }
+// Single-letter tile symbols for the standard-model rows, and the labels for
+// the self-conjugate row (both pinned against TILE_GROUPS in validate.js).
+const TILE_SYMBOLS = {up:'u',down:'d',charm:'c',strange:'s',top:'t',bottom:'b',
+                anti_up:'ū',anti_down:'d̄',anti_charm:'c̄',anti_strange:'s̄',anti_top:'t̄',anti_bottom:'b̄',
+                electron:'e',muon:'μ',tau:'τ',
+                nu_e:'ν<sub>e</sub>',nu_mu:'ν<sub>μ</sub>',nu_tau:'ν<sub>τ</sub>',
+                positron:'e⁺',anti_muon:'μ⁺',anti_tau:'τ⁺',
+                anti_nu_e:'ν̄<sub>e</sub>',anti_nu_mu:'ν̄<sub>μ</sub>',anti_nu_tau:'ν̄<sub>τ</sub>',
+                photon:'γ',gluon:'g',wboson:'W±',zboson:'Z⁰',higgs:'H'};
+const SELF_CONJUGATE_META = { photon:'γ = γ̄', zboson:'Z = Z̄', higgs:'H = H̄' };
 function symbolFor(id){
-  // Symbol for the big tile display
-  const p = PARTICLES[id];
-  if(!p) return '';
-  // For chart tiles, keep single-letter form for quarks (u,d,c,s,t,b)
-  const simple = {up:'u',down:'d',charm:'c',strange:'s',top:'t',bottom:'b',
-                  anti_up:'ū',anti_down:'d̄',anti_charm:'c̄',anti_strange:'s̄',anti_top:'t̄',anti_bottom:'b̄',
-                  electron:'e',muon:'μ',tau:'τ',
-                  nu_e:'ν<sub>e</sub>',nu_mu:'ν<sub>μ</sub>',nu_tau:'ν<sub>τ</sub>',
-                  positron:'e⁺',anti_muon:'μ⁺',anti_tau:'τ⁺',
-                  anti_nu_e:'ν̄<sub>e</sub>',anti_nu_mu:'ν̄<sub>μ</sub>',anti_nu_tau:'ν̄<sub>τ</sub>',
-                  photon:'γ',gluon:'g',wboson:'W±',zboson:'Z⁰',higgs:'H'};
-  return simple[id] || p.sym;
+  return TILE_SYMBOLS[id];
 }
 function shortName(id, lang){
   const over = PARTICLES_I18N?.[lang]?.[id];
@@ -3007,13 +3018,12 @@ function shortName(id, lang){
 }
 
 function rebuildStandardModelTiles(){
-  const lang = window.CURRENT_LANG || 'en';
+  const lang = window.CURRENT_LANG;
   Object.entries(TILE_GROUPS).forEach(([group, ids])=>{
     const container = document.querySelector(`[data-tiles="${group}"]`);
-    if(!container) return;
     container.innerHTML = '';
     ids.forEach(id=>{
-      const p = PARTICLES[id]; if(!p) return;
+      const p = PARTICLES[id];
       const tile = document.createElement('div');
       tile.className = 'ptile ' + tileClassFor(id) + (group==='selfanti' ? ' self-a' : '');
       tile.dataset.id = id;
@@ -3021,14 +3031,16 @@ function rebuildStandardModelTiles(){
       const name = shortName(id, lang);
       let meta;
       if(group==='selfanti'){
-        meta = id==='photon' ? 'γ = γ̄' : id==='zboson' ? 'Z = Z̄' : id==='higgs' ? 'H = H̄' : t('sm.meta.color_anticolor');
+        meta = SELF_CONJUGATE_META[id];
       } else {
         meta = `${massShort(p.mass)} · ${chargeShort(p)}`;
       }
       tile.innerHTML = `<div class="p-sym">${sym}</div><div class="p-name">${name}</div><div class="p-meta">${meta}</div>`;
       // year badge
-      const y = shortYear(p.discovered);
-      if(y){ const yb=document.createElement('div'); yb.className='p-year'; yb.textContent=y; tile.appendChild(yb); }
+      const yb=document.createElement('div');
+      yb.className='p-year';
+      yb.textContent=shortYear(p.discovered);
+      tile.appendChild(yb);
       // color dots for quarks/antiquarks
       const cls = tileClassFor(id);
       if(cls==='quark'){
@@ -3074,21 +3086,13 @@ document.querySelectorAll('.tab').forEach(t=>{
   });
 });
 
-/* ================ CHART CLICK -> DETAIL ================ */
-document.querySelectorAll('.ptile').forEach(tile=>{
-  tile.addEventListener('click',()=>{
-    document.querySelector('.tab[data-tab="detail"]').click();
-    showParticle(tile.dataset.id);
-  });
-});
-
 /* ================ DETAIL PANE ================ */
 const pList = document.getElementById('pList');
 const pDetail = document.getElementById('pDetail');
 const pfilter = document.getElementById('pfilter');
 
 function renderList(filter=''){
-  const lang = window.CURRENT_LANG || 'en';
+  const lang = window.CURRENT_LANG;
   pList.innerHTML='';
   Object.entries(PARTICLES).forEach(([id,p])=>{
     const localName = shortName(id, lang);
@@ -3106,9 +3110,6 @@ pfilter.addEventListener('input',e=>renderList(e.target.value));
 
 function showParticle(id){
   const p = getP(id); if(!p) return;
-  const lang = window.CURRENT_LANG || 'en';
-  const dict = LOCALES[lang];
-  const t = (k)=> dict[k] || LOCALES.en[k] || k;
   document.querySelectorAll('.pl-item').forEach(x=>x.classList.toggle('active', x.dataset.id===id));
   const colorMap = {quark:'#ff6b9d',lepton:'#4ea8ff',neutrino:'#7ee8c5',boson:'#ffb547',higgs:'#c77dff'};
   const c = colorMap[p.color];
@@ -3135,7 +3136,7 @@ function showParticle(id){
   let relatedInfo = '';
   if(p.antiparticle && !p.antiparticle.includes('own') && !p.antiparticle.includes('self') && !p.antiparticle.includes('自身')){
     relatedInfo = `<div class="d-section"><h4>${t('detail.section.anti')}</h4><p style="color:#c8cff0;line-height:1.7;font-size:14px">${p.antiparticle}</p></div>`;
-  } else if(p.antiparticle){
+  } else {
     relatedInfo = `<div class="d-section"><h4>${t('detail.section.anti')}</h4><p style="color:#c8cff0;line-height:1.7;font-size:14px"><b>${t('detail.section.anti.self')}</b></p></div>`;
   }
 
@@ -3179,13 +3180,13 @@ function renderContentReferences(tab){
     Object.entries(forceCards).forEach(([selector,id])=>replaceReferences(document.querySelector(selector), refs.force[id]));
   } else if(tab==='bsm'){
     document.querySelectorAll('.bsm-card').forEach(card=>{
-      const key = card.querySelector('h3[data-i18n]')?.dataset.i18n.match(/^bsm\.([^.]+)\.h$/)?.[1];
-      if(key) replaceReferences(card, refs.bsm[key]);
+      const key = card.querySelector('h3[data-i18n]').dataset.i18n.match(/^bsm\.([^.]+)\.h$/)[1];
+      replaceReferences(card, refs.bsm[key]);
     });
   } else if(tab==='phenomena'){
     document.querySelectorAll('.phen-card').forEach(card=>{
-      const key = card.querySelector('h3[data-i18n]')?.dataset.i18n.match(/^phen\.([^.]+)\.h$/)?.[1];
-      if(key) replaceReferences(card, refs.phenomenon[key]);
+      const key = card.querySelector('h3[data-i18n]').dataset.i18n.match(/^phen\.([^.]+)\.h$/)[1];
+      replaceReferences(card, refs.phenomenon[key]);
     });
   } else if(tab==='lab'){
     document.querySelectorAll('.lab-card').forEach(card=>{
@@ -3222,7 +3223,6 @@ let buildLastTimestamp=0;
 
 function resizeBuild(){
   const r = buildCanvas.getBoundingClientRect();
-  if(r.width<1 || r.height<1) return;
   buildCanvas.width = r.width * devicePixelRatio;
   buildCanvas.height = r.height * devicePixelRatio;
   bctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);
@@ -3253,8 +3253,8 @@ buildCanvas.addEventListener('click',e=>{
     if(d<bestD){bestD=d; best=i;}
   });
   if(best>=0){
-    const partIdx = buildViz.particles[best].partIdx;
-    if(partIdx!=null){ parts.splice(partIdx,1); buildComposites(); }
+    parts.splice(buildViz.particles[best].partIdx,1);
+    buildComposites();
   }
 });
 
@@ -3342,9 +3342,8 @@ function buildComposites(){
   // Attach meson metadata + friendly name.
   mesons.forEach(m=>{
     const key = `${baseFlavor(m.q)}|${m.aq}`;
-    const info = MESON_TABLE[key] || MESON_TABLE[`${baseFlavor(m.aq).replace('bar','')}|${m.q}bar`];
-    m.info = info || { sym:`${m.q}${m.aq}`, en:'exotic qq̄', zh:'奇特 qq̄', note:'not in the meson tables' };
-    m.charge = (QUARK_CHARGE[m.q]||0) + (QUARK_CHARGE[m.aq]||0);
+    m.info = MESON_TABLE[key];
+    m.charge = QUARK_CHARGE[m.q] + QUARK_CHARGE[m.aq];
   });
 
   // 2) Remaining bare quarks go to baryon builder (u,d only).
@@ -3425,7 +3424,24 @@ function buildComposites(){
     return { type:tt, x: cx + Math.cos(a)*80 + 220, y: cy + Math.sin(a)*80, free:true };
   });
 
-  buildViz = { nucleons, mesons, electrons, freeQuarks, cx, cy, nucR, atomR, N, e,
+  // 7) Flat hit-test list: every drawn constituent points back at the tray part
+  //    it came from, so clicking the canvas removes exactly one piece.
+  const partIndexPool = {};
+  parts.forEach((flavour, index)=>{
+    partIndexPool[flavour] = partIndexPool[flavour] || [];
+    partIndexPool[flavour].push(index);
+  });
+  const takePartIndex = flavour => partIndexPool[flavour].shift();
+  const particles = [];
+  nucleons.forEach(n=>n.quarkPos.forEach(q=>particles.push({ x:q.x, y:q.y, partIdx: takePartIndex(q.type) })));
+  mesons.forEach(m=>{
+    particles.push({ x:m.qPos.x,  y:m.qPos.y,  partIdx: takePartIndex(m.q) });
+    particles.push({ x:m.aqPos.x, y:m.aqPos.y, partIdx: takePartIndex(m.aq) });
+  });
+  electrons.forEach(el=>particles.push({ x:el.x, y:el.y, partIdx: takePartIndex('e') }));
+  freeQuarks.forEach(q=>particles.push({ x:q.x, y:q.y, partIdx: takePartIndex(q.type) }));
+
+  buildViz = { nucleons, mesons, electrons, freeQuarks, particles, cx, cy, nucR, atomR, N, e,
     u: (counts.u||0), d: (counts.d||0),
     hasNucleus: N>0, hasAtom: N>0 && e>0 };
 
@@ -3457,11 +3473,9 @@ function analyze(){
   // Real charge sum (includes heavy quarks, antiquarks, mesons already in freeQuarks)
   let charge = -e;
   parts.forEach(p=>{ if(p in QUARK_CHARGE) charge += QUARK_CHARGE[p]; });
-  const lang = window.CURRENT_LANG || 'en';
-  const dict = LOCALES[lang];
-  const t = (k)=> dict[k] || LOCALES.en[k] || k;
-  const decayBar = document.getElementById('buildDecayBar');
-  if(decayBar) decayBar.hidden = true;
+  const lang = window.CURRENT_LANG;
+  const decayBar = requireElement('buildDecayBar');
+  decayBar.hidden = true;
 
   if(parts.length===0){
     buildResult.textContent = t('builder.result.empty');
@@ -3514,7 +3528,7 @@ function analyze(){
     name = t('builder.msg.delta'); cls='result success';
   } else if(totalNucleons>0){
     const els = ELEMENT_I18N[lang] || ['','H','He','Li','Be','B','C','N','O','F','Ne','Na','Mg','Al','Si','P','S','Cl','Ar','K','Ca'];
-    const symb = els[protons] || `Z=${protons}`;
+    const symb = els[protons];
     const eLabel = lang==='zh-CN' ? '电子' : 'e⁻';
     const mesonSuffix = mesons.length ? ` + ${mesons.length} ${lang==='zh-CN'?'介子':'meson(s)'}` : '';
     name = `${symb} — ${protons}p + ${neutrons}n${nElectrons?` + ${nElectrons}${eLabel}`:''}${mesonSuffix}`;
@@ -3531,7 +3545,7 @@ function analyze(){
   const chargeVal = Math.round(charge*100)/100;
   buildStats.innerHTML = `
     <div>${t('builder.stats.up')}: <b>${parts.filter(x=>x==='u').length}</b> · ${t('builder.stats.down')}: <b>${parts.filter(x=>x==='d').length}</b> · ${t('builder.stats.electrons')}: <b>${e}</b>${heavyStr?` · <span style="color:#ffd166">${heavyStr}</span>`:''}</div>
-    <div>${t('builder.stats.protons')}: <b>${protons}</b> · ${t('builder.stats.neutrons')}: <b>${neutrons}</b>${deltas?` · ${t('builder.stats.delta')}: <b>${deltas}</b>`:''}${mesons.length?` · <span style="color:#7ee8c5">${t('builder.stats.mesons')||'mesons'}: ${mesons.length}</span>`:''}${freeQuarks.length?` · <span style="color:#ff6b9d">${t('builder.stats.freeq')}: ${freeQuarks.length}</span>`:''}</div>
+    <div>${t('builder.stats.protons')}: <b>${protons}</b> · ${t('builder.stats.neutrons')}: <b>${neutrons}</b>${deltas?` · ${t('builder.stats.delta')}: <b>${deltas}</b>`:''}${mesons.length?` · <span style="color:#7ee8c5">${t('builder.stats.mesons')}: ${mesons.length}</span>`:''}${freeQuarks.length?` · <span style="color:#ff6b9d">${t('builder.stats.freeq')}: ${freeQuarks.length}</span>`:''}</div>
     <div>${t('builder.stats.charge')}: <b>${chargeVal===0?'0':(chargeVal>0?'+':'')+chargeVal} e</b></div>
     <div>${t('builder.stats.parts')}: <b>${parts.length}</b></div>
   `;
@@ -3541,11 +3555,11 @@ function analyze(){
   if(decayBar && decayModes.length){
     decayBar.hidden = false;
     decayBar.innerHTML =
-      `<div class="decay-title">${t('builder.decay.title')||'This isotope is unstable — try a decay'}</div>`+
+      `<div class="decay-title">${t('builder.decay.title')}</div>`+
       `<div class="decay-modes">`+
         decayModes.map(m=>`<button data-mode="${m.id}">${m.label[lang]||m.label.en}</button>`).join('')+
       `</div>`+
-      `<div class="decay-note">${t('builder.decay.note')||'Watch the emitted particle fly out on the canvas.'}</div>`;
+      `<div class="decay-note">${t('builder.decay.note')}</div>`;
     decayBar.querySelectorAll('button').forEach(b=> b.onclick = ()=> triggerDecay(b.dataset.mode));
   }
 }
@@ -3585,7 +3599,7 @@ function drawBuild(){
     bctx.fillStyle='rgba(78,168,255,0.5)';
     bctx.font='11px JetBrains Mono, monospace';
     bctx.textAlign='left';
-    bctx.fillText((LOCALES[window.CURRENT_LANG||'en']||LOCALES.en)['builder.label.shell'], cx-atomR+10, cy-atomR-8);
+    bctx.fillText((LOCALES[window.CURRENT_LANG])['builder.label.shell'], cx-atomR+10, cy-atomR-8);
   }
 
   // Nucleus shell (strong force binding all nucleons)
@@ -3603,7 +3617,7 @@ function drawBuild(){
     bctx.fillStyle='rgba(255,107,157,0.6)';
     bctx.font='11px JetBrains Mono, monospace';
     bctx.textAlign='center';
-    bctx.fillText((LOCALES[window.CURRENT_LANG||'en']||LOCALES.en)['builder.label.nucleus'], cx, cy-R-8);
+    bctx.fillText((LOCALES[window.CURRENT_LANG])['builder.label.nucleus'], cx, cy-R-8);
 
     // draw pion-exchange lines between adjacent nucleons
     for(let i=0;i<nucleons.length;i++){
@@ -3678,11 +3692,11 @@ function drawBuild(){
     bctx.fillStyle='rgba(255,120,120,0.9)';
     bctx.font='10px Space Grotesk, sans-serif';
     bctx.textAlign='center';
-    bctx.fillText((LOCALES[window.CURRENT_LANG||'en']||LOCALES.en)['builder.confine'], fq.x, fq.y+22);
+    bctx.fillText((LOCALES[window.CURRENT_LANG])['builder.confine'], fq.x, fq.y+22);
   });
 
   // Mesons: two quarks joined by a bright gluon string
-  const mesons = buildViz.mesons || [];
+  const mesons = buildViz.mesons;
   mesons.forEach(m=>{
     // soft shell
     const g = bctx.createRadialGradient(m.x,m.y,4, m.x,m.y,m.r+8);
@@ -3920,7 +3934,6 @@ const ctx = canvas.getContext('2d');
 let W=0, H=0;
 function resizeCanvas(){
   const r = canvas.getBoundingClientRect();
-  if(r.width<1 || r.height<1) return;
   canvas.width = r.width * devicePixelRatio;
   canvas.height = r.height * devicePixelRatio;
   ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);
@@ -4242,7 +4255,7 @@ var IX_DEFS = [
       // proton bracket right, neutron bracket left
       s += `<text x="${xL-6}" y="60" text-anchor="end" fill="#8fa" font-size="10">n</text>`;
       s += `<text x="${xR+6}" y="60" text-anchor="start" fill="#8fa" font-size="10">p</text>`;
-      return { svg:s, anim(el,t){ const w=el.querySelector('.ix-w'); if(w) ixDashPhase(w,t*2); } };
+      return { svg:s, anim(el,t){ const w=el.querySelector('.ix-w'); ixDashPhase(w,t*2); } };
     }
   },
 
@@ -4261,8 +4274,8 @@ var IX_DEFS = [
       s += `<text x="${IX_W-IX_PAD_X+2}" y="90" fill="#ffd166" font-size="11" font-family="JetBrains Mono, monospace">γ</text>`;
       return { svg:s, anim(el,t){
         const p1=el.querySelector('.ix-ph1'), p2=el.querySelector('.ix-ph2');
-        if(p1) p1.setAttribute('d', ixWavy(xV,yV,IX_W-IX_PAD_X,25,-t*4));
-        if(p2) p2.setAttribute('d', ixWavy(xV,yV,IX_W-IX_PAD_X,85,-t*4));
+        p1.setAttribute('d', ixWavy(xV,yV,IX_W-IX_PAD_X,25,-t*4));
+        p2.setAttribute('d', ixWavy(xV,yV,IX_W-IX_PAD_X,85,-t*4));
       }};
     }
   },
@@ -4281,7 +4294,7 @@ var IX_DEFS = [
       s += ixArrow(xV,yV,IX_W-IX_PAD_X,85,'#ffd166','e⁺','end',true);
       return { svg:s, anim(el,t){
         const p=el.querySelector('.ix-ph');
-        if(p) p.setAttribute('d', ixWavy(IX_PAD_X,yV,xV,yV,-t*4));
+        p.setAttribute('d', ixWavy(IX_PAD_X,yV,xV,yV,-t*4));
       }};
     }
   },
@@ -4304,7 +4317,7 @@ var IX_DEFS = [
       s += ixVertex(xW,yW,'#7ee8c5');
       s += ixArrow(xW,yW,IX_W-IX_PAD_X,12,'#ffd166','e⁺','end',true);
       s += ixArrow(xW,yW,IX_W-IX_PAD_X,32,'#c8cff0','νₑ','end');
-      return { svg:s, anim(el,t){ const w=el.querySelector('.ix-w'); if(w) ixDashPhase(w,t*2); } };
+      return { svg:s, anim(el,t){ const w=el.querySelector('.ix-w'); ixDashPhase(w,t*2); } };
     }
   },
 
@@ -4326,10 +4339,10 @@ var IX_DEFS = [
       s += `<text x="${xR+2}" y="90" fill="#ffd166" font-size="11" font-family="JetBrains Mono, monospace">γ</text>`;
       const vx=xLoop+28;
       return { svg:s, anim(el,t){
-        const h=el.querySelector('.ix-h'); if(h) ixDashPhase(h,t*2);
+        const h=el.querySelector('.ix-h'); ixDashPhase(h,t*2);
         const p1=el.querySelector('.ix-ph1'), p2=el.querySelector('.ix-ph2');
-        if(p1) p1.setAttribute('d', ixWavy(vx,yC-8,xR,25,-t*4));
-        if(p2) p2.setAttribute('d', ixWavy(vx,yC+8,xR,85,-t*4));
+        p1.setAttribute('d', ixWavy(vx,yC-8,xR,25,-t*4));
+        p2.setAttribute('d', ixWavy(vx,yC+8,xR,85,-t*4));
       }};
     }
   },
@@ -4351,7 +4364,7 @@ var IX_DEFS = [
       s += `<text x="${vT_x+8}" y="${(vT_y+vB_y)/2+4}" fill="#ff6b9d" font-size="11" font-family="JetBrains Mono, monospace">g</text>`;
       return { svg:s, anim(el,t){
         const g=el.querySelector('.ix-g');
-        if(g) g.setAttribute('d', ixCurly(vT_x,vT_y,vB_x,vB_y,t*4));
+        g.setAttribute('d', ixCurly(vT_x,vT_y,vB_x,vB_y,t*4));
       }};
     }
   },
@@ -4373,7 +4386,7 @@ var IX_DEFS = [
       s += `<text x="${vT[0]+8}" y="55" fill="#ff6b9d" font-size="11" font-family="JetBrains Mono, monospace">g</text>`;
       return { svg:s, anim(el,t){
         const g=el.querySelector('.ix-g');
-        if(g) g.setAttribute('d', ixCurly(vT[0],vT[1],vB[0],vB[1],t*4));
+        g.setAttribute('d', ixCurly(vT[0],vT[1],vB[0],vB[1],t*4));
       }};
     }
   },
@@ -4394,7 +4407,7 @@ var IX_DEFS = [
       s += `<text x="${vT[0]+8}" y="55" fill="#ffd166" font-size="11" font-family="JetBrains Mono, monospace">γ</text>`;
       return { svg:s, anim(el,t){
         const p=el.querySelector('.ix-ph');
-        if(p) p.setAttribute('d', ixWavy(vT[0],vT[1],vB[0],vB[1],t*4));
+        p.setAttribute('d', ixWavy(vT[0],vT[1],vB[0],vB[1],t*4));
       }};
     }
   },
@@ -4413,7 +4426,7 @@ var IX_DEFS = [
       s += ixVertex(vT[0],vT[1]); s += ixVertex(vB[0],vB[1]);
       s += `<path class="ix-w" d="M${vT[0]} ${vT[1]} L${vB[0]} ${vB[1]}" stroke="#7ee8c5" stroke-width="1.6" stroke-dasharray="5 3" fill="none"/>`;
       s += `<text x="${vT[0]+8}" y="55" fill="#7ee8c5" font-size="11" font-family="JetBrains Mono, monospace">W⁻</text>`;
-      return { svg:s, anim(el,t){ const w=el.querySelector('.ix-w'); if(w) ixDashPhase(w,t*2); } };
+      return { svg:s, anim(el,t){ const w=el.querySelector('.ix-w'); ixDashPhase(w,t*2); } };
     }
   },
 
@@ -4439,8 +4452,8 @@ var IX_DEFS = [
       s += `<text x="${vT[0]+10}" y="55" fill="#7c5cff" font-size="11" font-family="JetBrains Mono, monospace">G?</text>`;
       return { svg:s, anim(el,t){
         const g1=el.querySelector('.ix-gr1'), g2=el.querySelector('.ix-gr2');
-        if(g1) g1.setAttribute('d', ixWavy(vT[0]-3,vT[1],vB[0]-3,vB[1],t*3,4,4));
-        if(g2) g2.setAttribute('d', ixWavy(vT[0]+3,vT[1],vB[0]+3,vB[1],t*3+Math.PI,4,4));
+        g1.setAttribute('d', ixWavy(vT[0]-3,vT[1],vB[0]-3,vB[1],t*3,4,4));
+        g2.setAttribute('d', ixWavy(vT[0]+3,vT[1],vB[0]+3,vB[1],t*3+Math.PI,4,4));
       }};
     }
   },
@@ -4463,7 +4476,7 @@ var IX_DEFS = [
         const cy=yC+22+Math.random()*20;
         s += `<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="1" fill="#c39bff" opacity="0.35"/>`;
       }
-      return { svg:s, anim(el,t){ const h=el.querySelector('.ix-h'); if(h) ixDashPhase(h,t*2); } };
+      return { svg:s, anim(el,t){ const h=el.querySelector('.ix-h'); ixDashPhase(h,t*2); } };
     }
   },
 
@@ -4485,8 +4498,8 @@ var IX_DEFS = [
       s += `<text x="${xR+2}" y="26" fill="#ffd166" font-size="11" font-family="JetBrains Mono, monospace">γ</text>`;
       return { svg:s, anim(el,t){
         const p1=el.querySelector('.ix-ph1'), p2=el.querySelector('.ix-ph2');
-        if(p1) p1.setAttribute('d', ixWavy(xL,30,v1[0],v1[1],-t*4));
-        if(p2) p2.setAttribute('d', ixWavy(v2[0],v2[1],xR,30,-t*4));
+        p1.setAttribute('d', ixWavy(xL,30,v1[0],v1[1],-t*4));
+        p2.setAttribute('d', ixWavy(v2[0],v2[1],xR,30,-t*4));
       }};
     }
   },
@@ -4507,7 +4520,7 @@ var IX_DEFS = [
       s += `<text x="${vT[0]+8}" y="55" fill="#ffd166" font-size="11" font-family="JetBrains Mono, monospace">γ*</text>`;
       return { svg:s, anim(el,t){
         const p=el.querySelector('.ix-ph');
-        if(p) p.setAttribute('d', ixWavy(vT[0],vT[1],vB[0],vB[1],t*4));
+        p.setAttribute('d', ixWavy(vT[0],vT[1],vB[0],vB[1],t*4));
       }};
     }
   },
@@ -4528,7 +4541,7 @@ var IX_DEFS = [
       s += `<text x="${vT[0]+8}" y="55" fill="#ffd166" font-size="11" font-family="JetBrains Mono, monospace">γ*</text>`;
       return { svg:s, anim(el,t){
         const p=el.querySelector('.ix-ph');
-        if(p) p.setAttribute('d', ixWavy(vT[0],vT[1],vB[0],vB[1],t*4));
+        p.setAttribute('d', ixWavy(vT[0],vT[1],vB[0],vB[1],t*4));
       }};
     }
   },
@@ -4549,7 +4562,7 @@ var IX_DEFS = [
       s += `<text x="${xR+2}" y="28" fill="#ffd166" font-size="11" font-family="JetBrains Mono, monospace">γ</text>`;
       return { svg:s, anim(el,t){
         const p=el.querySelector('.ix-ph');
-        if(p) p.setAttribute('d', ixWavy(xV,yC,xR,25,-t*4));
+        p.setAttribute('d', ixWavy(xV,yC,xR,25,-t*4));
       }};
     }
   },
@@ -4570,7 +4583,7 @@ var IX_DEFS = [
       s += ixVertex(xW,yW,'#7ee8c5');
       s += ixArrow(xW,yW,xR,12,'#ffd166','e⁻','end');
       s += ixArrow(xW,yW,xR,45,'#c8cff0','ν̄ₑ','end',true);
-      return { svg:s, anim(el,t){ const w=el.querySelector('.ix-w'); if(w) ixDashPhase(w,t*2); } };
+      return { svg:s, anim(el,t){ const w=el.querySelector('.ix-w'); ixDashPhase(w,t*2); } };
     }
   },
 
@@ -4590,7 +4603,7 @@ var IX_DEFS = [
       s += ixVertex(xW,yW,'#7ee8c5');
       s += ixArrow(xW,yW,xR,15,'#ffd166','e⁻','end');
       s += ixArrow(xW,yW,xR,45,'#c8cff0','ν̄ₑ','end',true);
-      return { svg:s, anim(el,t){ const w=el.querySelector('.ix-w'); if(w) ixDashPhase(w,t*2); } };
+      return { svg:s, anim(el,t){ const w=el.querySelector('.ix-w'); ixDashPhase(w,t*2); } };
     }
   },
 
@@ -4608,7 +4621,7 @@ var IX_DEFS = [
       s += ixVertex(xV+30,yC,'#7ee8c5');
       s += ixArrow(xV+30,yC,xR,25,'#ffd166','μ⁺','end',true);
       s += ixArrow(xV+30,yC,xR,85,'#c8cff0','νμ','end');
-      return { svg:s, anim(el,t){ const w=el.querySelector('.ix-w'); if(w) ixDashPhase(w,t*2); } };
+      return { svg:s, anim(el,t){ const w=el.querySelector('.ix-w'); ixDashPhase(w,t*2); } };
     }
   },
 
@@ -4632,7 +4645,7 @@ var IX_DEFS = [
       s += `<text x="${vT[0]+8}" y="55" fill="#ffd166" font-size="11" font-family="JetBrains Mono, monospace">γ*</text>`;
       return { svg:s, anim(el,t){
         const p=el.querySelector('.ix-ph');
-        if(p) p.setAttribute('d', ixWavy(vT[0],vT[1],vB[0],vB[1],t*4));
+        p.setAttribute('d', ixWavy(vT[0],vT[1],vB[0],vB[1],t*4));
       }};
     }
   },
@@ -4651,7 +4664,7 @@ var IX_DEFS = [
       s += ixVertex(v1[0],v1[1]); s += ixVertex(v2[0],v2[1]);
       s += ixArrow(v2[0],v2[1],xR,25,'#c8cff0','f','end');
       s += ixArrow(v2[0],v2[1],xR,85,'#c8cff0','f̄','end',true);
-      return { svg:s, anim(el,t){ const w=el.querySelector('.ix-w'); if(w) ixDashPhase(w,t*2); } };
+      return { svg:s, anim(el,t){ const w=el.querySelector('.ix-w'); ixDashPhase(w,t*2); } };
     }
   },
 
@@ -4674,8 +4687,8 @@ var IX_DEFS = [
       s += `<text x="${IX_W/2}" y="${yC-22}" text-anchor="middle" fill="#7c5cff" font-size="11" font-family="JetBrains Mono, monospace">${t('ix.svg.gw')}</text>`;
       return { svg:s, anim(el,t){
         const g1=el.querySelector('.ix-gr1'), g2=el.querySelector('.ix-gr2');
-        if(g1) g1.setAttribute('d', ixWavy(46,yC-2,IX_W-46,yC-2,-t*3,4,5));
-        if(g2) g2.setAttribute('d', ixWavy(46,yC+2,IX_W-46,yC+2,-t*3+Math.PI,4,5));
+        g1.setAttribute('d', ixWavy(46,yC-2,IX_W-46,yC-2,-t*3,4,5));
+        g2.setAttribute('d', ixWavy(46,yC+2,IX_W-46,yC+2,-t*3+Math.PI,4,5));
       }};
     }
   },
@@ -4697,7 +4710,6 @@ function localizeEq(eq){
 const IX_INSTANCES = [];
 let interactionTilesReady=false;
 function buildInteractionTiles(){
-  if(typeof IX_DEFS === 'undefined' || !IX_DEFS) return;
   IX_INSTANCES.length = 0;
   document.querySelectorAll('.ix-anim').forEach(container=>{
     const group = container.dataset.group;
@@ -4706,7 +4718,7 @@ function buildInteractionTiles(){
       const built = def.build();
       const card = document.createElement('div');
       card.className = 'ix-card';
-      const tagLabel = (typeof t==='function' ? t(def.tagKey) : def.tag);
+      const tagLabel = t(def.tagKey);
       card.innerHTML =
         `<div class="ix-head">`+
           `<span class="ix-title" data-i18n="${def.title}">${t(def.title)}</span>`+
@@ -4786,7 +4798,7 @@ function labSizeCanvas(c){
 
 /* ---------- Demo 1: Confinement / flux tube ---------- */
 function labInitConfinement(){
-  const c = document.getElementById('confCanvas'); if(!c) return;
+  const c = requireElement('confCanvas');
   const { ctx, w, h } = labSizeCanvas(c);
   LAB.conf = { ctx, w, h, canvas:c, q:{x:w*0.4,y:h/2}, aq:{x:w*0.6,y:h/2},
                dragging:null, snapPop:0, snapPos:null, snapPair:null, hint:0 };
@@ -4808,7 +4820,7 @@ function labInitConfinement(){
       target.x = Math.max(20, Math.min(LAB.conf.w-20, p.x));
       target.y = Math.max(30, Math.min(LAB.conf.h-30, p.y));
     });
-    window.addEventListener('mouseup', ()=>{ if(LAB.conf) LAB.conf.dragging=null; });
+    window.addEventListener('mouseup', ()=>{ LAB.conf.dragging=null; });
     c.addEventListener('touchstart', e=>{ const r=c.getBoundingClientRect(); const touch=e.touches[0]; LAB.conf.dragging = pick(touch.clientX-r.left, touch.clientY-r.top); e.preventDefault(); }, {passive:false});
     c.addEventListener('touchmove', e=>{
       if(!LAB.conf.dragging) return;
@@ -4818,7 +4830,7 @@ function labInitConfinement(){
       target.y = Math.max(30, Math.min(LAB.conf.h-30, touch.clientY-r.top));
       e.preventDefault();
     }, {passive:false});
-    c.addEventListener('touchend', ()=>{ if(LAB.conf) LAB.conf.dragging=null; });
+    c.addEventListener('touchend', ()=>{ LAB.conf.dragging=null; });
   }
 
   document.getElementById('confReset').onclick = ()=>{
@@ -4829,7 +4841,7 @@ function labInitConfinement(){
   };
 }
 function labDrawConfinement(){
-  const S = LAB.conf; if(!S) return;
+  const S = LAB.conf;
   const { ctx, w, h } = S;
   ctx.clearRect(0,0,w,h);
 
@@ -4920,8 +4932,7 @@ function labDrawConfinement(){
     if(p>=1){
       // reset for next cycle
       setTimeout(()=>{
-        if(!LAB.conf) return;
-        LAB.conf.q  = {x:w*0.4, y:h/2};
+          LAB.conf.q  = {x:w*0.4, y:h/2};
         LAB.conf.aq = {x:w*0.6, y:h/2};
         LAB.conf.snapPos=null; LAB.conf.snapPair=null; LAB.conf.snapPop=0;
       }, 400);
@@ -4981,43 +4992,36 @@ const DET_PARTICLES = {
               desc:'lab.det.desc.jet' },
 };
 function labInitDetector(){
-  const c = document.getElementById('detCanvas'); if(!c) return;
+  const c = requireElement('detCanvas');
   const { ctx, w, h } = labSizeCanvas(c);
   LAB.det = { ctx, w, h, canvas:c, current: (LAB.det && LAB.det.current) || 'electron' };
   labRebuildDetectorPicker();
 }
 function labRebuildDetectorPicker(){
   if(!LAB || !LAB.det) return;
-  const dict = LOCALES[window.CURRENT_LANG||'en'] || LOCALES.en;
-  const t = (k)=> dict[k] || LOCALES.en[k] || k;
-  const picker = document.getElementById('detPicker');
-  if(picker){
-    picker.innerHTML = '';
-    Object.keys(DET_PARTICLES).forEach(k=>{
-      const P = DET_PARTICLES[k];
-      const b = document.createElement('button');
-      b.innerHTML = `<b style="color:${P.color}">${P.label}</b> · ${t(P.role)}`;
-      if(k===LAB.det.current) b.classList.add('active');
-      b.onclick = ()=>{
-        LAB.det.current = k;
-        picker.querySelectorAll('button').forEach(x=>x.classList.remove('active'));
-        b.classList.add('active');
-      };
-      picker.appendChild(b);
-    });
-  }
-  const leg = document.getElementById('detLegend');
-  if(leg){
-    leg.innerHTML = DET_LAYERS.map(L=>
-      `<span class="ll-item"><i class="bar" style="background:${L.ring};color:${L.ring}"></i>${t(L.i18n)}</span>`
-    ).join('');
-  }
+  const dict = LOCALES[window.CURRENT_LANG];
+  const picker = requireElement('detPicker');
+  picker.innerHTML = '';
+  Object.keys(DET_PARTICLES).forEach(k=>{
+    const P = DET_PARTICLES[k];
+    const b = document.createElement('button');
+    b.innerHTML = `<b style="color:${P.color}">${P.label}</b> · ${t(P.role)}`;
+    if(k===LAB.det.current) b.classList.add('active');
+    b.onclick = ()=>{
+      LAB.det.current = k;
+      picker.querySelectorAll('button').forEach(x=>x.classList.remove('active'));
+      b.classList.add('active');
+    };
+    picker.appendChild(b);
+  });
+  const leg = requireElement('detLegend');
+  leg.innerHTML = DET_LAYERS.map(L=>
+    `<span class="ll-item"><i class="bar" style="background:${L.ring};color:${L.ring}"></i>${t(L.i18n)}</span>`
+  ).join('');
 }
 function labDrawDetector(){
-  const S = LAB.det; if(!S) return;
+  const S = LAB.det;
   const { ctx, w, h } = S;
-  const dict = LOCALES[window.CURRENT_LANG||'en'] || LOCALES.en;
-  const t = (k)=> dict[k] || LOCALES.en[k] || k;
   ctx.clearRect(0,0,w,h);
   const cx = w/2, cy = h/2;
   const maxR = Math.max(30, Math.min(w,h)/2 - 12);
@@ -5143,7 +5147,7 @@ function labDrawDetector(){
 
     // ---- MUON CHAMBERS ----
     if(P.muon === 'hit'){
-      const angM = ang + (P.charged ? 0.9 : 0);
+      const angM = ang + 0.9;
       // straight extension of the track (muons barely bend at outer radii due to return field)
       ctx.strokeStyle = P.color; ctx.lineWidth=2;
       ctx.beginPath();
@@ -5213,16 +5217,16 @@ function labDrawDetector(){
 function drawCalCells(ctx, cx, cy, r0, r1, ang, halfWidth, color, kind, colsOverride){
   const cellRad = kind==='had' ? 6 : 5;
   const rows = kind==='mip' ? 1 : 3;
-  const cols = colsOverride != null ? colsOverride : (kind==='mip' ? 2 : (kind==='had' ? 9 : 7));
+  const cols = colsOverride;
   const angSpread = halfWidth*2;
   for(let iRow=0; iRow<rows; iRow++){
     const r = r0 + ((iRow+0.5)/rows)*(r1-r0);
     for(let iCol=0; iCol<cols; iCol++){
       // Intensity — brighter toward the shower centre
-      const centrality = 1 - Math.abs((iCol/(cols-1||1))-0.5)*2;
+      const centrality = 1 - Math.abs((iCol/(cols-1))-0.5)*2;
       const rowFactor = 1 - iRow/rows*0.4;
       const alpha = (kind==='mip' ? 0.4 : 0.35 + centrality*0.55) * rowFactor;
-      const angC = ang - halfWidth + (iCol/(cols-1||1))*angSpread;
+      const angC = ang - halfWidth + (iCol/(cols-1))*angSpread;
       const x = cx + Math.cos(angC)*r;
       const y = cy + Math.sin(angC)*r;
       // cell rectangle rotated to face outward
@@ -5259,7 +5263,7 @@ function wrapText(ctx, text, x, y, maxW, lineH){
       ctx.fillText(line, x, ly); line = w; ly += lineH;
     } else line = test;
   }
-  if(line) ctx.fillText(line, x, ly);
+  ctx.fillText(line, x, ly);
 }
 
 /* ---------- Demo 3: Higgs field lattice ---------- */
@@ -5274,7 +5278,7 @@ const HIGGS_PARTICLES = [
   { id:'top',      sym:'t',   nameKey:'part.top',      role:'lab.higgs.role.top',      color:'#ff5c8a', visual:1.0,  couplingText:'yt≈0.99',     mass:'172.7 GeV',  note:'lab.higgs.note.top' },
 ];
 function labInitHiggs(){
-  const c = document.getElementById('higgsCanvas'); if(!c) return;
+  const c = requireElement('higgsCanvas');
   const { ctx, w, h } = labSizeCanvas(c);
   const keep = (LAB.higgs && LAB.higgs.current) || 'electron';
   LAB.higgs = { ctx, w, h, canvas:c, current:keep, fires:[] };
@@ -5295,8 +5299,7 @@ function labInitHiggs(){
 }
 function labRebuildHiggsPicker(){
   if(!LAB || !LAB.higgs) return;
-  const picker = document.getElementById('higgsPicker');
-  if(!picker) return;
+  const picker = requireElement('higgsPicker');
   picker.innerHTML = '';
   HIGGS_PARTICLES.forEach(P=>{
     const b = document.createElement('button');
@@ -5312,10 +5315,8 @@ function labRebuildHiggsPicker(){
   });
 }
 function labDrawHiggs(){
-  const S = LAB.higgs; if(!S) return;
+  const S = LAB.higgs;
   const { ctx, w, h, sites } = S;
-  const dict = LOCALES[window.CURRENT_LANG||'en'] || LOCALES.en;
-  const t = (k)=> dict[k] || LOCALES.en[k] || k;
   ctx.clearRect(0,0,w,h);
   // dim purple background
   const bg = ctx.createRadialGradient(w/2,h/2,0,w/2,h/2,Math.max(w,h)/1.4);
@@ -5355,7 +5356,7 @@ function labDrawHiggs(){
   ctx.beginPath();
   for(let iy=0;iy<rows;iy++){
     for(let ix=0;ix<cols;ix++){
-      const s = sites[iy*cols+ix]; if(!s) continue;
+      const s = sites[iy*cols+ix];
       const rx = ix<cols-1 ? sites[iy*cols+ix+1] : null;
       const dy2 = iy<rows-1 ? sites[(iy+1)*cols+ix] : null;
       if(rx){ ctx.moveTo(s.x+s.ox, s.y+s.oy); ctx.lineTo(rx.x+rx.ox, rx.y+rx.oy); }
@@ -5403,7 +5404,7 @@ var FEYN_VERTICES = {
   wnc: { color:'#7ee8c5', boson:'Z',      legs:['f','Z','f̄'], ruleKey:'lab.feyn.rule.wnc', label:'g_Z',  nameKey:'lab.feyn.vtx.wnc' },
 };
 function labInitFeyn(){
-  const c = document.getElementById('feynCanvas'); if(!c) return;
+  const c = requireElement('feynCanvas');
   const { ctx, w, h } = labSizeCanvas(c);
   const prev = LAB.feyn || {};
   LAB.feyn = { ctx, w, h, canvas:c, current:prev.current||'qed', vertices:prev.vertices||[], edges:prev.edges||[] };
@@ -5424,10 +5425,10 @@ function labInitFeyn(){
     }
   };
   labRebuildFeynPicker();
-  const clr = document.getElementById('feynClear');
-  if(clr) clr.onclick = ()=>{ LAB.feyn.vertices = []; LAB.feyn.edges = []; };
-  const ex = document.getElementById('feynExample');
-  if(ex) ex.onclick = ()=>{
+  const clr = requireElement('feynClear');
+  clr.onclick = ()=>{ LAB.feyn.vertices = []; LAB.feyn.edges = []; };
+  const ex = requireElement('feynExample');
+  ex.onclick = ()=>{
     // e-e+ → γ → μ-μ+ : two QED vertices connected by a photon propagator
     LAB.feyn.current = 'qed';
     LAB.feyn.vertices = [
@@ -5440,32 +5441,26 @@ function labInitFeyn(){
 }
 function labRebuildFeynPicker(){
   if(!LAB || !LAB.feyn) return;
-  const dict = LOCALES[window.CURRENT_LANG||'en'] || LOCALES.en;
-  const t = (k)=> dict[k] || LOCALES.en[k] || k;
-  const picker = document.getElementById('feynPicker');
-  if(picker){
-    picker.innerHTML = '';
-    Object.keys(FEYN_VERTICES).forEach(k=>{
-      const V = FEYN_VERTICES[k];
-      const b = document.createElement('button');
-      b.innerHTML = `<b style="color:${V.color}">${V.label}</b> · ${t(V.nameKey)}`;
-      if(k===LAB.feyn.current) b.classList.add('active');
-      b.onclick = ()=>{
-        LAB.feyn.current = k;
-        picker.querySelectorAll('button').forEach(x=>x.classList.remove('active'));
-        b.classList.add('active');
-      };
-      picker.appendChild(b);
-    });
-  }
-  const leg = document.getElementById('feynLegend');
-  if(leg){
-    leg.innerHTML = `
-      <span class="ll-item"><i class="bar" style="background:#c8cff0;color:#c8cff0"></i>${t('lab.feyn.legend.fermion')}</span>
-      <span class="ll-item"><i class="bar" style="background:#ffd166;color:#ffd166"></i>${t('lab.feyn.legend.photon')}</span>
-      <span class="ll-item"><i class="bar" style="background:#5aa8ff;color:#5aa8ff"></i>${t('lab.feyn.legend.gluon')}</span>
-      <span class="ll-item"><i class="bar" style="background:#ff6b9d;color:#ff6b9d"></i>${t('lab.feyn.legend.wz')}</span>`;
-  }
+  const picker = requireElement('feynPicker');
+  picker.innerHTML = '';
+  Object.keys(FEYN_VERTICES).forEach(k=>{
+    const V = FEYN_VERTICES[k];
+    const b = document.createElement('button');
+    b.innerHTML = `<b style="color:${V.color}">${V.label}</b> · ${t(V.nameKey)}`;
+    if(k===LAB.feyn.current) b.classList.add('active');
+    b.onclick = ()=>{
+      LAB.feyn.current = k;
+      picker.querySelectorAll('button').forEach(x=>x.classList.remove('active'));
+      b.classList.add('active');
+    };
+    picker.appendChild(b);
+  });
+  const leg = requireElement('feynLegend');
+  leg.innerHTML = `
+    <span class="ll-item"><i class="bar" style="background:#c8cff0;color:#c8cff0"></i>${t('lab.feyn.legend.fermion')}</span>
+    <span class="ll-item"><i class="bar" style="background:#ffd166;color:#ffd166"></i>${t('lab.feyn.legend.photon')}</span>
+    <span class="ll-item"><i class="bar" style="background:#5aa8ff;color:#5aa8ff"></i>${t('lab.feyn.legend.gluon')}</span>
+    <span class="ll-item"><i class="bar" style="background:#ff6b9d;color:#ff6b9d"></i>${t('lab.feyn.legend.wz')}</span>`;
 }
 function drawWavy(ctx, x1,y1,x2,y2, color){
   const dx=x2-x1, dy=y2-y1, L=Math.hypot(dx,dy);
@@ -5519,10 +5514,8 @@ function drawFermionArrow(ctx, x1,y1,x2,y2, color){
   ctx.closePath(); ctx.fill();
 }
 function labDrawFeyn(){
-  const S = LAB.feyn; if(!S) return;
+  const S = LAB.feyn;
   const { ctx, w, h } = S;
-  const dict = LOCALES[window.CURRENT_LANG||'en'] || LOCALES.en;
-  const t = (k)=> dict[k] || LOCALES.en[k] || k;
   ctx.clearRect(0,0,w,h);
   // dim graph paper background
   ctx.strokeStyle='rgba(78,168,255,0.05)'; ctx.lineWidth=1;
@@ -5536,7 +5529,6 @@ function labDrawFeyn(){
   // Boson propagators between vertices
   S.edges.forEach(e=>{
     const A = S.vertices[e.a], B = S.vertices[e.b];
-    if(!A||!B) return;
     if(e.boson==='photon') drawWavy(ctx, A.x,A.y, B.x,B.y, '#ffd166');
     else if(e.boson==='gluon') drawSpiral(ctx, A.x,A.y, B.x,B.y, '#5aa8ff');
     else drawDashed(ctx, A.x,A.y, B.x,B.y, '#ff6b9d');
@@ -5584,30 +5576,28 @@ function pickChannel(name){
   return PhysicsCore.pickDecayChannel(T, Math.random());
 }
 function labInitDecay(){
-  const c = document.getElementById('decayCanvas'); if(!c) return;
+  const c = requireElement('decayCanvas');
   const { ctx, w, h } = labSizeCanvas(c);
   const prev = LAB.decay || {};
   LAB.decay = { ctx, w, h, canvas:c, current: prev.current || 'τ⁻', tree:null, speed:1 };
   labRebuildDecayPicker();
-  const btn = document.getElementById('decayRestart');
-  if(btn) btn.onclick = ()=> labDecayStart();
-  const spd = document.getElementById('decaySpeed');
-  if(spd){ spd.oninput = ()=>{ LAB.decay.speed = parseFloat(spd.value); }; LAB.decay.speed = parseFloat(spd.value)||1; }
-  const leg = document.getElementById('decayLegend');
-  if(leg){
-    const dict = LOCALES[window.CURRENT_LANG||'en']||LOCALES.en;
-    leg.textContent = dict['lab.decay.legend']||'';
-  }
+  const btn = requireElement('decayRestart');
+  btn.onclick = ()=> labDecayStart();
+  const spd = requireElement('decaySpeed');
+  spd.oninput = ()=>{ LAB.decay.speed = parseFloat(spd.value); };
+  LAB.decay.speed = parseFloat(spd.value);
+  const leg = requireElement('decayLegend');
+  const dict = LOCALES[window.CURRENT_LANG];
+  leg.textContent = dict['lab.decay.legend'];
   labDecayStart();
 }
 function labRebuildDecayPicker(){
   if(!LAB || !LAB.decay) return;
-  const picker = document.getElementById('decayPicker');
-  if(!picker) return;
+  const picker = requireElement('decayPicker');
   picker.innerHTML='';
   DECAY_STARTERS.forEach(k=>{
     const b = document.createElement('button');
-    b.innerHTML = `<b style="color:${DECAY_COLORS[k]||'#fff'}">${k}</b>`;
+    b.innerHTML = `<b style="color:${DECAY_COLORS[k]}">${k}</b>`;
     if(k===LAB.decay.current) b.classList.add('active');
     b.onclick = ()=>{
       LAB.decay.current = k;
@@ -5617,20 +5607,17 @@ function labRebuildDecayPicker(){
     };
     picker.appendChild(b);
   });
-  const leg = document.getElementById('decayLegend');
-  if(leg){
-    const dict = LOCALES[window.CURRENT_LANG||'en']||LOCALES.en;
-    leg.textContent = dict['lab.decay.legend']||'';
-  }
+  const leg = requireElement('decayLegend');
+  const dict = LOCALES[window.CURRENT_LANG];
+  leg.textContent = dict['lab.decay.legend'];
 }
 function labDecayStart(){
-  if(!LAB.decay) return;
   // Build the tree eagerly, then reveal nodes progressively during draw.
   const now = performance.now();
   const root = { name: LAB.decay.current, born: now, revealAt: now, parent:null, children:[], depth:0 };
   const buildChildren = (node)=>{
     const T = DECAY_TABLE[node.name]; if(!T) return;
-    const ch = pickChannel(node.name); if(!ch) return;
+    const ch = pickChannel(node.name);
     // reveal delay compressed: log(τ) mapped into [400, 1400] ms
     const logTau = Math.log10(T.tau);
     const compressed = Math.max(300, Math.min(1600, 800 + logTau*80));
@@ -5645,14 +5632,14 @@ function labDecayStart(){
   LAB.decay.startTime = now;
 }
 function labDrawDecay(){
-  const S = LAB.decay; if(!S||!S.tree) return;
+  const S = LAB.decay;
   const { ctx, w, h } = S;
   ctx.clearRect(0,0,w,h);
   ctx.fillStyle='#050815'; ctx.fillRect(0,0,w,h);
 
   // layout: compute max revealed depth so far
   const now = performance.now();
-  const elapsed = (now - S.startTime) * (S.speed||1);
+  const elapsed = (now - S.startTime) * S.speed;
   const virtualNow = S.startTime + elapsed;
 
   // collect visible nodes; assign x by depth, y by in-order-of-siblings across the tree
@@ -5678,7 +5665,6 @@ function labDrawDecay(){
 
   // Edges
   const walkEdges = (n)=>{
-    if(virtualNow < n.revealAt) return;
     n.children.forEach(k=>{
       if(virtualNow >= k.revealAt){
         const dashed = (k.nBody===2);
@@ -5703,7 +5689,7 @@ function labDrawDecay(){
     const g = Math.min(1, age);
     const T = DECAY_TABLE[n.name];
     const stable = !T;
-    const c = DECAY_COLORS[n.name] || '#c8cff0';
+    const c = DECAY_COLORS[n.name];
     // node glow
     const gr = ctx.createRadialGradient(n._x, n._y, 0, n._x, n._y, 22*g);
     gr.addColorStop(0, c); gr.addColorStop(1, 'rgba(0,0,0,0)');
@@ -5717,9 +5703,9 @@ function labDrawDecay(){
     ctx.textBaseline='alphabetic';
     // stability marker
     if(stable){
-      const dict = LOCALES[window.CURRENT_LANG||'en']||LOCALES.en;
+      const dict = LOCALES[window.CURRENT_LANG];
       ctx.fillStyle='#8b93b3'; ctx.font='9px JetBrains Mono, monospace';
-      ctx.fillText(dict['lab.decay.stable']||'(stable)', n._x, n._y+18);
+      ctx.fillText(dict['lab.decay.stable'], n._x, n._y+18);
     }
     n.children.forEach(walkNodes);
   };
@@ -5729,7 +5715,7 @@ function labDrawDecay(){
   ctx.fillStyle='#e8ecff'; ctx.font='bold 13px Space Grotesk, sans-serif';
   ctx.textAlign='left'; ctx.textBaseline='alphabetic';
   const T0 = DECAY_TABLE[S.current];
-  const tau = T0 ? `τ ≈ ${T0.tau.toExponential(1)} s` : '';
+  const tau = `τ ≈ ${T0.tau.toExponential(1)} s`;
   ctx.fillText(`${S.current}  ${tau}`, 12, 20);
 }
 
@@ -5746,7 +5732,7 @@ var OSC = {
   source: 0,     // 0=e, 1=μ, 2=τ
 };
 function labInitOsc(){
-  const c = document.getElementById('oscCanvas'); if(!c) return;
+  const c = requireElement('oscCanvas');
   const { ctx, w, h } = labSizeCanvas(c);
   LAB.osc = { ctx, w, h, canvas:c };
   const ctrls = document.getElementById('oscControls');
@@ -5758,7 +5744,7 @@ function labInitOsc(){
       <div class="lab-slider"><label>θ₁₃ <span id="oscTh13v">${(OSC.th13*180/Math.PI).toFixed(1)}°</span></label><input type="range" id="oscTh13" min="0" max="45" step="0.1" value="${(OSC.th13*180/Math.PI).toFixed(1)}"></div>
       <div class="lab-slider"><label>Δm²₂₁ <span id="oscDm21v">${OSC.dm21.toExponential(1)}</span></label><input type="range" id="oscDm21" min="0.1" max="30" step="0.1" value="${(OSC.dm21*1e5).toFixed(1)}"></div>
       <div class="lab-slider"><label>Δm²₃₁ <span id="oscDm31v">${OSC.dm31.toExponential(1)}</span></label><input type="range" id="oscDm31" min="0.1" max="10" step="0.05" value="${(OSC.dm31*1e3).toFixed(2)}"></div>`;
-    const bind = (id, fn)=>{ const el=document.getElementById(id); if(el) el.oninput=fn; };
+    const bind = (id, fn)=>{ const el=requireElement(id); el.oninput=fn; };
     bind('oscTh12', e=>{ OSC.th12 = parseFloat(e.target.value)*Math.PI/180; document.getElementById('oscTh12v').textContent = parseFloat(e.target.value).toFixed(1)+'°'; });
     bind('oscTh23', e=>{ OSC.th23 = parseFloat(e.target.value)*Math.PI/180; document.getElementById('oscTh23v').textContent = parseFloat(e.target.value).toFixed(1)+'°'; });
     bind('oscTh13', e=>{ OSC.th13 = parseFloat(e.target.value)*Math.PI/180; document.getElementById('oscTh13v').textContent = parseFloat(e.target.value).toFixed(1)+'°'; });
@@ -5768,18 +5754,18 @@ function labInitOsc(){
   labRebuildOscLegend();
 }
 function labRebuildOscLegend(){
-  const leg = document.getElementById('oscLegend'); if(!leg) return;
+  const leg = requireElement('oscLegend');
   if(typeof OSC === 'undefined' || !OSC) return;
-  const dict = LOCALES[window.CURRENT_LANG||'en']||LOCALES.en;
+  const dict = LOCALES[window.CURRENT_LANG];
   const src = ['ν_e','ν_μ','ν_τ'][OSC.source];
   leg.innerHTML = `
     <span class="ll-item"><i class="bar" style="background:#4ea8ff;color:#4ea8ff"></i>P(${src}→ν_e)</span>
     <span class="ll-item"><i class="bar" style="background:#7ee8c5;color:#7ee8c5"></i>P(${src}→ν_μ)</span>
     <span class="ll-item"><i class="bar" style="background:#c39bff;color:#c39bff"></i>P(${src}→ν_τ)</span>
-    <span class="ll-item" style="cursor:pointer" id="oscSrcToggle">🔄 ${dict['lab.osc.source']||'source flavour'}: ${src}</span>
-    <div style="flex-basis:100%;color:#8b93b3;font-size:11px;margin-top:6px">${dict['lab.osc.legend']||''}</div>`;
-  const tog = document.getElementById('oscSrcToggle');
-  if(tog) tog.onclick = ()=>{ OSC.source = (OSC.source+1)%3; labRebuildOscLegend(); };
+    <span class="ll-item" style="cursor:pointer" id="oscSrcToggle">🔄 ${dict['lab.osc.source']}: ${src}</span>
+    <div style="flex-basis:100%;color:#8b93b3;font-size:11px;margin-top:6px">${dict['lab.osc.legend']}</div>`;
+  const tog = requireElement('oscSrcToggle');
+  tog.onclick = ()=>{ OSC.source = (OSC.source+1)%3; labRebuildOscLegend(); };
 }
 // Build PMNS matrix U (3x3, real, ignore CP phase for simplicity)
 function pmns(){
@@ -5807,7 +5793,7 @@ function oscProb(alpha, beta, LoverE){
   return Math.max(0, Math.min(1, P));
 }
 function labDrawOsc(){
-  const S = LAB.osc; if(!S) return;
+  const S = LAB.osc;
   const { ctx, w, h } = S;
   ctx.clearRect(0,0,w,h);
   // axes area
@@ -5869,7 +5855,7 @@ function labDrawOsc(){
 /* ---------- Demo 7: Parton distribution functions ---------- */
 var PDF = { logQ2: 1.0, showGluon: true }; // Q² = 10 GeV² default
 function labInitPDF(){
-  const c = document.getElementById('pdfCanvas'); if(!c) return;
+  const c = requireElement('pdfCanvas');
   const { ctx, w, h } = labSizeCanvas(c);
   LAB.pdf = { ctx, w, h, canvas:c };
   const ctrls = document.getElementById('pdfControls');
@@ -5877,21 +5863,21 @@ function labInitPDF(){
     ctrls.dataset.built='1';
     ctrls.innerHTML = `
       <div class="lab-slider"><label>log₁₀ Q² <span id="pdfQ2v">${PDF.logQ2.toFixed(2)}</span></label><input type="range" id="pdfQ2" min="0" max="4" step="0.05" value="${PDF.logQ2}"></div>
-      <label class="switch"><input type="checkbox" id="pdfShowG" ${PDF.showGluon?'checked':''}><span data-i18n="lab.pdf.showg">show gluon (÷10)</span></label>`;
+      <label class="switch"><input type="checkbox" id="pdfShowG" checked><span data-i18n="lab.pdf.showg">show gluon (÷10)</span></label>`;
     document.getElementById('pdfQ2').oninput = (e)=>{ PDF.logQ2 = parseFloat(e.target.value); document.getElementById('pdfQ2v').textContent = PDF.logQ2.toFixed(2); };
     document.getElementById('pdfShowG').onchange = (e)=>{ PDF.showGluon = e.target.checked; };
   }
   labRebuildPDFLegend();
 }
 function labRebuildPDFLegend(){
-  const leg = document.getElementById('pdfLegend'); if(!leg) return;
-  const dict = LOCALES[window.CURRENT_LANG||'en']||LOCALES.en;
+  const leg = requireElement('pdfLegend');
+  const dict = LOCALES[window.CURRENT_LANG];
   leg.innerHTML = `
     <span class="ll-item"><i class="bar" style="background:#ff6b9d;color:#ff6b9d"></i>${t('lab.pdf.leg.uv')}</span>
     <span class="ll-item"><i class="bar" style="background:#4ea8ff;color:#4ea8ff"></i>${t('lab.pdf.leg.dv')}</span>
     <span class="ll-item"><i class="bar" style="background:#c39bff;color:#c39bff"></i>${t('lab.pdf.leg.sea')}</span>
     <span class="ll-item"><i class="bar" style="background:#ffd166;color:#ffd166"></i>${t('lab.pdf.leg.g')}</span>
-    <div style="flex-basis:100%;color:#8b93b3;font-size:11px;margin-top:6px">${dict['lab.pdf.legend']||''}</div>`;
+    <div style="flex-basis:100%;color:#8b93b3;font-size:11px;margin-top:6px">${dict['lab.pdf.legend']}</div>`;
 }
 // Toy parameterisation. x·f(x) at Q²:
 //   x·u_v = A(Q²) · x^0.5 · (1-x)^3
@@ -5907,7 +5893,7 @@ function pdfXf(name, x, logQ2){
   return 0;
 }
 function labDrawPDF(){
-  const S = LAB.pdf; if(!S) return;
+  const S = LAB.pdf;
   const { ctx, w, h } = S;
   ctx.clearRect(0,0,w,h);
   const padL=52, padR=16, padT=28, padB=32;
@@ -5948,7 +5934,7 @@ function labDrawPDF(){
     for(let px=0; px<=plotW; px++){
       const lx = xMinLog + px/plotW*(xMaxLog-xMinLog);
       const x = Math.pow(10, lx);
-      const v = pdfXf(name, x, PDF.logQ2) / (div||1);
+      const v = pdfXf(name, x, PDF.logQ2) / div;
       const py = yToPx(v);
       if(px===0) ctx.moveTo(padL+px, py); else ctx.lineTo(padL+px, py);
     }
@@ -6019,7 +6005,7 @@ var EVD_EVENTS = {
   ]},
 };
 function labInitEVD(){
-  const c = document.getElementById('evdCanvas'); if(!c) return;
+  const c = requireElement('evdCanvas');
   const { ctx, w, h } = labSizeCanvas(c);
   const prev = LAB.evd || {};
   LAB.evd = {
@@ -6056,22 +6042,19 @@ function labInitEVD(){
       document.getElementById('evdL_'+k).onchange = (e)=>{ LAB.evd.layers[k] = e.target.checked; };
     });
   }
-  const leg = document.getElementById('evdLegend');
-  if(leg){
-    leg.innerHTML = `
-      <span class="ll-item"><i class="dot" style="background:#4ea8ff"></i>e±</span>
-      <span class="ll-item"><i class="dot" style="background:#7ee8c5"></i>μ±</span>
-      <span class="ll-item"><i class="dot" style="background:#ffd166"></i>γ</span>
-      <span class="ll-item"><i class="dot" style="background:#c39bff"></i>${t('lab.det.role.jet')}</span>
-      <span class="ll-item"><i class="dot" style="background:#ff5c8a"></i>b-${t('lab.det.role.jet')}</span>
-      <span class="ll-item"><i class="dot" style="background:#8fa8ff"></i>${t('lab.evd.met')}</span>
-      <div style="flex-basis:100%;color:#8b93b3;font-size:11px;margin-top:6px">${t('lab.evd.hover')}</div>`;
-  }
+  const leg = requireElement('evdLegend');
+  leg.innerHTML = `
+    <span class="ll-item"><i class="dot" style="background:#4ea8ff"></i>e±</span>
+    <span class="ll-item"><i class="dot" style="background:#7ee8c5"></i>μ±</span>
+    <span class="ll-item"><i class="dot" style="background:#ffd166"></i>γ</span>
+    <span class="ll-item"><i class="dot" style="background:#c39bff"></i>${t('lab.det.role.jet')}</span>
+    <span class="ll-item"><i class="dot" style="background:#ff5c8a"></i>b-${t('lab.det.role.jet')}</span>
+    <span class="ll-item"><i class="dot" style="background:#8fa8ff"></i>${t('lab.evd.met')}</span>
+    <div style="flex-basis:100%;color:#8b93b3;font-size:11px;margin-top:6px">${t('lab.evd.hover')}</div>`;
 }
 function labRebuildEVDPicker(){
   if(!LAB || !LAB.evd) return;
-  const picker = document.getElementById('evdPicker');
-  if(!picker) return;
+  const picker = requireElement('evdPicker');
   picker.innerHTML = '';
   Object.keys(EVD_EVENTS).forEach(k=>{
     const E = EVD_EVENTS[k];
@@ -6087,7 +6070,7 @@ function labRebuildEVDPicker(){
   });
 }
 function labDrawEVD(){
-  const S = LAB.evd; if(!S) return;
+  const S = LAB.evd;
   const { ctx, w, h } = S;
   ctx.clearRect(0,0,w,h);
   const cx = w/2, cy = h/2;
@@ -6115,7 +6098,7 @@ function labDrawEVD(){
   const pxOfPT = (pt)=> Math.min(1, pt/100); // heuristic thickness scaler
   let hoveredTrack = null;
   E.tracks.forEach((tr, idx)=>{
-    const pid = EVD_PID[tr.id] || { color:'#fff', shower:'none', muon:false, dashed:false, charged:false };
+    const pid = EVD_PID[tr.id];
     const phi = tr.phi + S.rot;
     // helical curve for charged, straight for neutral
     let x1=cx, y1=cy, x2, y2;
@@ -6141,7 +6124,7 @@ function labDrawEVD(){
     } else {
       ctx.strokeStyle = pid.color;
       ctx.lineWidth = 1.2 + pxOfPT(tr.pT)*2;
-      if(pid.dashed) ctx.setLineDash([4,4]);
+      ctx.setLineDash([4,4]);
       x2 = cx + Math.cos(phi)*rEnd;
       y2 = cy + Math.sin(phi)*rEnd;
       ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(x2, y2); ctx.stroke();
@@ -6158,7 +6141,7 @@ function labDrawEVD(){
     // muon hits
     if(pid.muon && S.layers.muon){
       const rA = 165*scale, rB = 185*scale;
-      const angM = phi + (pid.charged ? 0.12 : 0);
+      const angM = phi + 0.12;
       [rA,rB].forEach(rr=>{
         const hx = cx + Math.cos(angM)*rr, hy = cy + Math.sin(angM)*rr;
         ctx.fillStyle = pid.color;
@@ -6207,10 +6190,10 @@ function labDrawEVD(){
 // Le/Lmu/Ltau=lepton flavour, S=strangeness. Antiparticles flip all signs
 // except S which flips too. Naming follows PDG.
 function labInitCons(){
-  const c = document.getElementById('consCanvas'); if(!c) return;
+  const c = requireElement('consCanvas');
   const { ctx, w, h } = labSizeCanvas(c);
   const prev = LAB.cons || {};
-  LAB.cons = { ctx, w, h, canvas:c, R:prev.R||[], P:prev.P||[], example:prev.example||0 };
+  LAB.cons = { ctx, w, h, canvas:c, R:prev.R||[], P:prev.P||[], example:prev.example||0, _rects:[] };
   // Build controls: palette + reactant/product pads + example dropdown
   const ctrls = document.getElementById('consControls');
   if(ctrls && !ctrls.dataset.built){
@@ -6242,25 +6225,23 @@ function labInitCons(){
     document.getElementById('consClear').onclick = ()=>{ LAB.cons.R=[]; LAB.cons.P=[]; };
     const sel = document.getElementById('consExample');
     sel.innerHTML = CONS_EXAMPLES.map((e,i)=>`<option value="${i}">${e.name}</option>`).join('');
-    sel.onchange = ()=>{ LAB.cons.example = parseInt(sel.value)||0; };
+    sel.onchange = ()=>{ LAB.cons.example = parseInt(sel.value); };
     document.getElementById('consLoadExample').onclick = ()=>{
       const E = CONS_EXAMPLES[LAB.cons.example];
       LAB.cons.R = [...E.reactants]; LAB.cons.P = [...E.products];
     };
   }
-  const leg = document.getElementById('consLegend');
-  if(leg){
-    leg.innerHTML = `
-      <div style="flex-basis:100%;color:#8b93b3;font-size:11px">${t('lab.cons.legend')}</div>
-      <div style="flex-basis:100%;color:#8b93b3;font-size:10px;margin-top:4px">${'Click chip → add. Right-click → remove.'}</div>`;
-  }
+  const leg = requireElement('consLegend');
+  leg.innerHTML = `
+    <div style="flex-basis:100%;color:#8b93b3;font-size:11px">${t('lab.cons.legend')}</div>
+    <div style="flex-basis:100%;color:#8b93b3;font-size:10px;margin-top:4px">${'Click chip → add. Right-click → remove.'}</div>`;
   // Canvas click: also allow clicking on a particle in either pad to remove it
   c.onclick = (ev)=>{
-    const S = LAB.cons; if(!S) return;
+    const S = LAB.cons;
     const r = c.getBoundingClientRect();
     const mx = ev.clientX - r.left, my = ev.clientY - r.top;
     // check both pads
-    S._rects && S._rects.forEach(rect=>{
+    S._rects.forEach(rect=>{
       if(mx>=rect.x && mx<=rect.x+rect.w && my>=rect.y && my<=rect.y+rect.h){
         const arr = rect.side==='R' ? S.R : S.P;
         arr.splice(rect.idx,1);
@@ -6275,7 +6256,7 @@ function classifyProcess(R, P){
   return PhysicsCore.classifyProcess(R, P);
 }
 function labDrawCons(){
-  const S = LAB.cons; if(!S) return;
+  const S = LAB.cons;
   const { ctx, w, h } = S;
   ctx.clearRect(0,0,w,h);
   ctx.fillStyle='#050815'; ctx.fillRect(0,0,w,h);
@@ -6296,9 +6277,8 @@ function labDrawCons(){
     ctx.textAlign='left'; ctx.fillText(t(titleKey), rect.x+8, rect.y-8);
     // draw particles as chips
     const chipH = 24, gap = 6;
-    S._rects = S._rects || [];
     arr.forEach((k, i)=>{
-      const P = CONS_PARTICLES[k]; if(!P) return;
+      const P = CONS_PARTICLES[k];
       const chipW = 10 + ctx.measureText(k).width + 10;
       const cols = Math.max(1, Math.floor((rect.w - 12) / (chipW+gap)));
       const row = Math.floor(i/cols), col = i%cols;
@@ -6376,7 +6356,7 @@ function labDrawCons(){
 // MSSM: b = (33/5,  1,    -3)   above M_SUSY
 var RUN = { mssm:false, mSUSY: 3 };  // log10(M_SUSY/GeV) = 3
 function labInitRun(){
-  const c = document.getElementById('runCanvas'); if(!c) return;
+  const c = requireElement('runCanvas');
   const { ctx, w, h } = labSizeCanvas(c);
   LAB.run = { ctx, w, h, canvas:c };
   const ctrls = document.getElementById('runControls');
@@ -6392,7 +6372,7 @@ function labInitRun(){
   labRebuildRunLegend();
 }
 function labRebuildRunLegend(){
-  const leg = document.getElementById('runLegend'); if(!leg) return;
+  const leg = requireElement('runLegend');
   leg.innerHTML = `
     <span class="ll-item"><i class="bar" style="background:#4ea8ff;color:#4ea8ff"></i>${t('lab.run.show1')}</span>
     <span class="ll-item"><i class="bar" style="background:#7ee8c5;color:#7ee8c5"></i>${t('lab.run.show2')}</span>
@@ -6422,7 +6402,7 @@ function runInvAlpha(i, logMu){
   return invAtMS - (bMSSM[i]/(2*Math.PI)) * (tE - tS);
 }
 function labDrawRun(){
-  const S = LAB.run; if(!S) return;
+  const S = LAB.run;
   const { ctx, w, h } = S;
   ctx.clearRect(0,0,w,h);
   const padL=52, padR=16, padT=28, padB=32;
@@ -6514,11 +6494,11 @@ const LAB_DEMOS = [
 ];
 const initializedLabSubs = new Set();
 const LAB_FRAME_INTERVAL = 1000 / 30;
-let labStaticDirty=true, labLastTimestamp=0;
+let labLastTimestamp=0;
 LAB_DEMOS.forEach(demo=>observeAnimationTarget(document.getElementById(demo.canvas)));
 
 function activeLabSub(){
-  return document.querySelector('.lab-subtab.active')?.dataset.labSub || 'basics';
+  return document.querySelector('.lab-subtab.active').dataset.labSub;
 }
 function initActiveLabDemos(){
   const sub=activeLabSub();
@@ -6542,8 +6522,6 @@ function drawActiveLabDemos(advanceAnimations){
 }
 function labLoop(timestamp){
   if(!tabIsActive('lab') || document.hidden || reducedMotionQuery.matches){ labRAF=null; return; }
-  const hasAnimatedDemo=LAB_DEMOS.some(demo=>demo.sub===activeLabSub() && demo.animated);
-  if(!hasAnimatedDemo && !labStaticDirty){ labRAF=null; return; }
   if(labLastTimestamp && timestamp-labLastTimestamp<LAB_FRAME_INTERVAL){
     labRAF=requestAnimationFrame(labLoop);
     return;
@@ -6553,7 +6531,7 @@ function labLoop(timestamp){
   labT+=dt;
   PZ_PERF.frames.lab++;
   drawActiveLabDemos(true);
-  labRAF=hasAnimatedDemo ? requestAnimationFrame(labLoop) : null;
+  labRAF=requestAnimationFrame(labLoop);
 }
 function labStart(){
   if(labRAF!=null) return;
@@ -6622,7 +6600,7 @@ syncAnimationLoops();
    ../big-bang/index.html works.  When served from particle-zoo/mobile/
    (the built single-file bundle), we need ../../big-bang/index.html. */
 function fixBigBangLink(){
-  const a = document.getElementById('bigBangLink'); if(!a) return;
+  const a = requireElement('bigBangLink');
   const inMobile = /\/mobile\/(?:[^/]*)?$/i.test(location.pathname);
   a.setAttribute('href', inMobile ? '../../big-bang/index.html' : '../big-bang/index.html');
 }

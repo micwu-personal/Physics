@@ -104,6 +104,48 @@ for (const entry of [
   });
 }
 
+test('Particle Zoo stages every cold panel and sizes canvases only when active', async ({ page }) => {
+  await preparePage(page, '/particle-zoo/', 'en');
+  const panels = await page.evaluate(() =>
+    Object.entries(PANEL_CHUNK_SELECTORS).map(([tab, selector]) => ({
+      tab,
+      chunks: document.getElementById(`tab-${tab}`).querySelectorAll(selector).length
+    }))
+  );
+  expect(panels.length, 'the staged panel table is populated').toBeGreaterThan(0);
+  for (const panel of panels) {
+    expect(panel.chunks, `${panel.tab} is worth staging`).toBeGreaterThan(1);
+  }
+
+  // resizeCanvas()/resizeBuild() run only once their panel is active, so they
+  // never observe a zero-sized surface and need no defensive early return.
+  const cold = await page.evaluate(() => {
+    window.dispatchEvent(new Event('resize'));
+    return { playground: W, builder: BW, builderCold: document.querySelector('#tab-builder:not(.active)') !== null };
+  });
+  expect(cold.builderCold, 'the builder panel is cold while the chart is shown').toBe(true);
+  expect(cold.playground, 'a resize while cold never sizes the playground canvas').toBe(0);
+  expect(cold.builder, 'a resize while cold never sizes the builder canvas').toBe(0);
+
+  for (const [tab, id] of [['playground', 'pgCanvas'], ['builder', 'buildCanvas']]) {
+    await page.locator(`.tab[data-tab="${tab}"]`).click();
+    const warm = await page.evaluate(canvasId => {
+      const element = document.getElementById(canvasId);
+      const rect = element.getBoundingClientRect();
+      return {
+        width: rect.width,
+        height: rect.height,
+        tracked: canvasId === 'pgCanvas' ? W : BW,
+        backing: element.width
+      };
+    }, id);
+    expect(warm.width, `${id} has a layout box once its panel is active`).toBeGreaterThan(1);
+    expect(warm.height, `${id} has a layout box once its panel is active`).toBeGreaterThan(1);
+    expect(warm.tracked, `${id} sizing recorded a real width`).toBeGreaterThan(1);
+    expect(warm.backing, `${id} received a real backing store`).toBeGreaterThan(1);
+  }
+});
+
 test('Particle Zoo keeps large paints cached or compositor-only', async ({ page }) => {
   await preparePage(page, '/particle-zoo/', 'en');
   await expect(page.locator('#tab-chart .render-pending')).toHaveCount(0);

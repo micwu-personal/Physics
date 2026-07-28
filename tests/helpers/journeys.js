@@ -669,6 +669,10 @@ export async function exerciseParticleZoo(page) {
     canvas.dispatchEvent(end);
   }, confinementPoints);
   await page.locator('#confReset').click();
+  const touchStart = await page.evaluate(() => {
+    const rect = document.getElementById('confCanvas').getBoundingClientRect();
+    return { quarkX: rect.left + LAB.conf.q.x, quarkY: rect.top + LAB.conf.q.y, edgeX: rect.left + 24 };
+  });
   await page.evaluate(({ quarkX, quarkY, edgeX }) => {
     const canvas = document.getElementById('confCanvas');
     const touchEvent = (type, clientX) => {
@@ -683,7 +687,7 @@ export async function exerciseParticleZoo(page) {
     const end = new Event('touchend', { bubbles: true, cancelable: true });
     Object.defineProperty(end, 'touches', { value: [] });
     canvas.dispatchEvent(end);
-  }, confinementPoints);
+  }, touchStart);
   await page.waitForTimeout(200);
   await page.locator('#confAuto').check({ force: true });
   await page.locator('#confReset').click();

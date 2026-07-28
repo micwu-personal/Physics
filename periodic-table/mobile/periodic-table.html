@@ -4105,19 +4105,21 @@ async function speakSequence(zList, lang){
 }
 document.getElementById('ttsEn').addEventListener('click',(e)=>{
   if(!currentZ) return;
+  const button = e.currentTarget;             // currentTarget is null once dispatch ends
   _rowSpeakId++;                          // cancel any ongoing row-read
   cancelSpeech();
-  e.currentTarget.classList.add('playing');
+  button.classList.add('playing');
   speak(ELEMENTS[currentZ].name_en, 'en-US');
-  setTimeout(()=>e.currentTarget.classList.remove('playing'), 2000);
+  setTimeout(()=>button.classList.remove('playing'), 2000);
 });
 document.getElementById('ttsZh').addEventListener('click',(e)=>{
   if(!currentZ) return;
+  const button = e.currentTarget;
   _rowSpeakId++;
   cancelSpeech();
-  e.currentTarget.classList.add('playing');
+  button.classList.add('playing');
   speak(ELEMENTS[currentZ].name_zh, 'zh-CN');
-  setTimeout(()=>e.currentTarget.classList.remove('playing'), 2000);
+  setTimeout(()=>button.classList.remove('playing'), 2000);
 });
 
 /* ================ 3D MOLECULAR VIEWER ================

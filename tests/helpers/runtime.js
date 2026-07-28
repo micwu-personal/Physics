@@ -56,8 +56,12 @@ export async function installRuntimeProbe(page) {
 
 export async function setLanguage(page, language) {
   await page.addInitScript(lang => {
-    for (const key of ['physics.lang', 'bb-lang', 'pt-lang', 'pz-lang']) {
-      localStorage.setItem(key, lang);
+    try {
+      for (const key of ['physics.lang', 'bb-lang', 'pt-lang', 'pz-lang']) {
+        localStorage.setItem(key, lang);
+      }
+    } catch {
+      // Init scripts also run on opaque origins (about:blank) that deny storage.
     }
   }, language);
 }
