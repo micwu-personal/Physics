@@ -149,6 +149,24 @@ test('Particle Zoo visible simulations animate and honor reduced motion', async 
     .toBeGreaterThan(interactionFrames);
 
   await page.locator('.tab[data-tab="lab"]').click();
+  await page.setViewportSize({ width: 1440, height: 500 });
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await page.waitForTimeout(120);
+  const basicsAreOffscreen = await page.locator('#confCanvas, #detCanvas, #higgsCanvas')
+    .evaluateAll(canvases => canvases.every(canvas =>
+      canvas.getBoundingClientRect().top > innerHeight + 80
+    ));
+  expect(basicsAreOffscreen, 'all animated basics demos should be outside the observer margin').toBe(true);
+  const offscreenBefore = await page.evaluate(() => window.PZ_PERF.snapshot().draws);
+  await page.waitForTimeout(350);
+  const offscreenAfter = await page.evaluate(() => window.PZ_PERF.snapshot().draws);
+  for (const id of ['conf', 'det', 'higgs']) {
+    expect(
+      (offscreenAfter[`lab:${id}`] || 0) - (offscreenBefore[`lab:${id}`] || 0),
+      `${id} should advance while its active Lab subtab is open`
+    ).toBeGreaterThan(0);
+  }
+  await page.setViewportSize({ width: 1440, height: 1000 });
   for (const id of ['confCanvas', 'detCanvas', 'higgsCanvas']) {
     await expectCanvasToAdvance(id);
   }

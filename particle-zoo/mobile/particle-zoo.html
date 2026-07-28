@@ -6513,6 +6513,7 @@ const LAB_DEMOS = [
   {id:'run',canvas:'runCanvas',sub:'advanced',animated:false,init:labInitRun,draw:labDrawRun},
 ];
 const initializedLabSubs = new Set();
+const LAB_FRAME_INTERVAL = 1000 / 30;
 let labStaticDirty=true, labLastTimestamp=0;
 LAB_DEMOS.forEach(demo=>observeAnimationTarget(document.getElementById(demo.canvas)));
 
@@ -6528,24 +6529,25 @@ function initActiveLabDemos(){
 }
 function drawActiveLabDemos(advanceAnimations){
   const sub=activeLabSub();
-  let visibleCount=0;
+  let drawCount=0;
   LAB_DEMOS.filter(demo=>demo.sub===sub).forEach(demo=>{
-    const canvas=document.getElementById(demo.canvas);
-    if(!elementIsVisible(canvas)) return;
-    visibleCount++;
     if((demo.animated && advanceAnimations) || labStaticDirty || reducedMotionQuery.matches){
       demo.draw();
       recordDraw(`lab:${demo.id}`);
+      drawCount++;
     }
   });
   labStaticDirty=false;
-  return visibleCount;
+  return drawCount;
 }
 function labLoop(timestamp){
   if(!tabIsActive('lab') || document.hidden || reducedMotionQuery.matches){ labRAF=null; return; }
-  const visibleDemos=LAB_DEMOS.filter(demo=>demo.sub===activeLabSub() && elementIsVisible(document.getElementById(demo.canvas)));
-  const hasAnimatedDemo=visibleDemos.some(demo=>demo.animated);
-  if(visibleDemos.length===0 || (!hasAnimatedDemo && !labStaticDirty)){ labRAF=null; return; }
+  const hasAnimatedDemo=LAB_DEMOS.some(demo=>demo.sub===activeLabSub() && demo.animated);
+  if(!hasAnimatedDemo && !labStaticDirty){ labRAF=null; return; }
+  if(labLastTimestamp && timestamp-labLastTimestamp<LAB_FRAME_INTERVAL){
+    labRAF=requestAnimationFrame(labLoop);
+    return;
+  }
   const dt=labLastTimestamp ? Math.min(0.05,(timestamp-labLastTimestamp)/1000) : 0.016;
   labLastTimestamp=timestamp;
   labT+=dt;
