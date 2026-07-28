@@ -21,9 +21,14 @@ var BigBangCore = (function(){
   }
 
   function renderReferencePanel(element, sources, label){
-    element.innerHTML = Object.keys(sources)
-      .map(id=>buildReferenceLinks([id], sources, label))
-      .join('');
+    const seenUrls = new Set();
+    const referenceIds = Object.keys(sources).filter(id=>{
+      const url = sources[id].url;
+      if(seenUrls.has(url)) return false;
+      seenUrls.add(url);
+      return true;
+    });
+    element.innerHTML = buildReferenceLinks(referenceIds, sources, label);
   }
 
   function createAnimationController(options){
