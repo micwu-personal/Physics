@@ -2789,11 +2789,11 @@ function stagePanelRender(tab){
     pending.forEach(element=>element.classList.add('render-pending'));
     panelRenderQueues.set(tab,pending);
   }
-  const batchSize=2;
+  const batchSize=1;
   function revealBatch(){
     if(!tabIsActive(tab)) return;
     pending.splice(0,batchSize).forEach(element=>element.classList.remove('render-pending'));
-    if(pending.length) requestAnimationFrame(revealBatch);
+    if(pending.length) setTimeout(revealBatch,0);
     else {
       panelRenderQueues.delete(tab);
       stagedPanels.add(tab);
