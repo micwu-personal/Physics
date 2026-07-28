@@ -38,6 +38,7 @@ function renderTimeline(){
         <ul>${e.events.map(x=>`<li>${x}</li>`).join('')}</ul>
       </div>
       <div class="ep-evidence"><b>${dict['card.evidence']}:</b>${e.evidence}</div>
+      ${buildReferenceLinks(e.refs, SOURCES, dict['refs.label'])}
     `;
     card.onclick = ()=>{
       // Jump to Time Machine at this epoch
@@ -60,7 +61,12 @@ function resizeMachine(){
   mctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);
   MW = r.width; MH = r.height;
 }
-window.addEventListener('resize',()=>{resizeMachine(); updateMachine();});
+window.addEventListener('resize',()=>{
+  if(document.getElementById('tab-machine').classList.contains('active')){
+    resizeMachine();
+    updateMachine();
+  }
+});
 
 /* Interpolate epoch by log-time (seconds since Big Bang) */
 function pickEpoch(tsec){
@@ -93,6 +99,7 @@ function updateMachine(){
   document.getElementById('mpDens').textContent = ep.density;
   document.getElementById('mpDom').textContent = ep.dominant;
   document.getElementById('mpEvent').innerHTML = ep.events.slice(0,2).join('<br>');
+  document.getElementById('mpRefs').innerHTML = buildReferenceLinks(ep.refs, SOURCES, LOCALES[window.CURRENT_LANG || 'en']['refs.label']);
   drawMachine(tsec, ep);
 }
 
@@ -159,9 +166,9 @@ function renderComposition(){
   if(!grid) return;
   const dict = LOCALES[window.CURRENT_LANG||'en']||LOCALES.en;
   const snapshots = [
-    {key:'now',    labelKey:'comp.today',  data: COMPOSITIONS.now},
-    {key:'recomb', labelKey:'comp.recomb', data: COMPOSITIONS.recomb},
-    {key:'nucleo', labelKey:'comp.nucleo', noteKey:'comp.note.nucleo', data: COMPOSITIONS.nucleo}
+    {key:'now',    labelKey:'comp.today',  ...COMPOSITIONS.now},
+    {key:'recomb', labelKey:'comp.recomb', ...COMPOSITIONS.recomb},
+    {key:'nucleo', labelKey:'comp.nucleo', noteKey:'comp.note.nucleo', ...COMPOSITIONS.nucleo}
   ];
   grid.innerHTML = '';
   snapshots.forEach(sn=>{
@@ -179,6 +186,7 @@ function renderComposition(){
         }).join('')}
       </div>
       ${sn.noteKey ? `<p class="comp-note">${dict[sn.noteKey]}</p>` : ''}
+      ${buildReferenceLinks(sn.refs, SOURCES, dict['refs.label'])}
     `;
     grid.appendChild(c);
   });
@@ -211,19 +219,20 @@ function buildPieSvg(data){
 
 /* ================ Scale ================ */
 const SCALE_ROWS = [
-  {t:'10⁻³⁵ s',    tzh:'10⁻³⁵ 秒', size:'illustrative ~10⁻²⁷ m', sizezh:'示意值 ~10⁻²⁷ 米',              frac:0.005, compare:'Model-dependent; ~10¹² times smaller than a proton', comparezh:'依模型而定;比质子小约 10¹² 倍'},
-  {t:'10⁻³² s',    tzh:'10⁻³² 秒', size:'absolute size unknown',  sizezh:'绝对大小未知',                    frac:0.02,  compare:'Inflation requires ≥~10²⁶-fold linear growth', comparezh:'暴胀通常要求线性尺度增长至少约 10²⁶ 倍'},
-  {t:'1 s',        tzh:'1 秒',      size:'~13 ly radius',          sizezh:'半径约 13 光年',                  frac:0.12,  compare:'~25 light-years across', comparezh:'直径约 25 光年'},
-  {t:'3 min',      tzh:'3 分钟',    size:'~127 ly radius',         sizezh:'半径约 127 光年',                 frac:0.18,  compare:'~250 light-years across; BBN under way', comparezh:'直径约 250 光年;原初核合成进行中'},
-  {t:'380,000 yr', tzh:'38 万年',   size:'~42 million ly radius',  sizezh:'半径约 4200 万光年',              frac:0.32,  compare:'CMB released', comparezh:'CMB 光子退耦'},
-  {t:'500 Myr',    tzh:'5 亿年',    size:'~4–5 Gly radius',        sizezh:'半径约 40–50 亿光年',             frac:0.52,  compare:'First stars and galaxies', comparezh:'第一代恒星与早期星系'},
-  {t:'9.2 Gyr',    tzh:'92 亿年',   size:'~33 Gly radius',         sizezh:'半径约 330 亿光年',               frac:0.82,  compare:'Solar System forms', comparezh:'太阳系形成'},
-  {t:'13.8 Gyr',   tzh:'138 亿年',  size:'~46.5 Gly radius',       sizezh:'半径约 465 亿光年',               frac:1.0,   compare:'~93 billion light-years across today', comparezh:'今天直径约 930 亿光年'}
+  {refs:['scales2004','pdgCosmology'], t:'10⁻³⁵ s',    tzh:'10⁻³⁵ 秒', size:'illustrative ~10⁻²⁷ m', sizezh:'示意值 ~10⁻²⁷ 米',              frac:0.005, compare:'Model-dependent; ~10¹² times smaller than a proton', comparezh:'依模型而定;比质子小约 10¹² 倍'},
+  {refs:['planckInflation'], t:'10⁻³² s',    tzh:'10⁻³² 秒', size:'absolute size unknown',  sizezh:'绝对大小未知',                    frac:0.02,  compare:'Inflation requires ≥~10²⁶-fold linear growth', comparezh:'暴胀通常要求线性尺度增长至少约 10²⁶ 倍'},
+  {refs:['scales2004','pdgCosmology'], t:'1 s',        tzh:'1 秒',      size:'~13 ly radius',          sizezh:'半径约 13 光年',                  frac:0.12,  compare:'~25 light-years across', comparezh:'直径约 25 光年'},
+  {refs:['scales2004','pdgCosmology'], t:'3 min',      tzh:'3 分钟',    size:'~127 ly radius',         sizezh:'半径约 127 光年',                 frac:0.18,  compare:'~250 light-years across; BBN under way', comparezh:'直径约 250 光年;原初核合成进行中'},
+  {refs:['scales2004','planck2018'], t:'380,000 yr', tzh:'38 万年',   size:'~42 million ly radius',  sizezh:'半径约 4200 万光年',              frac:0.32,  compare:'CMB released', comparezh:'CMB 光子退耦'},
+  {refs:['scales2004','firstStars2023'], t:'500 Myr',    tzh:'5 亿年',    size:'~4–5 Gly radius',        sizezh:'半径约 40–50 亿光年',             frac:0.52,  compare:'First stars and galaxies', comparezh:'第一代恒星与早期星系'},
+  {refs:['scales2004','planck2018'], t:'9.2 Gyr',    tzh:'92 亿年',   size:'~33 Gly radius',         sizezh:'半径约 330 亿光年',               frac:0.82,  compare:'Solar System forms', comparezh:'太阳系形成'},
+  {refs:['scales2004','planck2018'], t:'13.8 Gyr',   tzh:'138 亿年',  size:'~46.5 Gly radius',       sizezh:'半径约 465 亿光年',               frac:1.0,   compare:'~93 billion light-years across today', comparezh:'今天直径约 930 亿光年'}
 ];
 function renderScale(){
   const wrap = document.getElementById('scaleWrap');
   if(!wrap) return;
   const zh = (window.CURRENT_LANG||'en')==='zh-CN';
+  const dict = LOCALES[window.CURRENT_LANG||'en']||LOCALES.en;
   wrap.innerHTML = '';
   SCALE_ROWS.forEach(row=>{
     const el = document.createElement('div');
@@ -235,6 +244,7 @@ function renderScale(){
         <div class="scale-label">${zh ? row.sizezh : row.size}</div>
       </div>
       <div class="scale-compare"><b>${zh ? row.comparezh : row.compare}</b></div>
+      ${buildReferenceLinks(row.refs, SOURCES, dict['refs.label'])}
     `;
     wrap.appendChild(el);
   });
@@ -255,6 +265,7 @@ function renderFates(){
       <div class="fate-name">${f.name}</div>
       <div class="fate-likely">${f.likely}</div>
       <div class="fate-desc">${f.desc}</div>
+      ${buildReferenceLinks(f.refs, SOURCES, LOCALES[lang]['refs.label'])}
     `;
     grid.appendChild(c);
   });
@@ -270,7 +281,7 @@ function renderMysteries(){
   list.forEach(m=>{
     const c = document.createElement('div');
     c.className='myst-card';
-    c.innerHTML = `<div class="myst-q">${m.name}</div><div class="myst-d">${m.desc}</div>`;
+    c.innerHTML = `<div class="myst-q">${m.name}</div><div class="myst-d">${m.desc}</div>${buildReferenceLinks(m.refs, SOURCES, LOCALES[lang]['refs.label'])}`;
     grid.appendChild(c);
   });
 }
@@ -300,21 +311,26 @@ for(let i=0;i<180;i++){
 function drawBg(){
   bgCtx.fillStyle = 'rgba(2,3,10,0.25)';
   bgCtx.fillRect(0,0,BGW,BGH);
-  const cx = BGW/2, cy = BGH/2;
-  for(const s of bgStars){
-    s.z -= 1.2;
-    if(s.z < 1){ s.z = BGW; s.x = (Math.random()-0.5)*BGW; s.y = (Math.random()-0.5)*BGH; }
-    const k = 128 / s.z;
-    const px = cx + s.x * k;
-    const py = cy + s.y * k;
-    if(px<0||px>BGW||py<0||py>BGH) continue;
-    const size = (1 - s.z/BGW) * 2.2;
-    bgCtx.fillStyle = `hsla(${s.hue},80%,80%,${1 - s.z/BGW})`;
-    bgCtx.beginPath(); bgCtx.arc(px,py,size,0,Math.PI*2); bgCtx.fill();
-  }
-  requestAnimationFrame(drawBg);
+  advanceStarfield(bgStars, BGW, BGH, Math.random, (star, x, y, size, alpha)=>{
+    bgCtx.fillStyle = `hsla(${star.hue},80%,80%,${alpha})`;
+    bgCtx.beginPath(); bgCtx.arc(x,y,size,0,Math.PI*2); bgCtx.fill();
+  });
 }
-drawBg();
+
+const motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+const bgAnimation = createAnimationController({
+  requestFrame: callback=>requestAnimationFrame(callback),
+  cancelFrame: id=>cancelAnimationFrame(id),
+  draw: drawBg
+});
+bgAnimation.setDocumentVisible(!document.hidden);
+bgAnimation.setReducedMotion(motionQuery.matches);
+document.addEventListener('visibilitychange',()=>bgAnimation.setDocumentVisible(!document.hidden));
+motionQuery.addEventListener('change',event=>bgAnimation.setReducedMotion(event.matches));
+if('IntersectionObserver' in window){
+  new IntersectionObserver(entries=>bgAnimation.setIntersecting(entries[0].isIntersecting)).observe(bgCanvas);
+}
+bgAnimation.start();
 
 /* ================ Slider ================ */
 document.getElementById('timeSlider').addEventListener('input', updateMachine);
@@ -333,6 +349,7 @@ const browserLang = (navigator.language||'').toLowerCase();
 const initLang = savedLang || (browserLang.startsWith('zh') ? 'zh-CN' : 'en');
 applyI18n(initLang);
 renderScale();
-
-/* Initial machine paint */
-setTimeout(()=>{ resizeMachine(); updateMachine(); }, 80);
+const sourceLinks = document.getElementById('sourceLinks');
+sourceLinks.innerHTML = Object.keys(SOURCES)
+  .map(id=>buildReferenceLinks([id], SOURCES, LOCALES[initLang]['refs.label']))
+  .join('');

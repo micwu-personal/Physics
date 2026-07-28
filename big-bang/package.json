@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "description": "Interactive journey through 13.8 billion years of cosmic history.",
   "scripts": {
-    "test": "node tests/validate.js",
+    "test": "node tests/validate.js && npm run test:coverage && npm run test:performance",
+    "test:coverage": "node --test --experimental-test-coverage --test-coverage-include=core.js --test-coverage-lines=100 --test-coverage-functions=100 --test-coverage-branches=100 tests/core.test.js",
+    "test:performance": "node tests/performance.js",
     "build": "node build.js"
   },
   "private": true

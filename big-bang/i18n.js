@@ -25,6 +25,7 @@ const LOCALES = {
     'card.dominant': 'Dominant content',
     'card.events': 'What happened',
     'card.evidence': 'How we know',
+    'refs.label': 'References',
 
     'machine.h2': 'Cosmic Time Machine',
     'machine.desc': 'Drag the logarithmic slider from the early universe into a model-dependent far future.',
@@ -89,6 +90,7 @@ const LOCALES = {
     'card.dominant': '主导成分',
     'card.events': '发生了什么',
     'card.evidence': '证据来源',
+    'refs.label': '参考资料',
 
     'machine.h2': '宇宙时间机器',
     'machine.desc': '拖动对数滑块,从早期宇宙穿越到依赖模型外推的遥远未来。',
@@ -130,13 +132,41 @@ const LOCALES = {
   }
 };
 
+const SOURCES = {
+  planck2018: {label:'Planck Collaboration 2018 VI', url:'https://doi.org/10.1051/0004-6361/201833910'},
+  planckInflation: {label:'Planck Collaboration 2018 X', url:'https://doi.org/10.1051/0004-6361/201833887'},
+  pdgCosmology: {label:'PDG Big-Bang Cosmology review', url:'https://pdg.lbl.gov/2025/reviews/rpp2025-rev-bbang-cosmology.pdf'},
+  pdgDarkMatter: {label:'PDG Dark Matter review', url:'https://pdg.lbl.gov/2025/reviews/rpp2025-rev-dark-matter.pdf'},
+  nasaUniverse: {label:'NASA Universe overview', url:'https://science.nasa.gov/universe/overview/'},
+  esaPlanck: {label:'ESA Planck mission', url:'https://www.esa.int/Science_Exploration/Space_Science/Planck_overview'},
+  superK2020: {label:'Super-Kamiokande 2020', url:'https://doi.org/10.1103/PhysRevD.102.112011'},
+  qgp2005: {label:'RHIC QGP review (2005)', url:'https://doi.org/10.1016/j.nuclphysa.2005.03.084'},
+  cmb1965: {label:'Penzias & Wilson 1965', url:'https://doi.org/10.1086/148307'},
+  saras2022: {label:'Singh et al. 2022 (SARAS 3)', url:'https://doi.org/10.1038/s41550-022-01610-5'},
+  firstStars2023: {label:'Klessen & Glover 2023', url:'https://doi.org/10.1146/annurev-astro-071221-053453'},
+  jades2024: {label:'Carniani et al. 2024 (JADES)', url:'https://doi.org/10.1038/s41586-024-07860-9'},
+  reion2022: {label:'Bosman et al. 2022', url:'https://doi.org/10.1093/mnras/stac1046'},
+  starFormation2014: {label:'Madau & Dickinson 2014', url:'https://doi.org/10.1146/annurev-astro-081811-125615'},
+  sawala2025: {label:'Sawala et al. 2025', url:'https://doi.org/10.1038/s41550-025-02563-1'},
+  scales2004: {label:'Davis & Lineweaver 2004', url:'https://doi.org/10.1071/AS03040'},
+  future1997: {label:'Adams & Laughlin 1997', url:'https://doi.org/10.1103/RevModPhys.69.337'},
+  bigRip2003: {label:'Caldwell et al. 2003', url:'https://doi.org/10.1103/PhysRevLett.91.071301'},
+  bounce2017: {label:'Brandenberger & Peter 2017', url:'https://doi.org/10.1007/s10701-016-0057-0'},
+  vacuum2018: {label:'Markkanen et al. 2018', url:'https://doi.org/10.3389/fspas.2018.00040'},
+  baryogenesis2012: {label:'Canetti et al. 2012', url:'https://doi.org/10.1088/1367-2630/14/9/095012'},
+  riess2022: {label:'Riess et al. 2022 (SH0ES)', url:'https://doi.org/10.3847/2041-8213/ac5c5b'},
+  riess2024: {label:'Riess et al. 2024 (JWST)', url:'https://doi.org/10.3847/2041-8213/ad1ddd'},
+  eternalInflation2007: {label:'Guth 2007', url:'https://doi.org/10.1088/1751-8113/40/25/S25'},
+  pdgConstants: {label:'PDG physical constants review', url:'https://pdg.lbl.gov/2025/reviews/rpp2025-rev-phys-constants.pdf'}
+};
+
 /* ================ Epoch data ================
    Each epoch has: id, time (human), tsec (rough seconds), temp, size,
    density, dominant, events (array), evidence, color (theme).
    All English by default; Chinese overrides in EPOCH_I18N.
 */
 const EPOCHS = [
-  {id:'planck', color:'#e94ecd',
+  {id:'planck', color:'#e94ecd', refs:['pdgCosmology','nasaUniverse'],
     time:'0 – 10⁻⁴³ s', tsec:1e-43,
     temp:'~10³² K (Planck temp.)',
     size:'Unknown (Planck length is a physics scale, not a measured universe size)',
@@ -145,7 +175,7 @@ const EPOCHS = [
     events:['General relativity and quantum field theory cannot both be applied reliably','A quantum theory of gravity is required','Force unification and “quantum foam” are hypotheses, not observations'],
     evidence:'No direct evidence describes this interval. String theory, loop quantum gravity, and other approaches remain unverified candidates.'
   },
-  {id:'gut', color:'#c77dff',
+  {id:'gut', color:'#c77dff', refs:['superK2020','pdgCosmology'],
     time:'10⁻⁴³ – 10⁻³⁶ s', tsec:1e-38,
     temp:'~10²⁹ K',
     size:'Unknown; depends on pre-inflationary geometry',
@@ -154,7 +184,7 @@ const EPOCHS = [
     events:['Some models place grand unification at these energies','Gravity may already be distinct from gauge interactions','Magnetic monopoles and X/Y bosons are model predictions, not detections'],
     evidence:'No direct evidence. Super-Kamiokande sets τ/B > 2.4 × 10³⁴ yr for p→e⁺π⁰; Hyper-Kamiokande will extend the search.'
   },
-  {id:'inflation', color:'#7c5cff',
+  {id:'inflation', color:'#7c5cff', refs:['planckInflation','nasaUniverse'],
     time:'10⁻³⁶ – 10⁻³² s', tsec:1e-34,
     temp:'Model-dependent; reheating may reach ~10²⁵–10²⁹ K',
     size:'Absolute size unknown; ≥~10²⁶ linear growth is commonly required',
@@ -163,7 +193,7 @@ const EPOCHS = [
     events:['🚀 Accelerated, nearly exponential expansion in inflationary models','At least ~60 e-folds are usually required; duration and doubling time depend on the model','Quantum fluctuations can seed later cosmic structure','Inflation addresses the horizon, flatness, and relic problems'],
     evidence:'The CMB is nearly uniform and its perturbation spectrum is consistent with many inflation models, but this is not unique proof; primordial inflationary gravitational waves have not been detected.'
   },
-  {id:'quark', color:'#5aa8ff',
+  {id:'quark', color:'#5aa8ff', refs:['qgp2005','pdgCosmology'],
     time:'10⁻³² – 10⁻⁶ s', tsec:1e-10,
     temp:'10²⁵ → 10¹³ K',
     size:'~100 m → ~0.01 ly (illustrative thermal scaling)',
@@ -172,7 +202,7 @@ const EPOCHS = [
     events:['The electroweak crossover occurs at roughly 10⁻¹¹ s; the Higgs field gives W and Z bosons mass','The universe contains a hot quark-gluon plasma','The surviving baryon asymmetry is only about one baryon per billion photons; its origin is unknown'],
     evidence:'Heavy-ion experiments at RHIC and the LHC create and measure quark-gluon plasma; the Higgs boson was discovered in 2012. These test the relevant physics, not the cosmological event directly.'
   },
-  {id:'hadron', color:'#5aff8a',
+  {id:'hadron', color:'#5aff8a', refs:['pdgCosmology'],
     time:'10⁻⁶ – 1 s', tsec:1e-3,
     temp:'10¹³ → 10¹⁰ K',
     size:'~0.01 → ~13 ly (illustrative thermal scaling)',
@@ -181,7 +211,7 @@ const EPOCHS = [
     events:['Quarks become confined in hadrons, including protons and neutrons','Most matter and antimatter annihilate, leaving the small baryon excess','Neutrinos decouple at roughly 1 s, forming an undetected cosmic neutrino background','The neutron/proton ratio freezes near 1:5, then falls toward ~1:7 before nucleosynthesis'],
     evidence:'Neutrino background predicted, not yet directly observed. Big Bang nucleosynthesis (below) confirms the n/p ratio.'
   },
-  {id:'nucleo', color:'#ffd166',
+  {id:'nucleo', color:'#ffd166', refs:['pdgCosmology','planck2018'],
     time:'1 s – 3 min', tsec:180,
     temp:'10¹⁰ → 10⁹ K',
     size:'~13 → ~127 ly (radius; illustrative thermal scaling)',
@@ -190,7 +220,7 @@ const EPOCHS = [
     events:['⚛ Big Bang Nucleosynthesis (BBN)','Protons + neutrons fuse into deuterium, then helium-4','Final light-element mix: ~75% H, ~25% He, trace D, ³He, ⁷Li','Universe still too hot for neutral atoms — remains an ionized plasma'],
     evidence:'Primordial deuterium and helium agree closely with BBN calculations and the CMB baryon density; lithium-7 remains anomalously low by a factor of about three.'
   },
-  {id:'photon', color:'#ffb547',
+  {id:'photon', color:'#ffb547', refs:['pdgCosmology','planck2018'],
     time:'3 min – 380 kyr', tsec:1e12,
     temp:'10⁹ → 3000 K',
     size:'~127 ly → ~42 million ly (radius)',
@@ -199,7 +229,7 @@ const EPOCHS = [
     events:['Universe is opaque, glowing plasma — like the inside of the Sun','Photons scatter off free electrons endlessly (Thomson scattering)','Dark matter starts to cluster gravitationally — invisible scaffolding for future galaxies'],
     evidence:'Predicted state consistent with CMB observations.'
   },
-  {id:'recomb', color:'#ff9e5c',
+  {id:'recomb', color:'#ff9e5c', refs:['cmb1965','planck2018','esaPlanck'],
     time:'~380,000 yr', tsec:1.2e13,
     temp:'~3000 K',
     size:'~42 million light-years',
@@ -208,7 +238,7 @@ const EPOCHS = [
     events:['🌌 Recombination: electrons bind to nuclei and neutral atoms form','Photons decouple as the universe becomes transparent','Those photons are observed today as the Cosmic Microwave Background (CMB)','This is the earliest event whose light we can directly observe; older neutrino or gravitational-wave relics remain undetected'],
     evidence:'The CMB itself — discovered 1965 (Penzias & Wilson), mapped by COBE, WMAP, Planck. Nobel 1978 & 2006.'
   },
-  {id:'darkages', color:'#4a4a7c',
+  {id:'darkages', color:'#4a4a7c', refs:['saras2022','pdgCosmology'],
     time:'380 kyr – 150 Myr', tsec:3e15,
     temp:'3000 → 60 K',
     size:'42 Mly → ~3 Gly',
@@ -217,7 +247,7 @@ const EPOCHS = [
     events:['🌑 The Dark Ages: no stars, no light sources','Only 21-cm hyperfine emission from neutral hydrogen','Dark matter halos grow and merge under gravity','First tiny density peaks begin to collapse'],
     evidence:'Radio experiments seek the 21-cm signal. EDGES reported a feature in 2018, but SARAS 3 did not confirm it and disfavors the original interpretation.'
   },
-  {id:'firststars', color:'#ff5c8a',
+  {id:'firststars', color:'#ff5c8a', refs:['firstStars2023','jades2024'],
     time:'~150 – 500 Myr', tsec:1e16,
     temp:'~40 K',
     size:'~5 Gly',
@@ -226,7 +256,7 @@ const EPOCHS = [
     events:['✨ Population III stars form from hydrogen and helium with essentially no heavier elements','Models favor characteristic masses of tens to a few hundred Suns, while allowing a broad range','Massive examples live only ~1–3 million years, then explode or collapse to black holes','Their radiation and heavy elements transform later star and galaxy formation'],
     evidence:'No individual Population III star is confirmed. JWST has observed the galaxy JADES-GS-z14-0 at z≈14.3, about 290 Myr after the Big Bang.'
   },
-  {id:'reion', color:'#ff6b9d',
+  {id:'reion', color:'#ff6b9d', refs:['reion2022','planck2018'],
     time:'~500 Myr – 1 Gyr', tsec:2.2e16,
     temp:'~20 K',
     size:'~8 Gly',
@@ -235,7 +265,7 @@ const EPOCHS = [
     events:['🌟 Reionization: UV from young stars/quasars strips electrons from hydrogen again','Universe becomes transparent to UV light','Galaxies and quasars grow rapidly','Supermassive black holes appear at galactic centers'],
     evidence:'Quasar absorption shows reionization was essentially complete by z≈5.3–6; Planck CMB polarization places its optical-depth midpoint near z≈7.7.'
   },
-  {id:'structure', color:'#7ee8c5',
+  {id:'structure', color:'#7ee8c5', refs:['starFormation2014','planck2018'],
     time:'1 – 9 Gyr', tsec:2e17,
     temp:'~5 K',
     size:'~7 → ~33 Gly (radius)',
@@ -244,7 +274,7 @@ const EPOCHS = [
     events:['Galaxy clusters, filaments, and voids continue to develop','Cosmic star formation peaks roughly 3–4 Gyr after the Big Bang (z≈2)','The Milky Way assembles over billions of years','The Solar System forms about 9.2 Gyr after the Big Bang'],
     evidence:'Redshift surveys (SDSS, DESI) map the cosmic web; simulations (IllustrisTNG) match observations.'
   },
-  {id:'now', color:'#ffd166',
+  {id:'now', color:'#ffd166', refs:['planck2018','sawala2025'],
     time:'13.8 Gyr (now)', tsec:4.35e17,
     temp:'2.725 K (CMB)',
     size:'~46.5 billion ly (radius; ~93 billion ly across)',
@@ -253,7 +283,7 @@ const EPOCHS = [
     events:['⏰ Present day','Expansion began accelerating about 6 Gyr ago; matter and dark-energy densities became equal later, about 3.5 Gyr ago','A 2025 orbit analysis finds only about a 50% chance that the Milky Way and Andromeda merge within 10 Gyr','The Sun is ~4.6 Gyr old and should leave the main sequence in roughly 5 Gyr','Evidence for life on Earth extends back at least ~3.5 Gyr'],
     evidence:'Planck 2018 gives H₀=67.4±0.5 km/s/Mpc and ρcrit≈8.5×10⁻²⁷ kg/m³. Type Ia supernovae, CMB, and BAO constrain accelerated expansion.'
   },
-  {id:'future', color:'#8b93b3',
+  {id:'future', color:'#8b93b3', refs:['future1997','planck2018'],
     time:'~10¹⁰⁰ years (far-future example)', tsec:3.156e107,
     temp:'Approaches de Sitter horizon temperature if Λ is constant',
     size:'Scale factor grows without bound if Λ is constant',
@@ -343,50 +373,50 @@ const EPOCH_I18N = {
 
 /* ================ Composition snapshots ================ */
 const COMPOSITIONS = {
-  'now':    [{k:'de',v:68.5},{k:'dm',v:26.6},{k:'baryon',v:4.9}],
-  'recomb': [{k:'photon',v:15},{k:'dm',v:63},{k:'baryon',v:12},{k:'neutrino',v:10}],
-  'nucleo': [{k:'radiation',v:99.99915},{k:'dm',v:0.00072},{k:'baryon',v:0.00013}]
+  now: {refs:['planck2018'], data:[{k:'de',v:68.5},{k:'dm',v:26.6},{k:'baryon',v:4.9}]},
+  recomb: {refs:['planck2018','pdgCosmology'], data:[{k:'photon',v:15},{k:'dm',v:63},{k:'baryon',v:12},{k:'neutrino',v:10}]},
+  nucleo: {refs:['pdgCosmology'], data:[{k:'radiation',v:99.99915},{k:'dm',v:0.00072},{k:'baryon',v:0.00013}]}
 };
 
 /* ================ Fates ================ */
 const FATES = {
   'en': [
-    {icon:'🥶', name:'Big Freeze / Heat Death', likely:'Favored if dark energy is a stable Λ', desc:'Accelerated expansion continues, ordinary star formation ends, and black holes eventually evaporate. Usable free energy dwindles toward an equilibrium-like state; all dates are extrapolations.'},
-    {icon:'💥', name:'Big Rip', likely:'Only if w stays below −1', desc:'Persistently strengthening “phantom” dark energy could eventually unbind galaxies, planetary systems, and atoms. Current data do not require this scenario.'},
-    {icon:'🎯', name:'Big Crunch', likely:'Strongly disfavored in current ΛCDM fits', desc:'Recollapse would require dark energy to evolve dramatically or become negative. Current expansion and near-flat geometry do not imply a future crunch, but unknown dark-energy physics prevents an absolute exclusion.'},
-    {icon:'🔁', name:'Big Bounce', likely:'Speculative', desc:'Some quantum-gravity and cyclic models replace a singular crunch or bang with a bounce. No observation currently selects these models.'},
-    {icon:'⚠', name:'Vacuum Decay', likely:'Allowed in some models; rate unknown', desc:'If our vacuum is metastable, a lower-energy vacuum bubble could alter particle physics as it expands. Theory does not provide an experimentally established lifetime.'}
+    {id:'freeze', refs:['future1997','planck2018'], icon:'🥶', name:'Big Freeze / Heat Death', likely:'Favored if dark energy is a stable Λ', desc:'Accelerated expansion continues, ordinary star formation ends, and black holes eventually evaporate. Usable free energy dwindles toward an equilibrium-like state; all dates are extrapolations.'},
+    {id:'rip', refs:['bigRip2003','planck2018'], icon:'💥', name:'Big Rip', likely:'Only if w stays below −1', desc:'Persistently strengthening “phantom” dark energy could eventually unbind galaxies, planetary systems, and atoms. Current data do not require this scenario.'},
+    {id:'crunch', refs:['planck2018'], icon:'🎯', name:'Big Crunch', likely:'Strongly disfavored in current ΛCDM fits', desc:'Recollapse would require dark energy to evolve dramatically or become negative. Current expansion and near-flat geometry do not imply a future crunch, but unknown dark-energy physics prevents an absolute exclusion.'},
+    {id:'bounce', refs:['bounce2017'], icon:'🔁', name:'Big Bounce', likely:'Speculative', desc:'Some quantum-gravity and cyclic models replace a singular crunch or bang with a bounce. No observation currently selects these models.'},
+    {id:'vacuum', refs:['vacuum2018'], icon:'⚠', name:'Vacuum Decay', likely:'Allowed in some models; rate unknown', desc:'If our vacuum is metastable, a lower-energy vacuum bubble could alter particle physics as it expands. Theory does not provide an experimentally established lifetime.'}
   ],
   'zh-CN': [
-    {icon:'🥶', name:'大冻结 / 热寂', likely:'若暗能量是稳定的 Λ,则最受支持', desc:'加速膨胀持续,常规恒星形成结束,黑洞最终蒸发。可用自由能逐渐枯竭,趋于近似平衡状态;所有年代均为外推。'},
-    {icon:'💥', name:'大撕裂', likely:'仅当 w 持续小于 −1', desc:'持续增强的“幻影”暗能量可能最终解除星系、行星系统乃至原子的束缚。现有数据并不要求这一情景。'},
-    {icon:'🎯', name:'大坍缩', likely:'在当前 ΛCDM 拟合中被强烈排斥', desc:'重新坍缩要求暗能量发生剧烈演化或变为负值。当前膨胀与近乎平坦的几何并不指向未来坍缩,但未知的暗能量物理使绝对排除仍不严谨。'},
-    {icon:'🔁', name:'大反弹', likely:'推测性模型', desc:'部分量子引力与循环宇宙模型以反弹替代奇点式坍缩或大爆炸。目前没有观测能够选定这些模型。'},
-    {icon:'⚠', name:'真空衰变', likely:'部分模型允许;发生率未知', desc:'如果当前真空是亚稳态,更低能量的真空泡可能在扩张时改变粒子物理。理论尚未给出经过实验确认的寿命。'}
+    {id:'freeze', refs:['future1997','planck2018'], icon:'🥶', name:'大冻结 / 热寂', likely:'若暗能量是稳定的 Λ,则最受支持', desc:'加速膨胀持续,常规恒星形成结束,黑洞最终蒸发。可用自由能逐渐枯竭,趋于近似平衡状态;所有年代均为外推。'},
+    {id:'rip', refs:['bigRip2003','planck2018'], icon:'💥', name:'大撕裂', likely:'仅当 w 持续小于 −1', desc:'持续增强的“幻影”暗能量可能最终解除星系、行星系统乃至原子的束缚。现有数据并不要求这一情景。'},
+    {id:'crunch', refs:['planck2018'], icon:'🎯', name:'大坍缩', likely:'在当前 ΛCDM 拟合中被强烈排斥', desc:'重新坍缩要求暗能量发生剧烈演化或变为负值。当前膨胀与近乎平坦的几何并不指向未来坍缩,但未知的暗能量物理使绝对排除仍不严谨。'},
+    {id:'bounce', refs:['bounce2017'], icon:'🔁', name:'大反弹', likely:'推测性模型', desc:'部分量子引力与循环宇宙模型以反弹替代奇点式坍缩或大爆炸。目前没有观测能够选定这些模型。'},
+    {id:'vacuum', refs:['vacuum2018'], icon:'⚠', name:'真空衰变', likely:'部分模型允许;发生率未知', desc:'如果当前真空是亚稳态,更低能量的真空泡可能在扩张时改变粒子物理。理论尚未给出经过实验确认的寿命。'}
   ]
 };
 
 /* ================ Mysteries ================ */
 const MYSTERIES = {
   'en': [
-    {name:'What is dark matter?', desc:'About 84% of matter is non-baryonic dark matter. Its gravity shapes galaxies, lensing, and the cosmic web, but no dark-matter particle has been identified. Candidates include axions, WIMPs, and limited primordial-black-hole mass ranges.'},
-    {name:'What is dark energy?', desc:'About 68.5% of today\'s mass–energy budget in Planck ΛCDM. It may be a cosmological constant, a dynamic field, or a sign that gravity needs modification; its physical origin is unknown.'},
-    {name:'Why is there matter, not antimatter?', desc:'The observable universe contains a tiny excess of baryons over antibaryons. Known Standard-Model CP violation appears insufficient, so the mechanism of baryogenesis remains unknown.'},
-    {name:'What caused inflation?', desc:'The inflaton field is a placeholder. What quantum field actually drove the exponential expansion? Where did it come from? Where did it go?'},
-    {name:'What preceded the hot Big Bang?', desc:'Classical general relativity cannot be extrapolated reliably through its initial singular boundary. A bounce, an earlier phase, or no meaningful “before” are model-dependent possibilities without observational confirmation.'},
-    {name:'The Hubble tension', desc:'Planck ΛCDM infers H₀=67.4±0.5 km/s/Mpc, while the SH0ES distance ladder finds 73.04±1.04 km/s/Mpc, a roughly 5σ difference. JWST Cepheid checks support the local calibration, but hidden systematics or physics beyond ΛCDM remain possible.'},
-    {name:'Are there other universes?', desc:'Some eternal-inflation and string-landscape models permit causally disconnected regions with different effective physics. Neither a multiverse nor a frequently quoted landscape count is observationally established.'},
-    {name:'Why these constants?', desc:'Particle masses and interaction strengths are measured inputs to the Standard Model. Whether their values follow from deeper theory, selection effects, or contingency remains open.'}
+    {id:'dark-matter', refs:['pdgDarkMatter','planck2018'], name:'What is dark matter?', desc:'About 84% of matter is non-baryonic dark matter. Its gravity shapes galaxies, lensing, and the cosmic web, but no dark-matter particle has been identified. Candidates include axions, WIMPs, and limited primordial-black-hole mass ranges.'},
+    {id:'dark-energy', refs:['planck2018'], name:'What is dark energy?', desc:'About 68.5% of today\'s mass–energy budget in Planck ΛCDM. It may be a cosmological constant, a dynamic field, or a sign that gravity needs modification; its physical origin is unknown.'},
+    {id:'antimatter', refs:['baryogenesis2012'], name:'Why is there matter, not antimatter?', desc:'The observable universe contains a tiny excess of baryons over antibaryons. Known Standard-Model CP violation appears insufficient, so the mechanism of baryogenesis remains unknown.'},
+    {id:'inflation', refs:['planckInflation'], name:'What caused inflation?', desc:'The inflaton field is a placeholder. What quantum field actually drove the exponential expansion? Where did it come from? Where did it go?'},
+    {id:'before', refs:['pdgCosmology','bounce2017'], name:'What preceded the hot Big Bang?', desc:'Classical general relativity cannot be extrapolated reliably through its initial singular boundary. A bounce, an earlier phase, or no meaningful “before” are model-dependent possibilities without observational confirmation.'},
+    {id:'hubble', refs:['planck2018','riess2022','riess2024'], name:'The Hubble tension', desc:'Planck ΛCDM infers H₀=67.4±0.5 km/s/Mpc, while the SH0ES distance ladder finds 73.04±1.04 km/s/Mpc, a roughly 5σ difference. JWST Cepheid checks support the local calibration, but hidden systematics or physics beyond ΛCDM remain possible.'},
+    {id:'multiverse', refs:['eternalInflation2007'], name:'Are there other universes?', desc:'Some eternal-inflation and string-landscape models permit causally disconnected regions with different effective physics. Neither a multiverse nor a frequently quoted landscape count is observationally established.'},
+    {id:'constants', refs:['pdgConstants'], name:'Why these constants?', desc:'Particle masses and interaction strengths are measured inputs to the Standard Model. Whether their values follow from deeper theory, selection effects, or contingency remains open.'}
   ],
   'zh-CN': [
-    {name:'暗物质到底是什么?', desc:'约 84% 的物质是非重子暗物质。它的引力塑造星系、引力透镜和宇宙网,但尚未确认任何暗物质粒子。候选者包括轴子、WIMP,以及质量范围受到严格限制的原初黑洞。'},
-    {name:'暗能量到底是什么?', desc:'在 Planck ΛCDM 中,暗能量约占今天质能总量的 68.5%。它可能是宇宙学常数、动力学场,也可能意味着引力理论需要修改;其物理起源未知。'},
-    {name:'为什么宇宙由物质而不是反物质构成?', desc:'可观测宇宙中的重子只比反重子多出极小比例。标准模型中已知的 CP 破坏似乎不足以解释它,重子生成机制仍然未知。'},
-    {name:'究竟是什么触发了暴胀?', desc:'"暴胀子场"只是一个占位符。到底是哪一种量子场推动了指数式膨胀?它从何而来?最后又去了哪里?'},
-    {name:'热大爆炸之前是什么?', desc:'经典广义相对论无法可靠地穿过其初始奇点边界外推。反弹、更早阶段,或“之前”没有物理意义,都是依赖模型且未获观测证实的可能性。'},
-    {name:'哈勃张力', desc:'Planck ΛCDM 推断 H₀=67.4±0.5 km/s/Mpc,SH0ES 距离阶梯测得 73.04±1.04 km/s/Mpc,相差约 5σ。JWST 的造父变星校验支持本地标定,但未知系统误差或超出 ΛCDM 的新物理仍有可能。'},
-    {name:'是否存在其他宇宙?', desc:'部分永恒暴胀与弦景观模型允许存在因果隔离、有效物理不同的区域。多宇宙及常被引用的景观数量都未得到观测证实。'},
-    {name:'为什么是这些常数?', desc:'粒子质量与相互作用强度是标准模型中的实测输入。它们究竟源于更深层理论、选择效应还是偶然,仍是开放问题。'}
+    {id:'dark-matter', refs:['pdgDarkMatter','planck2018'], name:'暗物质到底是什么?', desc:'约 84% 的物质是非重子暗物质。它的引力塑造星系、引力透镜和宇宙网,但尚未确认任何暗物质粒子。候选者包括轴子、WIMP,以及质量范围受到严格限制的原初黑洞。'},
+    {id:'dark-energy', refs:['planck2018'], name:'暗能量到底是什么?', desc:'在 Planck ΛCDM 中,暗能量约占今天质能总量的 68.5%。它可能是宇宙学常数、动力学场,也可能意味着引力理论需要修改;其物理起源未知。'},
+    {id:'antimatter', refs:['baryogenesis2012'], name:'为什么宇宙由物质而不是反物质构成?', desc:'可观测宇宙中的重子只比反重子多出极小比例。标准模型中已知的 CP 破坏似乎不足以解释它,重子生成机制仍然未知。'},
+    {id:'inflation', refs:['planckInflation'], name:'究竟是什么触发了暴胀?', desc:'"暴胀子场"只是一个占位符。到底是哪一种量子场推动了指数式膨胀?它从何而来?最后又去了哪里?'},
+    {id:'before', refs:['pdgCosmology','bounce2017'], name:'热大爆炸之前是什么?', desc:'经典广义相对论无法可靠地穿过其初始奇点边界外推。反弹、更早阶段,或“之前”没有物理意义,都是依赖模型且未获观测证实的可能性。'},
+    {id:'hubble', refs:['planck2018','riess2022','riess2024'], name:'哈勃张力', desc:'Planck ΛCDM 推断 H₀=67.4±0.5 km/s/Mpc,SH0ES 距离阶梯测得 73.04±1.04 km/s/Mpc,相差约 5σ。JWST 的造父变星校验支持本地标定,但未知系统误差或超出 ΛCDM 的新物理仍有可能。'},
+    {id:'multiverse', refs:['eternalInflation2007'], name:'是否存在其他宇宙?', desc:'部分永恒暴胀与弦景观模型允许存在因果隔离、有效物理不同的区域。多宇宙及常被引用的景观数量都未得到观测证实。'},
+    {id:'constants', refs:['pdgConstants'], name:'为什么是这些常数?', desc:'粒子质量与相互作用强度是标准模型中的实测输入。它们究竟源于更深层理论、选择效应还是偶然,仍是开放问题。'}
   ]
 };
 

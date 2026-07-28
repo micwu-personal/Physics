@@ -34,6 +34,7 @@ body{
   animation:drift 180s linear infinite;
 }
 @keyframes drift{from{background-position:0 0}to{background-position:900px 900px}}
+@media (prefers-reduced-motion:reduce){#bg-stars{animation:none}}
 
 .hero{position:relative;z-index:1;padding:60px 24px 24px;text-align:center}
 .hero-inner{max-width:900px;margin:0 auto}
@@ -80,6 +81,10 @@ main{position:relative;z-index:1;max-width:1400px;margin:0 auto;padding:40px 24p
 .ep-events li::before{content:"→ ";color:var(--accent);margin-right:6px}
 .ep-evidence{margin-top:12px;padding:10px 14px;background:linear-gradient(135deg,rgba(255,107,157,0.1),rgba(255,209,102,0.06));border-left:3px solid var(--accent);border-radius:6px;font-size:13px;color:#dfe4ff;font-style:italic}
 .ep-evidence b{font-style:normal;color:#fff;font-weight:600;margin-right:4px}
+.item-refs{display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin-top:12px;font-size:11px;color:var(--dim)}
+.item-refs span{font-weight:600;color:#c8cff0}
+.item-refs a{color:#aebcff;border:1px solid rgba(174,188,255,0.25);border-radius:999px;padding:3px 8px;text-decoration:none}
+.item-refs a:hover{color:#fff;border-color:var(--accent)}
 
 /* ---------- Time Machine ---------- */
 .machine{max-width:1200px;margin:0 auto}
@@ -115,7 +120,8 @@ main{position:relative;z-index:1;max-width:1400px;margin:0 auto;padding:40px 24p
 
 /* ---------- Scale ---------- */
 .scale-wrap{max-width:1000px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
-.scale-row{display:grid;grid-template-columns:180px 1fr 200px;gap:16px;align-items:center;background:var(--panel);border:1px solid var(--panel-b);border-radius:14px;padding:16px 20px}
+.scale-row{display:grid;grid-template-columns:180px 1fr 200px;gap:12px 16px;align-items:center;background:var(--panel);border:1px solid var(--panel-b);border-radius:14px;padding:16px 20px}
+.scale-row .item-refs{grid-column:1/-1;margin-top:0}
 .scale-time{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--accent2)}
 .scale-bar{position:relative;height:36px;background:rgba(0,0,0,0.35);border-radius:8px;overflow:hidden}
 .scale-fill{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:8px;box-shadow:0 0 20px rgba(255,107,157,0.5);transition:width 1.2s ease}
@@ -144,6 +150,8 @@ main{position:relative;z-index:1;max-width:1400px;margin:0 auto;padding:40px 24p
 .sources h2{text-align:center;font-size:24px;margin-bottom:8px}
 .sources p{text-align:center;color:var(--dim);font-size:13px;line-height:1.6;margin:0 auto 20px;max-width:760px}
 .source-links{display:flex;flex-wrap:wrap;justify-content:center;gap:8px}
+.source-links .item-refs{margin:0}
+.source-links .item-refs span{display:none}
 .source-links a{color:#dfe4ff;background:rgba(0,0,0,0.25);border:1px solid var(--panel-b);border-radius:999px;padding:7px 12px;font-size:12px;text-decoration:none}
 .source-links a:hover{color:#fff;border-color:var(--accent)}
 

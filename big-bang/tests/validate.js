@@ -6,18 +6,26 @@ const vm = require('vm');
 const root = path.resolve(__dirname, '..');
 const i18nSource = fs.readFileSync(path.join(root, 'i18n.js'), 'utf8');
 const appSource = fs.readFileSync(path.join(root, 'app.js'), 'utf8');
+const coreSource = fs.readFileSync(path.join(root, 'core.js'), 'utf8');
 const htmlSource = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 
 const context = {};
 vm.createContext(context);
 vm.runInContext(
   `${i18nSource}
-  globalThis.DATA = {LOCALES, EPOCHS, EPOCH_I18N, COMPOSITIONS, FATES, MYSTERIES};
+  globalThis.DATA = {LOCALES, SOURCES, EPOCHS, EPOCH_I18N, COMPOSITIONS, FATES, MYSTERIES};
   globalThis.formatCosmicTime = formatCosmicTime;`,
   context
 );
 
-const {LOCALES, EPOCHS, EPOCH_I18N, COMPOSITIONS, FATES, MYSTERIES} = context.DATA;
+const {LOCALES, SOURCES, EPOCHS, EPOCH_I18N, COMPOSITIONS, FATES, MYSTERIES} = context.DATA;
+
+function validateReferences(item, name){
+  assert(Array.isArray(item.refs) && item.refs.length > 0, `${name} must have references`);
+  for(const ref of item.refs){
+    assert(SOURCES[ref], `${name} has unknown reference ${ref}`);
+  }
+}
 
 assert.deepStrictEqual(
   Object.keys(LOCALES.en).sort(),
@@ -37,6 +45,7 @@ assert(sliderMatch, 'Time slider bounds must be present');
 const sliderMin = Number(sliderMatch[1]);
 const sliderMax = Number(sliderMatch[2]);
 for(const epoch of EPOCHS){
+  validateReferences(epoch, `Epoch ${epoch.id}`);
   const logTime = Math.log10(epoch.tsec);
   assert(logTime >= sliderMin && logTime <= sliderMax, `Epoch ${epoch.id} must be reachable with the time slider`);
 }
@@ -49,13 +58,18 @@ for(const id of ids){
   }
 }
 
-for(const [name, rows] of Object.entries(COMPOSITIONS)){
-  const total = rows.reduce((sum, row) => sum + row.v, 0);
+for(const [name, snapshot] of Object.entries(COMPOSITIONS)){
+  validateReferences(snapshot, `Composition ${name}`);
+  const total = snapshot.data.reduce((sum, row) => sum + row.v, 0);
   assert(Math.abs(total - 100) < 1e-9, `${name} composition must sum to 100%`);
 }
 
 assert.strictEqual(FATES.en.length, FATES['zh-CN'].length, 'Fate cards must have locale parity');
 assert.strictEqual(MYSTERIES.en.length, MYSTERIES['zh-CN'].length, 'Mystery cards must have locale parity');
+for(const locale of ['en', 'zh-CN']){
+  FATES[locale].forEach(item=>validateReferences(item, `${locale} fate ${item.id}`));
+  MYSTERIES[locale].forEach(item=>validateReferences(item, `${locale} mystery ${item.id}`));
+}
 
 const year = 3.156e7;
 assert.strictEqual(context.formatCosmicTime(13.8e9 * year, 'en'), '13.80 Gyr');
@@ -68,6 +82,7 @@ const scaleMatch = appSource.match(/const SCALE_ROWS = (\[[\s\S]*?\n\]);/);
 assert(scaleMatch, 'Scale rows must be present');
 const scaleRows = vm.runInNewContext(scaleMatch[1]);
 for(const [index, row] of scaleRows.entries()){
+  validateReferences(row, `Scale row ${index}`);
   for(const field of ['t', 'tzh', 'size', 'sizezh', 'compare', 'comparezh']){
     assert(row[field], `Scale row ${index} is missing ${field}`);
   }
@@ -76,6 +91,12 @@ for(const [index, row] of scaleRows.entries()){
 assert(!i18nSource.includes('collision in ~4.5 Gyr'), 'Outdated certain Milky Way–Andromeda collision claim must not return');
 assert(!appSource.includes('A billion times smaller than a proton'), 'Proton comparison must not be off by 1000×');
 assert(!i18nSource.includes("{k:'radiation',v:85}"), 'BBN composition must not show an arbitrary 85/15 split');
-assert(htmlSource.includes('arxiv.org/abs/2408.00064'), 'Sawala et al. source must be linked');
+assert.strictEqual(SOURCES.sawala2025.url, 'https://doi.org/10.1038/s41550-025-02563-1', 'Sawala et al. primary source must be registered');
+assert(htmlSource.indexOf('core.js') < htmlSource.indexOf('i18n.js'), 'Testable core must load before app data and rendering');
+assert(coreSource.includes('rel="noopener noreferrer"'), 'Reference links must protect opener context');
+for(const [id, source] of Object.entries(SOURCES)){
+  assert(/^https:\/\//.test(source.url), `Source ${id} must use HTTPS`);
+  assert(!/wikipedia/i.test(source.url), `Source ${id} must not cite Wikipedia`);
+}
 
-console.log(`Validated ${EPOCHS.length} epochs, ${Object.keys(LOCALES.en).length} locale keys, and ${scaleRows.length} scale rows.`);
+console.log(`Validated ${EPOCHS.length} epochs, ${Object.keys(LOCALES.en).length} locale keys, ${scaleRows.length} scale rows, and ${Object.keys(SOURCES).length} primary sources.`);

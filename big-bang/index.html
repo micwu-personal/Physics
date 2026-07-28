@@ -63,6 +63,7 @@
             <div class="mp-p"><div class="mp-k" data-i18n="machine.dominant">What exists</div><div class="mp-v" id="mpDom">—</div></div>
           </div>
           <div class="mp-event"><div class="mp-ek" data-i18n="machine.event">Key event</div><div class="mp-ev" id="mpEvent">—</div></div>
+          <div id="mpRefs"></div>
         </div>
         <div class="slider-wrap">
           <input type="range" id="timeSlider" min="-43" max="107.5" step="0.1" value="2.26">
@@ -111,24 +112,12 @@
   <aside class="sources" aria-labelledby="sourcesHeading">
     <h2 id="sourcesHeading" data-i18n="sources.h2">Scientific sources</h2>
     <p data-i18n="sources.desc">Numbers are rounded educational estimates; early-universe sizes and far-future dates are model-dependent.</p>
-    <div class="source-links">
-      <a href="https://doi.org/10.1051/0004-6361/201833910">Planck 2018 VI</a>
-      <a href="https://pdg.lbl.gov/2025/reviews/contents_sports.html">Particle Data Group reviews</a>
-      <a href="https://science.nasa.gov/universe/overview/">NASA Universe</a>
-      <a href="https://www.esa.int/Science_Exploration/Space_Science/Planck">ESA Planck</a>
-      <a href="https://arxiv.org/abs/2303.12500">Klessen &amp; Glover 2023 (first stars)</a>
-      <a href="https://arxiv.org/abs/2108.03699">Bosman et al. 2022 (reionization)</a>
-      <a href="https://arxiv.org/abs/2405.18485">Carniani et al. 2024 (z=14 galaxy)</a>
-      <a href="https://arxiv.org/abs/2408.00064">Sawala et al. 2025 (MW–M31)</a>
-      <a href="https://arxiv.org/abs/2112.04510">Riess et al. 2022 (SH0ES)</a>
-      <a href="https://arxiv.org/abs/2401.04773">Riess et al. 2024 (JWST)</a>
-      <a href="https://arxiv.org/abs/astro-ph/0310808">Davis &amp; Lineweaver 2004 (cosmic scales)</a>
-      <a href="https://arxiv.org/abs/astro-ph/9701131">Adams &amp; Laughlin 1997 (far future)</a>
-    </div>
+    <div class="source-links" id="sourceLinks"></div>
   </aside>
 
   <footer><span data-i18n="footer">Source-backed educational estimates; see the references above.</span></footer>
 
+  <script src="core.js"></script>
   <script src="i18n.js"></script>
   <script src="app.js"></script>
 </body>
