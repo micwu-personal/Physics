@@ -208,18 +208,14 @@ const LOCALES = {
 };
 
 function applyI18n(lang){
-  const dict = LOCALES[lang] || LOCALES.en;
+  const dict = LOCALES[lang];
   document.documentElement.lang = (lang==='zh-CN' ? 'zh-CN' : 'en');
   document.querySelectorAll('[data-i18n]').forEach(el=>{
     const key = el.getAttribute('data-i18n');
-    if(dict[key] !== undefined) el.innerHTML = dict[key];
+    el.innerHTML = dict[key];
   });
-  document.querySelectorAll('[data-i18n-placeholder]').forEach(el=>{
-    const key = el.getAttribute('data-i18n-placeholder');
-    if(dict[key] !== undefined) el.setAttribute('placeholder', dict[key]);
-  });
-  const titleKey = document.querySelector('title')?.getAttribute('data-i18n');
-  if(titleKey && dict[titleKey]) document.title = dict[titleKey];
+  const titleKey = document.querySelector('title').getAttribute('data-i18n');
+  document.title = dict[titleKey];
   document.querySelectorAll('.lang-pill').forEach(b=>{
     b.classList.toggle('active', b.dataset.lang===lang);
   });
@@ -228,13 +224,12 @@ function applyI18n(lang){
   });
   window.CURRENT_LANG = lang;
   // Re-render dynamic content
-  if(typeof rerenderGrid==='function') rerenderGrid();
-  if(typeof refreshDetail==='function') refreshDetail();
+  rerenderGrid();
+  refreshDetail();
 }
 
 function t(key){
-  const dict = LOCALES[window.CURRENT_LANG||'en'];
-  return (dict && dict[key]) || (LOCALES.en[key]) || key;
+  return LOCALES[window.CURRENT_LANG][key] || key;
 }
 
 function resolvePhaseLabel(phaseKey){

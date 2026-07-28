@@ -11,7 +11,7 @@
     {id:'en',      key:'ov.en',      dataFn:z=>ELEMENTS[z]?.electronegativity, unitKey:null, lo:'#1a1a5a', hi:'#00d4ff', fmt:v=>v.toFixed(2)},
     {id:'density', key:'ov.density', data:F_DENSITY,   unitKey:'ov.unit.gcc', lo:'#0e2a15', hi:'#ff8ac9', fmt:v=>v.toFixed(2), log:true},
     {id:'melt',    key:'ov.melt',    data:F_MELT,      unitKey:'ov.unit.k',   lo:'#0a2a4a', hi:'#ff6b6b', fmt:v=>v+''},
-    {id:'year',    key:'ov.year',    dataFn:z=>(typeof DISCOVERY==='object'&&DISCOVERY[z])?DISCOVERY[z][0]:null, unitKey:'ov.unit.year', lo:'#3a1a5a', hi:'#feca57', fmt:v=>v<0?('~'+(-v)+' BCE'):(''+v)},
+    {id:'year',    key:'ov.year',    dataFn:z=>DISCOVERY[z][0], unitKey:'ov.unit.year', lo:'#3a1a5a', hi:'#feca57', fmt:v=>v<0?('~'+(-v)+' BCE'):(''+v)},
     {id:'origin',  key:'ov.origin',  special:'origin'},
     {id:'abundance', key:'ov.abundance', data:F_ABUNDANCE, unitKey:'ov.unit.ppm', lo:'#0a2a2a', hi:'#5aff8a', fmt:v=>v>=1?v.toFixed(0):v.toExponential(1), log:true},
   ];
@@ -22,7 +22,6 @@
   function ensureToolbar(){
     if (document.getElementById('viewToolbar')) return;
     const wrap = document.querySelector('.pt-wrap');
-    if (!wrap) return;
     const bar = document.createElement('div');
     bar.className = 'view-toolbar';
     bar.id = 'viewToolbar';
@@ -34,7 +33,7 @@
       }).join('') + `<span class="vt-caveat" data-i18n="ov.caveat">${t('ov.caveat')}</span>`;
     wrap.parentNode.insertBefore(bar, wrap);
     const links = PeriodicSources.render('overlays', null, window.CURRENT_LANG, document);
-    if (links) bar.appendChild(links);
+    bar.appendChild(links);
 
     const legend = document.createElement('div');
     legend.className = 'view-legend';
@@ -70,10 +69,14 @@
     return `rgb(${r},${g},${c})`;
   }
 
+  function overlayValue(o, z){
+    return o.data ? o.data[z] : (o.dataFn ? o.dataFn(z) : null);
+  }
+
   function collectValues(o){
     const vals = [];
     for(let z=1; z<=118; z++){
-      let v = o.data ? o.data[z] : (o.dataFn ? o.dataFn(z) : null);
+      let v = overlayValue(o, z);
       if (v == null || v === 0 && o.log) continue;
       vals.push({z, v});
     }
@@ -91,7 +94,7 @@
         const chip = c.querySelector('.ov-chip'); if(chip) chip.remove();
         const val = c.querySelector('.ov-value'); if(val) val.remove();
       });
-      if (legend) legend.classList.remove('on');
+      legend.classList.remove('on');
       return;
     }
 
@@ -99,27 +102,24 @@
       // Discrete overlay
       cells.forEach(c => {
         const z = parseInt(c.dataset.z, 10);
-        if (!z) return;
         const o = F_ORIGIN[z];
         c.classList.add('overlay-on'); c.classList.remove('overlay-off');
         let chip = c.querySelector('.ov-chip');
         if (!chip){ chip = document.createElement('div'); chip.className='ov-chip'; c.appendChild(chip); }
-        chip.style.setProperty('--ov-color', F_ORIGIN_COLORS[o] || '#666');
+        chip.style.setProperty('--ov-color', F_ORIGIN_COLORS[o]);
         let val = c.querySelector('.ov-value');
         if (!val){ val = document.createElement('div'); val.className='ov-value'; c.appendChild(val); }
-        val.textContent = F_ORIGIN_ICON[o] || '';
+        val.textContent = F_ORIGIN_ICON[o];
         val.style.fontSize = '11px';
       });
       // Custom legend for origins
-      if (legend){
-        legend.classList.add('on');
-        legend.innerHTML = `<span class="vl-title">${t('ov.origin')}</span>` +
-          Object.keys(F_ORIGIN_COLORS).map(k => {
-            const key = 'origin.' + (k==='dwarf'?'dwarf':k);
-            const label = (LOCALES[window.CURRENT_LANG]||LOCALES.en)[key] || k;
-            return `<span class="nl-item"><span class="nl-dot" style="background:${F_ORIGIN_COLORS[k]}"></span>${F_ORIGIN_ICON[k]||''} ${label}</span>`;
-          }).join('');
-      }
+      legend.classList.add('on');
+      legend.innerHTML = `<span class="vl-title">${t('ov.origin')}</span>` +
+        Object.keys(F_ORIGIN_COLORS).map(k => {
+          const key = 'origin.' + k;
+          const label = LOCALES[window.CURRENT_LANG][key];
+          return `<span class="nl-item"><span class="nl-dot" style="background:${F_ORIGIN_COLORS[k]}"></span>${F_ORIGIN_ICON[k]} ${label}</span>`;
+        }).join('');
       return;
     }
 
@@ -139,9 +139,8 @@
 
     cells.forEach(c => {
       const z = parseInt(c.dataset.z, 10);
-      if (!z) return;
       c.classList.add('overlay-on');
-      let v = o.data ? o.data[z] : (o.dataFn ? o.dataFn(z) : null);
+      let v = overlayValue(o, z);
       let chip = c.querySelector('.ov-chip');
       let val = c.querySelector('.ov-value');
       if (v == null || (o.log && v <= 0)){
@@ -160,34 +159,25 @@
       val.style.fontSize = '8px';
     });
 
-    if (legend){
-      legend.classList.add('on');
-      legend.innerHTML =
-        `<span class="vl-title">${t(o.key)}</span>` +
-        `<span class="vl-tick">${o.fmt(o.log ? Math.pow(10,lo) : lo)}</span>` +
-        `<span class="vl-bar" style="background:linear-gradient(90deg,${o.lo},${o.hi})"></span>` +
-        `<span class="vl-tick">${o.fmt(o.log ? Math.pow(10,hi) : hi)}</span>` +
-        `<span class="vl-unit">${o.unitKey ? t(o.unitKey) : ''}</span>` +
-        (o.log ? `<span class="vl-na">${(window.CURRENT_LANG==='zh-CN')?'对数刻度':'log scale'}</span>` : '');
-    }
+    legend.classList.add('on');
+    legend.innerHTML =
+      `<span class="vl-title">${t(o.key)}</span>` +
+      `<span class="vl-tick">${o.fmt(o.log ? Math.pow(10,lo) : lo)}</span>` +
+      `<span class="vl-bar" style="background:linear-gradient(90deg,${o.lo},${o.hi})"></span>` +
+      `<span class="vl-tick">${o.fmt(o.log ? Math.pow(10,hi) : hi)}</span>` +
+      `<span class="vl-unit">${o.unitKey ? t(o.unitKey) : ''}</span>` +
+      (o.log ? `<span class="vl-na">${(window.CURRENT_LANG==='zh-CN')?'对数刻度':'log scale'}</span>` : '');
   }
 
   /* Init: run once at page load; and again whenever the grid rerenders */
   function init(){
     ensureToolbar();
-    // Attach data-z to every cell (in case makeCell didn't)
-    document.querySelectorAll('.cell').forEach(c => {
-      if (c.dataset.z) return;
-      const zEl = c.querySelector('.z');
-      if (zEl && zEl.textContent) c.dataset.z = zEl.textContent.trim();
-    });
     if (currentOverlay !== 'default') applyOverlay(currentOverlay);
   }
 
   /* Observe #ptGrid — every time it's rebuilt (language change etc.), re-apply overlay */
   function attachObserver(){
     const grid = document.getElementById('ptGrid');
-    if (!grid) return;
     let scheduled = false;
     const obs = new MutationObserver(()=>{
       if (scheduled) return;
@@ -200,7 +190,7 @@
     obs.observe(grid, {childList:true, subtree:true});
   }
 
-  window.__F1 = { applyOverlay, init, currentOverlay: ()=>currentOverlay };
+  window.__F1 = { applyOverlay, init, currentOverlay: ()=>currentOverlay, lerpHex, collectValues };
 
   // Initial setup after DOM is ready
   function bootstrap(){

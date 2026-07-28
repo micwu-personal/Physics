@@ -58,7 +58,7 @@
     root.querySelector('#nuclideBack').addEventListener('click', close);
     buildLegend();
     const links = PeriodicSources.render('nuclides', null, window.CURRENT_LANG, document);
-    if (links) root.querySelector('.nuclide-header').appendChild(links);
+    root.querySelector('.nuclide-header').appendChild(links);
 
     const body = root.querySelector('#nuclideBody');
     let dragStartPanX = 0, dragStartPanY = 0, dragStartMouseX = 0, dragStartMouseY = 0;
@@ -67,7 +67,7 @@
       ev.preventDefault();
       const rect = canvas.getBoundingClientRect();
       const mx = ev.clientX - rect.left, my = ev.clientY - rect.top;
-      const h = canvas.height / (window.devicePixelRatio || 1);
+      const h = canvas.height / window.devicePixelRatio;
       const worldN = (mx - panX) / scale;
       const worldZ = (h - my - panY) / scale;
       const delta = ev.deltaY > 0 ? 0.85 : 1.18;
@@ -119,11 +119,11 @@
 
   function resize(){
     const rect = root.querySelector('#nuclideBody').getBoundingClientRect();
-    canvas.width = rect.width * (window.devicePixelRatio || 1);
-    canvas.height = rect.height * (window.devicePixelRatio || 1);
+    canvas.width = rect.width * window.devicePixelRatio;
+    canvas.height = rect.height * window.devicePixelRatio;
     canvas.style.width = rect.width + 'px';
     canvas.style.height = rect.height + 'px';
-    ctx.setTransform(window.devicePixelRatio || 1, 0, 0, window.devicePixelRatio || 1, 0, 0);
+    ctx.setTransform(window.devicePixelRatio, 0, 0, window.devicePixelRatio, 0, 0);
     // Initial framing: fit N=0..180, Z=0..120
     const targetN = 180, targetZ = 120;
     const sX = (rect.width - 60) / targetN;
@@ -137,7 +137,7 @@
   function pickNuclide(mx, my){
     // Convert screen → world
     const N = (mx - panX) / scale;
-    const Zw = (canvas.height/(window.devicePixelRatio||1) - my - panY) / scale;
+    const Zw = (canvas.height/window.devicePixelRatio - my - panY) / scale;
     // Find closest
     let best = null, bestD = 999;
     for (const nc of F_NUCLIDES){
@@ -153,7 +153,6 @@
   function showTip(nc, x, y){
     const [Z, N, decay, hl] = nc;
     const el = ELEMENTS[Z];
-    if (!el) { tipEl.classList.remove('on'); return; }
     const A = Z + N;
     const halfTxt = (typeof hl === 'string') ? hl : formatHalfLife(hl);
     const magicZ = MAGIC.includes(Z), magicN = MAGIC.includes(N);
@@ -162,7 +161,7 @@
     tipEl.innerHTML = `
       <div class="nt-sym"><sup>${A}</sup>${el.symbol}</div>
       <div>Z=${Z}, N=${N}</div>
-      <div class="nt-mode">${t(DECAY_KEYS[decay]||'nuc.decay.unknown')}</div>
+      <div class="nt-mode">${t(DECAY_KEYS[decay])}</div>
       <div>${t('nuc.tip.half')}: ${halfTxt}</div>
       ${magicTxt}`;
     // Position tooltip near cursor
@@ -187,7 +186,7 @@
   }
 
   function draw(){
-    const dpr = window.devicePixelRatio || 1;
+    const dpr = window.devicePixelRatio;
     const w = canvas.width / dpr, h = canvas.height / dpr;
     ctx.clearRect(0, 0, w, h);
 
@@ -234,7 +233,7 @@
       const x = panX + N*scale;
       const y = h - Z*scale - panY;
       if (x < -size || x > w+size || y < -size || y > h+size) continue;
-      ctx.fillStyle = DECAY_COLORS[decay] || '#666';
+      ctx.fillStyle = DECAY_COLORS[decay];
       ctx.fillRect(x - size/2, y - size/2, size, size);
       if (MAGIC.includes(Z) && MAGIC.includes(N)){
         ctx.strokeStyle = '#fff';
@@ -281,19 +280,17 @@
     if (btn) btn.textContent = '⚛ ' + t('nuc.chart.open');
     if (root){
       buildLegend();
-      const back = root.querySelector('#nuclideBack');
-      if (back) back.textContent = t('nuc.chart.close');
-      const h2 = root.querySelector('h2');
-      if (h2) h2.textContent = t('nuc.chart.title');
+      root.querySelector('#nuclideBack').textContent = t('nuc.chart.close');
+      root.querySelector('h2').textContent = t('nuc.chart.title');
       root.querySelectorAll('.nuclide-header > .source-links').forEach(node => node.remove());
       const links = PeriodicSources.render('nuclides', null, window.CURRENT_LANG, document);
-      if (links) root.querySelector('.nuclide-header').appendChild(links);
+      root.querySelector('.nuclide-header').appendChild(links);
       if (root.classList.contains('on')) draw();
     }
   }
   new MutationObserver(refreshLang).observe(document.documentElement, {attributes:true, attributeFilter:['lang']});
 
-  window.__B1 = { open, close };
+  window.__B1 = { open, close, formatHalfLife, buildLegend, resize, pickNuclide, showTip, draw };
 
   function init(){
     addOpenButton();

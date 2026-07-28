@@ -2,6 +2,9 @@
 
 const test = require('node:test');
 const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
+const vm = require('node:vm');
 const Sources = require('../source-registry.js');
 
 class FakeNode {
@@ -27,6 +30,12 @@ class FakeDocument {
 test('source registry covers every required group and element links', ()=>{
   Sources.REQUIRED_GROUPS.forEach(group=>assert.ok(Sources.sourcesFor(group, 1).length));
   assert.equal(Sources.sourcesFor('shells').length, 1);
+  // Section-level citations ask for an element-scoped group without an element.
+  assert.deepEqual(
+    Sources.sourcesFor('core', null),
+    Sources.SOURCE_GROUPS.core.map(id=>Sources.SOURCES[id])
+  );
+  assert.equal(Sources.sourcesFor('discovery', 119).length, Sources.SOURCE_GROUPS.discovery.length);
   assert.equal(Sources.elementSource(0), null);
   assert.equal(Sources.elementSource(119), null);
   assert.equal(Sources.elementSource(1.5), null);
@@ -68,4 +77,12 @@ test('install replaces section source links and handles missing roots', ()=>{
   assert.equal(section.children.at(-1).className, 'source-links');
   assert.equal(Sources.install(null, 6, 'en'), 0);
   assert.equal(Sources.install({}, 6, 'en'), 0);
+});
+
+test('browser global receives the source registry API', ()=>{
+  const filename = path.resolve(__dirname, '../source-registry.js');
+  const context = {};
+  context.globalThis = context;
+  vm.runInNewContext(fs.readFileSync(filename, 'utf8'), context, {filename});
+  assert.equal(context.PeriodicSources.REQUIRED_GROUPS.length, Sources.REQUIRED_GROUPS.length);
 });

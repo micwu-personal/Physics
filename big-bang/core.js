@@ -72,7 +72,9 @@ var BigBangCore = (function(){
     const cy = height/2;
     for(const star of stars){
       star.z -= 1.2;
-      if(star.z < 1){
+      // A shrinking viewport leaves stars behind the new far plane; recycling
+      // them keeps the perspective fade inside [0, 1].
+      if(star.z < 1 || star.z > width){
         star.z = width;
         star.x = (random()-0.5)*width;
         star.y = (random()-0.5)*height;

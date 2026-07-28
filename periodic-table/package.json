@@ -5,7 +5,7 @@
   "scripts": {
     "build": "node build.js",
     "validate": "node validate.js",
-    "test": "node --test",
+    "test": "node validate.js && node --test",
     "coverage": "node --test --experimental-test-coverage --test-coverage-include=science.js --test-coverage-include=source-registry.js --test-coverage-lines=100 --test-coverage-functions=100 --test-coverage-branches=100",
     "profile": "node profile.js"
   },

@@ -63,8 +63,10 @@ export async function setLanguage(page, language) {
 }
 
 export async function blockExternalAssets(page) {
-  await page.route(/^https?:\/\/(?!127\.0\.0\.1:43817)/, route => {
-    route.fulfill({ status: 204, body: '' });
+  await page.route(/^https?:\/\//, route => {
+    const url = new URL(route.request().url());
+    if (url.hostname === '127.0.0.1') return route.continue();
+    return route.fulfill({ status: 204, body: '' });
   });
 }
 

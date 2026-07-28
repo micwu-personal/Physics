@@ -2,6 +2,9 @@
 
 const test = require('node:test');
 const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
+const vm = require('node:vm');
 const Science = require('../science.js');
 
 test('electron configurations produce principal-shell populations', ()=>{
@@ -48,4 +51,12 @@ test('animation state and radioactivity classification cover every branch', ()=>
   assert.equal(Science.radioactivityClass(94,2), 'trace');
   assert.equal(Science.radioactivityClass(95,2), 'synthetic');
   assert.equal(Science.radioactivityClass(84,2), 'natural');
+});
+
+test('browser global receives the same science API', ()=>{
+  const filename = path.resolve(__dirname, '../science.js');
+  const context = {};
+  context.globalThis = context;
+  vm.runInNewContext(fs.readFileSync(filename, 'utf8'), context, {filename});
+  assert.equal(context.PeriodicScience.reactionBalance('2H₂ + O₂ → 2H₂O').balanced, true);
 });

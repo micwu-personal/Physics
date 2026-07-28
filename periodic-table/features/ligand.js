@@ -22,6 +22,7 @@
     {id:'CN',  labelKey:'lf.spec.cn',  f:1.7},
     {id:'CO',  labelKey:'lf.spec.co',  f:1.9},
   ];
+  const DEFAULT_LIGAND = 'H2O';
 
   // Metal-ion contribution g (Δ ≈ f × g in units of cm⁻¹) — Jørgensen model
   // Only listing common M²⁺/M³⁺ ions from period 4. Key: 'symbol+charge'.
@@ -79,40 +80,29 @@
     return true;
   }
 
-  /* Pick default metal key for this Z */
+  /* Pick default metal key for this Z. Every Z that owns a METALS entry is
+     listed here, so an unlisted chromophore simply has no ligand-field model. */
+  const PREFERRED_METAL = {
+    22:'Ti3', 23:'V3', 24:'Cr3', 25:'Mn2', 26:'Fe3', 27:'Co2',
+    28:'Ni2', 29:'Cu2',
+    44:'Ru3', 45:'Rh3', 46:'Pd2',
+    77:'Ir3', 78:'Pt2',
+  };
   function defaultMetal(z){
     const el = ELEMENTS[z];
     if (!el) return null;
-    const sym = el.symbol;
-    // Prefer the most common charge (heuristic)
-    const preferred = {
-      22:'Ti3', 23:'V3', 24:'Cr3', 25:'Mn2', 26:'Fe3', 27:'Co2',
-      28:'Ni2', 29:'Cu2',
-      44:'Ru3', 45:'Rh3', 46:'Pd2',
-      77:'Ir3', 78:'Pt2',
-    };
-    if (preferred[z]) return preferred[z];
-    // Fallback: any key starting with symbol
-    for (const k of Object.keys(METALS)){
-      if (k.startsWith(sym)) return k;
-    }
-    return null;
+    return PREFERRED_METAL[z] || null;
   }
 
   function findColorsBlock(){
     // Locate the existing "Signature Colors" block (h3 has data-i18n="detail.section.colors")
-    const h3s = document.querySelectorAll('.d-block h3');
-    for (const h of h3s){
-      if (h.getAttribute('data-i18n') === 'detail.section.colors') return h.closest('.d-block');
-    }
-    return null;
+    return document.querySelector('.d-block h3[data-i18n="detail.section.colors"]').closest('.d-block');
   }
 
   function ensureLFBlock(){
     let block = document.getElementById('lfBlock');
     if (block) return block;
     const colors = findColorsBlock();
-    if (!colors) return null;
     block = document.createElement('div');
     block.className = 'd-block';
     block.id = 'lfBlock';
@@ -125,13 +115,10 @@
 
   function render(){
     const block = ensureLFBlock();
-    if (!block) return;
     // Determine current Z from active cell
     const active = document.querySelector('.cell.active');
     if (!active) { block.style.display = 'none'; return; }
     const z = parseInt(active.dataset.z, 10);
-    if (!z) { block.style.display = 'none'; return; }
-
     if (!isChromophore(z)){
       block.style.display = '';
       block.querySelector('#lfContent').innerHTML = `<div class="lf-na">${t('lf.na')}</div>`;
@@ -139,17 +126,18 @@
     }
     block.style.display = '';
 
-    const metalKey = block.dataset.metal || defaultMetal(z);
+    const selectedMetal = block.dataset.metal;
+    const metalKey = selectedMetal?.startsWith(ELEMENTS[z].symbol) ? selectedMetal : defaultMetal(z);
     if (!metalKey){
       block.querySelector('#lfContent').innerHTML = `<div class="lf-na">${t('lf.na')}</div>`;
       return;
     }
     block.dataset.metal = metalKey;
-    const ligandId = block.dataset.ligand || 'H2O';
+    const ligandId = block.dataset.ligand || DEFAULT_LIGAND;
     block.dataset.ligand = ligandId;
 
     const g = METALS[metalKey];
-    const lig = LIGANDS.find(l=>l.id===ligandId) || LIGANDS[5];
+    const lig = LIGANDS.find(l=>l.id===ligandId);
     const delta_cm = g * lig.f;                        // Δ_oct in cm⁻¹
     const wl_nm = cmToNm(delta_cm);
     const inVisible = wl_nm >= 380 && wl_nm <= 780;
@@ -209,7 +197,7 @@
         </div>
       </div>`;
     const sourceLinks = PeriodicSources.render('ligand', z, window.CURRENT_LANG, document);
-    if (sourceLinks) block.querySelector('#lfContent').appendChild(sourceLinks);
+    block.querySelector('#lfContent').appendChild(sourceLinks);
 
     // Wire ligand buttons
     block.querySelectorAll('[data-lig]').forEach(b => b.addEventListener('click', ()=>{
@@ -240,9 +228,8 @@
   }
 
   function drawSplitDiagram(canvas, delta_cm, ligandId){
-    if (!canvas) return;
     const rect = canvas.getBoundingClientRect();
-    const dpr = window.devicePixelRatio || 1;
+    const dpr = window.devicePixelRatio;
     canvas.width = rect.width * dpr;
     canvas.height = 200 * dpr;
     canvas.style.height = '200px';
@@ -328,12 +315,9 @@
   /* Observe the detail panel to re-render whenever it changes */
   function attachObserver(){
     const detail = document.getElementById('detail');
-    if (!detail) return;
     const dName = document.getElementById('dName');
-    if (dName){
-      new MutationObserver(()=>{ setTimeout(render, 30); })
-        .observe(dName, {childList:true, characterData:true, subtree:true});
-    }
+    new MutationObserver(()=>{ setTimeout(render, 30); })
+      .observe(dName, {childList:true, characterData:true, subtree:true});
     new MutationObserver(()=>{
       if (!detail.classList.contains('hidden')) setTimeout(render, 30);
     }).observe(detail, {attributes:true, attributeFilter:['class']});
@@ -345,7 +329,15 @@
   }
   new MutationObserver(refreshLang).observe(document.documentElement, {attributes:true, attributeFilter:['lang']});
 
-  window.__C5 = { render };
+  window.__C5 = {
+    render,
+    wavelengthToRGB,
+    complementary,
+    isChromophore,
+    defaultMetal,
+    nearestColorName,
+    drawSplitDiagram
+  };
 
   function init(){
     attachObserver();

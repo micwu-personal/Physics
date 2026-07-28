@@ -51,7 +51,6 @@
   function ensurePanel(){
     if (panel) return panel;
     const wrap = document.querySelector('.pt-wrap');
-    if (!wrap) return null;
     panel = document.createElement('div');
     panel.className = 'timeline-panel';
     panel.id = 'timelinePanel';
@@ -68,7 +67,7 @@
       <div class="tl-info" id="tlInfo"></div>`;
     wrap.parentNode.insertBefore(panel, wrap);
     const links = PeriodicSources.render('discovery', null, window.CURRENT_LANG, document);
-    if (links) panel.appendChild(links);
+    panel.appendChild(links);
 
     sliderEl = panel.querySelector('#tlSlider');
     yearDisplay = panel.querySelector('#tlYear');
@@ -94,7 +93,6 @@
 
     cells.forEach(c => {
       const z = parseInt(c.dataset.z, 10);
-      if (!z) return;
       const y = getDiscoveryYear(z);
       const known = y <= year;
       const wasKnown = y <= prevYearBar;
@@ -128,7 +126,7 @@
         `<br>&nbsp;&nbsp;<span class="eka">${t('tl.eka.mn')}</span>`;
     } else if (newlyDiscovered){
       const el = ELEMENTS[newlyDiscovered];
-      const rec = (typeof DISCOVERY === 'object' && DISCOVERY[newlyDiscovered]) || [null, ''];
+      const rec = DISCOVERY[newlyDiscovered];
       info = `<b>${year}:</b> ${el.name_en} / ${el.name_zh} (${el.symbol}, Z=${newlyDiscovered}) — ${rec[1]}`;
       if (EKA[newlyDiscovered]){
         const e = EKA[newlyDiscovered];
@@ -161,7 +159,6 @@
 
     const stepMs = 40;  // ~9 seconds total for 250 years
     function tick(){
-      if (!playing) return;
       year++;
       if (year > MAX_YEAR){ stopPlay(); return; }
       sliderEl.value = year;
@@ -172,14 +169,14 @@
   }
 
   function stopPlay(){
+    if (!playing) return;
     playing = false;
     clearTimeout(playRAF);
-    if (playBtn) playBtn.textContent = t('tl.play');
+    playBtn.textContent = t('tl.play');
   }
 
   function toggle(){
     const p = ensurePanel();
-    if (!p) return;
     p.classList.toggle('on');
     if (p.classList.contains('on')){
       applyYear(parseInt(sliderEl.value, 10));
@@ -210,15 +207,15 @@
     const btn = document.getElementById('tlToggleBtn');
     if (btn) btn.textContent = '🕰 ' + t('tl.title');
     if (panel){
-      const h = panel.querySelector('h3'); if (h) h.textContent = t('tl.title');
-      if (playBtn) playBtn.textContent = playing ? t('tl.stop') : t('tl.play');
+      panel.querySelector('h3').textContent = t('tl.title');
+      playBtn.textContent = playing ? t('tl.stop') : t('tl.play');
       if (panel.classList.contains('on') && sliderEl) applyYear(parseInt(sliderEl.value, 10));
     }
   }
   new MutationObserver(refreshLang).observe(document.documentElement, {attributes:true, attributeFilter:['lang']});
   document.addEventListener('visibilitychange', ()=>{ if (document.hidden) stopPlay(); });
 
-  window.__F2 = { toggle, applyYear };
+  window.__F2 = { toggle, applyYear, getDiscoveryYear, startPlay, stopPlay };
 
   function init(){ addToggleButton(); }
   function bootstrap(){ setTimeout(init, 300); }

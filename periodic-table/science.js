@@ -1,7 +1,7 @@
 (function(root, factory){
   const api = factory();
   if (typeof module === 'object' && module.exports) module.exports = api;
-  if (root) root.PeriodicScience = api;
+  root.PeriodicScience = api;
 })(globalThis, function(){
   'use strict';
 

@@ -16,6 +16,7 @@ build/
 coverage/
 playwright-report/
 test-results/
+.coverage-raw/
 .env
 .env.local
 

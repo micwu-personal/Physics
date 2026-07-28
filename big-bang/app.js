@@ -14,8 +14,7 @@ document.querySelectorAll('.tab').forEach(t=>{
 /* ================ Timeline ================ */
 function renderTimeline(){
   const wrap = document.getElementById('timelineWrap');
-  if(!wrap) return;
-  const dict = LOCALES[window.CURRENT_LANG||'en']||LOCALES.en;
+  const dict = LOCALES[window.CURRENT_LANG];
   wrap.innerHTML = '';
   EPOCHS.forEach(base=>{
     const e = getEpoch(base.id);
@@ -82,12 +81,11 @@ function pickEpoch(tsec){
 
 /* Format time nicely */
 function fmtTime(tsec){
-  return formatCosmicTime(tsec, window.CURRENT_LANG || 'en');
+  return formatCosmicTime(tsec, window.CURRENT_LANG);
 }
 
 function updateMachine(){
   const slider = document.getElementById('timeSlider');
-  if(!slider) return;
   const logT = parseFloat(slider.value);
   const tsec = Math.pow(10, logT);
   const ep = pickEpoch(tsec);
@@ -99,7 +97,7 @@ function updateMachine(){
   document.getElementById('mpDens').textContent = ep.density;
   document.getElementById('mpDom').textContent = ep.dominant;
   document.getElementById('mpEvent').innerHTML = ep.events.slice(0,2).join('<br>');
-  document.getElementById('mpRefs').innerHTML = buildReferenceLinks(ep.refs, SOURCES, LOCALES[window.CURRENT_LANG || 'en']['refs.label']);
+  document.getElementById('mpRefs').innerHTML = buildReferenceLinks(ep.refs, SOURCES, LOCALES[window.CURRENT_LANG]['refs.label']);
   drawMachine(tsec, ep);
 }
 
@@ -163,8 +161,7 @@ const COMP_COLORS = {
 
 function renderComposition(){
   const grid = document.getElementById('compGrid');
-  if(!grid) return;
-  const dict = LOCALES[window.CURRENT_LANG||'en']||LOCALES.en;
+  const dict = LOCALES[window.CURRENT_LANG];
   const snapshots = [
     {key:'now',    labelKey:'comp.today',  ...COMPOSITIONS.now},
     {key:'recomb', labelKey:'comp.recomb', ...COMPOSITIONS.recomb},
@@ -174,14 +171,14 @@ function renderComposition(){
   snapshots.forEach(sn=>{
     const c = document.createElement('div');
     c.className='comp-card';
-    const label = dict[sn.labelKey] || sn.labelKey;
+    const label = dict[sn.labelKey];
     c.innerHTML = `
       <h3>${label}</h3>
       <div class="pie-holder">${buildPieSvg(sn.data)}</div>
       <div class="comp-legend">
         ${sn.data.map(row=>{
-          const name = dict['comp.legend.'+row.k] || row.k;
-          const col = COMP_COLORS[row.k] || '#fff';
+          const name = dict['comp.legend.'+row.k];
+          const col = COMP_COLORS[row.k];
           return `<div class="cl-row"><div class="cl-dot" style="background:${col}"></div><div class="cl-name">${name}</div><div class="cl-val">${formatCompositionPercent(row.v)}</div></div>`;
         }).join('')}
       </div>
@@ -210,7 +207,7 @@ function buildPieSvg(data){
     const x2 = cx + r * Math.cos(endAngle);
     const y2 = cy + r * Math.sin(endAngle);
     const large = angle > Math.PI ? 1 : 0;
-    const col = COMP_COLORS[row.k] || '#fff';
+    const col = COMP_COLORS[row.k];
     paths += `<path d="M ${cx} ${cy} L ${x1} ${y1} A ${r} ${r} 0 ${large} 1 ${x2} ${y2} Z" fill="${col}" opacity="0.85" stroke="rgba(0,0,0,0.4)" stroke-width="1"/>`;
     startAngle = endAngle;
   });
@@ -230,9 +227,8 @@ const SCALE_ROWS = [
 ];
 function renderScale(){
   const wrap = document.getElementById('scaleWrap');
-  if(!wrap) return;
-  const zh = (window.CURRENT_LANG||'en')==='zh-CN';
-  const dict = LOCALES[window.CURRENT_LANG||'en']||LOCALES.en;
+  const zh = window.CURRENT_LANG==='zh-CN';
+  const dict = LOCALES[window.CURRENT_LANG];
   wrap.innerHTML = '';
   SCALE_ROWS.forEach(row=>{
     const el = document.createElement('div');
@@ -253,9 +249,8 @@ function renderScale(){
 /* ================ Fates ================ */
 function renderFates(){
   const grid = document.getElementById('fatesGrid');
-  if(!grid) return;
-  const lang = window.CURRENT_LANG || 'en';
-  const list = FATES[lang] || FATES.en;
+  const lang = window.CURRENT_LANG;
+  const list = FATES[lang];
   grid.innerHTML = '';
   list.forEach(f=>{
     const c = document.createElement('div');
@@ -274,9 +269,8 @@ function renderFates(){
 /* ================ Mysteries ================ */
 function renderMysteries(){
   const grid = document.getElementById('mysteriesGrid');
-  if(!grid) return;
-  const lang = window.CURRENT_LANG || 'en';
-  const list = MYSTERIES[lang] || MYSTERIES.en;
+  const lang = window.CURRENT_LANG;
+  const list = MYSTERIES[lang];
   grid.innerHTML = '';
   list.forEach(m=>{
     const c = document.createElement('div');

@@ -1,0 +1,22 @@
+[
+  "index.html#inline-script",
+  "big-bang/app.js",
+  "big-bang/core.js",
+  "big-bang/i18n.js",
+  "periodic-table/app.js",
+  "periodic-table/data.js",
+  "periodic-table/i18n.js",
+  "periodic-table/science.js",
+  "periodic-table/source-registry.js",
+  "periodic-table/features/features-data.js",
+  "periodic-table/features/features-i18n.js",
+  "periodic-table/features/ligand.js",
+  "periodic-table/features/nuclide.js",
+  "periodic-table/features/origins.js",
+  "periodic-table/features/overlays.js",
+  "periodic-table/features/timeline.js",
+  "particle-zoo/app.js",
+  "particle-zoo/i18n.js",
+  "particle-zoo/physics-core.js",
+  "particle-zoo/references.js"
+]

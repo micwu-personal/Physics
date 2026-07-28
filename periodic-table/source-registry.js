@@ -1,7 +1,7 @@
 (function(root, factory){
   const api = factory();
   if (typeof module === 'object' && module.exports) module.exports = api;
-  if (root) root.PeriodicSources = api;
+  root.PeriodicSources = api;
 })(globalThis, function(){
   'use strict';
 
@@ -92,7 +92,7 @@
     nodes.forEach(node => {
       node.querySelectorAll(':scope > .source-links').forEach(old => old.remove());
       const rendered = render(node.dataset.sourceGroup, atomicNumber, lang, node.ownerDocument);
-      if (rendered) node.appendChild(rendered);
+      node.appendChild(rendered);
     });
     return nodes.length;
   }

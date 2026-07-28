@@ -885,18 +885,14 @@ const LOCALES = {
 };
 
 function applyI18n(lang){
-  const dict = LOCALES[lang] || LOCALES.en;
+  const dict = LOCALES[lang];
   document.documentElement.lang = (lang==='zh-CN' ? 'zh-CN' : 'en');
   document.querySelectorAll('[data-i18n]').forEach(el=>{
     const key = el.getAttribute('data-i18n');
-    if(dict[key] !== undefined) el.innerHTML = dict[key];
+    el.innerHTML = dict[key];
   });
-  document.querySelectorAll('[data-i18n-placeholder]').forEach(el=>{
-    const key = el.getAttribute('data-i18n-placeholder');
-    if(dict[key] !== undefined) el.setAttribute('placeholder', dict[key]);
-  });
-  const titleKey = document.querySelector('title')?.getAttribute('data-i18n');
-  if(titleKey && dict[titleKey]) document.title = dict[titleKey];
+  const titleKey = document.querySelector('title').getAttribute('data-i18n');
+  document.title = dict[titleKey];
   document.querySelectorAll('.lang-pill').forEach(b=>{
     b.classList.toggle('active', b.dataset.lang===lang);
   });
@@ -905,13 +901,12 @@ function applyI18n(lang){
   });
   window.CURRENT_LANG = lang;
   // Re-render dynamic content
-  if(typeof rerenderGrid==='function') rerenderGrid();
-  if(typeof refreshDetail==='function') refreshDetail();
+  rerenderGrid();
+  refreshDetail();
 }
 
 function t(key){
-  const dict = LOCALES[window.CURRENT_LANG||'en'];
-  return (dict && dict[key]) || (LOCALES.en[key]) || key;
+  return LOCALES[window.CURRENT_LANG][key] || key;
 }
 
 function resolvePhaseLabel(phaseKey){
@@ -1132,12 +1127,9 @@ function resolvePhaseLabel(phaseKey){
     }
   };
 
-  // Merge into existing LOCALES
-  if (typeof LOCALES === 'object' && LOCALES) {
-    Object.keys(extra).forEach(lang => {
-      LOCALES[lang] = Object.assign(LOCALES[lang] || {}, extra[lang]);
-    });
-  }
+  Object.keys(extra).forEach(lang => {
+    LOCALES[lang] = Object.assign(LOCALES[lang], extra[lang]);
+  });
 })();
 
 </script>
@@ -1145,7 +1137,7 @@ function resolvePhaseLabel(phaseKey){
 (function(root, factory){
   const api = factory();
   if (typeof module === 'object' && module.exports) module.exports = api;
-  if (root) root.PeriodicScience = api;
+  root.PeriodicScience = api;
 })(globalThis, function(){
   'use strict';
 
@@ -1294,7 +1286,7 @@ function resolvePhaseLabel(phaseKey){
 (function(root, factory){
   const api = factory();
   if (typeof module === 'object' && module.exports) module.exports = api;
-  if (root) root.PeriodicSources = api;
+  root.PeriodicSources = api;
 })(globalThis, function(){
   'use strict';
 
@@ -1385,7 +1377,7 @@ function resolvePhaseLabel(phaseKey){
     nodes.forEach(node => {
       node.querySelectorAll(':scope > .source-links').forEach(old => old.remove());
       const rendered = render(node.dataset.sourceGroup, atomicNumber, lang, node.ownerDocument);
-      if (rendered) node.appendChild(rendered);
+      node.appendChild(rendered);
     });
     return nodes.length;
   }
@@ -2459,7 +2451,7 @@ if (reducedMotionQuery && reducedMotionQuery.addEventListener) {
 
 /* ----- Rendering the grid ----- */
 function rerenderGrid(){
-  const lang = window.CURRENT_LANG || 'en';
+  const lang = window.CURRENT_LANG;
   gridEl.innerHTML='';
   LAYOUT.forEach((row, rowIdx)=>{
     const rowDiv = document.createElement('div');
@@ -2476,7 +2468,7 @@ function rerenderGrid(){
     row.forEach(cell=>{
       if(cell === 'La-Lu'){ for(let z=57; z<=71; z++) rowZs.push(z); }
       else if(cell === 'Ac-Lr'){ for(let z=89; z<=103; z++) rowZs.push(z); }
-      else if(typeof cell === 'number'){ rowZs.push(cell); }
+      else if(cell !== 0){ rowZs.push(cell); }
     });
     speak.addEventListener('click', (e)=>{
       e.stopPropagation();
@@ -2573,7 +2565,7 @@ function refreshDetail(){
   if(!currentZ) return;
   const el = ELEMENTS[currentZ];
   const ext = Object.assign({}, generateFallbackExt(el), EXTENDED[currentZ] || {});
-  const lang = window.CURRENT_LANG || 'en';
+  const lang = window.CURRENT_LANG;
   const catColor = CATEGORY_COLORS[el.category];
   const nm = lang==='zh-CN' ? el.name_zh : el.name_en;
   const otherName = lang==='zh-CN' ? el.name_en : el.name_zh;
@@ -2593,7 +2585,7 @@ function refreshDetail(){
   // Properties
   const propsEl = document.getElementById('dProps');
   const shells = shellCounts(el.Z);
-  const phaseKey = ext.phase || (el.category==='noble'?'gas':(el.category==='halogen' && el.Z<=17 ? (el.Z===9||el.Z===17?'gas':'liquid'):'solid'));
+  const phaseKey = ext.phase;
   const phaseBase = resolvePhaseLabel(phaseKey);
   const phaseNote = lang==='zh-CN' ? ext.phaseNote_zh : ext.phaseNote_en;
   const phaseTxt = phaseNote ? `${phaseBase} — ${phaseNote}` : phaseBase;
@@ -2622,23 +2614,17 @@ function refreshDetail(){
   // Orbital / hybridization
   const orbTabs = document.getElementById('orbitalTabs');
   const availHybrids = inferHybrids(el);
-  orbTabs.innerHTML = availHybrids.length ? availHybrids.map(h=>`<button data-h="${h}">${labelForHybrid(h)}</button>`).join('') : `<span style="color:var(--dim);font-size:12px">${t('hybrid.none')}</span>`;
-  if(availHybrids.length){
-    if(!availHybrids.includes(currentHybrid)) currentHybrid = availHybrids[0];
-    orbTabs.querySelectorAll('button').forEach(b=>{
-      b.classList.toggle('active', b.dataset.h===currentHybrid);
-      b.addEventListener('click',()=>{
-        currentHybrid = b.dataset.h;
-        orbTabs.querySelectorAll('button').forEach(x=>x.classList.toggle('active', x.dataset.h===currentHybrid));
-        refreshOrbital();
-      });
+  orbTabs.innerHTML = availHybrids.map(h=>`<button data-h="${h}">${labelForHybrid(h)}</button>`).join('');
+  if(!availHybrids.includes(currentHybrid)) currentHybrid = availHybrids[0];
+  orbTabs.querySelectorAll('button').forEach(b=>{
+    b.classList.toggle('active', b.dataset.h===currentHybrid);
+    b.addEventListener('click',()=>{
+      currentHybrid = b.dataset.h;
+      orbTabs.querySelectorAll('button').forEach(x=>x.classList.toggle('active', x.dataset.h===currentHybrid));
+      refreshOrbital();
     });
-    refreshOrbital();
-  } else {
-    const ctx = document.getElementById('orbitalCanvas').getContext('2d');
-    ctx.clearRect(0,0,9999,9999);
-    document.getElementById('dHybridText').textContent = '';
-  }
+  });
+  refreshOrbital();
 
   // Oxidation states
   const oxEl = document.getElementById('dOx');
@@ -2664,13 +2650,13 @@ function refreshDetail(){
   // Reactions
   const rxBlock = document.getElementById('dReactionsBlock');
   const rxEl = document.getElementById('dRx');
-  const reactions = ext.reactions || [];
+  const reactions = ext.reactions;
   if(reactions.length){
     rxBlock.style.display='block';
     rxEl.innerHTML = reactions.map((r,i)=>`
       <div class="rx-item">
         <div class="rx-eq">${r.eq}</div>
-        <div class="rx-note">${lang==='zh-CN' ? (r.note_zh||r.note_en||'') : (r.note_en||r.note_zh||'')}</div>
+        <div class="rx-note">${lang==='zh-CN' ? r.note_zh : r.note_en}</div>
         <button class="rx-play" data-i="${i}">▶ ${lang==='zh-CN'?'播放':'Play'}</button>
       </div>
     `).join('') + `<div id="rxAnimBox"><canvas id="rxAnimCanvas"></canvas></div>`;
@@ -2691,7 +2677,7 @@ function refreshDetail(){
 
   // Isotopes
   const isoEl = document.getElementById('dIsotopes');
-  const isos = ext.isotopes || [];
+  const isos = ext.isotopes;
   isoEl.innerHTML = isos.length ? isos.map(i=>`
     <div class="iso-row">
       <div class="iso-sym">${i.s}</div>
@@ -2707,13 +2693,12 @@ function refreshDetail(){
   rn.textContent = radioTxt;
 
   // Uses & discovery
-  document.getElementById('dUses').textContent = lang==='zh-CN' ? (ext.uses_zh||ext.uses_en||'—') : (ext.uses_en||ext.uses_zh||'—');
+  document.getElementById('dUses').textContent = lang==='zh-CN' ? ext.uses_zh : ext.uses_en;
   const disc = ext.discovery;
-  document.getElementById('dDiscovery').textContent = disc
-    ? (disc.year < 0 || /antiquity|prehistory/i.test(disc.who||'')
-        ? `${t('discovery.ancient')}${disc.who? ' — '+disc.who:''}`
-        : `${t('discovery.year')} ${disc.year} ${t('discovery.by')} ${disc.who}`)
-    : '';
+  document.getElementById('dDiscovery').textContent =
+    disc.year < 0 || /antiquity|prehistory/i.test(disc.who)
+      ? `${t('discovery.ancient')} — ${disc.who}`
+      : `${t('discovery.year')} ${disc.year} ${t('discovery.by')} ${disc.who}`;
   PeriodicSources.install(detailEl, el.Z, lang);
 }
 
@@ -2818,8 +2803,7 @@ function inferHybrids(el){
     list.push('sp','sp2','sp3');
     if(period >= 3) list.push('sp3d','sp3d2');
   } else if(el.category==='posttransition'){
-    list.push('sp','sp2','sp3');
-    if(period >= 3) list.push('sp3d','sp3d2');
+    list.push('sp','sp2','sp3','sp3d','sp3d2');
   } else if(el.category==='transition'){
     list.push('dsp2','d2sp3','sp3d2','sp3');
   } else if(el.category==='lanthanide' || el.category==='actinide'){
@@ -2838,7 +2822,7 @@ function refreshOrbital(){
 
 /* Rich physics description per orbital / hybrid */
 function descriptionForOrbital(h){
-  const lang = window.CURRENT_LANG || 'en';
+  const lang = window.CURRENT_LANG;
   const zh = lang==='zh-CN';
   const D = {
     s: {
@@ -3114,7 +3098,7 @@ function drawOrbital(h){
     ctx.textAlign='left';
     ctx.fillText(labelForHybrid(h), 10, 20);
     // Legend
-    const lang = window.CURRENT_LANG || 'en';
+    const lang = window.CURRENT_LANG;
     ctx.font='10px JetBrains Mono, ui-monospace, monospace';
     ctx.fillStyle='rgba(127,227,255,0.9)';
     ctx.fillText('+', W-40, 20);
@@ -3231,7 +3215,7 @@ function drawTorus(ctx, cx, cy, R, axis, pos){
 /* ----- Signature colors ----- */
 function renderSignatureColors(el){
   const grid = document.getElementById('dColors');
-  const lang = window.CURRENT_LANG || 'en';
+  const lang = window.CURRENT_LANG;
   const colors = SIGNATURE_COLORS[el.Z];
   if(!colors || !colors.length){
     grid.innerHTML = `<div class="color-empty">${t('detail.colors.none')}</div>`;
@@ -3245,7 +3229,7 @@ function renderSignatureColors(el){
     'nano':   lang==='zh-CN' ? '纳米' : 'nano'
   };
   grid.innerHTML = colors.map(c=>{
-    const label = lang==='zh-CN' ? (c.label_zh||c.label_en) : (c.label_en||c.label_zh);
+    const label = lang==='zh-CN' ? c.label_zh : c.label_en;
     const st = stateLabel[c.state] || c.state;
     return `
       <div class="color-swatch">
@@ -3423,7 +3407,7 @@ const SUBSCRIPTS = {'₀':'0','₁':'1','₂':'2','₃':'3','₄':'4','₅':'5',
 const SUPERSCRIPTS = {'⁰':'','¹':'','²':'','³':'','⁴':'','⁵':'','⁶':'','⁷':'','⁸':'','⁹':'','⁺':'','⁻':''};
 function normalizeFormula(s){
   return String(s)
-    .replace(/[₀-₉]/g, ch => SUBSCRIPTS[ch] || ch)
+    .replace(/[₀-₉]/g, ch => SUBSCRIPTS[ch])
     .replace(/[⁰-⁹⁺⁻]/g, ch => SUPERSCRIPTS[ch] || '')
     .replace(/[↑↓]/g,'')
     .trim();
@@ -3540,9 +3524,7 @@ function moleculeShape(formula){
     atoms:[{sym:'O',x:0,y:0},{sym:m2o[1],x:-D*1.1,y:0},{sym:m2o[1],x:D*1.1,y:0}],
     bonds:[[0,1,1],[0,2,1]]
   };
-  // MO (transition oxide)
-  const mo = F.match(/^([A-Z][a-z]?)O$/);
-  if(mo) return { atoms:[{sym:mo[1],x:-D/2,y:0},{sym:'O',x:D/2,y:0}], bonds:[[0,1,2]] };
+  // MO (transition oxide) is covered by the binary-salt shape above.
   // M2O3
   const m2o3 = F.match(/^([A-Z][a-z]?)2O3$/);
   if(m2o3) return {
@@ -3568,14 +3550,20 @@ function moleculeShape(formula){
     ],
     bonds:[[0,1,1],[1,2,1],[0,3,1],[3,4,1]]
   };
-  // Fe2O3
-  if(F==='Fe2O3') return {
-    atoms:[
-      {sym:'Fe',x:-D*1.3,y:0},{sym:'Fe',x:D*1.3,y:0},
-      {sym:'O',x:0,y:-D*0.9},{sym:'O',x:0,y:D*0.9},{sym:'O',x:0,y:0}
-    ],
-    bonds:[[0,4,1],[1,4,1],[0,2,1],[1,3,1]]
-  };
+  // Fe2O3 is covered by the M2O3 shape above.
+  // HNO3 nitric acid — H binds the hydroxyl oxygen, so it must be matched
+  // before the generic metal-nitrate shape below.
+  if(F==='HNO3'){
+    return {
+      atoms:[
+        {sym:'N', x:0, y:0},
+        {sym:'O', x:D*1.2, y:-D*0.6},                  // =O
+        {sym:'O', x:D*1.2, y:D*0.6},                   // -O
+        {sym:'O', x:-D*1.2, y:0}, {sym:'H', x:-D*2.2, y:0}
+      ],
+      bonds:[[0,1,2],[0,2,1],[0,3,1],[3,4,1]]
+    };
+  }
   // Metal-nitrate M(NO3): trigonal-planar NO3 group hanging off M
   const mno3 = F.match(/^([A-Z][a-z]?)NO3$/);
   if(mno3){
@@ -3649,18 +3637,7 @@ function moleculeShape(formula){
       bonds:[[0,1,2],[0,2,2],[0,3,1],[3,4,1],[0,5,1],[5,6,1]]
     };
   }
-  // HNO3 nitric acid
-  if(F==='HNO3'){
-    return {
-      atoms:[
-        {sym:'N', x:0, y:0},
-        {sym:'O', x:D*1.2, y:-D*0.6},                  // =O
-        {sym:'O', x:D*1.2, y:D*0.6},                   // -O
-        {sym:'O', x:-D*1.2, y:0}, {sym:'H', x:-D*2.2, y:0}
-      ],
-      bonds:[[0,1,2],[0,2,1],[0,3,1],[3,4,1]]
-    };
-  }
+  // HNO3 nitric acid is matched before the metal-nitrate shape above.
   // H2SO3 sulfurous acid (similar layout)
   if(F==='H2SO3'){
     return {
@@ -3963,14 +3940,14 @@ function drawSideBonds(ctx, side, alpha, sideMarker){
       } else if(order===2){
         // parallel double lines
         const dx = b.gy-a.gy, dy = -(b.gx-a.gx);
-        const L = Math.hypot(dx,dy) || 1;
+        const L = Math.hypot(dx,dy);
         const ox = dx/L*3, oy = dy/L*3;
         line(ctx, a.gx+ox, a.gy+oy, b.gx+ox, b.gy+oy);
         line(ctx, a.gx-ox, a.gy-oy, b.gx-ox, b.gy-oy);
       } else {
         // triple
         const dx = b.gy-a.gy, dy = -(b.gx-a.gx);
-        const L = Math.hypot(dx,dy) || 1;
+        const L = Math.hypot(dx,dy);
         const ox = dx/L*3, oy = dy/L*3;
         line(ctx, a.gx, a.gy, b.gx, b.gy);
         line(ctx, a.gx+ox, a.gy+oy, b.gx+ox, b.gy+oy);
@@ -4062,23 +4039,26 @@ function darken(hex, amt){
   const b=Math.max(0, Math.round(parseInt(h.slice(4,6),16) * (1-amt)));
   return '#'+[r,g,b].map(v=>v.toString(16).padStart(2,'0')).join('');
 }
-function symToCategory(sym){
-  for(const z in ELEMENTS) if(ELEMENTS[z].symbol===sym) return ELEMENTS[z].category;
-  return 'unknown';
-}
-
 /* ================ Text-to-speech ================ */
 let voicesLoaded = false;
+function speechAvailable(){
+  return 'speechSynthesis' in window;
+}
+/* Clear any queued utterance. Safe to call on platforms without speech. */
+function cancelSpeech(){
+  if(!speechAvailable()) return;
+  speechSynthesis.cancel();
+}
 function ensureVoices(){
   return new Promise(res=>{
     const v = window.speechSynthesis?.getVoices?.() || [];
     if(v.length){ voicesLoaded=true; res(v); return; }
-    if(!window.speechSynthesis){ res([]); return; }
+    if(!speechAvailable()){ res([]); return; }
     speechSynthesis.onvoiceschanged = ()=>res(speechSynthesis.getVoices());
   });
 }
 async function speak(text, langHint){
-  if(!('speechSynthesis' in window)){
+  if(!speechAvailable()){
     alert(t('tts.unavailable')); return;
   }
   // Do NOT call speechSynthesis.cancel() here — that aborts prior
@@ -4107,15 +4087,15 @@ async function speak(text, langHint){
 /* Read a sequence of elements (by Z) in the current language. */
 let _rowSpeakId = 0;
 async function speakSequence(zList, lang){
-  if(!('speechSynthesis' in window)){ alert(t('tts.unavailable')); return; }
+  if(!speechAvailable()){ alert(t('tts.unavailable')); return; }
   const myId = ++_rowSpeakId;
-  speechSynthesis.cancel();
+  cancelSpeech();
   // Wait briefly so the browser's speech queue is truly clear
   await new Promise(r=>setTimeout(r, 60));
   const langHint = lang==='zh-CN' ? 'zh-CN' : 'en-US';
   for(const z of zList){
     if(myId !== _rowSpeakId) return; // superseded by newer click
-    const el = ELEMENTS[z]; if(!el) continue;
+    const el = ELEMENTS[z];
     const name = lang==='zh-CN' ? el.name_zh : el.name_en;
     await speak(name, langHint);
     if(myId !== _rowSpeakId) return;
@@ -4126,7 +4106,7 @@ async function speakSequence(zList, lang){
 document.getElementById('ttsEn').addEventListener('click',(e)=>{
   if(!currentZ) return;
   _rowSpeakId++;                          // cancel any ongoing row-read
-  speechSynthesis.cancel();
+  cancelSpeech();
   e.currentTarget.classList.add('playing');
   speak(ELEMENTS[currentZ].name_en, 'en-US');
   setTimeout(()=>e.currentTarget.classList.remove('playing'), 2000);
@@ -4134,7 +4114,7 @@ document.getElementById('ttsEn').addEventListener('click',(e)=>{
 document.getElementById('ttsZh').addEventListener('click',(e)=>{
   if(!currentZ) return;
   _rowSpeakId++;
-  speechSynthesis.cancel();
+  cancelSpeech();
   e.currentTarget.classList.add('playing');
   speak(ELEMENTS[currentZ].name_zh, 'zh-CN');
   setTimeout(()=>e.currentTarget.classList.remove('playing'), 2000);
@@ -4168,7 +4148,7 @@ const SHAPE_LABELS = {
 function render3DViewers(reactions){
   const block = document.getElementById('d3dBlock');
   const grid = document.getElementById('d3d');
-  const lang = window.CURRENT_LANG || 'en';
+  const lang = window.CURRENT_LANG;
   const seen = new Set();
   const known = [];
   reactions.forEach(r=>{
@@ -4188,8 +4168,7 @@ function render3DViewers(reactions){
   if(known.length===0){ block.style.display='none'; grid.innerHTML=''; return; }
   block.style.display='block';
   grid.innerHTML = known.map(f=>{
-    const shape = SHAPE_LABELS[f];
-    const shapeTxt = shape ? (lang==='zh-CN'?shape[1]:shape[0]) : '';
+    const shapeTxt = lang==='zh-CN' ? SHAPE_LABELS[f][1] : SHAPE_LABELS[f][0];
     return `<div class="mol3d-card" data-formula="${f}">
       <canvas></canvas>
       <div class="mol3d-caption">${prettyFormula(f)}</div>
@@ -4218,7 +4197,7 @@ function initMol3D(card, formula){
   const cy = mol.atoms.reduce((s,a)=>s+a.y,0)/mol.atoms.length;
   const cz = mol.atoms.reduce((s,a)=>s+a.z,0)/mol.atoms.length;
   const centered = mol.atoms.map(a=>({sym:a.sym, x:a.x-cx, y:a.y-cy, z:a.z-cz}));
-  const maxR = Math.max(...centered.map(a=>Math.hypot(a.x,a.y,a.z))) || 1;
+  const maxR = Math.max(...centered.map(a=>Math.hypot(a.x,a.y,a.z)));
 
   const state = {
     rotY: 0.6, rotX: 0.2, autoSpin: true,
@@ -4414,7 +4393,7 @@ openDetail(1);
     {id:'en',      key:'ov.en',      dataFn:z=>ELEMENTS[z]?.electronegativity, unitKey:null, lo:'#1a1a5a', hi:'#00d4ff', fmt:v=>v.toFixed(2)},
     {id:'density', key:'ov.density', data:F_DENSITY,   unitKey:'ov.unit.gcc', lo:'#0e2a15', hi:'#ff8ac9', fmt:v=>v.toFixed(2), log:true},
     {id:'melt',    key:'ov.melt',    data:F_MELT,      unitKey:'ov.unit.k',   lo:'#0a2a4a', hi:'#ff6b6b', fmt:v=>v+''},
-    {id:'year',    key:'ov.year',    dataFn:z=>(typeof DISCOVERY==='object'&&DISCOVERY[z])?DISCOVERY[z][0]:null, unitKey:'ov.unit.year', lo:'#3a1a5a', hi:'#feca57', fmt:v=>v<0?('~'+(-v)+' BCE'):(''+v)},
+    {id:'year',    key:'ov.year',    dataFn:z=>DISCOVERY[z][0], unitKey:'ov.unit.year', lo:'#3a1a5a', hi:'#feca57', fmt:v=>v<0?('~'+(-v)+' BCE'):(''+v)},
     {id:'origin',  key:'ov.origin',  special:'origin'},
     {id:'abundance', key:'ov.abundance', data:F_ABUNDANCE, unitKey:'ov.unit.ppm', lo:'#0a2a2a', hi:'#5aff8a', fmt:v=>v>=1?v.toFixed(0):v.toExponential(1), log:true},
   ];
@@ -4425,7 +4404,6 @@ openDetail(1);
   function ensureToolbar(){
     if (document.getElementById('viewToolbar')) return;
     const wrap = document.querySelector('.pt-wrap');
-    if (!wrap) return;
     const bar = document.createElement('div');
     bar.className = 'view-toolbar';
     bar.id = 'viewToolbar';
@@ -4437,7 +4415,7 @@ openDetail(1);
       }).join('') + `<span class="vt-caveat" data-i18n="ov.caveat">${t('ov.caveat')}</span>`;
     wrap.parentNode.insertBefore(bar, wrap);
     const links = PeriodicSources.render('overlays', null, window.CURRENT_LANG, document);
-    if (links) bar.appendChild(links);
+    bar.appendChild(links);
 
     const legend = document.createElement('div');
     legend.className = 'view-legend';
@@ -4473,10 +4451,14 @@ openDetail(1);
     return `rgb(${r},${g},${c})`;
   }
 
+  function overlayValue(o, z){
+    return o.data ? o.data[z] : (o.dataFn ? o.dataFn(z) : null);
+  }
+
   function collectValues(o){
     const vals = [];
     for(let z=1; z<=118; z++){
-      let v = o.data ? o.data[z] : (o.dataFn ? o.dataFn(z) : null);
+      let v = overlayValue(o, z);
       if (v == null || v === 0 && o.log) continue;
       vals.push({z, v});
     }
@@ -4494,7 +4476,7 @@ openDetail(1);
         const chip = c.querySelector('.ov-chip'); if(chip) chip.remove();
         const val = c.querySelector('.ov-value'); if(val) val.remove();
       });
-      if (legend) legend.classList.remove('on');
+      legend.classList.remove('on');
       return;
     }
 
@@ -4502,27 +4484,24 @@ openDetail(1);
       // Discrete overlay
       cells.forEach(c => {
         const z = parseInt(c.dataset.z, 10);
-        if (!z) return;
         const o = F_ORIGIN[z];
         c.classList.add('overlay-on'); c.classList.remove('overlay-off');
         let chip = c.querySelector('.ov-chip');
         if (!chip){ chip = document.createElement('div'); chip.className='ov-chip'; c.appendChild(chip); }
-        chip.style.setProperty('--ov-color', F_ORIGIN_COLORS[o] || '#666');
+        chip.style.setProperty('--ov-color', F_ORIGIN_COLORS[o]);
         let val = c.querySelector('.ov-value');
         if (!val){ val = document.createElement('div'); val.className='ov-value'; c.appendChild(val); }
-        val.textContent = F_ORIGIN_ICON[o] || '';
+        val.textContent = F_ORIGIN_ICON[o];
         val.style.fontSize = '11px';
       });
       // Custom legend for origins
-      if (legend){
-        legend.classList.add('on');
-        legend.innerHTML = `<span class="vl-title">${t('ov.origin')}</span>` +
-          Object.keys(F_ORIGIN_COLORS).map(k => {
-            const key = 'origin.' + (k==='dwarf'?'dwarf':k);
-            const label = (LOCALES[window.CURRENT_LANG]||LOCALES.en)[key] || k;
-            return `<span class="nl-item"><span class="nl-dot" style="background:${F_ORIGIN_COLORS[k]}"></span>${F_ORIGIN_ICON[k]||''} ${label}</span>`;
-          }).join('');
-      }
+      legend.classList.add('on');
+      legend.innerHTML = `<span class="vl-title">${t('ov.origin')}</span>` +
+        Object.keys(F_ORIGIN_COLORS).map(k => {
+          const key = 'origin.' + k;
+          const label = LOCALES[window.CURRENT_LANG][key];
+          return `<span class="nl-item"><span class="nl-dot" style="background:${F_ORIGIN_COLORS[k]}"></span>${F_ORIGIN_ICON[k]} ${label}</span>`;
+        }).join('');
       return;
     }
 
@@ -4542,9 +4521,8 @@ openDetail(1);
 
     cells.forEach(c => {
       const z = parseInt(c.dataset.z, 10);
-      if (!z) return;
       c.classList.add('overlay-on');
-      let v = o.data ? o.data[z] : (o.dataFn ? o.dataFn(z) : null);
+      let v = overlayValue(o, z);
       let chip = c.querySelector('.ov-chip');
       let val = c.querySelector('.ov-value');
       if (v == null || (o.log && v <= 0)){
@@ -4563,34 +4541,25 @@ openDetail(1);
       val.style.fontSize = '8px';
     });
 
-    if (legend){
-      legend.classList.add('on');
-      legend.innerHTML =
-        `<span class="vl-title">${t(o.key)}</span>` +
-        `<span class="vl-tick">${o.fmt(o.log ? Math.pow(10,lo) : lo)}</span>` +
-        `<span class="vl-bar" style="background:linear-gradient(90deg,${o.lo},${o.hi})"></span>` +
-        `<span class="vl-tick">${o.fmt(o.log ? Math.pow(10,hi) : hi)}</span>` +
-        `<span class="vl-unit">${o.unitKey ? t(o.unitKey) : ''}</span>` +
-        (o.log ? `<span class="vl-na">${(window.CURRENT_LANG==='zh-CN')?'对数刻度':'log scale'}</span>` : '');
-    }
+    legend.classList.add('on');
+    legend.innerHTML =
+      `<span class="vl-title">${t(o.key)}</span>` +
+      `<span class="vl-tick">${o.fmt(o.log ? Math.pow(10,lo) : lo)}</span>` +
+      `<span class="vl-bar" style="background:linear-gradient(90deg,${o.lo},${o.hi})"></span>` +
+      `<span class="vl-tick">${o.fmt(o.log ? Math.pow(10,hi) : hi)}</span>` +
+      `<span class="vl-unit">${o.unitKey ? t(o.unitKey) : ''}</span>` +
+      (o.log ? `<span class="vl-na">${(window.CURRENT_LANG==='zh-CN')?'对数刻度':'log scale'}</span>` : '');
   }
 
   /* Init: run once at page load; and again whenever the grid rerenders */
   function init(){
     ensureToolbar();
-    // Attach data-z to every cell (in case makeCell didn't)
-    document.querySelectorAll('.cell').forEach(c => {
-      if (c.dataset.z) return;
-      const zEl = c.querySelector('.z');
-      if (zEl && zEl.textContent) c.dataset.z = zEl.textContent.trim();
-    });
     if (currentOverlay !== 'default') applyOverlay(currentOverlay);
   }
 
   /* Observe #ptGrid — every time it's rebuilt (language change etc.), re-apply overlay */
   function attachObserver(){
     const grid = document.getElementById('ptGrid');
-    if (!grid) return;
     let scheduled = false;
     const obs = new MutationObserver(()=>{
       if (scheduled) return;
@@ -4603,7 +4572,7 @@ openDetail(1);
     obs.observe(grid, {childList:true, subtree:true});
   }
 
-  window.__F1 = { applyOverlay, init, currentOverlay: ()=>currentOverlay };
+  window.__F1 = { applyOverlay, init, currentOverlay: ()=>currentOverlay, lerpHex, collectValues };
 
   // Initial setup after DOM is ready
   function bootstrap(){
@@ -4639,10 +4608,9 @@ openDetail(1);
 
   function injectOriginBadge(){
     const dCat = document.getElementById('dCategory');
-    if (!dCat) return;
     const z = getCurrentZ();
     if (!z) return;
-    const origin = F_ORIGIN[z] || 'human';
+    const origin = F_ORIGIN[z];
     const key = 'origin.' + origin;
     let badge = document.getElementById('originBadge');
     if (!badge){
@@ -4652,7 +4620,7 @@ openDetail(1);
       dCat.appendChild(badge);
     }
     badge.className = 'origin-badge ' + origin;
-    badge.innerHTML = `<span class="oi">${F_ORIGIN_ICON[origin]||''}</span><span>${t(key)}</span>`;
+    badge.innerHTML = `<span class="oi">${F_ORIGIN_ICON[origin]}</span><span>${t(key)}</span>`;
     let caveat = document.getElementById('originCaveat');
     if (!caveat) {
       caveat = document.createElement('div');
@@ -4660,10 +4628,10 @@ openDetail(1);
       caveat.className = 'd-hint origin-caveat';
       dCat.parentNode.appendChild(caveat);
     }
+    // Assigning textContent already drops the previously rendered citations.
     caveat.textContent = t('origin.caveat');
-    caveat.querySelectorAll('.source-links').forEach(node => node.remove());
     const links = PeriodicSources.render('origins', z, window.CURRENT_LANG, document);
-    if (links) caveat.appendChild(links);
+    caveat.appendChild(links);
   }
 
   /* Watch #dName for changes (indicates a new element was opened),
@@ -4671,7 +4639,6 @@ openDetail(1);
   function attachDetailObserver(){
     const dName = document.getElementById('dName');
     const detail = document.getElementById('detail');
-    if (!dName || !detail) return;
     const obs = new MutationObserver(()=>{
       setTimeout(injectOriginBadge, 0);
     });
@@ -4684,9 +4651,15 @@ openDetail(1);
   }
 
   /* -------- Cosmic timeline playback -------- */
+  const ERA_TIMES = ['t=3 min','~200 Myr','~1 Gyr','~1-10 Gyr','~1-13 Gyr','4.6 Gyr ago','1937-2016 CE','Now'];
   let banner = null;
   let playing = false;
   let timerId = null;
+
+  function syncPlayButton(){
+    const btn = document.getElementById('cosmicPlayBtn');
+    if (btn) btn.textContent = playing ? t('timeline.stop') : t('timeline.play');
+  }
 
   function ensureBanner(){
     if (banner) return banner;
@@ -4701,13 +4674,12 @@ openDetail(1);
   function stop(){
     playing = false;
     clearTimeout(timerId); timerId = null;
-    if (banner) banner.classList.remove('on');
+    banner?.classList.remove('on');
     // Restore all cells
     document.querySelectorAll('.cell').forEach(c => {
       c.classList.remove('not-yet-forged', 'freshly-forged');
     });
-    const btn = document.getElementById('cosmicPlayBtn');
-    if (btn) btn.textContent = t('timeline.play');
+    syncPlayButton();
   }
 
   function play(){
@@ -4715,8 +4687,7 @@ openDetail(1);
     if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     playing = true;
     ensureBanner().classList.add('on');
-    const btn = document.getElementById('cosmicPlayBtn');
-    if (btn) btn.textContent = t('timeline.stop');
+    syncPlayButton();
 
     // Start: hide all
     document.querySelectorAll('.cell:not(.empty):not(.placeholder)').forEach(c => {
@@ -4729,15 +4700,13 @@ openDetail(1);
     let eraIdx = 0;
 
     function playEra(){
-      if (!playing) return;
       if (eraIdx >= eras.length){ stop(); return; }
       const era = eras[eraIdx];
 
       const bannerEra = document.getElementById('cbEra');
       const bannerTime = document.getElementById('cbTime');
-      if (bannerEra) bannerEra.textContent = t(era.labelKey);
-      const timeText = ['t=3 min','~200 Myr','~1 Gyr','~1-10 Gyr','~1-13 Gyr','4.6 Gyr ago','1937-2016 CE','Now'][eraIdx] || '';
-      if (bannerTime) bannerTime.textContent = timeText;
+      bannerEra.textContent = t(era.labelKey);
+      bannerTime.textContent = ERA_TIMES[eraIdx];
 
       // Forge all elements in this era's origins
       const zsToLight = [];
@@ -4752,10 +4721,9 @@ openDetail(1);
         setTimeout(()=>{
           if (!playing) return;
           const cell = document.querySelector(`.cell[data-z="${z}"]`);
-          if (!cell) return;
           cell.classList.remove('not-yet-forged');
           cell.classList.add('freshly-forged');
-          setTimeout(()=>cell && cell.classList.remove('freshly-forged'), 1200);
+          setTimeout(()=>cell.classList.remove('freshly-forged'), 1200);
         }, i * perEl);
       });
 
@@ -4768,7 +4736,6 @@ openDetail(1);
   /* -------- Add "Play Cosmic Timeline" button to the view toolbar -------- */
   function addTimelineButton(){
     const bar = document.getElementById('viewToolbar');
-    if (!bar) { if (window.__D1_debug) console.log('D1: no toolbar yet'); return; }
     if (document.getElementById('cosmicPlayBtn')) return;
     const btn = document.createElement('button');
     btn.id = 'cosmicPlayBtn';
@@ -4780,15 +4747,14 @@ openDetail(1);
   }
 
   function refreshLang(){
-    const btn = document.getElementById('cosmicPlayBtn');
-    if (btn) btn.textContent = playing ? t('timeline.stop') : t('timeline.play');
+    syncPlayButton();
     injectOriginBadge();
   }
   // Observe html[lang] attribute to detect language switch
   new MutationObserver(refreshLang).observe(document.documentElement, {attributes:true, attributeFilter:['lang']});
   document.addEventListener('visibilitychange', ()=>{ if (document.hidden) stop(); });
 
-  window.__D1 = { play, stop, injectOriginBadge };
+  window.__D1 = { play, stop, injectOriginBadge, getCurrentZ, ensureBanner };
 
   function init(){
     addTimelineButton();
@@ -4865,7 +4831,7 @@ openDetail(1);
     root.querySelector('#nuclideBack').addEventListener('click', close);
     buildLegend();
     const links = PeriodicSources.render('nuclides', null, window.CURRENT_LANG, document);
-    if (links) root.querySelector('.nuclide-header').appendChild(links);
+    root.querySelector('.nuclide-header').appendChild(links);
 
     const body = root.querySelector('#nuclideBody');
     let dragStartPanX = 0, dragStartPanY = 0, dragStartMouseX = 0, dragStartMouseY = 0;
@@ -4874,7 +4840,7 @@ openDetail(1);
       ev.preventDefault();
       const rect = canvas.getBoundingClientRect();
       const mx = ev.clientX - rect.left, my = ev.clientY - rect.top;
-      const h = canvas.height / (window.devicePixelRatio || 1);
+      const h = canvas.height / window.devicePixelRatio;
       const worldN = (mx - panX) / scale;
       const worldZ = (h - my - panY) / scale;
       const delta = ev.deltaY > 0 ? 0.85 : 1.18;
@@ -4926,11 +4892,11 @@ openDetail(1);
 
   function resize(){
     const rect = root.querySelector('#nuclideBody').getBoundingClientRect();
-    canvas.width = rect.width * (window.devicePixelRatio || 1);
-    canvas.height = rect.height * (window.devicePixelRatio || 1);
+    canvas.width = rect.width * window.devicePixelRatio;
+    canvas.height = rect.height * window.devicePixelRatio;
     canvas.style.width = rect.width + 'px';
     canvas.style.height = rect.height + 'px';
-    ctx.setTransform(window.devicePixelRatio || 1, 0, 0, window.devicePixelRatio || 1, 0, 0);
+    ctx.setTransform(window.devicePixelRatio, 0, 0, window.devicePixelRatio, 0, 0);
     // Initial framing: fit N=0..180, Z=0..120
     const targetN = 180, targetZ = 120;
     const sX = (rect.width - 60) / targetN;
@@ -4944,7 +4910,7 @@ openDetail(1);
   function pickNuclide(mx, my){
     // Convert screen → world
     const N = (mx - panX) / scale;
-    const Zw = (canvas.height/(window.devicePixelRatio||1) - my - panY) / scale;
+    const Zw = (canvas.height/window.devicePixelRatio - my - panY) / scale;
     // Find closest
     let best = null, bestD = 999;
     for (const nc of F_NUCLIDES){
@@ -4960,7 +4926,6 @@ openDetail(1);
   function showTip(nc, x, y){
     const [Z, N, decay, hl] = nc;
     const el = ELEMENTS[Z];
-    if (!el) { tipEl.classList.remove('on'); return; }
     const A = Z + N;
     const halfTxt = (typeof hl === 'string') ? hl : formatHalfLife(hl);
     const magicZ = MAGIC.includes(Z), magicN = MAGIC.includes(N);
@@ -4969,7 +4934,7 @@ openDetail(1);
     tipEl.innerHTML = `
       <div class="nt-sym"><sup>${A}</sup>${el.symbol}</div>
       <div>Z=${Z}, N=${N}</div>
-      <div class="nt-mode">${t(DECAY_KEYS[decay]||'nuc.decay.unknown')}</div>
+      <div class="nt-mode">${t(DECAY_KEYS[decay])}</div>
       <div>${t('nuc.tip.half')}: ${halfTxt}</div>
       ${magicTxt}`;
     // Position tooltip near cursor
@@ -4994,7 +4959,7 @@ openDetail(1);
   }
 
   function draw(){
-    const dpr = window.devicePixelRatio || 1;
+    const dpr = window.devicePixelRatio;
     const w = canvas.width / dpr, h = canvas.height / dpr;
     ctx.clearRect(0, 0, w, h);
 
@@ -5041,7 +5006,7 @@ openDetail(1);
       const x = panX + N*scale;
       const y = h - Z*scale - panY;
       if (x < -size || x > w+size || y < -size || y > h+size) continue;
-      ctx.fillStyle = DECAY_COLORS[decay] || '#666';
+      ctx.fillStyle = DECAY_COLORS[decay];
       ctx.fillRect(x - size/2, y - size/2, size, size);
       if (MAGIC.includes(Z) && MAGIC.includes(N)){
         ctx.strokeStyle = '#fff';
@@ -5088,19 +5053,17 @@ openDetail(1);
     if (btn) btn.textContent = '⚛ ' + t('nuc.chart.open');
     if (root){
       buildLegend();
-      const back = root.querySelector('#nuclideBack');
-      if (back) back.textContent = t('nuc.chart.close');
-      const h2 = root.querySelector('h2');
-      if (h2) h2.textContent = t('nuc.chart.title');
+      root.querySelector('#nuclideBack').textContent = t('nuc.chart.close');
+      root.querySelector('h2').textContent = t('nuc.chart.title');
       root.querySelectorAll('.nuclide-header > .source-links').forEach(node => node.remove());
       const links = PeriodicSources.render('nuclides', null, window.CURRENT_LANG, document);
-      if (links) root.querySelector('.nuclide-header').appendChild(links);
+      root.querySelector('.nuclide-header').appendChild(links);
       if (root.classList.contains('on')) draw();
     }
   }
   new MutationObserver(refreshLang).observe(document.documentElement, {attributes:true, attributeFilter:['lang']});
 
-  window.__B1 = { open, close };
+  window.__B1 = { open, close, formatHalfLife, buildLegend, resize, pickNuclide, showTip, draw };
 
   function init(){
     addOpenButton();
@@ -5168,7 +5131,6 @@ openDetail(1);
   function ensurePanel(){
     if (panel) return panel;
     const wrap = document.querySelector('.pt-wrap');
-    if (!wrap) return null;
     panel = document.createElement('div');
     panel.className = 'timeline-panel';
     panel.id = 'timelinePanel';
@@ -5185,7 +5147,7 @@ openDetail(1);
       <div class="tl-info" id="tlInfo"></div>`;
     wrap.parentNode.insertBefore(panel, wrap);
     const links = PeriodicSources.render('discovery', null, window.CURRENT_LANG, document);
-    if (links) panel.appendChild(links);
+    panel.appendChild(links);
 
     sliderEl = panel.querySelector('#tlSlider');
     yearDisplay = panel.querySelector('#tlYear');
@@ -5211,7 +5173,6 @@ openDetail(1);
 
     cells.forEach(c => {
       const z = parseInt(c.dataset.z, 10);
-      if (!z) return;
       const y = getDiscoveryYear(z);
       const known = y <= year;
       const wasKnown = y <= prevYearBar;
@@ -5245,7 +5206,7 @@ openDetail(1);
         `<br>&nbsp;&nbsp;<span class="eka">${t('tl.eka.mn')}</span>`;
     } else if (newlyDiscovered){
       const el = ELEMENTS[newlyDiscovered];
-      const rec = (typeof DISCOVERY === 'object' && DISCOVERY[newlyDiscovered]) || [null, ''];
+      const rec = DISCOVERY[newlyDiscovered];
       info = `<b>${year}:</b> ${el.name_en} / ${el.name_zh} (${el.symbol}, Z=${newlyDiscovered}) — ${rec[1]}`;
       if (EKA[newlyDiscovered]){
         const e = EKA[newlyDiscovered];
@@ -5278,7 +5239,6 @@ openDetail(1);
 
     const stepMs = 40;  // ~9 seconds total for 250 years
     function tick(){
-      if (!playing) return;
       year++;
       if (year > MAX_YEAR){ stopPlay(); return; }
       sliderEl.value = year;
@@ -5289,14 +5249,14 @@ openDetail(1);
   }
 
   function stopPlay(){
+    if (!playing) return;
     playing = false;
     clearTimeout(playRAF);
-    if (playBtn) playBtn.textContent = t('tl.play');
+    playBtn.textContent = t('tl.play');
   }
 
   function toggle(){
     const p = ensurePanel();
-    if (!p) return;
     p.classList.toggle('on');
     if (p.classList.contains('on')){
       applyYear(parseInt(sliderEl.value, 10));
@@ -5327,15 +5287,15 @@ openDetail(1);
     const btn = document.getElementById('tlToggleBtn');
     if (btn) btn.textContent = '🕰 ' + t('tl.title');
     if (panel){
-      const h = panel.querySelector('h3'); if (h) h.textContent = t('tl.title');
-      if (playBtn) playBtn.textContent = playing ? t('tl.stop') : t('tl.play');
+      panel.querySelector('h3').textContent = t('tl.title');
+      playBtn.textContent = playing ? t('tl.stop') : t('tl.play');
       if (panel.classList.contains('on') && sliderEl) applyYear(parseInt(sliderEl.value, 10));
     }
   }
   new MutationObserver(refreshLang).observe(document.documentElement, {attributes:true, attributeFilter:['lang']});
   document.addEventListener('visibilitychange', ()=>{ if (document.hidden) stopPlay(); });
 
-  window.__F2 = { toggle, applyYear };
+  window.__F2 = { toggle, applyYear, getDiscoveryYear, startPlay, stopPlay };
 
   function init(){ addToggleButton(); }
   function bootstrap(){ setTimeout(init, 300); }
@@ -5372,6 +5332,7 @@ openDetail(1);
     {id:'CN',  labelKey:'lf.spec.cn',  f:1.7},
     {id:'CO',  labelKey:'lf.spec.co',  f:1.9},
   ];
+  const DEFAULT_LIGAND = 'H2O';
 
   // Metal-ion contribution g (Δ ≈ f × g in units of cm⁻¹) — Jørgensen model
   // Only listing common M²⁺/M³⁺ ions from period 4. Key: 'symbol+charge'.
@@ -5429,40 +5390,29 @@ openDetail(1);
     return true;
   }
 
-  /* Pick default metal key for this Z */
+  /* Pick default metal key for this Z. Every Z that owns a METALS entry is
+     listed here, so an unlisted chromophore simply has no ligand-field model. */
+  const PREFERRED_METAL = {
+    22:'Ti3', 23:'V3', 24:'Cr3', 25:'Mn2', 26:'Fe3', 27:'Co2',
+    28:'Ni2', 29:'Cu2',
+    44:'Ru3', 45:'Rh3', 46:'Pd2',
+    77:'Ir3', 78:'Pt2',
+  };
   function defaultMetal(z){
     const el = ELEMENTS[z];
     if (!el) return null;
-    const sym = el.symbol;
-    // Prefer the most common charge (heuristic)
-    const preferred = {
-      22:'Ti3', 23:'V3', 24:'Cr3', 25:'Mn2', 26:'Fe3', 27:'Co2',
-      28:'Ni2', 29:'Cu2',
-      44:'Ru3', 45:'Rh3', 46:'Pd2',
-      77:'Ir3', 78:'Pt2',
-    };
-    if (preferred[z]) return preferred[z];
-    // Fallback: any key starting with symbol
-    for (const k of Object.keys(METALS)){
-      if (k.startsWith(sym)) return k;
-    }
-    return null;
+    return PREFERRED_METAL[z] || null;
   }
 
   function findColorsBlock(){
     // Locate the existing "Signature Colors" block (h3 has data-i18n="detail.section.colors")
-    const h3s = document.querySelectorAll('.d-block h3');
-    for (const h of h3s){
-      if (h.getAttribute('data-i18n') === 'detail.section.colors') return h.closest('.d-block');
-    }
-    return null;
+    return document.querySelector('.d-block h3[data-i18n="detail.section.colors"]').closest('.d-block');
   }
 
   function ensureLFBlock(){
     let block = document.getElementById('lfBlock');
     if (block) return block;
     const colors = findColorsBlock();
-    if (!colors) return null;
     block = document.createElement('div');
     block.className = 'd-block';
     block.id = 'lfBlock';
@@ -5475,13 +5425,10 @@ openDetail(1);
 
   function render(){
     const block = ensureLFBlock();
-    if (!block) return;
     // Determine current Z from active cell
     const active = document.querySelector('.cell.active');
     if (!active) { block.style.display = 'none'; return; }
     const z = parseInt(active.dataset.z, 10);
-    if (!z) { block.style.display = 'none'; return; }
-
     if (!isChromophore(z)){
       block.style.display = '';
       block.querySelector('#lfContent').innerHTML = `<div class="lf-na">${t('lf.na')}</div>`;
@@ -5489,17 +5436,18 @@ openDetail(1);
     }
     block.style.display = '';
 
-    const metalKey = block.dataset.metal || defaultMetal(z);
+    const selectedMetal = block.dataset.metal;
+    const metalKey = selectedMetal?.startsWith(ELEMENTS[z].symbol) ? selectedMetal : defaultMetal(z);
     if (!metalKey){
       block.querySelector('#lfContent').innerHTML = `<div class="lf-na">${t('lf.na')}</div>`;
       return;
     }
     block.dataset.metal = metalKey;
-    const ligandId = block.dataset.ligand || 'H2O';
+    const ligandId = block.dataset.ligand || DEFAULT_LIGAND;
     block.dataset.ligand = ligandId;
 
     const g = METALS[metalKey];
-    const lig = LIGANDS.find(l=>l.id===ligandId) || LIGANDS[5];
+    const lig = LIGANDS.find(l=>l.id===ligandId);
     const delta_cm = g * lig.f;                        // Δ_oct in cm⁻¹
     const wl_nm = cmToNm(delta_cm);
     const inVisible = wl_nm >= 380 && wl_nm <= 780;
@@ -5559,7 +5507,7 @@ openDetail(1);
         </div>
       </div>`;
     const sourceLinks = PeriodicSources.render('ligand', z, window.CURRENT_LANG, document);
-    if (sourceLinks) block.querySelector('#lfContent').appendChild(sourceLinks);
+    block.querySelector('#lfContent').appendChild(sourceLinks);
 
     // Wire ligand buttons
     block.querySelectorAll('[data-lig]').forEach(b => b.addEventListener('click', ()=>{
@@ -5590,9 +5538,8 @@ openDetail(1);
   }
 
   function drawSplitDiagram(canvas, delta_cm, ligandId){
-    if (!canvas) return;
     const rect = canvas.getBoundingClientRect();
-    const dpr = window.devicePixelRatio || 1;
+    const dpr = window.devicePixelRatio;
     canvas.width = rect.width * dpr;
     canvas.height = 200 * dpr;
     canvas.style.height = '200px';
@@ -5678,12 +5625,9 @@ openDetail(1);
   /* Observe the detail panel to re-render whenever it changes */
   function attachObserver(){
     const detail = document.getElementById('detail');
-    if (!detail) return;
     const dName = document.getElementById('dName');
-    if (dName){
-      new MutationObserver(()=>{ setTimeout(render, 30); })
-        .observe(dName, {childList:true, characterData:true, subtree:true});
-    }
+    new MutationObserver(()=>{ setTimeout(render, 30); })
+      .observe(dName, {childList:true, characterData:true, subtree:true});
     new MutationObserver(()=>{
       if (!detail.classList.contains('hidden')) setTimeout(render, 30);
     }).observe(detail, {attributes:true, attributeFilter:['class']});
@@ -5695,7 +5639,15 @@ openDetail(1);
   }
   new MutationObserver(refreshLang).observe(document.documentElement, {attributes:true, attributeFilter:['lang']});
 
-  window.__C5 = { render };
+  window.__C5 = {
+    render,
+    wavelengthToRGB,
+    complementary,
+    isChromophore,
+    defaultMetal,
+    nearestColorName,
+    drawSplitDiagram
+  };
 
   function init(){
     attachObserver();

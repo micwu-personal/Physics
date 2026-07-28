@@ -15,10 +15,11 @@
     "test:visual:update": "playwright test --project=visual-desktop --project=visual-mobile --update-snapshots",
     "test:performance": "playwright test --project=performance",
     "coverage:clean": "node scripts/coverage-clean.mjs",
+    "coverage:node": "node scripts/coverage-node.mjs",
     "coverage:report": "node scripts/coverage-report.mjs",
     "coverage:measure": "node scripts/coverage-report.mjs --report-only",
-    "test:coverage": "npm run coverage:clean && playwright test --project=coverage && npm run coverage:report",
-    "test:coverage:measure": "npm run coverage:clean && playwright test --project=coverage && npm run coverage:measure",
+    "test:coverage": "npm run coverage:clean && npm run coverage:node && playwright test --project=coverage && npm run coverage:report",
+    "test:coverage:measure": "npm run coverage:clean && npm run coverage:node && playwright test --project=coverage && npm run coverage:measure",
     "test:ci": "npm run build:mobile && npm run check:generated && npm run test:apps && npm run test:e2e && npm run test:visual && npm run test:performance && npm run test:coverage"
   },
   "devDependencies": {

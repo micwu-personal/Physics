@@ -19,10 +19,9 @@
 
   function injectOriginBadge(){
     const dCat = document.getElementById('dCategory');
-    if (!dCat) return;
     const z = getCurrentZ();
     if (!z) return;
-    const origin = F_ORIGIN[z] || 'human';
+    const origin = F_ORIGIN[z];
     const key = 'origin.' + origin;
     let badge = document.getElementById('originBadge');
     if (!badge){
@@ -32,7 +31,7 @@
       dCat.appendChild(badge);
     }
     badge.className = 'origin-badge ' + origin;
-    badge.innerHTML = `<span class="oi">${F_ORIGIN_ICON[origin]||''}</span><span>${t(key)}</span>`;
+    badge.innerHTML = `<span class="oi">${F_ORIGIN_ICON[origin]}</span><span>${t(key)}</span>`;
     let caveat = document.getElementById('originCaveat');
     if (!caveat) {
       caveat = document.createElement('div');
@@ -40,10 +39,10 @@
       caveat.className = 'd-hint origin-caveat';
       dCat.parentNode.appendChild(caveat);
     }
+    // Assigning textContent already drops the previously rendered citations.
     caveat.textContent = t('origin.caveat');
-    caveat.querySelectorAll('.source-links').forEach(node => node.remove());
     const links = PeriodicSources.render('origins', z, window.CURRENT_LANG, document);
-    if (links) caveat.appendChild(links);
+    caveat.appendChild(links);
   }
 
   /* Watch #dName for changes (indicates a new element was opened),
@@ -51,7 +50,6 @@
   function attachDetailObserver(){
     const dName = document.getElementById('dName');
     const detail = document.getElementById('detail');
-    if (!dName || !detail) return;
     const obs = new MutationObserver(()=>{
       setTimeout(injectOriginBadge, 0);
     });
@@ -64,9 +62,15 @@
   }
 
   /* -------- Cosmic timeline playback -------- */
+  const ERA_TIMES = ['t=3 min','~200 Myr','~1 Gyr','~1-10 Gyr','~1-13 Gyr','4.6 Gyr ago','1937-2016 CE','Now'];
   let banner = null;
   let playing = false;
   let timerId = null;
+
+  function syncPlayButton(){
+    const btn = document.getElementById('cosmicPlayBtn');
+    if (btn) btn.textContent = playing ? t('timeline.stop') : t('timeline.play');
+  }
 
   function ensureBanner(){
     if (banner) return banner;
@@ -81,13 +85,12 @@
   function stop(){
     playing = false;
     clearTimeout(timerId); timerId = null;
-    if (banner) banner.classList.remove('on');
+    banner?.classList.remove('on');
     // Restore all cells
     document.querySelectorAll('.cell').forEach(c => {
       c.classList.remove('not-yet-forged', 'freshly-forged');
     });
-    const btn = document.getElementById('cosmicPlayBtn');
-    if (btn) btn.textContent = t('timeline.play');
+    syncPlayButton();
   }
 
   function play(){
@@ -95,8 +98,7 @@
     if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     playing = true;
     ensureBanner().classList.add('on');
-    const btn = document.getElementById('cosmicPlayBtn');
-    if (btn) btn.textContent = t('timeline.stop');
+    syncPlayButton();
 
     // Start: hide all
     document.querySelectorAll('.cell:not(.empty):not(.placeholder)').forEach(c => {
@@ -109,15 +111,13 @@
     let eraIdx = 0;
 
     function playEra(){
-      if (!playing) return;
       if (eraIdx >= eras.length){ stop(); return; }
       const era = eras[eraIdx];
 
       const bannerEra = document.getElementById('cbEra');
       const bannerTime = document.getElementById('cbTime');
-      if (bannerEra) bannerEra.textContent = t(era.labelKey);
-      const timeText = ['t=3 min','~200 Myr','~1 Gyr','~1-10 Gyr','~1-13 Gyr','4.6 Gyr ago','1937-2016 CE','Now'][eraIdx] || '';
-      if (bannerTime) bannerTime.textContent = timeText;
+      bannerEra.textContent = t(era.labelKey);
+      bannerTime.textContent = ERA_TIMES[eraIdx];
 
       // Forge all elements in this era's origins
       const zsToLight = [];
@@ -132,10 +132,9 @@
         setTimeout(()=>{
           if (!playing) return;
           const cell = document.querySelector(`.cell[data-z="${z}"]`);
-          if (!cell) return;
           cell.classList.remove('not-yet-forged');
           cell.classList.add('freshly-forged');
-          setTimeout(()=>cell && cell.classList.remove('freshly-forged'), 1200);
+          setTimeout(()=>cell.classList.remove('freshly-forged'), 1200);
         }, i * perEl);
       });
 
@@ -148,7 +147,6 @@
   /* -------- Add "Play Cosmic Timeline" button to the view toolbar -------- */
   function addTimelineButton(){
     const bar = document.getElementById('viewToolbar');
-    if (!bar) { if (window.__D1_debug) console.log('D1: no toolbar yet'); return; }
     if (document.getElementById('cosmicPlayBtn')) return;
     const btn = document.createElement('button');
     btn.id = 'cosmicPlayBtn';
@@ -160,15 +158,14 @@
   }
 
   function refreshLang(){
-    const btn = document.getElementById('cosmicPlayBtn');
-    if (btn) btn.textContent = playing ? t('timeline.stop') : t('timeline.play');
+    syncPlayButton();
     injectOriginBadge();
   }
   // Observe html[lang] attribute to detect language switch
   new MutationObserver(refreshLang).observe(document.documentElement, {attributes:true, attributeFilter:['lang']});
   document.addEventListener('visibilitychange', ()=>{ if (document.hidden) stop(); });
 
-  window.__D1 = { play, stop, injectOriginBadge };
+  window.__D1 = { play, stop, injectOriginBadge, getCurrentZ, ensureBanner };
 
   function init(){
     addTimelineButton();

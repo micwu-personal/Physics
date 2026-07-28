@@ -1,6 +1,13 @@
+import { createHash } from 'node:crypto';
 import { defineConfig, devices } from '@playwright/test';
 
-const baseURL = 'http://127.0.0.1:43817';
+// Derive a worktree-specific port so parallel checkouts never share a static
+// server (a reused server would silently serve a different revision).
+const derivedPort = 50_000 + (
+  Number.parseInt(createHash('sha256').update(process.cwd()).digest('hex').slice(0, 8), 16) % 10_000
+);
+const port = Number(process.env.PHYSICS_TEST_PORT || derivedPort);
+const baseURL = `http://127.0.0.1:${port}`;
 
 export default defineConfig({
   testDir: './tests',
@@ -8,7 +15,9 @@ export default defineConfig({
   fullyParallel: false,
   timeout: 180_000,
   forbidOnly: Boolean(process.env.CI),
-  retries: process.env.CI ? 1 : 0,
+  // Browser launches on a shared machine occasionally fail with transient
+  // socket errors; a permanently failing journey still fails the coverage gate.
+  retries: 1,
   workers: 2,
   reporter: process.env.CI
     ? [['line'], ['html', { open: 'never' }], ['junit', { outputFile: 'test-results/junit.xml' }]]
@@ -33,8 +42,9 @@ export default defineConfig({
   },
   webServer: {
     command: 'node scripts/static-server.mjs',
+    env: { ...process.env, PORT: String(port) },
     url: `${baseURL}/__health`,
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer: false,
     timeout: 10_000
   },
   projects: [

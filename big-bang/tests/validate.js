@@ -64,6 +64,16 @@ for(const [name, snapshot] of Object.entries(COMPOSITIONS)){
   assert(Math.abs(total - 100) < 1e-9, `${name} composition must sum to 100%`);
 }
 
+for(const id of ['timelineWrap', 'timeSlider', 'compGrid', 'scaleWrap', 'fatesGrid', 'mysteriesGrid']){
+  assert(htmlSource.includes(`id="${id}"`), `Required rendering target #${id} must exist`);
+}
+const compositionKeys = new Set(Object.values(COMPOSITIONS).flatMap(snapshot => snapshot.data.map(row => row.k)));
+for(const key of compositionKeys){
+  assert(LOCALES.en[`comp.legend.${key}`], `English composition label ${key} must exist`);
+  assert(LOCALES['zh-CN'][`comp.legend.${key}`], `Chinese composition label ${key} must exist`);
+  assert(appSource.includes(`${key}:`), `Composition color ${key} must exist`);
+}
+
 assert.strictEqual(FATES.en.length, FATES['zh-CN'].length, 'Fate cards must have locale parity');
 assert.strictEqual(MYSTERIES.en.length, MYSTERIES['zh-CN'].length, 'Mystery cards must have locale parity');
 for(const locale of ['en', 'zh-CN']){

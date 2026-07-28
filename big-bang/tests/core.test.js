@@ -126,3 +126,19 @@ test('starfield component resets, projects, and culls stars', () => {
   assert.equal(stars[1].x, 0);
   assert.equal(stars[1].y, 0);
 });
+
+test('starfield recycles stars left behind by a shrinking viewport', () => {
+  // A star sitting deeper than the new far plane would otherwise project with a
+  // negative radius once the window is made smaller.
+  const stars = [{x:0, y:0, z:400, hue:10}];
+  const visited = [];
+  api.advanceStarfield(stars, 100, 100, ()=>0.5, (star, x, y, size, alpha)=>visited.push({size, alpha}));
+
+  assert.equal(stars[0].z, 100);
+  assert.equal(stars[0].x, 0);
+  assert.equal(stars[0].y, 0);
+  visited.forEach(entry => {
+    assert(entry.size >= 0, 'projected radius stays drawable');
+    assert(entry.alpha >= 0 && entry.alpha <= 1, 'fade stays inside [0, 1]');
+  });
+});

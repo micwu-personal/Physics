@@ -81,7 +81,7 @@ if (reducedMotionQuery && reducedMotionQuery.addEventListener) {
 
 /* ----- Rendering the grid ----- */
 function rerenderGrid(){
-  const lang = window.CURRENT_LANG || 'en';
+  const lang = window.CURRENT_LANG;
   gridEl.innerHTML='';
   LAYOUT.forEach((row, rowIdx)=>{
     const rowDiv = document.createElement('div');
@@ -98,7 +98,7 @@ function rerenderGrid(){
     row.forEach(cell=>{
       if(cell === 'La-Lu'){ for(let z=57; z<=71; z++) rowZs.push(z); }
       else if(cell === 'Ac-Lr'){ for(let z=89; z<=103; z++) rowZs.push(z); }
-      else if(typeof cell === 'number'){ rowZs.push(cell); }
+      else if(cell !== 0){ rowZs.push(cell); }
     });
     speak.addEventListener('click', (e)=>{
       e.stopPropagation();
@@ -195,7 +195,7 @@ function refreshDetail(){
   if(!currentZ) return;
   const el = ELEMENTS[currentZ];
   const ext = Object.assign({}, generateFallbackExt(el), EXTENDED[currentZ] || {});
-  const lang = window.CURRENT_LANG || 'en';
+  const lang = window.CURRENT_LANG;
   const catColor = CATEGORY_COLORS[el.category];
   const nm = lang==='zh-CN' ? el.name_zh : el.name_en;
   const otherName = lang==='zh-CN' ? el.name_en : el.name_zh;
@@ -215,7 +215,7 @@ function refreshDetail(){
   // Properties
   const propsEl = document.getElementById('dProps');
   const shells = shellCounts(el.Z);
-  const phaseKey = ext.phase || (el.category==='noble'?'gas':(el.category==='halogen' && el.Z<=17 ? (el.Z===9||el.Z===17?'gas':'liquid'):'solid'));
+  const phaseKey = ext.phase;
   const phaseBase = resolvePhaseLabel(phaseKey);
   const phaseNote = lang==='zh-CN' ? ext.phaseNote_zh : ext.phaseNote_en;
   const phaseTxt = phaseNote ? `${phaseBase} — ${phaseNote}` : phaseBase;
@@ -244,23 +244,17 @@ function refreshDetail(){
   // Orbital / hybridization
   const orbTabs = document.getElementById('orbitalTabs');
   const availHybrids = inferHybrids(el);
-  orbTabs.innerHTML = availHybrids.length ? availHybrids.map(h=>`<button data-h="${h}">${labelForHybrid(h)}</button>`).join('') : `<span style="color:var(--dim);font-size:12px">${t('hybrid.none')}</span>`;
-  if(availHybrids.length){
-    if(!availHybrids.includes(currentHybrid)) currentHybrid = availHybrids[0];
-    orbTabs.querySelectorAll('button').forEach(b=>{
-      b.classList.toggle('active', b.dataset.h===currentHybrid);
-      b.addEventListener('click',()=>{
-        currentHybrid = b.dataset.h;
-        orbTabs.querySelectorAll('button').forEach(x=>x.classList.toggle('active', x.dataset.h===currentHybrid));
-        refreshOrbital();
-      });
+  orbTabs.innerHTML = availHybrids.map(h=>`<button data-h="${h}">${labelForHybrid(h)}</button>`).join('');
+  if(!availHybrids.includes(currentHybrid)) currentHybrid = availHybrids[0];
+  orbTabs.querySelectorAll('button').forEach(b=>{
+    b.classList.toggle('active', b.dataset.h===currentHybrid);
+    b.addEventListener('click',()=>{
+      currentHybrid = b.dataset.h;
+      orbTabs.querySelectorAll('button').forEach(x=>x.classList.toggle('active', x.dataset.h===currentHybrid));
+      refreshOrbital();
     });
-    refreshOrbital();
-  } else {
-    const ctx = document.getElementById('orbitalCanvas').getContext('2d');
-    ctx.clearRect(0,0,9999,9999);
-    document.getElementById('dHybridText').textContent = '';
-  }
+  });
+  refreshOrbital();
 
   // Oxidation states
   const oxEl = document.getElementById('dOx');
@@ -286,13 +280,13 @@ function refreshDetail(){
   // Reactions
   const rxBlock = document.getElementById('dReactionsBlock');
   const rxEl = document.getElementById('dRx');
-  const reactions = ext.reactions || [];
+  const reactions = ext.reactions;
   if(reactions.length){
     rxBlock.style.display='block';
     rxEl.innerHTML = reactions.map((r,i)=>`
       <div class="rx-item">
         <div class="rx-eq">${r.eq}</div>
-        <div class="rx-note">${lang==='zh-CN' ? (r.note_zh||r.note_en||'') : (r.note_en||r.note_zh||'')}</div>
+        <div class="rx-note">${lang==='zh-CN' ? r.note_zh : r.note_en}</div>
         <button class="rx-play" data-i="${i}">▶ ${lang==='zh-CN'?'播放':'Play'}</button>
       </div>
     `).join('') + `<div id="rxAnimBox"><canvas id="rxAnimCanvas"></canvas></div>`;
@@ -313,7 +307,7 @@ function refreshDetail(){
 
   // Isotopes
   const isoEl = document.getElementById('dIsotopes');
-  const isos = ext.isotopes || [];
+  const isos = ext.isotopes;
   isoEl.innerHTML = isos.length ? isos.map(i=>`
     <div class="iso-row">
       <div class="iso-sym">${i.s}</div>
@@ -329,13 +323,12 @@ function refreshDetail(){
   rn.textContent = radioTxt;
 
   // Uses & discovery
-  document.getElementById('dUses').textContent = lang==='zh-CN' ? (ext.uses_zh||ext.uses_en||'—') : (ext.uses_en||ext.uses_zh||'—');
+  document.getElementById('dUses').textContent = lang==='zh-CN' ? ext.uses_zh : ext.uses_en;
   const disc = ext.discovery;
-  document.getElementById('dDiscovery').textContent = disc
-    ? (disc.year < 0 || /antiquity|prehistory/i.test(disc.who||'')
-        ? `${t('discovery.ancient')}${disc.who? ' — '+disc.who:''}`
-        : `${t('discovery.year')} ${disc.year} ${t('discovery.by')} ${disc.who}`)
-    : '';
+  document.getElementById('dDiscovery').textContent =
+    disc.year < 0 || /antiquity|prehistory/i.test(disc.who)
+      ? `${t('discovery.ancient')} — ${disc.who}`
+      : `${t('discovery.year')} ${disc.year} ${t('discovery.by')} ${disc.who}`;
   PeriodicSources.install(detailEl, el.Z, lang);
 }
 
@@ -440,8 +433,7 @@ function inferHybrids(el){
     list.push('sp','sp2','sp3');
     if(period >= 3) list.push('sp3d','sp3d2');
   } else if(el.category==='posttransition'){
-    list.push('sp','sp2','sp3');
-    if(period >= 3) list.push('sp3d','sp3d2');
+    list.push('sp','sp2','sp3','sp3d','sp3d2');
   } else if(el.category==='transition'){
     list.push('dsp2','d2sp3','sp3d2','sp3');
   } else if(el.category==='lanthanide' || el.category==='actinide'){
@@ -460,7 +452,7 @@ function refreshOrbital(){
 
 /* Rich physics description per orbital / hybrid */
 function descriptionForOrbital(h){
-  const lang = window.CURRENT_LANG || 'en';
+  const lang = window.CURRENT_LANG;
   const zh = lang==='zh-CN';
   const D = {
     s: {
@@ -736,7 +728,7 @@ function drawOrbital(h){
     ctx.textAlign='left';
     ctx.fillText(labelForHybrid(h), 10, 20);
     // Legend
-    const lang = window.CURRENT_LANG || 'en';
+    const lang = window.CURRENT_LANG;
     ctx.font='10px JetBrains Mono, ui-monospace, monospace';
     ctx.fillStyle='rgba(127,227,255,0.9)';
     ctx.fillText('+', W-40, 20);
@@ -853,7 +845,7 @@ function drawTorus(ctx, cx, cy, R, axis, pos){
 /* ----- Signature colors ----- */
 function renderSignatureColors(el){
   const grid = document.getElementById('dColors');
-  const lang = window.CURRENT_LANG || 'en';
+  const lang = window.CURRENT_LANG;
   const colors = SIGNATURE_COLORS[el.Z];
   if(!colors || !colors.length){
     grid.innerHTML = `<div class="color-empty">${t('detail.colors.none')}</div>`;
@@ -867,7 +859,7 @@ function renderSignatureColors(el){
     'nano':   lang==='zh-CN' ? '纳米' : 'nano'
   };
   grid.innerHTML = colors.map(c=>{
-    const label = lang==='zh-CN' ? (c.label_zh||c.label_en) : (c.label_en||c.label_zh);
+    const label = lang==='zh-CN' ? c.label_zh : c.label_en;
     const st = stateLabel[c.state] || c.state;
     return `
       <div class="color-swatch">
@@ -1045,7 +1037,7 @@ const SUBSCRIPTS = {'₀':'0','₁':'1','₂':'2','₃':'3','₄':'4','₅':'5',
 const SUPERSCRIPTS = {'⁰':'','¹':'','²':'','³':'','⁴':'','⁵':'','⁶':'','⁷':'','⁸':'','⁹':'','⁺':'','⁻':''};
 function normalizeFormula(s){
   return String(s)
-    .replace(/[₀-₉]/g, ch => SUBSCRIPTS[ch] || ch)
+    .replace(/[₀-₉]/g, ch => SUBSCRIPTS[ch])
     .replace(/[⁰-⁹⁺⁻]/g, ch => SUPERSCRIPTS[ch] || '')
     .replace(/[↑↓]/g,'')
     .trim();
@@ -1162,9 +1154,7 @@ function moleculeShape(formula){
     atoms:[{sym:'O',x:0,y:0},{sym:m2o[1],x:-D*1.1,y:0},{sym:m2o[1],x:D*1.1,y:0}],
     bonds:[[0,1,1],[0,2,1]]
   };
-  // MO (transition oxide)
-  const mo = F.match(/^([A-Z][a-z]?)O$/);
-  if(mo) return { atoms:[{sym:mo[1],x:-D/2,y:0},{sym:'O',x:D/2,y:0}], bonds:[[0,1,2]] };
+  // MO (transition oxide) is covered by the binary-salt shape above.
   // M2O3
   const m2o3 = F.match(/^([A-Z][a-z]?)2O3$/);
   if(m2o3) return {
@@ -1190,14 +1180,20 @@ function moleculeShape(formula){
     ],
     bonds:[[0,1,1],[1,2,1],[0,3,1],[3,4,1]]
   };
-  // Fe2O3
-  if(F==='Fe2O3') return {
-    atoms:[
-      {sym:'Fe',x:-D*1.3,y:0},{sym:'Fe',x:D*1.3,y:0},
-      {sym:'O',x:0,y:-D*0.9},{sym:'O',x:0,y:D*0.9},{sym:'O',x:0,y:0}
-    ],
-    bonds:[[0,4,1],[1,4,1],[0,2,1],[1,3,1]]
-  };
+  // Fe2O3 is covered by the M2O3 shape above.
+  // HNO3 nitric acid — H binds the hydroxyl oxygen, so it must be matched
+  // before the generic metal-nitrate shape below.
+  if(F==='HNO3'){
+    return {
+      atoms:[
+        {sym:'N', x:0, y:0},
+        {sym:'O', x:D*1.2, y:-D*0.6},                  // =O
+        {sym:'O', x:D*1.2, y:D*0.6},                   // -O
+        {sym:'O', x:-D*1.2, y:0}, {sym:'H', x:-D*2.2, y:0}
+      ],
+      bonds:[[0,1,2],[0,2,1],[0,3,1],[3,4,1]]
+    };
+  }
   // Metal-nitrate M(NO3): trigonal-planar NO3 group hanging off M
   const mno3 = F.match(/^([A-Z][a-z]?)NO3$/);
   if(mno3){
@@ -1271,18 +1267,7 @@ function moleculeShape(formula){
       bonds:[[0,1,2],[0,2,2],[0,3,1],[3,4,1],[0,5,1],[5,6,1]]
     };
   }
-  // HNO3 nitric acid
-  if(F==='HNO3'){
-    return {
-      atoms:[
-        {sym:'N', x:0, y:0},
-        {sym:'O', x:D*1.2, y:-D*0.6},                  // =O
-        {sym:'O', x:D*1.2, y:D*0.6},                   // -O
-        {sym:'O', x:-D*1.2, y:0}, {sym:'H', x:-D*2.2, y:0}
-      ],
-      bonds:[[0,1,2],[0,2,1],[0,3,1],[3,4,1]]
-    };
-  }
+  // HNO3 nitric acid is matched before the metal-nitrate shape above.
   // H2SO3 sulfurous acid (similar layout)
   if(F==='H2SO3'){
     return {
@@ -1585,14 +1570,14 @@ function drawSideBonds(ctx, side, alpha, sideMarker){
       } else if(order===2){
         // parallel double lines
         const dx = b.gy-a.gy, dy = -(b.gx-a.gx);
-        const L = Math.hypot(dx,dy) || 1;
+        const L = Math.hypot(dx,dy);
         const ox = dx/L*3, oy = dy/L*3;
         line(ctx, a.gx+ox, a.gy+oy, b.gx+ox, b.gy+oy);
         line(ctx, a.gx-ox, a.gy-oy, b.gx-ox, b.gy-oy);
       } else {
         // triple
         const dx = b.gy-a.gy, dy = -(b.gx-a.gx);
-        const L = Math.hypot(dx,dy) || 1;
+        const L = Math.hypot(dx,dy);
         const ox = dx/L*3, oy = dy/L*3;
         line(ctx, a.gx, a.gy, b.gx, b.gy);
         line(ctx, a.gx+ox, a.gy+oy, b.gx+ox, b.gy+oy);
@@ -1684,23 +1669,26 @@ function darken(hex, amt){
   const b=Math.max(0, Math.round(parseInt(h.slice(4,6),16) * (1-amt)));
   return '#'+[r,g,b].map(v=>v.toString(16).padStart(2,'0')).join('');
 }
-function symToCategory(sym){
-  for(const z in ELEMENTS) if(ELEMENTS[z].symbol===sym) return ELEMENTS[z].category;
-  return 'unknown';
-}
-
 /* ================ Text-to-speech ================ */
 let voicesLoaded = false;
+function speechAvailable(){
+  return 'speechSynthesis' in window;
+}
+/* Clear any queued utterance. Safe to call on platforms without speech. */
+function cancelSpeech(){
+  if(!speechAvailable()) return;
+  speechSynthesis.cancel();
+}
 function ensureVoices(){
   return new Promise(res=>{
     const v = window.speechSynthesis?.getVoices?.() || [];
     if(v.length){ voicesLoaded=true; res(v); return; }
-    if(!window.speechSynthesis){ res([]); return; }
+    if(!speechAvailable()){ res([]); return; }
     speechSynthesis.onvoiceschanged = ()=>res(speechSynthesis.getVoices());
   });
 }
 async function speak(text, langHint){
-  if(!('speechSynthesis' in window)){
+  if(!speechAvailable()){
     alert(t('tts.unavailable')); return;
   }
   // Do NOT call speechSynthesis.cancel() here — that aborts prior
@@ -1729,15 +1717,15 @@ async function speak(text, langHint){
 /* Read a sequence of elements (by Z) in the current language. */
 let _rowSpeakId = 0;
 async function speakSequence(zList, lang){
-  if(!('speechSynthesis' in window)){ alert(t('tts.unavailable')); return; }
+  if(!speechAvailable()){ alert(t('tts.unavailable')); return; }
   const myId = ++_rowSpeakId;
-  speechSynthesis.cancel();
+  cancelSpeech();
   // Wait briefly so the browser's speech queue is truly clear
   await new Promise(r=>setTimeout(r, 60));
   const langHint = lang==='zh-CN' ? 'zh-CN' : 'en-US';
   for(const z of zList){
     if(myId !== _rowSpeakId) return; // superseded by newer click
-    const el = ELEMENTS[z]; if(!el) continue;
+    const el = ELEMENTS[z];
     const name = lang==='zh-CN' ? el.name_zh : el.name_en;
     await speak(name, langHint);
     if(myId !== _rowSpeakId) return;
@@ -1748,7 +1736,7 @@ async function speakSequence(zList, lang){
 document.getElementById('ttsEn').addEventListener('click',(e)=>{
   if(!currentZ) return;
   _rowSpeakId++;                          // cancel any ongoing row-read
-  speechSynthesis.cancel();
+  cancelSpeech();
   e.currentTarget.classList.add('playing');
   speak(ELEMENTS[currentZ].name_en, 'en-US');
   setTimeout(()=>e.currentTarget.classList.remove('playing'), 2000);
@@ -1756,7 +1744,7 @@ document.getElementById('ttsEn').addEventListener('click',(e)=>{
 document.getElementById('ttsZh').addEventListener('click',(e)=>{
   if(!currentZ) return;
   _rowSpeakId++;
-  speechSynthesis.cancel();
+  cancelSpeech();
   e.currentTarget.classList.add('playing');
   speak(ELEMENTS[currentZ].name_zh, 'zh-CN');
   setTimeout(()=>e.currentTarget.classList.remove('playing'), 2000);
@@ -1790,7 +1778,7 @@ const SHAPE_LABELS = {
 function render3DViewers(reactions){
   const block = document.getElementById('d3dBlock');
   const grid = document.getElementById('d3d');
-  const lang = window.CURRENT_LANG || 'en';
+  const lang = window.CURRENT_LANG;
   const seen = new Set();
   const known = [];
   reactions.forEach(r=>{
@@ -1810,8 +1798,7 @@ function render3DViewers(reactions){
   if(known.length===0){ block.style.display='none'; grid.innerHTML=''; return; }
   block.style.display='block';
   grid.innerHTML = known.map(f=>{
-    const shape = SHAPE_LABELS[f];
-    const shapeTxt = shape ? (lang==='zh-CN'?shape[1]:shape[0]) : '';
+    const shapeTxt = lang==='zh-CN' ? SHAPE_LABELS[f][1] : SHAPE_LABELS[f][0];
     return `<div class="mol3d-card" data-formula="${f}">
       <canvas></canvas>
       <div class="mol3d-caption">${prettyFormula(f)}</div>
@@ -1840,7 +1827,7 @@ function initMol3D(card, formula){
   const cy = mol.atoms.reduce((s,a)=>s+a.y,0)/mol.atoms.length;
   const cz = mol.atoms.reduce((s,a)=>s+a.z,0)/mol.atoms.length;
   const centered = mol.atoms.map(a=>({sym:a.sym, x:a.x-cx, y:a.y-cy, z:a.z-cz}));
-  const maxR = Math.max(...centered.map(a=>Math.hypot(a.x,a.y,a.z))) || 1;
+  const maxR = Math.max(...centered.map(a=>Math.hypot(a.x,a.y,a.z)));
 
   const state = {
     rotY: 0.6, rotX: 0.2, autoSpin: true,

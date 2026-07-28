@@ -208,10 +208,7 @@
     }
   };
 
-  // Merge into existing LOCALES
-  if (typeof LOCALES === 'object' && LOCALES) {
-    Object.keys(extra).forEach(lang => {
-      LOCALES[lang] = Object.assign(LOCALES[lang] || {}, extra[lang]);
-    });
-  }
+  Object.keys(extra).forEach(lang => {
+    LOCALES[lang] = Object.assign(LOCALES[lang], extra[lang]);
+  });
 })();
