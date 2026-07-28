@@ -13,11 +13,6 @@
   <script>document.body.classList.add('render-booting');setTimeout(()=>document.body.classList.remove('render-booting'),2000)</script>
   <div id="bg-stars"></div>
 
-  <div class="lang-switch">
-    <button class="lang-pill active" data-lang="en">EN</button>
-    <button class="lang-pill" data-lang="zh-CN">中文</button>
-  </div>
-
   <header class="hero">
     <div class="hero-inner">
       <div class="badge" data-i18n="hero.badge">The Standard Model · Interactive</div>
@@ -27,6 +22,13 @@
   </header>
 
   <nav class="tabs">
+    <div class="control-row">
+      <div class="lang-switch">
+        <button id="motionToggle" class="motion-pill" type="button">⏸ Pause animations</button>
+        <button class="lang-pill active" data-lang="en">EN</button>
+        <button class="lang-pill" data-lang="zh-CN">中文</button>
+      </div>
+    </div>
     <button class="tab active" data-tab="chart" data-i18n="tab.chart">Standard Model</button>
     <button class="tab" data-tab="detail" data-i18n="tab.detail">Particle Detail</button>
     <button class="tab" data-tab="builder" data-i18n="tab.builder">Composition Builder</button>

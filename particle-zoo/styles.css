@@ -373,7 +373,11 @@ footer{text-align:center;padding:40px 20px;color:var(--dim);font-size:12px;posit
 .phen-example{margin-top:8px;font-size:12px;color:var(--dim);font-style:italic}
 
 /* ---------- Language switcher ---------- */
-.lang-switch{position:fixed;top:14px;right:16px;z-index:100;display:flex;gap:4px;background:rgba(5,6,13,0.92);border:1px solid var(--panel-b);border-radius:999px;padding:3px}
+.control-row{flex:0 0 100%;display:flex;justify-content:flex-end;margin-bottom:2px}
+.lang-switch{display:flex;gap:4px;background:rgba(5,6,13,0.92);border:1px solid var(--panel-b);border-radius:999px;padding:3px}
+.motion-pill{background:transparent;color:var(--text);border:none;border-right:1px solid var(--panel-b);padding:6px 10px;border-radius:999px 4px 4px 999px;font-family:inherit;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap}
+.motion-pill:hover{color:var(--accent2)}
+.motion-pill[data-state="paused"]{color:#ffd166}
 .lang-pill{background:transparent;color:var(--dim);border:none;padding:6px 12px;border-radius:999px;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;letter-spacing:0.5px}
 .lang-pill:hover{color:var(--text)}
 .lang-pill.active{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff}
@@ -381,3 +385,5 @@ footer{text-align:center;padding:40px 20px;color:var(--dim);font-size:12px;posit
   *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.001ms!important}
   #bg-stars{animation:none}
 }
+html[data-motion="paused"] #bg-stars{animation:none}
+html[data-motion="playing"] #bg-stars{animation:drift-transform 180s linear infinite!important}

@@ -28,6 +28,45 @@ const PZ_PERF = {
 window.PZ_PERF = PZ_PERF;
 
 const reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+const MOTION_STORAGE_KEY = 'pz-motion';
+const motionParameter = new URLSearchParams(location.search).get('motion');
+let motionMode = (function(){
+  if(['play','pause','system'].includes(motionParameter)) return motionParameter;
+  try {
+    const saved = localStorage.getItem(MOTION_STORAGE_KEY);
+    return ['play','pause'].includes(saved) ? saved : 'system';
+  } catch(_) {
+    return 'system';
+  }
+})();
+function persistMotionMode(){
+  try {
+    if(motionMode==='system') localStorage.removeItem(MOTION_STORAGE_KEY);
+    else localStorage.setItem(MOTION_STORAGE_KEY,motionMode);
+  } catch(_){}
+}
+if(['play','pause','system'].includes(motionParameter)) persistMotionMode();
+function motionIsPaused(){
+  return motionMode==='pause' || (motionMode==='system' && reducedMotionQuery.matches);
+}
+function updateMotionControl(){
+  const button=document.getElementById('motionToggle');
+  if(!button) return;
+  const paused=motionIsPaused();
+  button.textContent=paused ? `▶ ${t('motion.play')}` : `⏸ ${t('motion.pause')}`;
+  button.dataset.state=paused ? 'paused' : 'playing';
+  document.documentElement.dataset.motion=paused ? 'paused' : 'playing';
+  button.title=motionMode==='system' && reducedMotionQuery.matches ? t('motion.system') : '';
+}
+function setMotionMode(mode){
+  motionMode=mode;
+  persistMotionMode();
+  updateMotionControl();
+  syncAnimationLoops();
+}
+document.getElementById('motionToggle').addEventListener('click',()=>{
+  setMotionMode(motionIsPaused() ? 'play' : 'pause');
+});
 const viewportVisibility = new WeakMap();
 const stagedPanels = new Set();
 const panelRenderQueues = new Map();
@@ -57,13 +96,13 @@ function canAnimate(tab, element){
     active:tabIsActive(tab),
     documentVisible:!document.hidden,
     elementVisible:elementIsVisible(element),
-    reducedMotion:reducedMotionQuery.matches,
+    reducedMotion:motionIsPaused(),
   });
 }
 function recordDraw(id){ PZ_PERF.draws[id]=(PZ_PERF.draws[id]||0)+1; }
 
 function stagePanelRender(tab){
-  if(stagedPanels.has(tab) || reducedMotionQuery.matches) return;
+  if(stagedPanels.has(tab) || motionIsPaused()) return;
   const panel=document.getElementById(`tab-${tab}`);
   const selectors={
     chart:'.sm-grid,.count-summary,.color-panel',
@@ -1423,6 +1462,7 @@ document.querySelectorAll('.lang-pill').forEach(b=>{
     const lang = b.dataset.lang;
     try { localStorage.setItem('pz-lang', lang); } catch(_){}
     applyI18n(lang);
+    updateMotionControl();
   });
 });
 const savedLang = (function(){ try { return localStorage.getItem('pz-lang'); } catch(_){ return null; } })();
@@ -2016,7 +2056,7 @@ function buildInteractionTiles(){
       IX_INSTANCES.push({ card, el: card.querySelector('svg'), anim: built.anim });
     });
   });
-  if(reducedMotionQuery.matches) IX_INSTANCES.forEach(inst=>inst.anim(inst.el,0));
+  if(motionIsPaused()) IX_INSTANCES.forEach(inst=>inst.anim(inst.el,0));
   interactionTilesReady=true;
 }
 function refreshInteractionTiles(){
@@ -2038,7 +2078,7 @@ function ixLoop(timestamp){
 function ixStart(){
   if(ixRAF!=null) return;
   if(!interactionTilesReady) buildInteractionTiles();
-  if(reducedMotionQuery.matches){
+  if(motionIsPaused()){
     IX_INSTANCES.forEach(inst=>inst.anim(inst.el, ixT));
     return;
   }
@@ -3825,7 +3865,7 @@ function drawActiveLabDemos(advanceAnimations){
   const sub=activeLabSub();
   let drawCount=0;
   LAB_DEMOS.filter(demo=>demo.sub===sub).forEach(demo=>{
-    if((demo.animated && advanceAnimations) || labStaticDirty || reducedMotionQuery.matches){
+    if((demo.animated && advanceAnimations) || labStaticDirty || motionIsPaused()){
       demo.draw();
       recordDraw(`lab:${demo.id}`);
       drawCount++;
@@ -3835,7 +3875,7 @@ function drawActiveLabDemos(advanceAnimations){
   return drawCount;
 }
 function labLoop(timestamp){
-  if(!tabIsActive('lab') || document.hidden || reducedMotionQuery.matches){ labRAF=null; return; }
+  if(!tabIsActive('lab') || document.hidden || motionIsPaused()){ labRAF=null; return; }
   const hasAnimatedDemo=LAB_DEMOS.some(demo=>demo.sub===activeLabSub() && demo.animated);
   if(!hasAnimatedDemo && !labStaticDirty){ labRAF=null; return; }
   if(labLastTimestamp && timestamp-labLastTimestamp<LAB_FRAME_INTERVAL){
@@ -3854,7 +3894,7 @@ function labStart(){
   if(!tabIsActive('lab')) return;
   initActiveLabDemos();
   drawActiveLabDemos(false);
-  if(!document.hidden && !reducedMotionQuery.matches) labRAF=requestAnimationFrame(labLoop);
+  if(!document.hidden && !motionIsPaused()) labRAF=requestAnimationFrame(labLoop);
 }
 function labStop(){
   if(labRAF!=null) cancelAnimationFrame(labRAF);
@@ -3864,7 +3904,7 @@ function labStop(){
 function markLabDirty(){
   labStaticDirty=true;
   if(!tabIsActive('lab')) return;
-  if(reducedMotionQuery.matches) drawActiveLabDemos(false);
+  if(motionIsPaused()) drawActiveLabDemos(false);
   else if(labRAF==null) labStart();
 }
 
@@ -3898,18 +3938,22 @@ window.addEventListener('resize', ()=>{
 });
 
 function syncAnimationLoops(){
-  if(reducedMotionQuery.matches) finishStagedPanelRendering();
+  if(motionIsPaused()) finishStagedPanelRendering();
   if(canAnimate('builder',buildCanvas)) buildStart(); else buildStop();
   if(canAnimate('playground',canvas)) pgStart(); else pgStop();
-  if(reducedMotionQuery.matches && interactionTilesReady) IX_INSTANCES.forEach(inst=>inst.anim(inst.el,ixT));
-  if(tabIsActive('forces') && !document.hidden && !reducedMotionQuery.matches) ixStart(); else ixStop();
+  if(motionIsPaused() && interactionTilesReady) IX_INSTANCES.forEach(inst=>inst.anim(inst.el,ixT));
+  if(tabIsActive('forces') && !document.hidden && !motionIsPaused()) ixStart(); else ixStop();
   if(tabIsActive('lab') && !document.hidden) labStart(); else labStop();
 }
 document.addEventListener('visibilitychange',syncAnimationLoops);
-reducedMotionQuery.addEventListener('change',syncAnimationLoops);
+reducedMotionQuery.addEventListener('change',()=>{
+  updateMotionControl();
+  syncAnimationLoops();
+});
 
 // If lab is the initial tab (unlikely), start it.
 if(document.querySelector('.tab.active')?.dataset.tab === 'lab') labStart();
+updateMotionControl();
 syncAnimationLoops();
 
 /* ---- Fix Big Bang cross-link.  When served from particle-zoo/index.html,

@@ -214,7 +214,12 @@ test.describe('deterministic scientific renderers', () => {
         }
 
         await page.locator('.tab[data-tab="forces"]').click();
-        await stepVisualClock(page, 80);
+        await page.evaluate(() => {
+          setMotionMode('pause');
+          ixStop();
+          ixT = 0;
+          IX_INSTANCES.forEach(instance => instance.anim(instance.el, 0));
+        });
         const interactionSvgs = page.locator('#interactionsRoot .ix-card svg');
         expect(await interactionSvgs.count()).toBeGreaterThan(10);
         for (const svg of await interactionSvgs.all()) {

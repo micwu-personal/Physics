@@ -24,6 +24,9 @@ const LOCALES = {
     'tab.bsm': 'Beyond Standard Model',
     'tab.phenomena': 'Quantum Phenomena',
     'tab.playground': 'Physics Playground',
+    'motion.play': 'Play animations',
+    'motion.pause': 'Pause animations',
+    'motion.system': 'Your system reduced-motion preference is pausing animations. Use this button to override it.',
 
     // Chart tab
     'chart.h2': 'The Standard Model',
@@ -595,6 +598,9 @@ const LOCALES = {
     'tab.bsm': '超出标准模型',
     'tab.phenomena': '量子现象',
     'tab.playground': '物理沙盘',
+    'motion.play': '播放动画',
+    'motion.pause': '暂停动画',
+    'motion.system': '系统的“减少动态效果”设置已暂停动画。可用此按钮覆盖该设置。',
 
     'chart.h2': '粒子物理标准模型',
     'chart.desc.a': '17',
