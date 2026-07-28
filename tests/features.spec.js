@@ -218,6 +218,8 @@ test('Particle Zoo visible simulations animate and honor reduced motion', async 
   const errors = watchPage(page);
   await page.emulateMedia({ reducedMotion: 'no-preference' });
   await preparePage(page, '/particle-zoo/', 'en');
+  expect(await page.locator('#bg-stars').evaluate(element => getComputedStyle(element).animationName))
+    .toBe('drift-transform');
 
   const fingerprint = id => page.locator(`#${id}`).evaluate(canvas => {
     const pixels = canvas.getContext('2d').getImageData(0, 0, canvas.width, canvas.height).data;
@@ -285,13 +287,59 @@ test('Particle Zoo visible simulations animate and honor reduced motion', async 
   await page.locator('.tab[data-tab="playground"]').click();
   await expectCanvasToAdvance('pgCanvas');
 
-  await page.locator('.tab[data-tab="lab"]').click();
-  await page.locator('.lab-subtab[data-lab-sub="basics"]').click();
-  await page.locator('#detCanvas').scrollIntoViewIfNeeded();
   await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.reload({ waitUntil: 'load' });
+  await page.locator('.tab[data-tab="lab"]').click();
+  await page.locator('#detCanvas').scrollIntoViewIfNeeded();
   await page.waitForTimeout(120);
   const reducedBefore = await fingerprint('detCanvas');
   await page.waitForTimeout(350);
   expect(await fingerprint('detCanvas'), 'reduced motion should pause the detector').toBe(reducedBefore);
+  await expect(page.locator('#motionToggle')).toHaveAttribute('data-state', 'paused');
+  await expect(page.locator('#motionToggle')).toContainText('Play animations');
+  expect(await page.locator('#bg-stars').evaluate(element => getComputedStyle(element).animationName))
+    .toBe('none');
+  await page.locator('#motionToggle').click();
+  await expect(page.locator('#motionToggle')).toHaveAttribute('data-state', 'playing');
+  const forcedStarMotion = await page.locator('#bg-stars').evaluate(element => {
+    const style = getComputedStyle(element);
+    return {
+      duration: style.animationDuration,
+      iterations: style.animationIterationCount,
+      name: style.animationName
+    };
+  });
+  expect(forcedStarMotion).toEqual({
+    duration: '180s',
+    iterations: 'infinite',
+    name: 'drift-transform'
+  });
+  const overrideBefore = await fingerprint('detCanvas');
+  await page.waitForTimeout(350);
+  expect(await fingerprint('detCanvas'), 'the explicit play override should resume motion').not.toBe(overrideBefore);
+  expect(await page.evaluate(() => localStorage.getItem('pz-motion'))).toBe('play');
+  await page.locator('.lang-pill[data-lang="zh-CN"]').click();
+  await expect(page.locator('#motionToggle')).toContainText('暂停动画');
+  await page.reload({ waitUntil: 'load' });
+  await expect(page.locator('#motionToggle')).toHaveAttribute('data-state', 'playing');
+  await expect(page.locator('#motionToggle')).toContainText('Pause animations');
+  await page.locator('.lang-pill[data-lang="zh-CN"]').click();
+  await expect(page.locator('#motionToggle')).toContainText('暂停动画');
+  await page.locator('.tab[data-tab="lab"]').click();
+  const persistedFrames = await page.evaluate(() => window.PZ_PERF.snapshot().frames.lab);
+  await page.waitForTimeout(350);
+  expect(await page.evaluate(() => window.PZ_PERF.snapshot().frames.lab)).toBeGreaterThan(persistedFrames);
+  await page.setViewportSize({ width: 412, height: 915 });
+  await page.evaluate(() => window.scrollTo(0, 600));
+  await page.waitForTimeout(100);
+  const overlappingTabs = await page.locator('.tabs').evaluate(nav => {
+    const controls = nav.querySelector('.control-row').getBoundingClientRect();
+    return [...nav.querySelectorAll('.tab')].filter(tab => {
+      const rect = tab.getBoundingClientRect();
+      return rect.left < controls.right && rect.right > controls.left &&
+        rect.top < controls.bottom && rect.bottom > controls.top;
+    }).map(tab => tab.dataset.tab);
+  });
+  expect(overlappingTabs, 'motion/language controls must not cover sticky navigation').toEqual([]);
   await assertNoErrors(errors);
 });

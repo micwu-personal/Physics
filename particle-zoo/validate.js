@@ -87,7 +87,8 @@ for (const id of [
   'confAuto', 'confReset', 'consControls', 'consLegend', 'decayLegend',
   'decayRestart', 'decaySpeed', 'detLegend', 'detPicker', 'evdControls',
   'evdLegend', 'feynClear', 'feynExample', 'feynLegend', 'feynPicker',
-  'oscControls', 'pdfControls', 'pgClear', 'pgTrails', 'runControls', 'tab-lab'
+  'motionToggle', 'oscControls', 'pdfControls', 'pgClear', 'pgTrails',
+  'runControls', 'tab-lab'
 ]) {
   assert.ok(indexSource.includes(`id="${id}"`), `required DOM target #${id}`);
 }
