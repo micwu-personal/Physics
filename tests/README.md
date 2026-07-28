@@ -18,7 +18,7 @@ The harness separates two different completeness goals:
 
 Visual baselines are intentionally named for `win32`; CI uses `windows-latest`. The 36 route-level full-page baselines remain animation-insensitive and keep canvases hidden. `rendering-visual.spec.js` separately seeds randomness, freezes wall-clock time, controls `requestAnimationFrame`, asserts non-blank pixels and unclipped geometry, and captures deterministic element-level canvas/SVG baselines.
 
-Set `PHYSICS_TEST_PORT` when concurrent worktrees need isolated static servers; the default remains `43817`.
+Each worktree automatically derives an isolated static-server port. Set `PHYSICS_TEST_PORT` only to override it explicitly.
 
 The generated narrow Particle Zoo builder canvas is covered by non-blank pixel and unclipped-geometry assertions, while its stable result panel is snapshotted. Its curved gluon strokes exhibit Win32 subpixel raster noise at that width; the equivalent source/desktop builder canvas has exact pixel baselines in both locales.
 
