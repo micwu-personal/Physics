@@ -1279,6 +1279,9 @@ const PG_TYPES = {
   neutron: {c:'#a0a0a0', r:10, q:0,  mass:1839, kind:'matter', name:'n⁰'},
   photon:  {c:'#ffffff', r:3,  q:0,  mass:0,    kind:'boson',  name:'γ'},
 };
+const PHOTON_LIFETIME = 200;
+const PHOTON_FADE_FRAMES = 30;
+const SCENE_FADE_FRAMES = 18;
 
 let pgParts = [];
 let trails = true;
@@ -1289,7 +1292,7 @@ document.getElementById('pgClear').onclick = ()=>{
   playgroundSeeded=true;
   pgStop();
   pgLastTimestamp=0;
-  pgClearFrames=18;
+  pgClearFrames=SCENE_FADE_FRAMES;
   if(canAnimate('playground',canvas)) pgStart();
   else finishPlaygroundClear();
 };
@@ -1316,7 +1319,7 @@ function spawn(type, x, y, startLoop=true){
     y: y ?? Math.random()*H,
     vx: Math.cos(angle)*speed,
     vy: Math.sin(angle)*speed,
-    life: isPhoton ? 200 : Infinity,
+    life: isPhoton ? PHOTON_LIFETIME : Infinity,
     trail: []
   });
   if(pgParts.length>150) pgParts.shift();
@@ -1390,7 +1393,7 @@ function step(dt=1){
           const pair = PhysicsCore.photonPair(Math.random()*Math.PI*2);
           pair.forEach(momentum=>{
             toAdd.push({type:'photon',...PG_TYPES.photon,x:cx,y:cy,
-              vx:momentum.vx,vy:momentum.vy,life:200,trail:[],flash:1});
+              vx:momentum.vx,vy:momentum.vy,life:PHOTON_LIFETIME,trail:[],flash:1});
           });
           // flash
           flashes.push({x:cx,y:cy,r:0,life:20});
@@ -1403,6 +1406,11 @@ function step(dt=1){
 
   // draw
   for(const p of pgParts){
+    const opacity=Number.isFinite(p.life)
+      ? Math.max(0,Math.min(1,p.life/PHOTON_FADE_FRAMES))
+      : 1;
+    ctx.save();
+    ctx.globalAlpha=opacity;
     // trail
     if(trails && p.trail.length>1){
       ctx.strokeStyle = p.c+'40';
@@ -1428,6 +1436,7 @@ function step(dt=1){
       ctx.textAlign='center'; ctx.textBaseline='middle';
       ctx.fillText(p.q>0?'+':p.q<0?'−':'', p.x, p.y);
     }
+    ctx.restore();
   }
 
   // flashes
@@ -1464,10 +1473,14 @@ function seedPlayground(){
 function pgLoop(timestamp){
   if(!canAnimate('playground', canvas)){ pgRAF=null; return; }
   if(pgParts.length===0 && flashes.length===0 && pgClearFrames===0){ pgRAF=null; return; }
+  const hadScene=pgParts.length>0 || flashes.length>0;
   const dt=pgLastTimestamp ? Math.min(3,(timestamp-pgLastTimestamp)/(1000/60)) : 1;
   pgLastTimestamp=timestamp;
   PZ_PERF.frames.playground++;
   step(dt);
+  if(pgClearFrames===0 && hadScene && pgParts.length===0 && flashes.length===0){
+    pgClearFrames=SCENE_FADE_FRAMES;
+  }
   if(pgClearFrames>0){
     pgClearFrames--;
     if(pgClearFrames===0) finishPlaygroundClear();

@@ -1459,6 +1459,16 @@ test('particle-zoo playground clear branch coverage', async ({ page }) => {
     await page.locator('#pgClear').click();
     await page.evaluate(()=>spawn('electron'));
     expect(await page.evaluate(()=>pgClearFrames)).toBe(0);
+    await page.locator('#pgClear').click();
+    await page.waitForFunction(()=>pgClearFrames===0 && pgRAF===null);
+    await page.evaluate(()=>{
+      trails=false;
+      spawn('photon',W/2,H/2);
+      pgParts[0].vx=0;
+      pgParts[0].vy=0;
+      pgParts[0].life=PHOTON_FADE_FRAMES;
+    });
+    await page.waitForFunction(()=>pgParts.length===0 && pgClearFrames===0 && pgRAF===null);
     await page.evaluate(()=>setMotionMode('pause'));
     await page.locator('#pgClear').click();
     expect(await page.evaluate(()=>({frames:pgClearFrames,raf:pgRAF}))).toEqual({frames:0,raf:null});

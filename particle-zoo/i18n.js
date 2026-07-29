@@ -370,7 +370,7 @@ const LOCALES = {
 
     // Playground
     'pg.h2': 'Physics Playground',
-    'pg.desc': 'A qualitative 2-D toy model: opposite charges attract, like charges repel, and an electron-positron pair can convert to two exactly back-to-back photons in its assumed centre-of-momentum frame. Sizes, speeds, forces, and wall bounces are not to scale.',
+    'pg.desc': 'A qualitative 2-D toy model: opposite charges attract, like charges repel, and an electron-positron pair can convert to two exactly back-to-back photons in its assumed centre-of-momentum frame. Photons use a short display lifetime to keep the sandbox bounded, fading before removal. Sizes, speeds, forces, and wall bounces are not to scale.',
     'pg.spawn.e': '+ Electron (e⁻)',
     'pg.spawn.p': '+ Positron (e⁺)',
     'pg.spawn.pr': '+ Proton',
@@ -935,7 +935,7 @@ const LOCALES = {
     'phen.fermicond.p': '超冷费米原子可形成配对超流体,并从大而重叠的 BCS 配对连续演化到紧束缚分子的 BEC。可调相互作用使 BCS—BEC 交叉能够被直接检验。',
 
     'pg.h2': '物理沙盘',
-    'pg.desc': '定性的二维玩具模型:异号电荷吸引、同号电荷排斥;电子—正电子对在假定的质心系中转化为两个严格背对背的光子。粒子大小、速度、作用力和边界反弹均不按真实比例。',
+    'pg.desc': '定性的二维玩具模型:异号电荷吸引、同号电荷排斥;电子—正电子对在假定的质心系中转化为两个严格背对背的光子。为防止沙盘无限累积粒子,光子采用较短的显示寿命,并在移除前逐渐淡出。粒子大小、速度、作用力和边界反弹均不按真实比例。',
     'pg.spawn.e': '+ 电子 (e⁻)',
     'pg.spawn.p': '+ 正电子 (e⁺)',
     'pg.spawn.pr': '+ 质子',

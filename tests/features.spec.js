@@ -379,6 +379,69 @@ test('Particle Zoo playground clear finishes its fade and restarts on spawn', as
   await assertNoErrors(errors);
 });
 
+test('Particle Zoo photons fade before the final scene clears', async ({ page }) => {
+  const errors = watchPage(page);
+  await preparePage(page, '/particle-zoo/?motion=play', 'en');
+  await page.locator('.tab[data-tab="playground"]').click();
+  await page.locator('#pgCanvas').scrollIntoViewIfNeeded();
+  await page.locator('#pgClear').click();
+  await page.waitForFunction(() => pgClearFrames === 0 && pgRAF === null);
+  await page.evaluate(() => {
+    trails=false;
+    spawn('photon',W/2,H/2);
+    const photon=pgParts[0];
+    photon.vx=0;
+    photon.vy=0;
+    photon.life=PHOTON_FADE_FRAMES;
+    pgStart();
+  });
+  const fadeFrames=await page.evaluate(() => PHOTON_FADE_FRAMES);
+  const samplePhoton = () => page.evaluate(() => {
+    const photon=pgParts[0];
+    if(!photon) return null;
+    const pixel=ctx.getImageData(
+      Math.floor(photon.x*devicePixelRatio),
+      Math.floor(photon.y*devicePixelRatio),
+      1,
+      1
+    ).data;
+    return {brightness:pixel[0]+pixel[1]+pixel[2],life:photon.life};
+  });
+  await expect.poll(async () => (await samplePhoton())?.life, { timeout: 2_000, intervals:[20] })
+    .toBeLessThan(fadeFrames-3);
+  const early=await samplePhoton();
+  await expect.poll(async () => {
+    const sample=await samplePhoton();
+    if(sample && sample.life<8) await page.evaluate(()=>pgStop());
+    return sample?.life;
+  }, { timeout: 2_000, intervals:[20] })
+    .toBeLessThan(8);
+  const late=await samplePhoton();
+  expect(late.brightness).toBeLessThan(early.brightness);
+
+  await page.evaluate(()=>pgStart());
+  const removalState=await page.waitForFunction(() => {
+    if(pgParts.length!==0 || pgClearFrames===0) return null;
+    pgStop();
+    return {
+      clearFrames:pgClearFrames,
+      frames:window.PZ_PERF.snapshot().frames.playground
+    };
+  }).then(handle=>handle.jsonValue());
+  const framesAtRemoval=removalState.frames;
+  expect(removalState.clearFrames).toBeGreaterThan(0);
+  await page.evaluate(()=>pgStart());
+  await page.waitForFunction(() => pgClearFrames===0 && pgRAF===null);
+  expect(await page.evaluate(() => window.PZ_PERF.snapshot().frames.playground)).toBeGreaterThan(framesAtRemoval);
+  expect(await page.locator('#pgCanvas').evaluate(canvas => {
+    const context=canvas.getContext('2d');
+    return [...context.getImageData(canvas.width>>1,canvas.height>>1,1,1).data];
+  })).toEqual([3,5,16,255]);
+  await page.locator('.lang-pill[data-lang="zh-CN"]').click();
+  await expect(page.locator('#tab-playground .section-head p')).toContainText('逐渐淡出');
+  await assertNoErrors(errors);
+});
+
 test('Big Bang background motion can override and persist reduced motion', async ({ page }) => {
   const errors = watchPage(page);
   await page.emulateMedia({ reducedMotion: 'reduce' });
