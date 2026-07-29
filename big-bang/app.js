@@ -284,6 +284,51 @@ function renderSourceLinks(lang){
   renderReferencePanel(document.getElementById('sourceLinks'), SOURCES, LOCALES[lang]['refs.label']);
 }
 
+/* ================ Global motion preference ================ */
+const motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+const MOTION_STORAGE_KEY = 'bb-motion';
+const motionParameter = new URLSearchParams(location.search).get('motion');
+let motionMode = (function(){
+  if(['play','pause','system'].includes(motionParameter)) return motionParameter;
+  try {
+    const saved=localStorage.getItem(MOTION_STORAGE_KEY);
+    return ['play','pause'].includes(saved) ? saved : 'system';
+  } catch(_){
+    return 'system';
+  }
+})();
+function persistMotionMode(){
+  try {
+    if(motionMode==='system') localStorage.removeItem(MOTION_STORAGE_KEY);
+    else localStorage.setItem(MOTION_STORAGE_KEY,motionMode);
+  } catch(_){}
+}
+if(['play','pause','system'].includes(motionParameter)) persistMotionMode();
+function motionIsPaused(){
+  return motionMode==='pause' || (motionMode==='system' && motionQuery.matches);
+}
+function motionText(key){
+  const lang=window.CURRENT_LANG || 'en';
+  return LOCALES[lang]?.[key] || LOCALES.en[key] || key;
+}
+function updateMotionControl(){
+  const button=document.getElementById('motionToggle');
+  const paused=motionIsPaused();
+  button.textContent=paused ? `▶ ${motionText('motion.play')}` : `⏸ ${motionText('motion.pause')}`;
+  button.dataset.state=paused ? 'paused' : 'playing';
+  document.documentElement.dataset.motion=paused ? 'paused' : 'playing';
+  button.title=motionMode==='system' && motionQuery.matches ? motionText('motion.system') : '';
+}
+function setMotionMode(mode){
+  motionMode=mode;
+  persistMotionMode();
+  updateMotionControl();
+  bgAnimation.setReducedMotion(motionIsPaused());
+}
+document.getElementById('motionToggle').addEventListener('click',()=>{
+  setMotionMode(motionIsPaused() ? 'play' : 'pause');
+});
+
 /* ================ Background canvas — expanding starfield ================ */
 const bgCanvas = document.getElementById('bgCanvas');
 const bgCtx = bgCanvas.getContext('2d');
@@ -315,16 +360,18 @@ function drawBg(){
   });
 }
 
-const motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
 const bgAnimation = createAnimationController({
   requestFrame: callback=>requestAnimationFrame(callback),
   cancelFrame: id=>cancelAnimationFrame(id),
   draw: drawBg
 });
 bgAnimation.setDocumentVisible(!document.hidden);
-bgAnimation.setReducedMotion(motionQuery.matches);
+bgAnimation.setReducedMotion(motionIsPaused());
 document.addEventListener('visibilitychange',()=>bgAnimation.setDocumentVisible(!document.hidden));
-motionQuery.addEventListener('change',event=>bgAnimation.setReducedMotion(event.matches));
+motionQuery.addEventListener('change',()=>{
+  updateMotionControl();
+  bgAnimation.setReducedMotion(motionIsPaused());
+});
 if('IntersectionObserver' in window){
   new IntersectionObserver(entries=>bgAnimation.setIntersecting(entries[0].isIntersecting)).observe(bgCanvas);
 }
@@ -340,6 +387,7 @@ document.querySelectorAll('.lang-pill').forEach(b=>{
     try{ localStorage.setItem('bb-lang',lang); }catch(_){}
     applyI18n(lang);
     renderScale();
+    updateMotionControl();
   });
 });
 const savedLang = (()=>{ try{ return localStorage.getItem('bb-lang'); }catch(_){ return null; } })();
@@ -347,3 +395,4 @@ const browserLang = (navigator.language||'').toLowerCase();
 const initLang = savedLang || (browserLang.startsWith('zh') ? 'zh-CN' : 'en');
 applyI18n(initLang);
 renderScale();
+updateMotionControl();

@@ -26,10 +26,55 @@ const detailEl = document.getElementById('detail');
 let currentZ = null;
 let currentHybrid = null;
 
+/* Global motion preference: system default with an explicit persisted override. */
+const MOTION_STORAGE_KEY = 'pt-motion';
+const motionParameter = new URLSearchParams(location.search).get('motion');
+let motionMode = (function(){
+  if(['play','pause','system'].includes(motionParameter)) return motionParameter;
+  try {
+    const saved=localStorage.getItem(MOTION_STORAGE_KEY);
+    return ['play','pause'].includes(saved) ? saved : 'system';
+  } catch(_){
+    return 'system';
+  }
+})();
+function persistMotionMode(){
+  try {
+    if(motionMode==='system') localStorage.removeItem(MOTION_STORAGE_KEY);
+    else localStorage.setItem(MOTION_STORAGE_KEY,motionMode);
+  } catch(_){}
+}
+if(['play','pause','system'].includes(motionParameter)) persistMotionMode();
+
 /* Animation lifecycle: render a static first frame, then run only while visible. */
 const animationVisibility = new WeakMap();
 const pausedAnimationFrames = new Map();
 const reducedMotionQuery = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : null;
+function motionIsPaused(){
+  return motionMode==='pause' || (motionMode==='system' && Boolean(reducedMotionQuery && reducedMotionQuery.matches));
+}
+function updateMotionControl(){
+  const button=document.getElementById('motionToggle');
+  const paused=motionIsPaused();
+  button.textContent=paused ? `▶ ${t('motion.play')}` : `⏸ ${t('motion.pause')}`;
+  button.dataset.state=paused ? 'paused' : 'playing';
+  document.documentElement.dataset.motion=paused ? 'paused' : 'playing';
+  button.title=motionMode==='system' && reducedMotionQuery && reducedMotionQuery.matches ? t('motion.system') : '';
+}
+function announceMotionState(){
+  window.dispatchEvent(new CustomEvent('pt-motionchange',{detail:{paused:motionIsPaused()}}));
+}
+function setMotionMode(mode){
+  motionMode=mode;
+  persistMotionMode();
+  updateMotionControl();
+  announceMotionState();
+  if(!motionIsPaused()) resumeVisibleAnimations();
+}
+window.PT_MOTION={isPaused:motionIsPaused};
+document.getElementById('motionToggle').addEventListener('click',()=>{
+  setMotionMode(motionIsPaused() ? 'play' : 'pause');
+});
 const animationObserver = typeof IntersectionObserver === 'function'
   ? new IntersectionObserver(entries => {
       entries.forEach(entry => {
@@ -44,7 +89,7 @@ function animationStateFor(element){
     active:element && element.isConnected && !element.closest('.hidden'),
     documentVisible:!document.hidden,
     elementVisible:animationVisibility.get(element) !== false,
-    reducedMotion:Boolean(reducedMotionQuery && reducedMotionQuery.matches)
+    reducedMotion:motionIsPaused()
   };
 }
 function scheduleActiveFrame(element, callback){
@@ -65,8 +110,18 @@ function resumeAnimation(element){
   pausedAnimationFrames.delete(element);
   requestAnimationFrame(callback);
 }
+function refreshAnimationVisibility(element){
+  const rect=element.getBoundingClientRect();
+  animationVisibility.set(
+    element,
+    rect.width>0 && rect.height>0 && rect.bottom>=-80 && rect.top<=innerHeight+80
+  );
+}
 function resumeVisibleAnimations(){
-  pausedAnimationFrames.forEach((_, element) => resumeAnimation(element));
+  pausedAnimationFrames.forEach((_, element) => {
+    refreshAnimationVisibility(element);
+    resumeAnimation(element);
+  });
 }
 function disposeAnimatedElement(element){
   if (!element) return;
@@ -76,7 +131,11 @@ function disposeAnimatedElement(element){
 }
 document.addEventListener('visibilitychange', resumeVisibleAnimations);
 if (reducedMotionQuery && reducedMotionQuery.addEventListener) {
-  reducedMotionQuery.addEventListener('change', resumeVisibleAnimations);
+  reducedMotionQuery.addEventListener('change', ()=>{
+    updateMotionControl();
+    announceMotionState();
+    resumeVisibleAnimations();
+  });
 }
 
 /* ----- Rendering the grid ----- */
@@ -2003,12 +2062,14 @@ document.querySelectorAll('.lang-pill').forEach(b=>{
     const lang = b.dataset.lang;
     try { localStorage.setItem('pt-lang', lang); } catch(_){}
     applyI18n(lang);
+    updateMotionControl();
   });
 });
 const savedLang = (function(){ try { return localStorage.getItem('pt-lang'); } catch(_){ return null; } })();
 const browserLang = (navigator.language||'').toLowerCase();
 const initLang = savedLang || (browserLang.startsWith('zh') ? 'zh-CN' : 'en');
 applyI18n(initLang);
+updateMotionControl();
 
 /* Show hydrogen by default */
 openDetail(1);

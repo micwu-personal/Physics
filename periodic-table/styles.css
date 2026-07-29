@@ -31,10 +31,15 @@ body{
   background-size:800px 800px; opacity:0.4;
 }
 
-.lang-switch{position:fixed;top:14px;right:16px;z-index:100;display:flex;gap:4px;background:rgba(5,6,13,0.7);backdrop-filter:blur(20px);border:1px solid var(--panel-b);border-radius:999px;padding:3px}
+.control-row{position:sticky;top:0;z-index:100;display:flex;justify-content:flex-end;padding:8px 16px 0;pointer-events:none}
+.lang-switch{display:flex;gap:4px;background:rgba(5,6,13,0.94);border:1px solid var(--panel-b);border-radius:999px;padding:3px;pointer-events:auto}
+.motion-pill{background:transparent;color:var(--text);border:none;border-right:1px solid var(--panel-b);padding:6px 10px;border-radius:999px 4px 4px 999px;font-family:inherit;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap}
+.motion-pill:hover{color:var(--accent2)}
+.motion-pill[data-state="paused"]{color:#ffd166}
 .lang-pill{background:transparent;color:var(--dim);border:none;padding:6px 12px;border-radius:999px;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;letter-spacing:0.5px}
 .lang-pill:hover{color:var(--text)}
 .lang-pill.active{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff}
+html[data-motion="paused"] *,html[data-motion="paused"] *::before,html[data-motion="paused"] *::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}
 
 .hero{position:relative;z-index:1;padding:48px 24px 20px;text-align:center}
 .hero-inner{max-width:900px;margin:0 auto}

@@ -1130,8 +1130,10 @@ test('particle-zoo boot fallback coverage', async ({ page }) => {
     await blockExternalAssets(page);
     // A genuinely stalled application script: the inline boot fallback is the
     // only thing that can reveal the first panel.
+    let releaseApp;
+    const appGate = new Promise(resolve => { releaseApp = resolve; });
     await page.route('**/particle-zoo/app.js', async route => {
-      await new Promise(resolve => setTimeout(resolve, 3_000));
+      await appGate;
       await route.continue();
     });
     await page.goto('/particle-zoo/', { waitUntil: 'commit' });
@@ -1155,7 +1157,8 @@ test('particle-zoo boot fallback coverage', async ({ page }) => {
     }));
     expect(revealed.visibility, 'the 2 s fallback reveals the panel without the app').toBe('visible');
     expect(revealed.appLoaded, 'the fallback fired before the script finished').toBe(false);
-    await page.waitForTimeout(1_500);
+    releaseApp();
+    await page.waitForLoadState('load');
   });
 });
 
@@ -1334,5 +1337,140 @@ test('particle-zoo exhaustive component event coverage', async ({ page }) => {
     await sweepComponentEvents(page);
     await page.waitForTimeout(300);
     await sweepComponentEvents(page);
+  });
+});
+
+for (const app of [
+  { id:'big-bang', path:'/big-bang/', key:'bb-motion' },
+  { id:'periodic-table', path:'/periodic-table/', key:'pt-motion' }
+]) {
+  for (const [caseId, requested, stored, expectedState] of [
+    ['play','play','pause','playing'],
+    ['pause','pause',null,'paused'],
+    ['system','system','pause','playing'],
+    ['invalid','sideways','pause','paused']
+  ]) {
+    test(`${app.id} motion query ${caseId} coverage`, async ({ page }) => {
+      await collectCoverage(page, `${app.id}-motion-query-${caseId}`, async () => {
+        await installDeterminism(page);
+        await setLanguage(page,'en');
+        await blockExternalAssets(page);
+        await page.addInitScript(({key,stored})=>{
+          if(stored) localStorage.setItem(key,stored);
+          else localStorage.removeItem(key);
+        },{key:app.key,stored});
+        await page.goto(`${app.path}?motion=${requested}`);
+        await page.waitForLoadState('load');
+        await expect(page.locator('#motionToggle')).toHaveAttribute('data-state',expectedState);
+        expect(await page.evaluate(key=>localStorage.getItem(key),app.key))
+          .toBe(requested==='system' ? null : (['play','pause'].includes(requested) ? requested : stored));
+        expect(await page.evaluate(()=>document.documentElement.dataset.motion)).toBe(expectedState);
+        await page.locator('#motionToggle').click();
+        await page.locator('#motionToggle').click();
+      });
+    });
+  }
+
+  test(`${app.id} unavailable motion storage coverage`, async ({ page }) => {
+    await collectCoverage(page,`${app.id}-motion-storage-unavailable`,async()=>{
+      await installDeterminism(page);
+      await blockExternalAssets(page);
+      await page.addInitScript(({key,langKey})=>{
+        const nativeGet=Storage.prototype.getItem;
+        Storage.prototype.getItem=function(item){
+          if(item===key || item===langKey) throw new DOMException('denied','SecurityError');
+          return nativeGet.call(this,item);
+        };
+      },{key:app.key,langKey:app.id==='big-bang'?'bb-lang':'pt-lang'});
+      await page.goto(app.path);
+      await page.waitForLoadState('load');
+      await page.evaluate(()=>{
+        Storage.prototype.setItem=()=>{throw new DOMException('full','QuotaExceededError');};
+        Storage.prototype.removeItem=()=>{throw new DOMException('denied','SecurityError');};
+      });
+      await page.locator('.lang-pill[data-lang="zh-CN"]').click();
+      await page.locator('#motionToggle').click();
+      await page.locator('#motionToggle').click();
+      await page.evaluate(()=>setMotionMode('system'));
+    });
+  });
+
+  test(`${app.id} system motion media coverage`, async ({ page }) => {
+    await collectCoverage(page,`${app.id}-motion-system-media`,async()=>{
+      await installDeterminism(page);
+      await setLanguage(page,'zh-CN');
+      await blockExternalAssets(page);
+      await page.emulateMedia({reducedMotion:'reduce'});
+      await page.goto(`${app.path}?motion=system`);
+      await page.waitForLoadState('load');
+      await expect(page.locator('#motionToggle')).toHaveAttribute('data-state','paused');
+      expect(await page.locator('#motionToggle').getAttribute('title')).toContain('系统');
+      await page.locator('.lang-pill[data-lang="en"]').click();
+      expect(await page.locator('#motionToggle').getAttribute('title')).toContain('system');
+      await page.emulateMedia({reducedMotion:'no-preference'});
+      await expect(page.locator('#motionToggle')).toHaveAttribute('data-state','playing');
+      await page.emulateMedia({reducedMotion:'reduce'});
+      await expect(page.locator('#motionToggle')).toHaveAttribute('data-state','paused');
+      if(app.id==='big-bang'){
+        expect(await page.evaluate(()=>{
+          const previous=window.CURRENT_LANG;
+          window.CURRENT_LANG='';
+          const defaultLocale=motionText('motion.play');
+          window.CURRENT_LANG='missing-locale';
+          const englishFallback=motionText('motion.play');
+          const keyFallback=motionText('missing-motion-key');
+          window.CURRENT_LANG=previous;
+          return {defaultLocale,englishFallback,keyFallback};
+        })).toEqual({
+          defaultLocale:'Play animations',
+          englishFallback:'Play animations',
+          keyFallback:'missing-motion-key'
+        });
+      }else{
+        await page.evaluate(()=>{
+          const element=document.getElementById('orbitalCanvas');
+          animationVisibility.delete(element);
+          refreshAnimationVisibility(element);
+          window.dispatchEvent(new CustomEvent('pt-motionchange',{detail:{paused:true}}));
+        });
+      }
+    });
+  });
+}
+
+test('periodic-table missing matchMedia motion coverage', async ({ page }) => {
+  await collectCoverage(page,'periodic-motion-no-match-media',async()=>{
+    await installDeterminism(page);
+    await blockExternalAssets(page);
+    await page.addInitScript(()=>{ delete window.matchMedia; });
+    await page.goto('/periodic-table/');
+    await page.waitForLoadState('load');
+    await expect(page.locator('#motionToggle')).toHaveAttribute('data-state','playing');
+  });
+});
+
+test('particle-zoo playground clear branch coverage', async ({ page }) => {
+  await collectCoverage(page,'particle-playground-clear-branches',async()=>{
+    await preparePage(page,'/particle-zoo/?motion=play','en');
+    await page.locator('.tab[data-tab="playground"]').click();
+    await page.locator('#pgClear').click();
+    await page.waitForFunction(()=>pgClearFrames===0 && pgRAF===null);
+    await page.evaluate(()=>pgLoop(performance.now()));
+    await page.locator('#pgClear').click();
+    await page.evaluate(()=>spawn('electron'));
+    expect(await page.evaluate(()=>pgClearFrames)).toBe(0);
+    await page.evaluate(()=>setMotionMode('pause'));
+    await page.locator('#pgClear').click();
+    expect(await page.evaluate(()=>({frames:pgClearFrames,raf:pgRAF}))).toEqual({frames:0,raf:null});
+    expect(await page.evaluate(()=>{
+      const shortFallback=shortName('electron','missing-locale');
+      const particleName=shortName('proton','missing-locale');
+      const idFallback=shortName('missing-particle','missing-locale');
+      return {shortFallback,particleName,idFallback};
+    })).toEqual({
+      shortFallback:'electron',
+      particleName:'proton',
+      idFallback:'missing-particle'
+    });
   });
 });

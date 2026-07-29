@@ -95,7 +95,7 @@
 
   function play(){
     if (playing){ stop(); return; }
-    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if (window.PT_MOTION && window.PT_MOTION.isPaused()) return;
     playing = true;
     ensureBanner().classList.add('on');
     syncPlayButton();
@@ -164,6 +164,7 @@
   // Observe html[lang] attribute to detect language switch
   new MutationObserver(refreshLang).observe(document.documentElement, {attributes:true, attributeFilter:['lang']});
   document.addEventListener('visibilitychange', ()=>{ if (document.hidden) stop(); });
+  window.addEventListener('pt-motionchange', event=>{ if(event.detail.paused) stop(); });
 
   window.__D1 = { play, stop, injectOriginBadge, getCurrentZ, ensureBanner };
 

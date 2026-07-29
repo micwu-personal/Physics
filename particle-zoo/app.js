@@ -1283,7 +1283,16 @@ const PG_TYPES = {
 let pgParts = [];
 let trails = true;
 document.getElementById('pgTrails').onchange = e=>trails=e.target.checked;
-document.getElementById('pgClear').onclick = ()=>{ pgParts=[]; flashes=[]; pgStop(); step(); };
+document.getElementById('pgClear').onclick = ()=>{
+  pgParts=[];
+  flashes=[];
+  playgroundSeeded=true;
+  pgStop();
+  pgLastTimestamp=0;
+  pgClearFrames=18;
+  if(canAnimate('playground',canvas)) pgStart();
+  else finishPlaygroundClear();
+};
 
 document.querySelectorAll('[data-spawn]').forEach(b=>{
   b.onclick = ()=>spawn(b.dataset.spawn);
@@ -1297,6 +1306,7 @@ canvas.addEventListener('click',e=>{
 function spawn(type, x, y, startLoop=true){
   const t = PG_TYPES[type];
   if(!t) return;
+  pgClearFrames=0;
   const isPhoton = type==='photon';
   const angle = Math.random()*Math.PI*2;
   const speed = isPhoton? 4 : (Math.random()*0.8+0.2);
@@ -1431,8 +1441,17 @@ function step(dt=1){
 
 }
 let flashes = [];
-let pgRAF=null, pgLastTimestamp=0;
+let pgRAF=null, pgLastTimestamp=0, pgClearFrames=0;
 let playgroundSeeded=false;
+function finishPlaygroundClear(){
+  pgClearFrames=0;
+  ctx.save();
+  ctx.globalCompositeOperation='copy';
+  ctx.fillStyle='#030510';
+  ctx.fillRect(0,0,W,H);
+  ctx.restore();
+  recordDraw('playground:clear');
+}
 function seedPlayground(){
   if(playgroundSeeded) return;
   playgroundSeeded=true;
@@ -1444,17 +1463,23 @@ function seedPlayground(){
 }
 function pgLoop(timestamp){
   if(!canAnimate('playground', canvas)){ pgRAF=null; return; }
-  if(pgParts.length===0 && flashes.length===0){ step(); pgRAF=null; return; }
+  if(pgParts.length===0 && flashes.length===0 && pgClearFrames===0){ pgRAF=null; return; }
   const dt=pgLastTimestamp ? Math.min(3,(timestamp-pgLastTimestamp)/(1000/60)) : 1;
   pgLastTimestamp=timestamp;
   PZ_PERF.frames.playground++;
   step(dt);
-  pgRAF=requestAnimationFrame(pgLoop);
+  if(pgClearFrames>0){
+    pgClearFrames--;
+    if(pgClearFrames===0) finishPlaygroundClear();
+  }
+  pgRAF=(pgParts.length>0 || flashes.length>0 || pgClearFrames>0)
+    ? requestAnimationFrame(pgLoop)
+    : null;
 }
 function pgStart(){
   if(pgRAF!=null) return;
   seedPlayground();
-  if(canAnimate('playground', canvas) && (pgParts.length>0 || flashes.length>0)) pgRAF=requestAnimationFrame(pgLoop);
+  if(canAnimate('playground', canvas) && (pgParts.length>0 || flashes.length>0 || pgClearFrames>0)) pgRAF=requestAnimationFrame(pgLoop);
   else if(tabIsActive('playground')) step();
 }
 function pgStop(){

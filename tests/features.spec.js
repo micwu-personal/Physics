@@ -343,3 +343,112 @@ test('Particle Zoo visible simulations animate and honor reduced motion', async 
   expect(overlappingTabs, 'motion/language controls must not cover sticky navigation').toEqual([]);
   await assertNoErrors(errors);
 });
+
+test('Particle Zoo playground clear finishes its fade and restarts on spawn', async ({ page }) => {
+  const errors = watchPage(page);
+  await preparePage(page, '/particle-zoo/?motion=play', 'en');
+  await page.locator('.tab[data-tab="playground"]').click();
+  await page.locator('#pgCanvas').scrollIntoViewIfNeeded();
+  await page.waitForTimeout(180);
+  expect(await page.evaluate(() => pgParts.length)).toBeGreaterThan(0);
+
+  const framesBefore = await page.evaluate(() => window.PZ_PERF.snapshot().frames.playground);
+  await page.locator('#pgClear').click();
+  expect(await page.evaluate(() => ({ parts: pgParts.length, flashes: flashes.length })))
+    .toEqual({ parts: 0, flashes: 0 });
+  await page.waitForFunction(() => pgClearFrames === 0 && pgRAF === null);
+  expect(await page.evaluate(() => window.PZ_PERF.snapshot().frames.playground)).toBeGreaterThan(framesBefore);
+  const clearedPixels = await page.locator('#pgCanvas').evaluate(canvas => {
+    const context = canvas.getContext('2d');
+    return [
+      context.getImageData(0, 0, 1, 1).data,
+      context.getImageData(Math.floor(canvas.width / 2), Math.floor(canvas.height / 2), 1, 1).data,
+      context.getImageData(canvas.width - 1, canvas.height - 1, 1, 1).data
+    ].map(pixel => [...pixel]);
+  });
+  expect(clearedPixels).toEqual(Array(3).fill([3, 5, 16, 255]));
+  const clearedImage = await page.locator('#pgCanvas').evaluate(canvas => canvas.toDataURL());
+  await page.waitForTimeout(250);
+  expect(await page.locator('#pgCanvas').evaluate(canvas => canvas.toDataURL())).toBe(clearedImage);
+
+  await page.locator('[data-spawn="electron"]').click();
+  expect(await page.evaluate(() => pgParts.length)).toBe(1);
+  const restartFrames = await page.evaluate(() => window.PZ_PERF.snapshot().frames.playground);
+  await page.waitForTimeout(200);
+  expect(await page.evaluate(() => window.PZ_PERF.snapshot().frames.playground)).toBeGreaterThan(restartFrames);
+  await assertNoErrors(errors);
+});
+
+test('Big Bang background motion can override and persist reduced motion', async ({ page }) => {
+  const errors = watchPage(page);
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await preparePage(page, '/big-bang/?motion=system', 'en');
+  const fingerprint = () => page.locator('#bgCanvas').evaluate(canvas => {
+    const pixels = canvas.getContext('2d').getImageData(0, 0, canvas.width, canvas.height).data;
+    let hash = 2166136261;
+    for (let index = 0; index < pixels.length; index += 193) {
+      hash = Math.imul(hash ^ pixels[index], 16777619) >>> 0;
+    }
+    return hash;
+  });
+  await expect(page.locator('#motionToggle')).toHaveAttribute('data-state', 'paused');
+  await expect(page.locator('#motionToggle')).toContainText('Play animations');
+  const pausedFrame = await fingerprint();
+  await page.waitForTimeout(250);
+  expect(await fingerprint()).toBe(pausedFrame);
+
+  await page.locator('#motionToggle').click();
+  await expect(page.locator('#motionToggle')).toHaveAttribute('data-state', 'playing');
+  const playingFrame = await fingerprint();
+  await page.waitForTimeout(250);
+  expect(await fingerprint()).not.toBe(playingFrame);
+  expect(await page.evaluate(() => localStorage.getItem('bb-motion'))).toBe('play');
+  await page.locator('.lang-pill[data-lang="zh-CN"]').click();
+  await expect(page.locator('#motionToggle')).toContainText('暂停动画');
+  await page.goto('/big-bang/', { waitUntil: 'load' });
+  await expect(page.locator('#motionToggle')).toHaveAttribute('data-state', 'playing');
+  await page.setViewportSize({ width: 412, height: 915 });
+  const overlap = await page.locator('.tabs').evaluate(nav => {
+    const controls = nav.querySelector('.control-row').getBoundingClientRect();
+    return [...nav.querySelectorAll('.tab')].some(tab => {
+      const rect = tab.getBoundingClientRect();
+      return rect.left < controls.right && rect.right > controls.left &&
+        rect.top < controls.bottom && rect.bottom > controls.top;
+    });
+  });
+  expect(overlap).toBe(false);
+  await assertNoErrors(errors);
+});
+
+test('Periodic Table motion control resumes canvases and stops timed views', async ({ page }) => {
+  const errors = watchPage(page);
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await preparePage(page, '/periodic-table/?motion=system', 'en');
+  await expect(page.locator('#viewToolbar')).toBeVisible();
+  await expect(page.locator('#motionToggle')).toHaveAttribute('data-state', 'paused');
+  await page.locator('.cell[data-z="26"]').click();
+  await page.locator('#orbitalTabs button[data-h="p_x"]').click();
+  await page.locator('#orbitalCanvas').scrollIntoViewIfNeeded();
+  const fingerprint = () => page.locator('#orbitalCanvas').evaluate(canvas => canvas.toDataURL());
+  const pausedFrame = await fingerprint();
+  await page.waitForTimeout(250);
+  expect(await fingerprint()).toBe(pausedFrame);
+  await page.locator('#cosmicPlayBtn').click();
+  await expect(page.locator('#cosmicBanner')).toHaveCount(0);
+
+  await page.locator('#motionToggle').click();
+  await expect(page.locator('#motionToggle')).toHaveAttribute('data-state', 'playing');
+  await page.locator('#orbitalCanvas').scrollIntoViewIfNeeded();
+  await page.waitForTimeout(100);
+  const playingFrame = await fingerprint();
+  await page.waitForTimeout(250);
+  expect(await fingerprint()).not.toBe(playingFrame);
+  expect(await page.evaluate(() => localStorage.getItem('pt-motion'))).toBe('play');
+  await page.locator('#cosmicPlayBtn').click();
+  await expect(page.locator('#cosmicBanner')).toHaveClass(/on/);
+  await page.locator('#motionToggle').click();
+  await expect(page.locator('#cosmicBanner')).not.toHaveClass(/on/);
+  await page.locator('.lang-pill[data-lang="zh-CN"]').click();
+  await expect(page.locator('#motionToggle')).toContainText('播放动画');
+  await assertNoErrors(errors);
+});

@@ -46,10 +46,15 @@ body{
   background-size:800px 800px; opacity:0.4;
 }
 
-.lang-switch{position:fixed;top:14px;right:16px;z-index:100;display:flex;gap:4px;background:rgba(5,6,13,0.7);backdrop-filter:blur(20px);border:1px solid var(--panel-b);border-radius:999px;padding:3px}
+.control-row{position:sticky;top:0;z-index:100;display:flex;justify-content:flex-end;padding:8px 16px 0;pointer-events:none}
+.lang-switch{display:flex;gap:4px;background:rgba(5,6,13,0.94);border:1px solid var(--panel-b);border-radius:999px;padding:3px;pointer-events:auto}
+.motion-pill{background:transparent;color:var(--text);border:none;border-right:1px solid var(--panel-b);padding:6px 10px;border-radius:999px 4px 4px 999px;font-family:inherit;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap}
+.motion-pill:hover{color:var(--accent2)}
+.motion-pill[data-state="paused"]{color:#ffd166}
 .lang-pill{background:transparent;color:var(--dim);border:none;padding:6px 12px;border-radius:999px;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;letter-spacing:0.5px}
 .lang-pill:hover{color:var(--text)}
 .lang-pill.active{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff}
+html[data-motion="paused"] *,html[data-motion="paused"] *::before,html[data-motion="paused"] *::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}
 
 .hero{position:relative;z-index:1;padding:48px 24px 20px;text-align:center}
 .hero-inner{max-width:900px;margin:0 auto}
@@ -534,9 +539,12 @@ footer{text-align:center;padding:40px 20px;color:var(--dim);font-size:12px;posit
 <body>
   <div id="bg-stars"></div>
 
-  <div class="lang-switch">
-    <button class="lang-pill active" data-lang="en">EN</button>
-    <button class="lang-pill" data-lang="zh-CN">中文</button>
+  <div class="control-row">
+    <div class="lang-switch">
+      <button id="motionToggle" class="motion-pill" type="button">⏸ Pause animations</button>
+      <button class="lang-pill active" data-lang="en">EN</button>
+      <button class="lang-pill" data-lang="zh-CN">中文</button>
+    </div>
   </div>
 
   <header class="hero">
@@ -680,6 +688,9 @@ footer{text-align:center;padding:40px 20px;color:var(--dim);font-size:12px;posit
 const LOCALES = {
   'en': {
     'page.title': 'Periodic Table — An Interactive Journey into the Elements',
+    'motion.play':'Play animations',
+    'motion.pause':'Pause animations',
+    'motion.system':'Your system reduced-motion preference is pausing animations. Use this button to override it.',
     'hero.badge': 'All 118 Elements · Interactive',
     'hero.title.a': 'Periodic',
     'hero.title.b': 'Table',
@@ -783,6 +794,9 @@ const LOCALES = {
 
   'zh-CN': {
     'page.title': '元素周期表 — 元素的交互式探索',
+    'motion.play':'播放动画',
+    'motion.pause':'暂停动画',
+    'motion.system':'系统的“减少动态效果”设置已暂停动画。可用此按钮覆盖该设置。',
     'hero.badge': '全部 118 种元素 · 交互式',
     'hero.title.a': '元素',
     'hero.title.b': '周期表',
@@ -2397,10 +2411,55 @@ const detailEl = document.getElementById('detail');
 let currentZ = null;
 let currentHybrid = null;
 
+/* Global motion preference: system default with an explicit persisted override. */
+const MOTION_STORAGE_KEY = 'pt-motion';
+const motionParameter = new URLSearchParams(location.search).get('motion');
+let motionMode = (function(){
+  if(['play','pause','system'].includes(motionParameter)) return motionParameter;
+  try {
+    const saved=localStorage.getItem(MOTION_STORAGE_KEY);
+    return ['play','pause'].includes(saved) ? saved : 'system';
+  } catch(_){
+    return 'system';
+  }
+})();
+function persistMotionMode(){
+  try {
+    if(motionMode==='system') localStorage.removeItem(MOTION_STORAGE_KEY);
+    else localStorage.setItem(MOTION_STORAGE_KEY,motionMode);
+  } catch(_){}
+}
+if(['play','pause','system'].includes(motionParameter)) persistMotionMode();
+
 /* Animation lifecycle: render a static first frame, then run only while visible. */
 const animationVisibility = new WeakMap();
 const pausedAnimationFrames = new Map();
 const reducedMotionQuery = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : null;
+function motionIsPaused(){
+  return motionMode==='pause' || (motionMode==='system' && Boolean(reducedMotionQuery && reducedMotionQuery.matches));
+}
+function updateMotionControl(){
+  const button=document.getElementById('motionToggle');
+  const paused=motionIsPaused();
+  button.textContent=paused ? `▶ ${t('motion.play')}` : `⏸ ${t('motion.pause')}`;
+  button.dataset.state=paused ? 'paused' : 'playing';
+  document.documentElement.dataset.motion=paused ? 'paused' : 'playing';
+  button.title=motionMode==='system' && reducedMotionQuery && reducedMotionQuery.matches ? t('motion.system') : '';
+}
+function announceMotionState(){
+  window.dispatchEvent(new CustomEvent('pt-motionchange',{detail:{paused:motionIsPaused()}}));
+}
+function setMotionMode(mode){
+  motionMode=mode;
+  persistMotionMode();
+  updateMotionControl();
+  announceMotionState();
+  if(!motionIsPaused()) resumeVisibleAnimations();
+}
+window.PT_MOTION={isPaused:motionIsPaused};
+document.getElementById('motionToggle').addEventListener('click',()=>{
+  setMotionMode(motionIsPaused() ? 'play' : 'pause');
+});
 const animationObserver = typeof IntersectionObserver === 'function'
   ? new IntersectionObserver(entries => {
       entries.forEach(entry => {
@@ -2415,7 +2474,7 @@ function animationStateFor(element){
     active:element && element.isConnected && !element.closest('.hidden'),
     documentVisible:!document.hidden,
     elementVisible:animationVisibility.get(element) !== false,
-    reducedMotion:Boolean(reducedMotionQuery && reducedMotionQuery.matches)
+    reducedMotion:motionIsPaused()
   };
 }
 function scheduleActiveFrame(element, callback){
@@ -2436,8 +2495,18 @@ function resumeAnimation(element){
   pausedAnimationFrames.delete(element);
   requestAnimationFrame(callback);
 }
+function refreshAnimationVisibility(element){
+  const rect=element.getBoundingClientRect();
+  animationVisibility.set(
+    element,
+    rect.width>0 && rect.height>0 && rect.bottom>=-80 && rect.top<=innerHeight+80
+  );
+}
 function resumeVisibleAnimations(){
-  pausedAnimationFrames.forEach((_, element) => resumeAnimation(element));
+  pausedAnimationFrames.forEach((_, element) => {
+    refreshAnimationVisibility(element);
+    resumeAnimation(element);
+  });
 }
 function disposeAnimatedElement(element){
   if (!element) return;
@@ -2447,7 +2516,11 @@ function disposeAnimatedElement(element){
 }
 document.addEventListener('visibilitychange', resumeVisibleAnimations);
 if (reducedMotionQuery && reducedMotionQuery.addEventListener) {
-  reducedMotionQuery.addEventListener('change', resumeVisibleAnimations);
+  reducedMotionQuery.addEventListener('change', ()=>{
+    updateMotionControl();
+    announceMotionState();
+    resumeVisibleAnimations();
+  });
 }
 
 /* ----- Rendering the grid ----- */
@@ -4374,12 +4447,14 @@ document.querySelectorAll('.lang-pill').forEach(b=>{
     const lang = b.dataset.lang;
     try { localStorage.setItem('pt-lang', lang); } catch(_){}
     applyI18n(lang);
+    updateMotionControl();
   });
 });
 const savedLang = (function(){ try { return localStorage.getItem('pt-lang'); } catch(_){ return null; } })();
 const browserLang = (navigator.language||'').toLowerCase();
 const initLang = savedLang || (browserLang.startsWith('zh') ? 'zh-CN' : 'en');
 applyI18n(initLang);
+updateMotionControl();
 
 /* Show hydrogen by default */
 openDetail(1);
@@ -4690,7 +4765,7 @@ openDetail(1);
 
   function play(){
     if (playing){ stop(); return; }
-    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if (window.PT_MOTION && window.PT_MOTION.isPaused()) return;
     playing = true;
     ensureBanner().classList.add('on');
     syncPlayButton();
@@ -4759,6 +4834,7 @@ openDetail(1);
   // Observe html[lang] attribute to detect language switch
   new MutationObserver(refreshLang).observe(document.documentElement, {attributes:true, attributeFilter:['lang']});
   document.addEventListener('visibilitychange', ()=>{ if (document.hidden) stop(); });
+  window.addEventListener('pt-motionchange', event=>{ if(event.detail.paused) stop(); });
 
   window.__D1 = { play, stop, injectOriginBadge, getCurrentZ, ensureBanner };
 
@@ -5233,7 +5309,7 @@ openDetail(1);
   }
 
   function startPlay(){
-    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if (window.PT_MOTION && window.PT_MOTION.isPaused()) return;
     playing = true;
     playBtn.textContent = t('tl.stop');
     let year = parseInt(sliderEl.value, 10);
@@ -5300,6 +5376,7 @@ openDetail(1);
   }
   new MutationObserver(refreshLang).observe(document.documentElement, {attributes:true, attributeFilter:['lang']});
   document.addEventListener('visibilitychange', ()=>{ if (document.hidden) stopPlay(); });
+  window.addEventListener('pt-motionchange', event=>{ if(event.detail.paused) stopPlay(); });
 
   window.__F2 = { toggle, applyYear, getDiscoveryYear, startPlay, stopPlay };
 

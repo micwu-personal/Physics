@@ -147,7 +147,7 @@
   }
 
   function startPlay(){
-    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if (window.PT_MOTION && window.PT_MOTION.isPaused()) return;
     playing = true;
     playBtn.textContent = t('tl.stop');
     let year = parseInt(sliderEl.value, 10);
@@ -214,6 +214,7 @@
   }
   new MutationObserver(refreshLang).observe(document.documentElement, {attributes:true, attributeFilter:['lang']});
   document.addEventListener('visibilitychange', ()=>{ if (document.hidden) stopPlay(); });
+  window.addEventListener('pt-motionchange', event=>{ if(event.detail.paused) stopPlay(); });
 
   window.__F2 = { toggle, applyYear, getDiscoveryYear, startPlay, stopPlay };
 

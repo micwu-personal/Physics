@@ -2,6 +2,9 @@
 const LOCALES = {
   'en': {
     'page.title': 'Periodic Table — An Interactive Journey into the Elements',
+    'motion.play':'Play animations',
+    'motion.pause':'Pause animations',
+    'motion.system':'Your system reduced-motion preference is pausing animations. Use this button to override it.',
     'hero.badge': 'All 118 Elements · Interactive',
     'hero.title.a': 'Periodic',
     'hero.title.b': 'Table',
@@ -105,6 +108,9 @@ const LOCALES = {
 
   'zh-CN': {
     'page.title': '元素周期表 — 元素的交互式探索',
+    'motion.play':'播放动画',
+    'motion.pause':'暂停动画',
+    'motion.system':'系统的“减少动态效果”设置已暂停动画。可用此按钮覆盖该设置。',
     'hero.badge': '全部 118 种元素 · 交互式',
     'hero.title.a': '元素',
     'hero.title.b': '周期表',

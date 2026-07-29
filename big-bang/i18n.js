@@ -14,6 +14,9 @@ const LOCALES = {
     'tab.scale': 'Size of the Universe',
     'tab.fates': 'Ultimate Fates',
     'tab.mysteries': 'Open Mysteries',
+    'motion.play': 'Play animations',
+    'motion.pause': 'Pause animations',
+    'motion.system': 'Your system reduced-motion preference is pausing animations. Use this button to override it.',
 
     'timeline.h2': 'Cosmic Timeline',
     'timeline.desc': 'A model-based timeline from the earliest times physics can discuss. Click a card to zoom in.',
@@ -79,6 +82,9 @@ const LOCALES = {
     'tab.scale': '宇宙的大小',
     'tab.fates': '最终归宿',
     'tab.mysteries': '未解之谜',
+    'motion.play': '播放动画',
+    'motion.pause': '暂停动画',
+    'motion.system': '系统的“减少动态效果”设置已暂停动画。可用此按钮覆盖该设置。',
 
     'timeline.h2': '宇宙演化时间线',
     'timeline.desc': '从现有物理学能够讨论的最早时期开始的模型时间线。点击卡片可查看细节。',

@@ -40,7 +40,11 @@ h1{font-size:clamp(48px,8vw,104px);font-weight:700;letter-spacing:-3px;margin:16
 .grad{background:linear-gradient(120deg,#ff6b9d 0%,#ffd166 50%,#ff5c8a 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
 .tag{color:var(--dim);font-size:18px;max-width:640px;margin:0 auto}
 
-.lang-switch{position:fixed;top:14px;right:16px;z-index:100;display:flex;gap:4px;background:rgba(2,3,10,0.7);backdrop-filter:blur(20px);border:1px solid var(--panel-b);border-radius:999px;padding:3px}
+.control-row{flex:0 0 100%;display:flex;justify-content:flex-end;margin-bottom:2px}
+.lang-switch{display:flex;gap:4px;background:rgba(2,3,10,0.7);border:1px solid var(--panel-b);border-radius:999px;padding:3px}
+.motion-pill{background:transparent;color:var(--text);border:none;border-right:1px solid var(--panel-b);padding:6px 10px;border-radius:999px 4px 4px 999px;font-family:inherit;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap}
+.motion-pill:hover{color:var(--accent2)}
+.motion-pill[data-state="paused"]{color:#ffd166}
 .lang-pill{background:transparent;color:var(--dim);border:none;padding:6px 12px;border-radius:999px;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;letter-spacing:0.5px}
 .lang-pill:hover{color:var(--text)}
 .lang-pill.active{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff}
@@ -54,6 +58,7 @@ main{position:relative;z-index:1;max-width:1400px;margin:0 auto;padding:40px 24p
 .tab-panel{display:none;animation:fade .4s ease}
 .tab-panel.active{display:block}
 @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+html[data-motion="paused"] *,html[data-motion="paused"] *::before,html[data-motion="paused"] *::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}
 .section-head{text-align:center;margin-bottom:32px}
 .section-head h2{font-size:36px;font-weight:600;letter-spacing:-1px;margin-bottom:8px}
 .section-head p{color:var(--dim);font-size:16px;max-width:720px;margin:0 auto}
