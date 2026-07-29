@@ -20,6 +20,15 @@ const refsJs = fs.readFileSync(path.join(ROOT, 'references.js'), 'utf8');
 const i18nJs = fs.readFileSync(path.join(ROOT, 'i18n.js'), 'utf8');
 const appJs  = fs.readFileSync(path.join(ROOT, 'app.js'), 'utf8');
 
+function inlineMedia(source) {
+  return source.replace(/\.\.\/assets\/media\/([A-Za-z0-9_.-]+)/g, (match, filename) => {
+    const filePath = path.join(ROOT, '..', 'assets', 'media', filename);
+    if (!fs.existsSync(filePath)) throw new Error(`Missing media asset: ${filename}`);
+    const mime = path.extname(filename).toLowerCase() === '.jpg' ? 'image/jpeg' : 'image/png';
+    return `data:${mime};base64,${fs.readFileSync(filePath).toString('base64')}`;
+  });
+}
+
 // 1) replace <link rel="stylesheet" href="styles.css" /> with inline <style>
 let out = html.replace(
   /<link\s+rel="stylesheet"\s+href="styles\.css"\s*\/?>/,
@@ -49,6 +58,11 @@ out = out.replace(
   /<script\s+src="app\.js"><\/script>/,
   `<script>\n${appJs}\n</script>`
 );
+out = inlineMedia(out);
+out = out
+  .replace(/href="\.\.\/index\.html/g, 'href="https://micwu-personal.github.io/Physics/')
+  .replace(/href="\.\.\/(big-bang|particle-zoo|periodic-table)\/index\.html/g, 'href="https://micwu-personal.github.io/Physics/$1/');
+out = out.replace(/href="\.\.\/(?!https?:)/g, 'href="../../');
 
 // 3) Inject a small banner comment at the top
 const banner =

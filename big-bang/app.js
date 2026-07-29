@@ -20,6 +20,7 @@ function renderTimeline(){
     const e = getEpoch(base.id);
     const card = document.createElement('div');
     card.className = 'ep-card';
+    card.dataset.epochId = base.id;
     card.style.setProperty('--dot', e.color);
     card.innerHTML = `
       <div class="ep-head">
@@ -287,11 +288,12 @@ function renderSourceLinks(lang){
 /* ================ Global motion preference ================ */
 const motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
 const MOTION_STORAGE_KEY = 'bb-motion';
+const GLOBAL_MOTION_STORAGE_KEY = 'physics.motion';
 const motionParameter = new URLSearchParams(location.search).get('motion');
 let motionMode = (function(){
   if(['play','pause','system'].includes(motionParameter)) return motionParameter;
   try {
-    const saved=localStorage.getItem(MOTION_STORAGE_KEY);
+    const saved=localStorage.getItem(GLOBAL_MOTION_STORAGE_KEY) || localStorage.getItem(MOTION_STORAGE_KEY);
     return ['play','pause'].includes(saved) ? saved : 'system';
   } catch(_){
     return 'system';
@@ -301,6 +303,10 @@ function persistMotionMode(){
   try {
     if(motionMode==='system') localStorage.removeItem(MOTION_STORAGE_KEY);
     else localStorage.setItem(MOTION_STORAGE_KEY,motionMode);
+  } catch(_){}
+  try {
+    if(motionMode==='system') localStorage.removeItem(GLOBAL_MOTION_STORAGE_KEY);
+    else localStorage.setItem(GLOBAL_MOTION_STORAGE_KEY,motionMode);
   } catch(_){}
 }
 if(['play','pause','system'].includes(motionParameter)) persistMotionMode();
@@ -385,14 +391,21 @@ document.querySelectorAll('.lang-pill').forEach(b=>{
   b.addEventListener('click',()=>{
     const lang = b.dataset.lang;
     try{ localStorage.setItem('bb-lang',lang); }catch(_){}
+    try{ localStorage.setItem('physics.lang',lang); }catch(_){}
     applyI18n(lang);
     renderScale();
     updateMotionControl();
   });
 });
-const savedLang = (()=>{ try{ return localStorage.getItem('bb-lang'); }catch(_){ return null; } })();
+const savedLang = (()=>{
+  try{ return localStorage.getItem('physics.lang') || localStorage.getItem('bb-lang'); }
+  catch(_){ return null; }
+})();
 const browserLang = (navigator.language||'').toLowerCase();
 const initLang = savedLang || (browserLang.startsWith('zh') ? 'zh-CN' : 'en');
 applyI18n(initLang);
 renderScale();
 updateMotionControl();
+const requestedTab=new URLSearchParams(location.search).get('tab');
+const requestedTabButton=requestedTab && document.querySelector(`.tab[data-tab="${requestedTab}"]`);
+if(requestedTabButton) requestedTabButton.click();

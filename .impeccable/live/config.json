@@ -1,0 +1,7 @@
+{
+  "files": ["**/index.html"],
+  "exclude": ["**/mobile/**"],
+  "insertBefore": "</body>",
+  "commentSyntax": "html",
+  "cspChecked": true
+}

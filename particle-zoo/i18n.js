@@ -27,6 +27,11 @@ const LOCALES = {
     'motion.play': 'Play animations',
     'motion.pause': 'Pause animations',
     'motion.system': 'Your system reduced-motion preference is pausing animations. Use this button to override it.',
+    'journey.home': 'Story',
+    'aria.controls': 'Page controls',
+    'aria.sections': 'Particle Zoo sections',
+    'aria.detector': 'Simplified transverse cross-section of collider detector layers',
+    'alt.atlas': 'ATLAS reconstructed four-muon Higgs candidate event display',
 
     // Chart tab
     'chart.h2': 'The Standard Model',
@@ -116,10 +121,10 @@ const LOCALES = {
 
     // Builder tab
     'builder.h2': 'Build the Universe',
-    'builder.desc': 'Drag quarks and electrons into the assembly zone. Watch protons, neutrons, and atoms come to life.',
+    'builder.desc': 'Use the complete fermion family, then compare the valid ways light quarks can be grouped into ordinary nucleons or short-lived baryons.',
     'builder.parts': 'Parts',
     'builder.clear': 'Clear',
-    'builder.tip': 'Tip: 2 up + 1 down = proton · 1 up + 2 down = neutron · proton + electron = hydrogen',
+    'builder.tip': 'Tip: 2u+1d = proton · 1u+2d = neutron · qq̄ = meson. Top quarks decay before they can hadronize; other leptons remain unbound in this composition model.',
     'builder.hint': 'Drop parts here — watch forces & composites form',
     'builder.legend.strong': 'strong (gluon)',
     'builder.legend.emattract': 'EM attract (photon)',
@@ -129,6 +134,7 @@ const LOCALES = {
     'builder.stats.up': 'Up quarks (u)',
     'builder.stats.down': 'Down (d)',
     'builder.stats.electrons': 'Electrons',
+    'builder.stats.fermions': 'Other fermions',
     'builder.stats.protons': 'Protons',
     'builder.stats.neutrons': 'Neutrons',
     'builder.stats.delta': 'Δ',
@@ -143,6 +149,14 @@ const LOCALES = {
     'builder.confine': 'confinement violated!',
     'builder.label.nucleus': 'nucleus (residual strong force)',
     'builder.label.shell': 'electron shell (EM binding)',
+    'builder.parts.charged': 'Charged leptons',
+    'builder.parts.neutrinos': 'Neutrinos',
+    'builder.rep': 'Teaching schematic',
+    'builder.rep.note': 'Quarks, force lines, distances, and electron motion are not to scale. The builder tracks composition and charge, not real-time hadronization.',
+    'builder.packing.title': 'Choose how the available u/d quarks are grouped:',
+    'builder.packing.recommended': 'favours ordinary nucleons',
+    'builder.packing.unstable': 'contains short-lived Delta baryons',
+    'builder.packing.free': 'leaves confined quarks ungrouped',
 
     // Forces tab
     'forces.h2': 'The Four Fundamental Forces',
@@ -162,7 +176,7 @@ const LOCALES = {
     'forces.em.s': '1/137',
     'forces.em.r': 'infinite',
     'forces.em.p': 'Governs charged particles. Responsible for light, chemistry, magnets, electricity, and every solid surface you touch.',
-    'forces.em.ex': 'Example: electron orbiting a proton = hydrogen atom.',
+    'forces.em.ex': 'Example: an electron bound to a proton forms hydrogen; it does not follow a classical orbit.',
     'forces.weak.h': 'Weak Force',
     'forces.weak.c': 'W±, Z⁰ bosons',
     'forces.weak.s': '10⁻⁶',
@@ -503,7 +517,9 @@ const LOCALES = {
     // Tray parts
     'part.up':'up','part.down':'down','part.anti_up':'anti-up','part.anti_down':'anti-down',
     'part.strange':'strange','part.anti_strange':'anti-strange','part.charm':'charm','part.anti_charm':'anti-charm',
-    'part.bottom':'bottom','part.anti_bottom':'anti-bottom','part.electron':'electron',
+    'part.bottom':'bottom','part.anti_bottom':'anti-bottom','part.top':'top','part.anti_top':'anti-top',
+    'part.electron':'electron','part.positron':'positron','part.muon':'muon','part.antimuon':'antimuon','part.tau':'tau','part.antitau':'antitau',
+    'part.nue':'electron neutrino','part.nuebar':'electron antineutrino','part.numu':'muon neutrino','part.numubar':'muon antineutrino','part.nutau':'tau neutrino','part.nutaubar':'tau antineutrino',
     'part.photon':'photon','part.muon':'muon','part.tau':'tau','part.wboson':'W boson','part.top':'top quark',
     // Interaction equation snippets
     'ix.eq.near_nucleus': '(near nucleus)',
@@ -528,6 +544,20 @@ const LOCALES = {
     'lab.det.h': '2 · Inside a collider detector',
     'lab.det.tag': 'ATLAS / CMS style',
     'lab.det.p': 'A simplified ATLAS/CMS-style cross-section. Signatures show typical detector responses, not efficiencies, conversions, decays, pileup, or full shower fluctuations.',
+    'lab.det.learn': 'What do these detector layers measure?',
+    'lab.det.tracker.h': 'Tracker:',
+    'lab.det.tracker.p': 'silicon sensors record points along charged-particle paths; curvature in a magnetic field gives momentum and charge sign.',
+    'lab.det.ecal.h': 'ECAL:',
+    'lab.det.ecal.p': 'electrons and photons make electromagnetic showers, allowing their energy to be measured.',
+    'lab.det.hcal.h': 'HCAL:',
+    'lab.det.hcal.p': 'hadrons produce broader nuclear showers; clustered deposits are reconstructed as jets.',
+    'lab.det.muon.h': 'Muon system:',
+    'lab.det.muon.p': 'muons penetrate the calorimeters and leave hits in the outer chambers.',
+    'lab.det.missing.h': 'Missing transverse momentum:',
+    'lab.det.missing.p': 'an imbalance inferred from everything detected; it can indicate neutrinos, detector gaps, or mismeasurement.',
+    'lab.det.media.kind': 'Recorded data, reconstructed display',
+    'lab.det.media.caption': 'ATLAS four-muon Higgs candidate (2012), reconstructed mass 125.1 GeV. Tracks and deposits are calculated from detector readout; this is not a photograph of particles.',
+    'lab.det.media.source': 'Source / CC BY-SA 3.0',
     'lab.higgs.h': '3 · The Higgs field: why mass exists',
     'lab.higgs.tag': 'Higgs mechanism',
     'lab.higgs.p': 'Educational analogy, not a microscopic simulation: the Higgs field is drawn as a lattice whose disturbance represents coupling strength. Fermion masses scale with Yukawa couplings; W and Z masses arise through electroweak symmetry breaking. Click a particle to compare qualitative couplings.',
@@ -600,6 +630,11 @@ const LOCALES = {
     'motion.play': '播放动画',
     'motion.pause': '暂停动画',
     'motion.system': '系统的“减少动态效果”设置已暂停动画。可用此按钮覆盖该设置。',
+    'journey.home': '故事线',
+    'aria.controls': '页面控制',
+    'aria.sections': '粒子动物园主题分区',
+    'aria.detector': '对撞机探测器各层的简化横截面',
+    'alt.atlas': 'ATLAS 重建的四缪子希格斯候选事例显示',
 
     'chart.h2': '粒子物理标准模型',
     'chart.desc.a': '17',
@@ -685,10 +720,10 @@ const LOCALES = {
     'detail.color.gluon': '9 个色—反色基底组合分解为一个色八重态与一个色单态。QCD 包含八个八重态胶子;它们携带非阿贝尔色荷,因而会自相互作用。',
 
     'builder.h2': '搭建宇宙',
-    'builder.desc': '把夸克和电子拖进组合区,观察质子、中子和原子如何诞生。',
+    'builder.desc': '使用完整的费米子家族，并比较轻夸克组成普通核子或短寿命重子的不同有效方案。',
     'builder.parts': '零件',
     'builder.clear': '清空',
-    'builder.tip': '提示: 2 个上夸克 + 1 个下夸克 = 质子 · 1 个上夸克 + 2 个下夸克 = 中子 · 质子 + 电子 = 氢原子',
+    'builder.tip': '提示: 2u+1d = 质子 · 1u+2d = 中子 · qq̄ = 介子。顶夸克会在强子化之前衰变；本构成模型中其他轻子保持不束缚。',
     'builder.hint': '把零件拖到此处 — 观察各种相互作用与复合粒子的形成',
     'builder.legend.strong': '强相互作用(胶子)',
     'builder.legend.emattract': '电磁吸引(光子)',
@@ -698,6 +733,7 @@ const LOCALES = {
     'builder.stats.up': '上夸克 (u)',
     'builder.stats.down': '下夸克 (d)',
     'builder.stats.electrons': '电子',
+    'builder.stats.fermions': '其他费米子',
     'builder.stats.protons': '质子',
     'builder.stats.neutrons': '中子',
     'builder.stats.delta': 'Δ 重子',
@@ -712,6 +748,14 @@ const LOCALES = {
     'builder.confine': '违反色禁闭!',
     'builder.label.nucleus': '原子核(剩余强相互作用)',
     'builder.label.shell': '电子壳层(电磁束缚)',
+    'builder.parts.charged': '带电轻子',
+    'builder.parts.neutrinos': '中微子',
+    'builder.rep': '教学示意',
+    'builder.rep.note': '夸克、力线、距离和电子运动均不按比例。构成器只追踪组成与电荷，并非实时强子化模拟。',
+    'builder.packing.title': '选择如何对现有 u/d 夸克分组:',
+    'builder.packing.recommended': '优先形成普通核子',
+    'builder.packing.unstable': '包含短寿命 Delta 重子',
+    'builder.packing.free': '留下未分组的禁闭夸克',
 
     'forces.h2': '四种基本相互作用',
     'forces.desc': '四种基本相互作用组织已知物理。所示相对强度只是低能量级的粗略比较,并会随能标跑动。',
@@ -730,7 +774,7 @@ const LOCALES = {
     'forces.em.s': '1/137',
     'forces.em.r': '无穷远',
     'forces.em.p': '支配带电粒子。是光、化学、磁性、电流,以及你所触碰的每一个固体表面的根源。',
-    'forces.em.ex': '例子:电子围绕质子运行 = 氢原子。',
+    'forces.em.ex': '例子:电子与质子束缚形成氢原子；电子并不沿经典轨道运行。',
     'forces.weak.h': '弱相互作用',
     'forces.weak.c': 'W±、Z⁰ 玻色子',
     'forces.weak.s': '10⁻⁶',
@@ -1067,7 +1111,9 @@ const LOCALES = {
     // 托盘粒子
     'part.up':'上夸克','part.down':'下夸克','part.anti_up':'反上夸克','part.anti_down':'反下夸克',
     'part.strange':'奇夸克','part.anti_strange':'反奇夸克','part.charm':'粲夸克','part.anti_charm':'反粲夸克',
-    'part.bottom':'底夸克','part.anti_bottom':'反底夸克','part.electron':'电子',
+    'part.bottom':'底夸克','part.anti_bottom':'反底夸克','part.top':'顶夸克','part.anti_top':'反顶夸克',
+    'part.electron':'电子','part.positron':'正电子','part.muon':'缪子','part.antimuon':'反缪子','part.tau':'陶子','part.antitau':'反陶子',
+    'part.nue':'电子中微子','part.nuebar':'电子反中微子','part.numu':'缪子中微子','part.numubar':'缪子反中微子','part.nutau':'陶子中微子','part.nutaubar':'陶子反中微子',
     'part.photon':'光子','part.muon':'μ 子','part.tau':'τ 子','part.wboson':'W 玻色子','part.top':'顶夸克',
     // 相互作用等式片段
     'ix.eq.near_nucleus': '(在原子核附近)',
@@ -1092,6 +1138,20 @@ const LOCALES = {
     'lab.det.h': '2 · 对撞机探测器内部',
     'lab.det.tag': 'ATLAS / CMS 结构',
     'lab.det.p': '简化的 ATLAS/CMS 风格横截面。签名表示典型探测响应,未模拟效率、转化、衰变、堆积或完整簇射涨落。',
+    'lab.det.learn': '这些探测器层分别测量什么?',
+    'lab.det.tracker.h': '径迹器:',
+    'lab.det.tracker.p': '硅传感器记录带电粒子路径上的命中点；磁场中的弯曲程度给出动量与电荷符号。',
+    'lab.det.ecal.h': '电磁量能器:',
+    'lab.det.ecal.p': '电子和光子产生电磁簇射，由此测量能量。',
+    'lab.det.hcal.h': '强子量能器:',
+    'lab.det.hcal.p': '强子产生更宽的核簇射；成簇的能量沉积会被重建为喷注。',
+    'lab.det.muon.h': '缪子系统:',
+    'lab.det.muon.p': '缪子穿透量能器，并在最外层缪子室留下命中。',
+    'lab.det.missing.h': '横向缺失动量:',
+    'lab.det.missing.p': '由所有已探测对象的不平衡推断；可能来自中微子、探测器缝隙或测量误差。',
+    'lab.det.media.kind': '真实记录数据的重建显示',
+    'lab.det.media.caption': 'ATLAS 2012 年四缪子希格斯候选事例，重建质量 125.1 GeV。径迹与能量沉积由探测器读出计算得到，并非粒子照片。',
+    'lab.det.media.source': '来源 / CC BY-SA 3.0',
     'lab.higgs.h': '3 · 希格斯场:质量从何而来',
     'lab.higgs.tag': '希格斯机制',
     'lab.higgs.p': '教学类比,并非微观模拟:用晶格受扰程度表示希格斯耦合强弱。费米子质量随汤川耦合变化;W、Z 质量来自电弱对称性破缺。点击粒子比较定性耦合。',
@@ -1281,6 +1341,14 @@ function applyI18n(lang){
   document.querySelectorAll('[data-i18n-placeholder]').forEach(el=>{
     const key = el.getAttribute('data-i18n-placeholder');
     el.setAttribute('placeholder', dict[key]);
+  });
+  document.querySelectorAll('[data-i18n-alt]').forEach(el=>{
+    const key=el.getAttribute('data-i18n-alt');
+    el.setAttribute('alt',dict[key]);
+  });
+  document.querySelectorAll('[data-i18n-aria-label]').forEach(el=>{
+    const key=el.getAttribute('data-i18n-aria-label');
+    el.setAttribute('aria-label',dict[key]);
   });
   // title
   const titleKey = document.querySelector('title').getAttribute('data-i18n');

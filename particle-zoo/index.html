@@ -12,6 +12,14 @@
 <body>
   <script>document.body.classList.add('render-booting');setTimeout(()=>document.body.classList.remove('render-booting'),2000)</script>
   <div id="bg-stars"></div>
+  <div class="control-row" aria-label="Page controls" data-i18n-aria-label="aria.controls">
+    <div class="lang-switch">
+      <a class="journey-home" href="../index.html#particles" data-i18n="journey.home">Story</a>
+      <button id="motionToggle" class="motion-pill" type="button">⏸ Pause animations</button>
+      <button class="lang-pill active" data-lang="en">EN</button>
+      <button class="lang-pill" data-lang="zh-CN">中文</button>
+    </div>
+  </div>
 
   <header class="hero">
     <div class="hero-inner">
@@ -21,14 +29,7 @@
     </div>
   </header>
 
-  <nav class="tabs">
-    <div class="control-row">
-      <div class="lang-switch">
-        <button id="motionToggle" class="motion-pill" type="button">⏸ Pause animations</button>
-        <button class="lang-pill active" data-lang="en">EN</button>
-        <button class="lang-pill" data-lang="zh-CN">中文</button>
-      </div>
-    </div>
+  <nav class="tabs" aria-label="Particle Zoo sections" data-i18n-aria-label="aria.sections">
     <button class="tab active" data-tab="chart" data-i18n="tab.chart">Standard Model</button>
     <button class="tab" data-tab="detail" data-i18n="tab.detail">Particle Detail</button>
     <button class="tab" data-tab="builder" data-i18n="tab.builder">Composition Builder</button>
@@ -172,8 +173,22 @@
           <div class="tray-part anti" draggable="true" data-part="cbar">c̄ <span><span data-i18n="part.anti_charm">anti-c</span> · −⅔</span></div>
           <div class="tray-part" draggable="true" data-part="b">b <span><span data-i18n="part.bottom">bottom</span> · −⅓</span></div>
           <div class="tray-part anti" draggable="true" data-part="bbar">b̄ <span><span data-i18n="part.anti_bottom">anti-b</span> · +⅓</span></div>
-          <div class="tray-group" data-i18n="builder.parts.lept">Leptons</div>
+          <div class="tray-part" draggable="true" data-part="t">t <span><span data-i18n="part.top">top</span> · +⅔</span></div>
+          <div class="tray-part anti" draggable="true" data-part="tbar">t̄ <span><span data-i18n="part.anti_top">anti-top</span> · −⅔</span></div>
+          <div class="tray-group" data-i18n="builder.parts.charged">Charged leptons</div>
           <div class="tray-part" draggable="true" data-part="e">e⁻ <span><span data-i18n="part.electron">electron</span> · −1</span></div>
+          <div class="tray-part anti" draggable="true" data-part="eplus">e⁺ <span><span data-i18n="part.positron">positron</span> · +1</span></div>
+          <div class="tray-part" draggable="true" data-part="mu">μ⁻ <span><span data-i18n="part.muon">muon</span> · −1</span></div>
+          <div class="tray-part anti" draggable="true" data-part="muplus">μ⁺ <span><span data-i18n="part.antimuon">antimuon</span> · +1</span></div>
+          <div class="tray-part" draggable="true" data-part="tau">τ⁻ <span><span data-i18n="part.tau">tau</span> · −1</span></div>
+          <div class="tray-part anti" draggable="true" data-part="tauplus">τ⁺ <span><span data-i18n="part.antitau">antitau</span> · +1</span></div>
+          <div class="tray-group" data-i18n="builder.parts.neutrinos">Neutrinos</div>
+          <div class="tray-part neutral" draggable="true" data-part="nue">νₑ <span data-i18n="part.nue">electron neutrino</span></div>
+          <div class="tray-part anti neutral" draggable="true" data-part="nuebar">ν̄ₑ <span data-i18n="part.nuebar">electron antineutrino</span></div>
+          <div class="tray-part neutral" draggable="true" data-part="numu">νμ <span data-i18n="part.numu">muon neutrino</span></div>
+          <div class="tray-part anti neutral" draggable="true" data-part="numubar">ν̄μ <span data-i18n="part.numubar">muon antineutrino</span></div>
+          <div class="tray-part neutral" draggable="true" data-part="nutau">ντ <span data-i18n="part.nutau">tau neutrino</span></div>
+          <div class="tray-part anti neutral" draggable="true" data-part="nutaubar">ν̄τ <span data-i18n="part.nutaubar">tau antineutrino</span></div>
           <button id="clearBuild" class="btn ghost" data-i18n="builder.clear">Clear</button>
           <div class="hint2" data-i18n="builder.tip">Tip: 2u+1d = proton · 1u+2d = neutron · qq̄ = meson (π, K, J/ψ…) · proton+e⁻ = hydrogen</div>
         </div>
@@ -186,11 +201,13 @@
             <span><i style="background:#ffd166"></i><span data-i18n="builder.legend.emattract">EM attract (photon)</span></span>
             <span><i style="background:#4ea8ff"></i><span data-i18n="builder.legend.emrepel">EM repel (photon)</span></span>
           </div>
+          <div class="viz-status"><span class="rep-badge schematic" data-i18n="builder.rep">Teaching schematic</span><span data-i18n="builder.rep.note">Quarks, force lines, distances, and electron motion are not to scale. The builder tracks composition and charge, not real-time hadronization.</span></div>
         </div>
 
         <div class="build-out">
           <h3 data-i18n="builder.result.title">You built:</h3>
           <div id="buildResult" class="result" data-i18n="builder.result.empty">Nothing yet.</div>
+          <div id="packingChoices" class="packing-choices"></div>
           <div id="buildStats" class="stats"></div>
           <div id="buildDecayBar" class="decay-bar" hidden></div>
         </div>
@@ -293,17 +310,31 @@
       </div>
 
       <!-- Demo 2: Detector cross-section -->
-      <div class="lab-card">
+      <div class="lab-card" id="lab-detector" tabindex="-1">
         <div class="lab-head">
           <h3 data-i18n="lab.det.h">2 · Inside a collider detector</h3>
           <span class="lab-tag t-em" data-i18n="lab.det.tag">ATLAS / CMS style</span>
         </div>
         <p data-i18n="lab.det.p">A simplified detector cross-section showing typical signatures rather than full detector response.</p>
         <div class="lab-viz">
-          <canvas id="detCanvas"></canvas>
+          <canvas id="detCanvas" aria-label="Simplified transverse cross-section of collider detector layers" data-i18n-aria-label="aria.detector"></canvas>
           <div class="det-picker" id="detPicker"></div>
         </div>
         <div class="lab-legend" id="detLegend"></div>
+        <details class="concept-panel">
+          <summary data-i18n="lab.det.learn">What do these detector layers measure?</summary>
+          <div class="detector-primer">
+            <p><b data-i18n="lab.det.tracker.h">Tracker:</b> <span data-i18n="lab.det.tracker.p">silicon sensors record points along charged-particle paths; curvature in a magnetic field gives momentum and charge sign.</span></p>
+            <p><b data-i18n="lab.det.ecal.h">ECAL:</b> <span data-i18n="lab.det.ecal.p">electrons and photons make electromagnetic showers, allowing their energy to be measured.</span></p>
+            <p><b data-i18n="lab.det.hcal.h">HCAL:</b> <span data-i18n="lab.det.hcal.p">hadrons produce broader nuclear showers; clustered deposits are reconstructed as jets.</span></p>
+            <p><b data-i18n="lab.det.muon.h">Muon system:</b> <span data-i18n="lab.det.muon.p">muons penetrate the calorimeters and leave hits in the outer chambers.</span></p>
+            <p><b data-i18n="lab.det.missing.h">Missing transverse momentum:</b> <span data-i18n="lab.det.missing.p">an imbalance inferred from everything detected; it can indicate neutrinos, detector gaps, or mismeasurement.</span></p>
+          </div>
+        </details>
+        <figure class="evidence-media">
+          <img src="../assets/media/ATLAS_4muon_Higgs_2012.png" alt="ATLAS reconstructed four-muon Higgs candidate event display" data-i18n-alt="alt.atlas" loading="lazy">
+          <figcaption><span class="rep-badge reconstruction" data-i18n="lab.det.media.kind">Recorded data, reconstructed display</span> <span data-i18n="lab.det.media.caption">ATLAS four-muon Higgs candidate (2012), reconstructed mass 125.1 GeV. Tracks and deposits are calculated from detector readout; this is not a photograph of particles.</span> <a href="https://commons.wikimedia.org/wiki/File:Event_display_of_a_4-muon_candidate_in_the_ATLAS_detector.png" target="_blank" rel="noopener noreferrer" data-i18n="lab.det.media.source">Source / CC BY-SA 3.0</a></figcaption>
+        </figure>
       </div>
 
       <!-- Demo 3: Higgs field lattice -->

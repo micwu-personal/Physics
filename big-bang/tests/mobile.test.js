@@ -45,6 +45,8 @@ test('standalone mobile bundle embeds every current source exactly', () => {
   }
   assert(!/<script\s+src="(?:core|i18n|app)\.js"/.test(mobileHtml), 'Mobile bundle must not retain local script dependencies');
   assert(!/<link\s+rel="stylesheet"\s+href="styles\.css"/.test(mobileHtml), 'Mobile bundle must not retain its local stylesheet dependency');
+  assert(mobileHtml.includes('data:image/png;base64,'), 'Mobile bundle embeds the WMAP evidence image');
+  assert(mobileHtml.includes('href="https://micwu-personal.github.io/Physics/particle-zoo/?tab=chart"'), 'Standalone journey links use the hosted experience');
 });
 
 test('mobile slider and localized science data retain source behavior', () => {

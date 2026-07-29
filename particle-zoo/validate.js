@@ -40,6 +40,12 @@ assert.equal(core.classifyProcess(['π⁰'],['γ','γ']).force,'em');
 
 const appSource=fs.readFileSync(path.join(root,'app.js'),'utf8');
 const indexSource=fs.readFileSync(path.join(root,'index.html'),'utf8');
+const mobilePath=path.join(root,'mobile','index.html');
+if(fs.existsSync(mobilePath)){
+  const mobileSource=fs.readFileSync(mobilePath,'utf8');
+  assert.ok(mobileSource.includes('data:image/png;base64,'), 'mobile bundle embeds the ATLAS evidence image');
+  assert.ok(mobileSource.includes('href="https://micwu-personal.github.io/Physics/#particles"'), 'standalone journey link uses the hosted experience');
+}
 for (const required of [
   "mass:'80.369 GeV/c²'", "mass:'91.188 GeV/c²'", "mass:'125.20 GeV/c²'",
   'th12: 33.4 * Math.PI/180', 'dm21: 7.42e-5', 'dm31: 2.51e-3',
@@ -139,12 +145,21 @@ const mesonTable = readLiteral(appSource, 'MESON_TABLE');
 const quarkCharge = readLiteral(appSource, 'QUARK_CHARGE');
 const trayParts = matches(indexSource, /data-part="([^"]+)"/g);
 const trayQuarks = trayParts.filter(part=>part in quarkCharge && !part.endsWith('bar'));
-const trayAntiquarks = trayParts.filter(part=>part.endsWith('bar'));
+const trayAntiquarks = trayParts.filter(part=>part in quarkCharge && part.endsWith('bar'));
 assert.ok(trayQuarks.length && trayAntiquarks.length, 'the builder tray offers quarks and antiquarks');
-trayQuarks.forEach(quark=>{
-  trayAntiquarks.forEach(antiquark=>{
+trayQuarks.filter(quark=>quark!=='t').forEach(quark=>{
+  trayAntiquarks.filter(antiquark=>antiquark!=='tbar').forEach(antiquark=>{
     assert.ok(mesonTable[`${quark}|${antiquark}`], `meson record for ${quark}${antiquark}`);
   });
+});
+assert.ok(trayQuarks.includes('t') && trayAntiquarks.includes('tbar'), 'the complete quark family includes top and anti-top');
+const freeFermions = readLiteral(appSource, 'FREE_FERMION_META');
+[
+  't','tbar','eplus','mu','muplus','tau','tauplus',
+  'nue','nuebar','numu','numubar','nutau','nutaubar'
+].forEach(part=>{
+  assert.ok(trayParts.includes(part), `builder tray includes ${part}`);
+  assert.ok(freeFermions[part], `builder renderer supports ${part}`);
 });
 const detParticles = readLiteral(appSource, 'DET_PARTICLES');
 Object.entries(detParticles).forEach(([id, particle])=>{

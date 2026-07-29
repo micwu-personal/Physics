@@ -194,7 +194,14 @@
 
   // Initial setup after DOM is ready
   function bootstrap(){
-    setTimeout(()=>{ init(); attachObserver(); }, 120);
+    setTimeout(()=>{
+      if(OVERLAYS.some(overlay=>overlay.id===window.PT_INITIAL_OVERLAY)) currentOverlay=window.PT_INITIAL_OVERLAY;
+      init();
+      const button=document.querySelector(`#viewToolbar [data-ov="${currentOverlay}"]`);
+      document.querySelectorAll('#viewToolbar [data-ov]').forEach(item=>item.classList.toggle('active',item===button));
+      applyOverlay(currentOverlay);
+      attachObserver();
+    }, 120);
   }
   if (document.readyState === 'loading'){
     document.addEventListener('DOMContentLoaded', bootstrap);

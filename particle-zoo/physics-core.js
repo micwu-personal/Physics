@@ -172,6 +172,49 @@ globalThis.PhysicsCore = (() => {
     return active && documentVisible && elementVisible && !reducedMotion;
   }
 
+  function nucleonPlans(upQuarks, downQuarks) {
+    if (!Number.isInteger(upQuarks) || !Number.isInteger(downQuarks) || upQuarks < 0 || downQuarks < 0) {
+      throw new RangeError('Quark counts must be non-negative integers');
+    }
+
+    const plans = [];
+    for (let protons = 0; protons <= Math.floor(upQuarks / 2); protons++) {
+      for (let neutrons = 0; neutrons <= Math.floor(downQuarks / 2); neutrons++) {
+        const usedUp = 2 * protons + neutrons;
+        const usedDown = protons + 2 * neutrons;
+        if (usedUp > upQuarks || usedDown > downQuarks) continue;
+
+        const remainingUp = upQuarks - usedUp;
+        const remainingDown = downQuarks - usedDown;
+        const deltaPlus = Math.floor(remainingUp / 3);
+        const deltaMinus = Math.floor(remainingDown / 3);
+        const freeUp = remainingUp - 3 * deltaPlus;
+        const freeDown = remainingDown - 3 * deltaMinus;
+        const key = `${protons}p-${neutrons}n-${deltaPlus}dpp-${deltaMinus}dm-${freeUp}u-${freeDown}d`;
+        plans.push({
+          key,
+          protons,
+          neutrons,
+          deltaPlus,
+          deltaMinus,
+          freeUp,
+          freeDown,
+          stableCount: protons + neutrons,
+          deltaCount: deltaPlus + deltaMinus,
+          freeCount: freeUp + freeDown,
+        });
+      }
+    }
+
+    return plans.sort((left, right) =>
+      left.freeCount - right.freeCount ||
+      left.deltaCount - right.deltaCount ||
+      right.stableCount - left.stableCount ||
+      Math.abs(left.protons - left.neutrons) - Math.abs(right.protons - right.neutrons) ||
+      right.protons - left.protons
+    );
+  }
+
   return {
     CONS_EXAMPLES,
     CONS_PARTICLES,
@@ -182,6 +225,7 @@ globalThis.PhysicsCore = (() => {
     conjugateDaughters,
     photonPair,
     pickDecayChannel,
+    nucleonPlans,
     shouldAnimate,
     sumCharges,
   };

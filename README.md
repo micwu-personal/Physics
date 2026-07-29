@@ -1,6 +1,8 @@
 # Physics
 
-A collection of interactive apps exploring physics & chemistry concepts. Each sub-folder is a self-contained app with EN/中文 support.
+A connected, evidence-led journey through cosmology, particle physics, atoms, and chemistry. Start at the root page to follow the causal story from the hot early universe to particles, nuclei, atoms, stellar nucleosynthesis, and high-energy events. Each sub-folder remains a self-contained app with EN/中文 support.
+
+Every major visual is identified as an observation, reconstructed data, calculated model, or teaching schematic. Captions call out false color, compressed time, nonphysical scale, and other important gaps between the visualization and reality.
 
 ## Apps
 
@@ -9,7 +11,7 @@ An interactive visual journey through the Standard Model of particle physics —
 
 - Standard Model chart (17 fundamental + antimatter + 8 gluons + discovery years)
 - Particle detail: mass/charge/spin/discovery/forces/color-charge for 29+ particles
-- Composition Builder: drag quarks & electrons → live proton/neutron/atom formation with gluon lines, EM attraction/repulsion, nuclear residual force
+- Composition Builder: all 24 fermions/antifermions, selectable quark-packing plans, and live proton/neutron/atom formation. For example, 6u + 6d defaults to 2p + 2n (a helium-4 nucleus), while unstable Delta-baryon alternatives remain available and labeled.
 - Forces & Interactions, Beyond Standard Model (Majorana, gravitons, sterile ν, axions, WIMPs, SUSY, anyons, glueballs…)
 - Quantum Phenomena (BEC, Cooper pairs, superfluidity, quark-gluon plasma, entanglement, Pauli exclusion, topological matter, Hawking radiation)
 - Live physics playground: e⁻/e⁺ annihilation → 2γ
@@ -20,11 +22,12 @@ An interactive periodic table where every characteristic appears **in-context** 
 - Full 118-element grid, color-coded by category (metal → metalloid → nonmetal → noble gas), radioactive elements flagged with ☢
 - Click any element → in-line detail panel with:
   - Atomic properties (Z, mass, group, period, config, electronegativity, phase, melting/boiling, density)
-  - **Animated Bohr model** — nucleus + orbiting electrons per shell (K, L, M, N…)
-  - **Orbital shapes & hybridization** — pick sp, sp², sp³, sp³d, sp³d², d²sp³, dsp², or f (auto-filtered per element)
+  - **Animated Bohr model** — explicitly labeled historical shell model, paired with a quantum probability-density comparison
+  - **Orbital shapes & hybridization** — volumetric 3D projections that do not collapse edge-on, with phase, isosurface, hybrid-model, and legacy-hybridization caveats
   - **Common oxidation states** as color-coded chips
   - **Chemical bonding matrix** (ionic, covalent, metallic, hydrogen, van der Waals) marked ● per element
-  - **Signature reactions** with animated visualization (▶ Play)
+  - **Signature reactions** with a 0.5-second reactant hold and data-driven gas, precipitate, heat, and correctly colored light effects
+  - **Element-relevant 3D structures** — 45+ molecules, gas-phase geometries, ionic formula units, and labeled lattice fragments
   - **Nucleus / isotopes / radioactivity** — animated nucleus, isotope table, natural vs. artificial radioactivity flag
   - **Uses & discovery** (year + discoverer)
 - 🔊 **English & Chinese pronunciation** via Web Speech API (buttons next to each name)
@@ -34,6 +37,8 @@ An interactive periodic table where every characteristic appears **in-context** 
 
 1. **Full multi-file version** — open `<app>/index.html`. Best for desktop.
 2. **Single-file mobile version** — open `<app>/mobile/index.html` (or the `.html` file with the app's name). Copy to phone / USB / email; runs offline.
+
+The copied app itself remains offline. Its optional cross-chapter "Story" links open the hosted GitHub Pages journey when a network connection is available, because sibling app files are not present beside a standalone copy.
 
 ## Keeping the single-file version in sync
 
@@ -53,6 +58,16 @@ git config core.hooksPath .githooks
 ```
 
 Requires Node.js on your PATH.
+
+## Media and copyright
+
+The repository includes a small set of verified educational assets:
+
+- NASA/WMAP and NASA/Chandra images that are public-domain U.S. government works
+- A creator-released public-domain hydrogen probability-density visualization
+- An ATLAS/CERN reconstructed event display under CC BY-SA 3.0
+
+The CERN image is **not** covered by this repository's MIT license. Full per-file attribution, license links, and scientific caveats are in [`LICENSES/THIRD-PARTY-MEDIA.md`](./LICENSES/THIRD-PARTY-MEDIA.md). Media with unclear redistribution rights, and a recent CC BY-SA Planck derivative, were deliberately not committed.
 
 ## License
 
