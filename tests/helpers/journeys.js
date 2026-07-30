@@ -33,7 +33,7 @@ export async function exerciseBigBang(page) {
   await expect(page.locator('#tab-machine')).toHaveClass(/active/);
 
   const slider = page.locator('#timeSlider');
-  for (const value of [-43, -20, -4, 1.5, 3.86, 6, 10, 13, 15, 18, 20]) {
+  for (const value of [0, 100, 250, 400, 520, 620, 700, 740, 760, 840, 1000]) {
     await setRange(slider, value);
     await expect(page.locator('#mpTime')).not.toHaveText('—');
     await expect(page.locator('#mpEpoch')).not.toHaveText('—');

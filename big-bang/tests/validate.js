@@ -19,6 +19,7 @@ vm.runInContext(
 );
 
 const {LOCALES, SOURCES, EPOCHS, EPOCH_I18N, COMPOSITIONS, FATES, MYSTERIES} = context.DATA;
+const coreApi = vm.runInNewContext(`${coreSource}\n;BigBangCore`, {filename:'core.js'});
 
 function validateReferences(item, name){
   assert(Array.isArray(item.refs) && item.refs.length > 0, `${name} must have references`);
@@ -46,8 +47,8 @@ const sliderMin = Number(sliderMatch[1]);
 const sliderMax = Number(sliderMatch[2]);
 for(const epoch of EPOCHS){
   validateReferences(epoch, `Epoch ${epoch.id}`);
-  const logTime = Math.log10(epoch.tsec);
-  assert(logTime >= sliderMin && logTime <= sliderMax, `Epoch ${epoch.id} must be reachable with the time slider`);
+  const sliderValue = coreApi.cosmicTimeToAxisPosition(epoch.tsec) * sliderMax;
+  assert(sliderValue >= sliderMin && sliderValue <= sliderMax, `Epoch ${epoch.id} must be reachable with the time slider`);
 }
 
 const requiredEpochFields = ['name', 'time', 'temp', 'size', 'density', 'dominant', 'events', 'evidence'];
@@ -64,7 +65,7 @@ for(const [name, snapshot] of Object.entries(COMPOSITIONS)){
   assert(Math.abs(total - 100) < 1e-9, `${name} composition must sum to 100%`);
 }
 
-for(const id of ['timelineWrap', 'timeSlider', 'compGrid', 'scaleWrap', 'fatesGrid', 'mysteriesGrid']){
+for(const id of ['timelineWrap', 'timeSlider', 'spacetimeSvg', 'compGrid', 'scaleWrap', 'fatesGrid', 'mysteriesGrid']){
   assert(htmlSource.includes(`id="${id}"`), `Required rendering target #${id} must exist`);
 }
 const compositionKeys = new Set(Object.values(COMPOSITIONS).flatMap(snapshot => snapshot.data.map(row => row.k)));

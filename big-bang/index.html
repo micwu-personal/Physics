@@ -10,6 +10,13 @@
 <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
+  <!--
+    THESIS: Cosmic history becomes one manipulable spacetime object, not a detached animation plus slider.
+    OWN-WORLD: Deep-space instrument graphics, measured cyan lines, epoch color, and logarithmic rulers extend the established observatory.
+    STORY: Move through time, read the changing spatial slice, then connect it to temperature, contents, evidence, and events.
+    FIRST VIEWPORT: A flaring spacetime cone dominates; the selected slice and its log-radius readout move with the embedded control.
+    FORM: A local interactive scientific diagram inside the established Big Bang surface; no replacement visual world or concept seed.
+  -->
   <div id="bg-stars"></div>
   <canvas id="bgCanvas"></canvas>
   <div class="control-row" aria-label="Page controls" data-i18n-aria-label="aria.controls">
@@ -61,11 +68,26 @@
     <section id="tab-machine" class="tab-panel">
       <div class="section-head">
         <h2 data-i18n="machine.h2">Cosmic Time Machine</h2>
-        <p data-i18n="machine.desc">Drag the logarithmic slider from the early universe into a model-dependent far future.</p>
+        <p data-i18n="machine.desc">Move through an original spacetime diagram from the earliest modeled era into a conditional far future.</p>
       </div>
       <div class="machine">
-        <canvas id="machineCanvas" aria-label="Teaching schematic of cosmic expansion and changing contents" data-i18n-aria-label="aria.machine"></canvas>
-        <div class="viz-status"><span class="rep-badge schematic" data-i18n="machine.rep.kind">Teaching schematic</span> <span data-i18n="machine.rep.caption">The glowing disk is not the edge, shape, or size of the universe. Radius, dot count, color, and speed are visual encodings; use the adjacent values for the model-based quantities.</span></div>
+        <figure class="spacetime-figure">
+          <div class="spacetime-shell">
+            <svg id="spacetimeSvg" viewBox="0 0 1000 600" role="img" aria-label="Interactive spacetime diagram of cosmic expansion" data-i18n-aria-label="aria.machine"></svg>
+            <div class="spacetime-readout" aria-live="polite">
+              <span id="diagramTime">3 min</span>
+              <strong id="diagramScale">—</strong>
+            </div>
+            <div class="spacetime-control">
+              <label for="timeSlider">
+                <span data-i18n="machine.diagram.drag">Drag through cosmic time</span>
+                <output id="sliderTimeOutput" for="timeSlider">3 min</output>
+              </label>
+              <input type="range" id="timeSlider" min="0" max="1000" step="1" value="560" aria-label="Choose a time in cosmic history" data-i18n-aria-label="machine.diagram.slider" aria-controls="spacetimeSvg mpTime mpEpoch">
+            </div>
+          </div>
+          <figcaption class="viz-status"><span class="rep-badge schematic" data-i18n="machine.rep.kind">Teaching schematic</span> <span data-i18n="machine.rep.caption">Original diagram; no external artwork is reproduced. Time runs left to right. Each ellipse is a 2D spatial slice, and its half-height maps the modeled physical radius on a logarithmic meter scale. Hatched early scales and the dashed future are model-dependent; the shape is not an edge of the whole universe.</span></figcaption>
+        </figure>
         <div class="machine-panel">
           <div class="mp-time" id="mpTime">3 min</div>
           <div class="mp-epoch" id="mpEpoch">—</div>
@@ -77,10 +99,6 @@
           </div>
           <div class="mp-event"><div class="mp-ek" data-i18n="machine.event">Key event</div><div class="mp-ev" id="mpEvent">—</div></div>
           <div id="mpRefs"></div>
-        </div>
-        <div class="slider-wrap">
-          <input type="range" id="timeSlider" min="-43" max="107.5" step="0.1" value="2.26">
-          <div class="slider-marks" id="sliderMarks"></div>
         </div>
       </div>
     </section>
