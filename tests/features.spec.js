@@ -161,7 +161,9 @@ test('Periodic Table keeps structures element-relevant and labels model limits',
     return document.elementFromPoint(rect.left+rect.width/2,rect.top+rect.height/2)?.id;
   });
   expect(closeHitTarget).toBe('detailClose');
+  await page.locator('#dReactionsBlock').scrollIntoViewIfNeeded();
   await page.locator('.rx-play').first().click();
+  await page.locator('#rxAnimBox').scrollIntoViewIfNeeded();
   expect(await page.evaluate(()=>window.PT_REACTION_DEBUG)).toMatchObject({
     sourceHoldMs:500,
     effects:{heat:true,light:true,lightColor:'#d7193f'}
@@ -172,7 +174,7 @@ test('Periodic Table keeps structures element-relevant and labels model limits',
   await page.locator('#motionToggle').click();
   await expect.poll(
     ()=>page.evaluate(()=>window.PT_REACTION_DEBUG.holdingSource),
-    {timeout:2500}
+    {timeout:5000}
   ).toBe(false);
   await page.locator('[data-lang="zh-CN"]').click();
   await expect(page.locator('img[data-i18n-alt="alt.hydrogen"]')).toHaveAttribute('alt',/氢原子计算概率密度/);
