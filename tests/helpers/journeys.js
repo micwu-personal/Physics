@@ -33,14 +33,33 @@ export async function exerciseBigBang(page) {
   await expect(page.locator('#tab-machine')).toHaveClass(/active/);
 
   const slider = page.locator('#timeSlider');
-  for (const value of [0, 100, 250, 400, 520, 620, 700, 740, 760, 840, 1000]) {
+  // Positions chosen so every cosmic-time format band is rendered: sub-second
+  // exponents, seconds, minutes, hours, days, years, and far-future decades.
+  // The sweep ends on a sub-millennium year so the language switch below
+  // reformats that same instant in Chinese.
+  for (const value of [0, 100, 250, 400, 520, 560, 574, 587, 620, 700, 740, 760, 840, 1000, 664]) {
     await setRange(slider, value);
     await expect(page.locator('#mpTime')).not.toHaveText('—');
     await expect(page.locator('#mpEpoch')).not.toHaveText('—');
   }
 
+  // The narrow diagram layout drops secondary event labels and thins the ruler.
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expect(page.locator('#spacetimeSvg .event-label')).toHaveCount(5);
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await expect(page.locator('#spacetimeSvg .event-label')).toHaveCount(7);
+
   await page.locator('.lang-pill[data-lang="zh-CN"]').click();
+  for (const value of [574, 587, 664]) {
+    await setRange(slider, value);
+    await expect(page.locator('#mpTime')).not.toHaveText('—');
+  }
   await page.locator('.lang-pill[data-lang="en"]').dispatchEvent('click');
+
+  // Each scale row jumps back into the diagram at its own epoch.
+  await page.locator('.tab[data-tab="scale"]').click();
+  await page.locator('.scale-jump').first().click();
+  await expect(page.locator('#tab-machine')).toHaveClass(/active/);
 
   await page.setViewportSize({ width: 1000, height: 700 });
   await page.locator('.tab[data-tab="timeline"]').click();
