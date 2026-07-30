@@ -13,6 +13,43 @@ test('escapeHtml encodes all HTML-significant characters', () => {
   assert.equal(api.escapeHtml(42), '42');
 });
 
+test('cosmic time axis preserves detail before now and keeps the far future reachable', () => {
+  const now = 4.35e17;
+  assert.equal(api.cosmicTimeToAxisPosition(1e-43), 0);
+  assert(Math.abs(api.cosmicTimeToAxisPosition(now) - 0.76) < 1e-12);
+  assert.equal(api.cosmicTimeToAxisPosition(Math.pow(10, 107.5)), 1);
+  for(const tsec of [1e-43, 1e-32, 1, 1.2e13, now, 1e40, Math.pow(10, 107.5)]){
+    const position = api.cosmicTimeToAxisPosition(tsec);
+    const roundTrip = api.axisPositionToCosmicTime(position);
+    assert(Math.abs(Math.log10(roundTrip) - Math.log10(tsec)) < 1e-10);
+  }
+  assert.equal(api.cosmicTimeToAxisPosition(1e-50), 0);
+  assert.equal(api.cosmicTimeToAxisPosition(1e200), 1);
+  assert.equal(api.axisPositionToCosmicTime(-1), 1e-43);
+  assert.equal(api.axisPositionToCosmicTime(2), Math.pow(10, 107.5));
+  assert.throws(()=>api.cosmicTimeToAxisPosition(Infinity), /positive finite/);
+  assert.throws(()=>api.cosmicTimeToAxisPosition(0), /positive finite/);
+  assert.throws(()=>api.axisPositionToCosmicTime(NaN), /finite/);
+  const customAxis = {minLog:0, nowLog:1, maxLog:2, nowPosition:0.5};
+  assert.equal(api.cosmicTimeToAxisPosition(10, customAxis), 0.5);
+  assert.equal(api.axisPositionToCosmicTime(0.5, customAxis), 10);
+});
+
+test('log-scale interpolation is geometric in time and rejects invalid anchors', () => {
+  const anchors = [{tsec:1, value:2}, {tsec:100, value:6}];
+  assert.equal(api.interpolateLogValue(1, anchors), 2);
+  assert.equal(api.interpolateLogValue(100, anchors), 6);
+  assert.equal(api.interpolateLogValue(10, anchors), 4);
+  assert.equal(api.interpolateLogValue(50, [{tsec:1,value:0},{tsec:10,value:1},{tsec:100,value:2}]), 1 + Math.log10(5));
+  assert.equal(api.interpolateLogValue(0.1, anchors), null);
+  assert.equal(api.interpolateLogValue(1000, anchors), null);
+  assert.throws(()=>api.interpolateLogValue(Infinity, anchors), /positive finite/);
+  assert.throws(()=>api.interpolateLogValue(0, anchors), /positive finite/);
+  assert.throws(()=>api.interpolateLogValue(10, null), /two scale anchors/);
+  assert.throws(()=>api.interpolateLogValue(10, [anchors[0]]), /two scale anchors/);
+  assert.throws(()=>api.interpolateLogValue(10, [{tsec:2,value:0},{tsec:1,value:1}]), /ordered/);
+});
+
 test('buildReferenceLinks creates safe links and rejects incomplete metadata', () => {
   const html = api.buildReferenceLinks(
     ['paper'],

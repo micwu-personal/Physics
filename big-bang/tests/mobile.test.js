@@ -55,8 +55,9 @@ test('mobile slider and localized science data retain source behavior', () => {
   const {LOCALES, EPOCHS, EPOCH_I18N} = context.DATA;
   assert.deepEqual(Object.keys(LOCALES.en).sort(), Object.keys(LOCALES['zh-CN']).sort());
   assert.deepEqual(Array.from(EPOCHS, epoch=>epoch.id).sort(), Object.keys(EPOCH_I18N['zh-CN']).sort());
-  const maxLog = Number(sliderAttributes(mobileHtml).max);
-  assert(EPOCHS.every(epoch=>Math.log10(epoch.tsec) <= maxLog), 'Every mobile epoch must be slider-reachable');
+  const slider = sliderAttributes(mobileHtml);
+  const maxValue = Number(slider.max);
+  assert(EPOCHS.every(epoch=>context.BigBangCore.cosmicTimeToAxisPosition(epoch.tsec) * maxValue <= maxValue), 'Every mobile epoch must be slider-reachable');
   assert.equal(context.formatCosmicTime(13.8e9*3.156e7, 'zh-CN'), '138.00 亿年');
   assert.equal(context.formatCosmicTime(1e100*3.156e7, 'en'), '10^100 yr');
 });

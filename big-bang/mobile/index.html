@@ -109,8 +109,34 @@ html[data-motion="paused"] *,html[data-motion="paused"] *::before,html[data-moti
 
 /* ---------- Time Machine ---------- */
 .machine{max-width:1200px;margin:0 auto}
-#machineCanvas{display:block;width:100%;height:400px;background:radial-gradient(ellipse at center,#0e0724 0%,#02030a 100%);border:1px solid var(--panel-b);border-radius:16px;margin-bottom:20px}
-.viz-status{display:flex;align-items:flex-start;gap:8px;margin:-8px 0 20px;color:var(--dim);font-size:11px;line-height:1.5}
+.spacetime-figure{margin:0 0 22px}
+.spacetime-shell{--epoch-color:var(--accent2);position:relative;overflow:hidden;border:1px solid rgba(143,199,255,.22);border-radius:16px;background:#040611;box-shadow:0 18px 48px rgba(0,0,0,.34)}
+#spacetimeSvg{display:block;width:100%;aspect-ratio:5/3;background:radial-gradient(ellipse at 52% 48%,rgba(20,29,63,.62),#03040c 72%)}
+.diagram-field{fill:transparent}
+.radius-grid{stroke:rgba(143,199,255,.12);stroke-width:1;stroke-dasharray:4 8}
+.radius-tick,.axis-title,.event-label,.region-label{font-family:'JetBrains Mono',monospace;fill:#aeb8da}
+.radius-tick{font-size:11px}
+.axis-title{font-size:11px;text-transform:uppercase;letter-spacing:1px;fill:#dfe4ff}
+.history-envelope{fill:url(#historyFill);stroke:#8fc7ff;stroke-width:1.5}
+.future-envelope{fill:rgba(139,147,179,.05);stroke:#8b93b3;stroke-width:1.5;stroke-dasharray:8 9}
+.time-axis{stroke:#e8ecff;stroke-opacity:.42;stroke-width:1}
+.present-line{stroke:#ffd166;stroke-width:1.5;stroke-dasharray:4 5}
+.region-label{font-size:12px;letter-spacing:1px;fill:#dfe4ff}
+.future-label{fill:#8b93b3}
+.event-guide{stroke:#c8cff0;stroke-opacity:.28;stroke-width:1}
+.event-dot{fill:#05060d;stroke:#dfe4ff;stroke-width:1.5}
+.event-label{font-size:11px;fill:#e8ecff}
+.selected-glow{fill:var(--epoch-color);opacity:.32;filter:url(#sliceGlow)}
+.selected-slice{fill:url(#sliceFill);stroke:#fff;stroke-width:2.5}
+.selected-radius{stroke:#fff;stroke-width:1.5;stroke-dasharray:3 4}
+.selected-center{fill:#fff;stroke:var(--epoch-color);stroke-width:3}
+.spacetime-readout{position:absolute;top:18px;left:18px;display:flex;flex-direction:column;gap:4px;max-width:310px;padding:11px 13px;border:1px solid rgba(143,199,255,.25);border-radius:10px;background:rgba(3,4,12,.9);box-shadow:0 10px 30px rgba(0,0,0,.3)}
+.spacetime-readout span{font:600 18px/1.1 'JetBrains Mono',monospace;color:#fff}
+.spacetime-readout strong{font:500 11px/1.4 'JetBrains Mono',monospace;color:#b8c5eb}
+.spacetime-control{position:absolute;left:9.2%;right:4.2%;bottom:14px;padding:10px 13px 12px;border:1px solid rgba(255,255,255,.15);border-radius:10px;background:rgba(3,4,12,.94);box-shadow:0 12px 30px rgba(0,0,0,.42)}
+.spacetime-control label{display:flex;justify-content:space-between;gap:16px;margin-bottom:8px;font-size:11px;color:#c8cff0}
+.spacetime-control output{font-family:'JetBrains Mono',monospace;color:#fff}
+.viz-status{display:flex;align-items:flex-start;gap:8px;margin:10px 0 0;color:var(--dim);font-size:11px;line-height:1.5}
 .machine-panel{background:var(--panel);border:1px solid var(--panel-b);border-radius:16px;padding:24px;margin-bottom:20px;backdrop-filter:blur(12px)}
 .mp-time{font-family:'JetBrains Mono',monospace;font-size:36px;font-weight:700;color:var(--accent2);letter-spacing:-1px;line-height:1;margin-bottom:6px}
 .mp-epoch{font-size:22px;font-weight:600;margin-bottom:20px;color:#fff}
@@ -121,11 +147,10 @@ html[data-motion="paused"] *,html[data-motion="paused"] *::before,html[data-moti
 .mp-event{padding:12px 16px;background:linear-gradient(135deg,rgba(255,107,157,0.14),rgba(255,209,102,0.08));border:1px solid rgba(255,107,157,.3);border-radius:8px}
 .mp-ek{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--accent);margin-bottom:4px}
 .mp-ev{font-size:14px;color:#dfe4ff;line-height:1.6}
-.slider-wrap{background:var(--panel);border:1px solid var(--panel-b);border-radius:16px;padding:24px}
 #timeSlider{width:100%;height:8px;-webkit-appearance:none;appearance:none;background:linear-gradient(90deg,#e94ecd 0%,#7c5cff 15%,#5aa8ff 30%,#5aff8a 45%,#ffd166 60%,#ff9e5c 70%,#ff6b9d 80%,#ff5c8a 90%,#8b93b3 100%);border-radius:4px;outline:none}
 #timeSlider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:24px;height:24px;border-radius:50%;background:#fff;cursor:pointer;box-shadow:0 0 20px rgba(255,255,255,0.8);border:3px solid var(--accent)}
 #timeSlider::-moz-range-thumb{width:24px;height:24px;border-radius:50%;background:#fff;cursor:pointer;box-shadow:0 0 20px rgba(255,255,255,0.8);border:3px solid var(--accent)}
-.slider-marks{display:flex;justify-content:space-between;margin-top:12px;color:var(--dim);font-size:11px;font-family:'JetBrains Mono',monospace}
+#timeSlider:focus-visible{outline:2px solid #00d4ff;outline-offset:6px}
 
 /* ---------- Composition ---------- */
 .comp-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:20px;max-width:1200px;margin:0 auto}
@@ -142,14 +167,23 @@ html[data-motion="paused"] *,html[data-motion="paused"] *::before,html[data-moti
 
 /* ---------- Scale ---------- */
 .scale-wrap{max-width:1000px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+.scale-axis{position:relative;height:34px;margin:0 216px 0 196px;border-bottom:1px solid rgba(143,199,255,.35);color:#aeb8da;font:500 10px/1 'JetBrains Mono',monospace}
+.scale-axis span{position:absolute;bottom:8px;transform:translateX(-50%);white-space:nowrap}
+.scale-axis span:first-child{transform:none}
+.scale-axis span:last-child{transform:translateX(-100%)}
 .scale-row{display:grid;grid-template-columns:180px 1fr 200px;gap:12px 16px;align-items:center;background:var(--panel);border:1px solid var(--panel-b);border-radius:14px;padding:16px 20px}
 .scale-row .item-refs{grid-column:1/-1;margin-top:0}
 .scale-time{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--accent2)}
-.scale-bar{position:relative;height:36px;background:rgba(0,0,0,0.35);border-radius:8px;overflow:hidden}
-.scale-fill{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:8px;box-shadow:0 0 20px rgba(255,107,157,0.5)}
+.scale-bar{position:relative;height:42px;background:repeating-linear-gradient(90deg,rgba(143,199,255,.08) 0 1px,transparent 1px calc(100% / 6)),rgba(0,0,0,.35);border-radius:8px;overflow:hidden}
+.scale-fill{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,rgba(255,107,157,.35),rgba(255,209,102,.72));border-radius:8px}
+.scale-point{position:absolute;top:0;bottom:0;width:2px;background:#fff;box-shadow:4px 0 12px rgba(255,209,102,.65)}
+.scale-unknown{position:absolute;inset:0;background:repeating-linear-gradient(135deg,rgba(232,236,255,.14) 0 5px,transparent 5px 11px)}
 .scale-label{position:absolute;top:50%;left:12px;transform:translateY(-50%);font-size:12px;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,0.8);font-family:'JetBrains Mono',monospace;white-space:nowrap}
 .scale-compare{font-size:12px;color:var(--dim);text-align:right}
 .scale-compare b{color:#fff;display:block;font-size:13px}
+.scale-jump{margin-top:8px;padding:7px 10px;border:1px solid rgba(143,199,255,.28);border-radius:8px;background:#0b0e1c;color:#c8cff0;font:600 11px/1.2 inherit;cursor:pointer}
+.scale-jump:hover{border-color:#00d4ff;color:#fff}
+.scale-jump:focus-visible{outline:2px solid #00d4ff;outline-offset:2px}
 
 /* ---------- Fates ---------- */
 .fates-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:20px;max-width:1300px;margin:0 auto}
@@ -196,6 +230,7 @@ footer{text-align:center;padding:40px 20px;color:var(--dim);font-size:12px;borde
   .timeline-wrap{padding-left:44px}
   .timeline-wrap::before{left:12px}
   .ep-card::before{left:-38px;width:16px;height:16px}
+  .scale-axis{margin:0}
   .scale-row{grid-template-columns:1fr;gap:8px}
   .scale-compare{text-align:left}
 }
@@ -203,11 +238,26 @@ footer{text-align:center;padding:40px 20px;color:var(--dim);font-size:12px;borde
   .tabs{top:60px;padding:10px 8px}
   .control-row{right:6px}
   .journey-home,.motion-pill,.lang-pill{padding-inline:8px}
+  #spacetimeSvg{aspect-ratio:19/16}
+  .spacetime-readout{top:10px;left:10px;max-width:260px;padding:9px 10px}
+  .spacetime-readout span{font-size:15px}
+  .spacetime-control{left:7.5%;right:4%;bottom:10px}
+  .spacetime-control label{font-size:10px}
+  .radius-tick,.axis-title,.event-label{font-size:14px}
+  .region-label{font-size:14px}
+  .machine-panel{padding:18px}
 }
 
 </style>
 </head>
 <body>
+  <!--
+    THESIS: Cosmic history becomes one manipulable spacetime object, not a detached animation plus slider.
+    OWN-WORLD: Deep-space instrument graphics, measured cyan lines, epoch color, and logarithmic rulers extend the established observatory.
+    STORY: Move through time, read the changing spatial slice, then connect it to temperature, contents, evidence, and events.
+    FIRST VIEWPORT: A flaring spacetime cone dominates; the selected slice and its log-radius readout move with the embedded control.
+    FORM: A local interactive scientific diagram inside the established Big Bang surface; no replacement visual world or concept seed.
+  -->
   <div id="bg-stars"></div>
   <canvas id="bgCanvas"></canvas>
   <div class="control-row" aria-label="Page controls" data-i18n-aria-label="aria.controls">
@@ -259,11 +309,26 @@ footer{text-align:center;padding:40px 20px;color:var(--dim);font-size:12px;borde
     <section id="tab-machine" class="tab-panel">
       <div class="section-head">
         <h2 data-i18n="machine.h2">Cosmic Time Machine</h2>
-        <p data-i18n="machine.desc">Drag the logarithmic slider from the early universe into a model-dependent far future.</p>
+        <p data-i18n="machine.desc">Move through an original spacetime diagram from the earliest modeled era into a conditional far future.</p>
       </div>
       <div class="machine">
-        <canvas id="machineCanvas" aria-label="Teaching schematic of cosmic expansion and changing contents" data-i18n-aria-label="aria.machine"></canvas>
-        <div class="viz-status"><span class="rep-badge schematic" data-i18n="machine.rep.kind">Teaching schematic</span> <span data-i18n="machine.rep.caption">The glowing disk is not the edge, shape, or size of the universe. Radius, dot count, color, and speed are visual encodings; use the adjacent values for the model-based quantities.</span></div>
+        <figure class="spacetime-figure">
+          <div class="spacetime-shell">
+            <svg id="spacetimeSvg" viewBox="0 0 1000 600" role="img" aria-label="Interactive spacetime diagram of cosmic expansion" data-i18n-aria-label="aria.machine"></svg>
+            <div class="spacetime-readout" aria-live="polite">
+              <span id="diagramTime">3 min</span>
+              <strong id="diagramScale">—</strong>
+            </div>
+            <div class="spacetime-control">
+              <label for="timeSlider">
+                <span data-i18n="machine.diagram.drag">Drag through cosmic time</span>
+                <output id="sliderTimeOutput" for="timeSlider">3 min</output>
+              </label>
+              <input type="range" id="timeSlider" min="0" max="1000" step="1" value="560" aria-label="Choose a time in cosmic history" data-i18n-aria-label="machine.diagram.slider" aria-controls="spacetimeSvg mpTime mpEpoch">
+            </div>
+          </div>
+          <figcaption class="viz-status"><span class="rep-badge schematic" data-i18n="machine.rep.kind">Teaching schematic</span> <span data-i18n="machine.rep.caption">Original diagram; no external artwork is reproduced. Time runs left to right. Each ellipse is a 2D spatial slice, and its half-height maps the modeled physical radius on a logarithmic meter scale. Hatched early scales and the dashed future are model-dependent; the shape is not an edge of the whole universe.</span></figcaption>
+        </figure>
         <div class="machine-panel">
           <div class="mp-time" id="mpTime">3 min</div>
           <div class="mp-epoch" id="mpEpoch">—</div>
@@ -275,10 +340,6 @@ footer{text-align:center;padding:40px 20px;color:var(--dim);font-size:12px;borde
           </div>
           <div class="mp-event"><div class="mp-ek" data-i18n="machine.event">Key event</div><div class="mp-ev" id="mpEvent">—</div></div>
           <div id="mpRefs"></div>
-        </div>
-        <div class="slider-wrap">
-          <input type="range" id="timeSlider" min="-43" max="107.5" step="0.1" value="2.26">
-          <div class="slider-marks" id="sliderMarks"></div>
         </div>
       </div>
     </section>
@@ -337,6 +398,55 @@ var BigBangCore = (function(){
       .replaceAll('>', '&gt;')
       .replaceAll('"', '&quot;')
       .replaceAll("'", '&#39;');
+  }
+
+  const DEFAULT_COSMIC_AXIS = Object.freeze({
+    minLog: -43,
+    nowLog: Math.log10(4.35e17),
+    maxLog: 107.5,
+    nowPosition: 0.76
+  });
+
+  function clamp(value, min, max){
+    return Math.min(max, Math.max(min, value));
+  }
+
+  function cosmicTimeToAxisPosition(tsec, axis=DEFAULT_COSMIC_AXIS){
+    if(!Number.isFinite(tsec)) throw new Error('Cosmic time must be a positive finite number');
+    if(tsec <= 0) throw new Error('Cosmic time must be a positive finite number');
+    const logTime = clamp(Math.log10(tsec), axis.minLog, axis.maxLog);
+    if(logTime <= axis.nowLog){
+      return axis.nowPosition * (logTime - axis.minLog) / (axis.nowLog - axis.minLog);
+    }
+    return axis.nowPosition +
+      (1 - axis.nowPosition) * (logTime - axis.nowLog) / (axis.maxLog - axis.nowLog);
+  }
+
+  function axisPositionToCosmicTime(position, axis=DEFAULT_COSMIC_AXIS){
+    if(!Number.isFinite(position)) throw new Error('Axis position must be finite');
+    const normalized = clamp(position, 0, 1);
+    const logTime = normalized <= axis.nowPosition
+      ? axis.minLog + (normalized / axis.nowPosition) * (axis.nowLog - axis.minLog)
+      : axis.nowLog + ((normalized - axis.nowPosition) / (1 - axis.nowPosition)) * (axis.maxLog - axis.nowLog);
+    return Math.pow(10, logTime);
+  }
+
+  function interpolateLogValue(tsec, anchors){
+    if(!Number.isFinite(tsec)) throw new Error('Interpolation time must be a positive finite number');
+    if(tsec <= 0) throw new Error('Interpolation time must be a positive finite number');
+    if(!Array.isArray(anchors)) throw new Error('At least two scale anchors are required');
+    if(anchors.length < 2) throw new Error('At least two scale anchors are required');
+    for(let index=1; index<anchors.length; index++){
+      if(anchors[index].tsec <= anchors[index - 1].tsec) throw new Error('Scale anchors must be ordered by time');
+    }
+    if(tsec < anchors[0].tsec || tsec > anchors[anchors.length - 1].tsec) return null;
+    let upperIndex = 1;
+    while(tsec > anchors[upperIndex].tsec) upperIndex++;
+    const lower = anchors[upperIndex - 1];
+    const upper = anchors[upperIndex];
+    const span = Math.log10(upper.tsec) - Math.log10(lower.tsec);
+    const progress = (Math.log10(tsec) - Math.log10(lower.tsec)) / span;
+    return lower.value + (upper.value - lower.value) * progress;
   }
 
   function buildReferenceLinks(referenceIds, sources, label){
@@ -424,12 +534,24 @@ var BigBangCore = (function(){
     }
   }
 
-  return {advanceStarfield, buildReferenceLinks, createAnimationController, escapeHtml, renderReferencePanel};
+  return {
+    advanceStarfield,
+    axisPositionToCosmicTime,
+    buildReferenceLinks,
+    cosmicTimeToAxisPosition,
+    createAnimationController,
+    escapeHtml,
+    interpolateLogValue,
+    renderReferencePanel
+  };
 })();
 var buildReferenceLinks = BigBangCore.buildReferenceLinks;
 var createAnimationController = BigBangCore.createAnimationController;
 var advanceStarfield = BigBangCore.advanceStarfield;
 var renderReferencePanel = BigBangCore.renderReferencePanel;
+var cosmicTimeToAxisPosition = BigBangCore.cosmicTimeToAxisPosition;
+var axisPositionToCosmicTime = BigBangCore.axisPositionToCosmicTime;
+var interpolateLogValue = BigBangCore.interpolateLogValue;
 
 </script>
   <script>
@@ -455,7 +577,7 @@ const LOCALES = {
     'journey.home': 'Story',
     'aria.controls': 'Page controls',
     'aria.sections': 'Big Bang sections',
-    'aria.machine': 'Teaching schematic of cosmic expansion and changing contents',
+    'aria.machine': 'Interactive spacetime diagram of cosmic expansion, physical scale, and key events',
     'alt.wmap': 'False-color all-sky cosmic microwave background temperature map measured by WMAP',
 
     'timeline.h2': 'Cosmic Timeline',
@@ -478,7 +600,7 @@ const LOCALES = {
     'refs.label': 'References',
 
     'machine.h2': 'Cosmic Time Machine',
-    'machine.desc': 'Drag the logarithmic slider from the early universe into a model-dependent far future.',
+    'machine.desc': 'Move through an original spacetime diagram from the earliest modeled era into a conditional far future.',
     'machine.temp': 'Radiation/background temperature',
     'machine.size': 'Radius of today\'s observable patch, then',
     'machine.density': 'Mass–energy density (ρ = u/c²)',
@@ -486,7 +608,25 @@ const LOCALES = {
     'machine.epoch': 'Epoch',
     'machine.event': 'Key event',
     'machine.rep.kind': 'Teaching schematic',
-    'machine.rep.caption': 'The glowing disk is not the edge, shape, or size of the universe. Radius, dot count, color, and speed are visual encodings; use the adjacent values for the model-based quantities.',
+    'machine.rep.caption': 'Original diagram; no external artwork is reproduced. Time runs left to right. Each ellipse is a 2D spatial slice, and its half-height maps the modeled physical radius on a logarithmic meter scale. Hatched early scales and the dashed future are model-dependent; the shape is not an edge of the whole universe.',
+    'machine.diagram.title': 'History of today\'s observable patch',
+    'machine.diagram.drag': 'Drag through cosmic time',
+    'machine.diagram.slider': 'Choose a time in cosmic history',
+    'machine.diagram.radiusAxis': 'physical radius · log₁₀ metres',
+    'machine.diagram.history': 'modeled history',
+    'machine.diagram.future': 'conditional Λ future',
+    'machine.diagram.now': 'now',
+    'machine.diagram.unknown': 'absolute scale unknown',
+    'machine.diagram.futureScale': 'scale grows beyond the plotted range',
+    'machine.diagram.radiusValue': 'modeled radius',
+    'machine.diagram.model': 'model-dependent',
+    'machine.event.inflation': 'inflation',
+    'machine.event.oneSecond': '1 second',
+    'machine.event.bbn': 'light nuclei',
+    'machine.event.cmb': 'CMB released',
+    'machine.event.stars': 'first stars',
+    'machine.event.now': 'today',
+    'machine.event.future': 'black-hole era',
 
     'comp.h2': 'What is the Universe made of?',
     'comp.desc': 'The mix has changed dramatically over cosmic history. Today, only 5% of the universe is ordinary matter.',
@@ -506,6 +646,8 @@ const LOCALES = {
     'scale.desc': 'This compares the physical <b>radius</b>, at each epoch, of the patch that became today\'s observable universe. It is not the size of the whole universe, which may be infinite. Pre-BBN values are model-dependent.',
     'scale.now': 'now',
     'scale.compare': 'Compare to',
+    'scale.axis': 'Logarithmic radius scale in metres',
+    'scale.view': 'View this slice',
 
     'fates.h2': 'How does it end?',
     'fates.desc': 'The outcome depends on whether dark energy remains a cosmological constant, evolves, or the vacuum changes.',
@@ -537,7 +679,7 @@ const LOCALES = {
     'journey.home': '故事线',
     'aria.controls': '页面控制',
     'aria.sections': '大爆炸主题分区',
-    'aria.machine': '宇宙膨胀与成分变化的教学示意图',
+    'aria.machine': '展示宇宙膨胀、物理尺度与关键事件的交互式时空图',
     'alt.wmap': 'WMAP 测得的宇宙微波背景温度涨落全天假彩色图',
 
     'timeline.h2': '宇宙演化时间线',
@@ -560,7 +702,7 @@ const LOCALES = {
     'refs.label': '参考资料',
 
     'machine.h2': '宇宙时间机器',
-    'machine.desc': '拖动对数滑块,从早期宇宙穿越到依赖模型外推的遥远未来。',
+    'machine.desc': '在原创时空图中穿越宇宙历史，从最早的模型时期一直到条件性的遥远未来。',
     'machine.temp': '辐射/背景温度',
     'machine.size': '今天可观测区域在当时的半径',
     'machine.density': '质能密度 (ρ = u/c²)',
@@ -568,7 +710,25 @@ const LOCALES = {
     'machine.epoch': '所处纪元',
     'machine.event': '关键事件',
     'machine.rep.kind': '教学示意',
-    'machine.rep.caption': '发光圆盘不是宇宙的边缘、形状或大小。半径、点数、颜色与速度均为视觉编码；模型量请以旁边的数值为准。',
+    'machine.rep.caption': '本图为原创，没有复制外部作品。时间从左向右；每个椭圆代表二维空间切片，其半高度按米制物理半径的对数映射。带纹理的早期尺度与虚线未来依赖模型；轮廓并非整个宇宙的边缘。',
+    'machine.diagram.title': '今天可观测区域的历史',
+    'machine.diagram.drag': '拖动，穿越宇宙时间',
+    'machine.diagram.slider': '选择宇宙历史中的一个时刻',
+    'machine.diagram.radiusAxis': '物理半径 · 米的 log₁₀',
+    'machine.diagram.history': '模型化历史',
+    'machine.diagram.future': '条件性 Λ 未来',
+    'machine.diagram.now': '现在',
+    'machine.diagram.unknown': '绝对尺度未知',
+    'machine.diagram.futureScale': '尺度增长超出图示范围',
+    'machine.diagram.radiusValue': '模型半径',
+    'machine.diagram.model': '依赖模型',
+    'machine.event.inflation': '暴胀',
+    'machine.event.oneSecond': '1 秒',
+    'machine.event.bbn': '轻元素原子核',
+    'machine.event.cmb': 'CMB 释放',
+    'machine.event.stars': '第一代恒星',
+    'machine.event.now': '今天',
+    'machine.event.future': '黑洞时代',
 
     'comp.h2': '宇宙由什么构成?',
     'comp.desc': '宇宙的成分随时间发生了剧烈变化。今天,普通物质仅占 5%。',
@@ -588,6 +748,8 @@ const LOCALES = {
     'scale.desc': '这里比较的是最终形成<b>今天可观测宇宙</b>的那片区域在各时期的物理<b>半径</b>,并非整个宇宙的大小;整个宇宙可能是无限的。原初核合成之前的数值依赖模型。',
     'scale.now': '今天',
     'scale.compare': '相当于',
+    'scale.axis': '以米为单位的对数半径标尺',
+    'scale.view': '在时空图中查看',
 
     'fates.h2': '宇宙将如何终结?',
     'fates.desc': '宇宙的结局取决于暗能量是否保持为宇宙学常数、随时间演化,以及真空是否发生变化。',
@@ -959,7 +1121,7 @@ document.querySelectorAll('.tab').forEach(t=>{
     document.querySelectorAll('.tab-panel').forEach(x=>x.classList.remove('active'));
     t.classList.add('active');
     document.getElementById('tab-'+t.dataset.tab).classList.add('active');
-    if(t.dataset.tab==='machine') { resizeMachine(); updateMachine(); }
+    if(t.dataset.tab==='machine') updateMachine();
   });
 });
 
@@ -995,7 +1157,7 @@ function renderTimeline(){
     card.onclick = ()=>{
       // Jump to Time Machine at this epoch
       const slider = document.getElementById('timeSlider');
-      slider.value = Math.log10(base.tsec);
+      slider.value = Math.round(cosmicTimeToAxisPosition(base.tsec) * 1000);
       document.querySelector('.tab[data-tab="machine"]').click();
     };
     wrap.appendChild(card);
@@ -1003,22 +1165,21 @@ function renderTimeline(){
 }
 
 /* ================ Time Machine ================ */
-const machineCanvas = document.getElementById('machineCanvas');
-const mctx = machineCanvas.getContext('2d');
-let MW=0, MH=0;
-function resizeMachine(){
-  const r = machineCanvas.getBoundingClientRect();
-  machineCanvas.width = r.width*devicePixelRatio;
-  machineCanvas.height = r.height*devicePixelRatio;
-  mctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);
-  MW = r.width; MH = r.height;
-}
-window.addEventListener('resize',()=>{
-  if(document.getElementById('tab-machine').classList.contains('active')){
-    resizeMachine();
-    updateMachine();
-  }
-});
+const LIGHT_YEAR_M = 9.4607e15;
+const NOW_SECONDS = 4.35e17;
+const SCALE_LOG_MIN = -27;
+const SCALE_LOG_MAX = 27;
+const SIZE_ANCHORS = [
+  {tsec:1e-35, value:-27},
+  {tsec:1e-32, value:2},
+  {tsec:1e-6, value:Math.log10(0.01 * LIGHT_YEAR_M)},
+  {tsec:1, value:Math.log10(13 * LIGHT_YEAR_M)},
+  {tsec:180, value:Math.log10(127 * LIGHT_YEAR_M)},
+  {tsec:1.2e13, value:Math.log10(42e6 * LIGHT_YEAR_M)},
+  {tsec:1.578e16, value:Math.log10(4.5e9 * LIGHT_YEAR_M)},
+  {tsec:2.9e17, value:Math.log10(33e9 * LIGHT_YEAR_M)},
+  {tsec:NOW_SECONDS, value:Math.log10(46.5e9 * LIGHT_YEAR_M)}
+];
 
 /* Interpolate epoch by log-time (seconds since Big Bang) */
 function pickEpoch(tsec){
@@ -1039,10 +1200,11 @@ function fmtTime(tsec){
 
 function updateMachine(){
   const slider = document.getElementById('timeSlider');
-  const logT = parseFloat(slider.value);
-  const tsec = Math.pow(10, logT);
+  const tsec = axisPositionToCosmicTime(parseFloat(slider.value) / 1000);
   const ep = pickEpoch(tsec);
-  document.getElementById('mpTime').textContent = fmtTime(tsec);
+  const formattedTime = fmtTime(tsec);
+  const scaleEstimate = getScaleEstimate(tsec);
+  document.getElementById('mpTime').textContent = formattedTime;
   document.getElementById('mpEpoch').textContent = ep.name || ep.id;
   document.getElementById('mpEpoch').style.color = ep.color;
   document.getElementById('mpTemp').textContent = ep.temp;
@@ -1051,58 +1213,134 @@ function updateMachine(){
   document.getElementById('mpDom').textContent = ep.dominant;
   document.getElementById('mpEvent').innerHTML = ep.events.slice(0,2).join('<br>');
   document.getElementById('mpRefs').innerHTML = buildReferenceLinks(ep.refs, SOURCES, LOCALES[window.CURRENT_LANG]['refs.label']);
-  drawMachine(tsec, ep);
+  document.getElementById('sliderTimeOutput').textContent = formattedTime;
+  document.getElementById('diagramTime').textContent = formattedTime;
+  document.getElementById('diagramScale').textContent = formatScaleEstimate(scaleEstimate, tsec);
+  document.querySelector('.spacetime-shell').style.setProperty('--epoch-color', ep.color);
+  drawSpacetimeDiagram(tsec, ep, scaleEstimate);
 }
 
-function drawMachine(tsec, ep){
-  if(MW===0) return;
-  mctx.clearRect(0,0,MW,MH);
-  // background nebula
-  const g = mctx.createRadialGradient(MW/2, MH/2, 0, MW/2, MH/2, Math.max(MW,MH)*0.7);
-  g.addColorStop(0, ep.color+'55');
-  g.addColorStop(1, 'rgba(2,3,10,0)');
-  mctx.fillStyle = g;
-  mctx.fillRect(0,0,MW,MH);
+function getScaleEstimate(tsec){
+  const logMeters = interpolateLogValue(tsec, SIZE_ANCHORS);
+  if(logMeters === null) return null;
+  return {logMeters, modelDependent:tsec < 180};
+}
 
-  // Central "universe" visualization — a growing bubble whose look changes with epoch
-  const cx = MW/2, cy = MH/2;
-  const logT = Math.log10(Math.max(tsec,1e-43));
-  const slider = document.getElementById('timeSlider');
-  const minLog = Number(slider.min);
-  const maxLog = Number(slider.max);
-  const normalizedTime = Math.max(0, Math.min(1, (logT - minLog) / (maxLog - minLog)));
-  const radius = 20 + normalizedTime * 170;
+function formatScaleEstimate(estimate, tsec){
+  const dict = LOCALES[window.CURRENT_LANG];
+  if(tsec > NOW_SECONDS) return dict['machine.diagram.futureScale'];
+  if(!estimate) return dict['machine.diagram.unknown'];
+  const exponent = estimate.logMeters.toFixed(1);
+  const prefix = estimate.modelDependent ? `${dict['machine.diagram.model']} · ` : '';
+  return `${prefix}${dict['machine.diagram.radiusValue']} ≈ 10^${exponent} m`;
+}
 
-  // Glow
-  const gr = mctx.createRadialGradient(cx,cy,0,cx,cy,radius*2.2);
-  gr.addColorStop(0, ep.color+'ff');
-  gr.addColorStop(0.4, ep.color+'55');
-  gr.addColorStop(1, ep.color+'00');
-  mctx.fillStyle = gr;
-  mctx.beginPath(); mctx.arc(cx,cy,radius*2.2,0,Math.PI*2); mctx.fill();
+function scaleHalfHeight(logMeters, maxHeight){
+  if(logMeters === null) return 12;
+  const normalized = Math.max(0, Math.min(1, (logMeters - SCALE_LOG_MIN) / (SCALE_LOG_MAX - SCALE_LOG_MIN)));
+  return 12 + normalized * (maxHeight - 12);
+}
 
-  // Core disk
-  mctx.fillStyle = ep.color;
-  mctx.beginPath(); mctx.arc(cx,cy,radius,0,Math.PI*2); mctx.fill();
+function envelopePath(points, centerY){
+  const top = points.map(point=>`${point.x.toFixed(1)},${(centerY-point.h).toFixed(1)}`).join(' L ');
+  const bottom = points.slice().reverse().map(point=>`${point.x.toFixed(1)},${(centerY+point.h).toFixed(1)}`).join(' L ');
+  return `M ${top} L ${bottom} Z`;
+}
 
-  // Draw scatter dots representing "content" (density of particles / stars)
-  mctx.fillStyle = 'rgba(255,255,255,0.7)';
-  const nDots = Math.min(300, Math.max(20, Math.floor(radius * 1.2)));
-  for(let i=0;i<nDots;i++){
-    const a = (i / nDots) * Math.PI * 2 + (i*0.31);
-    const r = radius * (0.2 + Math.random()*0.75);
-    const x = cx + Math.cos(a) * r;
-    const y = cy + Math.sin(a) * r;
-    const s = Math.random()*1.6 + 0.4;
-    mctx.beginPath(); mctx.arc(x,y,s,0,Math.PI*2); mctx.fill();
-  }
-
-  // Ring for horizon
-  mctx.strokeStyle = ep.color;
-  mctx.lineWidth = 1.5;
-  mctx.setLineDash([4,6]);
-  mctx.beginPath(); mctx.arc(cx,cy,radius,0,Math.PI*2); mctx.stroke();
-  mctx.setLineDash([]);
+function drawSpacetimeDiagram(tsec, ep, estimate){
+  const svg = document.getElementById('spacetimeSvg');
+  const dict = LOCALES[window.CURRENT_LANG];
+  const mobile = window.matchMedia('(max-width: 600px)').matches;
+  const layout = mobile
+    ? {width:760, height:640, x0:64, x1:730, centerY:300, maxHeight:216}
+    : {width:1000, height:600, x0:92, x1:958, centerY:278, maxHeight:205};
+  svg.setAttribute('viewBox', `0 0 ${layout.width} ${layout.height}`);
+  const timeX = time=>layout.x0 + cosmicTimeToAxisPosition(time) * (layout.x1-layout.x0);
+  const historyTimes = [1e-43,1e-35,1e-34,1e-32,1e-6,1,180,1.2e13,1e16,NOW_SECONDS];
+  const historyPoints = historyTimes.map(time=>{
+    const value = interpolateLogValue(time, SIZE_ANCHORS);
+    return {x:timeX(time), h:scaleHalfHeight(value, layout.maxHeight)};
+  });
+  const nowPoint = historyPoints[historyPoints.length-1];
+  const futurePoints = [
+    nowPoint,
+    {x:timeX(3.156e21), h:layout.maxHeight},
+    {x:layout.x1, h:layout.maxHeight}
+  ];
+  const selectedX = timeX(tsec);
+  const selectedH = scaleHalfHeight(estimate?.logMeters ?? null, layout.maxHeight);
+  const selectedRx = Math.max(12, Math.min(44, selectedH * 0.2));
+  const radiusTicks = mobile ? [-27,-9,9,27] : [-27,-18,-9,0,9,18,27];
+  const grid = radiusTicks.map(value=>{
+    const offset = scaleHalfHeight(value, layout.maxHeight);
+    const label = value === 0 ? '1 m' : `10^${value} m`;
+    return `
+      <line class="radius-grid" x1="${layout.x0}" y1="${layout.centerY-offset}" x2="${layout.x1}" y2="${layout.centerY-offset}"/>
+      <line class="radius-grid" x1="${layout.x0}" y1="${layout.centerY+offset}" x2="${layout.x1}" y2="${layout.centerY+offset}"/>
+      <text class="radius-tick" x="${layout.x0-8}" y="${layout.centerY-offset+4}" text-anchor="end">${label}</text>`;
+  }).join('');
+  const events = [
+    {tsec:1e-34, key:'machine.event.inflation', level:0, secondary:false},
+    {tsec:1, key:'machine.event.oneSecond', level:1, secondary:false},
+    {tsec:180, key:'machine.event.bbn', level:0, secondary:true},
+    {tsec:1.2e13, key:'machine.event.cmb', level:1, secondary:false},
+    {tsec:1e16, key:'machine.event.stars', level:0, secondary:true},
+    {tsec:NOW_SECONDS, key:'machine.event.now', level:2, secondary:false},
+    {tsec:3.156e99, key:'machine.event.future', level:1, secondary:false}
+  ].filter(event=>!mobile || !event.secondary);
+  const eventMarkup = events.map(event=>{
+    const x = timeX(event.tsec);
+    const above = event.level % 2 === 0;
+    const y = above ? 36 + event.level*18 : layout.height-76-event.level*18;
+    const edgeY = above ? layout.centerY-layout.maxHeight : layout.centerY+layout.maxHeight;
+    return `
+      <line class="event-guide" x1="${x}" y1="${edgeY}" x2="${x}" y2="${y+(above?10:-16)}"/>
+      <circle class="event-dot" cx="${x}" cy="${edgeY}" r="4"/>
+      <text class="event-label" x="${x}" y="${y}" text-anchor="middle">${dict[event.key]}</text>`;
+  }).join('');
+  const inflationStart = timeX(1e-36);
+  const inflationEnd = timeX(1e-32);
+  const presentX = timeX(NOW_SECONDS);
+  const title = BigBangCore.escapeHtml(dict['machine.diagram.title']);
+  const description = BigBangCore.escapeHtml(dict['machine.rep.caption']);
+  svg.innerHTML = `
+    <title>${title}</title>
+    <desc>${description}</desc>
+    <defs>
+      <linearGradient id="historyFill" x1="0" x2="1">
+        <stop offset="0" stop-color="#e94ecd" stop-opacity=".3"/>
+        <stop offset=".4" stop-color="#5aa8ff" stop-opacity=".25"/>
+        <stop offset=".76" stop-color="#ffd166" stop-opacity=".22"/>
+        <stop offset="1" stop-color="#8b93b3" stop-opacity=".08"/>
+      </linearGradient>
+      <pattern id="uncertainHatch" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(30)">
+        <line x1="0" y1="0" x2="0" y2="10" stroke="#e8ecff" stroke-opacity=".2" stroke-width="3"/>
+      </pattern>
+      <radialGradient id="sliceFill">
+        <stop offset="0" stop-color="${ep.color}" stop-opacity=".75"/>
+        <stop offset="1" stop-color="${ep.color}" stop-opacity=".1"/>
+      </radialGradient>
+      <filter id="sliceGlow" x="-100%" y="-30%" width="300%" height="160%">
+        <feGaussianBlur stdDeviation="8"/>
+      </filter>
+      <clipPath id="historyClip"><path d="${envelopePath(historyPoints, layout.centerY)}"/></clipPath>
+    </defs>
+    <rect class="diagram-field" width="${layout.width}" height="${layout.height}"/>
+    ${grid}
+    <text class="axis-title" x="${layout.x0+(mobile?250:270)}" y="${layout.centerY-layout.maxHeight-24}">${dict['machine.diagram.radiusAxis']}</text>
+    <path class="history-envelope" d="${envelopePath(historyPoints, layout.centerY)}"/>
+    <path class="future-envelope" d="${envelopePath(futurePoints, layout.centerY)}"/>
+    <rect x="${inflationStart}" y="${layout.centerY-layout.maxHeight}" width="${inflationEnd-inflationStart}" height="${layout.maxHeight*2}" fill="url(#uncertainHatch)" clip-path="url(#historyClip)"/>
+    <line class="time-axis" x1="${layout.x0}" y1="${layout.centerY}" x2="${layout.x1}" y2="${layout.centerY}"/>
+    <line class="present-line" x1="${presentX}" y1="${layout.centerY-layout.maxHeight-10}" x2="${presentX}" y2="${layout.centerY+layout.maxHeight+10}"/>
+    <text class="region-label" x="${(layout.x0+presentX)/2}" y="${layout.centerY+18}" text-anchor="middle">${dict['machine.diagram.history']}</text>
+    <text class="region-label future-label" x="${(presentX+layout.x1)/2}" y="${layout.centerY+18}" text-anchor="middle">${dict['machine.diagram.future']}</text>
+    ${eventMarkup}
+    <ellipse class="selected-glow" cx="${selectedX}" cy="${layout.centerY}" rx="${selectedRx*1.8}" ry="${Math.max(24,selectedH)}"/>
+    <ellipse class="selected-slice" cx="${selectedX}" cy="${layout.centerY}" rx="${selectedRx}" ry="${selectedH}"/>
+    <line class="selected-radius" x1="${selectedX}" y1="${layout.centerY}" x2="${selectedX}" y2="${layout.centerY-selectedH}"/>
+    <circle class="selected-center" cx="${selectedX}" cy="${layout.centerY}" r="5"/>
+  `;
 }
 
 /* ================ Composition ================ */
@@ -1169,34 +1407,47 @@ function buildPieSvg(data){
 
 /* ================ Scale ================ */
 const SCALE_ROWS = [
-  {refs:['scales2004','pdgCosmology'], t:'10⁻³⁵ s',    tzh:'10⁻³⁵ 秒', size:'illustrative ~10⁻²⁷ m', sizezh:'示意值 ~10⁻²⁷ 米',              frac:0.005, compare:'Model-dependent; ~10¹² times smaller than a proton', comparezh:'依模型而定;比质子小约 10¹² 倍'},
-  {refs:['planckInflation'], t:'10⁻³² s',    tzh:'10⁻³² 秒', size:'absolute size unknown',  sizezh:'绝对大小未知',                    frac:0.02,  compare:'Inflation requires ≥~10²⁶-fold linear growth', comparezh:'暴胀通常要求线性尺度增长至少约 10²⁶ 倍'},
-  {refs:['scales2004','pdgCosmology'], t:'1 s',        tzh:'1 秒',      size:'~13 ly radius',          sizezh:'半径约 13 光年',                  frac:0.12,  compare:'~25 light-years across', comparezh:'直径约 25 光年'},
-  {refs:['scales2004','pdgCosmology'], t:'3 min',      tzh:'3 分钟',    size:'~127 ly radius',         sizezh:'半径约 127 光年',                 frac:0.18,  compare:'~250 light-years across; BBN under way', comparezh:'直径约 250 光年;原初核合成进行中'},
-  {refs:['scales2004','planck2018'], t:'380,000 yr', tzh:'38 万年',   size:'~42 million ly radius',  sizezh:'半径约 4200 万光年',              frac:0.32,  compare:'CMB released', comparezh:'CMB 光子退耦'},
-  {refs:['scales2004','firstStars2023'], t:'500 Myr',    tzh:'5 亿年',    size:'~4–5 Gly radius',        sizezh:'半径约 40–50 亿光年',             frac:0.52,  compare:'First stars and galaxies', comparezh:'第一代恒星与早期星系'},
-  {refs:['scales2004','planck2018'], t:'9.2 Gyr',    tzh:'92 亿年',   size:'~33 Gly radius',         sizezh:'半径约 330 亿光年',               frac:0.82,  compare:'Solar System forms', comparezh:'太阳系形成'},
-  {refs:['scales2004','planck2018'], t:'13.8 Gyr',   tzh:'138 亿年',  size:'~46.5 Gly radius',       sizezh:'半径约 465 亿光年',               frac:1.0,   compare:'~93 billion light-years across today', comparezh:'今天直径约 930 亿光年'}
+  {refs:['scales2004','pdgCosmology'], tsec:1e-35, t:'10⁻³⁵ s', tzh:'10⁻³⁵ 秒', size:'illustrative ~10⁻²⁷ m', sizezh:'示意值 ~10⁻²⁷ 米', logRadiusM:-27, compare:'Model-dependent; ~10¹² times smaller than a proton', comparezh:'依模型而定;比质子小约 10¹² 倍'},
+  {refs:['planckInflation'], tsec:1e-32, t:'10⁻³² s', tzh:'10⁻³² 秒', size:'absolute size unknown', sizezh:'绝对大小未知', logRadiusM:null, compare:'Inflation requires ≥~10²⁶-fold linear growth', comparezh:'暴胀通常要求线性尺度增长至少约 10²⁶ 倍'},
+  {refs:['scales2004','pdgCosmology'], tsec:1, t:'1 s', tzh:'1 秒', size:'~13 ly radius', sizezh:'半径约 13 光年', logRadiusM:17.089866623475046, compare:'~25 light-years across', comparezh:'直径约 25 光年'},
+  {refs:['scales2004','pdgCosmology'], tsec:180, t:'3 min', tzh:'3 分钟', size:'~127 ly radius', sizezh:'半径约 127 光年', logRadiusM:18.079726992124165, compare:'~250 light-years across; BBN under way', comparezh:'直径约 250 光年;原初核合成进行中'},
+  {refs:['scales2004','planck2018'], tsec:1.2e13, t:'380,000 yr', tzh:'38 万年', size:'~42 million ly radius', sizezh:'半径约 4200 万光年', logRadiusM:23.59917256156611, compare:'CMB released', comparezh:'CMB 光子退耦'},
+  {refs:['scales2004','firstStars2023'], tsec:1.578e16, t:'500 Myr', tzh:'5 亿年', size:'~4–5 Gly radius', sizezh:'半径约 40–50 亿光年', logRadiusM:25.629135784943553, compare:'First stars and galaxies', comparezh:'第一代恒星与早期星系'},
+  {refs:['scales2004','planck2018'], tsec:2.9e17, t:'9.2 Gyr', tzh:'92 亿年', size:'~33 Gly radius', sizezh:'半径约 330 亿光年', logRadiusM:26.494437211046098, compare:'Solar System forms', comparezh:'太阳系形成'},
+  {refs:['scales2004','planck2018'], tsec:4.35e17, t:'13.8 Gyr', tzh:'138 亿年', size:'~46.5 Gly radius', sizezh:'半径约 465 亿光年', logRadiusM:26.643376224058162, compare:'~93 billion light-years across today', comparezh:'今天直径约 930 亿光年'}
 ];
 function renderScale(){
   const wrap = document.getElementById('scaleWrap');
   const zh = window.CURRENT_LANG==='zh-CN';
   const dict = LOCALES[window.CURRENT_LANG];
-  wrap.innerHTML = '';
+  const ticks = [-27,-18,-9,0,9,18,27];
+  wrap.innerHTML = `
+    <div class="scale-axis" aria-label="${dict['scale.axis']}">
+      ${ticks.map(value=>`<span style="left:${((value-SCALE_LOG_MIN)/(SCALE_LOG_MAX-SCALE_LOG_MIN))*100}%">${value===0?'1 m':`10^${value} m`}</span>`).join('')}
+    </div>`;
   SCALE_ROWS.forEach(row=>{
     const el = document.createElement('div');
     el.className = 'scale-row';
+    const position = row.logRadiusM === null
+      ? null
+      : ((row.logRadiusM-SCALE_LOG_MIN)/(SCALE_LOG_MAX-SCALE_LOG_MIN))*100;
     el.innerHTML = `
       <div class="scale-time">${zh ? row.tzh : row.t}</div>
-      <div class="scale-bar">
-        <div class="scale-fill" style="width:${row.frac*100}%"></div>
+      <div class="scale-bar" aria-label="${zh ? row.sizezh : row.size}">
+        ${position === null
+          ? '<div class="scale-unknown"></div>'
+          : `<div class="scale-fill" style="width:${position}%"></div><div class="scale-point" style="left:${position}%"></div>`}
         <div class="scale-label">${zh ? row.sizezh : row.size}</div>
       </div>
-      <div class="scale-compare"><b>${zh ? row.comparezh : row.compare}</b></div>
+      <div class="scale-compare"><b>${zh ? row.comparezh : row.compare}</b><button class="scale-jump" type="button" data-tsec="${row.tsec}">${dict['scale.view']}</button></div>
       ${buildReferenceLinks(row.refs, SOURCES, dict['refs.label'])}
     `;
     wrap.appendChild(el);
   });
+  wrap.querySelectorAll('.scale-jump').forEach(button=>button.addEventListener('click',()=>{
+    document.getElementById('timeSlider').value = Math.round(cosmicTimeToAxisPosition(Number(button.dataset.tsec)) * 1000);
+    document.querySelector('.tab[data-tab="machine"]').click();
+  }));
 }
 
 /* ================ Fates ================ */
@@ -1337,6 +1588,9 @@ bgAnimation.start();
 
 /* ================ Slider ================ */
 document.getElementById('timeSlider').addEventListener('input', updateMachine);
+window.addEventListener('resize',()=>{
+  if(document.getElementById('tab-machine').classList.contains('active')) updateMachine();
+});
 
 /* ================ Language switch ================ */
 document.querySelectorAll('.lang-pill').forEach(b=>{

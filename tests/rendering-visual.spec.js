@@ -25,11 +25,11 @@ test.describe('deterministic scientific renderers', () => {
         }
 
         await page.locator('.tab[data-tab="machine"]').click();
-        const machineCanvas = page.locator('#machineCanvas');
+        const spacetimeDiagram = page.locator('#spacetimeSvg');
         const slider = page.locator('#timeSlider');
-        for (const [epoch, label] of [[-43, 'planck'], [-4, 'early'], [18, 'stars']]) {
+        for (const [epoch, label] of [[0, 'planck'], [480, 'early'], [735, 'stars']]) {
           await setRangeValue(slider, epoch);
-          await expectCanvasRendered(machineCanvas);
+          await expectSvgRendered(spacetimeDiagram);
           await expect(page.locator('#mpEpoch')).not.toHaveText('—');
           await captureRendering(page.locator('.machine'), `big-bang-machine-${label}-${language}.png`);
         }
@@ -51,8 +51,8 @@ test.describe('deterministic scientific renderers', () => {
       await page.setViewportSize({ width: 390, height: 844 });
       await prepareRenderingPage(page, '/big-bang/mobile/index.html', 'zh-CN');
       await page.locator('.tab[data-tab="machine"]').click();
-      await setRangeValue(page.locator('#timeSlider'), 13);
-      await expectCanvasRendered(page.locator('#machineCanvas'));
+      await setRangeValue(page.locator('#timeSlider'), 700);
+      await expectSvgRendered(page.locator('#spacetimeSvg'));
       await expect(page.locator('#mpTime')).not.toHaveText('—');
       await captureRendering(page.locator('.machine'), 'big-bang-mobile-machine-zh-CN.png');
     });

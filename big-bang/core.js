@@ -8,6 +8,55 @@ var BigBangCore = (function(){
       .replaceAll("'", '&#39;');
   }
 
+  const DEFAULT_COSMIC_AXIS = Object.freeze({
+    minLog: -43,
+    nowLog: Math.log10(4.35e17),
+    maxLog: 107.5,
+    nowPosition: 0.76
+  });
+
+  function clamp(value, min, max){
+    return Math.min(max, Math.max(min, value));
+  }
+
+  function cosmicTimeToAxisPosition(tsec, axis=DEFAULT_COSMIC_AXIS){
+    if(!Number.isFinite(tsec)) throw new Error('Cosmic time must be a positive finite number');
+    if(tsec <= 0) throw new Error('Cosmic time must be a positive finite number');
+    const logTime = clamp(Math.log10(tsec), axis.minLog, axis.maxLog);
+    if(logTime <= axis.nowLog){
+      return axis.nowPosition * (logTime - axis.minLog) / (axis.nowLog - axis.minLog);
+    }
+    return axis.nowPosition +
+      (1 - axis.nowPosition) * (logTime - axis.nowLog) / (axis.maxLog - axis.nowLog);
+  }
+
+  function axisPositionToCosmicTime(position, axis=DEFAULT_COSMIC_AXIS){
+    if(!Number.isFinite(position)) throw new Error('Axis position must be finite');
+    const normalized = clamp(position, 0, 1);
+    const logTime = normalized <= axis.nowPosition
+      ? axis.minLog + (normalized / axis.nowPosition) * (axis.nowLog - axis.minLog)
+      : axis.nowLog + ((normalized - axis.nowPosition) / (1 - axis.nowPosition)) * (axis.maxLog - axis.nowLog);
+    return Math.pow(10, logTime);
+  }
+
+  function interpolateLogValue(tsec, anchors){
+    if(!Number.isFinite(tsec)) throw new Error('Interpolation time must be a positive finite number');
+    if(tsec <= 0) throw new Error('Interpolation time must be a positive finite number');
+    if(!Array.isArray(anchors)) throw new Error('At least two scale anchors are required');
+    if(anchors.length < 2) throw new Error('At least two scale anchors are required');
+    for(let index=1; index<anchors.length; index++){
+      if(anchors[index].tsec <= anchors[index - 1].tsec) throw new Error('Scale anchors must be ordered by time');
+    }
+    if(tsec < anchors[0].tsec || tsec > anchors[anchors.length - 1].tsec) return null;
+    let upperIndex = 1;
+    while(tsec > anchors[upperIndex].tsec) upperIndex++;
+    const lower = anchors[upperIndex - 1];
+    const upper = anchors[upperIndex];
+    const span = Math.log10(upper.tsec) - Math.log10(lower.tsec);
+    const progress = (Math.log10(tsec) - Math.log10(lower.tsec)) / span;
+    return lower.value + (upper.value - lower.value) * progress;
+  }
+
   function buildReferenceLinks(referenceIds, sources, label){
     if(!Array.isArray(referenceIds) || referenceIds.length === 0) {
       throw new Error('At least one scientific reference is required');
@@ -93,9 +142,21 @@ var BigBangCore = (function(){
     }
   }
 
-  return {advanceStarfield, buildReferenceLinks, createAnimationController, escapeHtml, renderReferencePanel};
+  return {
+    advanceStarfield,
+    axisPositionToCosmicTime,
+    buildReferenceLinks,
+    cosmicTimeToAxisPosition,
+    createAnimationController,
+    escapeHtml,
+    interpolateLogValue,
+    renderReferencePanel
+  };
 })();
 var buildReferenceLinks = BigBangCore.buildReferenceLinks;
 var createAnimationController = BigBangCore.createAnimationController;
 var advanceStarfield = BigBangCore.advanceStarfield;
 var renderReferencePanel = BigBangCore.renderReferencePanel;
+var cosmicTimeToAxisPosition = BigBangCore.cosmicTimeToAxisPosition;
+var axisPositionToCosmicTime = BigBangCore.axisPositionToCosmicTime;
+var interpolateLogValue = BigBangCore.interpolateLogValue;
