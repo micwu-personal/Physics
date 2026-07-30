@@ -208,6 +208,7 @@ test('landing unavailable storage coverage', async ({ page }) => {
     await page.goto('/');
     await page.waitForLoadState('load');
     await page.locator('[data-lang="zh-CN"]').click();
+    await page.locator('#motionToggle').click();
   });
 });
 
@@ -293,13 +294,28 @@ test('landing and big-bang component fallbacks coverage', async ({ page }) => {
       applyLang('unsupported');
       const element = document.querySelector('[data-i18n]');
       element.dataset.i18n = 'missing.translation';
+      const image=document.createElement('img');
+      image.src='data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==';
+      image.dataset.i18nAlt='missing.alt';
+      document.body.appendChild(image);
+      const labelled=document.createElement('div');
+      labelled.dataset.i18nAriaLabel='missing.aria';
+      document.body.appendChild(labelled);
       applyLang('en');
     });
+    await page.locator('#motionToggle').click();
+    await page.locator('#motionToggle').click();
+    await page.emulateMedia({reducedMotion:'reduce'});
+    await page.emulateMedia({reducedMotion:'no-preference'});
 
     await preparePage(page, '/big-bang/', 'en');
     await page.evaluate(() => {
       fmtTime(1);
     });
+    await page.goto('/big-bang/?tab=machine');
+    await page.waitForLoadState('load');
+    await page.goto('/big-bang/?tab=missing');
+    await page.waitForLoadState('load');
   });
 });
 
@@ -311,6 +327,8 @@ test('big-bang isolated i18n fallbacks coverage', async ({ page }) => {
       <html><head><title>Fallback title</title></head>
       <body>
         <div data-i18n="missing.translation"></div>
+        <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==" data-i18n-alt="missing.alt">
+        <div data-i18n-aria-label="missing.aria"></div>
         <button class="lang-pill" data-lang="en"></button>
       </body></html>
     `);
@@ -576,6 +594,69 @@ for (const language of ['en', 'zh-CN']) {
     });
   });
 }
+
+test('periodic-table reaction effects and deep-link coverage', async ({ page }) => {
+  await collectCoverage(page,'periodic-effects-routes',async ()=>{
+    await preparePage(page,'/periodic-table/?element=3&overlay=origin','en');
+    await page.evaluate(()=>{
+      const nativeSetTimeout=window.setTimeout;
+      let replay=null;
+      window.setTimeout=(callback,delay,...args)=>{
+        if(delay===1500){
+          replay=()=>callback(...args);
+          return 1;
+        }
+        return nativeSetTimeout(callback,delay,...args);
+      };
+      const reaction={
+        eq:'2CO + O₂ → 2CO₂',
+        effects:{gas:true,precipitate:true,heat:true,light:true,deposition:true}
+      };
+      animateReaction(reaction);
+      const replayCanvas=document.getElementById('rxAnimCanvas');
+      const advance=progress=>{
+        if(rxRAF!=null) cancelAnimationFrame(rxRAF);
+        rxRAF=null;
+        PT_REACTION_DEBUG.advanceTo(progress);
+        if(rxRAF!=null) cancelAnimationFrame(rxRAF);
+        rxRAF=null;
+      };
+      for(const progress of [0.1,0.4,0.55,0.65,0.75,0.9]) advance(progress);
+      animationResumeVersion++;
+      advance(0.5);
+      advance(1);
+
+      animateReaction({
+        eq:'2H₂ + O₂ → 2H₂O',
+        effects:{
+          gas:true,precipitate:true,heat:true,light:true,deposition:true,
+          lightColor:'#ffffff',precipitateColor:'#eeeeee',depositionColor:'#dddddd'
+        }
+      });
+      advance(0.7);
+      applyI18n('zh-CN');
+      advance(0.7);
+      advance(0.9);
+      animationVisibility.set(replayCanvas,false);
+      replay?.();
+      const replayFrame=pausedAnimationFrames.get(replayCanvas);
+      replayFrame?.();
+      pausedAnimationFrames.delete(replayCanvas);
+      window.setTimeout=nativeSetTimeout;
+
+      render3DViewers([{eq:'X( → X('}],'X');
+    });
+    await page.waitForTimeout(50);
+    await page.evaluate(()=>{
+      if(rxRAF!=null) cancelAnimationFrame(rxRAF);
+      rxRAF=null;
+      clearTimeout(rxReplayTimer);
+    });
+    await page.goto('/periodic-table/?element=999&overlay=missing');
+    await page.waitForLoadState('load');
+    await page.waitForTimeout(250);
+  });
+});
 
 test('periodic-table cosmic timeline completion coverage', async ({ page }) => {
   await collectCoverage(page, 'periodic-cosmic-timeline', async () => {
@@ -1120,6 +1201,54 @@ test('particle-zoo staged rendering coverage', async ({ page }) => {
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await page.locator('.tab[data-tab="lab"]').click();
     await expect(page.locator('.render-pending')).toHaveCount(0);
+  });
+});
+
+test('particle-zoo fermion, packing, and deep-link coverage', async ({ page }) => {
+  await collectCoverage(page,'particle-builder-routes',async ()=>{
+    await preparePage(page,'/particle-zoo/?tab=builder&preset=helium4','en');
+    await page.waitForTimeout(350);
+    await page.locator('.packing-choice.unstable').first().dispatchEvent('click');
+    const positron=page.locator('.tray-part[data-part="eplus"]');
+    await positron.dispatchEvent('keydown',{key:'Escape'});
+    await positron.dispatchEvent('keydown',{key:'Enter'});
+    await positron.dispatchEvent('keydown',{key:' '});
+    await page.evaluate(()=>{
+      parts=['t','tbar','eplus'];
+      resizeBuild();
+      buildComposites();
+      drawBuild();
+      parts=['u','u','d','eplus'];
+      buildComposites();
+      drawBuild();
+
+      const saved=MESON_TABLE['u|dbar'];
+      delete MESON_TABLE['u|dbar'];
+      parts=['u','dbar'];
+      buildComposites();
+      MESON_TABLE['u|dbar']=saved;
+
+      const plans=[
+        {key:'free',protons:0,neutrons:0,deltaPlus:0,deltaMinus:0,freeUp:1,freeDown:1,freeCount:2,deltaCount:0},
+        {key:'delta',protons:0,neutrons:0,deltaPlus:1,deltaMinus:1,freeUp:0,freeDown:0,freeCount:2,deltaCount:2},
+        {key:'third',protons:1,neutrons:0,deltaPlus:0,deltaMinus:0,freeUp:0,freeDown:0,freeCount:2,deltaCount:0},
+        {key:'fourth',protons:0,neutrons:1,deltaPlus:0,deltaMinus:0,freeUp:0,freeDown:0,freeCount:2,deltaCount:0},
+        {key:'fifth',protons:0,neutrons:0,deltaPlus:0,deltaMinus:0,freeUp:0,freeDown:0,freeCount:2,deltaCount:0}
+      ];
+      renderPackingChoices(plans,plans[4]);
+      document.querySelector('.packing-choice')?.click();
+      renderPackingChoices([
+        {...plans[4],key:'empty-a',freeCount:0},
+        {...plans[4],key:'empty-b',freeCount:0}
+      ],{...plans[4],key:'empty-a',freeCount:0});
+    });
+
+    await page.goto('/particle-zoo/?tab=lab&demo=detector');
+    await page.waitForLoadState('load');
+    await page.waitForTimeout(350);
+    await page.goto('/particle-zoo/?tab=missing&demo=missing&preset=missing');
+    await page.waitForLoadState('load');
+    await page.waitForTimeout(100);
   });
 });
 

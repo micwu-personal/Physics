@@ -73,6 +73,115 @@ test('Periodic Table reaction shapes keep bonded atoms apart', async ({ page }) 
   expect(degenerate, 'reaction bonds always have a direction').toEqual([]);
 });
 
+test('Landing page carries shared language, motion, and the six-chapter story into every app', async ({ page }) => {
+  const errors=watchPage(page);
+  await page.goto('/',{waitUntil:'load'});
+  await expect(page.locator('.chapter')).toHaveCount(6);
+  await expect(page.locator('.card')).toHaveCount(3);
+  await expect(page.locator('.rep')).toHaveCount(10);
+  expect(await page.locator('.controls').evaluate(element=>getComputedStyle(element).position)).toBe('fixed');
+  const media=page.locator('.media-frame img');
+  for(let index=0;index<await media.count();index++){
+    await media.nth(index).scrollIntoViewIfNeeded();
+    await expect.poll(()=>media.nth(index).evaluate(image=>image.complete && image.naturalWidth>0)).toBe(true);
+  }
+
+  await page.locator('[data-lang="zh-CN"]').click();
+  await expect(page.locator('.story-map')).toHaveAttribute('aria-label','旅程章节');
+  await expect(page.locator('img[data-i18n-alt="alt.wmap"]')).toHaveAttribute('alt',/WMAP 测得/);
+  await page.goto('/big-bang/index.html?tab=timeline',{waitUntil:'load'});
+  await expect(page.locator('html')).toHaveAttribute('lang','zh-CN');
+  await expect(page.locator('img[data-i18n-alt="alt.wmap"]')).toHaveAttribute('alt',/宇宙微波背景/);
+  await page.goto('/particle-zoo/index.html?tab=lab&demo=detector',{waitUntil:'load'});
+  await expect(page.locator('img[data-i18n-alt="alt.atlas"]')).toHaveAttribute('alt',/ATLAS 重建/);
+  await page.goto('/',{waitUntil:'load'});
+  await page.locator('#motionToggle').click();
+  await page.goto('/big-bang/',{waitUntil:'load'});
+  await expect(page.locator('#motionToggle')).toHaveAttribute('data-state','paused');
+  await assertNoErrors(errors);
+});
+
+test('Landing explicit Play overrides a system reduced-motion preference', async ({ page }) => {
+  await page.emulateMedia({reducedMotion:'reduce'});
+  await page.goto('/',{waitUntil:'load'});
+  await expect(page.locator('#motionToggle')).toHaveAttribute('data-state','paused');
+  await page.locator('#motionToggle').click();
+  await expect(page.locator('#motionToggle')).toHaveAttribute('data-state','playing');
+  const ringMotion=await page.locator('.diagram .ring').first().evaluate(element=>{
+    const style=getComputedStyle(element);
+    return {duration:style.animationDuration,iterations:style.animationIterationCount};
+  });
+  expect(ringMotion).toEqual({duration:'5s',iterations:'infinite'});
+});
+
+test('Particle Zoo packs helium-4 by default and exposes every Standard Model fermion', async ({ page }) => {
+  const errors=watchPage(page);
+  await preparePage(page,'/particle-zoo/?tab=builder&preset=helium4','en');
+  await expect(page.locator('#tab-builder')).toHaveClass(/active/);
+  await expect(page.locator('#buildResult')).toContainText('Helium-4 nucleus');
+  await expect(page.locator('.packing-choice.active')).toContainText('2p + 2n');
+  await expect(page.locator('.tray-part[data-part]')).toHaveCount(24);
+  for(const part of ['t','tbar','e','eplus','mu','muplus','tau','tauplus','nue','nuebar','numu','numubar','nutau','nutaubar']){
+    await expect(page.locator(`.tray-part[data-part="${part}"]`)).toHaveCount(1);
+  }
+  const unstable=page.locator('.packing-choice.unstable').first();
+  await expect(unstable).toBeVisible();
+  await unstable.click();
+  await expect(page.locator('#buildResult')).toContainText('Δ baryon');
+  await page.locator('#clearBuild').click();
+  const positron=page.locator('.tray-part[data-part="eplus"]');
+  await expect(positron).toHaveAttribute('role','button');
+  await expect(positron).toHaveAttribute('tabindex','0');
+  await positron.focus();
+  await page.keyboard.press('Enter');
+  expect(await page.evaluate(()=>parts)).toEqual(['eplus']);
+  await assertNoErrors(errors);
+});
+
+test('Particle Zoo detector deep link lands on the requested learning module', async ({ page }) => {
+  await preparePage(page,'/particle-zoo/index.html?tab=lab&demo=detector','en');
+  await expect(page.locator('#tab-lab')).toHaveClass(/active/);
+  await expect(page.locator('#lab-detector')).toBeFocused();
+  const position=await page.locator('#lab-detector').evaluate(element=>element.getBoundingClientRect().top);
+  expect(position).toBeGreaterThanOrEqual(120);
+  expect(position).toBeLessThan(250);
+});
+
+test('Periodic Table keeps structures element-relevant and labels model limits', async ({ page }) => {
+  const errors=watchPage(page);
+  await preparePage(page,'/periodic-table/?element=3','en');
+  await expect(page.locator('.model-caveat')).toHaveCount(2);
+  await expect(page.locator('.model-caveat').first()).toContainText('rings are not electron paths');
+  await expect(page.locator('.mol3d-caption',{hasText:'LiOH'})).toHaveCount(1);
+  await expect(page.locator('.mol3d-caption',{hasText:'H₂'})).toHaveCount(1);
+  await expect(page.locator('.mol3d-caption',{hasText:'H₂O'})).toHaveCount(0);
+  expect(await page.evaluate(()=>Object.keys(MOLECULE_3D).length)).toBeGreaterThanOrEqual(45);
+  const closeHitTarget=await page.locator('#detailClose').evaluate(button=>{
+    const rect=button.getBoundingClientRect();
+    return document.elementFromPoint(rect.left+rect.width/2,rect.top+rect.height/2)?.id;
+  });
+  expect(closeHitTarget).toBe('detailClose');
+  await page.locator('#dReactionsBlock').scrollIntoViewIfNeeded();
+  await page.locator('.rx-play').first().click();
+  await page.locator('#rxAnimBox').scrollIntoViewIfNeeded();
+  expect(await page.evaluate(()=>window.PT_REACTION_DEBUG)).toMatchObject({
+    sourceHoldMs:500,
+    effects:{heat:true,light:true,lightColor:'#d7193f'}
+  });
+  await page.locator('#motionToggle').click();
+  await page.waitForTimeout(750);
+  expect(await page.evaluate(()=>window.PT_REACTION_DEBUG.holdingSource)).toBe(true);
+  await page.locator('#motionToggle').click();
+  await expect.poll(
+    ()=>page.evaluate(()=>window.PT_REACTION_DEBUG.holdingSource),
+    {timeout:5000}
+  ).toBe(false);
+  await page.locator('[data-lang="zh-CN"]').click();
+  await expect(page.locator('img[data-i18n-alt="alt.hydrogen"]')).toHaveAttribute('alt',/氢原子计算概率密度/);
+  expect(await page.locator('.control-row').evaluate(element=>getComputedStyle(element).position)).toBe('fixed');
+  await assertNoErrors(errors);
+});
+
 test('Periodic Table playback stops cleanly', async ({ page }) => {
   await preparePage(page, '/periodic-table/', 'en');
   await page.locator('#tlToggleBtn').click();
@@ -333,7 +442,7 @@ test('Particle Zoo visible simulations animate and honor reduced motion', async 
   await page.evaluate(() => window.scrollTo(0, 600));
   await page.waitForTimeout(100);
   const overlappingTabs = await page.locator('.tabs').evaluate(nav => {
-    const controls = nav.querySelector('.control-row').getBoundingClientRect();
+    const controls = document.querySelector('.control-row').getBoundingClientRect();
     return [...nav.querySelectorAll('.tab')].filter(tab => {
       const rect = tab.getBoundingClientRect();
       return rect.left < controls.right && rect.right > controls.left &&
@@ -472,7 +581,7 @@ test('Big Bang background motion can override and persist reduced motion', async
   await expect(page.locator('#motionToggle')).toHaveAttribute('data-state', 'playing');
   await page.setViewportSize({ width: 412, height: 915 });
   const overlap = await page.locator('.tabs').evaluate(nav => {
-    const controls = nav.querySelector('.control-row').getBoundingClientRect();
+    const controls = document.querySelector('.control-row').getBoundingClientRect();
     return [...nav.querySelectorAll('.tab')].some(tab => {
       const rect = tab.getBoundingClientRect();
       return rect.left < controls.right && rect.right > controls.left &&

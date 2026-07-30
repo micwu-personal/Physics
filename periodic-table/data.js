@@ -157,7 +157,11 @@ const EXTENDED = {
        uses_zh:'合成氨、火箭燃料、氢燃料电池、油脂加氢、发电机冷却。',
        isotopes:[{s:'¹H',ab:'99.98%',stable:true,note:'protium'},{s:'²H',ab:'0.02%',stable:true,note:'deuterium'},{s:'³H',ab:'trace',stable:false,note:'tritium, β⁻, t½=12.3y'}],
        hybrid:['s'],
-       reactions:[{eq:'2H₂ + O₂ → 2H₂O',note_en:'combustion',note_zh:'燃烧生成水'},{eq:'N₂ + 3H₂ ⇌ 2NH₃',note_en:'Haber process',note_zh:'哈伯法合成氨'}]},
+       reactions:[
+         {eq:'2H₂ + O₂ → 2H₂O',note_en:'combustion; pale-blue flame in clean hydrogen',note_zh:'燃烧生成水；纯氢火焰呈淡蓝色',effects:{heat:true,light:true,lightColor:'#9ed8ff'},molecules_3d:['H2O']},
+         {eq:'N₂ + 3H₂ ⇌ 2NH₃',note_en:'Haber-Bosch equilibrium over an iron-based catalyst',note_zh:'在铁基催化剂上的哈伯-博施平衡反应',effects:{heat:true},molecules_3d:['NH3']},
+         {eq:'2H₂O₂ → 2H₂O + O₂↑',note_en:'catalytic hydrogen-peroxide decomposition',note_zh:'过氧化氢的催化分解',effects:{gas:true,heat:true},molecules_3d:['H2O','O2']}
+       ]},
   2:  {phase:'gas', melt:0.95, meltNote_en:'only above about 2.5 MPa; helium does not freeze at standard pressure', meltNote_zh:'仅在约 2.5 MPa 以上；氦在标准压力下不会凝固', boil:4.22, density:0.000178,
        discovery:{year:1868, who:'Janssen & Lockyer'},
        uses_en:'Balloons, MRI cryogenics, deep-sea breathing mixes, protective atmosphere.',
@@ -171,63 +175,98 @@ const EXTENDED = {
        uses_zh:'锂离子电池、稳定情绪药物(碳酸锂)、锂基润滑脂、玻璃与陶瓷。',
        isotopes:[{s:'⁶Li',ab:'7.6%',stable:true,note:''},{s:'⁷Li',ab:'92.4%',stable:true,note:''}],
        hybrid:['s'],
-       reactions:[{eq:'4Li + O₂ → 2Li₂O',note_en:'burns with crimson flame',note_zh:'燃烧发深红色火焰'},{eq:'2Li + 2H₂O → 2LiOH + H₂↑',note_en:'reacts with water',note_zh:'与水反应放氢'}]},
+       reactions:[
+         {eq:'4Li + O₂ → 2Li₂O',note_en:'burns with a crimson flame',note_zh:'燃烧发深红色火焰',effects:{heat:true,light:true,lightColor:'#d7193f'},molecules_3d:['Li2O']},
+         {eq:'2Li + 2H₂O → 2LiOH + H₂↑',note_en:'exothermic water reaction releases hydrogen',note_zh:'与水放热反应并释放氢气',effects:{gas:true,heat:true},molecules_3d:['LiOH','H2']},
+         {eq:'2Li + H₂ → 2LiH',note_en:'lithium hydride forms on heating',note_zh:'加热时生成氢化锂',molecules_3d:['LiH']}
+       ]},
   6:  {phase:'solid', melt:3823, boil:4098, density:2.267,
        discovery:{year:-3750, who:'known since antiquity'},
        uses_en:'Backbone of organic chemistry & life. Steel, graphite, diamond, carbon fiber, nanotubes, batteries.',
        uses_zh:'有机化学与生命的骨架。钢铁冶炼、石墨、金刚石、碳纤维、纳米管、电池。',
        isotopes:[{s:'¹²C',ab:'98.9%',stable:true,note:'defines atomic mass unit'},{s:'¹³C',ab:'1.1%',stable:true,note:''},{s:'¹⁴C',ab:'trace',stable:false,note:'β⁻, t½=5730y, radiocarbon dating'}],
        hybrid:['sp','sp²','sp³'],
-       reactions:[{eq:'C + O₂ → CO₂',note_en:'complete combustion',note_zh:'完全燃烧'},{eq:'2C + O₂ → 2CO',note_en:'incomplete combustion',note_zh:'不完全燃烧'},{eq:'CH₄ + 2O₂ → CO₂ + 2H₂O',note_en:'methane burning',note_zh:'甲烷燃烧'}]},
+       reactions:[
+         {eq:'C + O₂ → CO₂',note_en:'complete combustion',note_zh:'完全燃烧',effects:{heat:true,light:true,lightColor:'#ffb347'},molecules_3d:['CO2']},
+         {eq:'2C + O₂ → 2CO',note_en:'oxygen-limited incomplete combustion; carbon monoxide is toxic',note_zh:'缺氧条件下不完全燃烧；一氧化碳有毒',effects:{heat:true},molecules_3d:['CO']},
+         {eq:'CH₄ + 2O₂ → CO₂ + 2H₂O',note_en:'methane combustion, normally a blue flame with adequate oxygen',note_zh:'甲烷充分燃烧时通常呈蓝色火焰',effects:{heat:true,light:true,lightColor:'#6fb8ff'},molecules_3d:['CH4','CO2','H2O']}
+       ]},
   7:  {phase:'gas', melt:63.15, boil:77.36, density:0.001251,
        discovery:{year:1772, who:'Daniel Rutherford'},
        uses_en:'78% of atmosphere. Fertilizers, explosives, cryogenics, protective atmosphere.',
        uses_zh:'占大气 78%。化肥、炸药、低温制冷、保护气氛。',
        isotopes:[{s:'¹⁴N',ab:'99.6%',stable:true,note:''},{s:'¹⁵N',ab:'0.4%',stable:true,note:''}],
        hybrid:['sp','sp²','sp³'],
-       reactions:[{eq:'N₂ + 3H₂ ⇌ 2NH₃',note_en:'Haber-Bosch (industrial)',note_zh:'哈伯-博施法'},{eq:'N₂ + O₂ → 2NO',note_en:'lightning; smog',note_zh:'闪电反应；产生光化学烟雾'}]},
+       reactions:[
+         {eq:'N₂ + 3H₂ ⇌ 2NH₃',note_en:'Haber-Bosch equilibrium over an iron-based catalyst',note_zh:'在铁基催化剂上的哈伯-博施平衡反应',effects:{heat:true},molecules_3d:['N2','NH3']},
+         {eq:'N₂ + O₂ → 2NO',note_en:'requires very high temperature, including lightning and engines',note_zh:'需要极高温度，可发生于闪电与发动机中',molecules_3d:['N2','O2','NO']},
+         {eq:'2NO + O₂ → 2NO₂',note_en:'atmospheric oxidation gives brown nitrogen dioxide',note_zh:'大气氧化生成棕色二氧化氮',molecules_3d:['NO','O2','NO2']}
+       ]},
   8:  {phase:'gas', melt:54.36, boil:90.20, density:0.001429,
        discovery:{year:1774, who:'Joseph Priestley'},
        uses_en:'Respiration, combustion, steel-making, medical use, rocket propellant oxidizer.',
        uses_zh:'呼吸、燃烧、炼钢、医疗供氧、火箭氧化剂。',
        isotopes:[{s:'¹⁶O',ab:'99.76%',stable:true,note:''},{s:'¹⁷O',ab:'0.04%',stable:true,note:''},{s:'¹⁸O',ab:'0.20%',stable:true,note:''}],
        hybrid:['sp²','sp³'],
-       reactions:[{eq:'2H₂ + O₂ → 2H₂O',note_en:'water formation',note_zh:'生成水'},{eq:'3O₂ → 2O₃',note_en:'ozone formation (UV)',note_zh:'紫外线下生成臭氧'}]},
+       reactions:[
+         {eq:'2H₂ + O₂ → 2H₂O',note_en:'hydrogen combustion',note_zh:'氢气燃烧生成水',effects:{heat:true,light:true,lightColor:'#9ed8ff'},molecules_3d:['O2','H2O']},
+         {eq:'3O₂ → 2O₃',note_en:'ozone formation driven by ultraviolet radiation or an electrical discharge',note_zh:'紫外线或放电驱动臭氧生成',molecules_3d:['O2','O3']},
+         {eq:'2CO + O₂ → 2CO₂',note_en:'carbon monoxide oxidation',note_zh:'一氧化碳氧化',effects:{heat:true},molecules_3d:['CO','O2','CO2']}
+       ]},
   11: {phase:'solid', melt:370.87, boil:1156, density:0.968,
        discovery:{year:1807, who:'Humphry Davy'},
        uses_en:'Table salt (NaCl), sodium-vapor lamps, sodium-cooled reactors, soap manufacture.',
        uses_zh:'食盐(NaCl)、钠灯、钠冷反应堆、肥皂制造。',
        isotopes:[{s:'²³Na',ab:'100%',stable:true,note:''}],
        hybrid:['s'],
-       reactions:[{eq:'2Na + Cl₂ → 2NaCl',note_en:'violent, exothermic',note_zh:'剧烈放热反应'},{eq:'2Na + 2H₂O → 2NaOH + H₂↑',note_en:'reacts strongly with water',note_zh:'与水剧烈反应放氢'}]},
+       reactions:[
+         {eq:'2Na + Cl₂ → 2NaCl',note_en:'violent, exothermic salt formation with intense yellow sodium emission',note_zh:'剧烈放热成盐，并出现强烈的钠黄光',effects:{heat:true,light:true,lightColor:'#ffd21f'},molecules_3d:['NaCl']},
+         {eq:'2Na + 2H₂O → 2NaOH + H₂↑',note_en:'strongly exothermic water reaction releases hydrogen',note_zh:'与水剧烈放热反应并释放氢气',effects:{gas:true,heat:true,light:true,lightColor:'#ffd21f'},molecules_3d:['NaOH','H2']},
+         {eq:'4Na + O₂ → 2Na₂O',note_en:'limited oxygen can form sodium oxide; peroxide is favored in excess oxygen',note_zh:'有限氧气中可生成氧化钠；过量氧气更易形成过氧化物',effects:{heat:true,light:true,lightColor:'#ffd21f'},molecules_3d:['Na2O']}
+       ]},
   17: {phase:'gas', melt:171.6, boil:239.11, density:0.003214,
        discovery:{year:1774, who:'Carl Wilhelm Scheele'},
        uses_en:'Water disinfection, PVC & organic solvents, bleaches, hydrochloric acid.',
        uses_zh:'饮用水消毒、聚氯乙烯与有机溶剂、漂白剂、盐酸。',
        isotopes:[{s:'³⁵Cl',ab:'75.8%',stable:true,note:''},{s:'³⁷Cl',ab:'24.2%',stable:true,note:''}],
        hybrid:['sp³'],
-       reactions:[{eq:'H₂ + Cl₂ → 2HCl',note_en:'photochemical chain reaction',note_zh:'光化学链反应'},{eq:'2Na + Cl₂ → 2NaCl',note_en:'ionic salt formation',note_zh:'生成离子化合物'}]},
+       reactions:[
+         {eq:'H₂ + Cl₂ → 2HCl',note_en:'light-initiated radical chain reaction; mixtures can explode',note_zh:'光引发自由基链反应；混合物可能爆炸',effects:{heat:true,light:true,lightColor:'#d8f5ff'},molecules_3d:['Cl2','HCl']},
+         {eq:'2Na + Cl₂ → 2NaCl',note_en:'violent, exothermic ionic salt formation',note_zh:'剧烈放热并生成离子盐',effects:{heat:true,light:true,lightColor:'#ffd21f'},molecules_3d:['Cl2','NaCl']},
+         {eq:'Cl₂ + 2KI → 2KCl + I₂',note_en:'chlorine displaces iodide; iodine gives a brown solution',note_zh:'氯置换碘离子；碘使溶液呈棕色',molecules_3d:['Cl2']}
+       ]},
   26: {phase:'solid', melt:1811, boil:3134, density:7.874,
        discovery:{year:-5000, who:'known since prehistory'},
        uses_en:'Steel & cast iron (~90% of all metal used), hemoglobin, magnetic cores, catalysts.',
        uses_zh:'钢铁与铸铁(占全部金属用量约 90%)、血红蛋白、磁芯、催化剂。',
        isotopes:[{s:'⁵⁴Fe',ab:'5.8%',stable:true,note:''},{s:'⁵⁶Fe',ab:'91.8%',stable:true,note:'most tightly bound nucleus'},{s:'⁵⁷Fe',ab:'2.1%',stable:true,note:''},{s:'⁵⁸Fe',ab:'0.3%',stable:true,note:''}],
        hybrid:['d²sp³','sp³d²'],
-       reactions:[{eq:'4Fe + 3O₂ → 2Fe₂O₃',note_en:'rusting',note_zh:'生锈(氧化)'},{eq:'Fe + 2HCl → FeCl₂ + H₂↑',note_en:'reacts with acid',note_zh:'与酸反应放氢'}]},
+       reactions:[
+         {eq:'4Fe + 3O₂ → 2Fe₂O₃',note_en:'overall oxidation equation; ordinary rust is hydrated and forms through electrochemical steps',note_zh:'总氧化方程；普通铁锈含水并经电化学步骤形成',molecules_3d:['Fe2O3']},
+         {eq:'Fe + 2HCl → FeCl₂ + H₂↑',note_en:'acid reaction releases hydrogen',note_zh:'与酸反应释放氢气',effects:{gas:true},molecules_3d:['FeCl2','H2']},
+         {eq:'Fe₂O₃ + 2Al → 2Fe + Al₂O₃',note_en:'thermite reaction produces molten iron and intense white-orange light',note_zh:'铝热反应产生熔融铁和强烈白橙光',effects:{heat:true,light:true,lightColor:'#fff2c2'},molecules_3d:['Fe2O3','Al2O3']}
+       ]},
   29: {phase:'solid', melt:1357.77, boil:2835, density:8.96,
        discovery:{year:-9000, who:'known since antiquity'},
        uses_en:'Electrical wiring, plumbing, alloys (bronze, brass), antimicrobial surfaces.',
        uses_zh:'电线、水管、合金(青铜、黄铜)、抗菌表面。',
        isotopes:[{s:'⁶³Cu',ab:'69.2%',stable:true,note:''},{s:'⁶⁵Cu',ab:'30.8%',stable:true,note:''}],
        hybrid:['sp','sp³','dsp²'],
-       reactions:[{eq:'2Cu + O₂ → 2CuO',note_en:'oxidation on heating',note_zh:'加热氧化'},{eq:'Cu + 2AgNO₃ → Cu(NO₃)₂ + 2Ag',note_en:'displacement (single-replacement)',note_zh:'置换反应'}]},
+       reactions:[
+         {eq:'2Cu + O₂ → 2CuO',note_en:'black copper(II) oxide forms on heating',note_zh:'加热生成黑色氧化铜',molecules_3d:['CuO']},
+         {eq:'Cu + 2AgNO₃ → Cu(NO₃)₂ + 2Ag',note_en:'silver crystals grow on the copper surface while the solution turns blue',note_zh:'银晶体在铜表面生长，溶液变蓝',effects:{deposition:true,depositionColor:'#d8d8d8'},molecules_3d:['AgNO3']},
+         {eq:'CuO + 2HCl → CuCl₂ + H₂O',note_en:'basic oxide dissolves to a blue-green copper(II) chloride solution',note_zh:'碱性氧化物溶解，形成蓝绿色氯化铜溶液',molecules_3d:['CuO','CuCl2']}
+       ]},
   79: {phase:'solid', melt:1337.33, boil:3129, density:19.30,
        discovery:{year:-6000, who:'known since antiquity'},
        uses_en:'Jewelry, monetary reserves, electronics contacts, medical, dentistry.',
        uses_zh:'珠宝、货币储备、电子接点、医疗、牙科。',
        isotopes:[{s:'¹⁹⁷Au',ab:'100%',stable:true,note:'only stable isotope'}],
        hybrid:['sp','sp³','dsp²'],
-       reactions:[{eq:'Au + HNO₃ + 4HCl → HAuCl₄ + NO↑ + 2H₂O',note_en:'aqua regia: HNO₃ oxidizes, HCl complexes Au',note_zh:'王水:HNO₃ 氧化,HCl 与金形成配合物'}]},
+       reactions:[
+         {eq:'Au + HNO₃ + 4HCl → HAuCl₄ + NO↑ + 2H₂O',note_en:'aqua regia: nitrate oxidizes gold while chloride stabilizes the complex',note_zh:'王水中硝酸根氧化金，氯离子稳定配合物',effects:{gas:true},molecules_3d:['HNO3','HCl','H2O']},
+         {eq:'2Au + 3Cl₂ → 2AuCl₃',note_en:'gold reacts with chlorine on heating',note_zh:'金在加热时与氯气反应',molecules_3d:['Cl2']}
+       ]},
   92: {phase:'solid', melt:1405.3, boil:4404, density:19.1,
        discovery:{year:1789, who:'Martin Heinrich Klaproth'},
        uses_en:'Nuclear fuel (²³⁵U fission), armor-piercing rounds (depleted U), radiometric dating.',
@@ -235,8 +274,8 @@ const EXTENDED = {
        isotopes:[{s:'²³⁴U',ab:'0.005%',stable:false,note:'α, t½=245,500 y'},{s:'²³⁵U',ab:'0.72%',stable:false,note:'α, t½=704 My, fissile'},{s:'²³⁸U',ab:'99.27%',stable:false,note:'α, t½=4.47 By'}],
        hybrid:['f'],
        reactions:[
-         {eq:'U + 3F₂ → UF₆', note_en:'used for enrichment (gaseous UF₆)', note_zh:'用于铀浓缩(六氟化铀)'},
-         {eq:'2U + 3O₂ → 2UO₃', note_en:'oxidation in air (yellowcake chemistry)', note_zh:'空气中氧化(黄饼化学)'}
+         {eq:'U + 3F₂ → UF₆', note_en:'strongly exothermic fluorination; gaseous UF₆ is used for enrichment', note_zh:'强放热氟化；气态 UF₆ 用于铀浓缩', effects:{heat:true}, molecules_3d:['F2','UF6']},
+         {eq:'2U + 3O₂ → 2UO₃', note_en:'simplified oxidation equation within uranium-oxide processing', note_zh:'铀氧化物加工中的简化氧化方程', molecules_3d:['O2','UO3']}
        ]}
 };
 
@@ -500,14 +539,65 @@ const CATEGORY_USES = {
 
 /* Element-specific, balanced examples only. Unsupported category-wide claims are omitted. */
 const ELEMENT_REACTIONS = {
-  4:[{eq:'2Be + O₂ → 2BeO', note_en:'forms BeO on strong heating; passivated Be does not react with water', note_zh:'强热时生成 BeO；钝化的铍不与水反应'}],
-  5:[{eq:'4B + 3O₂ → 2B₂O₃', note_en:'oxidation on strong heating', note_zh:'强热时氧化'}],
-  12:[{eq:'Mg + H₂O → MgO + H₂↑', note_en:'reaction with steam; cold-water reaction is very slow', note_zh:'与水蒸气反应；与冷水反应极慢'}],
-  15:[{eq:'P₄ + 5O₂ → P₄O₁₀', note_en:'complete combustion in excess oxygen', note_zh:'在过量氧气中完全燃烧'}],
-  21:[{eq:'4Sc + 3O₂ → 2Sc₂O₃', note_en:'oxidation gives scandium(III) oxide', note_zh:'氧化生成三氧化二钪'}],
-  47:[{eq:'2Ag₂O → 4Ag + O₂', note_en:'silver(I) oxide decomposes on heating; silver does not form AgO by simple air oxidation', note_zh:'氧化银受热分解；银在空气中不会直接生成 AgO'}],
-  50:[{eq:'Sn + O₂ → SnO₂', note_en:'oxidation on heating', note_zh:'加热氧化生成二氧化锡'}],
-  82:[{eq:'2Pb + O₂ → 2PbO', note_en:'oxidation on heating', note_zh:'加热氧化生成氧化铅'}]
+  4:[
+    {eq:'2Be + O₂ → 2BeO',note_en:'forms BeO on strong heating; passivated Be does not react with water',note_zh:'强热时生成 BeO；钝化的铍不与水反应',molecules_3d:['BeO']},
+    {eq:'Be + 2HCl → BeCl₂ + H₂↑',note_en:'acid dissolves beryllium after its oxide film is breached',note_zh:'氧化膜被破坏后，酸可溶解铍并放出氢气',effects:{gas:true},molecules_3d:['HCl','H2']}
+  ],
+  5:[
+    {eq:'4B + 3O₂ → 2B₂O₃',note_en:'oxidation on strong heating',note_zh:'强热时氧化',effects:{heat:true},molecules_3d:['B2O3']},
+    {eq:'2B + 3Cl₂ → 2BCl₃',note_en:'halogenation produces trigonal-planar boron trichloride',note_zh:'卤化生成平面三角形的三氯化硼',molecules_3d:['Cl2','BCl3']}
+  ],
+  12:[
+    {eq:'Mg + H₂O → MgO + H₂↑',note_en:'reaction with steam; cold-water reaction is very slow',note_zh:'与水蒸气反应；与冷水反应极慢',effects:{gas:true},molecules_3d:['MgO','H2']},
+    {eq:'2Mg + O₂ → 2MgO',note_en:'burns with intense white light; ultraviolet output is hazardous',note_zh:'燃烧发出强烈白光并含危险紫外辐射',effects:{heat:true,light:true,lightColor:'#ffffff'},molecules_3d:['O2','MgO']},
+    {eq:'Mg + 2HCl → MgCl₂ + H₂↑',note_en:'acid reaction releases hydrogen',note_zh:'与酸反应释放氢气',effects:{gas:true},molecules_3d:['HCl','H2']}
+  ],
+  13:[
+    {eq:'4Al + 3O₂ → 2Al₂O₃',note_en:'a thin oxide film passivates bulk aluminium',note_zh:'致密氧化膜使块状铝钝化',effects:{heat:true},molecules_3d:['Al2O3']},
+    {eq:'2Al + 6HCl → 2AlCl₃ + 3H₂↑',note_en:'acid reaction after the oxide film is removed',note_zh:'去除氧化膜后与酸反应放氢',effects:{gas:true},molecules_3d:['HCl','H2']}
+  ],
+  14:[
+    {eq:'Si + O₂ → SiO₂',note_en:'oxidation forms a protective silica layer',note_zh:'氧化形成保护性二氧化硅层',molecules_3d:['SiO2']},
+    {eq:'Si + 2Cl₂ → SiCl₄',note_en:'chlorination produces volatile silicon tetrachloride',note_zh:'氯化生成挥发性四氯化硅',molecules_3d:['Cl2','SiCl4']}
+  ],
+  15:[
+    {eq:'P₄ + 5O₂ → P₄O₁₀',note_en:'complete combustion in excess oxygen gives intense white light',note_zh:'在过量氧气中完全燃烧并发出强白光',effects:{heat:true,light:true,lightColor:'#fff7d6'},molecules_3d:['P4','P4O10']},
+    {eq:'P₄ + 6Cl₂ → 4PCl₃',note_en:'limited chlorine favors phosphorus trichloride',note_zh:'有限氯气条件下主要生成三氯化磷',molecules_3d:['P4','Cl2','PCl3']}
+  ],
+  16:[
+    {eq:'S + O₂ → SO₂',note_en:'sulfur burns with a blue flame to sulfur dioxide',note_zh:'硫以蓝色火焰燃烧生成二氧化硫',effects:{heat:true,light:true,lightColor:'#5e8cff'},molecules_3d:['O2','SO2']},
+    {eq:'2H₂S + 3O₂ → 2SO₂ + 2H₂O',note_en:'hydrogen sulfide combustion',note_zh:'硫化氢燃烧',effects:{heat:true,light:true,lightColor:'#6f9cff'},molecules_3d:['H2S','SO2','H2O']}
+  ],
+  19:[
+    {eq:'2K + 2H₂O → 2KOH + H₂↑',note_en:'violent water reaction; potassium vapor can burn lilac',note_zh:'与水剧烈反应；钾蒸气可呈淡紫色火焰',effects:{gas:true,heat:true,light:true,lightColor:'#c79cff'},molecules_3d:['H2']},
+    {eq:'2K + Cl₂ → 2KCl',note_en:'exothermic ionic salt formation',note_zh:'放热生成离子盐',effects:{heat:true,light:true,lightColor:'#c79cff'},molecules_3d:['Cl2']}
+  ],
+  20:[
+    {eq:'Ca + 2H₂O → Ca(OH)₂ + H₂↑',note_en:'calcium reacts with water, releasing hydrogen',note_zh:'钙与水反应释放氢气',effects:{gas:true,heat:true},molecules_3d:['H2']},
+    {eq:'2Ca + O₂ → 2CaO',note_en:'calcium burns to calcium oxide',note_zh:'钙燃烧生成氧化钙',effects:{heat:true,light:true,lightColor:'#ff8f5a'},molecules_3d:['CaO']}
+  ],
+  21:[{eq:'4Sc + 3O₂ → 2Sc₂O₃',note_en:'oxidation gives scandium(III) oxide',note_zh:'氧化生成三氧化二钪'}],
+  22:[{eq:'Ti + O₂ → TiO₂',note_en:'titanium burns in oxygen at high temperature',note_zh:'钛在高温氧气中燃烧',effects:{heat:true,light:true,lightColor:'#ffffff'},molecules_3d:['TiO2']}],
+  25:[
+    {eq:'Mn + 2HCl → MnCl₂ + H₂↑',note_en:'acid reaction releases hydrogen',note_zh:'与酸反应释放氢气',effects:{gas:true},molecules_3d:['HCl','H2']},
+    {eq:'3MnO₂ + 4Al → 3Mn + 2Al₂O₃',note_en:'aluminothermic reduction is intensely exothermic',note_zh:'铝热还原反应强烈放热',effects:{heat:true,light:true,lightColor:'#fff0c2'},molecules_3d:['Al2O3']}
+  ],
+  30:[
+    {eq:'Zn + 2HCl → ZnCl₂ + H₂↑',note_en:'acid reaction releases hydrogen',note_zh:'与酸反应释放氢气',effects:{gas:true},molecules_3d:['HCl','H2']},
+    {eq:'2Zn + O₂ → 2ZnO',note_en:'hot zinc oxide is yellow and turns white on cooling',note_zh:'热氧化锌呈黄色，冷却后变白',effects:{heat:true},molecules_3d:['ZnO']}
+  ],
+  47:[
+    {eq:'2Ag₂O → 4Ag + O₂↑',note_en:'silver(I) oxide decomposes on heating; silver does not form AgO by simple air oxidation',note_zh:'氧化银受热分解；银在空气中不会直接生成 AgO',effects:{gas:true}},
+    {eq:'2Ag + S → Ag₂S',note_en:'tarnishing forms black silver sulfide',note_zh:'失泽生成黑色硫化银'}
+  ],
+  50:[
+    {eq:'Sn + O₂ → SnO₂',note_en:'oxidation on heating',note_zh:'加热氧化生成二氧化锡'},
+    {eq:'Sn + 2HCl → SnCl₂ + H₂↑',note_en:'tin dissolves in hydrochloric acid and releases hydrogen',note_zh:'锡溶于盐酸并释放氢气',effects:{gas:true},molecules_3d:['HCl','H2']}
+  ],
+  82:[
+    {eq:'2Pb + O₂ → 2PbO',note_en:'oxidation on heating',note_zh:'加热氧化生成氧化铅'},
+    {eq:'Pb(NO₃)₂ + 2KI → PbI₂↓ + 2KNO₃',note_en:'bright yellow lead(II) iodide precipitates; lead compounds are toxic',note_zh:'生成亮黄色碘化铅沉淀；铅化合物有毒',effects:{precipitate:true,precipitateColor:'#f6d643'}}
+  ]
 };
 
 /* ================ 3D MOLECULAR STRUCTURES ================
@@ -677,6 +767,218 @@ const MOLECULE_3D = {
       {sym:'O',x:0,y:1.2,z:0},{sym:'O',x:0,y:-1.2,z:0},{sym:'O',x:0,y:0,z:1.3}
     ],
     bonds:[[0,2,1],[0,3,1],[0,4,1],[1,2,1],[1,3,1],[1,4,1]]
+  },
+  'H2': {
+    atoms:[{sym:'H',x:-0.37,y:0,z:0},{sym:'H',x:0.37,y:0,z:0}],
+    bonds:[[0,1,1]]
+  },
+  'N2': {
+    atoms:[{sym:'N',x:-0.55,y:0,z:0},{sym:'N',x:0.55,y:0,z:0}],
+    bonds:[[0,1,3]]
+  },
+  'O2': {
+    atoms:[{sym:'O',x:-0.605,y:0,z:0},{sym:'O',x:0.605,y:0,z:0}],
+    bonds:[[0,1,2]]
+  },
+  'F2': {
+    atoms:[{sym:'F',x:-0.71,y:0,z:0},{sym:'F',x:0.71,y:0,z:0}],
+    bonds:[[0,1,1]]
+  },
+  'Cl2': {
+    atoms:[{sym:'Cl',x:-0.995,y:0,z:0},{sym:'Cl',x:0.995,y:0,z:0}],
+    bonds:[[0,1,1]]
+  },
+  'HCl': {
+    atoms:[{sym:'H',x:-0.64,y:0,z:0},{sym:'Cl',x:0.64,y:0,z:0}],
+    bonds:[[0,1,1]]
+  },
+  'NO': {
+    atoms:[{sym:'N',x:-0.575,y:0,z:0},{sym:'O',x:0.575,y:0,z:0}],
+    bonds:[[0,1,2]]
+  },
+  'NO2': {
+    atoms:[{sym:'N',x:0,y:0,z:0},{sym:'O',x:-1.102,y:0.468,z:0},{sym:'O',x:1.102,y:0.468,z:0}],
+    bonds:[[0,1,1.5],[0,2,1.5]]
+  },
+  'O3': {
+    atoms:[{sym:'O',x:0,y:0,z:0},{sym:'O',x:-1.08,y:0.62,z:0},{sym:'O',x:1.08,y:0.62,z:0}],
+    bonds:[[0,1,1.5],[0,2,1.5]]
+  },
+  'SO2': {
+    atoms:[{sym:'S',x:0,y:0,z:0},{sym:'O',x:-1.24,y:0.72,z:0},{sym:'O',x:1.24,y:0.72,z:0}],
+    bonds:[[0,1,1.5],[0,2,1.5]]
+  },
+  'H2S': {
+    atoms:[{sym:'S',x:0,y:0,z:0},{sym:'H',x:-0.962,y:0.928,z:0},{sym:'H',x:0.962,y:0.928,z:0}],
+    bonds:[[0,1,1],[0,2,1]]
+  },
+  'LiH': {
+    atoms:[{sym:'Li',x:-0.8,y:0,z:0},{sym:'H',x:0.8,y:0,z:0}],
+    bonds:[[0,1,1]],
+    representation:'gas-phase pair; solid LiH is an ionic lattice'
+  },
+  'LiOH': {
+    atoms:[{sym:'Li',x:-1.35,y:0,z:0},{sym:'O',x:0,y:0,z:0},{sym:'H',x:0.96,y:0,z:0}],
+    bonds:[[0,1,1],[1,2,1]],
+    representation:'formula-unit view; solid and aqueous structures differ'
+  },
+  'Li2O': {
+    atoms:[{sym:'Li',x:-1.65,y:0,z:0},{sym:'O',x:0,y:0,z:0},{sym:'Li',x:1.65,y:0,z:0}],
+    bonds:[[0,1,1],[1,2,1]],
+    representation:'ionic formula-unit fragment, not an isolated solid-state molecule'
+  },
+  'NaOH': {
+    atoms:[{sym:'Na',x:-1.55,y:0,z:0},{sym:'O',x:0,y:0,z:0},{sym:'H',x:0.96,y:0,z:0}],
+    bonds:[[0,1,1],[1,2,1]],
+    representation:'formula-unit view; solid and aqueous structures differ'
+  },
+  'Na2O': {
+    atoms:[{sym:'Na',x:-1.9,y:0,z:0},{sym:'O',x:0,y:0,z:0},{sym:'Na',x:1.9,y:0,z:0}],
+    bonds:[[0,1,1],[1,2,1]],
+    representation:'ionic formula-unit fragment, not an isolated solid-state molecule'
+  },
+  'BeO': {
+    atoms:[{sym:'Be',x:-0.665,y:0,z:0},{sym:'O',x:0.665,y:0,z:0}],
+    bonds:[[0,1,1]],
+    representation:'diatomic gas-phase view; solid BeO is a lattice'
+  },
+  'MgO': {
+    atoms:[{sym:'Mg',x:-0.875,y:0,z:0},{sym:'O',x:0.875,y:0,z:0}],
+    bonds:[[0,1,1]],
+    representation:'ionic pair view; solid MgO has a rock-salt lattice'
+  },
+  'CaO': {
+    atoms:[{sym:'Ca',x:-0.91,y:0,z:0},{sym:'O',x:0.91,y:0,z:0}],
+    bonds:[[0,1,1]],
+    representation:'ionic pair view; solid CaO has a rock-salt lattice'
+  },
+  'BCl3': {
+    atoms:[
+      {sym:'B',x:0,y:0,z:0},
+      {sym:'Cl',x:1.75,y:0,z:0},
+      {sym:'Cl',x:-0.875,y:1.516,z:0},
+      {sym:'Cl',x:-0.875,y:-1.516,z:0}
+    ],
+    bonds:[[0,1,1],[0,2,1],[0,3,1]]
+  },
+  'Al2O3': {
+    atoms:[
+      {sym:'Al',x:-1.35,y:0,z:0},{sym:'Al',x:1.35,y:0,z:0},
+      {sym:'O',x:0,y:1.2,z:0},{sym:'O',x:0,y:-1.2,z:0},{sym:'O',x:0,y:0,z:1.3}
+    ],
+    bonds:[[0,2,1],[0,3,1],[0,4,1],[1,2,1],[1,3,1],[1,4,1]],
+    representation:'small corundum-like connectivity fragment, not a molecule'
+  },
+  'SiO2': {
+    atoms:[
+      {sym:'Si',x:0,y:0,z:0},
+      {sym:'O',x:0.93,y:0.93,z:0.93},{sym:'O',x:-0.93,y:-0.93,z:0.93},
+      {sym:'O',x:-0.93,y:0.93,z:-0.93},{sym:'O',x:0.93,y:-0.93,z:-0.93}
+    ],
+    bonds:[[0,1,1],[0,2,1],[0,3,1],[0,4,1]],
+    representation:'one SiO4 network tetrahedron; bulk silica is an extended solid'
+  },
+  'P4': {
+    atoms:[
+      {sym:'P',x:0.9,y:0.9,z:0.9},{sym:'P',x:-0.9,y:-0.9,z:0.9},
+      {sym:'P',x:-0.9,y:0.9,z:-0.9},{sym:'P',x:0.9,y:-0.9,z:-0.9}
+    ],
+    bonds:[[0,1,1],[0,2,1],[0,3,1],[1,2,1],[1,3,1],[2,3,1]]
+  },
+  'PCl3': {
+    atoms:[
+      {sym:'P',x:0,y:0.35,z:0},
+      {sym:'Cl',x:1.65,y:-0.45,z:0},
+      {sym:'Cl',x:-0.825,y:-0.45,z:1.43},
+      {sym:'Cl',x:-0.825,y:-0.45,z:-1.43}
+    ],
+    bonds:[[0,1,1],[0,2,1],[0,3,1]]
+  },
+  'HNO3': {
+    atoms:[
+      {sym:'N',x:0,y:0,z:0},{sym:'O',x:1.20,y:0,z:0},
+      {sym:'O',x:-0.65,y:1.04,z:0},{sym:'O',x:-0.65,y:-1.04,z:0},
+      {sym:'H',x:-1.45,y:-1.25,z:0}
+    ],
+    bonds:[[0,1,2],[0,2,1.5],[0,3,1],[3,4,1]]
+  },
+  'CuO': {
+    atoms:[{sym:'Cu',x:-0.85,y:0,z:0},{sym:'O',x:0.85,y:0,z:0}],
+    bonds:[[0,1,1]],
+    representation:'formula-unit view; solid CuO is an extended monoclinic lattice'
+  },
+  'CuCl2': {
+    atoms:[{sym:'Cl',x:-2.05,y:0,z:0},{sym:'Cu',x:0,y:0,z:0},{sym:'Cl',x:2.05,y:0,z:0}],
+    bonds:[[0,1,1],[1,2,1]],
+    representation:'gas-phase monomer; hydrated and solid structures differ'
+  },
+  'FeCl2': {
+    atoms:[{sym:'Cl',x:-2.15,y:0,z:0},{sym:'Fe',x:0,y:0,z:0},{sym:'Cl',x:2.15,y:0,z:0}],
+    bonds:[[0,1,1],[1,2,1]],
+    representation:'gas-phase monomer; solid FeCl2 is layered'
+  },
+  'AgNO3': {
+    atoms:[
+      {sym:'Ag',x:-2.1,y:0,z:0},{sym:'N',x:0,y:0,z:0},
+      {sym:'O',x:1.22,y:0,z:0},{sym:'O',x:-0.6,y:1.05,z:0},{sym:'O',x:-0.6,y:-1.05,z:0}
+    ],
+    bonds:[[0,3,1],[1,2,1.5],[1,3,1.5],[1,4,1.5]],
+    representation:'ion-pair/formula-unit view; solid silver nitrate is an ionic lattice'
+  },
+  'UF6': {
+    atoms:[
+      {sym:'U',x:0,y:0,z:0},
+      {sym:'F',x:1.996,y:0,z:0},{sym:'F',x:-1.996,y:0,z:0},
+      {sym:'F',x:0,y:1.996,z:0},{sym:'F',x:0,y:-1.996,z:0},
+      {sym:'F',x:0,y:0,z:1.996},{sym:'F',x:0,y:0,z:-1.996}
+    ],
+    bonds:[[0,1,1],[0,2,1],[0,3,1],[0,4,1],[0,5,1],[0,6,1]]
+  },
+  'UO3': {
+    atoms:[{sym:'U',x:0,y:0,z:0},{sym:'O',x:1.2,y:0,z:0},{sym:'O',x:-0.6,y:1.04,z:0},{sym:'O',x:-0.6,y:-1.04,z:0}],
+    bonds:[[0,1,1],[0,2,1],[0,3,1]],
+    representation:'local coordination fragment; UO3 is an extended solid'
+  },
+  'TiO2': {
+    atoms:[{sym:'O',x:-1.62,y:0,z:0},{sym:'Ti',x:0,y:0,z:0},{sym:'O',x:1.62,y:0,z:0}],
+    bonds:[[0,1,1],[1,2,1]],
+    representation:'local formula-unit view; rutile and anatase are extended lattices'
+  },
+  'ZnO': {
+    atoms:[{sym:'Zn',x:-0.85,y:0,z:0},{sym:'O',x:0.85,y:0,z:0}],
+    bonds:[[0,1,1]],
+    representation:'local ionic pair; bulk ZnO has a wurtzite lattice'
+  },
+  'B2O3': {
+    atoms:[
+      {sym:'B',x:-1.0,y:0,z:0},{sym:'B',x:1.0,y:0,z:0},
+      {sym:'O',x:0,y:0,z:0},{sym:'O',x:-1.65,y:1.0,z:0},{sym:'O',x:1.65,y:1.0,z:0}
+    ],
+    bonds:[[0,2,1],[1,2,1],[0,3,1],[1,4,1]],
+    representation:'small network fragment; vitreous B2O3 is an extended borate network'
+  },
+  'SiCl4': {
+    atoms:[
+      {sym:'Si',x:0,y:0,z:0},
+      {sym:'Cl',x:1.16,y:1.16,z:1.16},{sym:'Cl',x:-1.16,y:-1.16,z:1.16},
+      {sym:'Cl',x:-1.16,y:1.16,z:-1.16},{sym:'Cl',x:1.16,y:-1.16,z:-1.16}
+    ],
+    bonds:[[0,1,1],[0,2,1],[0,3,1],[0,4,1]]
+  },
+  'P4O10': {
+    atoms:[
+      {sym:'P',x:0.9,y:0.9,z:0.9},{sym:'P',x:-0.9,y:-0.9,z:0.9},
+      {sym:'P',x:-0.9,y:0.9,z:-0.9},{sym:'P',x:0.9,y:-0.9,z:-0.9},
+      {sym:'O',x:1.55,y:1.55,z:1.55},{sym:'O',x:-1.55,y:-1.55,z:1.55},
+      {sym:'O',x:-1.55,y:1.55,z:-1.55},{sym:'O',x:1.55,y:-1.55,z:-1.55},
+      {sym:'O',x:0,y:0,z:1.05},{sym:'O',x:0,y:1.05,z:0},{sym:'O',x:1.05,y:0,z:0},
+      {sym:'O',x:-1.05,y:0,z:0},{sym:'O',x:0,y:-1.05,z:0},{sym:'O',x:0,y:0,z:-1.05}
+    ],
+    bonds:[
+      [0,4,2],[1,5,2],[2,6,2],[3,7,2],
+      [0,8,1],[1,8,1],[0,9,1],[2,9,1],[0,10,1],[3,10,1],
+      [1,11,1],[2,11,1],[1,12,1],[3,12,1],[2,13,1],[3,13,1]
+    ]
   }
 };
 

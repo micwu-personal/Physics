@@ -5,6 +5,11 @@ const LOCALES = {
     'motion.play':'Play animations',
     'motion.pause':'Pause animations',
     'motion.system':'Your system reduced-motion preference is pausing animations. Use this button to override it.',
+    'journey.home':'Story',
+    'aria.controls':'Page controls',
+    'aria.bohr':'Historical Bohr shell model teaching schematic',
+    'aria.orbital':'Rotatable three-dimensional orbital or hybrid model surface',
+    'alt.hydrogen':'Calculated hydrogen probability density plots for n equals 1 through 4',
     'hero.badge': 'All 118 Elements · Interactive',
     'hero.title.a': 'Periodic',
     'hero.title.b': 'Table',
@@ -50,7 +55,16 @@ const LOCALES = {
     'detail.section.bond':'Chemical Bonding',
     'detail.section.rx':'Signature Reactions',
     'detail.section.mol3d':'3D Molecular Structures',
-    'detail.mol3d.hint':'Drag to rotate. Ball-and-stick model with true bond angles.',
+    'detail.mol3d.hint':'Drag to rotate. Approximate reviewed geometry; ionic solids are labeled lattice fragments, not isolated molecules.',
+    'detail.bohr.kind':'Historical teaching model',
+    'detail.bohr.caveat':'The rings are not electron paths. Bohr shells are useful for energy levels and electron counting, but a real atom is described by a quantum state and probability density.',
+    'detail.bohr.compare':'Compare with a quantum probability map',
+    'detail.cloud.kind':'Calculated model, not a photograph',
+    'detail.cloud.caption':'Brightness shows calculated |psi|^2 for hydrogen. Experiments test this model\'s predictions; the image is not a literal view through a microscope.',
+    'detail.orbital.kind':'3D probability/model surface',
+    'detail.orbital.caveat':'Atomic orbitals are volumetric isosurfaces of a calculated wavefunction; they can look narrow edge-on but are never flat sheets. Hybrid orbitals are mathematical combinations used to rationalize molecular geometry, not photographed objects.',
+    'detail.media.source':'Source / public domain',
+    'detail.rx.caveat':'Teaching schematic: atom paths and timing are not a molecular-dynamics simulation. The animation holds reactants for 0.5 s, then conserves atom counts while illustrating bond changes and observable effects.',
     'detail.section.nucleus':'Inside the Nucleus · Isotopes · Radioactivity',
     'detail.section.uses':'Uses &amp; Discovery',
     'detail.ox.hint':'These are the charges this element can take in compounds — determining what bonds &amp; reactions it prefers.',
@@ -111,6 +125,11 @@ const LOCALES = {
     'motion.play':'播放动画',
     'motion.pause':'暂停动画',
     'motion.system':'系统的“减少动态效果”设置已暂停动画。可用此按钮覆盖该设置。',
+    'journey.home':'故事线',
+    'aria.controls':'页面控制',
+    'aria.bohr':'历史玻尔电子壳层教学示意图',
+    'aria.orbital':'可旋转的三维原子轨道或杂化模型表面',
+    'alt.hydrogen':'主量子数 n 从 1 到 4 的氢原子计算概率密度图',
     'hero.badge': '全部 118 种元素 · 交互式',
     'hero.title.a': '元素',
     'hero.title.b': '周期表',
@@ -156,7 +175,16 @@ const LOCALES = {
     'detail.section.bond':'化学键',
     'detail.section.rx':'代表性化学反应',
     'detail.section.mol3d':'3D 分子结构',
-    'detail.mol3d.hint':'鼠标拖动可旋转。球棍模型采用真实键角。',
+    'detail.mol3d.hint':'拖动可旋转。几何结构为经核查的近似值；离子固体会标为晶格片段，并非孤立分子。',
+    'detail.bohr.kind':'历史教学模型',
+    'detail.bohr.caveat':'圆环不是电子路径。玻尔壳层有助于理解能级和电子计数，但真实原子由量子态与概率密度描述。',
+    'detail.bohr.compare':'与量子概率图比较',
+    'detail.cloud.kind':'计算模型，并非照片',
+    'detail.cloud.caption':'亮度表示氢原子的计算 |psi|^2。实验检验该模型的预测；这不是显微镜下的字面景象。',
+    'detail.orbital.kind':'3D 概率/模型表面',
+    'detail.orbital.caveat':'原子轨道是计算波函数的三维等值面；侧视时可能显得很窄，但绝不是平面薄片。杂化轨道是用于解释分子几何的数学组合，并非被拍摄到的物体。',
+    'detail.media.source':'来源 / 公有领域',
+    'detail.rx.caveat':'教学示意：原子路径与时间并非分子动力学模拟。动画先保持反应物 0.5 秒，再在守恒原子数的前提下说明键变化与可观察现象。',
     'detail.section.nucleus':'原子核 · 同位素 · 放射性',
     'detail.section.uses':'用途与发现',
     'detail.ox.hint':'这些是该元素在化合物中可以呈现的电荷——决定了它偏好的化学键与反应。',
@@ -219,6 +247,14 @@ function applyI18n(lang){
   document.querySelectorAll('[data-i18n]').forEach(el=>{
     const key = el.getAttribute('data-i18n');
     el.innerHTML = dict[key];
+  });
+  document.querySelectorAll('[data-i18n-alt]').forEach(el=>{
+    const key=el.getAttribute('data-i18n-alt');
+    el.setAttribute('alt',dict[key]);
+  });
+  document.querySelectorAll('[data-i18n-aria-label]').forEach(el=>{
+    const key=el.getAttribute('data-i18n-aria-label');
+    el.setAttribute('aria-label',dict[key]);
   });
   const titleKey = document.querySelector('title').getAttribute('data-i18n');
   document.title = dict[titleKey];

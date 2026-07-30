@@ -31,12 +31,13 @@ body{
   background-size:800px 800px; opacity:0.4;
 }
 
-.control-row{position:sticky;top:0;z-index:100;display:flex;justify-content:flex-end;padding:8px 16px 0;pointer-events:none}
-.lang-switch{display:flex;gap:4px;background:rgba(5,6,13,0.94);border:1px solid var(--panel-b);border-radius:999px;padding:3px;pointer-events:auto}
-.motion-pill{background:transparent;color:var(--text);border:none;border-right:1px solid var(--panel-b);padding:6px 10px;border-radius:999px 4px 4px 999px;font-family:inherit;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap}
+.control-row{position:fixed;top:8px;right:12px;z-index:100;display:flex;justify-content:flex-end;pointer-events:none}
+.lang-switch{display:flex;gap:4px;background:rgba(5,6,13,0.96);border:1px solid var(--panel-b);border-radius:999px;padding:3px;box-shadow:0 12px 34px rgba(0,0,0,.42);pointer-events:auto}
+.journey-home{display:inline-flex;align-items:center;min-height:44px;color:var(--accent2);text-decoration:none;padding:6px 10px;border-right:1px solid var(--panel-b);font-size:11px;font-weight:600}
+.motion-pill{min-height:44px;background:transparent;color:var(--text);border:none;border-right:1px solid var(--panel-b);padding:6px 10px;border-radius:999px 4px 4px 999px;font-family:inherit;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap}
 .motion-pill:hover{color:var(--accent2)}
 .motion-pill[data-state="paused"]{color:#ffd166}
-.lang-pill{background:transparent;color:var(--dim);border:none;padding:6px 12px;border-radius:999px;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;letter-spacing:0.5px}
+.lang-pill{min-width:44px;min-height:44px;background:transparent;color:var(--dim);border:none;padding:6px 12px;border-radius:999px;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;letter-spacing:0.5px}
 .lang-pill:hover{color:var(--text)}
 .lang-pill.active{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff}
 html[data-motion="paused"] *,html[data-motion="paused"] *::before,html[data-motion="paused"] *::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}
@@ -45,7 +46,7 @@ html[data-motion="paused"] *,html[data-motion="paused"] *::before,html[data-moti
 .hero-inner{max-width:900px;margin:0 auto}
 .badge{display:inline-block;padding:6px 14px;border:1px solid var(--panel-b);border-radius:999px;font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--dim);background:var(--panel);backdrop-filter:blur(10px)}
 h1{font-size:clamp(40px,7vw,80px);font-weight:700;letter-spacing:-3px;margin:14px 0 10px;line-height:1}
-.grad{background:linear-gradient(120deg,#7c5cff 0%,#00d4ff 50%,#ff6b9d 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.grad{color:var(--accent2)}
 .tag{color:var(--dim);font-size:16px;max-width:700px;margin:0 auto}
 
 .legend{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;padding:12px 20px;max-width:1400px;margin:0 auto;position:relative;z-index:1}
@@ -138,6 +139,7 @@ html[lang="zh-CN"] .cell .nm{font-size:12px;font-weight:500;color:#fff;margin-to
 .detail{
   position:relative;z-index:1;
   max-width:1400px;margin:32px auto 0;
+  scroll-margin-top:76px;
   background:var(--panel);
   border:1px solid var(--panel-b);
   border-radius:20px;
@@ -147,7 +149,7 @@ html[lang="zh-CN"] .cell .nm{font-size:12px;font-weight:500;color:#fff;margin-to
 }
 .detail.hidden{display:none}
 @keyframes slideIn{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:none}}
-.detail-close{position:absolute;top:18px;right:18px;background:rgba(0,0,0,0.3);border:1px solid var(--panel-b);color:var(--text);width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:16px;font-family:inherit;transition:background .15s}
+.detail-close{position:absolute;top:14px;right:14px;background:rgba(0,0,0,0.3);border:1px solid var(--panel-b);color:var(--text);width:44px;height:44px;border-radius:50%;cursor:pointer;font-size:16px;font-family:inherit;transition:background .15s}
 .detail-close:hover{background:rgba(255,80,80,0.25)}
 
 .detail-head{display:grid;grid-template-columns:auto 1fr;gap:24px;align-items:center;margin-bottom:24px;padding-bottom:20px;border-bottom:1px solid var(--panel-b)}
@@ -185,6 +187,17 @@ html[lang="zh-CN"] .cell .nm{font-size:12px;font-weight:500;color:#fff;margin-to
 .orbital-tabs button{background:rgba(255,255,255,0.05);border:1px solid var(--panel-b);color:var(--dim);padding:5px 12px;border-radius:6px;cursor:pointer;font-family:inherit;font-size:11px;font-weight:600;letter-spacing:0.5px;transition:all .15s}
 .orbital-tabs button:hover{color:#fff}
 .orbital-tabs button.active{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border-color:transparent}
+.model-caveat{margin-top:12px;padding:12px 14px;border:1px solid rgba(255,209,102,.28);border-radius:10px;background:rgba(255,209,102,.07)}
+.model-caveat p{margin:7px 0 0;color:#dfe4ff;font-size:12px;line-height:1.6}
+.rep-badge{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--panel-b);border-radius:999px;padding:3px 8px;color:var(--text);background:#0b0e1c;font:600 10px/1.4 'JetBrains Mono',ui-monospace,monospace}
+.rep-badge::before{content:"";width:6px;height:6px;border-radius:50%;background:#ffd166}
+.rep-badge.model::before{background:#7c5cff}
+.quantum-reality{margin-top:10px;border:1px solid var(--panel-b);border-radius:10px;background:rgba(0,0,0,.24)}
+.quantum-reality summary{padding:11px 13px;color:var(--accent2);font-size:12px;font-weight:600;cursor:pointer}
+.quantum-reality figure{margin:0;border-top:1px solid var(--panel-b)}
+.quantum-reality img{display:block;width:100%;max-height:420px;object-fit:contain;background:#02030a}
+.quantum-reality figcaption{padding:11px 13px;color:var(--dim);font-size:11px;line-height:1.55}
+.quantum-reality figcaption a{color:var(--accent2)}
 
 .d-block{margin-bottom:24px;background:rgba(0,0,0,0.25);border:1px solid var(--panel-b);border-radius:14px;padding:20px}
 .d-block h3{font-size:14px;font-weight:600;color:var(--accent2);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:14px}
@@ -215,6 +228,7 @@ html[lang="zh-CN"] .cell .nm{font-size:12px;font-weight:500;color:#fff;margin-to
 .mol3d-card canvas{width:100%;height:100%;display:block}
 .mol3d-caption{position:absolute;top:8px;left:10px;color:#fff;font-family:'JetBrains Mono',ui-monospace,'SF Mono','Cascadia Mono','Consolas',monospace;font-size:12px;font-weight:700;text-shadow:0 1px 3px rgba(0,0,0,0.9);pointer-events:none}
 .mol3d-shape{position:absolute;top:8px;right:10px;color:var(--accent2);font-size:10px;text-transform:uppercase;letter-spacing:1px;pointer-events:none}
+.mol3d-note{position:absolute;left:8px;right:8px;bottom:8px;padding:5px 7px;border-radius:7px;background:rgba(3,5,16,.82);color:#c8cff0;font-size:9px;line-height:1.35;pointer-events:none}
 
 .bond-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
 .bond-card{background:rgba(0,0,0,0.3);border:1px solid var(--panel-b);border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:6px;transition:opacity .15s}
@@ -234,6 +248,7 @@ html[lang="zh-CN"] .cell .nm{font-size:12px;font-weight:500;color:#fff;margin-to
 #rxAnimBox{width:100%;height:200px;background:radial-gradient(ellipse at center, #0a1130 0%, #030510 100%);border-radius:10px;margin-top:10px;display:none;position:relative;overflow:hidden}
 #rxAnimBox.on{display:block}
 #rxAnimCanvas{width:100%;height:100%;display:block}
+.reaction-caveat{line-height:1.6}
 
 .nucleus-row{display:grid;grid-template-columns:340px 1fr;gap:20px}
 @media (max-width:900px){.nucleus-row{grid-template-columns:1fr}}
@@ -259,6 +274,12 @@ html[lang="zh-CN"] .cell .nm{font-size:12px;font-weight:500;color:#fff;margin-to
 .d-discovery{margin-top:12px;color:var(--dim);font-size:13px;font-style:italic}
 
 footer{text-align:center;padding:40px 20px;color:var(--dim);font-size:12px;position:relative;z-index:1;border-top:1px solid var(--panel-b);margin-top:40px}
+
+@media(max-width:560px){
+  .control-row{right:6px}
+  .journey-home,.motion-pill,.lang-pill{padding-inline:8px}
+  .hero{padding-top:72px}
+}
 
 @media (max-width:1100px){
   .cell{min-height:40px}

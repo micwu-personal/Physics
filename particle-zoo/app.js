@@ -35,11 +35,12 @@ function requireElement(id){
 
 const reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
 const MOTION_STORAGE_KEY = 'pz-motion';
+const GLOBAL_MOTION_STORAGE_KEY = 'physics.motion';
 const motionParameter = new URLSearchParams(location.search).get('motion');
 let motionMode = (function(){
   if(['play','pause','system'].includes(motionParameter)) return motionParameter;
   try {
-    const saved = localStorage.getItem(MOTION_STORAGE_KEY);
+    const saved = localStorage.getItem(GLOBAL_MOTION_STORAGE_KEY) || localStorage.getItem(MOTION_STORAGE_KEY);
     return ['play','pause'].includes(saved) ? saved : 'system';
   } catch(_) {
     return 'system';
@@ -49,6 +50,10 @@ function persistMotionMode(){
   try {
     if(motionMode==='system') localStorage.removeItem(MOTION_STORAGE_KEY);
     else localStorage.setItem(MOTION_STORAGE_KEY,motionMode);
+  } catch(_){}
+  try {
+    if(motionMode==='system') localStorage.removeItem(GLOBAL_MOTION_STORAGE_KEY);
+    else localStorage.setItem(GLOBAL_MOTION_STORAGE_KEY,motionMode);
   } catch(_){}
 }
 if(['play','pause','system'].includes(motionParameter)) persistMotionMode();
@@ -562,8 +567,15 @@ function resizeBuild(){
 window.addEventListener('resize',()=>{ if(tabIsActive('builder')) resizeBuild(); });
 
 document.querySelectorAll('.tray-part').forEach(el=>{
+  el.setAttribute('role','button');
+  el.tabIndex=0;
   el.addEventListener('dragstart',e=>{ e.dataTransfer.setData('text/plain', el.dataset.part); });
   el.addEventListener('click',()=>addPart(el.dataset.part));
+  el.addEventListener('keydown',event=>{
+    if(event.key!=='Enter' && event.key!==' ') return;
+    event.preventDefault();
+    addPart(el.dataset.part);
+  });
 });
 zone.addEventListener('dragover',e=>{e.preventDefault(); zone.classList.add('drag')});
 zone.addEventListener('dragleave',()=>zone.classList.remove('drag'));
@@ -572,7 +584,7 @@ zone.addEventListener('drop',e=>{
   const part = e.dataTransfer.getData('text/plain');
   if(part) addPart(part);
 });
-document.getElementById('clearBuild').onclick = ()=>{ parts=[]; buildComposites(); buildStop(); drawBuild(); };
+document.getElementById('clearBuild').onclick = ()=>{ parts=[]; selectedPackingKey=null; buildComposites(); buildStop(); drawBuild(); };
 
 // Click canvas to remove nearest particle
 buildCanvas.addEventListener('click',e=>{
@@ -603,7 +615,8 @@ function addPart(p){
    3. Heavy quarks (s,c,b) without partner → free.
    4. Electrons orbit only if there's a nucleus of protons.
 */
-let buildViz = { particles:[], nucleons:[], mesons:[], atomR:0, cx:0, cy:0 };
+let buildViz = { particles:[], nucleons:[], mesons:[], freeFermions:[], atomR:0, cx:0, cy:0 };
+let selectedPackingKey = null;
 
 // Meson lookup: (quark, antiquark) → { name (en), zh, latex, mass, lifetime, tag }
 // Symmetric on qq̄ vs q̄q; we normalise so the flavour is stored as (q,q̄).
@@ -638,6 +651,15 @@ const QUARK_CHARGE = { u:+2/3, c:+2/3, t:+2/3, d:-1/3, s:-1/3, b:-1/3,
                         ubar:-2/3, cbar:-2/3, tbar:-2/3, dbar:+1/3, sbar:+1/3, bbar:+1/3 };
 const QUARK_COLOR = { u:'#ff6b9d', d:'#ff8fb8', s:'#ffd166', c:'#ffb347', b:'#c39bff', t:'#c39bff',
                        ubar:'#7ee8c5', dbar:'#a8f0d8', sbar:'#4ea8ff', cbar:'#5db8ff', bbar:'#ff6bff', tbar:'#ff6bff' };
+const FREE_FERMION_META = {
+  t:{sym:'t',charge:+2/3,color:'#c39bff'}, tbar:{sym:'t̄',charge:-2/3,color:'#ff6bff'},
+  eplus:{sym:'e⁺',charge:+1,color:'#8fc7ff'},
+  mu:{sym:'μ⁻',charge:-1,color:'#7ee8c5'}, muplus:{sym:'μ⁺',charge:+1,color:'#9af2d6'},
+  tau:{sym:'τ⁻',charge:-1,color:'#c39bff'}, tauplus:{sym:'τ⁺',charge:+1,color:'#dfb8ff'},
+  nue:{sym:'νₑ',charge:0,color:'#8fa8ff'}, nuebar:{sym:'ν̄ₑ',charge:0,color:'#b4c4ff'},
+  numu:{sym:'νμ',charge:0,color:'#76d7c4'}, numubar:{sym:'ν̄μ',charge:0,color:'#a4eadc'},
+  nutau:{sym:'ντ',charge:0,color:'#d79cff'}, nutaubar:{sym:'ν̄τ',charge:0,color:'#e9c5ff'}
+};
 function isAntiQ(p){ return p && p.endsWith && p.endsWith('bar'); }
 function isQuarkPart(p){ return p in QUARK_CHARGE; }
 function isHeavyQ(p){ return ['s','c','b','sbar','cbar','bbar'].indexOf(p)>=0; }
@@ -655,18 +677,31 @@ function buildComposites(){
     if(!isQuarkPart(p)) continue;
     for(let i=0;i<counts[p];i++) (isAntiQ(p)?aqList:qList).push(p);
   }
+  // Top quarks decay through the weak interaction before QCD can bind them
+  // into hadrons, so they remain explicit short-lived fermions in this model.
+  for(let i=qList.length-1;i>=0;i--) if(qList[i]==='t') qList.splice(i,1);
+  for(let i=aqList.length-1;i>=0;i--) if(aqList[i]==='tbar') aqList.splice(i,1);
   // Prefer same-flavour pairings first
   for(let i=qList.length-1;i>=0;i--){
     const q = qList[i], want = q+'bar';
     const j = aqList.indexOf(want);
-    if(j>=0){
+    if(j>=0 && MESON_TABLE[`${baseFlavor(q)}|${aqList[j]}`]){
       mesons.push({q, aq:aqList[j]});
       qList.splice(i,1); aqList.splice(j,1);
     }
   }
   // Then any remaining q with any aq (mixed-flavour meson)
   while(qList.length && aqList.length){
-    mesons.push({q:qList.shift(), aq:aqList.shift()});
+    let pair = null;
+    for(let qi=0;qi<qList.length && !pair;qi++){
+      for(let ai=0;ai<aqList.length;ai++){
+        if(MESON_TABLE[`${baseFlavor(qList[qi])}|${aqList[ai]}`]){
+          pair={qi,ai}; break;
+        }
+      }
+    }
+    if(!pair) break;
+    mesons.push({q:qList.splice(pair.qi,1)[0], aq:aqList.splice(pair.ai,1)[0]});
   }
   const freeAntiQuarks = aqList.slice();  // orphaned antiquarks
 
@@ -681,12 +716,15 @@ function buildComposites(){
   const uL0 = qList.filter(x=>x==='u').length;
   const dL0 = qList.filter(x=>x==='d').length;
   const heavyFree = qList.filter(x=>x!=='u' && x!=='d');
-  let uL=uL0, dL=dL0;
+  const packingPlans = PhysicsCore.nucleonPlans(uL0,dL0);
+  const packingPlan = packingPlans.find(plan=>plan.key===selectedPackingKey) || packingPlans[0];
+  selectedPackingKey = packingPlan.key;
+  let uL=packingPlan.freeUp, dL=packingPlan.freeDown;
   const nucleons = [];
-  while(uL>=2 && dL>=1){ nucleons.push({kind:'proton', q:[ 'u','u','d' ]}); uL-=2; dL-=1; }
-  while(uL>=1 && dL>=2){ nucleons.push({kind:'neutron', q:[ 'u','d','d' ]}); uL-=1; dL-=2; }
-  while(uL>=3){ nucleons.push({kind:'delta++', q:['u','u','u']}); uL-=3; }
-  while(dL>=3){ nucleons.push({kind:'delta-', q:['d','d','d']}); dL-=3; }
+  for(let i=0;i<packingPlan.protons;i++) nucleons.push({kind:'proton', q:[ 'u','u','d' ]});
+  for(let i=0;i<packingPlan.neutrons;i++) nucleons.push({kind:'neutron', q:[ 'u','d','d' ]});
+  for(let i=0;i<packingPlan.deltaPlus;i++) nucleons.push({kind:'delta++', q:['u','u','u']});
+  for(let i=0;i<packingPlan.deltaMinus;i++) nucleons.push({kind:'delta-', q:['d','d','d']});
   const leftoverQuarks = [];
   for(let i=0;i<uL;i++) leftoverQuarks.push('u');
   for(let i=0;i<dL;i++) leftoverQuarks.push('d');
@@ -749,6 +787,14 @@ function buildComposites(){
     }
   }
 
+  // All remaining Standard-Model fermions are shown explicitly. Neutrinos are
+  // unbound here; muons and taus decay; top quarks decay before hadronization.
+  const freeFermions = parts.filter(p=>FREE_FERMION_META[p]).map((type,i,array)=>{
+    const a=(i/Math.max(array.length,1))*Math.PI*2-Math.PI/2;
+    const radius=Math.min(BW,BH)*0.38;
+    return {type,meta:FREE_FERMION_META[type],x:cx+Math.cos(a)*radius,y:cy+Math.sin(a)*radius};
+  });
+
   // 6) Free quarks (confinement violation).
   const freeQuarks = leftoverQuarks.map((tt,i)=>{
     const a = (i/Math.max(leftoverQuarks.length,1))*Math.PI*2;
@@ -771,8 +817,9 @@ function buildComposites(){
   });
   electrons.forEach(el=>particles.push({ x:el.x, y:el.y, partIdx: takePartIndex('e') }));
   freeQuarks.forEach(q=>particles.push({ x:q.x, y:q.y, partIdx: takePartIndex(q.type) }));
+  freeFermions.forEach(f=>particles.push({x:f.x,y:f.y,partIdx:takePartIndex(f.type)}));
 
-  buildViz = { nucleons, mesons, electrons, freeQuarks, particles, cx, cy, nucR, atomR, N, e,
+  buildViz = { nucleons, mesons, electrons, freeQuarks, freeFermions, packingPlans, packingPlan, particles, cx, cy, nucR, atomR, N, e,
     u: (counts.u||0), d: (counts.d||0),
     hasNucleus: N>0, hasAtom: N>0 && e>0 };
 
@@ -791,7 +838,7 @@ const ATOM_I18N = {
     '1p2n1e':['⚛ 氚原子 (³H)','β⁻ 衰变,半衰期 12.3 年'],
     '2p1n2e':['⚛ 氦-3 原子 (³He)','稳定,天然含量极低'],
     '2p2n2e':['⚛ 氦-4 原子 (⁴He)','稳定,最常见的氦'],
-    '2p2n0e':['α 粒子 (⁴He²⁺)','α 衰变的产物'],
+    '2p2n0e':['氦-4 原子核 / ⁴He²⁺ 离子 (α 粒子)','稳定；也是 α 衰变产物'],
     '3p3n3e':['⚛ 锂-6 原子 (⁶Li)','稳定'],
     '3p4n3e':['⚛ 锂-7 原子 (⁷Li)','稳定,地球上最常见的锂同位素']
   }
@@ -799,11 +846,52 @@ const ATOM_I18N = {
 const ELEMENT_I18N = {
   'zh-CN': ['','氢','氦','锂','铍','硼','碳','氮','氧','氟','氖','钠','镁','铝','硅','磷','硫','氯','氩','钾','钙']
 };
+function renderPackingChoices(plans, selectedPlan){
+  const root=requireElement('packingChoices');
+  if(!plans || plans.length<2 || !selectedPlan){
+    root.innerHTML='';
+    return;
+  }
+  const preferred=plans.filter(plan=>plan.freeCount===plans[0].freeCount).slice(0,4);
+  if(preferred.length<2){
+    root.innerHTML='';
+    return;
+  }
+  if(!preferred.some(plan=>plan.key===selectedPlan.key)) preferred.unshift(selectedPlan);
+  const lang=window.CURRENT_LANG;
+  const planText=plan=>{
+    const pieces=[];
+    if(plan.protons) pieces.push(`${plan.protons}p`);
+    if(plan.neutrons) pieces.push(`${plan.neutrons}n`);
+    if(plan.deltaPlus) pieces.push(`${plan.deltaPlus}Δ⁺⁺`);
+    if(plan.deltaMinus) pieces.push(`${plan.deltaMinus}Δ⁻`);
+    if(plan.freeUp) pieces.push(`${plan.freeUp} free u`);
+    if(plan.freeDown) pieces.push(`${plan.freeDown} free d`);
+    return pieces.join(' + ') || (lang==='zh-CN'?'无重子':'no baryons');
+  };
+  root.innerHTML=`<div class="packing-title">${t('builder.packing.title')}</div>`+
+    preferred.map((plan,index)=>{
+      const active=plan.key===selectedPlan.key;
+      const note=plan.deltaCount ? t('builder.packing.unstable')
+        : plan.freeCount ? t('builder.packing.free')
+        : index===0 ? t('builder.packing.recommended') : t('builder.packing.recommended');
+      return `<button class="packing-choice${active?' active':''}${plan.deltaCount?' unstable':''}" data-plan="${plan.key}" type="button">${planText(plan)}<small>${note}</small></button>`;
+    }).join('');
+  root.querySelectorAll('.packing-choice').forEach(button=>{
+    button.addEventListener('click',()=>{
+      selectedPackingKey=button.dataset.plan;
+      buildComposites();
+    });
+  });
+}
 function analyze(){
-  const {nucleons, mesons=[], electrons, freeQuarks, u, d, e} = buildViz;
+  const {nucleons, mesons=[], electrons, freeQuarks, freeFermions=[], packingPlans, packingPlan, u, d, e} = buildViz;
   // Real charge sum (includes heavy quarks, antiquarks, mesons already in freeQuarks)
   let charge = -e;
-  parts.forEach(p=>{ if(p in QUARK_CHARGE) charge += QUARK_CHARGE[p]; });
+  parts.forEach(p=>{
+    if(p in QUARK_CHARGE) charge += QUARK_CHARGE[p];
+    else if(FREE_FERMION_META[p]) charge += FREE_FERMION_META[p].charge;
+  });
   const lang = window.CURRENT_LANG;
   const decayBar = requireElement('buildDecayBar');
   decayBar.hidden = true;
@@ -812,8 +900,10 @@ function analyze(){
     buildResult.textContent = t('builder.result.empty');
     buildResult.className='result';
     buildStats.innerHTML='';
+    renderPackingChoices(null,null);
     return;
   }
+  renderPackingChoices(packingPlans,packingPlan);
 
   const protons  = nucleons.filter(n=>n.kind==='proton').length;
   const neutrons = nucleons.filter(n=>n.kind==='neutron').length;
@@ -835,24 +925,27 @@ function analyze(){
     '1p2n1e':['⚛ Tritium (³H)','β⁻ decays, half-life 12.3 y'],
     '2p1n2e':['⚛ Helium-3 (³He)','stable, very rare'],
     '2p2n2e':['⚛ Helium-4 (⁴He)','stable, most common He'],
-    '2p2n0e':['α particle (⁴He²⁺)','emitted in α decay'],
+    '2p2n0e':['Helium-4 nucleus / ⁴He²⁺ ion (α particle)','stable; also emitted in α decay'],
     '3p3n3e':['⚛ Lithium-6 (⁶Li)','stable'],
     '3p4n3e':['⚛ Lithium-7 (⁷Li)','stable, most Li on Earth'],
   };
   const atomMap = ATOM_I18N[lang] || atomMap_en;
 
   // Meson-only assembly: proudly show what was formed
-  if(totalNucleons===0 && nElectrons===0 && freeQuarks.length===0 && mesons.length>0){
+  if(totalNucleons===0 && nElectrons===0 && freeQuarks.length===0 && freeFermions.length===0 && mesons.length>0){
     const names = mesons.map(m=> lang==='zh-CN' ? m.info.zh : m.info.en);
     name = names.length===1 ? names[0] : `${names.length} × ${lang==='zh-CN'?'介子':'mesons'}: ${names.join(', ')}`;
     cls = 'result success';
-  } else if(atomMap[key] && mesons.length===0){
+  } else if(atomMap[key] && mesons.length===0 && freeFermions.length===0){
     name = atomMap[key][0] + ' — ' + atomMap[key][1];
     cls = 'result success';
-  } else if(protons===0 && neutrons===1 && nElectrons===0 && freeQuarks.length===0 && mesons.length===0){
+  } else if(protons===0 && neutrons===1 && nElectrons===0 && freeQuarks.length===0 && freeFermions.length===0 && mesons.length===0){
     name = t('builder.msg.freeneutron'); cls='result success';
-  } else if(totalNucleons===0 && nElectrons>0 && freeQuarks.length===0 && mesons.length===0){
+  } else if(totalNucleons===0 && nElectrons>0 && freeQuarks.length===0 && freeFermions.length===0 && mesons.length===0){
     name = nElectrons===1 ? t('builder.msg.electron.one') : `${nElectrons} ${t('builder.msg.electron.many')}`; cls='result success';
+  } else if(totalNucleons===0 && nElectrons===0 && freeQuarks.length===0 && mesons.length===0 && freeFermions.length>0){
+    name = freeFermions.map(fermion=>fermion.meta.sym).join(' + ');
+    cls='result success';
   } else if(freeQuarks.length>0){
     name = t('builder.msg.freeq'); cls='result';
   } else if(deltas>0 && mesons.length===0){
@@ -862,7 +955,8 @@ function analyze(){
     const symb = els[protons];
     const eLabel = lang==='zh-CN' ? '电子' : 'e⁻';
     const mesonSuffix = mesons.length ? ` + ${mesons.length} ${lang==='zh-CN'?'介子':'meson(s)'}` : '';
-    name = `${symb} — ${protons}p + ${neutrons}n${nElectrons?` + ${nElectrons}${eLabel}`:''}${mesonSuffix}`;
+    const fermionSuffix = freeFermions.length ? ` + ${freeFermions.map(f=>f.meta.sym).join(' + ')}` : '';
+    name = `${symb} — ${protons}p + ${neutrons}n${nElectrons?` + ${nElectrons}${eLabel}`:''}${mesonSuffix}${fermionSuffix}`;
     cls = 'result success';
   }
 
@@ -877,6 +971,7 @@ function analyze(){
   buildStats.innerHTML = `
     <div>${t('builder.stats.up')}: <b>${parts.filter(x=>x==='u').length}</b> · ${t('builder.stats.down')}: <b>${parts.filter(x=>x==='d').length}</b> · ${t('builder.stats.electrons')}: <b>${e}</b>${heavyStr?` · <span style="color:#ffd166">${heavyStr}</span>`:''}</div>
     <div>${t('builder.stats.protons')}: <b>${protons}</b> · ${t('builder.stats.neutrons')}: <b>${neutrons}</b>${deltas?` · ${t('builder.stats.delta')}: <b>${deltas}</b>`:''}${mesons.length?` · <span style="color:#7ee8c5">${t('builder.stats.mesons')}: ${mesons.length}</span>`:''}${freeQuarks.length?` · <span style="color:#ff6b9d">${t('builder.stats.freeq')}: ${freeQuarks.length}</span>`:''}</div>
+    ${freeFermions.length?`<div>${t('builder.stats.fermions')}: <b>${freeFermions.map(f=>f.meta.sym).join(' · ')}</b></div>`:''}
     <div>${t('builder.stats.charge')}: <b>${chargeVal===0?'0':(chargeVal>0?'+':'')+chargeVal} e</b></div>
     <div>${t('builder.stats.parts')}: <b>${parts.length}</b></div>
   `;
@@ -911,7 +1006,7 @@ function drawBuild(){
   for(let x=0;x<BW;x+=40){bctx.beginPath();bctx.moveTo(x,0);bctx.lineTo(x,BH);bctx.stroke();}
   for(let y=0;y<BH;y+=40){bctx.beginPath();bctx.moveTo(0,y);bctx.lineTo(BW,y);bctx.stroke();}
 
-  const {nucleons=[], electrons=[], freeQuarks=[], cx=BW/2, cy=BH/2, nucR=0, atomR=0, hasAtom, hasNucleus, N=0} = buildViz;
+  const {nucleons=[], electrons=[], freeQuarks=[], freeFermions=[], cx=BW/2, cy=BH/2, nucR=0, atomR=0, hasAtom, hasNucleus, N=0} = buildViz;
 
   // Outer atom shell (electron cloud)
   if(hasAtom){
@@ -1024,6 +1119,23 @@ function drawBuild(){
     bctx.font='10px Space Grotesk, sans-serif';
     bctx.textAlign='center';
     bctx.fillText((LOCALES[window.CURRENT_LANG])['builder.confine'], fq.x, fq.y+22);
+  });
+
+  freeFermions.forEach(fermion=>{
+    const {meta}=fermion;
+    const glow=bctx.createRadialGradient(fermion.x,fermion.y,0,fermion.x,fermion.y,19);
+    glow.addColorStop(0,`${meta.color}88`);
+    glow.addColorStop(1,`${meta.color}00`);
+    bctx.fillStyle=glow;
+    bctx.beginPath(); bctx.arc(fermion.x,fermion.y,19,0,Math.PI*2); bctx.fill();
+    bctx.fillStyle=meta.color;
+    bctx.beginPath(); bctx.arc(fermion.x,fermion.y,8,0,Math.PI*2); bctx.fill();
+    bctx.fillStyle='#fff';
+    bctx.font='bold 10px JetBrains Mono, monospace';
+    bctx.textAlign='center';
+    bctx.textBaseline='middle';
+    bctx.fillText(meta.sym,fermion.x,fermion.y);
+    bctx.textBaseline='alphabetic';
   });
 
   // Mesons: two quarks joined by a bright gluon string
@@ -1510,11 +1622,15 @@ document.querySelectorAll('.lang-pill').forEach(b=>{
   b.addEventListener('click',()=>{
     const lang = b.dataset.lang;
     try { localStorage.setItem('pz-lang', lang); } catch(_){}
+    try { localStorage.setItem('physics.lang', lang); } catch(_){}
     applyI18n(lang);
     updateMotionControl();
   });
 });
-const savedLang = (function(){ try { return localStorage.getItem('pz-lang'); } catch(_){ return null; } })();
+const savedLang = (function(){
+  try { return localStorage.getItem('physics.lang') || localStorage.getItem('pz-lang'); }
+  catch(_){ return null; }
+})();
 const browserLang = (navigator.language||'').toLowerCase();
 const initLang = savedLang || (browserLang.startsWith('zh') ? 'zh-CN' : 'en');
 applyI18n(initLang);
@@ -1522,6 +1638,33 @@ ensureContentReferences('chart');
 showParticle('electron');
 stagePanelRender('chart');
 document.body.classList.remove('render-booting');
+const initialRoute = new URLSearchParams(location.search);
+if(initialRoute.has('tab') || initialRoute.has('demo') || initialRoute.has('preset')){
+  setTimeout(()=>{
+    const requestedTab = initialRoute.get('tab');
+    const requestedTabButton = requestedTab && document.querySelector(`.tab[data-tab="${requestedTab}"]`);
+    if(requestedTabButton) requestedTabButton.click();
+    if(initialRoute.get('demo')==='detector'){
+      document.querySelector('.lab-subtab[data-lab-sub="basics"]')?.click();
+      const revealDetector=()=>{
+        const detector=document.getElementById('lab-detector');
+        detector?.scrollIntoView({behavior:'auto',block:'start'});
+        detector?.focus({preventScroll:true});
+      };
+      requestAnimationFrame(revealDetector);
+      setTimeout(revealDetector,250);
+    }
+    if(initialRoute.get('preset')==='helium4'){
+      parts=[...Array(6).fill('u'),...Array(6).fill('d')];
+      document.querySelector('.tab[data-tab="builder"]').click();
+      requestAnimationFrame(()=>{
+        resizeBuild();
+        buildComposites();
+        buildStart();
+      });
+    }
+  },0);
+}
 
 /* ================ FORCES TAB: animated interaction diagrams ================ */
 /* Each diagram is an SVG. We build a stable structure of static "shape" paths

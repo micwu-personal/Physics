@@ -12,6 +12,14 @@
 <body>
   <div id="bg-stars"></div>
   <canvas id="bgCanvas"></canvas>
+  <div class="control-row" aria-label="Page controls" data-i18n-aria-label="aria.controls">
+    <div class="lang-switch">
+      <a class="journey-home" href="../index.html#origin" data-i18n="journey.home">Story</a>
+      <button id="motionToggle" class="motion-pill" type="button">⏸ Pause animations</button>
+      <button class="lang-pill active" data-lang="en">EN</button>
+      <button class="lang-pill" data-lang="zh-CN">中文</button>
+    </div>
+  </div>
 
   <header class="hero">
     <div class="hero-inner">
@@ -21,14 +29,7 @@
     </div>
   </header>
 
-  <nav class="tabs">
-    <div class="control-row">
-      <div class="lang-switch">
-        <button id="motionToggle" class="motion-pill" type="button">⏸ Pause animations</button>
-        <button class="lang-pill active" data-lang="en">EN</button>
-        <button class="lang-pill" data-lang="zh-CN">中文</button>
-      </div>
-    </div>
+  <nav class="tabs" aria-label="Big Bang sections" data-i18n-aria-label="aria.sections">
     <button class="tab active" data-tab="timeline" data-i18n="tab.timeline">Cosmic Timeline</button>
     <button class="tab" data-tab="machine" data-i18n="tab.machine">Time Machine</button>
     <button class="tab" data-tab="composition" data-i18n="tab.composition">Composition</button>
@@ -44,7 +45,16 @@
         <h2 data-i18n="timeline.h2">Cosmic Timeline</h2>
         <p data-i18n="timeline.desc">A model-based timeline from the earliest times physics can discuss. Click a card to zoom in.</p>
       </div>
+      <figure class="evidence-media">
+        <img src="../assets/media/WMAP_2012_1280.png" alt="False-color all-sky cosmic microwave background temperature map measured by WMAP" data-i18n-alt="alt.wmap" loading="lazy">
+        <figcaption><span class="rep-badge reconstruction" data-i18n="timeline.media.kind">Data map, not visible light</span> <span data-i18n="timeline.media.caption">WMAP's nine-year map shows measured microwave temperature fluctuations around 2.725 K. It is a sky projection and processed data product, not a photograph of the early universe.</span> <a href="https://commons.wikimedia.org/wiki/File:WMAP_2012.png" target="_blank" rel="noopener noreferrer" data-i18n="timeline.media.source">Source / public domain</a></figcaption>
+      </figure>
       <div id="timelineWrap" class="timeline-wrap"></div>
+      <aside class="journey-bridge">
+        <span class="rep-badge schematic" data-i18n="journey.bridge.kind">Continue the causal story</span>
+        <h3 data-i18n="journey.bridge.title">Cooling makes particles, nuclei, atoms, and eventually stars possible.</h3>
+        <div><a href="../particle-zoo/index.html?tab=chart" data-i18n="journey.bridge.particles">Next: particles and forces</a><a href="../periodic-table/index.html?overlay=origin&amp;element=2" data-i18n="journey.bridge.elements">Then: where elements are forged</a></div>
+      </aside>
     </section>
 
     <!-- Time Machine -->
@@ -54,7 +64,8 @@
         <p data-i18n="machine.desc">Drag the logarithmic slider from the early universe into a model-dependent far future.</p>
       </div>
       <div class="machine">
-        <canvas id="machineCanvas"></canvas>
+        <canvas id="machineCanvas" aria-label="Teaching schematic of cosmic expansion and changing contents" data-i18n-aria-label="aria.machine"></canvas>
+        <div class="viz-status"><span class="rep-badge schematic" data-i18n="machine.rep.kind">Teaching schematic</span> <span data-i18n="machine.rep.caption">The glowing disk is not the edge, shape, or size of the universe. Radius, dot count, color, and speed are visual encodings; use the adjacent values for the model-based quantities.</span></div>
         <div class="machine-panel">
           <div class="mp-time" id="mpTime">3 min</div>
           <div class="mp-epoch" id="mpEpoch">—</div>

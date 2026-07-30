@@ -66,6 +66,29 @@ test('animation policy requires every lifecycle condition', () => {
   ]) assert.equal(core.shouldAnimate(blocked), false);
 });
 
+test('nucleon planner favors stable complete groupings over Delta baryons', () => {
+  const helium = core.nucleonPlans(6, 6);
+  assert.deepEqual(
+    {
+      protons: helium[0].protons,
+      neutrons: helium[0].neutrons,
+      deltaCount: helium[0].deltaCount,
+      freeCount: helium[0].freeCount,
+    },
+    {protons: 2, neutrons: 2, deltaCount: 0, freeCount: 0}
+  );
+  assert.ok(helium.some(plan => plan.protons === 3 && plan.deltaMinus === 1));
+});
+
+test('nucleon planner covers proton, neutron, Delta, and invalid inputs', () => {
+  assert.equal(core.nucleonPlans(2, 1)[0].protons, 1);
+  assert.equal(core.nucleonPlans(1, 2)[0].neutrons, 1);
+  assert.equal(core.nucleonPlans(3, 0)[0].deltaPlus, 1);
+  assert.equal(core.nucleonPlans(12, 6)[0].protons, 6);
+  assert.throws(() => core.nucleonPlans(-1, 2), RangeError);
+  assert.throws(() => core.nucleonPlans(1.5, 2), RangeError);
+});
+
 test('key constants match the displayed scientific baseline', () => {
   assert.deepEqual(core.KEY_CONSTANTS, {
     electronMassMeV: 0.51099895,

@@ -135,11 +135,78 @@
     return 'natural';
   }
 
+  function reactionTimeline(elapsedMs, animationMs = 5500, sourceHoldMs = 500){
+    if (![elapsedMs, animationMs, sourceHoldMs].every(Number.isFinite) || animationMs <= 0 || sourceHoldMs < 0) {
+      throw new RangeError('Reaction timing values must be finite and non-negative');
+    }
+    const elapsed = Math.max(0, elapsedMs);
+    return {
+      progress: elapsed <= sourceHoldMs ? 0 : Math.min(1, (elapsed - sourceHoldMs) / animationMs),
+      holdingSource: elapsed < sourceHoldMs,
+      complete: elapsed >= sourceHoldMs + animationMs
+    };
+  }
+
+  function reactionEffects(reaction){
+    const record = reaction || {};
+    const explicit = record.effects || {};
+    const equation = String(record.eq || '');
+    return {
+      gas: explicit.gas ?? /↑/.test(equation),
+      precipitate: explicit.precipitate ?? /↓/.test(equation),
+      heat: Boolean(explicit.heat),
+      light: Boolean(explicit.light),
+      lightColor: explicit.lightColor || null,
+      precipitateColor: explicit.precipitateColor || null,
+      deposition: Boolean(explicit.deposition),
+      depositionColor: explicit.depositionColor || null
+    };
+  }
+
+  function projectOrbitalLobe(direction, radius){
+    if (!Array.isArray(direction) || direction.length !== 3 || !direction.every(Number.isFinite) ||
+        !Number.isFinite(radius) || radius <= 0) {
+      throw new RangeError('A finite 3D direction and positive radius are required');
+    }
+    const length = Math.hypot(...direction) || 1;
+    const dir = direction.map(value=>value/length);
+    const screenLength = Math.hypot(dir[0],dir[1]);
+    const angle = screenLength > 1e-6 ? Math.atan2(-dir[1],dir[0]) : 0;
+    const depthScale = 1 + dir[2] * 0.22;
+    const semiMinor = radius * 0.28 * depthScale;
+    const projectedAxis = radius * 0.52 * screenLength * depthScale;
+    return {
+      angle,
+      depthScale,
+      screenLength,
+      semiMinor,
+      semiMajor: Math.max(semiMinor, Math.hypot(projectedAxis, semiMinor * Math.abs(dir[2]))),
+      centreDistance: radius * 0.48 * screenLength * depthScale
+    };
+  }
+
+  function advanceActiveTime(elapsedMs, lastTimestamp, timestamp, resumed = false, maxFrameGapMs = 100){
+    if (![elapsedMs, timestamp, maxFrameGapMs].every(Number.isFinite) || elapsedMs < 0 || maxFrameGapMs < 0 ||
+        (lastTimestamp != null && !Number.isFinite(lastTimestamp))) {
+      throw new RangeError('Animation clock values must be finite and non-negative');
+    }
+    if (lastTimestamp == null || resumed) return {elapsedMs,lastTimestamp:timestamp};
+    const frameGap=Math.max(0,timestamp-lastTimestamp);
+    return {
+      elapsedMs:elapsedMs+Math.min(frameGap,maxFrameGapMs),
+      lastTimestamp:timestamp
+    };
+  }
+
   return Object.freeze({
+    advanceActiveTime,
     shellCountsFromConfig,
     parseFormula,
     parseReactionSide,
+    projectOrbitalLobe,
     reactionBalance,
+    reactionEffects,
+    reactionTimeline,
     isAnimationAllowed,
     radioactivityClass
   });

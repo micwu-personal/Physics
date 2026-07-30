@@ -28,11 +28,12 @@ let currentHybrid = null;
 
 /* Global motion preference: system default with an explicit persisted override. */
 const MOTION_STORAGE_KEY = 'pt-motion';
+const GLOBAL_MOTION_STORAGE_KEY = 'physics.motion';
 const motionParameter = new URLSearchParams(location.search).get('motion');
 let motionMode = (function(){
   if(['play','pause','system'].includes(motionParameter)) return motionParameter;
   try {
-    const saved=localStorage.getItem(MOTION_STORAGE_KEY);
+    const saved=localStorage.getItem(GLOBAL_MOTION_STORAGE_KEY) || localStorage.getItem(MOTION_STORAGE_KEY);
     return ['play','pause'].includes(saved) ? saved : 'system';
   } catch(_){
     return 'system';
@@ -43,12 +44,17 @@ function persistMotionMode(){
     if(motionMode==='system') localStorage.removeItem(MOTION_STORAGE_KEY);
     else localStorage.setItem(MOTION_STORAGE_KEY,motionMode);
   } catch(_){}
+  try {
+    if(motionMode==='system') localStorage.removeItem(GLOBAL_MOTION_STORAGE_KEY);
+    else localStorage.setItem(GLOBAL_MOTION_STORAGE_KEY,motionMode);
+  } catch(_){}
 }
 if(['play','pause','system'].includes(motionParameter)) persistMotionMode();
 
 /* Animation lifecycle: render a static first frame, then run only while visible. */
 const animationVisibility = new WeakMap();
 const pausedAnimationFrames = new Map();
+let animationResumeVersion=0;
 const reducedMotionQuery = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : null;
 function motionIsPaused(){
   return motionMode==='pause' || (motionMode==='system' && Boolean(reducedMotionQuery && reducedMotionQuery.matches));
@@ -108,7 +114,7 @@ function resumeAnimation(element){
   const callback = pausedAnimationFrames.get(element);
   if (!callback || !PeriodicScience.isAnimationAllowed(animationStateFor(element))) return;
   pausedAnimationFrames.delete(element);
-  requestAnimationFrame(callback);
+  requestAnimationFrame(timestamp=>callback(timestamp,true));
 }
 function refreshAnimationVisibility(element){
   const rect=element.getBoundingClientRect();
@@ -129,7 +135,10 @@ function disposeAnimatedElement(element){
   animationVisibility.delete(element);
   if (animationObserver) animationObserver.unobserve(element);
 }
-document.addEventListener('visibilitychange', resumeVisibleAnimations);
+document.addEventListener('visibilitychange',()=>{
+  animationResumeVersion++;
+  resumeVisibleAnimations();
+});
 if (reducedMotionQuery && reducedMotionQuery.addEventListener) {
   reducedMotionQuery.addEventListener('change', ()=>{
     updateMotionControl();
@@ -353,11 +362,11 @@ function refreshDetail(){
       </div>
     `).join('') + `<div id="rxAnimBox"><canvas id="rxAnimCanvas"></canvas></div>`;
     rxEl.querySelectorAll('.rx-play').forEach(b=>{
-      b.addEventListener('click',()=>animateReaction(reactions[+b.dataset.i].eq));
+      b.addEventListener('click',()=>animateReaction(reactions[+b.dataset.i]));
     });
 
     // 3D molecule viewers for formulas that have MOLECULE_3D data
-    render3DViewers(reactions);
+    render3DViewers(reactions,el.symbol);
   } else {
     rxBlock.style.display='none';
   }
@@ -395,11 +404,11 @@ function refreshDetail(){
 }
 
 /* ================ ORBITAL & HYBRIDIZATION ENGINE ================
-   Each entry describes a real quantum-mechanical shape as a list of
+   Each entry describes qualitative isosurface symmetry as a list of
    "lobes". Each lobe: {dir:[x,y,z], phase:+1|-1, kind:'lobe'|'torus'|'sphere', size?}
    Rendering is done in 3D with perspective projection so p, d, f
-   orbitals look correct, and hybrid sets (sp, sp², sp³, sp³d,
-   sp³d², d²sp³, dsp²) point in true geometric directions.
+   orbitals retain 3D volume, and hybrid/legacy geometry sets point in
+   their conventional directions. These are model surfaces, not photos.
 ================================================================= */
 const ORBITAL_SHAPES = {
   // Atomic orbitals ---------------------------------------------
@@ -424,15 +433,23 @@ const ORBITAL_SHAPES = {
               {kind:'lobe', dir:[-1,+1,+1], phase:-1}, {kind:'lobe', dir:[+1,-1,+1], phase:-1},
               {kind:'lobe', dir:[+1,+1,-1], phase:-1}, {kind:'lobe', dir:[-1,-1,-1], phase:-1} ],
   // Hybrid orbitals (correct geometries) ------------------------
-  'sp':     [ {kind:'lobe', dir:[+1,0,0], phase:+1}, {kind:'lobe', dir:[-1,0,0], phase:+1} ],
+  'sp':     [ {kind:'lobe', dir:[+1,0,0], phase:+1}, {kind:'lobe', dir:[-1,0,0], phase:+1},
+              {kind:'lobe', dir:[-1,0,0], phase:-1, size:0.3}, {kind:'lobe', dir:[+1,0,0], phase:-1, size:0.3} ],
   'sp2':    [ {kind:'lobe', dir:[Math.cos(0),Math.sin(0),0], phase:+1},
+              {kind:'lobe', dir:[Math.cos(Math.PI),Math.sin(Math.PI),0], phase:-1, size:0.3},
               {kind:'lobe', dir:[Math.cos(2*Math.PI/3),Math.sin(2*Math.PI/3),0], phase:+1},
-              {kind:'lobe', dir:[Math.cos(4*Math.PI/3),Math.sin(4*Math.PI/3),0], phase:+1} ],
+              {kind:'lobe', dir:[Math.cos(5*Math.PI/3),Math.sin(5*Math.PI/3),0], phase:-1, size:0.3},
+              {kind:'lobe', dir:[Math.cos(4*Math.PI/3),Math.sin(4*Math.PI/3),0], phase:+1},
+              {kind:'lobe', dir:[Math.cos(Math.PI/3),Math.sin(Math.PI/3),0], phase:-1, size:0.3} ],
   'sp3':    [ // tetrahedral: (1,1,1),(-1,-1,1),(-1,1,-1),(1,-1,-1)
               {kind:'lobe', dir:[+1,+1,+1], phase:+1},
+              {kind:'lobe', dir:[-1,-1,-1], phase:-1, size:0.3},
               {kind:'lobe', dir:[-1,-1,+1], phase:+1},
+              {kind:'lobe', dir:[+1,+1,-1], phase:-1, size:0.3},
               {kind:'lobe', dir:[-1,+1,-1], phase:+1},
-              {kind:'lobe', dir:[+1,-1,-1], phase:+1} ],
+              {kind:'lobe', dir:[+1,-1,+1], phase:-1, size:0.3},
+              {kind:'lobe', dir:[+1,-1,-1], phase:+1},
+              {kind:'lobe', dir:[-1,+1,+1], phase:-1, size:0.3} ],
   'sp3d':   [ // trigonal bipyramidal: 3 equatorial + 2 axial
               {kind:'lobe', dir:[Math.cos(0),Math.sin(0),0], phase:+1},
               {kind:'lobe', dir:[Math.cos(2*Math.PI/3),Math.sin(2*Math.PI/3),0], phase:+1},
@@ -576,8 +593,8 @@ function descriptionForOrbital(h){
     sp: {
       title: zh ? 'sp 杂化 — 直线形 (180°)' : 'sp hybridization — linear (180°)',
       body: zh
-        ? '一个 s 与一个 p 轨道等权重线性组合,产生 <b>2 个</b>大小相同、指向相反(180°)的杂化轨道。剩下的 2 个 p 轨道保持不变,常用来形成 π 键。'
-        : 'Linear combination of one s and one p orbital, giving <b>2</b> equivalent hybrid orbitals pointing 180° apart. The remaining two p orbitals stay pure and typically form π bonds.'
+        ? '一个 s 与一个 p 轨道等权重线性组合,产生 <b>2 个</b>指向相反(180°)的等价杂化轨道。每个轨道都有一个大成键瓣和一个反相的小背瓣（3D 模型中已包含；重叠时可能被遮住）。剩下的 2 个 p 轨道保持不变,常用来形成 π 键。'
+        : 'Linear combination of one s and one p orbital, giving <b>2</b> equivalent hybrid orbitals pointing 180° apart. Each has a large bonding lobe and a small opposite-phase back lobe (included in the 3D model; overlapping lobes can partly hide it). The remaining two p orbitals stay pure and typically form π bonds.'
     },
     sp2: {
       title: zh ? 'sp² 杂化 — 平面三角形 (120°)' : 'sp² hybridization — trigonal planar (120°)',
@@ -760,7 +777,7 @@ function drawOrbital(h){
       }
     });
     // Back-to-front sort
-    items.sort((a,b)=>a.z - b.z);
+    items.sort((a,b)=>a.z - b.z || a.size - b.size);
 
     // Draw
     items.forEach(it=>{
@@ -827,41 +844,27 @@ function rotate3D(v, ry, rx){
   const z2 = y*sx + z*cx;
   return [x, y2, z2];
 }
-/* Draw a single teardrop lobe from origin (nucleus) in direction dir (rotated) */
+/* Draw a volumetric lobe as the orthographic projection of a prolate spheroid. */
 function drawLobe3D(ctx, cx, cy, R, dir, pos){
-  // Screen coordinates: x maps to +x, y maps to -y (invert), z is depth
-  const sx = cx + dir[0] * R * 0.05;  // start at nucleus (offset a tiny bit)
-  const sy = cy - dir[1] * R * 0.05;
-  const tx = cx + dir[0] * R;
-  const ty = cy - dir[1] * R;
-  // Perspective scale based on z (closer = bigger)
-  const persp = 1 + dir[2] * 0.35;
-  const width = R * 0.32 * persp;
-  const length = Math.hypot(tx-sx, ty-sy);
-  const angle = Math.atan2(ty-sy, tx-sx);
+  const {angle,semiMajor,semiMinor,centreDistance}=PeriodicScience.projectOrbitalLobe(dir,R);
+  // Looking down the lobe axis reveals a circular cross-section instead of
+  // collapsing the 3D probability/model volume into a line or sheet.
+  const x = cx + Math.cos(angle) * centreDistance;
+  const y = cy + Math.sin(angle) * centreDistance;
 
-  // Draw teardrop as an ellipse offset from nucleus
   ctx.save();
-  ctx.translate((sx+tx)/2, (sy+ty)/2);
+  ctx.translate(x,y);
   ctx.rotate(angle);
-  // Radial gradient: pick sharper falloff away from tip
-  const g = ctx.createRadialGradient(length*0.15, 0, 0, length*0.15, 0, length*0.7);
+  const g = ctx.createRadialGradient(semiMajor*0.15, -semiMinor*0.12, 0, 0, 0, semiMajor);
   g.addColorStop(0, pos.core);
-  g.addColorStop(0.5, pos.mid);
+  g.addColorStop(0.58, pos.mid);
   g.addColorStop(1, pos.edge);
   ctx.fillStyle = g;
   ctx.beginPath();
-  // Teardrop-like ellipse - use quadratic curves
-  ctx.moveTo(-length*0.5, 0);
-  ctx.quadraticCurveTo(-length*0.5, -width, length*0.15, -width);
-  ctx.quadraticCurveTo(length*0.55, -width*0.4, length*0.55, 0);
-  ctx.quadraticCurveTo(length*0.55, width*0.4, length*0.15, width);
-  ctx.quadraticCurveTo(-length*0.5, width, -length*0.5, 0);
-  ctx.closePath();
+  ctx.ellipse(0,0,semiMajor,semiMinor,0,0,Math.PI*2);
   ctx.fill();
-  // Rim outline
   ctx.strokeStyle = pos.stroke;
-  ctx.lineWidth = 0.6;
+  ctx.lineWidth = 0.8;
   ctx.stroke();
   ctx.restore();
 }
@@ -1470,7 +1473,10 @@ function pairAtoms(left, right){
 }
 
 /* ---- 5. main animate ---- */
-function animateReaction(eq){
+function animateReaction(reactionInput){
+  const reaction=typeof reactionInput==='string' ? {eq:reactionInput} : reactionInput;
+  const eq=reaction.eq;
+  const effects=PeriodicScience.reactionEffects(reaction);
   const box = document.getElementById('rxAnimBox');
   box.classList.add('on');
   const canvas = document.getElementById('rxAnimCanvas');
@@ -1478,7 +1484,7 @@ function animateReaction(eq){
   const rct = canvas.getBoundingClientRect();
   if(rct.width<20 || rct.height<20) {
     // re-try after layout
-    requestAnimationFrame(()=>animateReaction(eq));
+    requestAnimationFrame(()=>animateReaction(reaction));
     return;
   }
   canvas.width = rct.width*devicePixelRatio;
@@ -1507,11 +1513,26 @@ function animateReaction(eq){
 
   const pairs = pairAtoms(leftSide.atoms, rightSide.atoms);
 
-  const start = performance.now();
-  const dur = 5500;
+  const animationMs = 5500;
+  const sourceHoldMs = 500;
+  let activeClock={elapsedMs:0,lastTimestamp:null};
+  let seenResumeVersion=animationResumeVersion;
+  window.PT_REACTION_DEBUG={eq,effects,sourceHoldMs,animationMs,progress:0,holdingSource:true};
 
-  function frame(){
-    const p = Math.min(1, (performance.now()-start)/dur);
+  function frame(timestamp=performance.now(),resumed=false){
+    if(seenResumeVersion!==animationResumeVersion){
+      resumed=true;
+      seenResumeVersion=animationResumeVersion;
+    }
+    // Large rAF gaps represent a paused/hidden tab or scheduler suspension.
+    // Slow the teaching sequence instead of skipping stages.
+    activeClock=PeriodicScience.advanceActiveTime(
+      activeClock.elapsedMs,activeClock.lastTimestamp,timestamp,resumed
+    );
+    const timeline=PeriodicScience.reactionTimeline(activeClock.elapsedMs,animationMs,sourceHoldMs);
+    window.PT_REACTION_DEBUG.progress=timeline.progress;
+    window.PT_REACTION_DEBUG.holdingSource=timeline.holdingSource;
+    const p=timeline.progress;
     ctx.clearRect(0,0,W,H);
 
     // Determine phase
@@ -1571,14 +1592,82 @@ function animateReaction(eq){
       drawAtom(ctx, x, y, sym, alpha);
     });
 
-    // Central collision flash
-    if(p>0.4 && p<0.55){
-      const flashA = (0.5 - Math.abs(p-0.475))*4;
-      const g = ctx.createRadialGradient(cx,cyC,0,cx,cyC,scatterR*2);
-      g.addColorStop(0, `rgba(255,255,200,${flashA*0.7})`);
-      g.addColorStop(1, 'rgba(255,255,200,0)');
+    // Observable-effect overlays are data-driven. Their icons remain schematic;
+    // a reaction without emitted light never receives an invented white flash.
+    if(effects.heat && p>0.25 && p<0.9){
+      const heatA=Math.sin(((p-0.25)/0.65)*Math.PI)*0.32;
+      const g=ctx.createRadialGradient(cx,cyC,0,cx,cyC,scatterR*2.4);
+      g.addColorStop(0,`rgba(255,126,40,${heatA})`);
+      g.addColorStop(1,'rgba(255,126,40,0)');
       ctx.fillStyle=g;
       ctx.beginPath(); ctx.arc(cx,cyC,scatterR*2,0,Math.PI*2); ctx.fill();
+    }
+    if(effects.light && p>0.34 && p<0.72){
+      const lightA=Math.sin(((p-0.34)/0.38)*Math.PI);
+      const color=effects.lightColor || '#fff4c2';
+      ctx.save();
+      ctx.translate(cx,cyC);
+      ctx.strokeStyle=color;
+      ctx.globalAlpha=lightA*0.75;
+      ctx.lineWidth=2;
+      for(let ray=0;ray<16;ray++){
+        const a=ray*Math.PI/8;
+        const inner=scatterR*(0.8+0.08*Math.sin(ray));
+        const outer=scatterR*(1.45+0.12*Math.cos(ray*2));
+        ctx.beginPath();
+        ctx.moveTo(Math.cos(a)*inner,Math.sin(a)*inner);
+        ctx.lineTo(Math.cos(a)*outer,Math.sin(a)*outer);
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+    if(effects.gas && p>0.58){
+      ctx.save();
+      ctx.strokeStyle='rgba(200,235,255,.75)';
+      ctx.fillStyle='rgba(160,215,255,.10)';
+      for(let bubble=0;bubble<9;bubble++){
+        const local=(p-0.58)*1.9+bubble*0.13;
+        const x=rightX-42+(bubble%3)*22+Math.sin(local*9+bubble)*5;
+        const y=H-28-(local%1)*110;
+        const radius=3+(bubble%3)*1.5;
+        ctx.beginPath(); ctx.arc(x,y,radius,0,Math.PI*2); ctx.fill(); ctx.stroke();
+      }
+      ctx.restore();
+    }
+    if(effects.precipitate && p>0.64){
+      ctx.save();
+      ctx.fillStyle=effects.precipitateColor || 'rgba(220,224,232,.82)';
+      for(let grain=0;grain<18;grain++){
+        const local=Math.min(1,(p-0.64)*2.8+grain*0.018);
+        const x=rightX-70+(grain%9)*17;
+        const y=cyC-18+local*(H-cyC-18)+(grain%3)*2;
+        ctx.beginPath(); ctx.arc(x,y,2.3+(grain%2),0,Math.PI*2); ctx.fill();
+      }
+      ctx.restore();
+    }
+    if(effects.deposition && p>0.58){
+      const growth=Math.min(1,(p-0.58)/0.32);
+      ctx.save();
+      ctx.translate(rightX,cyC+42);
+      ctx.strokeStyle='rgba(184,116,72,.9)';
+      ctx.lineWidth=5;
+      ctx.beginPath(); ctx.moveTo(-70,0); ctx.lineTo(70,0); ctx.stroke();
+      ctx.strokeStyle=effects.depositionColor || '#d8d8d8';
+      ctx.fillStyle=effects.depositionColor || '#d8d8d8';
+      ctx.lineWidth=1.4;
+      for(let crystal=0;crystal<11;crystal++){
+        const x=-58+crystal*12;
+        const height=(8+(crystal%4)*4)*growth;
+        ctx.beginPath();
+        ctx.moveTo(x,0);
+        ctx.lineTo(x-4,-height*0.55);
+        ctx.lineTo(x,-height);
+        ctx.lineTo(x+4,-height*0.55);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+      }
+      ctx.restore();
     }
 
     // Arrow (always visible, brightens during middle)
@@ -1596,7 +1685,8 @@ function animateReaction(eq){
     ctx.fillText(eq, W/2, 16);
 
     // Phase label at bottom
-    const phaseName = p<0.2 ? (window.CURRENT_LANG==='zh-CN'?'反应物接近':'reactants approach')
+    const phaseName = timeline.holdingSource ? (window.CURRENT_LANG==='zh-CN'?'观察反应物 (保持 0.5 秒)':'inspect reactants (0.5 s hold)')
+                    : p<0.2 ? (window.CURRENT_LANG==='zh-CN'?'反应物接近':'reactants approach')
                     : p<0.5 ? (window.CURRENT_LANG==='zh-CN'?'键断裂':'bonds break')
                     : p<0.8 ? (window.CURRENT_LANG==='zh-CN'?'键重组':'bonds re-form')
                     :         (window.CURRENT_LANG==='zh-CN'?'生成物分离':'products separate');
@@ -1605,14 +1695,34 @@ function animateReaction(eq){
     ctx.textAlign='center';
     ctx.fillText(phaseName, W/2, H-8);
 
-    if(p<1) rxRAF = scheduleActiveFrame(canvas, frame);
+    const effectLabels=[];
+    if(effects.gas) effectLabels.push(window.CURRENT_LANG==='zh-CN'?'气体产物 (气泡为示意)':'gas product (bubbles schematic)');
+    if(effects.precipitate) effectLabels.push(window.CURRENT_LANG==='zh-CN'?'沉淀形成':'precipitate forms');
+    if(effects.deposition) effectLabels.push(window.CURRENT_LANG==='zh-CN'?'固体在表面沉积':'solid deposits on a surface');
+    if(effects.heat) effectLabels.push(window.CURRENT_LANG==='zh-CN'?'放热':'heat released');
+    if(effects.light) effectLabels.push(window.CURRENT_LANG==='zh-CN'?'发光':'light emitted');
+    if(effectLabels.length){
+      ctx.fillStyle='rgba(255,255,255,.72)';
+      ctx.font='9px JetBrains Mono, monospace';
+      ctx.textAlign='left';
+      ctx.fillText(effectLabels.join(' · '),10,34);
+    }
+
+    if(!timeline.complete) rxRAF = scheduleActiveFrame(canvas, frame);
     else {
       // Freeze on final product state, replay after 1.5 s
       rxReplayTimer = setTimeout(()=>{
-        rxRAF = scheduleActiveFrame(canvas, ()=>animateReaction(eq));
+        rxRAF = scheduleActiveFrame(canvas, ()=>animateReaction(reaction));
       }, 1500);
     }
   }
+  window.PT_REACTION_DEBUG.advanceTo=progress=>{
+    activeClock={
+      elapsedMs:sourceHoldMs+progress*animationMs,
+      lastTimestamp:performance.now()
+    };
+    frame(activeClock.lastTimestamp,true);
+  };
   frame();
 }
 
@@ -1834,21 +1944,63 @@ const SHAPE_LABELS = {
   'H2SO4':['tetrahedral','四面体'],
   'NaCl':['rock-salt lattice','岩盐晶格'],
   'C_diamond':['tetrahedral network','四面体网络'],
-  'Fe2O3':['ionic oxide','离子型氧化物']
+  'Fe2O3':['corundum fragment','刚玉型片段'],
+  'H2':['linear diatomic','直线形双原子'],
+  'N2':['linear, triple bond','直线形三键'],
+  'O2':['linear diatomic','直线形双原子'],
+  'F2':['linear diatomic','直线形双原子'],
+  'Cl2':['linear diatomic','直线形双原子'],
+  'HCl':['linear polar molecule','直线形极性分子'],
+  'NO':['linear radical','直线形自由基'],
+  'NO2':['bent radical','弯曲形自由基'],
+  'O3':['bent','弯曲形'],
+  'SO2':['bent','弯曲形'],
+  'H2S':['bent','弯曲形'],
+  'LiH':['pair / lattice caveat','原子对 / 晶格说明'],
+  'LiOH':['formula-unit view','化学式单元视图'],
+  'Li2O':['ionic fragment','离子晶格片段'],
+  'NaOH':['formula-unit view','化学式单元视图'],
+  'Na2O':['ionic fragment','离子晶格片段'],
+  'BeO':['pair / lattice caveat','原子对 / 晶格说明'],
+  'MgO':['rock-salt pair','岩盐型离子对'],
+  'CaO':['rock-salt pair','岩盐型离子对'],
+  'BCl3':['trigonal planar','平面三角形'],
+  'Al2O3':['corundum fragment','刚玉型片段'],
+  'SiO2':['network tetrahedron','网络四面体'],
+  'P4':['tetrahedral molecule','四面体分子'],
+  'PCl3':['trigonal pyramidal','三角锥形'],
+  'HNO3':['planar nitrate group','平面硝酸根骨架'],
+  'CuO':['lattice formula unit','晶格化学式单元'],
+  'CuCl2':['linear gas monomer','气相直线形单体'],
+  'FeCl2':['linear gas monomer','气相直线形单体'],
+  'AgNO3':['ion-pair view','离子对视图'],
+  'UF6':['octahedral','正八面体'],
+  'UO3':['solid coordination fragment','固体配位片段'],
+  'TiO2':['solid formula-unit view','固体化学式单元'],
+  'ZnO':['wurtzite pair','纤锌矿型离子对'],
+  'B2O3':['borate network fragment','硼酸盐网络片段'],
+  'SiCl4':['tetrahedral','正四面体'],
+  'P4O10':['molecular cage','分子笼']
 };
 
-/* Collect all unique formulas appearing in reactions, look up their 3D data,
-   and render one viewer per known structure. */
-function render3DViewers(reactions){
+/* Prefer an explicit, element-focused structure list. For legacy records,
+   only include formulas that actually contain the selected element. */
+function render3DViewers(reactions,elementSymbol){
   const block = document.getElementById('d3dBlock');
   const grid = document.getElementById('d3d');
   const lang = window.CURRENT_LANG;
   const seen = new Set();
   const known = [];
   reactions.forEach(r=>{
-    const parsed = parseEquation(r.eq);
-    [...parsed.lhs, ...parsed.rhs].forEach(g=>{
-      const f = g.formula;
+    let formulas=r.molecules_3d;
+    if(!Array.isArray(formulas)){
+      const parsed=parseEquation(r.eq);
+      formulas=[...parsed.lhs,...parsed.rhs].map(group=>group.formula).filter(formula=>{
+        try { return Boolean(PeriodicScience.parseFormula(formula)[elementSymbol]); }
+        catch(_){ return false; }
+      });
+    }
+    formulas.forEach(f=>{
       if(!seen.has(f) && MOLECULE_3D[f]){
         seen.add(f); known.push(f);
       }
@@ -1863,10 +2015,14 @@ function render3DViewers(reactions){
   block.style.display='block';
   grid.innerHTML = known.map(f=>{
     const shapeTxt = lang==='zh-CN' ? SHAPE_LABELS[f][1] : SHAPE_LABELS[f][0];
+    const modelNote=MOLECULE_3D[f].representation
+      ? (lang==='zh-CN' ? '局部、气相或化学式单元模型；凝聚态结构可能不同。' : MOLECULE_3D[f].representation)
+      : '';
     return `<div class="mol3d-card" data-formula="${f}">
       <canvas></canvas>
       <div class="mol3d-caption">${prettyFormula(f)}</div>
       <div class="mol3d-shape">${shapeTxt}</div>
+      ${modelNote?`<div class="mol3d-note">${modelNote}</div>`:''}
     </div>`;
   }).join('');
   // Start viewers
@@ -2037,7 +2193,8 @@ function drawBond3D(ctx, a, b, order){
   const width = Math.max(3, Math.min(a.size, b.size) * 0.4);
   // Offset for double/triple bonds
   const nx = -dy/len, ny = dx/len;
-  const offset = order===1 ? [0] : order===2 ? [-width*0.5, width*0.5] : [-width, 0, width];
+  const lineCount = order >= 2.5 ? 3 : order >= 1.75 ? 2 : 1;
+  const offset = lineCount===1 ? [0] : lineCount===2 ? [-width*0.5, width*0.5] : [-width, 0, width];
   offset.forEach(off=>{
     // Half A
     ctx.strokeStyle = darken(ca, 0.15);
@@ -2061,15 +2218,21 @@ document.querySelectorAll('.lang-pill').forEach(b=>{
   b.addEventListener('click',()=>{
     const lang = b.dataset.lang;
     try { localStorage.setItem('pt-lang', lang); } catch(_){}
+    try { localStorage.setItem('physics.lang', lang); } catch(_){}
     applyI18n(lang);
     updateMotionControl();
   });
 });
-const savedLang = (function(){ try { return localStorage.getItem('pt-lang'); } catch(_){ return null; } })();
+const savedLang = (function(){
+  try { return localStorage.getItem('physics.lang') || localStorage.getItem('pt-lang'); }
+  catch(_){ return null; }
+})();
 const browserLang = (navigator.language||'').toLowerCase();
 const initLang = savedLang || (browserLang.startsWith('zh') ? 'zh-CN' : 'en');
 applyI18n(initLang);
 updateMotionControl();
 
-/* Show hydrogen by default */
-openDetail(1);
+const initialRoute=new URLSearchParams(location.search);
+const requestedElement=Number(initialRoute.get('element'));
+window.PT_INITIAL_OVERLAY=initialRoute.get('overlay');
+openDetail(Number.isInteger(requestedElement) && requestedElement>=1 && requestedElement<=118 ? requestedElement : 1);

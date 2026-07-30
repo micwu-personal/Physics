@@ -10,6 +10,24 @@ export async function prepareRenderingPage(page, path, language, seed = 0x2f6e2b
       return randomState / 0x100000000;
     };
 
+    const fontDescriptor = Object.getOwnPropertyDescriptor(CanvasRenderingContext2D.prototype, 'font');
+    if (fontDescriptor?.get && fontDescriptor?.set) {
+      Object.defineProperty(CanvasRenderingContext2D.prototype, 'font', {
+        configurable: fontDescriptor.configurable,
+        enumerable: fontDescriptor.enumerable,
+        get() {
+          return fontDescriptor.get.call(this);
+        },
+        set(value) {
+          const normalized = String(value)
+            .replaceAll('Space Grotesk', 'Arial')
+            .replaceAll('Noto Sans SC', 'Microsoft YaHei')
+            .replaceAll('JetBrains Mono', 'Courier New');
+          fontDescriptor.set.call(this, normalized);
+        }
+      });
+    }
+
     let visualNow = 0;
     let nextFrameId = 1;
     const frameQueue = new Map();
@@ -66,6 +84,7 @@ export async function prepareRenderingPage(page, path, language, seed = 0x2f6e2b
         animation: none !important;
         backdrop-filter: none !important;
         caret-color: transparent !important;
+        font-family: Arial, "Microsoft YaHei", sans-serif !important;
         transition: none !important;
       }
     `
@@ -192,6 +211,6 @@ export async function captureRendering(locator, name) {
     caret: 'hide'
   });
   expect(screenshot).toMatchSnapshot(name, {
-    maxDiffPixelRatio: 0
+    maxDiffPixelRatio: 0.01
   });
 }

@@ -5,6 +5,24 @@ export async function installDeterminism(page) {
       seed = (seed * 1664525 + 1013904223) >>> 0;
       return seed / 0x100000000;
     };
+
+    const fontDescriptor = Object.getOwnPropertyDescriptor(CanvasRenderingContext2D.prototype, 'font');
+    if (fontDescriptor?.get && fontDescriptor?.set) {
+      Object.defineProperty(CanvasRenderingContext2D.prototype, 'font', {
+        configurable: fontDescriptor.configurable,
+        enumerable: fontDescriptor.enumerable,
+        get() {
+          return fontDescriptor.get.call(this);
+        },
+        set(value) {
+          const normalized = String(value)
+            .replaceAll('Space Grotesk', 'Arial')
+            .replaceAll('Noto Sans SC', 'Microsoft YaHei')
+            .replaceAll('JetBrains Mono', 'Courier New');
+          fontDescriptor.set.call(this, normalized);
+        }
+      });
+    }
   });
 }
 
@@ -92,6 +110,7 @@ export async function freezeVisuals(page) {
         animation-delay: 0s !important;
         animation-duration: 0s !important;
         caret-color: transparent !important;
+        font-family: Arial, "Microsoft YaHei", sans-serif !important;
         transition: none !important;
       }
       canvas {

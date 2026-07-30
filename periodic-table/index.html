@@ -13,8 +13,9 @@
 <body>
   <div id="bg-stars"></div>
 
-  <div class="control-row">
+  <div class="control-row" aria-label="Page controls" data-i18n-aria-label="aria.controls">
     <div class="lang-switch">
+      <a class="journey-home" href="../index.html#atoms" data-i18n="journey.home">Story</a>
       <button id="motionToggle" class="motion-pill" type="button">⏸ Pause animations</button>
       <button class="lang-pill active" data-lang="en">EN</button>
       <button class="lang-pill" data-lang="zh-CN">中文</button>
@@ -78,15 +79,30 @@
       <div class="d-viz-row">
         <div class="d-viz-card" data-source-group="shells">
           <h3 data-i18n="detail.section.atom">Bohr Model &amp; Electron Shells</h3>
-          <canvas id="bohrCanvas"></canvas>
+          <canvas id="bohrCanvas" aria-label="Historical Bohr shell model teaching schematic" data-i18n-aria-label="aria.bohr"></canvas>
           <div id="dShellText" class="d-shell-text"></div>
+          <div class="model-caveat">
+            <span class="rep-badge schematic" data-i18n="detail.bohr.kind">Historical teaching model</span>
+            <p data-i18n="detail.bohr.caveat">The rings are not electron paths. Bohr shells are useful for energy levels and electron counting, but a real atom is described by a quantum state and probability density.</p>
+          </div>
+          <details class="quantum-reality">
+            <summary data-i18n="detail.bohr.compare">Compare with a quantum probability map</summary>
+            <figure>
+              <img src="../assets/media/Hydrogen_Density_Plots_1280.png" alt="Calculated hydrogen probability density plots for n equals 1 through 4" data-i18n-alt="alt.hydrogen" loading="lazy">
+              <figcaption><span class="rep-badge model" data-i18n="detail.cloud.kind">Calculated model, not a photograph</span> <span data-i18n="detail.cloud.caption">Brightness shows calculated |psi|^2 for hydrogen. Experiments test this model's predictions; the image is not a literal view through a microscope.</span> <a href="https://commons.wikimedia.org/wiki/File:Hydrogen_Density_Plots.png" target="_blank" rel="noopener noreferrer" data-i18n="detail.media.source">Source / public domain</a></figcaption>
+            </figure>
+          </details>
         </div>
 
         <div class="d-viz-card" data-source-group="orbitals">
           <h3 data-i18n="detail.section.orbital">Orbital Shape &amp; Hybridization</h3>
           <div class="orbital-tabs" id="orbitalTabs"></div>
-          <canvas id="orbitalCanvas"></canvas>
+          <canvas id="orbitalCanvas" aria-label="Rotatable three-dimensional orbital or hybrid model surface" data-i18n-aria-label="aria.orbital"></canvas>
           <div id="dHybridText" class="d-shell-text"></div>
+          <div class="model-caveat">
+            <span class="rep-badge model" data-i18n="detail.orbital.kind">3D probability/model surface</span>
+            <p data-i18n="detail.orbital.caveat">Atomic orbitals are volumetric isosurfaces of a calculated wavefunction; they can look narrow edge-on but are never flat sheets. Hybrid orbitals are mathematical combinations used to rationalize molecular geometry, not photographed objects.</p>
+          </div>
         </div>
       </div>
 
@@ -114,13 +130,14 @@
       <div class="d-block" id="dReactionsBlock" data-source-group="reactions">
         <h3 data-i18n="detail.section.rx">Signature Reactions</h3>
         <div id="dRx" class="rx-list"></div>
+        <div class="d-hint reaction-caveat" data-i18n="detail.rx.caveat">Teaching schematic: atom paths and timing are not a molecular-dynamics simulation. The animation holds reactants for 0.5 s, then conserves atom counts while illustrating bond changes and observable effects.</div>
       </div>
 
       <!-- 3D molecular structures for the reaction molecules -->
       <div class="d-block" id="d3dBlock" data-source-group="molecules" style="display:none">
         <h3 data-i18n="detail.section.mol3d">3D Molecular Structures</h3>
         <div id="d3d" class="mol3d-grid"></div>
-        <div class="d-hint" data-i18n="detail.mol3d.hint">Drag to rotate. Ball-and-stick model with true bond angles.</div>
+        <div class="d-hint" data-i18n="detail.mol3d.hint">Drag to rotate. Approximate reviewed geometry; ionic solids are labeled lattice fragments, not isolated molecules.</div>
       </div>
 
       <!-- Nucleus / isotopes / radioactivity -->

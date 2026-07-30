@@ -18,6 +18,15 @@ const sourcesJs = fs.readFileSync(path.join(ROOT, 'source-registry.js'), 'utf8')
 const dataJs = fs.readFileSync(path.join(ROOT, 'data.js'), 'utf8');
 const appJs  = fs.readFileSync(path.join(ROOT, 'app.js'), 'utf8');
 
+function inlineMedia(source) {
+  return source.replace(/\.\.\/assets\/media\/([A-Za-z0-9_.-]+)/g, (match, filename) => {
+    const filePath = path.join(ROOT, '..', 'assets', 'media', filename);
+    if (!fs.existsSync(filePath)) throw new Error(`Missing media asset: ${filename}`);
+    const mime = path.extname(filename).toLowerCase() === '.jpg' ? 'image/jpeg' : 'image/png';
+    return `data:${mime};base64,${fs.readFileSync(filePath).toString('base64')}`;
+  });
+}
+
 // Feature module sources (F1 overlays, D1 origins, B1 nuclide chart,
 // F2 discovery timeline, C5 ligand-field colors)
 const featCss   = fs.readFileSync(path.join(ROOT, 'features/features.css'), 'utf8');
@@ -44,6 +53,11 @@ let out = html
   .replace(/<script\s+src="features\/nuclide\.js"><\/script>/,  `<script>\n${featNuclide}\n</script>`)
   .replace(/<script\s+src="features\/timeline\.js"><\/script>/, `<script>\n${featTimeline}\n</script>`)
   .replace(/<script\s+src="features\/ligand\.js"><\/script>/,   `<script>\n${featLigand}\n</script>`);
+out = inlineMedia(out);
+out = out
+  .replace(/href="\.\.\/index\.html/g, 'href="https://micwu-personal.github.io/Physics/')
+  .replace(/href="\.\.\/(big-bang|particle-zoo|periodic-table)\/index\.html/g, 'href="https://micwu-personal.github.io/Physics/$1/');
+out = out.replace(/href="\.\.\/(?!https?:)/g, 'href="../../');
 
 // Strip external CDN links (Google Fonts) for offline / self-contained use.
 // CSS already falls back to system fonts.

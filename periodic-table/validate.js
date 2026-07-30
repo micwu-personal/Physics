@@ -110,7 +110,20 @@ function validate(){
   reactions.forEach(reaction => {
     assert.equal(Science.reactionBalance(reaction.eq).balanced, true, `balanced: ${reaction.eq}`);
     assert.ok(reaction.note_en && reaction.note_zh, `localized reaction note: ${reaction.eq}`);
+    (reaction.molecules_3d || []).forEach(formula=>{
+      assert.ok(core.MOLECULE_3D[formula], `3D reaction structure ${formula}: ${reaction.eq}`);
+    });
+    const effects=Science.reactionEffects(reaction);
+    assert.equal(typeof effects.gas,'boolean');
+    assert.equal(typeof effects.precipitate,'boolean');
   });
+  assert.ok(core.MOLECULE_3D.LiOH && core.MOLECULE_3D.Li2O && core.MOLECULE_3D.LiH,
+    'lithium reactions have element-relevant structures');
+  assert.deepEqual(
+    Array.from(core.EXTENDED[3].reactions[1].molecules_3d),
+    ['LiOH','H2'],
+    'lithium water reaction focuses on products rather than unrelated water'
+  );
   Object.entries(core.EXTENDED).forEach(([z, record]) => {
     (record.isotopes || []).forEach(isotope => {
       assert.ok(isotope.s && isotope.ab && typeof isotope.stable === 'boolean', `complete isotope item Z=${z}`);
@@ -207,6 +220,16 @@ function validate(){
   const subscripts = readLiteral(appSource, 'SUBSCRIPTS');
   assert.deepEqual(Object.keys(subscripts), [...'₀₁₂₃₄₅₆₇₈₉'], 'every subscript digit is normalizable');
   const shapeLabels = readLiteral(appSource, 'SHAPE_LABELS');
+  assert.ok(Object.keys(core.MOLECULE_3D).length >= 45, '3D catalogue covers at least 45 reviewed structures or fragments');
+  const bondAngle = (formula, centre, left, right) => {
+    const atoms=core.MOLECULE_3D[formula].atoms;
+    const a=atoms[left], c=atoms[centre], b=atoms[right];
+    const av=[a.x-c.x,a.y-c.y,a.z-c.z], bv=[b.x-c.x,b.y-c.y,b.z-c.z];
+    const cosine=av.reduce((sum,value,index)=>sum+value*bv[index],0)/(Math.hypot(...av)*Math.hypot(...bv));
+    return Math.acos(Math.max(-1,Math.min(1,cosine)))*180/Math.PI;
+  };
+  assert.ok(Math.abs(bondAngle('NO2',0,1,2)-134)<0.5, 'NO2 uses its approximately 134 degree gas-phase angle');
+  assert.ok(Math.abs(bondAngle('H2S',0,1,2)-92.1)<0.5, 'H2S uses its approximately 92.1 degree gas-phase angle');
   Object.entries(core.MOLECULE_3D).forEach(([formula, molecule]) => {
     assert.ok(shapeLabels[formula], `3D shape label for ${formula}`);
     assert.equal(shapeLabels[formula].length, 2, `bilingual shape label for ${formula}`);
@@ -294,6 +317,8 @@ function validate(){
     assert.equal(/<script\s+src=/.test(html), false, 'mobile scripts are inlined');
     assert.equal(/<link\s+rel="stylesheet"/.test(html), false, 'mobile styles are inlined');
     assert.equal(html.includes('fonts.googleapis.com'), false, 'mobile build has no font CDN');
+    assert.ok(html.includes('data:image/png;base64,'), 'mobile build embeds the electron-density evidence image');
+    assert.ok(html.includes('href="https://micwu-personal.github.io/Physics/#atoms"'), 'standalone journey link uses the hosted experience');
     assert.ok(html.includes('CNCTST 术语在线') && html.includes('NNDC NuDat 3'), 'mobile build contains structured references');
     [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].forEach((match, index) => {
       assert.doesNotThrow(()=>new Function(match[1]), `mobile inline script ${index + 1} parses`);

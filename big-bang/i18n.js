@@ -17,9 +17,21 @@ const LOCALES = {
     'motion.play': 'Play animations',
     'motion.pause': 'Pause animations',
     'motion.system': 'Your system reduced-motion preference is pausing animations. Use this button to override it.',
+    'journey.home': 'Story',
+    'aria.controls': 'Page controls',
+    'aria.sections': 'Big Bang sections',
+    'aria.machine': 'Teaching schematic of cosmic expansion and changing contents',
+    'alt.wmap': 'False-color all-sky cosmic microwave background temperature map measured by WMAP',
 
     'timeline.h2': 'Cosmic Timeline',
     'timeline.desc': 'A model-based timeline from the earliest times physics can discuss. Click a card to zoom in.',
+    'timeline.media.kind': 'Data map, not visible light',
+    'timeline.media.caption': 'WMAP\'s nine-year map shows measured microwave temperature fluctuations around 2.725 K. It is a sky projection and processed data product, not a photograph of the early universe.',
+    'timeline.media.source': 'Source / public domain',
+    'journey.bridge.kind': 'Continue the causal story',
+    'journey.bridge.title': 'Cooling makes particles, nuclei, atoms, and eventually stars possible.',
+    'journey.bridge.particles': 'Next: particles and forces',
+    'journey.bridge.elements': 'Then: where elements are forged',
 
     'card.time': 'Time',
     'card.temp': 'Radiation/background temperature',
@@ -38,6 +50,8 @@ const LOCALES = {
     'machine.dominant': 'What exists',
     'machine.epoch': 'Epoch',
     'machine.event': 'Key event',
+    'machine.rep.kind': 'Teaching schematic',
+    'machine.rep.caption': 'The glowing disk is not the edge, shape, or size of the universe. Radius, dot count, color, and speed are visual encodings; use the adjacent values for the model-based quantities.',
 
     'comp.h2': 'What is the Universe made of?',
     'comp.desc': 'The mix has changed dramatically over cosmic history. Today, only 5% of the universe is ordinary matter.',
@@ -85,9 +99,21 @@ const LOCALES = {
     'motion.play': '播放动画',
     'motion.pause': '暂停动画',
     'motion.system': '系统的“减少动态效果”设置已暂停动画。可用此按钮覆盖该设置。',
+    'journey.home': '故事线',
+    'aria.controls': '页面控制',
+    'aria.sections': '大爆炸主题分区',
+    'aria.machine': '宇宙膨胀与成分变化的教学示意图',
+    'alt.wmap': 'WMAP 测得的宇宙微波背景温度涨落全天假彩色图',
 
     'timeline.h2': '宇宙演化时间线',
     'timeline.desc': '从现有物理学能够讨论的最早时期开始的模型时间线。点击卡片可查看细节。',
+    'timeline.media.kind': '数据图，并非可见光',
+    'timeline.media.caption': 'WMAP 九年图显示 2.725 K 附近实测的微波温度涨落。它是全天投影和处理后的数据产品，并非早期宇宙的照片。',
+    'timeline.media.source': '来源 / 公有领域',
+    'journey.bridge.kind': '继续因果故事线',
+    'journey.bridge.title': '冷却使粒子、原子核、原子乃至恒星逐步成为可能。',
+    'journey.bridge.particles': '下一章：粒子与相互作用',
+    'journey.bridge.elements': '再下一章：元素在哪里形成',
 
     'card.time': '时刻',
     'card.temp': '辐射/背景温度',
@@ -106,6 +132,8 @@ const LOCALES = {
     'machine.dominant': '此时存在的东西',
     'machine.epoch': '所处纪元',
     'machine.event': '关键事件',
+    'machine.rep.kind': '教学示意',
+    'machine.rep.caption': '发光圆盘不是宇宙的边缘、形状或大小。半径、点数、颜色与速度均为视觉编码；模型量请以旁边的数值为准。',
 
     'comp.h2': '宇宙由什么构成?',
     'comp.desc': '宇宙的成分随时间发生了剧烈变化。今天,普通物质仅占 5%。',
@@ -457,6 +485,14 @@ function applyI18n(lang){
   document.querySelectorAll('[data-i18n]').forEach(el=>{
     const key = el.getAttribute('data-i18n');
     if(dict[key]!==undefined) el.innerHTML = dict[key];
+  });
+  document.querySelectorAll('[data-i18n-alt]').forEach(el=>{
+    const key=el.getAttribute('data-i18n-alt');
+    if(dict[key]!==undefined) el.setAttribute('alt',dict[key]);
+  });
+  document.querySelectorAll('[data-i18n-aria-label]').forEach(el=>{
+    const key=el.getAttribute('data-i18n-aria-label');
+    if(dict[key]!==undefined) el.setAttribute('aria-label',dict[key]);
   });
   const titleEl = document.querySelector('title');
   if(titleEl?.getAttribute('data-i18n')) document.title = dict[titleEl.getAttribute('data-i18n')] || document.title;
