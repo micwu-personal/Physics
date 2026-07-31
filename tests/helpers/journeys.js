@@ -22,6 +22,18 @@ export async function exerciseTopLevel(page, app) {
     await exercisePhysicsArea(page);
     return;
   }
+  if (app === 'physics-astro') {
+    await exercisePhysicsAstro(page);
+    return;
+  }
+  if (app === 'physics-light') {
+    await exercisePhysicsLight(page);
+    return;
+  }
+  if (app === 'physics-field') {
+    await exercisePhysicsField(page);
+    return;
+  }
   const tabs = page.locator('.tab');
   const count = await tabs.count();
   for (let index = 0; index < count; index++) {
@@ -34,7 +46,7 @@ export async function exerciseTopLevel(page, app) {
 
 export async function exercisePhysicsAtlas(page) {
   const nodes = page.locator('.field-node');
-  await expect(nodes).toHaveCount(21);
+  await expect(nodes).toHaveCount(22);
   await page.locator('.field-node[data-field="mechanics"] button').click();
   await expect(page.locator('#fieldInspector')).toHaveClass(/open/);
   await expect(page.locator('#fieldInspector h3')).not.toHaveText('');
@@ -61,6 +73,46 @@ export async function exercisePhysicsArea(page) {
   await page.locator('#labReset').click();
   await page.locator('#audioToggle').click();
   await expect(page.locator('#audioToggle')).toHaveAttribute('aria-pressed', 'true');
+}
+
+export async function exercisePhysicsAstro(page) {
+  await expect(page.locator('#collapseCanvas')).toBeVisible();
+  for (const selector of ['#collapseProgress', '#starMass', '#limitMass']) {
+    const control = page.locator(selector);
+    await setRange(control, await control.getAttribute('max'));
+    await setRange(control, await control.getAttribute('min'));
+    await setRange(control, await control.getAttribute('value'));
+  }
+  // Step through every mass class so each stellar track is rendered.
+  for (const mass of [0.05, 0.3, 3, 18, 90]) {
+    await setRange(page.locator('#starMass'), mass);
+  }
+  await expect(page.locator('#stageDetail dt')).toHaveCount(3);
+  await page.locator('[data-lang="zh-CN"]').click();
+  await expect(page.locator('html')).toHaveAttribute('lang', 'zh-CN');
+  await page.locator('[data-lang="en"]').click();
+}
+
+export async function exercisePhysicsLight(page) {
+  await expect(page.locator('#cherenkovCanvas')).toBeVisible();
+  for (const selector of ['#betaControl', '#indexControl', '#dispersionControl', '#redshiftControl']) {
+    const control = page.locator(selector);
+    await setRange(control, await control.getAttribute('max'));
+    await setRange(control, await control.getAttribute('min'));
+  }
+  await page.locator('.motion-toggle').click();
+  await page.locator('.motion-toggle').click();
+}
+
+export async function exercisePhysicsField(page) {
+  await expect(page.locator('#fieldName')).not.toHaveText('');
+  await expect(page.locator('#conceptRibbon .concept')).toHaveCount(3);
+  await expect(page.locator('#boundaryGrid .limit')).toHaveCount(2);
+  await expect(page.locator('#relationMap a')).toHaveCount(3);
+  await expect(page.locator('#lineageMap .lineage-column')).toHaveCount(3);
+  await page.locator('[data-lang="zh-CN"]').click();
+  await expect(page.locator('html')).toHaveAttribute('lang', 'zh-CN');
+  await page.locator('[data-lang="en"]').click();
 }
 
 export async function exerciseBigBang(page) {

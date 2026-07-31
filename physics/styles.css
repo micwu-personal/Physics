@@ -512,7 +512,8 @@ button {
 
 .atlas-tools {
   position: sticky;
-  top: 12px;
+  /* Clears the fixed control cluster so filters never sit beneath it. */
+  top: 76px;
   z-index: 35;
   display: grid;
   grid-template-columns: minmax(220px, 1fr) 2fr;
@@ -1018,7 +1019,8 @@ button {
 
 .topic-index {
   position: sticky;
-  top: 10px;
+  /* Clears the fixed control cluster so section links stay clickable. */
+  top: 76px;
   z-index: 30;
   display: flex;
   gap: 6px;
@@ -1380,6 +1382,421 @@ input[type="range"] {
   font-size: 22px;
 }
 
+/* --- astrophysics and light guides --- */
+
+body[data-topic="astrophysics"] {
+  --topic: var(--gold);
+}
+
+body[data-topic="light"] {
+  --topic: var(--pink);
+}
+
+.reason-chain {
+  display: grid;
+  gap: 1px;
+  margin: 0 0 48px;
+  padding: 0;
+  list-style: none;
+  background: var(--line);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.reason-chain li {
+  display: grid;
+  grid-template-columns: 56px minmax(0, 1fr);
+  gap: 0 20px;
+  padding: 24px 26px;
+  background: var(--deep);
+}
+
+.step-mark {
+  grid-row: span 2;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid color-mix(in srgb, var(--topic) 60%, transparent);
+  border-radius: 50%;
+  color: var(--topic);
+  font: 600 15px/1 "JetBrains Mono", monospace;
+}
+
+.reason-chain h3 {
+  margin: 8px 0 0;
+  font-size: 20px;
+  line-height: 1.2;
+}
+
+.reason-chain p {
+  margin: 8px 0 0;
+  max-width: 74ch;
+  color: var(--muted);
+  line-height: 1.65;
+}
+
+.scrub-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(300px, .85fr);
+  gap: clamp(24px, 4vw, 56px);
+  align-items: start;
+  padding: clamp(24px, 4vw, 40px);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--enamel);
+}
+
+.scrub-copy h3 {
+  margin: 0 0 12px;
+  font-size: 24px;
+}
+
+.scrub-copy p {
+  margin: 0;
+  max-width: 62ch;
+  color: var(--muted);
+  line-height: 1.68;
+}
+
+.scrub-control .lab-note {
+  margin-top: 18px;
+}
+
+.case-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.case {
+  display: flex;
+  flex-direction: column;
+  padding: 26px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--deep);
+}
+
+.case h3 {
+  margin: 0 0 6px;
+  font-size: 24px;
+  line-height: 1.15;
+}
+
+.case-scale {
+  margin: 0 0 16px;
+  color: var(--topic);
+  font: 500 12px/1.5 "JetBrains Mono", monospace;
+}
+
+.case > p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.68;
+}
+
+.case-caveat {
+  margin-top: auto;
+  padding-top: 18px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.6;
+  opacity: .92;
+}
+
+.case-figure {
+  position: relative;
+  height: 92px;
+  margin-bottom: 18px;
+  overflow: hidden;
+  border-radius: 10px;
+  background: #070b18;
+}
+
+.case-figure span {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.case-figure[data-shape="solar"] span {
+  border: 1px solid rgba(255, 209, 102, .5);
+  height: 22px;
+}
+
+.case-figure[data-shape="solar"] span:nth-child(1) { width: 70px; }
+.case-figure[data-shape="solar"] span:nth-child(2) { width: 130px; height: 34px; }
+.case-figure[data-shape="solar"] span:nth-child(3) { width: 200px; height: 50px; }
+
+.case-figure[data-shape="rings"] span {
+  border: 1px solid rgba(0, 212, 255, .55);
+  height: 8px;
+}
+
+.case-figure[data-shape="rings"] span:nth-child(1) { width: 150px; }
+.case-figure[data-shape="rings"] span:nth-child(2) { width: 210px; height: 12px; }
+
+.case-figure[data-shape="galaxy"] span {
+  border: 1px solid rgba(139, 114, 255, .5);
+}
+
+.case-figure[data-shape="galaxy"] span:nth-child(1) { width: 230px; height: 26px; }
+.case-figure[data-shape="galaxy"] span:nth-child(2) { width: 150px; height: 18px; }
+.case-figure[data-shape="galaxy"] span:nth-child(3) { width: 58px; height: 58px; border-color: rgba(255, 209, 102, .55); }
+
+.case-figure[data-shape="accretion"] span {
+  border: 1px solid rgba(255, 107, 157, .55);
+}
+
+.case-figure[data-shape="accretion"] span:nth-child(1) { width: 210px; height: 16px; }
+.case-figure[data-shape="accretion"] span:nth-child(2) { width: 26px; height: 26px; background: #05070f; border-color: rgba(238, 242, 255, .7); }
+
+.ladder {
+  margin-top: 30px;
+}
+
+.ladder-title {
+  margin: 0 0 18px;
+  font-size: 26px;
+}
+
+.physics-table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  overflow: hidden;
+  font-size: 14px;
+}
+
+.physics-table th,
+.physics-table td {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  vertical-align: top;
+  line-height: 1.55;
+}
+
+.physics-table thead th {
+  color: var(--topic);
+  background: var(--enamel);
+  font-size: 12px;
+  font-weight: 650;
+  letter-spacing: .02em;
+}
+
+.physics-table tbody td {
+  color: var(--muted);
+  background: var(--deep);
+}
+
+.physics-table tbody td:first-child {
+  color: var(--paper);
+  font-weight: 600;
+}
+
+.physics-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.table-note {
+  margin: 16px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.derivations {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+  margin-top: 30px;
+}
+
+.derivation {
+  display: flex;
+  flex-direction: column;
+  padding: 26px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--deep);
+}
+
+.derivation h3 {
+  margin: 0 0 8px;
+  font-size: 22px;
+  line-height: 1.18;
+}
+
+.derivation-lede {
+  margin: 0 0 18px;
+  color: var(--topic);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.derivation ol {
+  margin: 0;
+  padding-left: 20px;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.66;
+}
+
+.derivation ol li {
+  margin-bottom: 12px;
+  padding-left: 4px;
+}
+
+.derivation ol li::marker {
+  color: var(--topic);
+  font-weight: 700;
+}
+
+.derivation-note {
+  margin: auto 0 0;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.stage-detail {
+  margin: 0;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+}
+
+.stage-detail dt {
+  color: var(--topic);
+  font-size: 11px;
+  font-weight: 650;
+  letter-spacing: .02em;
+}
+
+.stage-detail dd {
+  margin: 5px 0 16px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.stage-detail dd:last-child {
+  margin-bottom: 0;
+}
+
+/* --- shared field guide shell --- */
+
+.field-kicker {
+  margin: 0 0 14px;
+  color: var(--topic);
+  font: 600 12px/1.4 "JetBrains Mono", monospace;
+}
+
+.equation-note {
+  max-width: 58ch;
+  margin: 12px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.lineage-instrument {
+  display: flex;
+  align-items: stretch;
+  padding: 26px 26px 78px;
+}
+
+.lineage-map {
+  display: grid;
+  grid-template-rows: auto auto auto;
+  gap: 18px;
+  width: 100%;
+  align-content: center;
+}
+
+.lineage-heading {
+  margin: 0 0 10px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 650;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.lineage-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.lineage-list a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 38px;
+  padding: 7px 12px;
+  border: 1px solid color-mix(in srgb, var(--field-color, var(--muted)) 52%, transparent);
+  border-radius: 8px;
+  color: var(--paper);
+  background: #0d1530;
+  text-decoration: none;
+  font-size: 13px;
+}
+
+.lineage-list a:hover {
+  border-color: var(--field-color, var(--cyan));
+  background: #142046;
+}
+
+.lineage-empty {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.lineage-column.current {
+  padding: 16px 0;
+  border-block: 1px solid var(--line);
+}
+
+.lineage-current {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  color: var(--field-color, var(--topic));
+}
+
+.lineage-current strong {
+  color: var(--paper);
+  font-size: 22px;
+  line-height: 1.15;
+}
+
+.field-context {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+  margin-top: 34px;
+  padding-top: 26px;
+  border-top: 1px solid var(--line);
+}
+
+.field-context .inspector-links {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
 .relation-map span {
   color: var(--muted);
   font-size: 13px;
@@ -1484,6 +1901,19 @@ input[type="range"] {
     grid-template-columns: 1fr;
   }
 
+  .case-grid,
+  .derivations {
+    grid-template-columns: 1fr;
+  }
+
+  .scrub-panel {
+    grid-template-columns: 1fr;
+  }
+
+  .field-context {
+    grid-template-columns: 1fr;
+  }
+
   .limit,
   .relation-map a {
     min-height: 0;
@@ -1535,7 +1965,10 @@ input[type="range"] {
 
   .hero-copy h1,
   .topic-title h1 {
-    font-size: clamp(3rem, 16vw, 4.4rem);
+    /* Long single-word field names (Electromagnetism, Thermodynamics) must fit
+       a 412px viewport without forcing a horizontal scroll. */
+    font-size: clamp(2.2rem, 11vw, 4rem);
+    overflow-wrap: break-word;
   }
 
   .atlas-preview {
@@ -1673,6 +2106,24 @@ input[type="range"] {
   .topic-footer,
   .atlas-footer {
     display: block;
+  }
+
+  .reason-chain li {
+    grid-template-columns: 40px minmax(0, 1fr);
+    gap: 0 14px;
+    padding: 20px 18px;
+  }
+
+  .physics-table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+
+  .physics-table td,
+  .physics-table th {
+    white-space: normal;
+    min-width: 150px;
   }
 
   .topic-footer > :last-child,

@@ -118,6 +118,20 @@ export async function freezeVisuals(page) {
       }
     `
   });
+  // A full-page screenshot scrolls the viewport, so lazily loaded images can
+  // resolve mid-capture and change the document height. Force them all in
+  // before measuring so the captured layout is deterministic.
+  await page.evaluate(async () => {
+    const images = [...document.images];
+    for (const image of images) image.loading = 'eager';
+    await Promise.all(images.map(image => image.complete
+      ? Promise.resolve()
+      : new Promise(resolve => {
+        image.addEventListener('load', resolve, { once: true });
+        image.addEventListener('error', resolve, { once: true });
+      })));
+    await document.fonts.ready;
+  });
   await page.waitForTimeout(100);
 }
 

@@ -32,6 +32,66 @@ for (const journey of journeys) {
   }
 }
 
+/* The control cluster is fixed to the viewport, so every sticky bar on the
+   physics routes must come to rest below it and stay clickable. */
+for (const [name, path, sticky] of [
+  ['Physics Atlas', '/physics/', '.atlas-tools'],
+  ['Newtonian Mechanics', '/physics/newtonian.html', '.topic-index'],
+  ['Relativity', '/physics/relativity.html', '.topic-index'],
+  ['Quantum Mechanics', '/physics/quantum.html', '.topic-index']
+]) {
+  for (const viewport of [{ width: 1440, height: 1000 }, { width: 412, height: 915 }]) {
+    test(`${name} sticky bar clears the controls at ${viewport.width}px`, async ({ page }) => {
+      await page.setViewportSize(viewport);
+      await preparePage(page, path, 'en');
+
+      // Font availability changes how the bar wraps, so assert the resolved
+      // sticky offset rather than relying on a particular wrapped layout.
+      const geometry = await page.evaluate(selector => {
+        const bar = document.querySelector(selector);
+        const controls = document.querySelector('.site-controls').getBoundingClientRect();
+        return {
+          controlsBottom: controls.bottom,
+          position: getComputedStyle(bar).position,
+          stickyTop: parseFloat(getComputedStyle(bar).top)
+        };
+      }, sticky);
+
+      // A static bar scrolls away from the cluster like any other content, so
+      // the invariant only binds when the bar is actually pinned.
+      if (geometry.position !== 'sticky') return;
+
+      expect(
+        geometry.stickyTop,
+        'the sticky bar must come to rest below the fixed control cluster'
+      ).toBeGreaterThanOrEqual(geometry.controlsBottom);
+
+      // Belt and braces: no interactive child may sit under the cluster at any
+      // scroll offset the visitor can reach.
+      const overlap = await page.locator(sticky).evaluate(async bar => {
+        const controls = document.querySelector('.site-controls').getBoundingClientRect();
+        const hits = new Set();
+        const step = Math.round(innerHeight / 3);
+        for (let offset = 0; offset <= document.body.scrollHeight; offset += step) {
+          scrollTo(0, offset);
+          await new Promise(resolve => requestAnimationFrame(resolve));
+          for (const item of bar.querySelectorAll('button, a, input')) {
+            const rect = item.getBoundingClientRect();
+            if (rect.width > 0 && rect.height > 0 &&
+              rect.left < controls.right && rect.right > controls.left &&
+              rect.top < controls.bottom && rect.bottom > controls.top) {
+              hits.add(item.textContent.trim() || item.id);
+            }
+          }
+        }
+        scrollTo(0, 0);
+        return [...hits];
+      });
+      expect(overlap, 'no sticky control sits under the fixed cluster').toEqual([]);
+    });
+  }
+}
+
 /* Data invariants the atlas relies on instead of re-checking them defensively:
    every lineage edge must resolve, and every node must render a signature. */
 test('Physics Atlas renders a resolved lineage for every field', async ({ page }) => {

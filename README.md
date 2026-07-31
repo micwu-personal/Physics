@@ -9,11 +9,15 @@ Every major visual is identified as an observation, reconstructed data, calculat
 ### 🧭 [physics](./physics/) — The Field Atlas
 An interactive timeline showing how physics areas branch, inherit ideas, and recombine.
 
-- 21 linked milestones spanning mechanics, fluids, acoustics, thermodynamics, electromagnetism, electrodynamics, relativity, quantum mechanics, nuclear and particle physics, condensed matter, plasma, biophysics, nonlinear dynamics, quantum information, and more
+- 22 linked milestones spanning mechanics, fluids, acoustics, thermodynamics, electromagnetism, electrodynamics, relativity, astrophysics, quantum mechanics, nuclear and particle physics, condensed matter, plasma, biophysics, nonlinear dynamics, quantum information, and more
 - Search and lineage filters with ancestor/descendant highlighting
 - Public-domain portraits and historical documents stored locally with per-file licensing
-- Complete interactive guides for [Newtonian mechanics](./physics/newtonian.html), [relativity](./physics/relativity.html), and [quantum mechanics](./physics/quantum.html)
-- Numerical orbit, moving light-clock, and double-slit probability laboratories with optional Web Audio sonification
+- **Every field opens a guide.** Five are bespoke deep dives; the rest render from shared data through [`field.html?id=…`](./physics/field.html), each showing what the field inherited, three core ideas, and where its framework stops
+- Deep dives: [Newtonian mechanics](./physics/newtonian.html) (numerical orbit integrator), [relativity](./physics/relativity.html) (moving light clock), [quantum mechanics](./physics/quantum.html) (double-slit sampler), [astrophysics](./physics/astrophysics.html), and [light &amp; signals](./physics/electrodynamics.html)
+
+**Astrophysics** covers why disks form (Solar System, Saturn's rings, the galactic disk, accretion disks), stellar evolution by initial mass with the forces supporting each stage, step-by-step derivations of the Chandrasekhar, Oppenheimer–Volkoff, and Eddington limits, and why standard candles work.
+
+**Light & signals** covers Cherenkov radiation with an interactive cone angle, the strict distinction between phase, group, and front velocity, a table of apparent superluminal effects and why each preserves causality, and the three redshift mechanisms including which of them stretch the apparent pace of distant events.
 
 ### 🌌 [particle-zoo](./particle-zoo/) — The Standard Model
 An interactive visual journey through the Standard Model of particle physics — and beyond.

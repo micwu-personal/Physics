@@ -1,6 +1,6 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import { expect, test } from '@playwright/test';
-import { exerciseBigBang, exerciseLanding, exerciseParticleZoo, exercisePeriodicTable, exercisePhysicsArea, exercisePhysicsAtlas } from './helpers/journeys.js';
+import { exerciseBigBang, exerciseLanding, exerciseParticleZoo, exercisePeriodicTable, exercisePhysicsArea, exercisePhysicsAstro, exercisePhysicsAtlas, exercisePhysicsField, exercisePhysicsLight } from './helpers/journeys.js';
 import {
   blockExternalAssets,
   installDeterminism,
@@ -15,6 +15,9 @@ const journeys = [
   { id: 'physics-newtonian', path: '/physics/newtonian.html', run: exercisePhysicsArea },
   { id: 'physics-relativity', path: '/physics/relativity.html', run: exercisePhysicsArea },
   { id: 'physics-quantum', path: '/physics/quantum.html', run: exercisePhysicsArea },
+  { id: 'physics-astro', path: '/physics/astrophysics.html', run: exercisePhysicsAstro },
+  { id: 'physics-light', path: '/physics/electrodynamics.html', run: exercisePhysicsLight },
+  { id: 'physics-field', path: '/physics/field.html?id=thermodynamics', run: exercisePhysicsField },
   { id: 'big-bang', path: '/big-bang/', run: exerciseBigBang },
   { id: 'periodic-table', path: '/periodic-table/', run: exercisePeriodicTable },
   { id: 'particle-zoo', path: '/particle-zoo/', run: exerciseParticleZoo }
@@ -296,10 +299,13 @@ test('physics atlas selection, filter, and resize coverage', async ({ page }) =>
     await page.waitForTimeout(150);
     await page.setViewportSize({ width: 1440, height: 1000 });
     await page.waitForTimeout(150);
-    // Escape dismisses the inspector; a second press is a no-op once nothing is selected.
+    // Escape dismisses the inspector; a second press is a no-op once nothing is
+    // selected, and an unrelated key must be ignored entirely.
     await page.keyboard.press('Escape');
     await page.keyboard.press('Escape');
+    await page.keyboard.press('a');
     await page.locator('.field-node[data-field="mechanics"] button').dispatchEvent('click');
+    await page.keyboard.press('a');
     await page.locator('.inspector-close').click();
   });
 });
@@ -437,6 +443,69 @@ for (const storedMotion of ['pause', 'play']) {
     });
   });
 }
+
+for (const [id, path] of [
+  ['astro', '/physics/astrophysics.html'],
+  ['light', '/physics/electrodynamics.html']
+]) {
+  test(`physics ${id} instrument lifecycle coverage`, async ({ page }) => {
+    await collectCoverage(page, `physics-${id}-lifecycle`, async () => {
+      await preparePage(page, path, 'en');
+      await page.waitForTimeout(500);
+      // Pausing twice exercises both the guarded early return and the restart.
+      await page.locator('.motion-toggle').click();
+      await page.locator('.motion-toggle').click();
+      await page.evaluate(() => {
+        Object.defineProperty(document, 'hidden', { configurable: true, get: () => true });
+        document.dispatchEvent(new Event('visibilitychange'));
+        document.dispatchEvent(new Event('visibilitychange'));
+        Object.defineProperty(document, 'hidden', { configurable: true, get: () => false });
+        document.dispatchEvent(new Event('visibilitychange'));
+        document.dispatchEvent(new Event('visibilitychange'));
+      });
+      await page.locator('[data-lang="zh-CN"]').click();
+      await page.setViewportSize({ width: 900, height: 800 });
+      await page.waitForTimeout(200);
+      await page.locator('[data-lang="en"]').click();
+    });
+  });
+
+  test(`physics ${id} reduced-motion start coverage`, async ({ page }) => {
+    await collectCoverage(page, `physics-${id}-reduced-motion`, async () => {
+      await page.emulateMedia({ reducedMotion: 'reduce' });
+      await preparePage(page, path, 'en');
+      await page.waitForTimeout(300);
+      // Hidden-document handling must also work while motion is already paused.
+      await page.evaluate(() => {
+        Object.defineProperty(document, 'hidden', { configurable: true, get: () => false });
+        document.dispatchEvent(new Event('visibilitychange'));
+      });
+      await page.locator('.motion-toggle').click();
+      await page.waitForTimeout(200);
+    });
+  });
+}
+
+/* Every field guide renders from the same shell, so walking all of them covers
+   the branches for fields with and without listed ancestors or descendants. */
+test('physics every field guide renders coverage', async ({ page }) => {
+  test.slow();
+  await collectCoverage(page, 'physics-all-field-guides', async () => {
+    await preparePage(page, '/physics/', 'en');
+    const ids = await page.evaluate(() => PhysicsFieldList
+      .filter(field => field.page.includes('field.html'))
+      .map(field => field.page.split('=')[1]));
+    for (const id of ids) {
+      await page.goto(`/physics/field.html?id=${id}`, { waitUntil: 'load' });
+      await expect(page.locator('#fieldName')).not.toHaveText('');
+    }
+    // An unknown id must fall back rather than render an empty guide.
+    await page.goto('/physics/field.html?id=not-a-field', { waitUntil: 'load' });
+    await expect(page.locator('#fieldName')).not.toHaveText('');
+    await page.locator('[data-lang="zh-CN"]').click();
+    await page.locator('[data-lang="en"]').click();
+  });
+});
 
 test('physics reduced-motion preference coverage', async ({ page }) => {
   await collectCoverage(page, 'physics-reduced-motion', async () => {
