@@ -3,6 +3,8 @@ import { assertNoErrors, watchPage } from './helpers/assertions.js';
 import {
   assertBigBangSourceLinksRerender,
   exerciseBigBang,
+  exercisePhysicsArea,
+  exercisePhysicsAtlas,
   exerciseParticleZoo,
   exercisePeriodicTable
 } from './helpers/journeys.js';
@@ -10,6 +12,10 @@ import { locales } from './helpers/matrix.js';
 import { preparePage } from './helpers/runtime.js';
 
 const journeys = [
+  { name: 'Physics Atlas', path: '/physics/', run: exercisePhysicsAtlas },
+  { name: 'Newtonian Mechanics', path: '/physics/newtonian.html', run: exercisePhysicsArea },
+  { name: 'Relativity', path: '/physics/relativity.html', run: exercisePhysicsArea },
+  { name: 'Quantum Mechanics', path: '/physics/quantum.html', run: exercisePhysicsArea },
   { name: 'Big Bang', path: '/big-bang/', run: exerciseBigBang },
   { name: 'Periodic Table', path: '/periodic-table/', run: exercisePeriodicTable },
   { name: 'Particle Zoo', path: '/particle-zoo/', run: exerciseParticleZoo }
@@ -25,6 +31,43 @@ for (const journey of journeys) {
     });
   }
 }
+
+/* Data invariants the atlas relies on instead of re-checking them defensively:
+   every lineage edge must resolve, and every node must render a signature. */
+test('Physics Atlas renders a resolved lineage for every field', async ({ page }) => {
+  await preparePage(page, '/physics/', 'en');
+  const nodes = page.locator('.field-node');
+  const total = await nodes.count();
+  expect(total).toBeGreaterThan(0);
+
+  const broken = await page.locator('.field-node').evaluateAll(elements => {
+    const ids = new Set(elements.map(element => element.dataset.field));
+    return elements.flatMap(element => {
+      const problems = [];
+      if (!element.querySelector('.field-signature svg, svg.field-signature')?.innerHTML.trim()) {
+        problems.push(`${element.dataset.field}: empty signature`);
+      }
+      if (!element.querySelector('h3').textContent.trim()) {
+        problems.push(`${element.dataset.field}: missing name`);
+      }
+      if (!ids.has(element.dataset.field)) problems.push(`${element.dataset.field}: unresolved id`);
+      return problems;
+    });
+  });
+  expect(broken, 'every field node renders a signature and name').toEqual([]);
+
+  // Selecting each field walks its full ancestor/descendant graph; an unresolved
+  // parent id would throw inside graphFamily(). The inspector floats over the
+  // stage, so dispatch the activation directly instead of hit-testing.
+  const errors = watchPage(page);
+  for (let index = 0; index < total; index++) {
+    await nodes.nth(index).locator('button').dispatchEvent('click');
+    await expect(page.locator('#fieldInspector h3')).not.toHaveText('');
+  }
+  await page.keyboard.press('Escape');
+  await expect(page.locator('#fieldInspector')).not.toHaveClass(/open/);
+  await assertNoErrors(errors);
+});
 
 /* Structural invariants the periodic-table feature modules rely on instead of
    re-checking them defensively on every render. */

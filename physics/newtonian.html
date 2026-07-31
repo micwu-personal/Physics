@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!--
+  THESIS: Newtonian mechanics is a prediction machine for changes in motion, not a list of three slogans.
+  OWN-WORLD: Gold vectors, measured grids, historical paper, and a live orbital instrument inhabit the Evidence Observatory.
+  STORY: Learn the laws, launch a numerical orbit, inspect the historical synthesis, then see exactly where the theory yields to relativity and quantum mechanics.
+  FIRST VIEWPORT: A large F = dp/dt faces a working miniature Solar System; the orbit is already legible when motion is paused.
+  FORM: A museum instrument sequence inside the established physics world; the experiment owns the center of the page.
+  -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="An interactive bilingual guide to Newtonian mechanics with orbital simulation, Newton's laws, historical sources, and connections to relativity and quantum mechanics.">
+  <title>Newtonian Mechanics — Physics Field Atlas</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Noto+Sans+SC:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-topic="newtonian">
+  <a class="skip-link" href="#main" data-copy-en="Skip to Newtonian mechanics" data-copy-zh="跳到牛顿力学内容">Skip to Newtonian mechanics</a>
+  <div class="site-controls" aria-label="Page controls" data-aria-en="Page controls" data-aria-zh="页面控制">
+    <button class="motion-toggle" type="button" aria-pressed="false">Pause motion</button>
+    <button type="button" data-lang="en" aria-pressed="true">EN</button>
+    <button type="button" data-lang="zh-CN" aria-pressed="false">中文</button>
+  </div>
+
+  <div class="topic-shell">
+    <nav class="route-bar" aria-label="Newtonian mechanics routes" data-aria-en="Newtonian mechanics routes" data-aria-zh="牛顿力学路线">
+      <a class="route-home" href="./index.html#genealogy" data-copy-en="Back to the field atlas" data-copy-zh="返回物理领域图谱">Back to the field atlas</a>
+      <div class="route-links">
+        <a href="./relativity.html" data-copy-en="Next: relativity" data-copy-zh="下一站：相对论">Next: relativity</a>
+        <a href="../big-bang/index.html?tab=gravity" data-copy-en="Gravity in the universe" data-copy-zh="宇宙中的引力">Gravity in the universe</a>
+      </div>
+    </nav>
+
+    <header class="topic-hero">
+      <div class="topic-title">
+        <h1 data-copy-en="Newtonian mechanics" data-copy-zh="牛顿力学">Newtonian mechanics</h1>
+        <p data-copy-en="A compact theory connects pushes, collisions, falling objects, machines, moons, and planets. It is not “old physics” to discard: engineers and astronomers still use it whenever objects are much larger than atoms and move much slower than light."
+           data-copy-zh="一套紧凑理论连接推力、碰撞、落体、机械、卫星与行星。它并非应被丢弃的“旧物理”：当物体远大于原子且速度远低于光速时，工程师和天文学家仍每天使用它。">
+          A compact theory connects pushes, collisions, falling objects, machines, moons, and planets. It is not “old physics” to discard: engineers and astronomers still use it whenever objects are much larger than atoms and move much slower than light.
+        </p>
+        <span class="hero-equation">F = dp/dt · F<sub>g</sub> = −GMm r̂/r²</span>
+        <div class="hero-actions">
+          <a class="primary-action" href="#orbit-lab" data-copy-en="Launch an orbit" data-copy-zh="发射一条轨道">Launch an orbit</a>
+          <a class="secondary-action" href="#laws" data-copy-en="Read the three laws precisely" data-copy-zh="准确理解三条定律">Read the three laws precisely</a>
+        </div>
+      </div>
+      <div class="hero-instrument">
+        <canvas id="heroCanvas" aria-label="Teaching schematic of three planets orbiting a central star" data-aria-en="Teaching schematic of three planets orbiting a central star" data-aria-zh="三颗行星围绕恒星运行的教学示意动画">Three elliptical planet paths around a central star.</canvas>
+        <div class="instrument-label">
+          <span><strong data-copy-en="One force. Many orbits." data-copy-zh="一种力，多种轨道。">One force. Many orbits.</strong><span data-copy-en="Ellipse sizes, masses, colors, and speeds are schematic." data-copy-zh="椭圆大小、质量、颜色和速度均为示意。">Ellipse sizes, masses, colors, and speeds are schematic.</span></span>
+          <span class="rep-badge schematic" data-copy-en="Teaching schematic" data-copy-zh="教学示意">Teaching schematic</span>
+        </div>
+      </div>
+    </header>
+
+    <nav class="topic-index" aria-label="Newtonian mechanics sections" data-aria-en="Newtonian mechanics sections" data-aria-zh="牛顿力学章节">
+      <a href="#laws" data-copy-en="The laws" data-copy-zh="三条定律">The laws</a>
+      <a href="#orbit-lab" data-copy-en="Orbit laboratory" data-copy-zh="轨道实验室">Orbit laboratory</a>
+      <a href="#evidence" data-copy-en="Newton & Principia" data-copy-zh="牛顿与《原理》">Newton &amp; Principia</a>
+      <a href="#limits" data-copy-en="Where it stops" data-copy-zh="适用边界">Where it stops</a>
+      <a href="#connections" data-copy-en="Continue exploring" data-copy-zh="继续探索">Continue exploring</a>
+    </nav>
+
+    <main id="main">
+      <section id="laws" class="topic-section">
+        <header>
+          <h2 data-copy-en="Three laws describe how momentum changes."
+              data-copy-zh="三条定律描述动量如何改变。">Three laws describe how momentum changes.</h2>
+          <p data-copy-en="The familiar F = ma is a constant-mass form of the second law. The more general statement is that net force equals the time rate of change of momentum. Frames in which the first law holds are called inertial frames."
+             data-copy-zh="熟悉的 F = ma 是质量恒定时的第二定律。更一般的表述是：合力等于动量对时间的变化率。满足第一定律的参考系称为惯性系。">
+            The familiar F = ma is a constant-mass form of the second law. The more general statement is that net force equals the time rate of change of momentum. Frames in which the first law holds are called inertial frames.
+          </p>
+        </header>
+        <div class="concept-ribbon">
+          <article class="concept">
+            <div class="concept-mark">ΣF = 0</div>
+            <h3 data-copy-en="Inertia" data-copy-zh="惯性">Inertia</h3>
+            <p data-copy-en="With zero net force, velocity stays constant. Rest is not privileged: uniform straight-line motion is equally natural."
+               data-copy-zh="当合力为零，速度保持不变。静止并不特殊；匀速直线运动同样自然。">With zero net force, velocity stays constant. Rest is not privileged: uniform straight-line motion is equally natural.</p>
+          </article>
+          <article class="concept">
+            <div class="concept-mark">ΣF = dp/dt</div>
+            <h3 data-copy-en="Dynamics" data-copy-zh="动力学">Dynamics</h3>
+            <p data-copy-en="Net force changes momentum. For constant mass, doubling the force doubles acceleration; doubling mass halves it."
+               data-copy-zh="合力改变动量。质量恒定时，力加倍则加速度加倍；质量加倍则加速度减半。">Net force changes momentum. For constant mass, doubling the force doubles acceleration; doubling mass halves it.</p>
+          </article>
+          <article class="concept">
+            <div class="concept-mark">F<sub>AB</sub> = −F<sub>BA</sub></div>
+            <h3 data-copy-en="Interaction pairs" data-copy-zh="相互作用对">Interaction pairs</h3>
+            <p data-copy-en="Forces between two bodies are equal and opposite. They act on different bodies, so they do not cancel inside either body’s equation of motion."
+               data-copy-zh="两个物体之间的力大小相等、方向相反。它们作用在不同物体上，因此不会在任一物体自身的运动方程中彼此抵消。">Forces between two bodies are equal and opposite. They act on different bodies, so they do not cancel inside either body’s equation of motion.</p>
+          </article>
+        </div>
+      </section>
+
+      <section id="orbit-lab" class="topic-section">
+        <header>
+          <h2 data-copy-en="Orbiting is continuous falling with enough sideways speed."
+              data-copy-zh="绕轨运行，就是带着足够横向速度持续下落。">Orbiting is continuous falling with enough sideways speed.</h2>
+          <p data-copy-en="This numerical teaching model integrates Newton’s inverse-square gravity in small time steps. Change the launch speed or central mass and watch the same force create an ellipse, a tighter orbit, or an escape trajectory."
+             data-copy-zh="这个数值教学模型用小时间步积分牛顿平方反比引力。改变初速度或中心质量，观察同一种力如何产生椭圆、更紧的轨道或逃逸轨迹。">
+            This numerical teaching model integrates Newton’s inverse-square gravity in small time steps. Change the launch speed or central mass and watch the same force create an ellipse, a tighter orbit, or an escape trajectory.
+          </p>
+        </header>
+        <div class="lab">
+          <div class="lab-stage">
+            <canvas id="labCanvas" aria-label="Interactive numerical orbit simulation" data-aria-en="Interactive numerical orbit simulation" data-aria-zh="可交互的数值轨道模拟">A planet trajectory around a central star with a force vector.</canvas>
+            <div class="lab-overlay">
+              <span id="labReadout" class="lab-readout">r = 1.00 AU · v = 1.00</span>
+              <span id="labSecondaryReadout" class="lab-readout secondary">Bound orbit</span>
+            </div>
+          </div>
+          <div class="lab-controls">
+            <h3 data-copy-en="Orbital launch controls" data-copy-zh="轨道发射控制">Orbital launch controls</h3>
+            <p data-copy-en="The units are normalized: radius 1 and circular speed 1. The drawing is not a scale model of the Solar System."
+               data-copy-zh="这里使用归一化单位：初始半径为 1、圆轨道速度为 1。图像不是太阳系按比例模型。">The units are normalized: radius 1 and circular speed 1. The drawing is not a scale model of the Solar System.</p>
+            <div class="control-group">
+              <label for="primaryControl"><span data-copy-en="Sideways launch speed" data-copy-zh="横向初速度">Sideways launch speed</span><output id="primaryOutput" for="primaryControl">1.00 × circular</output></label>
+              <input id="primaryControl" type="range" min="0.65" max="1.45" value="1" step="0.01">
+            </div>
+            <div class="control-group">
+              <label for="secondaryControl"><span data-copy-en="Central mass" data-copy-zh="中心天体质量">Central mass</span><output id="secondaryOutput" for="secondaryControl">1.00 × solar</output></label>
+              <input id="secondaryControl" type="range" min="0.7" max="1.4" value="1" step="0.01">
+            </div>
+            <div class="lab-buttons">
+              <button id="labToggle" type="button">Pause experiment</button>
+              <button id="labReset" type="button">Reset</button>
+              <button id="audioToggle" class="wide" type="button" aria-pressed="false">Enable sonification</button>
+            </div>
+            <p class="lab-note"><span class="rep-badge model" data-copy-en="Calculated model" data-copy-zh="计算模型">Calculated model</span><br><span data-copy-en="The trail is generated from a finite-step integrator. Small numerical error accumulates; it is an explanatory model, not mission-navigation software. Sonification maps orbital speed to pitch and is not measured sound from space."
+              data-copy-zh="轨迹由有限时间步积分器生成，微小数值误差会累积；这是解释模型，不是航天任务导航软件。声音映射把轨道速度转成音高，并非太空中的实测声音。">The trail is generated from a finite-step integrator. Small numerical error accumulates; it is an explanatory model, not mission-navigation software. Sonification maps orbital speed to pitch and is not measured sound from space.</span></p>
+          </div>
+        </div>
+      </section>
+
+      <section id="evidence" class="topic-section">
+        <header>
+          <h2 data-copy-en="A synthesis built from observation, geometry, and argument."
+              data-copy-zh="由观测、几何与论证共同构成的综合体系。">A synthesis built from observation, geometry, and argument.</h2>
+          <p data-copy-en="Newton did not invent celestial data or the mathematics of motion from nothing. His synthesis depended on Galileo’s mechanics, Kepler’s empirical planetary laws, earlier geometry, and a broad exchange of experiments and correspondence."
+             data-copy-zh="牛顿并非凭空创造天文数据或运动数学。他的综合建立在伽利略力学、开普勒经验行星定律、早期几何，以及广泛的实验与通信交流之上。">
+            Newton did not invent celestial data or the mathematics of motion from nothing. His synthesis depended on Galileo’s mechanics, Kepler’s empirical planetary laws, earlier geometry, and a broad exchange of experiments and correspondence.
+          </p>
+        </header>
+        <div class="evidence-pair">
+          <figure class="portrait-study">
+            <img src="../assets/media/Isaac_Newton_Kneller_1689.jpg" loading="lazy" decoding="async" alt="Portrait of Isaac Newton after Godfrey Kneller" data-alt-en="Portrait of Isaac Newton after Godfrey Kneller" data-alt-zh="戈弗雷·内勒画作中的艾萨克·牛顿肖像">
+            <figcaption class="portrait-caption">
+              <strong data-copy-en="Isaac Newton, 1643–1727" data-copy-zh="艾萨克·牛顿，1643–1727">Isaac Newton, 1643–1727</strong>
+              <span data-copy-en="Portrait after Godfrey Kneller, 1689. Public-domain historical artwork."
+                    data-copy-zh="据戈弗雷·内勒 1689 年画作。公有领域历史艺术品。">Portrait after Godfrey Kneller, 1689. Public-domain historical artwork.</span>
+              <a href="https://commons.wikimedia.org/wiki/File:GodfreyKneller-IsaacNewton-1689.jpg" target="_blank" rel="noopener noreferrer" data-copy-en="Source and license" data-copy-zh="来源与许可">Source and license</a>
+            </figcaption>
+          </figure>
+          <figure class="document-study">
+            <img src="../assets/media/Principia_title_page_1687.jpg" loading="lazy" decoding="async" alt="Title page of the first edition of Newton's Principia Mathematica, 1687" data-alt-en="Title page of the first edition of Newton's Principia Mathematica, 1687" data-alt-zh="牛顿 1687 年《自然哲学的数学原理》第一版扉页">
+            <figcaption>
+              <span class="rep-badge document" data-copy-en="Historical document" data-copy-zh="历史文献">Historical document</span>
+              <strong data-copy-en="Principia Mathematica, first edition, 1687" data-copy-zh="《自然哲学的数学原理》第一版，1687">Principia Mathematica, first edition, 1687</strong>
+              <span data-copy-en="The book presents the laws of motion and uses geometrical arguments to develop universal gravitation. This repository stores a resized derivative of a public-domain scan."
+                    data-copy-zh="该书提出运动定律，并用几何论证发展万有引力理论。仓库保存的是公有领域扫描件的缩放版本。">The book presents the laws of motion and uses geometrical arguments to develop universal gravitation. This repository stores a resized derivative of a public-domain scan.</span>
+              <a href="https://commons.wikimedia.org/wiki/File:Newton%27s_Principia_title_page.png" target="_blank" rel="noopener noreferrer" data-copy-en="Source and license" data-copy-zh="来源与许可">Source and license</a>
+            </figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <section id="limits" class="topic-section">
+        <header>
+          <h2 data-copy-en="A powerful approximation has visible boundaries."
+              data-copy-zh="强大的近似，也有清晰边界。">A powerful approximation has visible boundaries.</h2>
+          <p data-copy-en="A later theory does not make an earlier one useless. Relativity and quantum mechanics reproduce Newtonian predictions in the appropriate limits, while explaining regimes Newton’s framework cannot."
+             data-copy-zh="后来的理论不会让早期理论失效。相对论与量子力学在适当极限下会重现牛顿预测，同时解释牛顿框架无法覆盖的情形。">
+            A later theory does not make an earlier one useless. Relativity and quantum mechanics reproduce Newtonian predictions in the appropriate limits, while explaining regimes Newton’s framework cannot.
+          </p>
+        </header>
+        <div class="limit-grid">
+          <article class="limit">
+            <h3 data-copy-en="Very high speed" data-copy-zh="极高速度">Very high speed</h3>
+            <p data-copy-en="Near light speed, time intervals, lengths, energy, and momentum obey special relativity. No massive object can be accelerated through c."
+               data-copy-zh="接近光速时，时间间隔、长度、能量与动量遵循狭义相对论；有质量物体不能被加速越过光速 c。">Near light speed, time intervals, lengths, energy, and momentum obey special relativity. No massive object can be accelerated through c.</p>
+            <a href="./relativity.html" data-copy-en="Compare moving clocks →" data-copy-zh="比较运动中的时钟 →">Compare moving clocks →</a>
+          </article>
+          <article class="limit">
+            <h3 data-copy-en="Strong gravity" data-copy-zh="强引力">Strong gravity</h3>
+            <p data-copy-en="Near black holes, and for precision effects such as Mercury’s perihelion shift, gravity is spacetime geometry rather than a force acting in fixed space."
+               data-copy-zh="在黑洞附近，以及水星近日点进动等精密效应中，引力表现为时空几何，而不是固定空间中的一种力。">Near black holes, and for precision effects such as Mercury’s perihelion shift, gravity is spacetime geometry rather than a force acting in fixed space.</p>
+            <a href="../big-bang/index.html?tab=gravity" data-copy-en="Explore gravity across cosmic time →" data-copy-zh="探索宇宙时间中的引力 →">Explore gravity across cosmic time →</a>
+          </article>
+          <article class="limit">
+            <h3 data-copy-en="Atomic scale" data-copy-zh="原子尺度">Atomic scale</h3>
+            <p data-copy-en="Electrons in atoms do not follow little planetary paths. Quantum states predict probability amplitudes, discrete energies, and interference."
+               data-copy-zh="原子中的电子并不沿着微型行星轨道运动。量子状态预测概率振幅、离散能级与干涉。">Electrons in atoms do not follow little planetary paths. Quantum states predict probability amplitudes, discrete energies, and interference.</p>
+            <a href="./quantum.html" data-copy-en="Build an interference pattern →" data-copy-zh="构建干涉图样 →">Build an interference pattern →</a>
+          </article>
+        </div>
+      </section>
+
+      <section id="connections" class="topic-section">
+        <header>
+          <h2 data-copy-en="Follow mechanics into the rest of the museum."
+              data-copy-zh="从力学继续走进整座物理博物馆。">Follow mechanics into the rest of the museum.</h2>
+          <p data-copy-en="Newtonian ideas remain inside fluid dynamics, acoustics, statistical mechanics, orbital astronomy, engineering, and every later theory’s low-speed limit."
+             data-copy-zh="牛顿思想继续存在于流体、声学、统计力学、轨道天文学、工程学，以及每个后继理论的低速极限中。">
+            Newtonian ideas remain inside fluid dynamics, acoustics, statistical mechanics, orbital astronomy, engineering, and every later theory’s low-speed limit.
+          </p>
+        </header>
+        <div class="relation-map">
+          <a href="../big-bang/index.html?tab=gravity"><strong data-copy-en="Cosmic gravity" data-copy-zh="宇宙引力">Cosmic gravity</strong><span data-copy-en="See where Newtonian attraction remains useful and where expanding spacetime needs general relativity." data-copy-zh="了解牛顿引力何时仍然有效，以及膨胀时空何时需要广义相对论。">See where Newtonian attraction remains useful and where expanding spacetime needs general relativity.</span></a>
+          <a href="../particle-zoo/index.html?tab=forces"><strong data-copy-en="Fundamental interactions" data-copy-zh="基本相互作用">Fundamental interactions</strong><span data-copy-en="Compare gravity with electromagnetic, weak, and strong interactions—without treating them all as Newtonian contact forces." data-copy-zh="比较引力与电磁、弱、强相互作用，而不把它们都误作牛顿式接触力。">Compare gravity with electromagnetic, weak, and strong interactions—without treating them all as Newtonian contact forces.</span></a>
+          <a href="./index.html#genealogy"><strong data-copy-en="Field genealogy" data-copy-zh="领域谱系">Field genealogy</strong><span data-copy-en="Trace mechanics into fluids, acoustics, nonlinear dynamics, relativity, and the probabilistic physics of many particles." data-copy-zh="追踪力学如何进入流体、声学、非线性动力学、相对论与多粒子概率物理。">Trace mechanics into fluids, acoustics, nonlinear dynamics, relativity, and the probabilistic physics of many particles.</span></a>
+        </div>
+      </section>
+    </main>
+
+    <footer class="topic-footer">
+      <span data-copy-en="Equations use idealized bodies and normalized units unless stated otherwise." data-copy-zh="除非另有说明，方程使用理想化物体与归一化单位。">Equations use idealized bodies and normalized units unless stated otherwise.</span>
+      <span><a href="../LICENSES/THIRD-PARTY-MEDIA.md" data-copy-en="Media licenses" data-copy-zh="媒体许可">Media licenses</a> · <a href="./relativity.html" data-copy-en="Next field: relativity" data-copy-zh="下一领域：相对论">Next field: relativity</a></span>
+    </footer>
+  </div>
+
+  <script src="common.js"></script>
+  <script src="labs.js"></script>
+</body>
+</html>

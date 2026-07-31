@@ -18,5 +18,8 @@
   "particle-zoo/app.js",
   "particle-zoo/i18n.js",
   "particle-zoo/physics-core.js",
-  "particle-zoo/references.js"
+  "particle-zoo/references.js",
+  "physics/atlas.js",
+  "physics/common.js",
+  "physics/labs.js"
 ]

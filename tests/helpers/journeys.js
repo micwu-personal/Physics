@@ -14,6 +14,14 @@ export async function exerciseTopLevel(page, app) {
     await exerciseLanding(page);
     return;
   }
+  if (app === 'physics-atlas') {
+    await exercisePhysicsAtlas(page);
+    return;
+  }
+  if (app === 'physics-area') {
+    await exercisePhysicsArea(page);
+    return;
+  }
   const tabs = page.locator('.tab');
   const count = await tabs.count();
   for (let index = 0; index < count; index++) {
@@ -22,6 +30,37 @@ export async function exerciseTopLevel(page, app) {
     await tab.dispatchEvent('click');
     await expect(page.locator(`#tab-${id}`)).toHaveClass(/active/);
   }
+}
+
+export async function exercisePhysicsAtlas(page) {
+  const nodes = page.locator('.field-node');
+  await expect(nodes).toHaveCount(21);
+  await page.locator('.field-node[data-field="mechanics"] button').click();
+  await expect(page.locator('#fieldInspector')).toHaveClass(/open/);
+  await expect(page.locator('#fieldInspector h3')).not.toHaveText('');
+  await page.locator('.lineage-filter[data-lineage="quantum"]').click();
+  expect(await page.locator('.field-node:not(.hidden)').count()).toBeGreaterThan(3);
+  await page.locator('.lineage-filter[data-lineage="all"]').click();
+  await page.locator('#fieldSearch').fill('Einstein');
+  expect(await page.locator('.field-node:not(.hidden)').count()).toBeGreaterThan(0);
+  await page.locator('#fieldSearch').fill('');
+  await page.locator('.inspector-close').click();
+  await expect(page.locator('#fieldInspector')).not.toHaveClass(/open/);
+}
+
+export async function exercisePhysicsArea(page) {
+  await expect(page.locator('#heroCanvas')).toBeVisible();
+  await expect(page.locator('#labCanvas')).toBeVisible();
+  for (const selector of ['#primaryControl', '#secondaryControl', '#rateControl']) {
+    const control = page.locator(selector);
+    if (!await control.count()) continue;
+    await setRange(control, await control.getAttribute('max'));
+    await setRange(control, await control.getAttribute('min'));
+  }
+  await page.locator('#labToggle').click();
+  await page.locator('#labReset').click();
+  await page.locator('#audioToggle').click();
+  await expect(page.locator('#audioToggle')).toHaveAttribute('aria-pressed', 'true');
 }
 
 export async function exerciseBigBang(page) {

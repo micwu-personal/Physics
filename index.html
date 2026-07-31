@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<meta name="description" content="An evidence-led interactive journey from the Big Bang to particles, atoms, elements, stars, and high-energy events." />
-<title>Physics Journey — From the Big Bang to Us</title>
+<meta name="description" content="An evidence-led interactive journey through the history of matter and the connected fields of physics." />
+<title>Physics Journey — Matter, Ideas, and the Laws of Nature</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -116,8 +116,8 @@
   .story-map a { display: block; padding: 8px 12px; border-radius: 8px; color: var(--muted); text-decoration: none; font-size: 13px; }
   .story-map a:hover { color: var(--text); background: var(--surface-2); }
   .reading-key { padding: 72px 0; }
-  .reading-key h2, .journey-head h2 { margin: 0 0 12px; font-size: clamp(2rem, 4vw, 3.25rem); }
-  .reading-key > p, .journey-head p { max-width: 70ch; color: var(--muted); line-height: 1.7; }
+  .reading-key h2, .journey-head h2, .field-portal h2 { margin: 0 0 12px; font-size: clamp(2rem, 4vw, 3.25rem); }
+  .reading-key > p, .journey-head p, .field-portal-copy > p { max-width: 70ch; color: var(--muted); line-height: 1.7; }
   .key-row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 26px; }
   .rep {
     display: inline-flex;
@@ -135,6 +135,62 @@
   .rep.reconstruction { --rep-color: var(--cyan); }
   .rep.model { --rep-color: var(--violet); }
   .rep.schematic { --rep-color: var(--gold); }
+  .field-portal {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(380px, .9fr);
+    gap: clamp(32px, 6vw, 80px);
+    align-items: center;
+    margin: 20px 0 64px;
+    padding: clamp(28px, 5vw, 54px);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    background: var(--surface);
+  }
+  .field-portal-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 24px; }
+  .field-map-preview {
+    position: relative;
+    min-height: 310px;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: #0d1530;
+  }
+  .field-map-preview::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(24deg, transparent 34%, var(--gold) 34.4%, var(--gold) 35%, transparent 35.4%),
+      linear-gradient(-18deg, transparent 48%, var(--cyan) 48.4%, var(--cyan) 49%, transparent 49.4%),
+      linear-gradient(9deg, transparent 62%, var(--violet) 62.4%, var(--violet) 63%, transparent 63.4%);
+    opacity: .72;
+  }
+  .field-map-preview span {
+    position: absolute;
+    z-index: 1;
+    display: grid;
+    place-items: center;
+    width: 68px;
+    height: 68px;
+    border: 2px solid currentColor;
+    border-radius: 50%;
+    background: #0d1530;
+    font: 700 18px/1 "JetBrains Mono", monospace;
+  }
+  .field-map-preview .newton-node { left: 13%; top: 18%; color: var(--gold); }
+  .field-map-preview .einstein-node { right: 14%; top: 23%; color: var(--cyan); }
+  .field-map-preview .quantum-node { left: 44%; bottom: 14%; color: var(--violet); }
+  .field-map-preview p {
+    position: absolute;
+    left: 18px;
+    right: 18px;
+    bottom: 12px;
+    z-index: 2;
+    margin: 0;
+    color: var(--muted);
+    font-size: 11px;
+    line-height: 1.45;
+  }
   .journey-head { padding: 70px 0 36px; }
   .journey { margin: 0; padding: 0; list-style: none; counter-reset: chapter; }
   .chapter {
@@ -189,6 +245,7 @@
     .hero { min-height: auto; }
     .chapter { grid-template-columns: 1fr; min-height: auto; padding: 64px 0; }
     .chapter:nth-child(even) .chapter-copy, .chapter:nth-child(even) .chapter-visual { order: initial; }
+    .field-portal { grid-template-columns: 1fr; }
     .controls { max-width: calc(100vw - 24px); }
     .controls button { padding-inline: 9px; }
     .diagram { min-height: 300px; }
@@ -222,6 +279,7 @@
         <div class="hero-actions">
           <a class="primary-action" href="#origin" data-i18n="hero.begin">Begin at the beginning</a>
           <a class="secondary-action" href="#read-visuals" data-i18n="hero.key">How to read the visuals</a>
+          <a class="secondary-action" href="./physics/index.html" data-i18n="hero.fields">Explore the fields of physics</a>
         </div>
       </div>
     </header>
@@ -234,6 +292,7 @@
         <li><a href="#atoms" data-i18n="nav.atoms">Atoms</a></li>
         <li><a href="#stars" data-i18n="nav.stars">Stars</a></li>
         <li><a href="#events" data-i18n="nav.events">High-energy universe</a></li>
+        <li><a href="./physics/index.html" data-i18n="nav.fields">Field atlas</a></li>
       </ol>
     </nav>
 
@@ -245,6 +304,23 @@
         <span class="rep reconstruction" data-i18n="key.reconstruction">Reconstructed data</span>
         <span class="rep model" data-i18n="key.model">Calculated model</span>
         <span class="rep schematic" data-i18n="key.schematic">Teaching schematic</span>
+      </div>
+    </section>
+
+    <section class="field-portal">
+      <div class="field-portal-copy">
+        <h2 data-i18n="fields.title">Now change the lens: how did the ideas connect?</h2>
+        <p data-i18n="fields.body">The cosmic journey follows what happened in nature. The field atlas follows how people learned to describe it—from mechanics and fluids to electromagnetism, relativity, quantum theory, condensed matter, and living systems.</p>
+        <div class="field-portal-actions">
+          <a class="primary-action" href="./physics/index.html" data-i18n="fields.open">Open the complete physics timeline</a>
+          <a class="secondary-action" href="./physics/newtonian.html" data-i18n="fields.newton">Start with Newtonian mechanics</a>
+        </div>
+      </div>
+      <div class="field-map-preview" aria-label="Schematic map connecting Newtonian mechanics, relativity, and quantum mechanics" data-i18n-aria-label="aria.fields">
+        <span class="newton-node">F</span>
+        <span class="einstein-node">c</span>
+        <span class="quantum-node">ψ</span>
+        <p data-i18n="fields.caption">Teaching schematic: line crossings indicate conceptual inheritance, not literal historical routes.</p>
       </div>
     </section>
 
@@ -395,10 +471,14 @@
       'hero.lede':'Follow the universe as expansion cools energy into particles, particles bind into nuclei and atoms, and stars forge the elements that make planets and life possible.',
       'hero.begin':'Begin at the beginning',
       'hero.key':'How to read the visuals',
-      'nav.origin':'Origin','nav.particles':'Particles','nav.nuclei':'Nuclei','nav.atoms':'Atoms','nav.stars':'Stars','nav.events':'High-energy universe',
+      'hero.fields':'Explore the fields of physics',
+      'nav.origin':'Origin','nav.particles':'Particles','nav.nuclei':'Nuclei','nav.atoms':'Atoms','nav.stars':'Stars','nav.events':'High-energy universe','nav.fields':'Field atlas',
       'key.title':'First: what kind of picture are you seeing?',
       'key.body':'Physics often cannot offer a literal photograph. This site names the evidence level beside each important visual, and explains false color, compressed time, changed scale, and model assumptions.',
       'key.observation':'Observation','key.reconstruction':'Reconstructed data','key.model':'Calculated model','key.schematic':'Teaching schematic',
+      'fields.title':'Now change the lens: how did the ideas connect?',
+      'fields.body':'The cosmic journey follows what happened in nature. The field atlas follows how people learned to describe it—from mechanics and fluids to electromagnetism, relativity, quantum theory, condensed matter, and living systems.',
+      'fields.open':'Open the complete physics timeline','fields.newton':'Start with Newtonian mechanics','fields.caption':'Teaching schematic: line crossings indicate conceptual inheritance, not literal historical routes.',
       'journey.title':'A causal journey through physics',
       'journey.body':'Each chapter begins with what existed, shows what changed, and points to the evidence and interactive model that let us test the idea.',
       'origin.time':'10^-43 s to 380,000 years','origin.title':'Space expands. The universe cools.','origin.body':'The Big Bang was not matter exploding into empty space. It describes an early hot, dense state and the expansion of space itself. Cooling changes which particles and nuclei can exist; after recombination, photons travel freely and become the cosmic microwave background.','origin.deep.title':'What do we actually observe?','origin.deep.body':'We observe expansion, primordial light-element abundances, and the CMB. Earlier epochs are reconstructed by testing physical models against those measurements; inflation and quantum gravity remain less certain.','origin.open':'Explore the Big Bang timeline','origin.media.kind':'Data map, not visible light','origin.media.caption':'Nine-year WMAP all-sky CMB map. Color encodes tiny temperature fluctuations around 2.725 K.',
@@ -408,7 +488,7 @@
       'stars.time':'First stars to the present','stars.title':'Stars forge elements; explosions and mergers disperse them.','stars.body':'Fusion builds many nuclei up to the iron region. Slow neutron capture in evolved stars, explosive burning, Type Ia supernovae, core-collapse supernovae, and neutron-star mergers contribute different heavy elements. Their relative shares remain an active research topic.','stars.deep.title':'Does one supernova make every heavy element?','stars.deep.body':'No. Different nuclear pathways dominate in different sites. The periodic table origin overlay summarizes current evidence and calls out model-dependent r-process contributions.','stars.open':'Trace where each element was forged','stars.media.kind':'Observation in invisible X-rays, false color','stars.media.caption':"Tycho's Type Ia supernova remnant. Colors map X-ray energy bands; Type Ia explosions are major sources of iron-peak elements.",
       'events.time':'The high-energy universe today','events.title':'Cosmic rays, collisions, and extreme remnants keep the story active.','events.body':'Supernova shocks accelerate particles, neutron stars create intense magnetic environments, and colliders isolate interactions under controlled conditions. These events connect cosmic evolution back to the particle rules introduced near the beginning.','events.deep.title':'What should I try next?','events.deep.body':'Use the detector lab to identify signatures, the decay sandbox to sample measured branching ratios, and the reaction animations to compare gas, light, heat, and precipitate outcomes without mistaking them for molecular-dynamics simulations.','events.open':'Enter the detector learning lab','events.visual.kind':'Detector-inspired schematic','events.visual.caption':'The rings suggest detector layers. The interactive lab explains which particles leave tracks, showers, muon hits, or missing transverse momentum.',
       'media.source':'Source and license',
-      'aria.controls':'Page controls','aria.chapters':'Journey chapters','aria.nuclei':'Teaching schematic of nested quark, nucleon, and nuclear binding scales','aria.events':'Detector-inspired teaching schematic of a high-energy event',
+      'aria.controls':'Page controls','aria.chapters':'Journey chapters','aria.fields':'Schematic map connecting Newtonian mechanics, relativity, and quantum mechanics','aria.nuclei':'Teaching schematic of nested quark, nucleon, and nuclear binding scales','aria.events':'Detector-inspired teaching schematic of a high-energy event',
       'alt.wmap':'False-color oval map of cosmic microwave background temperature fluctuations measured by WMAP',
       'alt.atlas':'ATLAS reconstructed four-muon Higgs candidate event display with colored tracks through detector layers',
       'alt.hydrogen':'Calculated hydrogen orbital probability density plots for quantum numbers n equals 1 through 4',
@@ -424,10 +504,14 @@
       'hero.lede':'沿着宇宙膨胀与冷却的过程，看能量如何形成粒子、粒子如何结合成原子核与原子，以及恒星如何锻造构成行星和生命的元素。',
       'hero.begin':'从起点开始',
       'hero.key':'如何理解这些图像',
-      'nav.origin':'起源','nav.particles':'粒子','nav.nuclei':'原子核','nav.atoms':'原子','nav.stars':'恒星','nav.events':'高能宇宙',
+      'hero.fields':'探索物理学各领域',
+      'nav.origin':'起源','nav.particles':'粒子','nav.nuclei':'原子核','nav.atoms':'原子','nav.stars':'恒星','nav.events':'高能宇宙','nav.fields':'领域图谱',
       'key.title':'首先：你看到的是哪一种“图”？',
       'key.body':'物理学往往无法提供字面意义上的照片。本站会在重要图像旁标明证据层级，并说明假彩色、压缩时间、改变尺度和模型假设。',
       'key.observation':'观测','key.reconstruction':'重建数据','key.model':'计算模型','key.schematic':'教学示意',
+      'fields.title':'现在换一个视角：这些思想如何彼此连接？',
+      'fields.body':'宇宙旅程追踪自然中发生了什么；领域图谱追踪人类如何描述它——从力学与流体，到电磁学、相对论、量子理论、凝聚态与生命系统。',
+      'fields.open':'打开完整物理学时间线','fields.newton':'从牛顿力学开始','fields.caption':'教学示意：连线交汇表示概念继承，并非字面的历史路线。',
       'journey.title':'一条因果相连的物理旅程',
       'journey.body':'每一章都从当时存在什么开始，说明发生了什么变化，并给出支持这一变化的证据与可交互模型。',
       'origin.time':'10^-43 秒至 38 万年','origin.title':'空间膨胀，宇宙冷却。','origin.body':'大爆炸不是物质向空无空间中的爆炸，而是描述早期炽热致密状态以及空间本身的膨胀。冷却决定哪些粒子与原子核能够存在；复合之后，光子开始自由传播，成为今天的宇宙微波背景。','origin.deep.title':'我们究竟观测到了什么？','origin.deep.body':'我们观测到宇宙膨胀、原初轻元素丰度和宇宙微波背景。更早时期是通过用物理模型检验这些测量来重建的；暴胀和量子引力仍有更大不确定性。','origin.open':'探索大爆炸时间线','origin.media.kind':'数据图，并非可见光','origin.media.caption':'WMAP 九年全天宇宙微波背景图。颜色编码 2.725 K 附近极微小的温度涨落。',
@@ -437,7 +521,7 @@
       'stars.time':'第一代恒星至今','stars.title':'恒星锻造元素，爆炸与并合将它们散布。','stars.body':'聚变产生许多直至铁区的原子核。演化晚期恒星中的慢中子俘获、爆炸核合成、Ia 型和核塌缩超新星以及中子星并合分别贡献不同重元素；各自比例仍是活跃研究课题。','stars.deep.title':'一次超新星会产生所有重元素吗？','stars.deep.body':'不会。不同核反应路径在不同天体环境中占主导。元素周期表的起源覆盖层总结当前证据，并明确指出依赖模型的 r 过程贡献。','stars.open':'追踪每种元素在哪里形成','stars.media.kind':'不可见 X 射线观测，使用假彩色','stars.media.caption':'第谷 Ia 型超新星遗迹。颜色映射不同 X 射线能段；Ia 型爆炸是铁峰元素的重要来源。',
       'events.time':'今天的高能宇宙','events.title':'宇宙线、碰撞和极端天体让故事继续发生。','events.body':'超新星激波加速粒子，中子星产生极强磁场环境，而对撞机在受控条件下分离各种相互作用。这些事件把宇宙演化重新连接回开篇的粒子规律。','events.deep.title':'接下来可以尝试什么？','events.deep.body':'在探测器实验中识别特征，用衰变沙盒抽样测得的分支比，再用反应动画比较产气、发光、放热和沉淀现象，同时不要把它们误认为分子动力学模拟。','events.open':'进入探测器学习实验室','events.visual.kind':'探测器启发的示意图','events.visual.caption':'圆环表示探测器层。交互实验会解释哪些粒子留下径迹、簇射、缪子命中或横向缺失动量。',
       'media.source':'来源与许可',
-      'aria.controls':'页面控制','aria.chapters':'旅程章节','aria.nuclei':'夸克、核子与原子核多层束缚尺度的教学示意图','aria.events':'高能事例的探测器启发教学示意图',
+      'aria.controls':'页面控制','aria.chapters':'旅程章节','aria.fields':'连接牛顿力学、相对论与量子力学的示意图','aria.nuclei':'夸克、核子与原子核多层束缚尺度的教学示意图','aria.events':'高能事例的探测器启发教学示意图',
       'alt.wmap':'WMAP 测得的宇宙微波背景温度涨落全天假彩色椭圆投影图',
       'alt.atlas':'ATLAS 重建的四缪子希格斯候选事例，彩色径迹穿过探测器各层',
       'alt.hydrogen':'主量子数 n 从 1 到 4 的氢原子轨道计算概率密度图',

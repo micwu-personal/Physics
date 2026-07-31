@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!--
+  THESIS: Quantum mechanics predicts distributions from amplitudes; it is neither tiny billiard balls nor mystical observer magic.
+  OWN-WORLD: Violet amplitudes, discrete detector marks, probability maps, and the Solvay record extend the Evidence Observatory.
+  STORY: Learn states and superposition, accumulate a double-slit pattern, inspect calculated orbitals and historical debate, then connect quantum rules to atoms and particles.
+  FIRST VIEWPORT: A wavefront meets two slits and becomes an interference field beside the Schrödinger equation; the paused state still shows the full mechanism.
+  FORM: A probability laboratory followed by evidence and conceptual boundaries, not a parade of paradox cards.
+  -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="An interactive bilingual guide to quantum mechanics with a double-slit probability experiment, orbital models, historical context, and links to particles and atoms.">
+  <title>Quantum Mechanics — Physics Field Atlas</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Noto+Sans+SC:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-topic="quantum">
+  <a class="skip-link" href="#main" data-copy-en="Skip to quantum mechanics" data-copy-zh="跳到量子力学内容">Skip to quantum mechanics</a>
+  <div class="site-controls" aria-label="Page controls" data-aria-en="Page controls" data-aria-zh="页面控制">
+    <button class="motion-toggle" type="button" aria-pressed="false">Pause motion</button>
+    <button type="button" data-lang="en" aria-pressed="true">EN</button>
+    <button type="button" data-lang="zh-CN" aria-pressed="false">中文</button>
+  </div>
+
+  <div class="topic-shell">
+    <nav class="route-bar" aria-label="Quantum mechanics routes" data-aria-en="Quantum mechanics routes" data-aria-zh="量子力学路线">
+      <a class="route-home" href="./index.html#genealogy" data-copy-en="Back to the field atlas" data-copy-zh="返回物理领域图谱">Back to the field atlas</a>
+      <div class="route-links">
+        <a href="./relativity.html" data-copy-en="Relativity" data-copy-zh="相对论">Relativity</a>
+        <a href="../particle-zoo/index.html" data-copy-en="Particle Zoo" data-copy-zh="粒子动物园">Particle Zoo</a>
+        <a href="../periodic-table/index.html?element=1" data-copy-en="Quantum atoms" data-copy-zh="量子原子">Quantum atoms</a>
+      </div>
+    </nav>
+
+    <header class="topic-hero">
+      <div class="topic-title">
+        <h1 data-copy-en="Quantum mechanics" data-copy-zh="量子力学">Quantum mechanics</h1>
+        <p data-copy-en="Quantum mechanics describes physical states with complex amplitudes. Amplitudes combine and interfere; their squared magnitude gives outcome probabilities. The theory predicts atoms, lasers, chemistry, semiconductors, and every particle detector on this site."
+           data-copy-zh="量子力学用复振幅描述物理状态。振幅会组合与干涉，其模平方给出结果概率。这套理论预测原子、激光、化学、半导体，以及本网站中的每一种粒子探测器。">
+          Quantum mechanics describes physical states with complex amplitudes. Amplitudes combine and interfere; their squared magnitude gives outcome probabilities. The theory predicts atoms, lasers, chemistry, semiconductors, and every particle detector on this site.
+        </p>
+        <span class="hero-equation">iℏ ∂ψ/∂t = Ĥψ · P(x) = |ψ(x)|²</span>
+        <div class="hero-actions">
+          <a class="primary-action" href="#slit-lab" data-copy-en="Build an interference pattern" data-copy-zh="构建干涉图样">Build an interference pattern</a>
+          <a class="secondary-action" href="#evidence" data-copy-en="See what a quantum picture means" data-copy-zh="理解量子图像的含义">See what a quantum picture means</a>
+        </div>
+      </div>
+      <div class="hero-instrument">
+        <canvas id="heroCanvas" aria-label="Teaching schematic of wave amplitudes passing through two slits and interfering" data-aria-en="Teaching schematic of wave amplitudes passing through two slits and interfering" data-aria-zh="波振幅穿过双缝并产生干涉的教学示意">Wavefronts meet a two-slit barrier and overlap into an interference field.</canvas>
+        <div class="instrument-label">
+          <span><strong data-copy-en="Alternatives combine before outcomes appear." data-copy-zh="在结果出现前，可能路径的振幅会先组合。">Alternatives combine before outcomes appear.</strong><span data-copy-en="The waves visualize probability amplitude, not ripples in ordinary material." data-copy-zh="图中的波表示概率振幅，并非普通物质中的涟漪。">The waves visualize probability amplitude, not ripples in ordinary material.</span></span>
+          <span class="rep-badge schematic" data-copy-en="Teaching schematic" data-copy-zh="教学示意">Teaching schematic</span>
+        </div>
+      </div>
+    </header>
+
+    <nav class="topic-index" aria-label="Quantum mechanics sections" data-aria-en="Quantum mechanics sections" data-aria-zh="量子力学章节">
+      <a href="#principles" data-copy-en="Core principles" data-copy-zh="核心原理">Core principles</a>
+      <a href="#slit-lab" data-copy-en="Double-slit laboratory" data-copy-zh="双缝实验室">Double-slit laboratory</a>
+      <a href="#evidence" data-copy-en="Models & people" data-copy-zh="模型与人物">Models &amp; people</a>
+      <a href="#limits" data-copy-en="What it does—and does not—say" data-copy-zh="理论边界">What it does—and does not—say</a>
+      <a href="#connections" data-copy-en="Continue exploring" data-copy-zh="继续探索">Continue exploring</a>
+    </nav>
+
+    <main id="main">
+      <section id="principles" class="topic-section">
+        <header>
+          <h2 data-copy-en="A state predicts possibilities, not a hidden classical movie."
+              data-copy-zh="量子状态预测可能性，而不是隐藏的经典电影。">A state predicts possibilities, not a hidden classical movie.</h2>
+          <p data-copy-en="The wavefunction is a mathematical representation of a quantum state. Its phase matters because amplitudes can reinforce or cancel. A measurement produces one recorded outcome sampled from the distribution predicted for the chosen measurement."
+             data-copy-zh="波函数是量子状态的数学表示。它的相位很重要，因为振幅可以相长或相消。一次测量会记录一个结果，该结果从指定测量所预测的分布中抽样。">
+            The wavefunction is a mathematical representation of a quantum state. Its phase matters because amplitudes can reinforce or cancel. A measurement produces one recorded outcome sampled from the distribution predicted for the chosen measurement.
+          </p>
+        </header>
+        <div class="concept-ribbon">
+          <article class="concept">
+            <div class="concept-mark">|ψ⟩</div>
+            <h3 data-copy-en="State & evolution" data-copy-zh="状态与演化">State &amp; evolution</h3>
+            <p data-copy-en="A state contains amplitudes for possible measurement outcomes. Between measurements, an isolated state evolves continuously according to the Schrödinger equation."
+               data-copy-zh="状态包含不同测量结果的振幅。在测量之间，孤立状态按照薛定谔方程连续演化。">A state contains amplitudes for possible measurement outcomes. Between measurements, an isolated state evolves continuously according to the Schrödinger equation.</p>
+          </article>
+          <article class="concept">
+            <div class="concept-mark">ψ = ψ₁ + ψ₂</div>
+            <h3 data-copy-en="Superposition & interference" data-copy-zh="叠加与干涉">Superposition &amp; interference</h3>
+            <p data-copy-en="Alternative amplitudes add before probabilities are calculated. Their phases create bright and dark regions that no mixture of independent classical paths can reproduce."
+               data-copy-zh="先把不同可能路径的振幅相加，再计算概率。振幅相位产生明暗区域，独立经典路径的混合无法重现这种结构。">Alternative amplitudes add before probabilities are calculated. Their phases create bright and dark regions that no mixture of independent classical paths can reproduce.</p>
+          </article>
+          <article class="concept">
+            <div class="concept-mark">ΔxΔp ≥ ℏ/2</div>
+            <h3 data-copy-en="Incompatible observables" data-copy-zh="不相容可观测量">Incompatible observables</h3>
+            <p data-copy-en="Position and momentum cannot both have arbitrarily narrow distributions in one state. This is state structure, not merely a clumsy instrument disturbing a pre-existing exact pair."
+               data-copy-zh="同一状态中的位置与动量分布不能同时任意狭窄。这是状态本身的结构，不只是笨拙仪器扰动了预先存在的精确数值。">Position and momentum cannot both have arbitrarily narrow distributions in one state. This is state structure, not merely a clumsy instrument disturbing a pre-existing exact pair.</p>
+          </article>
+        </div>
+      </section>
+
+      <section id="slit-lab" class="topic-section">
+        <header>
+          <h2 data-copy-en="One detection looks random. Thousands reveal the amplitude."
+              data-copy-zh="一次探测看似随机，成千上万次揭示振幅。">One detection looks random. Thousands reveal the amplitude.</h2>
+          <p data-copy-en="Each simulated particle produces one localized mark. The pattern emerges only after many events. Change slit separation and wavelength to reshape the interference spacing; closing the path information is essential to preserve interference."
+             data-copy-zh="每个模拟粒子只留下一个局域落点；图样要在大量事件后才显现。改变缝间距与波长会重塑条纹间距；若获得路径信息，干涉会消失。">
+            Each simulated particle produces one localized mark. The pattern emerges only after many events. Change slit separation and wavelength to reshape the interference spacing; closing the path information is essential to preserve interference.
+          </p>
+        </header>
+        <div class="lab">
+          <div class="lab-stage">
+            <canvas id="labCanvas" aria-label="Interactive double-slit probability simulation accumulating detector hits" data-aria-en="Interactive double-slit probability simulation accumulating detector hits" data-aria-zh="逐步累积探测落点的可交互双缝概率模拟">A barrier with two slits faces a detection screen where points accumulate.</canvas>
+            <div class="lab-overlay">
+              <span id="labReadout" class="lab-readout">0 detections</span>
+              <span id="labSecondaryReadout" class="lab-readout secondary">The interference distribution emerges in aggregate.</span>
+            </div>
+          </div>
+          <div class="lab-controls">
+            <h3 data-copy-en="Double-slit controls" data-copy-zh="双缝控制">Double-slit controls</h3>
+            <p data-copy-en="This sampler draws hits from an idealized far-field two-slit distribution with a smooth envelope. It does not simulate a particular electron gun, photon source, or detector."
+               data-copy-zh="该采样器从带平滑包络的理想远场双缝分布中生成落点，并不模拟某一具体电子枪、光源或探测器。">This sampler draws hits from an idealized far-field two-slit distribution with a smooth envelope. It does not simulate a particular electron gun, photon source, or detector.</p>
+            <div class="control-group">
+              <label for="primaryControl"><span data-copy-en="Slit separation" data-copy-zh="缝间距">Slit separation</span><output id="primaryOutput" for="primaryControl">2.6 ×</output></label>
+              <input id="primaryControl" type="range" min="1" max="4.5" value="2.6" step="0.1">
+            </div>
+            <div class="control-group">
+              <label for="secondaryControl"><span data-copy-en="Wavelength" data-copy-zh="波长">Wavelength</span><output id="secondaryOutput" for="secondaryControl">1.0 ×</output></label>
+              <input id="secondaryControl" type="range" min="0.7" max="1.6" value="1" step="0.1">
+            </div>
+            <div class="control-group">
+              <label for="rateControl"><span data-copy-en="Detection rate" data-copy-zh="探测速率">Detection rate</span><output>1–8 / frame</output></label>
+              <input id="rateControl" type="range" min="1" max="8" value="3" step="1">
+            </div>
+            <div class="lab-buttons">
+              <button id="labToggle" type="button">Pause experiment</button>
+              <button id="labReset" type="button">Reset</button>
+              <button id="audioToggle" class="wide" type="button" aria-pressed="false">Enable sonification</button>
+            </div>
+            <p class="lab-note"><span class="rep-badge model" data-copy-en="Calculated probability model" data-copy-zh="计算概率模型">Calculated probability model</span><br><span data-copy-en="Point positions are pseudorandom samples from the displayed distribution. Sonification maps vertical detector position to pitch; it is not sound emitted by a quantum particle."
+              data-copy-zh="落点位置是从所示分布中生成的伪随机样本。声音映射把探测器纵向位置转成音高，并非量子粒子发出的声音。">Point positions are pseudorandom samples from the displayed distribution. Sonification maps vertical detector position to pitch; it is not sound emitted by a quantum particle.</span></p>
+          </div>
+        </div>
+      </section>
+
+      <section id="evidence" class="topic-section">
+        <header>
+          <h2 data-copy-en="Quantum pictures are usually calculations or reconstructed evidence."
+              data-copy-zh="量子图像通常是计算结果或重建证据。">Quantum pictures are usually calculations or reconstructed evidence.</h2>
+          <p data-copy-en="No ordinary camera sees a wavefunction. Experiments record counts, positions, energies, currents, or spectra; physicists compare those records with quantum predictions. Calculated orbitals are still powerful pictures—provided we label what they encode."
+             data-copy-zh="普通相机无法拍到波函数。实验记录计数、位置、能量、电流或光谱，再与量子预测比较。计算轨道图仍然非常有用——前提是明确标注它编码的含义。">
+            No ordinary camera sees a wavefunction. Experiments record counts, positions, energies, currents, or spectra; physicists compare those records with quantum predictions. Calculated orbitals are still powerful pictures—provided we label what they encode.
+          </p>
+        </header>
+        <div class="evidence-pair">
+          <figure class="document-study">
+            <img src="../assets/media/Hydrogen_Density_Plots_1280.png" loading="lazy" decoding="async" alt="Calculated hydrogen probability density plots for principal quantum numbers one through four" data-alt-en="Calculated hydrogen probability density plots for principal quantum numbers one through four" data-alt-zh="主量子数 1 至 4 的氢原子计算概率密度图">
+            <figcaption>
+              <span class="rep-badge model" data-copy-en="Calculated model" data-copy-zh="计算模型">Calculated model</span>
+              <strong data-copy-en="Hydrogen probability density |ψ|²" data-copy-zh="氢原子概率密度 |ψ|²">Hydrogen probability density |ψ|²</strong>
+              <span data-copy-en="Brightness encodes calculated probability density for selected hydrogen states. These are not electron paths, solid shells, or photographs."
+                    data-copy-zh="亮度编码所选氢原子状态的计算概率密度。这些不是电子路径、实体壳层或照片。">Brightness encodes calculated probability density for selected hydrogen states. These are not electron paths, solid shells, or photographs.</span>
+              <a href="https://commons.wikimedia.org/wiki/File:Hydrogen_Density_Plots.png" target="_blank" rel="noopener noreferrer" data-copy-en="Source · public domain" data-copy-zh="来源 · 公有领域">Source · public domain</a>
+            </figcaption>
+          </figure>
+          <figure class="document-study wide">
+            <img src="../assets/media/Solvay_conference_1927.jpg" loading="lazy" decoding="async" alt="Group photograph of participants at the fifth Solvay Conference in 1927" data-alt-en="Group photograph of participants at the fifth Solvay Conference in 1927" data-alt-zh="1927 年第五届索尔维会议与会者合影">
+            <figcaption>
+              <span class="rep-badge document" data-copy-en="Historical photograph" data-copy-zh="历史照片">Historical photograph</span>
+              <strong data-copy-en="Fifth Solvay Conference, 1927" data-copy-zh="第五届索尔维会议，1927">Fifth Solvay Conference, 1927</strong>
+              <span data-copy-en="Among those pictured: Marie Curie, Max Planck, Albert Einstein, Niels Bohr, Erwin Schrödinger, Werner Heisenberg, Wolfgang Pauli, Louis de Broglie, Paul Dirac, Max Born, and Arthur Compton. The image documents people, not a settled consensus; they disagreed sharply about interpretation."
+                    data-copy-zh="照片中的人物包括居里夫人、普朗克、爱因斯坦、玻尔、薛定谔、海森堡、泡利、德布罗意、狄拉克、玻恩与康普顿。它记录的是人物，而不是已经形成的共识；他们对理论解释有尖锐分歧。">Among those pictured: Marie Curie, Max Planck, Albert Einstein, Niels Bohr, Erwin Schrödinger, Werner Heisenberg, Wolfgang Pauli, Louis de Broglie, Paul Dirac, Max Born, and Arthur Compton. The image documents people, not a settled consensus; they disagreed sharply about interpretation.</span>
+              <a href="https://commons.wikimedia.org/wiki/File:Solvay_conference_1927.jpg" target="_blank" rel="noopener noreferrer" data-copy-en="Source · public domain" data-copy-zh="来源 · 公有领域">Source · public domain</a>
+            </figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <section id="limits" class="topic-section">
+        <header>
+          <h2 data-copy-en="Quantum mechanics is precise without answering every interpretation."
+              data-copy-zh="量子力学预测精确，但不等于所有解释问题都有定论。">Quantum mechanics is precise without answering every interpretation.</h2>
+          <p data-copy-en="Different interpretations can agree on the same laboratory probabilities. The operational predictions are extraordinarily well tested; questions about ontology, measurement, and quantum gravity remain active."
+             data-copy-zh="不同解释可以对同一实验概率给出相同预测。可操作的量子预测已经得到极高精度检验；本体论、测量与量子引力问题仍在研究中。">
+            Different interpretations can agree on the same laboratory probabilities. The operational predictions are extraordinarily well tested; questions about ontology, measurement, and quantum gravity remain active.
+          </p>
+        </header>
+        <div class="limit-grid">
+          <article class="limit">
+            <h3 data-copy-en="Not consciousness magic" data-copy-zh="不是“意识魔法”">Not consciousness magic</h3>
+            <p data-copy-en="A measurement is a physical interaction that creates a stable record. Standard quantum calculations do not require a human mind to cause an outcome."
+               data-copy-zh="测量是一种产生稳定记录的物理相互作用。标准量子计算不要求人类意识“导致”结果。">A measurement is a physical interaction that creates a stable record. Standard quantum calculations do not require a human mind to cause an outcome.</p>
+            <a href="../particle-zoo/index.html?tab=lab" data-copy-en="See how detectors make records →" data-copy-zh="了解探测器如何形成记录 →">See how detectors make records →</a>
+          </article>
+          <article class="limit">
+            <h3 data-copy-en="The classical limit" data-copy-zh="经典极限">The classical limit</h3>
+            <p data-copy-en="For large systems interacting strongly with environments, decoherence suppresses observable interference between alternatives. Classical trajectories emerge as an approximation, not a separate set of fundamental rules."
+               data-copy-zh="对与环境强烈相互作用的大系统，退相干会抑制不同可能之间可观测的干涉。经典轨迹作为近似涌现，而不是另一套基本规律。">For large systems interacting strongly with environments, decoherence suppresses observable interference between alternatives. Classical trajectories emerge as an approximation, not a separate set of fundamental rules.</p>
+            <a href="./newtonian.html" data-copy-en="Return to classical trajectories →" data-copy-zh="返回经典轨迹 →">Return to classical trajectories →</a>
+          </article>
+          <article class="limit">
+            <h3 data-copy-en="Relativistic quantum fields" data-copy-zh="相对论量子场">Relativistic quantum fields</h3>
+            <p data-copy-en="Ordinary nonrelativistic quantum mechanics does not allow particle creation and annihilation. Quantum field theory combines quantum principles with special relativity."
+               data-copy-zh="普通非相对论量子力学不允许粒子产生与湮灭；量子场论把量子原理与狭义相对论结合起来。">Ordinary nonrelativistic quantum mechanics does not allow particle creation and annihilation. Quantum field theory combines quantum principles with special relativity.</p>
+            <a href="../particle-zoo/index.html?tab=chart" data-copy-en="Meet field excitations in the Particle Zoo →" data-copy-zh="在粒子动物园认识场激发 →">Meet field excitations in the Particle Zoo →</a>
+          </article>
+        </div>
+      </section>
+
+      <section id="connections" class="topic-section">
+        <header>
+          <h2 data-copy-en="Quantum rules build atoms, chemistry, materials, and detectors."
+              data-copy-zh="量子规律构成原子、化学、材料与探测器。">Quantum rules build atoms, chemistry, materials, and detectors.</h2>
+          <p data-copy-en="The Periodic Table uses electron configuration and orbitals. The Particle Zoo uses quantum fields and decays. Big Bang nucleosynthesis and the cosmic microwave background depend on quantum and statistical processes in the early universe."
+             data-copy-zh="元素周期表使用电子排布与轨道；粒子动物园使用量子场与衰变；大爆炸核合成和宇宙微波背景依赖早期宇宙中的量子与统计过程。">
+            The Periodic Table uses electron configuration and orbitals. The Particle Zoo uses quantum fields and decays. Big Bang nucleosynthesis and the cosmic microwave background depend on quantum and statistical processes in the early universe.
+          </p>
+        </header>
+        <div class="relation-map">
+          <a href="../periodic-table/index.html?element=1"><strong data-copy-en="Atoms & orbitals" data-copy-zh="原子与轨道">Atoms &amp; orbitals</strong><span data-copy-en="Compare shell bookkeeping with calculated hydrogen probability density, then follow electron structure across the elements." data-copy-zh="比较壳层记账模型与氢原子计算概率密度，再沿元素追踪电子结构。">Compare shell bookkeeping with calculated hydrogen probability density, then follow electron structure across the elements.</span></a>
+          <a href="../particle-zoo/index.html?tab=chart"><strong data-copy-en="Particles & fields" data-copy-zh="粒子与场">Particles &amp; fields</strong><span data-copy-en="See which particles are matter excitations, which mediate interactions, and how detectors infer short-lived states." data-copy-zh="了解哪些粒子是物质激发、哪些传递相互作用，以及探测器如何推断短寿命状态。">See which particles are matter excitations, which mediate interactions, and how detectors infer short-lived states.</span></a>
+          <a href="../big-bang/index.html?tab=timeline"><strong data-copy-en="Quantum early universe" data-copy-zh="量子早期宇宙">Quantum early universe</strong><span data-copy-en="Follow cooling conditions through particle, nuclear, and atomic transitions while keeping observations separate from extrapolated models." data-copy-zh="沿冷却条件追踪粒子、核与原子转变，并区分观测证据与外推模型。">Follow cooling conditions through particle, nuclear, and atomic transitions while keeping observations separate from extrapolated models.</span></a>
+        </div>
+      </section>
+    </main>
+
+    <footer class="topic-footer">
+      <span data-copy-en="Quantum diagrams encode amplitudes or probabilities; they are not microscopic photographs." data-copy-zh="量子图示编码振幅或概率，并非微观照片。">Quantum diagrams encode amplitudes or probabilities; they are not microscopic photographs.</span>
+      <span><a href="../LICENSES/THIRD-PARTY-MEDIA.md" data-copy-en="Media licenses" data-copy-zh="媒体许可">Media licenses</a> · <a href="./index.html#genealogy" data-copy-en="Return to the complete field atlas" data-copy-zh="返回完整领域图谱">Return to the complete field atlas</a></span>
+    </footer>
+  </div>
+
+  <script src="common.js"></script>
+  <script src="labs.js"></script>
+</body>
+</html>

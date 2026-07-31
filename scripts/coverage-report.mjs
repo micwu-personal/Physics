@@ -12,7 +12,7 @@ const origin = await resolveOrigin();
 const expectedSources = JSON.parse(await readFile('./scripts/coverage-sources.json', 'utf8'));
 const expectedSourceSet = new Set(expectedSources);
 const evidenceBySource = new Map(expectedSources.map(source => [source, new Set()]));
-const browserPath = /^(big-bang|periodic-table|particle-zoo)\/.*\.js$/;
+const browserPath = /^(big-bang|periodic-table|particle-zoo|physics)\/.*\.js$/;
 const pureModules = [
   'big-bang/core.js',
   'periodic-table/science.js',
@@ -65,7 +65,7 @@ async function discoverBrowserSourceCandidates(directory, prefix = directory) {
 }
 
 const discoveredSources = ['index.html#inline-script'];
-for (const directory of ['big-bang', 'periodic-table', 'particle-zoo']) {
+for (const directory of ['big-bang', 'periodic-table', 'particle-zoo', 'physics']) {
   discoveredSources.push(...await discoverBrowserSourceCandidates(directory));
 }
 const unexpectedSources = discoveredSources.filter(source => !expectedSourceSet.has(source));
@@ -110,7 +110,7 @@ const report = MCR({
   },
   sourcePath: filePath => {
     const normalized = filePath.replaceAll('\\', '/');
-    for (const directory of ['big-bang', 'periodic-table', 'particle-zoo']) {
+    for (const directory of ['big-bang', 'periodic-table', 'particle-zoo', 'physics']) {
       const marker = `/${directory}/`;
       const index = normalized.lastIndexOf(marker);
       if (index >= 0) return normalized.slice(index + 1);

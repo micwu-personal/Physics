@@ -1,15 +1,20 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import { expect, test } from '@playwright/test';
-import { exerciseBigBang, exerciseLanding, exerciseParticleZoo, exercisePeriodicTable } from './helpers/journeys.js';
+import { exerciseBigBang, exerciseLanding, exerciseParticleZoo, exercisePeriodicTable, exercisePhysicsArea, exercisePhysicsAtlas } from './helpers/journeys.js';
 import {
   blockExternalAssets,
   installDeterminism,
   preparePage,
-  setLanguage
+  setLanguage,
+  setRange
 } from './helpers/runtime.js';
 
 const journeys = [
   { id: 'landing', path: '/', run: exerciseLanding },
+  { id: 'physics-atlas', path: '/physics/', run: exercisePhysicsAtlas },
+  { id: 'physics-newtonian', path: '/physics/newtonian.html', run: exercisePhysicsArea },
+  { id: 'physics-relativity', path: '/physics/relativity.html', run: exercisePhysicsArea },
+  { id: 'physics-quantum', path: '/physics/quantum.html', run: exercisePhysicsArea },
   { id: 'big-bang', path: '/big-bang/', run: exerciseBigBang },
   { id: 'periodic-table', path: '/periodic-table/', run: exercisePeriodicTable },
   { id: 'particle-zoo', path: '/particle-zoo/', run: exerciseParticleZoo }
@@ -209,6 +214,241 @@ test('landing unavailable storage coverage', async ({ page }) => {
     await page.waitForLoadState('load');
     await page.locator('[data-lang="zh-CN"]').click();
     await page.locator('#motionToggle').click();
+  });
+});
+
+/* ---------------------------------------------------------------- physics --
+   The atlas and the three field laboratories share common.js, so the platform
+   fallbacks below are exercised once on the page that reaches them first. */
+
+test('physics unavailable storage coverage', async ({ page }) => {
+  await collectCoverage(page, 'physics-storage-unavailable', async () => {
+    await installDeterminism(page);
+    await blockExternalAssets(page);
+    await page.addInitScript(() => {
+      Storage.prototype.getItem = () => {
+        throw new DOMException('Storage unavailable', 'SecurityError');
+      };
+      Storage.prototype.setItem = () => {
+        throw new DOMException('Storage unavailable', 'QuotaExceededError');
+      };
+    });
+    await page.goto('/physics/');
+    await page.waitForLoadState('load');
+    await page.locator('[data-lang="zh-CN"]').click();
+    await page.locator('.motion-toggle').click();
+    await page.locator('[data-lang="en"]').click();
+  });
+});
+
+for (const [id, navigatorLanguage] of [['zh', 'zh-CN'], ['en', 'en-US'], ['empty', '']]) {
+  test(`physics navigator-language ${id} fallback coverage`, async ({ page }) => {
+    await collectCoverage(page, `physics-navigator-${id}`, async () => {
+      await installDeterminism(page);
+      await blockExternalAssets(page);
+      await page.addInitScript(language => {
+        localStorage.removeItem('physics.lang');
+        localStorage.removeItem('physics.motion');
+        Object.defineProperty(navigator, 'language', {
+          configurable: true,
+          get: () => language
+        });
+      }, navigatorLanguage);
+      await page.goto('/physics/');
+      await page.waitForLoadState('load');
+      await page.locator('.field-node[data-field="mechanics"] button').click();
+      await page.locator('[data-lang="zh-CN"]').click();
+    });
+  });
+}
+
+test('physics unsupported stored language coverage', async ({ page }) => {
+  await collectCoverage(page, 'physics-unsupported-language', async () => {
+    await installDeterminism(page);
+    await blockExternalAssets(page);
+    // An unknown persisted value must fall back to English rather than throw.
+    await setLanguage(page, 'de-DE');
+    await page.goto('/physics/');
+    await page.waitForLoadState('load');
+    await page.locator('.field-node[data-field="fluids"] button').click();
+  });
+});
+
+test('physics atlas selection, filter, and resize coverage', async ({ page }) => {
+  await collectCoverage(page, 'physics-atlas-graph', async () => {
+    await preparePage(page, '/physics/', 'en');
+    // A field with no ancestors exercises the empty-lineage caption, one with a
+    // guide renders the action link, and one without renders the pending state.
+    for (const field of ['astronomy-optics', 'fluids', 'standard-model', 'mechanics']) {
+      await page.locator(`.field-node[data-field="${field}"] button`).dispatchEvent('click');
+    }
+    // Re-rendering copy while a node is selected refreshes the open inspector.
+    await page.locator('[data-lang="zh-CN"]').click();
+    await page.locator('.field-node[data-field="astronomy-optics"] button').dispatchEvent('click');
+    await page.locator('[data-lang="en"]').click();
+
+    for (const lineage of ['motion', 'fields', 'matter', 'quantum', 'cosmos', 'life', 'systems', 'all']) {
+      await page.locator(`.lineage-filter[data-lineage="${lineage}"]`).click();
+    }
+    await page.locator('#fieldSearch').fill('entropy');
+    await page.locator('#fieldSearch').fill('');
+    await page.setViewportSize({ width: 900, height: 900 });
+    await page.waitForTimeout(150);
+    await page.setViewportSize({ width: 1440, height: 1000 });
+    await page.waitForTimeout(150);
+    // Escape dismisses the inspector; a second press is a no-op once nothing is selected.
+    await page.keyboard.press('Escape');
+    await page.keyboard.press('Escape');
+    await page.locator('.field-node[data-field="mechanics"] button').dispatchEvent('click');
+    await page.locator('.inspector-close').click();
+  });
+});
+
+for (const [id, path] of [
+  ['newtonian', '/physics/newtonian.html'],
+  ['relativity', '/physics/relativity.html'],
+  ['quantum', '/physics/quantum.html']
+]) {
+  test(`physics ${id} lab lifecycle coverage`, async ({ page }) => {
+    await collectCoverage(page, `physics-${id}-lifecycle`, async () => {
+      await preparePage(page, path, 'en');
+      await page.locator('#audioToggle').click();
+      // Long enough for the relativity light clock to cross both half-cycles and
+      // for the orbit trail and detection buffer to reach their retention caps.
+      await page.waitForTimeout(4_000);
+      await page.locator('[data-lang="zh-CN"]').click();
+      await page.locator('#labToggle').click();
+      await page.locator('#labReset').click();
+      await page.locator('#audioToggle').click();
+      await page.locator('#labToggle').click();
+      await page.locator('[data-lang="en"]').click();
+      await page.evaluate(() => {
+        Object.defineProperty(document, 'hidden', { configurable: true, get: () => true });
+        document.dispatchEvent(new Event('visibilitychange'));
+        Object.defineProperty(document, 'hidden', { configurable: true, get: () => false });
+        document.dispatchEvent(new Event('visibilitychange'));
+      });
+      await page.locator('.motion-toggle').click();
+      await page.evaluate(() => {
+        Object.defineProperty(document, 'hidden', { configurable: true, get: () => true });
+        document.dispatchEvent(new Event('visibilitychange'));
+        Object.defineProperty(document, 'hidden', { configurable: true, get: () => false });
+        document.dispatchEvent(new Event('visibilitychange'));
+      });
+      await page.locator('.motion-toggle').click();
+    });
+  });
+}
+
+test('physics orbit escape and close-approach coverage', async ({ page }) => {
+  test.slow();
+  await collectCoverage(page, 'physics-orbit-limits', async () => {
+    await preparePage(page, '/physics/newtonian.html', 'en');
+    const speed = page.locator('#primaryControl');
+    const mass = page.locator('#secondaryControl');
+    // The slowest launch around the heaviest star falls inside the capture radius.
+    await setRange(speed, await speed.getAttribute('min'));
+    await setRange(mass, await mass.getAttribute('max'));
+    await page.waitForTimeout(4_000);
+    // The fastest launch around the lightest star leaves on an open trajectory.
+    await setRange(speed, await speed.getAttribute('max'));
+    await setRange(mass, await mass.getAttribute('min'));
+    await page.waitForTimeout(6_000);
+  });
+});
+
+test('physics quantum sampling extremes coverage', async ({ page }) => {
+  test.slow();
+  await collectCoverage(page, 'physics-quantum-extremes', async () => {
+    await preparePage(page, '/physics/quantum.html', 'en');
+    const separation = page.locator('#primaryControl');
+    const wavelength = page.locator('#secondaryControl');
+    const rate = page.locator('#rateControl');
+    await setRange(separation, await separation.getAttribute('max'));
+    await setRange(wavelength, await wavelength.getAttribute('min'));
+    await page.waitForTimeout(1_000);
+    await setRange(separation, await separation.getAttribute('min'));
+    await setRange(wavelength, await wavelength.getAttribute('max'));
+    // The fastest detection rate fills the retained-hit buffer past its cap.
+    await setRange(rate, await rate.getAttribute('max'));
+    await page.waitForTimeout(8_000);
+  });
+});
+
+test('physics unavailable platform APIs coverage', async ({ page }) => {
+  await collectCoverage(page, 'physics-platform-fallbacks', async () => {
+    await installDeterminism(page);
+    await setLanguage(page, 'en');
+    await blockExternalAssets(page);
+    await page.addInitScript(() => {
+      // A device that reports no pixel ratio and exposes no Web Audio support.
+      Object.defineProperty(window, 'devicePixelRatio', { configurable: true, get: () => 0 });
+      delete window.AudioContext;
+      delete window.webkitAudioContext;
+    });
+    await page.goto('/physics/newtonian.html');
+    await page.waitForLoadState('load');
+    await page.locator('#audioToggle').click();
+    await page.waitForTimeout(300);
+  });
+});
+
+test('physics prefixed audio context coverage', async ({ page }) => {
+  await collectCoverage(page, 'physics-prefixed-audio', async () => {
+    await installDeterminism(page);
+    await setLanguage(page, 'en');
+    await blockExternalAssets(page);
+    await page.addInitScript(() => {
+      // Older WebKit only exposes the prefixed constructor, and starts suspended
+      // until a gesture resumes it.
+      const NativeAudioContext = window.AudioContext;
+      class PrefixedAudioContext extends NativeAudioContext {
+        get state() {
+          return this.__resumed ? 'running' : 'suspended';
+        }
+        resume() {
+          this.__resumed = true;
+          return Promise.resolve();
+        }
+      }
+      delete window.AudioContext;
+      window.webkitAudioContext = PrefixedAudioContext;
+    });
+    await page.goto('/physics/quantum.html');
+    await page.waitForLoadState('load');
+    await page.locator('#audioToggle').click();
+    await page.waitForTimeout(800);
+  });
+});
+
+for (const storedMotion of ['pause', 'play']) {
+  test(`physics stored ${storedMotion} motion coverage`, async ({ page }) => {
+    await collectCoverage(page, `physics-stored-motion-${storedMotion}`, async () => {
+      await installDeterminism(page);
+      await blockExternalAssets(page);
+      // A persisted override must win over the system reduced-motion setting.
+      await page.emulateMedia({ reducedMotion: 'reduce' });
+      await page.addInitScript(motion => {
+        localStorage.setItem('physics.motion', motion);
+      }, storedMotion);
+      await page.goto('/physics/newtonian.html');
+      await page.waitForLoadState('load');
+      await page.waitForTimeout(400);
+    });
+  });
+}
+
+test('physics reduced-motion preference coverage', async ({ page }) => {
+  await collectCoverage(page, 'physics-reduced-motion', async () => {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await preparePage(page, '/physics/relativity.html', 'en');
+    await page.locator('#labToggle').click();
+    await page.emulateMedia({ reducedMotion: 'no-preference' });
+    await page.waitForTimeout(300);
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.waitForTimeout(300);
+    await page.locator('.motion-toggle').click();
+    await page.waitForTimeout(300);
   });
 });
 

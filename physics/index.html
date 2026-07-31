@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!--
+  THESIS: Physics is a genealogy of transferable ideas, not a shelf of unrelated subjects; the page refuses a same-size topic-card directory.
+  OWN-WORLD: The Evidence Observatory becomes a midnight instrument map with luminous lineages, documentary photography, and precise status labels.
+  STORY: Trace how mechanics, fields, matter, quantum theory, Earth, cosmos, life, and complex systems inherit from and reshape one another.
+  FIRST VIEWPORT: A monumental title faces an enamel lineage preview; the primary action descends into the complete interactive chronology.
+  FORM: Fourth grounded structure, a chronological genealogy tree staged as an explorable system map; seed e8e7f09a.
+  -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="An interactive bilingual timeline and genealogy of physics, from classical mechanics and electromagnetism to relativity, quantum theory, condensed matter, and beyond.">
+  <title>Physics Field Atlas — A Genealogy of Ideas</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Noto+Sans+SC:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#main" data-copy-en="Skip to the field atlas" data-copy-zh="跳到物理领域图谱">Skip to the field atlas</a>
+  <div class="site-controls" aria-label="Page controls" data-aria-en="Page controls" data-aria-zh="页面控制">
+    <button class="motion-toggle" type="button" aria-pressed="false">Pause motion</button>
+    <button type="button" data-lang="en" aria-pressed="true">EN</button>
+    <button type="button" data-lang="zh-CN" aria-pressed="false">中文</button>
+  </div>
+
+  <div class="atlas-shell">
+    <nav class="route-bar" aria-label="Physics journey routes" data-aria-en="Physics journey routes" data-aria-zh="物理旅程路线">
+      <a class="route-home" href="../index.html" data-copy-en="Back to the story of matter" data-copy-zh="返回物质演化故事">Back to the story of matter</a>
+      <div class="route-links">
+        <a href="./newtonian.html" data-copy-en="Newtonian mechanics" data-copy-zh="牛顿力学">Newtonian mechanics</a>
+        <a href="./relativity.html" data-copy-en="Relativity" data-copy-zh="相对论">Relativity</a>
+        <a href="./quantum.html" data-copy-en="Quantum mechanics" data-copy-zh="量子力学">Quantum mechanics</a>
+      </div>
+    </nav>
+
+    <header class="hero-map">
+      <div class="hero-copy">
+        <h1 data-html-en="Physics is a <em>family of ideas.</em>" data-html-zh="物理学是一棵<em>思想谱系。</em>">Physics is a <em>family of ideas.</em></h1>
+        <p data-copy-en="Mechanics gives motion to fluids. Thermodynamics meets probability and becomes statistical mechanics. Electromagnetism becomes light, relativity, and quantum field theory. Follow the inheritances, transfers, and revolutions that made today’s physics."
+           data-copy-zh="力学把运动语言交给流体；热力学遇到概率，形成统计力学；电磁学通向光、相对论与量子场论。沿着继承、迁移与革命，看见今天的物理学如何形成。">
+          Mechanics gives motion to fluids. Thermodynamics meets probability and becomes statistical mechanics. Electromagnetism becomes light, relativity, and quantum field theory. Follow the inheritances, transfers, and revolutions that made today’s physics.
+        </p>
+        <div class="hero-actions">
+          <a class="primary-action" href="#genealogy" data-copy-en="Trace the complete genealogy" data-copy-zh="追踪完整物理谱系">Trace the complete genealogy</a>
+          <a class="secondary-action" href="#people" data-copy-en="Meet the people behind the ideas" data-copy-zh="认识思想背后的物理学家">Meet the people behind the ideas</a>
+        </div>
+      </div>
+
+      <div class="atlas-preview" aria-label="Schematic preview of physics lineages crossing through time" data-aria-en="Schematic preview of physics lineages crossing through time" data-aria-zh="物理学谱系穿越时间并相互交汇的示意预览">
+        <span class="preview-century c17">1600</span>
+        <span class="preview-century c19">1800</span>
+        <span class="preview-century c20">1900</span>
+        <div class="preview-line mechanics"></div>
+        <div class="preview-line fields"></div>
+        <div class="preview-line quantum"></div>
+        <div class="preview-line cosmos"></div>
+        <div class="preview-station newton">F</div>
+        <div class="preview-station maxwell">∇</div>
+        <div class="preview-station einstein">c</div>
+        <div class="preview-station quantum">ψ</div>
+        <div class="preview-note">
+          <span><strong data-copy-en="A map of influence, not a claim of single inventors." data-copy-zh="这是影响关系图，不是“单一发明者”清单。">A map of influence, not a claim of single inventors.</strong></span>
+          <span data-copy-en="Dates mark milestones; every field has deeper roots." data-copy-zh="日期标记里程碑；每个领域都有更深的根源。">Dates mark milestones; every field has deeper roots.</span>
+        </div>
+      </div>
+    </header>
+
+    <aside class="representation-key" aria-label="Visual evidence key" data-aria-en="Visual evidence key" data-aria-zh="视觉证据图例">
+      <span data-copy-en="How this atlas labels its pictures:" data-copy-zh="本图谱如何标注图像：">How this atlas labels its pictures:</span>
+      <span class="rep-badge observation" data-copy-en="Observation" data-copy-zh="观测">Observation</span>
+      <span class="rep-badge document" data-copy-en="Historical document" data-copy-zh="历史文献">Historical document</span>
+      <span class="rep-badge model" data-copy-en="Calculated model" data-copy-zh="计算模型">Calculated model</span>
+      <span class="rep-badge schematic" data-copy-en="Teaching schematic" data-copy-zh="教学示意">Teaching schematic</span>
+    </aside>
+
+    <main id="main">
+      <section id="genealogy" class="atlas-section">
+        <div class="section-heading">
+          <h2 data-copy-en="Four centuries of ideas, branching and recombining."
+              data-copy-zh="四个世纪的思想，不断分支，也不断汇流。">Four centuries of ideas, branching and recombining.</h2>
+          <p data-copy-en="Select any field to illuminate its direct ancestors and descendants. The connections show major conceptual transfers, not every historical influence. Search by field, concept, or physicist."
+             data-copy-zh="选择任一领域，即可点亮它的直接祖先与后继。连线表示重要的概念迁移，并不穷尽全部历史影响。你可以按领域、概念或物理学家搜索。">
+            Select any field to illuminate its direct ancestors and descendants. The connections show major conceptual transfers, not every historical influence. Search by field, concept, or physicist.
+          </p>
+        </div>
+
+        <div class="atlas-tools">
+          <label class="search-wrap">
+            <span class="sr-only" data-copy-en="Search the physics atlas" data-copy-zh="搜索物理图谱">Search the physics atlas</span>
+            <input id="fieldSearch" type="search" autocomplete="off" placeholder="Search fields, ideas, or people" data-placeholder-en="Search fields, ideas, or people" data-placeholder-zh="搜索领域、思想或人物">
+          </label>
+          <div class="lineage-filters" aria-label="Filter by lineage" data-aria-en="Filter by lineage" data-aria-zh="按谱系筛选">
+            <button class="lineage-filter active" type="button" data-lineage="all">All lineages</button>
+            <button class="lineage-filter" type="button" data-lineage="motion">Motion</button>
+            <button class="lineage-filter" type="button" data-lineage="fields">Fields &amp; waves</button>
+            <button class="lineage-filter" type="button" data-lineage="matter">Matter</button>
+            <button class="lineage-filter" type="button" data-lineage="quantum">Quantum</button>
+            <button class="lineage-filter" type="button" data-lineage="cosmos">Earth &amp; cosmos</button>
+            <button class="lineage-filter" type="button" data-lineage="life">Living systems</button>
+            <button class="lineage-filter" type="button" data-lineage="systems">Complex systems</button>
+          </div>
+        </div>
+
+        <div id="fieldTimeline" class="field-genealogy">
+          <div class="year-axis" aria-hidden="true"></div>
+          <div id="fieldStage" class="field-stage">
+            <svg id="lineageSvg" class="lineage-svg" aria-hidden="true"></svg>
+          </div>
+        </div>
+
+        <aside id="fieldInspector" class="field-inspector" aria-hidden="true" aria-live="polite">
+          <button class="inspector-close" type="button" aria-label="Close field details" data-aria-en="Close field details" data-aria-zh="关闭领域详情">×</button>
+          <div class="inspector-year"></div>
+          <h3></h3>
+          <p class="inspector-detail"></p>
+          <p class="inspector-links inspector-shift"><strong>What changed</strong><span></span></p>
+          <p class="inspector-links inspector-people"><strong>People to know</strong><span></span></p>
+          <p class="inspector-links inspector-parents"><strong>Direct ancestors</strong><span></span></p>
+          <div class="inspector-action"></div>
+        </aside>
+      </section>
+
+      <section id="people" class="people-section">
+        <div class="section-heading">
+          <h2 data-copy-en="No revolution belongs to one portrait."
+              data-copy-zh="没有一场物理革命只属于一张肖像。">No revolution belongs to one portrait.</h2>
+          <p data-copy-en="These scientists are waypoints in a much larger human network of observers, instrument makers, mathematicians, experimentalists, teachers, and collaborators. Each image below is stored locally and public domain."
+             data-copy-zh="这些科学家只是更庞大人类网络中的路标；网络里还有观测者、仪器制造者、数学家、实验家、教师与合作者。下列图像均已存入仓库并属于公有领域。">
+            These scientists are waypoints in a much larger human network of observers, instrument makers, mathematicians, experimentalists, teachers, and collaborators. Each image below is stored locally and public domain.
+          </p>
+        </div>
+
+        <div class="people-ledger">
+          <article class="person">
+            <img src="../assets/media/Isaac_Newton_Kneller_1689.jpg" loading="lazy" decoding="async" alt="Portrait of Isaac Newton after Godfrey Kneller" data-alt-en="Portrait of Isaac Newton after Godfrey Kneller" data-alt-zh="戈弗雷·内勒画作中的艾萨克·牛顿肖像">
+            <div class="person-copy">
+              <time>1643–1727</time>
+              <h3 data-copy-en="Isaac Newton" data-copy-zh="艾萨克·牛顿">Isaac Newton</h3>
+              <p data-copy-en="Built a mathematical synthesis of motion and gravitation, developed calculus independently, and transformed optics through experiments with prisms and color."
+                 data-copy-zh="建立运动与引力的数学综合体系，独立发展微积分，并通过棱镜与颜色实验改变光学。">Built a mathematical synthesis of motion and gravitation, developed calculus independently, and transformed optics through experiments with prisms and color.</p>
+              <a class="person-source" href="https://commons.wikimedia.org/wiki/File:GodfreyKneller-IsaacNewton-1689.jpg" target="_blank" rel="noopener noreferrer" data-copy-en="Portrait source · public domain" data-copy-zh="肖像来源 · 公有领域">Portrait source · public domain</a>
+            </div>
+          </article>
+
+          <article class="person">
+            <img src="../assets/media/Galileo_Sustermans_1640.jpg" loading="lazy" decoding="async" alt="Portrait of Galileo Galilei by Justus Sustermans" data-alt-en="Portrait of Galileo Galilei by Justus Sustermans" data-alt-zh="尤斯图斯·苏斯特曼斯绘制的伽利略肖像">
+            <div class="person-copy">
+              <time>1564–1642</time>
+              <h3 data-copy-en="Galileo Galilei" data-copy-zh="伽利略">Galileo Galilei</h3>
+              <p data-copy-en="Joined experiment, mathematical motion, and telescopic observation; his work on inertia and falling bodies prepared the ground for classical mechanics."
+                 data-copy-zh="把实验、运动数学与望远镜观测结合起来；他对惯性与落体的研究为经典力学铺路。">Joined experiment, mathematical motion, and telescopic observation; his work on inertia and falling bodies prepared the ground for classical mechanics.</p>
+              <a class="person-source" href="https://commons.wikimedia.org/wiki/File:Galileo.arp.300pix.jpg" target="_blank" rel="noopener noreferrer" data-copy-en="Portrait source · public domain" data-copy-zh="肖像来源 · 公有领域">Portrait source · public domain</a>
+            </div>
+          </article>
+
+          <article class="person">
+            <img src="../assets/media/Albert_Einstein_1921.jpg" loading="lazy" decoding="async" alt="Albert Einstein photographed by Ferdinand Schmutzer in 1921" data-alt-en="Albert Einstein photographed by Ferdinand Schmutzer in 1921" data-alt-zh="费迪南德·施穆策于 1921 年拍摄的爱因斯坦">
+            <div class="person-copy">
+              <time>1879–1955</time>
+              <h3 data-copy-en="Albert Einstein" data-copy-zh="阿尔伯特·爱因斯坦">Albert Einstein</h3>
+              <p data-copy-en="Reframed space, time, gravity, light quanta, and Brownian motion. Relativity grew from many prior measurements and later needed a community to test and extend it."
+                 data-copy-zh="重塑空间、时间、引力、光量子与布朗运动。相对论建立在众多先前测量之上，也需要整个科学共同体检验与扩展。">Reframed space, time, gravity, light quanta, and Brownian motion. Relativity grew from many prior measurements and later needed a community to test and extend it.</p>
+              <a class="person-source" href="https://commons.wikimedia.org/wiki/File:Einstein_1921_by_F_Schmutzer_-_restoration.jpg" target="_blank" rel="noopener noreferrer" data-copy-en="Photo source · public domain" data-copy-zh="照片来源 · 公有领域">Photo source · public domain</a>
+            </div>
+          </article>
+
+          <article class="person">
+            <img src="../assets/media/Michael_Faraday_Phillips.jpg" loading="lazy" decoding="async" alt="Michael Faraday painted by Thomas Phillips" data-alt-en="Michael Faraday painted by Thomas Phillips" data-alt-zh="托马斯·菲利普斯绘制的迈克尔·法拉第肖像">
+            <div class="person-copy">
+              <time>1791–1867</time>
+              <h3 data-copy-en="Michael Faraday" data-copy-zh="迈克尔·法拉第">Michael Faraday</h3>
+              <p data-copy-en="Discovered electromagnetic induction and made field lines physically meaningful through unusually clear and inventive experiments."
+                 data-copy-zh="发现电磁感应，并通过格外清晰且富有创造性的实验赋予“场线”真实的物理意义。">Discovered electromagnetic induction and made field lines physically meaningful through unusually clear and inventive experiments.</p>
+              <a class="person-source" href="https://commons.wikimedia.org/wiki/File:Michael_Faraday_001.jpg" target="_blank" rel="noopener noreferrer" data-copy-en="Portrait source · public domain" data-copy-zh="肖像来源 · 公有领域">Portrait source · public domain</a>
+            </div>
+          </article>
+
+          <article class="person">
+            <img src="../assets/media/James_Clerk_Maxwell_1882.jpg" loading="lazy" decoding="async" alt="Engraved portrait of James Clerk Maxwell" data-alt-en="Engraved portrait of James Clerk Maxwell" data-alt-zh="詹姆斯·克拉克·麦克斯韦雕版肖像">
+            <div class="person-copy">
+              <time>1831–1879</time>
+              <h3 data-copy-en="James Clerk Maxwell" data-copy-zh="詹姆斯·克拉克·麦克斯韦">James Clerk Maxwell</h3>
+              <p data-copy-en="Unified electric and magnetic phenomena in equations whose waves travel at light speed, revealing light itself as electromagnetic."
+                 data-copy-zh="用方程统一电与磁；方程中的波以光速传播，从而揭示光本身就是电磁现象。">Unified electric and magnetic phenomena in equations whose waves travel at light speed, revealing light itself as electromagnetic.</p>
+              <a class="person-source" href="https://commons.wikimedia.org/wiki/File:James_Clerk_Maxwell_big.jpg" target="_blank" rel="noopener noreferrer" data-copy-en="Portrait source · public domain" data-copy-zh="肖像来源 · 公有领域">Portrait source · public domain</a>
+            </div>
+          </article>
+
+          <article class="person">
+            <img src="../assets/media/Marie_Curie_1920s.jpg" loading="lazy" decoding="async" alt="Marie Curie photographed by Henri Manuel in the 1920s" data-alt-en="Marie Curie photographed by Henri Manuel in the 1920s" data-alt-zh="亨利·马努埃尔于 1920 年代拍摄的玛丽·居里">
+            <div class="person-copy">
+              <time>1867–1934</time>
+              <h3 data-copy-en="Marie Curie" data-copy-zh="玛丽·居里">Marie Curie</h3>
+              <p data-copy-en="Established radioactivity as a quantitative field, discovered polonium and radium with Pierre Curie, and linked atomic change to measurable energy."
+                 data-copy-zh="把放射性建立为定量研究领域，与皮埃尔·居里发现钋和镭，并把原子变化连接到可测能量。">Established radioactivity as a quantitative field, discovered polonium and radium with Pierre Curie, and linked atomic change to measurable energy.</p>
+              <a class="person-source" href="https://commons.wikimedia.org/wiki/File:Marie_Curie_c._1920s.jpg" target="_blank" rel="noopener noreferrer" data-copy-en="Photo source · public domain" data-copy-zh="照片来源 · 公有领域">Photo source · public domain</a>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="atlas-close">
+        <div>
+          <h2 data-copy-en="Choose a laboratory. Test an idea."
+              data-copy-zh="选择一间实验室，亲手检验一个思想。">Choose a laboratory. Test an idea.</h2>
+          <p data-copy-en="The first three complete field guides turn landmark concepts into interactive instruments: launch an orbit, compare moving clocks, and build a quantum interference pattern one detection at a time."
+             data-copy-zh="首批三个完整专题把里程碑概念变成互动仪器：发射一条轨道、比较运动中的时钟，并用一次次探测构建量子干涉图样。">
+            The first three complete field guides turn landmark concepts into interactive instruments: launch an orbit, compare moving clocks, and build a quantum interference pattern one detection at a time.
+          </p>
+        </div>
+        <div class="close-links">
+          <a href="./newtonian.html"><span data-copy-en="Newtonian mechanics" data-copy-zh="牛顿力学">Newtonian mechanics</span><span>F = ma →</span></a>
+          <a href="./relativity.html"><span data-copy-en="Relativity" data-copy-zh="相对论">Relativity</span><span>Gμν →</span></a>
+          <a href="./quantum.html"><span data-copy-en="Quantum mechanics" data-copy-zh="量子力学">Quantum mechanics</span><span>ψ →</span></a>
+        </div>
+      </section>
+    </main>
+
+    <footer class="atlas-footer">
+      <span data-copy-en="Historical dates mark representative milestones, not single moments of invention." data-copy-zh="历史日期标记代表性里程碑，并非单一“发明时刻”。">Historical dates mark representative milestones, not single moments of invention.</span>
+      <span><a href="../LICENSES/THIRD-PARTY-MEDIA.md" data-copy-en="Media licenses" data-copy-zh="媒体许可">Media licenses</a> · <a href="https://github.com/micwu-personal/Physics">GitHub</a></span>
+    </footer>
+  </div>
+
+  <script src="common.js"></script>
+  <script src="atlas.js"></script>
+</body>
+</html>
