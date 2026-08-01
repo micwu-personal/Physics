@@ -2,6 +2,13 @@ export const locales = ['en', 'zh-CN'];
 
 export const entries = [
   { id: 'landing', app: 'landing', path: '/', generated: false },
+  { id: 'physics-atlas', app: 'physics-atlas', path: '/physics/', generated: false },
+  { id: 'newtonian-mechanics', app: 'physics-area', path: '/physics/newtonian.html', generated: false },
+  { id: 'relativity', app: 'physics-area', path: '/physics/relativity.html', generated: false },
+  { id: 'quantum-mechanics', app: 'physics-area', path: '/physics/quantum.html', generated: false },
+  { id: 'astrophysics', app: 'physics-astro', path: '/physics/astrophysics.html', generated: false },
+  { id: 'electrodynamics', app: 'physics-light', path: '/physics/electrodynamics.html', generated: false },
+  { id: 'field-guide', app: 'physics-field', path: '/physics/field.html?id=thermodynamics', generated: false },
   { id: 'big-bang', app: 'big-bang', path: '/big-bang/', generated: false },
   { id: 'big-bang-mobile', app: 'big-bang', path: '/big-bang/mobile/index.html', generated: true },
   { id: 'periodic-table', app: 'periodic-table', path: '/periodic-table/', generated: false },

@@ -3,6 +3,8 @@ import { assertNoErrors, watchPage } from './helpers/assertions.js';
 import {
   assertBigBangSourceLinksRerender,
   exerciseBigBang,
+  exercisePhysicsArea,
+  exercisePhysicsAtlas,
   exerciseParticleZoo,
   exercisePeriodicTable
 } from './helpers/journeys.js';
@@ -10,6 +12,10 @@ import { locales } from './helpers/matrix.js';
 import { preparePage } from './helpers/runtime.js';
 
 const journeys = [
+  { name: 'Physics Atlas', path: '/physics/', run: exercisePhysicsAtlas },
+  { name: 'Newtonian Mechanics', path: '/physics/newtonian.html', run: exercisePhysicsArea },
+  { name: 'Relativity', path: '/physics/relativity.html', run: exercisePhysicsArea },
+  { name: 'Quantum Mechanics', path: '/physics/quantum.html', run: exercisePhysicsArea },
   { name: 'Big Bang', path: '/big-bang/', run: exerciseBigBang },
   { name: 'Periodic Table', path: '/periodic-table/', run: exercisePeriodicTable },
   { name: 'Particle Zoo', path: '/particle-zoo/', run: exerciseParticleZoo }
@@ -25,6 +31,103 @@ for (const journey of journeys) {
     });
   }
 }
+
+/* The control cluster is fixed to the viewport, so every sticky bar on the
+   physics routes must come to rest below it and stay clickable. */
+for (const [name, path, sticky] of [
+  ['Physics Atlas', '/physics/', '.atlas-tools'],
+  ['Newtonian Mechanics', '/physics/newtonian.html', '.topic-index'],
+  ['Relativity', '/physics/relativity.html', '.topic-index'],
+  ['Quantum Mechanics', '/physics/quantum.html', '.topic-index']
+]) {
+  for (const viewport of [{ width: 1440, height: 1000 }, { width: 412, height: 915 }]) {
+    test(`${name} sticky bar clears the controls at ${viewport.width}px`, async ({ page }) => {
+      await page.setViewportSize(viewport);
+      await preparePage(page, path, 'en');
+
+      // Font availability changes how the bar wraps, so assert the resolved
+      // sticky offset rather than relying on a particular wrapped layout.
+      const geometry = await page.evaluate(selector => {
+        const bar = document.querySelector(selector);
+        const controls = document.querySelector('.site-controls').getBoundingClientRect();
+        return {
+          controlsBottom: controls.bottom,
+          position: getComputedStyle(bar).position,
+          stickyTop: parseFloat(getComputedStyle(bar).top)
+        };
+      }, sticky);
+
+      // A static bar scrolls away from the cluster like any other content, so
+      // the invariant only binds when the bar is actually pinned.
+      if (geometry.position !== 'sticky') return;
+
+      expect(
+        geometry.stickyTop,
+        'the sticky bar must come to rest below the fixed control cluster'
+      ).toBeGreaterThanOrEqual(geometry.controlsBottom);
+
+      // Belt and braces: no interactive child may sit under the cluster at any
+      // scroll offset the visitor can reach.
+      const overlap = await page.locator(sticky).evaluate(async bar => {
+        const controls = document.querySelector('.site-controls').getBoundingClientRect();
+        const hits = new Set();
+        const step = Math.round(innerHeight / 3);
+        for (let offset = 0; offset <= document.body.scrollHeight; offset += step) {
+          scrollTo(0, offset);
+          await new Promise(resolve => requestAnimationFrame(resolve));
+          for (const item of bar.querySelectorAll('button, a, input')) {
+            const rect = item.getBoundingClientRect();
+            if (rect.width > 0 && rect.height > 0 &&
+              rect.left < controls.right && rect.right > controls.left &&
+              rect.top < controls.bottom && rect.bottom > controls.top) {
+              hits.add(item.textContent.trim() || item.id);
+            }
+          }
+        }
+        scrollTo(0, 0);
+        return [...hits];
+      });
+      expect(overlap, 'no sticky control sits under the fixed cluster').toEqual([]);
+    });
+  }
+}
+
+/* Data invariants the atlas relies on instead of re-checking them defensively:
+   every lineage edge must resolve, and every node must render a signature. */
+test('Physics Atlas renders a resolved lineage for every field', async ({ page }) => {
+  await preparePage(page, '/physics/', 'en');
+  const nodes = page.locator('.field-node');
+  const total = await nodes.count();
+  expect(total).toBeGreaterThan(0);
+
+  const broken = await page.locator('.field-node').evaluateAll(elements => {
+    const ids = new Set(elements.map(element => element.dataset.field));
+    return elements.flatMap(element => {
+      const problems = [];
+      if (!element.querySelector('.field-signature svg, svg.field-signature')?.innerHTML.trim()) {
+        problems.push(`${element.dataset.field}: empty signature`);
+      }
+      if (!element.querySelector('h3').textContent.trim()) {
+        problems.push(`${element.dataset.field}: missing name`);
+      }
+      if (!ids.has(element.dataset.field)) problems.push(`${element.dataset.field}: unresolved id`);
+      return problems;
+    });
+  });
+  expect(broken, 'every field node renders a signature and name').toEqual([]);
+
+  // Selecting each field walks its full ancestor/descendant graph; an unresolved
+  // parent id would throw inside graphFamily(). The inspector floats over the
+  // stage, so dispatch the activation directly instead of hit-testing.
+  const errors = watchPage(page);
+  for (let index = 0; index < total; index++) {
+    await nodes.nth(index).locator('button').dispatchEvent('click');
+    await expect(page.locator('#fieldInspector h3')).not.toHaveText('');
+  }
+  await page.keyboard.press('Escape');
+  await expect(page.locator('#fieldInspector')).not.toHaveClass(/open/);
+  await assertNoErrors(errors);
+});
 
 /* Structural invariants the periodic-table feature modules rely on instead of
    re-checking them defensively on every render. */

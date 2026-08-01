@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!--
+  THESIS: Every physics field is a position in a lineage, so a guide should show what it inherited and what it made possible, not just define it.
+  OWN-WORLD: The Evidence Observatory, with the field's own accent colour and signature mark driving the page.
+  STORY: Read what the field studies, see its ancestors and descendants, learn three core ideas, then find where it stops.
+  FIRST VIEWPORT: The field's name and signature relation beside a live map of its place in the genealogy.
+  FORM: One shared guide shell rendered from the atlas data; selected with ?id=.
+  -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Field guides for every area of the physics atlas: what each field studies, the ideas it inherited, its core concepts, and where its framework stops.">
+  <title>Field Guide — Physics Field Atlas</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Noto+Sans+SC:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-topic="field">
+  <a class="skip-link" href="#main" data-copy-en="Skip to the field guide" data-copy-zh="跳到领域导览">Skip to the field guide</a>
+  <div class="site-controls" aria-label="Page controls" data-aria-en="Page controls" data-aria-zh="页面控制">
+    <button class="motion-toggle" type="button" aria-pressed="false">Pause motion</button>
+    <button type="button" data-lang="en" aria-pressed="true">EN</button>
+    <button type="button" data-lang="zh-CN" aria-pressed="false">中文</button>
+  </div>
+
+  <div class="topic-shell">
+    <nav class="route-bar" aria-label="Field guide routes" data-aria-en="Field guide routes" data-aria-zh="领域导览路线">
+      <a class="route-home" href="./index.html#genealogy" data-copy-en="Back to the field atlas" data-copy-zh="返回物理领域图谱">Back to the field atlas</a>
+      <div class="route-links">
+        <a id="previousField" href="./index.html#genealogy"></a>
+        <a id="nextField" href="./index.html#genealogy"></a>
+      </div>
+    </nav>
+
+    <header class="topic-hero">
+      <div class="topic-title">
+        <p id="fieldKicker" class="field-kicker"></p>
+        <h1 id="fieldName"></h1>
+        <p id="fieldLede"></p>
+        <span id="fieldEquation" class="hero-equation"></span>
+        <p id="fieldEquationNote" class="equation-note"></p>
+        <div class="hero-actions">
+          <a class="primary-action" href="#concepts" data-copy-en="Three core ideas" data-copy-zh="三个核心概念">Three core ideas</a>
+          <a class="secondary-action" href="./index.html#genealogy" data-copy-en="See the whole genealogy" data-copy-zh="查看完整谱系">See the whole genealogy</a>
+        </div>
+      </div>
+      <div class="hero-instrument lineage-instrument">
+        <div id="lineageMap" class="lineage-map"></div>
+        <div class="instrument-label">
+          <span><strong data-copy-en="A position, not an island." data-copy-zh="这是一个位置，不是一座孤岛。">A position, not an island.</strong><span data-copy-en="Links show major conceptual transfers, not every historical influence." data-copy-zh="连接表示主要的概念迁移，并非全部历史影响。">Links show major conceptual transfers, not every historical influence.</span></span>
+          <span class="rep-badge schematic" data-copy-en="Teaching schematic" data-copy-zh="教学示意">Teaching schematic</span>
+        </div>
+      </div>
+    </header>
+
+    <main id="main">
+      <section id="concepts" class="topic-section">
+        <header>
+          <h2 data-copy-en="Three ideas the field is built on."
+              data-copy-zh="这一领域赖以建立的三个概念。">Three ideas the field is built on.</h2>
+          <p id="fieldDetail"></p>
+        </header>
+        <div id="conceptRibbon" class="concept-ribbon"></div>
+        <div class="field-context">
+          <p class="inspector-links"><strong id="shiftLabel"></strong><span id="shiftBody"></span></p>
+          <p class="inspector-links"><strong id="peopleLabel"></strong><span id="peopleBody"></span></p>
+        </div>
+      </section>
+
+      <section class="topic-section">
+        <header>
+          <h2 data-copy-en="Where the standard framework stops."
+              data-copy-zh="标准框架在哪里失效。">Where the standard framework stops.</h2>
+          <p data-copy-en="A working theory is defined as much by its boundaries as by its successes. These are the places where this field's usual description stops being the right one, or where a common summary of it is misleading."
+             data-copy-zh="一个有效理论的边界与它的成功同样重要。以下是该领域常用描述不再适用的地方，或是关于它的常见概括容易造成误解之处。">
+            A working theory is defined as much by its boundaries as by its successes. These are the places where this field's usual description stops being the right one, or where a common summary of it is misleading.
+          </p>
+        </header>
+        <div id="boundaryGrid" class="limit-grid"></div>
+      </section>
+
+      <section class="topic-section">
+        <header>
+          <h2 data-copy-en="Continue exploring."
+              data-copy-zh="继续探索。">Continue exploring.</h2>
+          <p data-copy-en="Physics areas are not sealed off from one another. These are the nearest rooms in the museum."
+             data-copy-zh="物理各领域并非彼此隔绝。以下是馆内距离最近的几个展厅。">
+            Physics areas are not sealed off from one another. These are the nearest rooms in the museum.
+          </p>
+        </header>
+        <div id="relationMap" class="relation-map"></div>
+      </section>
+    </main>
+
+    <footer class="topic-footer">
+      <span data-copy-en="Dates mark representative milestones, not single moments of invention." data-copy-zh="日期标记代表性里程碑，并非单一的“发明时刻”。">Dates mark representative milestones, not single moments of invention.</span>
+      <span><a href="../LICENSES/THIRD-PARTY-MEDIA.md" data-copy-en="Media licenses" data-copy-zh="媒体许可">Media licenses</a> · <a href="./index.html#genealogy" data-copy-en="Return to the field atlas" data-copy-zh="返回领域图谱">Return to the field atlas</a></span>
+    </footer>
+  </div>
+
+  <script src="fields-core.js"></script>
+  <script src="fields-data.js"></script>
+  <script src="common.js"></script>
+  <script src="field.js"></script>
+</body>
+</html>

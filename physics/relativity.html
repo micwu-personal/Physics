@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!--
+  THESIS: Relativity is a geometry of measurement, not the slogan that “everything is relative.”
+  OWN-WORLD: Cyan spacetime grids, gold light paths, clock readouts, and eclipse evidence extend the Evidence Observatory.
+  STORY: Establish invariant light speed, compare moving clocks, see gravity bend geometry, inspect the 1919 test, then connect the theory to cosmology and particle physics.
+  FIRST VIEWPORT: A curved grid and deflected light ray face the invariant interval; the static frame explains the idea without animation.
+  FORM: A sequence of measurement instruments and historical evidence, not a biography-led article.
+  -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="An interactive bilingual guide to special and general relativity with a moving light-clock experiment, spacetime visualization, historical eclipse evidence, and links to cosmology.">
+  <title>Relativity — Physics Field Atlas</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Noto+Sans+SC:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-topic="relativity">
+  <a class="skip-link" href="#main" data-copy-en="Skip to relativity" data-copy-zh="跳到相对论内容">Skip to relativity</a>
+  <div class="site-controls" aria-label="Page controls" data-aria-en="Page controls" data-aria-zh="页面控制">
+    <button class="motion-toggle" type="button" aria-pressed="false">Pause motion</button>
+    <button type="button" data-lang="en" aria-pressed="true">EN</button>
+    <button type="button" data-lang="zh-CN" aria-pressed="false">中文</button>
+  </div>
+
+  <div class="topic-shell">
+    <nav class="route-bar" aria-label="Relativity routes" data-aria-en="Relativity routes" data-aria-zh="相对论路线">
+      <a class="route-home" href="./index.html#genealogy" data-copy-en="Back to the field atlas" data-copy-zh="返回物理领域图谱">Back to the field atlas</a>
+      <div class="route-links">
+        <a href="./newtonian.html" data-copy-en="Newtonian limit" data-copy-zh="牛顿极限">Newtonian limit</a>
+        <a href="./quantum.html" data-copy-en="Next: quantum mechanics" data-copy-zh="下一站：量子力学">Next: quantum mechanics</a>
+        <a href="../big-bang/index.html" data-copy-en="Cosmic spacetime" data-copy-zh="宇宙时空">Cosmic spacetime</a>
+      </div>
+    </nav>
+
+    <header class="topic-hero">
+      <div class="topic-title">
+        <h1 data-copy-en="Relativity" data-copy-zh="相对论">Relativity</h1>
+        <p data-copy-en="Special relativity reorganizes space and time so every inertial observer measures the same light speed. General relativity goes further: freely falling bodies follow spacetime geometry, and matter-energy helps determine that geometry."
+           data-copy-zh="狭义相对论重组空间与时间，使每个惯性观察者都测得相同光速；广义相对论更进一步：自由下落的物体沿时空几何运动，物质与能量参与决定这种几何。">
+          Special relativity reorganizes space and time so every inertial observer measures the same light speed. General relativity goes further: freely falling bodies follow spacetime geometry, and matter-energy helps determine that geometry.
+        </p>
+        <span class="hero-equation">Δs² = c²Δt² − Δx² · G<sub>μν</sub> = 8πG T<sub>μν</sub>/c⁴</span>
+        <div class="hero-actions">
+          <a class="primary-action" href="#clock-lab" data-copy-en="Compare moving clocks" data-copy-zh="比较运动中的时钟">Compare moving clocks</a>
+          <a class="secondary-action" href="#evidence" data-copy-en="Inspect the 1919 eclipse" data-copy-zh="查看 1919 年日食证据">Inspect the 1919 eclipse</a>
+        </div>
+      </div>
+      <div class="hero-instrument">
+        <canvas id="heroCanvas" aria-label="Teaching schematic of a curved spacetime grid bending a light ray" data-aria-en="Teaching schematic of a curved spacetime grid bending a light ray" data-aria-zh="弯曲时空网格使光线偏折的教学示意">A warped grid surrounds a compact mass while a light ray bends past it.</canvas>
+        <div class="instrument-label">
+          <span><strong data-copy-en="Matter changes geometry; geometry guides motion." data-copy-zh="物质改变几何，几何引导运动。">Matter changes geometry; geometry guides motion.</strong><span data-copy-en="The grid is a 2D teaching metaphor, not a literal fabric in a higher-dimensional room." data-copy-zh="网格是二维教学隐喻，并非置于更高维房间中的真实“布料”。">The grid is a 2D teaching metaphor, not a literal fabric in a higher-dimensional room.</span></span>
+          <span class="rep-badge schematic" data-copy-en="Teaching schematic" data-copy-zh="教学示意">Teaching schematic</span>
+        </div>
+      </div>
+    </header>
+
+    <nav class="topic-index" aria-label="Relativity sections" data-aria-en="Relativity sections" data-aria-zh="相对论章节">
+      <a href="#principles" data-copy-en="Core principles" data-copy-zh="核心原理">Core principles</a>
+      <a href="#clock-lab" data-copy-en="Light-clock laboratory" data-copy-zh="光钟实验室">Light-clock laboratory</a>
+      <a href="#evidence" data-copy-en="Einstein & eclipse" data-copy-zh="爱因斯坦与日食">Einstein &amp; eclipse</a>
+      <a href="#limits" data-copy-en="What it does—and does not—say" data-copy-zh="理论边界">What it does—and does not—say</a>
+      <a href="#connections" data-copy-en="Continue exploring" data-copy-zh="继续探索">Continue exploring</a>
+    </nav>
+
+    <main id="main">
+      <section id="principles" class="topic-section">
+        <header>
+          <h2 data-copy-en="Measurements change between observers; physical law does not."
+              data-copy-zh="观察者之间的测量会改变，物理规律不会。">Measurements change between observers; physical law does not.</h2>
+          <p data-copy-en="Relativity does not say every statement is equally true. It gives exact transformation rules between reference frames and identifies invariants—quantities every observer can agree on after accounting for those rules."
+             data-copy-zh="相对论并不是说所有陈述都同样正确。它给出参考系之间精确的变换规则，并识别不变量——每个观察者在正确换算后都能同意的量。">
+            Relativity does not say every statement is equally true. It gives exact transformation rules between reference frames and identifies invariants—quantities every observer can agree on after accounting for those rules.
+          </p>
+        </header>
+        <div class="concept-ribbon">
+          <article class="concept">
+            <div class="concept-mark">c = constant</div>
+            <h3 data-copy-en="Invariant light speed" data-copy-zh="光速不变">Invariant light speed</h3>
+            <p data-copy-en="Every inertial observer measures the same vacuum light speed c, regardless of the source’s motion. Space and time coordinates must transform together to make that possible."
+               data-copy-zh="每个惯性观察者都测得相同的真空光速 c，不依赖光源运动。要做到这一点，空间与时间坐标必须共同变换。">Every inertial observer measures the same vacuum light speed c, regardless of the source’s motion. Space and time coordinates must transform together to make that possible.</p>
+          </article>
+          <article class="concept">
+            <div class="concept-mark">Δτ ≤ Δt</div>
+            <h3 data-copy-en="Proper time" data-copy-zh="固有时">Proper time</h3>
+            <p data-copy-en="A clock measures time along its own path through spacetime. Different paths between reunion events can accumulate different elapsed times; experiments verify this routinely."
+               data-copy-zh="时钟测量它自身沿时空路径经过的时间。两次重逢事件之间，不同路径可以积累不同时间；实验已反复验证。">A clock measures time along its own path through spacetime. Different paths between reunion events can accumulate different elapsed times; experiments verify this routinely.</p>
+          </article>
+          <article class="concept">
+            <div class="concept-mark">free fall = geodesic</div>
+            <h3 data-copy-en="Equivalence & curvature" data-copy-zh="等效原理与曲率">Equivalence &amp; curvature</h3>
+            <p data-copy-en="Locally, free fall removes the felt weight of gravity. Globally, tidal effects reveal curvature: neighboring free-fall paths converge or diverge."
+               data-copy-zh="局部地看，自由落体会消除对重力的“感受”；整体地看，潮汐效应揭示曲率：相邻自由落体路径会汇聚或分离。">Locally, free fall removes the felt weight of gravity. Globally, tidal effects reveal curvature: neighboring free-fall paths converge or diverge.</p>
+          </article>
+        </div>
+      </section>
+
+      <section id="clock-lab" class="topic-section">
+        <header>
+          <h2 data-copy-en="A moving light clock traces a longer path between ticks."
+              data-copy-zh="运动中的光钟，每一“滴答”都走过更长路径。">A moving light clock traces a longer path between ticks.</h2>
+          <p data-copy-en="Inside the ship, light travels straight between two mirrors at c. From the ground, the ship moves sideways while light crosses, so the light follows a diagonal path. Because both observers measure c, the ground assigns more time between the same ticks."
+             data-copy-zh="在飞船内，光以 c 在两面镜子之间直线往返；从地面看，光横穿镜间距离时飞船也在侧向移动，因此光走对角线。由于双方都测得 c，地面会为同一对滴答分配更多时间。">
+            Inside the ship, light travels straight between two mirrors at c. From the ground, the ship moves sideways while light crosses, so the light follows a diagonal path. Because both observers measure c, the ground assigns more time between the same ticks.
+          </p>
+        </header>
+        <div class="lab">
+          <div class="lab-stage">
+            <canvas id="labCanvas" aria-label="Interactive moving light-clock demonstration" data-aria-en="Interactive moving light-clock demonstration" data-aria-zh="可交互的运动光钟演示">Two mirrors move sideways while a light pulse bounces between them.</canvas>
+            <div class="lab-overlay">
+              <span id="labReadout" class="lab-readout">γ = 1.250</span>
+              <span id="labSecondaryReadout" class="lab-readout secondary">Moving clocks accumulate less proper time.</span>
+            </div>
+          </div>
+          <div class="lab-controls">
+            <h3 data-copy-en="Light-clock controls" data-copy-zh="光钟控制">Light-clock controls</h3>
+            <p data-copy-en="Increase the ship’s speed to lengthen the ground-frame light path. The ship is repeatedly wrapped across the display; it is not accelerating back to the left."
+               data-copy-zh="提高飞船速度，地面系中的光路会变长。画面中的飞船会循环回到左侧，这只是显示方式，并非实际加速返回。">Increase the ship’s speed to lengthen the ground-frame light path. The ship is repeatedly wrapped across the display; it is not accelerating back to the left.</p>
+            <div class="control-group">
+              <label for="primaryControl"><span data-copy-en="Ship speed" data-copy-zh="飞船速度">Ship speed</span><output id="primaryOutput" for="primaryControl">0.60 c</output></label>
+              <input id="primaryControl" type="range" min="0" max="0.95" value="0.6" step="0.01">
+            </div>
+            <div class="lab-buttons">
+              <button id="labToggle" type="button">Pause experiment</button>
+              <button id="labReset" type="button">Reset</button>
+              <button id="audioToggle" class="wide" type="button" aria-pressed="false">Enable sonification</button>
+            </div>
+            <p class="lab-note"><span class="rep-badge model" data-copy-en="Calculated model" data-copy-zh="计算模型">Calculated model</span><br><span data-copy-en="The Lorentz factor γ is calculated exactly from the selected β = v/c. Distances and animation speed are compressed for teaching. Sonification marks mirror events; it is not sound propagating in vacuum."
+              data-copy-zh="洛伦兹因子 γ 由所选 β = v/c 精确计算。距离与动画速度均为教学压缩。声音映射标记镜面事件，并非真空中传播的声音。">The Lorentz factor γ is calculated exactly from the selected β = v/c. Distances and animation speed are compressed for teaching. Sonification marks mirror events; it is not sound propagating in vacuum.</span></p>
+          </div>
+        </div>
+      </section>
+
+      <section id="evidence" class="topic-section">
+        <header>
+          <h2 data-copy-en="A prediction becomes physics when nature can answer."
+              data-copy-zh="只有自然能够作答，预言才成为物理。">A prediction becomes physics when nature can answer.</h2>
+          <p data-copy-en="During the 1919 total solar eclipse, expeditions measured star positions near the darkened Sun and compared them with reference plates. The result supported general relativity’s prediction that gravity deflects light, although later measurements became much more precise."
+             data-copy-zh="1919 年日全食期间，考察队测量暗日附近恒星的位置，并与参考底片比较。结果支持广义相对论关于引力偏折光线的预言；后来的测量精度已大幅提高。">
+            During the 1919 total solar eclipse, expeditions measured star positions near the darkened Sun and compared them with reference plates. The result supported general relativity’s prediction that gravity deflects light, although later measurements became much more precise.
+          </p>
+        </header>
+        <div class="evidence-pair">
+          <figure class="portrait-study">
+            <img src="../assets/media/Albert_Einstein_1921.jpg" loading="lazy" decoding="async" alt="Albert Einstein photographed by Ferdinand Schmutzer in 1921" data-alt-en="Albert Einstein photographed by Ferdinand Schmutzer in 1921" data-alt-zh="费迪南德·施穆策于 1921 年拍摄的爱因斯坦">
+            <figcaption class="portrait-caption">
+              <strong data-copy-en="Albert Einstein, 1879–1955" data-copy-zh="阿尔伯特·爱因斯坦，1879–1955">Albert Einstein, 1879–1955</strong>
+              <span data-copy-en="Ferdinand Schmutzer photograph, 1921; restored by Adam Cuerden. Public domain historical photograph."
+                    data-copy-zh="费迪南德·施穆策摄于 1921 年；亚当·柯登修复。公有领域历史照片。">Ferdinand Schmutzer photograph, 1921; restored by Adam Cuerden. Public domain historical photograph.</span>
+              <a href="https://commons.wikimedia.org/wiki/File:Einstein_1921_by_F_Schmutzer_-_restoration.jpg" target="_blank" rel="noopener noreferrer" data-copy-en="Source and rights statement" data-copy-zh="来源与权利说明">Source and rights statement</a>
+            </figcaption>
+          </figure>
+          <figure class="document-study wide">
+            <img src="../assets/media/Eddington_eclipse_1919.jpg" loading="lazy" decoding="async" alt="Positive photograph of the 1919 solar eclipse used in tests of general relativity" data-alt-en="Positive photograph of the 1919 solar eclipse used in tests of general relativity" data-alt-zh="用于检验广义相对论的 1919 年日食正片">
+            <figcaption>
+              <span class="rep-badge observation" data-copy-en="Historical observation" data-copy-zh="历史观测">Historical observation</span>
+              <strong data-copy-en="The 1919 solar-eclipse plates" data-copy-zh="1919 年日食底片">The 1919 solar-eclipse plates</strong>
+              <span data-copy-en="Stars near the eclipsed Sun appear on the plate. Researchers estimated tiny position shifts relative to comparison images. This is a historical photographic record, not a direct photograph of curved spacetime."
+                    data-copy-zh="底片记录了日食期间太阳附近的恒星。研究者相对比较图像估计微小位置偏移。这是历史照片记录，并非“弯曲时空”的直接照片。">Stars near the eclipsed Sun appear on the plate. Researchers estimated tiny position shifts relative to comparison images. This is a historical photographic record, not a direct photograph of curved spacetime.</span>
+              <a href="https://commons.wikimedia.org/wiki/File:1919_eclipse_positive.jpg" target="_blank" rel="noopener noreferrer" data-copy-en="Source and license" data-copy-zh="来源与许可">Source and license</a>
+            </figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <section id="limits" class="topic-section">
+        <header>
+          <h2 data-copy-en="Relativity is exact in scope—and incomplete as a final theory."
+              data-copy-zh="相对论在适用范围内精确，却不是最终完整理论。">Relativity is exact in scope—and incomplete as a final theory.</h2>
+          <p data-copy-en="Relativity supplies stricter structure than Newtonian mechanics, but the classical geometry of general relativity has not yet been successfully unified with quantum mechanics in every regime."
+             data-copy-zh="相对论比牛顿力学提供更严格的结构，但广义相对论的经典几何尚未在所有情形下与量子力学成功统一。">
+            Relativity supplies stricter structure than Newtonian mechanics, but the classical geometry of general relativity has not yet been successfully unified with quantum mechanics in every regime.
+          </p>
+        </header>
+        <div class="limit-grid">
+          <article class="limit">
+            <h3 data-copy-en="The Newtonian limit" data-copy-zh="牛顿极限">The Newtonian limit</h3>
+            <p data-copy-en="At low speeds and in weak, slowly changing gravitational fields, relativistic equations reduce to Newtonian mechanics and gravity with extremely high accuracy."
+               data-copy-zh="在低速、弱且缓慢变化的引力场中，相对论方程会以极高精度化为牛顿力学与牛顿引力。">At low speeds and in weak, slowly changing gravitational fields, relativistic equations reduce to Newtonian mechanics and gravity with extremely high accuracy.</p>
+            <a href="./newtonian.html" data-copy-en="Return to the orbital laboratory →" data-copy-zh="返回轨道实验室 →">Return to the orbital laboratory →</a>
+          </article>
+          <article class="limit">
+            <h3 data-copy-en="Quantum gravity" data-copy-zh="量子引力">Quantum gravity</h3>
+            <p data-copy-en="Near Planck-scale conditions or the deepest black-hole questions, treating spacetime as a smooth classical geometry is expected to fail. No experimentally confirmed complete quantum-gravity theory yet exists."
+               data-copy-zh="在普朗克尺度条件或最深层黑洞问题中，把时空视为光滑经典几何预计会失效。目前尚无经实验证实的完整量子引力理论。">Near Planck-scale conditions or the deepest black-hole questions, treating spacetime as a smooth classical geometry is expected to fail. No experimentally confirmed complete quantum-gravity theory yet exists.</p>
+            <a href="./quantum.html" data-copy-en="See how quantum prediction differs →" data-copy-zh="了解量子预测如何不同 →">See how quantum prediction differs →</a>
+          </article>
+          <article class="limit">
+            <h3 data-copy-en="Not faster-than-light messaging" data-copy-zh="不能超光速通信">Not faster-than-light messaging</h3>
+            <p data-copy-en="Relativity of simultaneity and quantum entanglement do not provide controllable signals faster than light. Causal influence remains constrained by light cones."
+               data-copy-zh="同时性的相对性与量子纠缠都不能提供可控的超光速信号；因果影响仍受光锥约束。">Relativity of simultaneity and quantum entanglement do not provide controllable signals faster than light. Causal influence remains constrained by light cones.</p>
+            <a href="../particle-zoo/index.html?tab=forces" data-copy-en="Compare field interactions →" data-copy-zh="比较场的相互作用 →">Compare field interactions →</a>
+          </article>
+        </div>
+      </section>
+
+      <section id="connections" class="topic-section">
+        <header>
+          <h2 data-copy-en="Relativity connects the smallest clocks to the whole universe."
+              data-copy-zh="相对论把最小的时钟连接到整个宇宙。">Relativity connects the smallest clocks to the whole universe.</h2>
+          <p data-copy-en="GPS corrects relativistic clock rates. Particle accelerators require relativistic momentum. Cosmology uses general relativity to model an expanding universe. Gravitational-wave detectors measure spacetime disturbances smaller than a proton over kilometer scales."
+             data-copy-zh="GPS 修正相对论钟速；粒子加速器需要相对论动量；宇宙学用广义相对论描述膨胀宇宙；引力波探测器在公里尺度上测量远小于质子的长度变化。">
+            GPS corrects relativistic clock rates. Particle accelerators require relativistic momentum. Cosmology uses general relativity to model an expanding universe. Gravitational-wave detectors measure spacetime disturbances smaller than a proton over kilometer scales.
+          </p>
+        </header>
+        <div class="relation-map">
+          <a href="../big-bang/index.html"><strong data-copy-en="Cosmic history" data-copy-zh="宇宙历史">Cosmic history</strong><span data-copy-en="Follow an expanding spacetime from the hot early universe to structure formation and today’s measured acceleration." data-copy-zh="沿着膨胀时空，从炽热早期宇宙走到结构形成与今天测得的加速膨胀。">Follow an expanding spacetime from the hot early universe to structure formation and today’s measured acceleration.</span></a>
+          <a href="../particle-zoo/index.html?tab=lab"><strong data-copy-en="Relativistic particles" data-copy-zh="相对论性粒子">Relativistic particles</strong><span data-copy-en="See how collider detectors reconstruct near-light-speed tracks, energy, decays, and missing momentum." data-copy-zh="了解对撞机探测器如何重建近光速径迹、能量、衰变与缺失动量。">See how collider detectors reconstruct near-light-speed tracks, energy, decays, and missing momentum.</span></a>
+          <a href="./index.html#genealogy"><strong data-copy-en="Field genealogy" data-copy-zh="领域谱系">Field genealogy</strong><span data-copy-en="Trace relativity’s inheritance from mechanics and electrodynamics, then its influence on nuclear, particle, and astrophysical theory." data-copy-zh="追踪相对论如何继承力学与电动力学，又如何影响核物理、粒子物理与天体物理。">Trace relativity’s inheritance from mechanics and electrodynamics, then its influence on nuclear, particle, and astrophysical theory.</span></a>
+        </div>
+      </section>
+    </main>
+
+    <footer class="topic-footer">
+      <span data-copy-en="The curved-grid picture is a teaching schematic; the eclipse plate is historical observational evidence." data-copy-zh="弯曲网格是教学示意；日食底片是历史观测证据。">The curved-grid picture is a teaching schematic; the eclipse plate is historical observational evidence.</span>
+      <span><a href="../LICENSES/THIRD-PARTY-MEDIA.md" data-copy-en="Media licenses" data-copy-zh="媒体许可">Media licenses</a> · <a href="./quantum.html" data-copy-en="Next field: quantum mechanics" data-copy-zh="下一领域：量子力学">Next field: quantum mechanics</a></span>
+    </footer>
+  </div>
+
+  <script src="common.js"></script>
+  <script src="labs.js"></script>
+</body>
+</html>

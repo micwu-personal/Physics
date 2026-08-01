@@ -1,10 +1,23 @@
 # Physics
 
-A connected, evidence-led journey through cosmology, particle physics, atoms, and chemistry. Start at the root page to follow the causal story from the hot early universe to particles, nuclei, atoms, stellar nucleosynthesis, and high-energy events. Each sub-folder remains a self-contained app with EN/中文 support.
+A connected, evidence-led journey through cosmology, the major fields of physics, particles, atoms, and chemistry. Start at the root page to choose between the causal story of matter and a chronological genealogy of physical ideas. Each sub-folder remains a self-contained app with EN/中文 support.
 
 Every major visual is identified as an observation, reconstructed data, calculated model, or teaching schematic. Captions call out false color, compressed time, nonphysical scale, and other important gaps between the visualization and reality.
 
 ## Apps
+
+### 🧭 [physics](./physics/) — The Field Atlas
+An interactive timeline showing how physics areas branch, inherit ideas, and recombine.
+
+- 22 linked milestones spanning mechanics, fluids, acoustics, thermodynamics, electromagnetism, electrodynamics, relativity, astrophysics, quantum mechanics, nuclear and particle physics, condensed matter, plasma, biophysics, nonlinear dynamics, quantum information, and more
+- Search and lineage filters with ancestor/descendant highlighting
+- Public-domain portraits and historical documents stored locally with per-file licensing
+- **Every field opens a guide.** Five are bespoke deep dives; the rest render from shared data through [`field.html?id=…`](./physics/field.html), each showing what the field inherited, three core ideas, and where its framework stops
+- Deep dives: [Newtonian mechanics](./physics/newtonian.html) (numerical orbit integrator), [relativity](./physics/relativity.html) (moving light clock), [quantum mechanics](./physics/quantum.html) (double-slit sampler), [astrophysics](./physics/astrophysics.html), and [light &amp; signals](./physics/electrodynamics.html)
+
+**Astrophysics** covers why disks form (Solar System, Saturn's rings, the galactic disk, accretion disks), stellar evolution by initial mass with the forces supporting each stage, step-by-step derivations of the Chandrasekhar, Oppenheimer–Volkoff, and Eddington limits, and why standard candles work.
+
+**Light & signals** covers Cherenkov radiation with an interactive cone angle, the strict distinction between phase, group, and front velocity, a table of apparent superluminal effects and why each preserves causality, and the three redshift mechanisms including which of them stretch the apparent pace of distant events.
 
 ### 🌌 [particle-zoo](./particle-zoo/) — The Standard Model
 An interactive visual journey through the Standard Model of particle physics — and beyond.
@@ -66,6 +79,8 @@ The repository includes a small set of verified educational assets:
 - NASA/WMAP and NASA/Chandra images that are public-domain U.S. government works
 - A creator-released public-domain hydrogen probability-density visualization
 - An ATLAS/CERN reconstructed event display under CC BY-SA 3.0
+- Public-domain historical portraits of Galileo, Newton, Faraday, Maxwell, Curie, and Einstein
+- Public-domain scans and photographs of the *Principia*, the 1919 eclipse expedition, and the 1927 Solvay Conference
 
 The CERN image is **not** covered by this repository's MIT license. Full per-file attribution, license links, and scientific caveats are in [`LICENSES/THIRD-PARTY-MEDIA.md`](./LICENSES/THIRD-PARTY-MEDIA.md). Media with unclear redistribution rights, and a recent CC BY-SA Planck derivative, were deliberately not committed.
 

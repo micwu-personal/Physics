@@ -43,6 +43,71 @@ Brightness encodes calculated hydrogen electron probability density; this is not
 
 This is a false-color X-ray image. Red, green, and blue encode different X-ray energy bands, not visible color.
 
+### `assets/media/Isaac_Newton_Kneller_1689.jpg`
+
+- Creator: After Godfrey Kneller (1689)
+- Source: https://commons.wikimedia.org/wiki/File:GodfreyKneller-IsaacNewton-1689.jpg
+- Status: Public-domain historical artwork (`PD-old-100-expired` and `PD-Art`).
+- Changes: Resized and JPEG-compressed for web delivery.
+
+### `assets/media/Albert_Einstein_1921.jpg`
+
+- Creator: Ferdinand Schmutzer; restoration by Adam Cuerden
+- Source: https://commons.wikimedia.org/wiki/File:Einstein_1921_by_F_Schmutzer_-_restoration.jpg
+- Status: Public domain. Wikimedia Commons metadata marks the work uncopyrighted with no attribution requirement.
+- Changes: Resized and JPEG-compressed for web delivery.
+
+### `assets/media/Marie_Curie_1920s.jpg`
+
+- Creator: Henri Manuel, c. 1920s
+- Source: https://commons.wikimedia.org/wiki/File:Marie_Curie_c._1920s.jpg
+- Status: Public-domain historical photograph (`PD-old-75-expired`).
+- Changes: Resized and JPEG-compressed for web delivery.
+
+### `assets/media/Galileo_Sustermans_1640.jpg`
+
+- Creator: Justus Sustermans, c. 1640
+- Source: https://commons.wikimedia.org/wiki/File:Galileo.arp.300pix.jpg
+- Status: Public-domain historical artwork (`PD-old-100-expired` and `PD-Art`).
+- Changes: File renamed; image content otherwise unchanged.
+
+### `assets/media/James_Clerk_Maxwell_1882.jpg`
+
+- Creator: G. J. Stodart after a photograph by Fergus of Greenock, published 1882
+- Source: https://commons.wikimedia.org/wiki/File:James_Clerk_Maxwell_big.jpg
+- Status: Public-domain historical engraving.
+- Changes: File renamed; image content otherwise unchanged.
+
+### `assets/media/Michael_Faraday_Phillips.jpg`
+
+- Creator: Thomas Phillips, 1841-1842
+- Collection: National Portrait Gallery, London (NPG 269)
+- Source: https://commons.wikimedia.org/wiki/File:Michael_Faraday_001.jpg
+- Status: Public-domain historical artwork (`PD-old-100` and `PD-Art`).
+- Changes: File renamed; image content otherwise unchanged.
+
+### `assets/media/Principia_title_page_1687.jpg`
+
+- Work: Title page of the first edition of Newton's *Philosophiae Naturalis Principia Mathematica* (1687)
+- Source: https://commons.wikimedia.org/wiki/File:Newton%27s_Principia_title_page.png
+- Status: Public-domain historical document (`PD-old-100-expired`).
+- Changes: Resized and converted from PNG to JPEG for web delivery.
+
+### `assets/media/Eddington_eclipse_1919.jpg`
+
+- Creator: Frank Watson Dyson, Arthur Stanley Eddington, and Charles Rundle Davidson
+- Publication: *Philosophical Transactions of the Royal Society A* (1920)
+- Source: https://commons.wikimedia.org/wiki/File:1919_eclipse_positive.jpg
+- Status: Public-domain historical observation (`PD-old-80-expired`).
+- Changes: File renamed; image content otherwise unchanged.
+
+### `assets/media/Solvay_conference_1927.jpg`
+
+- Creator: Benjamin Couprie / Institut International de Physique Solvay
+- Source: https://commons.wikimedia.org/wiki/File:Solvay_conference_1927.jpg
+- Status: Public-domain historical photograph.
+- Changes: Resized and JPEG-compressed for web delivery.
+
 ## Media intentionally not committed
 
 - ESA/Planck 2018 CMB render processed by Mark McCaughrean: CC BY-SA 4.0; linked only because the recent derivative has a separate share-alike license.
