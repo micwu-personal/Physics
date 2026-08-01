@@ -4,9 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title data-i18n="page.title">Periodic Table — An Interactive Journey into the Elements</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/fonts/fonts.css">
 <link rel="stylesheet" href="styles.css" />
 <link rel="stylesheet" href="features/features.css" />
 </head>
@@ -57,6 +55,10 @@
     <!-- Detail panel (in-context) -->
     <section id="detail" class="detail hidden">
       <button class="detail-close" id="detailClose" aria-label="Close">✕</button>
+    <nav class="detail-step" aria-label="Move between elements" data-i18n-aria-label="detail.step">
+      <button type="button" id="detailPrev" aria-label="Previous element" data-i18n-aria-label="detail.prev">←</button>
+      <button type="button" id="detailNext" aria-label="Next element" data-i18n-aria-label="detail.next">→</button>
+    </nav>
 
       <div class="detail-head" data-source-group="core">
         <div class="d-tile-wrap">
@@ -89,7 +91,7 @@
           <details class="quantum-reality">
             <summary data-i18n="detail.bohr.compare">Compare with a quantum probability map</summary>
             <figure>
-              <img src="../assets/media/Hydrogen_Density_Plots_1280.png" alt="Calculated hydrogen probability density plots for n equals 1 through 4" data-i18n-alt="alt.hydrogen" loading="lazy">
+              <img src="../assets/media/Hydrogen_Density_Plots_1280.jpg" alt="Calculated hydrogen probability density plots for n equals 1 through 4" data-i18n-alt="alt.hydrogen" loading="lazy">
               <figcaption><span class="rep-badge model" data-i18n="detail.cloud.kind">Calculated model, not a photograph</span> <span data-i18n="detail.cloud.caption">Brightness shows calculated |psi|^2 for hydrogen. Experiments test this model's predictions; the image is not a literal view through a microscope.</span> <a href="https://commons.wikimedia.org/wiki/File:Hydrogen_Density_Plots.png" target="_blank" rel="noopener noreferrer" data-i18n="detail.media.source">Source / public domain</a></figcaption>
             </figure>
           </details>

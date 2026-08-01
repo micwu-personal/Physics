@@ -103,6 +103,19 @@ test.describe('deterministic scientific renderers', () => {
       await expect(page.locator('#orbitalTabs')).toContainText('该元素通常不涉及杂化轨道');
       expect(await page.evaluate(() => currentHybrid)).toBe('s');
       await expectCanvasRendered(page.locator('#orbitalCanvas'));
+      // On phones the detail is a scrollable bottom sheet, so scroll the card
+      // fully inside it before measuring, and wait for the scroll to settle.
+      await page.evaluate(() => {
+        const card = document.querySelector('#orbitalCanvas')
+          .closest('.d-viz-card');
+        const sheet = document.getElementById('detail');
+        sheet.scrollTop += card.getBoundingClientRect().bottom - sheet.getBoundingClientRect().bottom + 12;
+      });
+      await page.waitForFunction(() => {
+        const card = document.querySelector('#orbitalCanvas').closest('.d-viz-card');
+        const rect = card.getBoundingClientRect();
+        return rect.bottom <= innerHeight + 1 && rect.top >= -1;
+      });
       await captureRendering(
         page.locator('#orbitalCanvas').locator('xpath=ancestor::div[contains(@class,"d-viz-card")][1]'),
         'periodic-mobile-noble-atomic-zh-CN.png'

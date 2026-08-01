@@ -25,12 +25,26 @@ function inlineMedia(source) {
   });
 }
 
+function inlineFonts(source) {
+  const fontDir = path.join(ROOT, '..', 'assets', 'fonts');
+  const fontCss = fs.readFileSync(path.join(fontDir, 'fonts.css'), 'utf8')
+    .replace(/url\("\.\/([^"]+)"\)/g, (match, file) => {
+      const data = fs.readFileSync(path.join(fontDir, file)).toString('base64');
+      return `url("data:font/woff2;base64,${data}")`;
+    });
+  return source.replace(
+    /<link\s+rel="stylesheet"\s+href="\.\.\/assets\/fonts\/fonts\.css"\s*\/?>/,
+    `<style>\n${fontCss}\n</style>`
+  );
+}
+
 let out = html
   .replace(/<link\s+rel="stylesheet"\s+href="styles\.css"\s*\/?>/, `<style>\n${css}\n</style>`)
   .replace(/<script\s+src="core\.js"><\/script>/, `<script>\n${coreJs}\n</script>`)
   .replace(/<script\s+src="i18n\.js"><\/script>/, `<script>\n${i18nJs}\n</script>`)
   .replace(/<script\s+src="app\.js"><\/script>/, `<script>\n${appJs}\n</script>`);
 out = inlineMedia(out);
+out = inlineFonts(out);
 out = out
   .replace(/href="\.\.\/index\.html/g, 'href="https://micwu-personal.github.io/Physics/')
   .replace(/href="\.\.\/(big-bang|particle-zoo|periodic-table)\/index\.html/g, 'href="https://micwu-personal.github.io/Physics/$1/');

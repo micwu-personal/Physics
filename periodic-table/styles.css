@@ -303,17 +303,66 @@ footer{text-align:center;padding:40px 20px;color:var(--dim);font-size:12px;posit
 }
 .source-links a:hover{color:#fff}
 .source-label{font-weight:600;color:var(--muted)}
+.detail-step{
+  position:absolute;
+  top:14px;
+  right:56px;
+  display:none;
+  gap:6px;
+  z-index:2;
+}
+.detail-step button{
+  width:40px;
+  height:40px;
+  border:1px solid var(--panel-b);
+  border-radius:10px;
+  background:rgba(5,6,13,.85);
+  color:var(--text);
+  font-size:16px;
+  cursor:pointer;
+}
+.detail-step button:disabled{opacity:.35;cursor:default}
+.detail-step button:not(:disabled):hover{border-color:var(--accent2);color:var(--accent2)}
 @media (max-width:700px){
   .pt-grid{gap:2px;padding:4px}
+  /* Squeezing 18 columns into a phone made cells overlap, because aspect-ratio
+     plus min-height forced them wider than their grid column. The table now
+     keeps legible cells and scrolls sideways instead. */
+  .pt-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .pt-grid{min-width:600px}
   .pt-row{grid-template-columns:24px repeat(18, 1fr);gap:3px}
   .pt-frow{grid-template-columns:24px repeat(15, 1fr);gap:3px}
   .row-speak{font-size:10px;width:24px;min-width:24px;max-width:24px;height:24px}
   .pt-fblock{gap:2px}
-  .cell{min-height:28px;border-radius:4px}
+  .cell{min-height:28px;border-radius:4px;scroll-margin-bottom:66svh}
   .cell .z{font-size:7px}
   .cell .sym{font-size:11px}
   .detail{padding:20px;border-radius:14px}
   .detail-head{grid-template-columns:1fr;text-align:center}
   .d-tile-wrap{margin:0 auto}
   .d-name-row{justify-content:center}
+
+  /* Detail becomes a bottom sheet so the grid stays visible and another element
+     is always one tap away. Only an explicit tap raises the sheet; a deep-linked
+     element on load still renders inline below the table. */
+  body.detail-open .detail:not(.hidden){
+    position:fixed;
+    left:0;
+    right:0;
+    bottom:0;
+    z-index:55;
+    max-height:62svh;
+    margin:0;
+    overflow-y:auto;
+    overscroll-behavior:contain;
+    border-radius:16px 16px 0 0;
+    border-bottom:0;
+    /* Opaque: a translucent sheet let the page beneath show through the text. */
+    background:#0c1024;
+    box-shadow:0 -18px 48px rgba(0,0,0,.6);
+    padding-bottom:calc(20px + env(safe-area-inset-bottom));
+  }
+  body.detail-open{padding-bottom:62svh}
+  .detail-step{display:flex;top:12px;right:60px}
+  body.detail-open .detail-close{top:12px;right:12px}
 }

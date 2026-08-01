@@ -62,7 +62,7 @@
         <div class="tl-slider">
           <input type="range" id="tlSlider" min="${MIN_YEAR}" max="${MAX_YEAR}" value="${MAX_YEAR}" step="1">
         </div>
-        <button class="tl-play" id="tlPlay" data-i18n="tl.play">▶ Play</button>
+        <button class="tl-play" id="tlPlay" data-motion-start data-i18n="tl.play">▶ Play</button>
       </div>
       <div class="tl-info" id="tlInfo"></div>`;
     wrap.parentNode.insertBefore(panel, wrap);

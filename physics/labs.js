@@ -562,6 +562,8 @@
 
   toggle.addEventListener('click', () => {
     playing = !playing;
+    // Resuming the experiment implies the visitor wants to see it move.
+    if (playing) PhysicsUI.requestMotion();
     updateButtonCopy();
     render(0);
   });

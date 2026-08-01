@@ -43,7 +43,7 @@ const indexSource=fs.readFileSync(path.join(root,'index.html'),'utf8');
 const mobilePath=path.join(root,'mobile','index.html');
 if(fs.existsSync(mobilePath)){
   const mobileSource=fs.readFileSync(mobilePath,'utf8');
-  assert.ok(mobileSource.includes('data:image/png;base64,'), 'mobile bundle embeds the ATLAS evidence image');
+  assert.ok(/data:image\/(png|jpeg);base64,/.test(mobileSource), 'mobile bundle embeds the ATLAS evidence image');
   assert.ok(mobileSource.includes('href="https://micwu-personal.github.io/Physics/#particles"'), 'standalone journey link uses the hosted experience');
 }
 for (const required of [

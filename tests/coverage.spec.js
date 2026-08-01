@@ -444,6 +444,56 @@ for (const storedMotion of ['pause', 'play']) {
   });
 }
 
+/* The formula parser supports more grammar than any single page uses, so it is
+   exercised directly rather than only through the equations that appear in copy. */
+test('physics formula parser grammar coverage', async ({ page }) => {
+  await collectCoverage(page, 'physics-formula-grammar', async () => {
+    await preparePage(page, '/physics/field.html?id=statistical', 'en');
+    const results = await page.evaluate(() => {
+      const samples = [
+        'F = \\frac{dp}{dt}',
+        'v = \\sqrt{\\frac{2E}{m}}',
+        '\\hat{r} \\vec{v} \\overline{x}',
+        '\\mathrm{Re} = 1 \\text{ok}',
+        '\\mathcal{E} = \\mathcal{L} + \\mathcal{zz}',
+        '\\left( a + b \\right) [c] \\langle d \\rangle |e|',
+        'a\\,b\\;c\\quad d\\qquad e\\!f',
+        'x_i^2 + y^{n+1} - z_{ab}',
+        '\\alpha\\beta\\gamma\\Delta\\Omega\\varepsilon',
+        '\\partial \\nabla \\infty \\hbar \\ell \\deg',
+        'a \\cdot b \\times c \\pm d \\mp e \\approx f \\neq g',
+        'h \\leq i \\geq j \\ll k \\gg l \\sim m \\simeq n',
+        'p \\to q \\rightarrow r \\propto s',
+        '\\unknowncommand{x} 42.5',
+        '\\lvert \\psi \\rvert^2'
+      ];
+      const rendered = samples.map(tex => PhysicsFormula.toMathML(tex));
+      const block = PhysicsFormula.toMathML('E = mc^2', { display: true, label: 'E equals m c squared' });
+
+      // upgrade() replaces [data-tex] elements and must be idempotent.
+      const host = document.createElement('div');
+      host.innerHTML = '<span data-tex="a^2 + b^2 = c^2">a2 plus b2</span>' +
+        '<span data-tex="\\frac{1}{2}" data-tex-display="block">half</span>';
+      document.body.append(host);
+      PhysicsFormula.upgrade(host);
+      const first = host.firstElementChild.innerHTML;
+      PhysicsFormula.upgrade(host);
+      const stable = host.firstElementChild.innerHTML === first;
+      PhysicsFormula.upgrade();
+      host.remove();
+
+      return {
+        allMath: rendered.every(html => html.startsWith('<math')),
+        block: block.includes('display="block"') && block.includes('aria-label'),
+        stable
+      };
+    });
+    if (!results.allMath || !results.block || !results.stable) {
+      throw new Error(`formula parser regression: ${JSON.stringify(results)}`);
+    }
+  });
+});
+
 for (const [id, path] of [
   ['astro', '/physics/astrophysics.html'],
   ['light', '/physics/electrodynamics.html']

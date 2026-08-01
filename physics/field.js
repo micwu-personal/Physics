@@ -80,6 +80,54 @@
     host.append(build(children, 'children', zh() ? '直接影响' : 'Leads to'));
   }
 
+  const REP_LABELS = {
+    observation: { en: 'Observation', zh: '观测' },
+    document: { en: 'Historical document', zh: '历史文献' },
+    reconstruction: { en: 'Reconstructed data', zh: '重建数据' },
+    model: { en: 'Calculated model', zh: '计算模型' },
+    schematic: { en: 'Teaching schematic', zh: '教学示意' }
+  };
+
+  function renderMedia() {
+    const host = document.getElementById('fieldMedia');
+    host.innerHTML = '';
+    const caption = document.createElement('figcaption');
+
+    if (guide.media) {
+      const image = document.createElement('img');
+      image.src = `../assets/media/${guide.media.file}`;
+      image.loading = 'lazy';
+      image.decoding = 'async';
+      image.alt = pick(guide.media.caption);
+      host.dataset.kind = 'photo';
+      host.append(image);
+
+      const badge = element('span', `rep-badge ${guide.media.kind}`, pick(REP_LABELS[guide.media.kind]));
+      caption.append(badge);
+      caption.append(element('span', 'media-text', pick(guide.media.caption)));
+      const link = document.createElement('a');
+      link.href = guide.media.source;
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      link.textContent = zh() ? '来源与许可' : 'Source and license';
+      caption.append(link);
+    } else {
+      // No licensed photograph fits this field, so an authored diagram stands in
+      // rather than leaving the guide without a visual.
+      const panel = element('div', 'field-diagram');
+      panel.style.setProperty('--field-color', field.color);
+      panel.innerHTML = physicsSignatureMarkup(field.signature);
+      host.dataset.kind = 'diagram';
+      host.append(panel);
+
+      caption.append(element('span', 'rep-badge schematic', pick(REP_LABELS.schematic)));
+      caption.append(element('span', 'media-text', zh()
+        ? `${pick(field).name}的标志性图形。这是为本图谱绘制的示意图，用来概括该领域研究的结构，并非测量结果。`
+        : `The signature mark for ${pick(field).name.toLowerCase()}. It is drawn for this atlas to summarise the structure the field studies, and is not a measurement.`));
+    }
+    host.append(caption);
+  }
+
   function renderCopy() {
     document.title = `${pick(field).name} — Physics Field Atlas`;
     document.documentElement.style.setProperty('--topic', field.color);
@@ -88,7 +136,12 @@
       `${field.year} · ${lineageNames[field.lineage][zh() ? 'zh' : 'en']}`;
     document.getElementById('fieldName').textContent = pick(field).name;
     document.getElementById('fieldLede').textContent = pick(guide.lede);
-    document.getElementById('fieldEquation').textContent = guide.equation;
+    const equation = document.getElementById('fieldEquation');
+    if (guide.tex) {
+      equation.innerHTML = PhysicsFormula.toMathML(guide.tex, { label: guide.equation });
+    } else {
+      equation.textContent = guide.equation;
+    }
     document.getElementById('fieldEquationNote').textContent = pick(guide.equationNote);
 
     document.getElementById('fieldDetail').textContent = pick(field).detail;
@@ -101,7 +154,13 @@
     conceptHost.innerHTML = '';
     for (const concept of guide.concepts) {
       const article = element('article', 'concept');
-      article.append(element('div', 'concept-mark', concept.mark));
+      const mark = element('div', 'concept-mark');
+      if (concept.markTex) {
+        mark.innerHTML = PhysicsFormula.toMathML(concept.markTex, { label: concept.mark });
+      } else {
+        mark.textContent = concept.mark;
+      }
+      article.append(mark);
       article.append(element('h3', null, pick(concept.title)));
       article.append(element('p', null, pick(concept.body)));
       conceptHost.append(article);
@@ -144,6 +203,7 @@
     }
 
     renderLineageMap();
+    renderMedia();
   }
 
   document.addEventListener('physics-language', renderCopy);

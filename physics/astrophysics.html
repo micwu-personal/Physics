@@ -12,9 +12,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="An interactive bilingual guide to astrophysics: why disks form, how stars evolve by mass, how the Chandrasekhar, Oppenheimer-Volkoff and Eddington limits are derived, and why standard candles work.">
   <title>Astrophysics — Physics Field Atlas</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Noto+Sans+SC:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/fonts/fonts.css">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body data-topic="astrophysics">
@@ -42,7 +40,7 @@
            data-copy-zh="恒星、盘和致密遗迹并不是杂乱的清单。少数几种相互竞争的效应，向内的引力、向外的压强、抵抗塌缩的角动量，以及不断耗散能量的碰撞，共同决定物质能取什么形状，以及每类天体必然如何终结。">
           Stars, disks, and remnants are not an arbitrary catalogue. A small number of competing effects, gravity pulling in, pressure pushing out, angular momentum resisting collapse, and collisions draining energy, decide what shapes matter can take and how each object must end.
         </p>
-        <span class="hero-equation">L = 4πGMm<sub>p</sub>c / σ<sub>T</sub></span>
+        <span class="hero-equation" data-tex="L_{\mathrm{Edd}} = \frac{4\pi GMm_p c}{\sigma_T}">L_Edd = 4 pi G M m_p c / sigma_T</span>
         <div class="hero-actions">
           <a class="primary-action" href="#coplanarity" data-copy-en="Why is everything a disk?" data-copy-zh="为什么到处都是盘？">Why is everything a disk?</a>
           <a class="secondary-action" href="#evolution" data-copy-en="Follow a star by its mass" data-copy-zh="按质量追踪恒星一生">Follow a star by its mass</a>
@@ -435,6 +433,8 @@
       <span><a href="../LICENSES/THIRD-PARTY-MEDIA.md" data-copy-en="Media licenses" data-copy-zh="媒体许可">Media licenses</a> · <a href="./index.html#genealogy" data-copy-en="Return to the field atlas" data-copy-zh="返回领域图谱">Return to the field atlas</a></span>
     </footer>
   </div>
+
+  <script src="formula.js"></script>
 
   <script src="common.js"></script>
   <script src="astro.js"></script>

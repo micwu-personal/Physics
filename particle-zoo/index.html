@@ -4,9 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title data-i18n="page.title">Particle Zoo — An Interactive Journey into the Standard Model</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/fonts/fonts.css">
 <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -299,7 +297,7 @@
         <div class="lab-viz">
           <canvas id="confCanvas"></canvas>
           <div class="lab-controls">
-            <button class="btn" id="confReset" data-i18n="lab.conf.reset">Reset</button>
+            <button class="btn" id="confReset" data-motion-start data-i18n="lab.conf.reset">Reset</button>
             <label class="switch"><input type="checkbox" id="confAuto" checked><span data-i18n="lab.conf.auto">Auto-pull</span></label>
           </div>
         </div>
@@ -333,7 +331,7 @@
           </div>
         </details>
         <figure class="evidence-media">
-          <img src="../assets/media/ATLAS_4muon_Higgs_2012.png" alt="ATLAS reconstructed four-muon Higgs candidate event display" data-i18n-alt="alt.atlas" loading="lazy">
+          <img src="../assets/media/ATLAS_4muon_Higgs_2012.jpg" alt="ATLAS reconstructed four-muon Higgs candidate event display" data-i18n-alt="alt.atlas" loading="lazy">
           <figcaption><span class="rep-badge reconstruction" data-i18n="lab.det.media.kind">Recorded data, reconstructed display</span> <span data-i18n="lab.det.media.caption">ATLAS four-muon Higgs candidate (2012), reconstructed mass 125.1 GeV. Tracks and deposits are calculated from detector readout; this is not a photograph of particles.</span> <a href="https://commons.wikimedia.org/wiki/File:Event_display_of_a_4-muon_candidate_in_the_ATLAS_detector.png" target="_blank" rel="noopener noreferrer" data-i18n="lab.det.media.source">Source / CC BY-SA 3.0</a></figcaption>
         </figure>
       </div>
@@ -366,7 +364,7 @@
         </div>
         <div class="lab-controls">
           <button class="btn" id="feynClear" data-i18n="lab.feyn.clear">Clear</button>
-          <button class="btn" id="feynExample" data-i18n="lab.feyn.example">Load: Bhabha e⁺e⁻ → e⁺e⁻</button>
+          <button class="btn" id="feynExample" data-motion-start data-i18n="lab.feyn.example">Load: Bhabha e⁺e⁻ → e⁺e⁻</button>
         </div>
         <div class="lab-legend" id="feynLegend"></div>
       </div>
@@ -383,7 +381,7 @@
           <div class="det-picker" id="decayPicker"></div>
         </div>
         <div class="lab-controls">
-          <button class="btn" id="decayRestart" data-i18n="lab.decay.restart">Re-run</button>
+          <button class="btn" id="decayRestart" data-motion-start data-i18n="lab.decay.restart">Re-run</button>
           <label class="switch"><input type="range" id="decaySpeed" min="0.2" max="5" step="0.1" value="1" style="width:120px"><span data-i18n="lab.decay.speed">speed</span></label>
         </div>
         <div class="lab-legend" id="decayLegend"></div>

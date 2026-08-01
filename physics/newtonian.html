@@ -12,9 +12,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="An interactive bilingual guide to Newtonian mechanics with orbital simulation, Newton's laws, historical sources, and connections to relativity and quantum mechanics.">
   <title>Newtonian Mechanics — Physics Field Atlas</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Noto+Sans+SC:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/fonts/fonts.css">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body data-topic="newtonian">
@@ -41,7 +39,7 @@
            data-copy-zh="一套紧凑理论连接推力、碰撞、落体、机械、卫星与行星。它并非应被丢弃的“旧物理”：当物体远大于原子且速度远低于光速时，工程师和天文学家仍每天使用它。">
           A compact theory connects pushes, collisions, falling objects, machines, moons, and planets. It is not “old physics” to discard: engineers and astronomers still use it whenever objects are much larger than atoms and move much slower than light.
         </p>
-        <span class="hero-equation">F = dp/dt · F<sub>g</sub> = −GMm r̂/r²</span>
+        <span class="hero-equation" data-tex="F = \frac{dp}{dt} \qquad \vec{F}_g = -\frac{GMm}{r^2}\hat{r}">F = dp/dt, F_g = -GMm r-hat / r^2</span>
         <div class="hero-actions">
           <a class="primary-action" href="#orbit-lab" data-copy-en="Launch an orbit" data-copy-zh="发射一条轨道">Launch an orbit</a>
           <a class="secondary-action" href="#laws" data-copy-en="Read the three laws precisely" data-copy-zh="准确理解三条定律">Read the three laws precisely</a>
@@ -221,6 +219,8 @@
       <span><a href="../LICENSES/THIRD-PARTY-MEDIA.md" data-copy-en="Media licenses" data-copy-zh="媒体许可">Media licenses</a> · <a href="./relativity.html" data-copy-en="Next field: relativity" data-copy-zh="下一领域：相对论">Next field: relativity</a></span>
     </footer>
   </div>
+
+  <script src="formula.js"></script>
 
   <script src="common.js"></script>
   <script src="labs.js"></script>

@@ -317,7 +317,7 @@ function validate(){
     assert.equal(/<script\s+src=/.test(html), false, 'mobile scripts are inlined');
     assert.equal(/<link\s+rel="stylesheet"/.test(html), false, 'mobile styles are inlined');
     assert.equal(html.includes('fonts.googleapis.com'), false, 'mobile build has no font CDN');
-    assert.ok(html.includes('data:image/png;base64,'), 'mobile build embeds the electron-density evidence image');
+    assert.ok(/data:image\/(png|jpeg);base64,/.test(html), 'mobile build embeds the electron-density evidence image');
     assert.ok(html.includes('href="https://micwu-personal.github.io/Physics/#atoms"'), 'standalone journey link uses the hosted experience');
     assert.ok(html.includes('CNCTST 术语在线') && html.includes('NNDC NuDat 3'), 'mobile build contains structured references');
     [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].forEach((match, index) => {

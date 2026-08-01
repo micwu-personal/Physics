@@ -12,9 +12,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Field guides for every area of the physics atlas: what each field studies, the ideas it inherited, its core concepts, and where its framework stops.">
   <title>Field Guide — Physics Field Atlas</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Noto+Sans+SC:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/fonts/fonts.css">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body data-topic="field">
@@ -71,6 +69,18 @@
 
       <section class="topic-section">
         <header>
+          <h2 data-copy-en="What the evidence looks like."
+              data-copy-zh="证据看起来是什么样子。">What the evidence looks like.</h2>
+          <p data-copy-en="Physics rarely offers a literal photograph. Each visual below is labelled as an observation, a historical document, reconstructed data, a calculated model, or a teaching schematic, so you always know what you are looking at."
+             data-copy-zh="物理学很少能提供字面意义上的照片。下面每幅图都标明属于观测、历史文献、重建数据、计算模型还是教学示意，让你始终清楚自己看到的是什么。">
+            Physics rarely offers a literal photograph. Each visual below is labelled as an observation, a historical document, reconstructed data, a calculated model, or a teaching schematic, so you always know what you are looking at.
+          </p>
+        </header>
+        <figure id="fieldMedia" class="field-media"></figure>
+      </section>
+
+      <section class="topic-section">
+        <header>
           <h2 data-copy-en="Where the standard framework stops."
               data-copy-zh="标准框架在哪里失效。">Where the standard framework stops.</h2>
           <p data-copy-en="A working theory is defined as much by its boundaries as by its successes. These are the places where this field's usual description stops being the right one, or where a common summary of it is misleading."
@@ -102,6 +112,7 @@
 
   <script src="fields-core.js"></script>
   <script src="fields-data.js"></script>
+  <script src="formula.js"></script>
   <script src="common.js"></script>
   <script src="field.js"></script>
 </body>
