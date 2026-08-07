@@ -465,10 +465,18 @@ test('physics formula parser grammar coverage', async ({ page }) => {
         'h \\leq i \\geq j \\ll k \\gg l \\sim m \\simeq n',
         'p \\to q \\rightarrow r \\propto s',
         '\\unknowncommand{x} 42.5',
-        '\\lvert \\psi \\rvert^2'
+        '\\lvert \\psi \\rvert^2',
+        '\\',
+        '\\sqrt',
+        '\\left',
+        '\\mathrm{\\frac{1}{2}}',
+        '<&>'
       ];
       const rendered = samples.map(tex => PhysicsFormula.toMathML(tex));
-      const block = PhysicsFormula.toMathML('E = mc^2', { display: true, label: 'E equals m c squared' });
+      const block = PhysicsFormula.toMathML('E = mc^2', {
+        display: true,
+        label: 'E & m are < c > zero'
+      });
 
       // upgrade() replaces [data-tex] elements and must be idempotent.
       const host = document.createElement('div');
@@ -484,13 +492,38 @@ test('physics formula parser grammar coverage', async ({ page }) => {
 
       return {
         allMath: rendered.every(html => html.startsWith('<math')),
-        block: block.includes('display="block"') && block.includes('aria-label'),
+        block: block.includes('display="block"') &&
+          block.includes('aria-label') &&
+          block.includes('&amp;') &&
+          block.includes('&lt;') &&
+          block.includes('&gt;'),
         stable
       };
     });
+    // The normal page load exercises the DOMContentLoaded path. Loading the same
+    // browser-only script after document completion covers its immediate upgrade.
+    await page.addScriptTag({ url: '/physics/formula.js' });
     if (!results.allMath || !results.block || !results.stable) {
       throw new Error(`formula parser regression: ${JSON.stringify(results)}`);
     }
+  });
+});
+
+test('physics field authored diagram and equation fallback coverage', async ({ page }) => {
+  await collectCoverage(page, 'physics-field-fallbacks', async () => {
+    await preparePage(page, '/physics/field.html?id=fluids', 'zh-CN');
+    await expect(page.locator('#fieldMedia')).toHaveAttribute('data-kind', 'diagram');
+    const equation = await page.evaluate(() => {
+      const guide = PhysicsFieldGuides.fluids;
+      const tex = guide.tex;
+      delete guide.tex;
+      document.dispatchEvent(new Event('physics-language'));
+      const text = document.getElementById('fieldEquation').textContent;
+      guide.tex = tex;
+      document.dispatchEvent(new Event('physics-language'));
+      return { expected: guide.equation, text };
+    });
+    expect(equation.text).toBe(equation.expected);
   });
 });
 
@@ -708,6 +741,13 @@ test('periodic-table reduced-motion and visibility coverage', async ({ page }) =
     await collectCoverage(page, 'periodic-reduced-hidden', async () => {
       await page.emulateMedia({ reducedMotion: 'reduce' });
       await preparePage(page, '/periodic-table/', 'en');
+      await page.evaluate(() => {
+        document.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+        __D1.play();
+        __F2.toggle();
+        __F2.startPlay();
+        __F2.toggle();
+      });
       await page.locator('.cell[data-z="26"]').first().dispatchEvent('click');
       await page.locator('#tlToggleBtn').click();
       await page.locator('#tlPlay').click();
@@ -722,6 +762,27 @@ test('periodic-table reduced-motion and visibility coverage', async ({ page }) =
         document.dispatchEvent(new Event('visibilitychange'));
       });
     });
+});
+
+test('periodic-table mobile sheet boundary coverage', async ({ page }) => {
+  await collectCoverage(page, 'periodic-mobile-sheet-boundaries', async () => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await preparePage(page, '/periodic-table/', 'en');
+    await page.locator('.cell[data-z="1"]').click();
+    await page.evaluate(() => stepElement(-1));
+    await page.evaluate(() => stepElement(1));
+    await page.evaluate(() => {
+      document.querySelector('.cell[data-z="3"]').remove();
+      stepElement(1);
+    });
+    await page.evaluate(() => openDetail(4));
+    await page.waitForTimeout(50);
+    await page.evaluate(() => {
+      document.getElementById('detailPrev').remove();
+      document.getElementById('detailNext').remove();
+      syncStepControls();
+    });
+  });
 });
 
 test('periodic-table unavailable observer and media APIs coverage', async ({ page }) => {
@@ -1822,6 +1883,7 @@ test('particle-zoo exhaustive component event coverage', async ({ page }) => {
   page.on('dialog', dialog => dialog.dismiss());
   await collectCoverage(page, 'particle-component-events', async () => {
     await preparePage(page, '/particle-zoo/', 'en');
+    await page.evaluate(() => document.dispatchEvent(new MouseEvent('click', { bubbles: true })));
     await sweepComponentEvents(page);
     await page.waitForTimeout(300);
     await sweepComponentEvents(page);

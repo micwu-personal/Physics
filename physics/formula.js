@@ -220,8 +220,6 @@
         return `<msup>${wrap(node.base)}${wrap(node.sup)}</msup>`;
       case 'subsup':
         return `<msubsup>${wrap(node.base)}${wrap(node.sub)}${wrap(node.sup)}</msubsup>`;
-      default:
-        return '';
     }
   }
 
@@ -260,11 +258,9 @@
   }
 
   globalThis.PhysicsFormula = Object.freeze({ toMathML, upgrade });
-  if (typeof document !== 'undefined') {
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', () => upgrade());
-    } else {
-      upgrade();
-    }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => upgrade());
+  } else {
+    upgrade();
   }
 })();
