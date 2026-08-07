@@ -6,31 +6,34 @@ Media listed here is not covered by this repository's MIT license.
 
 Full license: https://creativecommons.org/licenses/by-sa/3.0/
 
-### `assets/media/ATLAS_4muon_Higgs_2012.png`
+### `assets/media/ATLAS_4muon_Higgs_2012.jpg`
 
 - Title: Event display of a 4-muon candidate in the ATLAS detector
 - Creator: ATLAS Collaboration / CERN
 - Source: https://commons.wikimedia.org/wiki/File:Event_display_of_a_4-muon_candidate_in_the_ATLAS_detector.png
 - CERN record: https://cds.cern.ch/record/1605821
-- Changes: None. The original file is redistributed unchanged.
+- Changes: Converted from PNG to JPEG and recompressed for web delivery; image content
+  is otherwise unchanged. This derivative remains under CC BY-SA 3.0.
 
 This is a reconstructed visualization of recorded detector data, not a photograph of particles.
 
 ## Public domain
 
-### `assets/media/WMAP_2012_1280.png`
+### `assets/media/WMAP_2012_1280.jpg`
 
 - Creator: NASA / WMAP Science Team
 - Source: https://commons.wikimedia.org/wiki/File:WMAP_2012.png
 - Status: Public-domain U.S. government work. This repository uses Wikimedia's 1280-pixel derivative.
+- Changes: Converted from PNG to JPEG for web delivery; image content otherwise unchanged.
 
 Colors encode cosmic microwave background temperature fluctuations and are not visible-light colors.
 
-### `assets/media/Hydrogen_Density_Plots_1280.png`
+### `assets/media/Hydrogen_Density_Plots_1280.jpg`
 
 - Creator: PoorLeno
 - Source: https://commons.wikimedia.org/wiki/File:Hydrogen_Density_Plots.png
 - Status: Released into the public domain by the creator. This repository uses Wikimedia's 1280-pixel derivative.
+- Changes: Resized and converted from PNG to JPEG for web delivery.
 
 Brightness encodes calculated hydrogen electron probability density; this is not a photograph.
 
@@ -40,6 +43,7 @@ Brightness encodes calculated hydrogen electron probability density; this is not
 - Source: https://commons.wikimedia.org/wiki/File:Tycho-supernova-xray.jpg
 - NASA source: https://chandra.harvard.edu/photo/2005/tycho/
 - Status: Public-domain NASA work.
+- Changes: Resized and JPEG-recompressed for web delivery.
 
 This is a false-color X-ray image. Red, green, and blue encode different X-ray energy bands, not visible color.
 

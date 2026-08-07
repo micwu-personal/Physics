@@ -27,6 +27,19 @@ function inlineMedia(source) {
   });
 }
 
+function inlineFonts(source) {
+  const fontDir = path.join(ROOT, '..', 'assets', 'fonts');
+  const fontCss = fs.readFileSync(path.join(fontDir, 'fonts.css'), 'utf8')
+    .replace(/url\("\.\/([^"]+)"\)/g, (match, file) => {
+      const data = fs.readFileSync(path.join(fontDir, file)).toString('base64');
+      return `url("data:font/woff2;base64,${data}")`;
+    });
+  return source.replace(
+    /<link\s+rel="stylesheet"\s+href="\.\.\/assets\/fonts\/fonts\.css"\s*\/?>/,
+    `<style>\n${fontCss}\n</style>`
+  );
+}
+
 // Feature module sources (F1 overlays, D1 origins, B1 nuclide chart,
 // F2 discovery timeline, C5 ligand-field colors)
 const featCss   = fs.readFileSync(path.join(ROOT, 'features/features.css'), 'utf8');
@@ -54,13 +67,13 @@ let out = html
   .replace(/<script\s+src="features\/timeline\.js"><\/script>/, `<script>\n${featTimeline}\n</script>`)
   .replace(/<script\s+src="features\/ligand\.js"><\/script>/,   `<script>\n${featLigand}\n</script>`);
 out = inlineMedia(out);
+out = inlineFonts(out);
 out = out
   .replace(/href="\.\.\/index\.html/g, 'href="https://micwu-personal.github.io/Physics/')
   .replace(/href="\.\.\/(big-bang|particle-zoo|periodic-table)\/index\.html/g, 'href="https://micwu-personal.github.io/Physics/$1/');
 out = out.replace(/href="\.\.\/(?!https?:)/g, 'href="../../');
 
-// Strip external CDN links (Google Fonts) for offline / self-contained use.
-// CSS already falls back to system fonts.
+// Strip any remaining external CDN links so the file works fully offline.
 out = out.replace(/<link\s+rel="preconnect"[^>]*>\s*/g, '');
 out = out.replace(/<link\s+href="https:\/\/fonts\.googleapis\.com[^"]*"\s+rel="stylesheet"[^>]*>\s*/g, '');
 out = out.replace(/<link\s+rel="stylesheet"\s+href="https:\/\/fonts\.googleapis\.com[^"]*"[^>]*>\s*/g, '');

@@ -77,7 +77,17 @@ function setMotionMode(mode){
   announceMotionState();
   if(!motionIsPaused()) resumeVisibleAnimations();
 }
-window.PT_MOTION={isPaused:motionIsPaused};
+window.PT_MOTION={isPaused:motionIsPaused,requestPlay:requestMotionPlay};
+// Activating a control that starts an animation should not also require the
+// visitor to un-pause motion separately. Capture phase so the state is already
+// playing by the time the control's own handler runs.
+function requestMotionPlay(){
+  if(motionIsPaused()) setMotionMode('play');
+}
+document.addEventListener('click',event=>{
+  const target=event.target instanceof Element ? event.target.closest('[data-motion-start]') : null;
+  if(target) requestMotionPlay();
+},true);
 document.getElementById('motionToggle').addEventListener('click',()=>{
   setMotionMode(motionIsPaused() ? 'play' : 'pause');
 });
@@ -227,21 +237,56 @@ function makeCell(z, lang){
     <div class="ms">${el.massDisplay}</div>
   `;
   if(currentZ===z) d.classList.add('active');
-  d.addEventListener('click',()=>openDetail(z));
+  d.addEventListener('click',()=>openDetail(z,{fromUser:true}));
   return d;
 }
 
 /* ----- Detail panel ----- */
-function openDetail(z){
+// On phones the detail opens as a bottom sheet so the grid stays visible and
+// tappable above it; scrolling the whole page to a 9000px panel made comparing
+// elements impractical.
+function isSheetLayout(){
+  return window.matchMedia('(max-width:700px)').matches;
+}
+// The detail lives inside a container that establishes its own stacking context,
+// so a fixed sheet would still paint under later siblings. Promoting the node to
+// <body> while it is a sheet is the reliable way out; it returns on close.
+const detailHome = { parent: detailEl.parentNode, next: detailEl.nextSibling };
+function setSheetMode(on){
+  document.body.classList.toggle('detail-open', on);
+  if(on){
+    if(detailEl.parentNode !== document.body) document.body.appendChild(detailEl);
+  } else if(detailEl.parentNode !== detailHome.parent){
+    detailHome.parent.insertBefore(detailEl, detailHome.next);
+  }
+}
+function stepElement(delta){
+  if(currentZ==null) return;
+  const next=currentZ+delta;
+  if(next<1 || next>118) return;
+  openDetail(next,{fromUser:true});
+  const cell=document.querySelector(`.cell[data-z="${next}"]`);
+  if(cell) cell.scrollIntoView({block:'nearest',inline:'nearest'});
+}
+function syncStepControls(){
+  const previous=document.getElementById('detailPrev');
+  const next=document.getElementById('detailNext');
+  if(previous) previous.disabled = !(currentZ>1);
+  if(next) next.disabled = !(currentZ<118);
+}
+function openDetail(z,options={}){
   cancelAnimationFrame(rxRAF); clearTimeout(rxReplayTimer);
   currentZ = z;
   currentHybrid = null;
   document.querySelectorAll('.cell').forEach(c=>c.classList.toggle('active', +c.dataset.z===z));
   detailEl.classList.remove('hidden');
+  setSheetMode(isSheetLayout() && options.fromUser===true);
   refreshDetail();
+  syncStepControls();
   // Scroll into view + re-render canvases once layout has settled
   requestAnimationFrame(()=>{
-    detailEl.scrollIntoView({behavior:'smooth', block:'start'});
+    if(isSheetLayout() && options.fromUser===true) detailEl.scrollTop = 0;
+    else detailEl.scrollIntoView({behavior:'smooth', block:'start'});
     // Re-draw canvases now that they have real dimensions
     drawBohr(currentZ);
     if(currentHybrid) drawOrbital(currentHybrid);
@@ -249,8 +294,11 @@ function openDetail(z){
     if(el) drawNucleus(el.Z, Math.round(el.mass - el.Z));
   });
 }
+document.getElementById('detailPrev').addEventListener('click',()=>stepElement(-1));
+document.getElementById('detailNext').addEventListener('click',()=>stepElement(1));
 document.getElementById('detailClose').addEventListener('click',()=>{
   detailEl.classList.add('hidden'); currentZ=null;
+  setSheetMode(false);
   [bohrRAF, orbRAF, nucRAF, rxRAF].forEach(id=>cancelAnimationFrame(id));
   clearTimeout(rxReplayTimer);
   detailEl.querySelectorAll('canvas').forEach(disposeAnimatedElement);
@@ -358,7 +406,7 @@ function refreshDetail(){
       <div class="rx-item">
         <div class="rx-eq">${r.eq}</div>
         <div class="rx-note">${lang==='zh-CN' ? r.note_zh : r.note_en}</div>
-        <button class="rx-play" data-i="${i}">▶ ${lang==='zh-CN'?'播放':'Play'}</button>
+        <button class="rx-play" data-motion-start data-i="${i}">▶ ${lang==='zh-CN'?'播放':'Play'}</button>
       </div>
     `).join('') + `<div id="rxAnimBox"><canvas id="rxAnimCanvas"></canvas></div>`;
     rxEl.querySelectorAll('.rx-play').forEach(b=>{

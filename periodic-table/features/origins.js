@@ -151,6 +151,7 @@
     const btn = document.createElement('button');
     btn.id = 'cosmicPlayBtn';
     btn.className = 'view-btn special';
+    btn.dataset.motionStart = '';
     btn.style.marginLeft = 'auto';
     btn.textContent = t('timeline.play');
     btn.addEventListener('click', play);

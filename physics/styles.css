@@ -36,7 +36,7 @@ body {
   background:
     radial-gradient(circle at 12% 2%, color-mix(in srgb, var(--topic) 13%, transparent), transparent 28rem),
     var(--ink);
-  font-family: "Space Grotesk", "Noto Sans SC", "Segoe UI", sans-serif;
+  font-family: "Space Grotesk", "PingFang SC", "Microsoft YaHei", "Hiragino Sans GB", "Noto Sans SC", "Segoe UI", sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -104,7 +104,6 @@ button {
   background: rgba(9, 13, 29, 0.95);
   box-shadow: 0 12px 36px rgba(0, 0, 0, 0.45);
 }
-
 .site-controls button {
   min-width: 44px;
   min-height: 44px;
@@ -512,12 +511,14 @@ button {
 
 .atlas-tools {
   position: sticky;
-  /* Clears the fixed control cluster so filters never sit beneath it. */
-  top: 76px;
+  /* Shares the row with the fixed control cluster; the reserved right padding
+     keeps the filters clear of it. */
+  top: max(12px, env(safe-area-inset-top));
   z-index: 35;
   display: grid;
   grid-template-columns: minmax(220px, 1fr) 2fr;
   gap: 12px;
+  margin-right: 250px;
   padding: 12px;
   border: 1px solid var(--line);
   border-radius: 12px;
@@ -972,9 +973,32 @@ button {
 
 .hero-equation {
   display: block;
+  max-width: 100%;
   margin-top: 30px;
+  padding-bottom: 4px;
+  overflow-x: auto;
+  overflow-y: hidden;
   color: var(--topic);
-  font: 500 clamp(1.4rem, 3vw, 2.2rem)/1.2 "JetBrains Mono", monospace;
+  font: 500 clamp(1.5rem, 2.6vw, 2.1rem)/1.35 "Space Grotesk", "Segoe UI", serif;
+}
+
+/* Native MathML: real fractions and radicals, correct italics and spacing, and
+   no external typesetting library. A long expression scrolls sideways inside
+   its own box rather than breaking across lines mid-equation. */
+math {
+  font-family: "Space Grotesk", "Segoe UI", serif;
+  font-size: inherit;
+  math-style: compact;
+}
+
+.hero-equation math {
+  display: inline-block;
+  min-width: max-content;
+}
+
+.concept-mark math,
+.derivation-lede math {
+  min-width: max-content;
 }
 
 .hero-instrument {
@@ -1019,12 +1043,15 @@ button {
 
 .topic-index {
   position: sticky;
-  /* Clears the fixed control cluster so section links stay clickable. */
-  top: 76px;
+  /* Shares the row with the fixed control cluster instead of stacking below it,
+     which keeps a whole bar's height of content visible while scrolling. */
+  top: max(12px, env(safe-area-inset-top));
   z-index: 30;
   display: flex;
   gap: 6px;
+  /* Reserve the cluster's width so section links never slide underneath it. */
   margin-bottom: 50px;
+  margin-right: 250px;
   padding: 10px;
   overflow-x: auto;
   border: 1px solid var(--line);
@@ -1212,8 +1239,13 @@ input[type="range"] {
 }
 
 .concept-mark {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 3px;
   color: var(--topic);
-  font: 600 28px/1 "JetBrains Mono", monospace;
+  font: 600 23px/1.35 "Space Grotesk", "Segoe UI", serif;
 }
 
 .concept h3 {
@@ -1635,6 +1667,8 @@ body[data-topic="light"] {
 
 .derivation-lede {
   margin: 0 0 18px;
+  overflow-x: auto;
+  overflow-y: hidden;
   color: var(--topic);
   font-size: 13px;
   line-height: 1.55;
@@ -1791,6 +1825,66 @@ body[data-topic="light"] {
   border-top: 1px solid var(--line);
 }
 
+.field-media {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(280px, .85fr);
+  gap: 0;
+  margin: 0;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--deep);
+}
+
+.field-media img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-height: 480px;
+  object-fit: cover;
+  object-position: center 20%;
+  background: #05070f;
+}
+
+.field-media[data-kind="diagram"] {
+  grid-template-columns: minmax(0, 1fr) minmax(280px, .85fr);
+}
+
+.field-diagram {
+  display: grid;
+  place-items: center;
+  min-height: 300px;
+  padding: 40px;
+  color: var(--field-color, var(--topic));
+  background:
+    radial-gradient(circle at 50% 45%, color-mix(in srgb, var(--field-color, var(--topic)) 16%, transparent), transparent 62%),
+    #070b18;
+}
+
+.field-diagram .field-signature {
+  width: min(210px, 55%);
+  height: auto;
+  aspect-ratio: 1;
+}
+
+.field-media figcaption {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 28px;
+  border-left: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.65;
+}
+
+.field-media figcaption a {
+  color: var(--cyan);
+  font-size: 13px;
+  text-underline-offset: 4px;
+}
+
 .field-context .inspector-links {
   margin: 0;
   padding: 0;
@@ -1914,6 +2008,16 @@ body[data-topic="light"] {
     grid-template-columns: 1fr;
   }
 
+  .field-media,
+  .field-media[data-kind="diagram"] {
+    grid-template-columns: 1fr;
+  }
+
+  .field-media figcaption {
+    border-left: 0;
+    border-top: 1px solid var(--line);
+  }
+
   .limit,
   .relation-map a {
     min-height: 0;
@@ -2011,6 +2115,7 @@ body[data-topic="light"] {
   .atlas-tools {
     position: static;
     grid-template-columns: 1fr;
+    margin-right: 0;
   }
 
   .lineage-filters {
@@ -2089,7 +2194,9 @@ body[data-topic="light"] {
   }
 
   .topic-index {
-    margin-inline: -13px;
+    /* The control cluster is narrower on phones, so reserve less. */
+    margin-left: -13px;
+    margin-right: 150px;
     border-inline: 0;
     border-radius: 0;
   }

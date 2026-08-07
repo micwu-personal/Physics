@@ -74,6 +74,15 @@ function setMotionMode(mode){
   updateMotionControl();
   syncAnimationLoops();
 }
+// Activating a control that starts an animation should not also require the
+// visitor to un-pause motion separately.
+function requestMotionPlay(){
+  if(motionIsPaused()) setMotionMode('play');
+}
+document.addEventListener('click',event=>{
+  const target=event.target instanceof Element ? event.target.closest('[data-motion-start]') : null;
+  if(target) requestMotionPlay();
+},true);
 requireElement('motionToggle').addEventListener('click',()=>{
   setMotionMode(motionIsPaused() ? 'play' : 'pause');
 });

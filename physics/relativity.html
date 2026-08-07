@@ -12,9 +12,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="An interactive bilingual guide to special and general relativity with a moving light-clock experiment, spacetime visualization, historical eclipse evidence, and links to cosmology.">
   <title>Relativity — Physics Field Atlas</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Noto+Sans+SC:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/fonts/fonts.css">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body data-topic="relativity">
@@ -42,7 +40,7 @@
            data-copy-zh="狭义相对论重组空间与时间，使每个惯性观察者都测得相同光速；广义相对论更进一步：自由下落的物体沿时空几何运动，物质与能量参与决定这种几何。">
           Special relativity reorganizes space and time so every inertial observer measures the same light speed. General relativity goes further: freely falling bodies follow spacetime geometry, and matter-energy helps determine that geometry.
         </p>
-        <span class="hero-equation">Δs² = c²Δt² − Δx² · G<sub>μν</sub> = 8πG T<sub>μν</sub>/c⁴</span>
+        <span class="hero-equation" data-tex="\Delta s^2 = c^2\Delta t^2 - \Delta x^2 \qquad G_{\mu\nu} = \frac{8\pi G}{c^4} T_{\mu\nu}">Delta s^2 = c^2 Delta t^2 - Delta x^2, G_munu = 8 pi G T_munu / c^4</span>
         <div class="hero-actions">
           <a class="primary-action" href="#clock-lab" data-copy-en="Compare moving clocks" data-copy-zh="比较运动中的时钟">Compare moving clocks</a>
           <a class="secondary-action" href="#evidence" data-copy-en="Inspect the 1919 eclipse" data-copy-zh="查看 1919 年日食证据">Inspect the 1919 eclipse</a>
@@ -218,6 +216,8 @@
       <span><a href="../LICENSES/THIRD-PARTY-MEDIA.md" data-copy-en="Media licenses" data-copy-zh="媒体许可">Media licenses</a> · <a href="./quantum.html" data-copy-en="Next field: quantum mechanics" data-copy-zh="下一领域：量子力学">Next field: quantum mechanics</a></span>
     </footer>
   </div>
+
+  <script src="formula.js"></script>
 
   <script src="common.js"></script>
   <script src="labs.js"></script>

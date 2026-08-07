@@ -1,6 +1,6 @@
 globalThis.PhysicsMedia = Object.freeze({
   wmap2012: {
-    file: 'WMAP_2012_1280.png',
+    file: 'WMAP_2012_1280.jpg',
     kind: 'data-map',
     license: 'public-domain',
     attribution: 'NASA / WMAP Science Team',
@@ -11,7 +11,7 @@ globalThis.PhysicsMedia = Object.freeze({
     }
   },
   atlas4Muon: {
-    file: 'ATLAS_4muon_Higgs_2012.png',
+    file: 'ATLAS_4muon_Higgs_2012.jpg',
     kind: 'reconstructed-data',
     license: 'CC BY-SA 3.0',
     attribution: 'ATLAS Collaboration / CERN',
@@ -22,7 +22,7 @@ globalThis.PhysicsMedia = Object.freeze({
     }
   },
   hydrogenDensity: {
-    file: 'Hydrogen_Density_Plots_1280.png',
+    file: 'Hydrogen_Density_Plots_1280.jpg',
     kind: 'calculated-model',
     license: 'public-domain',
     attribution: 'PoorLeno / Wikimedia Commons',

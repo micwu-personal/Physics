@@ -7,7 +7,9 @@
 */
 globalThis.PhysicsFieldGuides = Object.freeze({
   'astronomy-optics': {
+    media: { file: 'Galileo_Sustermans_1640.jpg', kind: 'document', caption: { en: "Portrait of Galileo Galilei by Justus Sustermans, c. 1640. He turned the telescope into an instrument for measurement.", zh: "尤斯图斯·苏斯特曼斯约 1640 年绘制的伽利略肖像。他把望远镜变成了测量仪器。" }, source: 'https://commons.wikimedia.org/wiki/File:Galileo.arp.300pix.jpg' },
     equation: 'θ ≈ 1.22 λ/D',
+    tex: '\\theta \\approx 1.22\\,\\frac{\\lambda}{D}',
     equationNote: {
       en: "θ is the smallest angle a telescope of aperture D can resolve at wavelength λ.",
       zh: "θ 是口径为 D 的望远镜在波长 λ 下能分辨的最小角度。"
@@ -18,7 +20,7 @@ globalThis.PhysicsFieldGuides = Object.freeze({
     },
     concepts: [
       {
-        mark: '1/v − 1/u = 1/f',
+        mark: '1/v − 1/u = 1/f', markTex: '\\frac{1}{v} - \\frac{1}{u} = \\frac{1}{f}',
         title: { en: "Image formation", zh: "成像" },
         body: {
           en: "A lens or curved mirror bends rays so that light from one point reconverges to another, forming a focused image whose size and position follow from the geometry.",
@@ -34,7 +36,7 @@ globalThis.PhysicsFieldGuides = Object.freeze({
         }
       },
       {
-        mark: 'n₁sinθ₁=n₂sinθ₂',
+        mark: 'n₁sinθ₁=n₂sinθ₂', markTex: 'n_1\\mathrm{sin}\\,\\theta_1 = n_2\\mathrm{sin}\\,\\theta_2',
         title: { en: "Refraction", zh: "折射与色散" },
         body: {
           en: "Light changes direction crossing between media of different optical density; the law that splits colors in a prism also limits lens design through chromatic aberration.",
@@ -88,6 +90,7 @@ globalThis.PhysicsFieldGuides = Object.freeze({
 
   'fluids': {
     equation: 'ρ(∂v/∂t + v·∇v) = −∇p + μ∇²v',
+    tex: '\\rho\\left(\\frac{\\partial \\vec{v}}{\\partial t} + \\vec{v}\\cdot\\nabla \\vec{v}\\right) = -\\nabla p + \\mu\\nabla^2 \\vec{v}',
     equationNote: {
       en: "A fluid's acceleration is set by the pressure gradient plus viscous forces; ρ is density, μ viscosity, v velocity.",
       zh: "流体的加速度由压强梯度和黏性力决定；ρ 为密度，μ 为黏度，v 为速度。"
@@ -98,7 +101,7 @@ globalThis.PhysicsFieldGuides = Object.freeze({
     },
     concepts: [
       {
-        mark: 'Re = ρvL/μ',
+        mark: 'Re = ρvL/μ', markTex: '\\mathrm{Re} = \\frac{\\rho v L}{\\mu}',
         title: { en: "Reynolds number", zh: "雷诺数" },
         body: {
           en: "A single ratio compares inertia to viscosity and predicts whether a flow stays smooth and layered or breaks into turbulence.",
@@ -106,7 +109,7 @@ globalThis.PhysicsFieldGuides = Object.freeze({
         }
       },
       {
-        mark: 'p + ½ρv² + ρgh',
+        mark: 'p + ½ρv² + ρgh', markTex: 'p + \\frac{1}{2}\\rho v^2 + \\rho g h',
         title: { en: "Bernoulli's balance", zh: "伯努利关系" },
         body: {
           en: "Along a steady, low-friction streamline, faster flow accompanies lower pressure. It is a bookkeeping of energy, often misread as a full explanation of a wing's lift.",
@@ -126,7 +129,7 @@ globalThis.PhysicsFieldGuides = Object.freeze({
       {
         title: { en: "Turbulence is unsolved", zh: "湍流尚未解决" },
         body: {
-          en: "The Navier-Stokes equations are written down, but no general method predicts turbulent flow from first principles, and whether smooth solutions always exist remains an open mathematical problem.",
+          en: "Simulations of the Navier-Stokes equations reproduce many turbulent flows, but no general closed theory predicts turbulent statistics, and whether smooth solutions always exist in three dimensions is still unproven.",
           zh: "纳维-斯托克斯方程虽已写出，但尚无普适方法从第一性原理预测湍流，其光滑解是否总是存在也仍是重要的数学难题。"
         }
       },
@@ -168,6 +171,7 @@ globalThis.PhysicsFieldGuides = Object.freeze({
 
   'acoustics': {
     equation: '∂²p/∂t² = c²∇²p',
+    tex: '\\frac{\\partial^2 p}{\\partial t^2} = c^2\\nabla^2 p',
     equationNote: {
       en: "Pressure disturbances p travel as waves at a speed c set by the medium.",
       zh: "压强扰动 p 以介质决定的速度 c 作为波传播。"
@@ -178,7 +182,7 @@ globalThis.PhysicsFieldGuides = Object.freeze({
     },
     concepts: [
       {
-        mark: 'c = fλ',
+        mark: 'c = fλ', markTex: 'c = f\\lambda',
         title: { en: "Speed, pitch, size", zh: "速度、音高与尺寸" },
         body: {
           en: "Wave speed equals frequency times wavelength, so a fixed speed in air ties a note's pitch to the physical length of a resonating column or string.",
@@ -186,11 +190,11 @@ globalThis.PhysicsFieldGuides = Object.freeze({
         }
       },
       {
-        mark: 'f_n = n·f₁',
+        mark: 'f_n = n·f₁', markTex: 'f_n = n f_1',
         title: { en: "Standing waves", zh: "驻波" },
         body: {
-          en: "Boundaries pick out discrete modes whose frequencies form a harmonic series; their mix, the timbre, is what distinguishes a flute from a violin at the same pitch.",
-          zh: "边界选出一系列离散的简正模，其频率构成谐波列；它们的混合即音色，使同一音高下长笛与小提琴听来不同。"
+          en: "Boundaries pick out discrete modes: strings and open pipes give whole-number harmonics, while a pipe closed at one end gives only the odd ones. Their mix, the timbre, distinguishes a flute from a violin at the same pitch.",
+          zh: "边界选出一系列离散简正模：弦与两端开口的管给出整数次谐波，一端封闭的管只给出奇数次谐波。它们的混合即音色，使同一音高下长笛与小提琴听来不同。"
         }
       },
       {
@@ -247,14 +251,16 @@ globalThis.PhysicsFieldGuides = Object.freeze({
   },
 
   'thermodynamics': {
+    media: { file: 'Tycho_supernova_xray.jpg', kind: 'observation', caption: { en: "Tycho supernova remnant in false-color Chandra X-rays. Expanding hot gas is thermodynamics at astronomical scale; colors map X-ray energy bands.", zh: "钱德拉 X 射线假彩色显示的第谷超新星遗迹。膨胀的高温气体是天文尺度上的热力学；颜色映射 X 射线能段。" }, source: 'https://commons.wikimedia.org/wiki/File:Tycho-supernova-xray.jpg' },
     equation: 'η = 1 − T_c/T_h',
+    tex: '\\eta = 1 - \\frac{T_c}{T_h}',
     equationNote: {
-      en: "The best possible efficiency of a heat engine, set by its cold and hot temperatures T_c and T_h.",
-      zh: "热机的最高效率由低温 T_c 与高温 T_h 决定。"
+      en: "The efficiency ceiling for a reversible engine between reservoirs at absolute temperatures T_c and T_h.",
+      zh: "在绝对温度为 T_c 与 T_h 的两个热源之间，可逆热机所能达到的效率上限。"
     },
     lede: {
-      en: "The science of heat, work, and energy in systems described by bulk quantities like temperature and pressure, without tracking individual molecules. It answers which energy transformations are possible and which are forbidden. It explains why no engine can turn heat entirely into work.",
-      zh: "研究用温度、压强等宏观量描述的系统中的热、功与能量，而不追踪单个分子。它回答哪些能量转化可行、哪些被禁止。它解释为何无论多么巧妙的热机都不能把热完全转化为功。"
+      en: "The science of heat, work, and energy in systems described by bulk quantities like temperature and pressure, without tracking individual molecules. It answers which energy transformations are possible and which are forbidden. It explains why a cyclic engine cannot turn heat from a single reservoir entirely into work.",
+      zh: "研究用温度、压强等宏观量描述的系统中的热、功与能量，而不追踪单个分子。它回答哪些能量转化可行、哪些被禁止。它解释为何循环热机不能把取自单一热源的热完全转化为功。"
     },
     concepts: [
       {
@@ -327,18 +333,20 @@ globalThis.PhysicsFieldGuides = Object.freeze({
   },
 
   'electromagnetism': {
+    media: { file: 'Michael_Faraday_Phillips.jpg', kind: 'document', caption: { en: "Michael Faraday by Thomas Phillips, 1841-42. His experiments made the field concept physically meaningful.", zh: "托马斯·菲利普斯 1841–42 年绘制的迈克尔·法拉第。他的实验赋予场概念真实的物理意义。" }, source: 'https://commons.wikimedia.org/wiki/File:Michael_Faraday_001.jpg' },
     equation: 'ℰ = −dΦ/dt',
+    tex: '\\mathcal{E} = -\\frac{d\\Phi}{dt}',
     equationNote: {
       en: "A changing magnetic flux Φ through a loop drives a voltage ℰ around it.",
       zh: "穿过回路的磁通量 Φ 发生变化，会在回路中产生电动势 ℰ。"
     },
     lede: {
       en: "The study of electric charge, current, and the electric and magnetic fields they create. It answers how electricity and magnetism are two aspects of one interaction, revealed when a moving magnet was found to drive a current. It explains how a generator turns motion into electricity.",
-      zh: "研究电荷、电流以及它们产生并响应的电场和磁场。它回答电与磁如何是同一相互作用的两个方面，这一点在发现运动的磁体能驱动电流时被揭示。它解释发电机和变压器如何把运动转化为电。"
+      zh: "研究电荷、电流以及它们产生并响应的电场和磁场。它回答电与磁如何是同一相互作用的两个方面，这一点在发现运动的磁体能驱动电流时被揭示。它解释发电机如何把机械运动转化为电能。"
     },
     concepts: [
       {
-        mark: 'F = qE + qv×B',
+        mark: 'F = qE + qv×B', markTex: '\\vec{F} = q\\vec{E} + q\\vec{v}\\times\\vec{B}',
         title: { en: "Lorentz force", zh: "洛伦兹力" },
         body: {
           en: "Fields are defined by the force they exert: an electric field pushes a charge along it, while a magnetic field deflects only a moving charge, sideways to its motion.",
@@ -346,7 +354,7 @@ globalThis.PhysicsFieldGuides = Object.freeze({
         }
       },
       {
-        mark: '∇×E = −∂B/∂t',
+        mark: '∇×E = −∂B/∂t', markTex: '\\nabla\\times\\vec{E} = -\\frac{\\partial \\vec{B}}{\\partial t}',
         title: { en: "Induction", zh: "电磁感应" },
         body: {
           en: "A changing magnetic field creates a circulating electric field. This single fact underlies electric generators, transformers, and induction cooktops.",
@@ -407,7 +415,9 @@ globalThis.PhysicsFieldGuides = Object.freeze({
   },
 
   'statistical': {
+    media: { file: 'James_Clerk_Maxwell_1882.jpg', kind: 'document', caption: { en: "Engraved portrait of James Clerk Maxwell, 1882. His velocity distribution began the statistical treatment of matter.", zh: "1882 年出版的麦克斯韦雕版肖像。他的速度分布开启了物质的统计描述。" }, source: 'https://commons.wikimedia.org/wiki/File:James_Clerk_Maxwell_big.jpg' },
     equation: 'S = k·log W',
+    tex: 'S = k\\,\\mathrm{ln}\\,W',
     equationNote: {
       en: "Entropy S counts the number W of microscopic arrangements consistent with what we measure; k is Boltzmann's constant.",
       zh: "熵 S 衡量与宏观测量相容的微观状态数 W，k 为玻尔兹曼常数。"
@@ -418,7 +428,7 @@ globalThis.PhysicsFieldGuides = Object.freeze({
     },
     concepts: [
       {
-        mark: 'P ∝ e^(−E/kT)',
+        mark: 'P ∝ e^(−E/kT)', markTex: 'P \\propto \\mathrm{e}^{-E/kT}',
         title: { en: "Boltzmann factor", zh: "玻尔兹曼因子" },
         body: {
           en: "In equilibrium at temperature T, a state's probability falls off exponentially with its energy, so higher-energy configurations are rarer but never quite forbidden.",
@@ -426,15 +436,15 @@ globalThis.PhysicsFieldGuides = Object.freeze({
         }
       },
       {
-        mark: '⟨E⟩ = (f/2)kT',
+        mark: '⟨E⟩ = (f/2)kT', markTex: '\\langle E\\rangle = \\frac{f}{2}kT',
         title: { en: "Equipartition", zh: "能量均分" },
         body: {
           en: "Classically, thermal energy spreads evenly across each way a system can move, giving on average one-half kT per quadratic degree of freedom.",
-          zh: "经典情形下，热能均匀分配到系统每一种运动方式，平均每个自由度分得二分之一 kT。"
+          zh: "经典情形下，热能均匀分配到系统每一种运动方式，平均每个二次自由度分得二分之一 kT。"
         }
       },
       {
-        mark: 'ΔE/E ∝ 1/√N',
+        mark: 'ΔE/E ∝ 1/√N', markTex: '\\frac{\\Delta E}{E} \\propto \\frac{1}{\\sqrt{N}}',
         title: { en: "Why bulk is smooth", zh: "宏观为何平滑" },
         body: {
           en: "Relative fluctuations shrink as the number of particles grows, which is why a cup of water has a sharp, definite temperature despite molecular chaos.",
@@ -488,6 +498,7 @@ globalThis.PhysicsFieldGuides = Object.freeze({
 
   'geophysics': {
     equation: 'v_P = √((K + 4μ/3)/ρ)',
+    tex: 'v_P = \\sqrt{\\frac{K + \\frac{4}{3}\\mu}{\\rho}}',
     equationNote: {
       en: "A seismic pressure wave's speed depends on the rock's stiffness (K, μ) and density ρ.",
       zh: "地震纵波的速度取决于岩石的刚度（体积模量 K、剪切模量 μ）与密度 ρ。"
@@ -506,7 +517,7 @@ globalThis.PhysicsFieldGuides = Object.freeze({
         }
       },
       {
-        mark: 'g = GM/r²',
+        mark: 'g = GM/r²', markTex: 'g = \\frac{GM}{r^2}',
         title: { en: "Gravity mapping", zh: "重力测绘" },
         body: {
           en: "Tiny local variations in surface gravity reveal buried density differences, from ore bodies and oil basins to the thickness of the crust.",
@@ -567,7 +578,9 @@ globalThis.PhysicsFieldGuides = Object.freeze({
   },
 
   'quantum-theory': {
+    media: { file: 'Solvay_conference_1927.jpg', kind: 'document', caption: { en: "The fifth Solvay Conference, 1927. Planck, Einstein, Bohr and others pictured while the interpretation of quanta was still openly disputed.", zh: "1927 年第五届索尔维会议。照片中的普朗克、爱因斯坦、玻尔等人当时仍在公开争论量子的诠释。" }, source: 'https://commons.wikimedia.org/wiki/File:Solvay_conference_1927.jpg' },
     equation: 'E = hν',
+    tex: 'E = h\\nu',
     equationNote: {
       en: "The energy E carried by light arrives in packets set by its frequency ν and Planck's constant h.",
       zh: "光携带的能量 E 以离散份额出现，由频率 ν 与普朗克常数 h 决定。"
@@ -578,7 +591,7 @@ globalThis.PhysicsFieldGuides = Object.freeze({
     },
     concepts: [
       {
-        mark: 'E = nhν',
+        mark: 'E = nhν', markTex: 'E = n h \\nu',
         title: { en: "Energy quanta", zh: "能量量子" },
         body: {
           en: "Planck fit the black-body spectrum by assuming oscillators exchange energy only in whole multiples of hν, a mathematical step whose physical meaning took years to accept.",
@@ -586,7 +599,7 @@ globalThis.PhysicsFieldGuides = Object.freeze({
         }
       },
       {
-        mark: 'K = hν − φ',
+        mark: 'K_max = hν − φ', markTex: 'K_{\\mathrm{max}} = h\\nu - \\phi',
         title: { en: "Photoelectric effect", zh: "光电效应" },
         body: {
           en: "Einstein proposed that light itself arrives as quanta, explaining why light below a threshold frequency ejects no electrons no matter how bright it is.",
@@ -594,7 +607,7 @@ globalThis.PhysicsFieldGuides = Object.freeze({
         }
       },
       {
-        mark: 'h ≈ 6.6e−34 J·s',
+        mark: 'h ≈ 6.6e−34 J·s', markTex: 'h \\approx 6.63\\times10^{-34}\\,\\mathrm{J}\\cdot\\mathrm{s}',
         title: { en: "A new constant", zh: "一个新常数" },
         body: {
           en: "Planck's constant sets the scale at which quantization matters; it is so small that everyday energy exchange looks perfectly continuous.",
@@ -647,7 +660,9 @@ globalThis.PhysicsFieldGuides = Object.freeze({
   },
 
   'nuclear': {
+    media: { file: 'Marie_Curie_1920s.jpg', kind: 'document', caption: { en: "Marie Curie photographed by Henri Manuel, c. 1920s. She made radioactivity a quantitative science.", zh: "亨利·马努埃尔于 1920 年代拍摄的玛丽·居里。她把放射性变成了定量科学。" }, source: 'https://commons.wikimedia.org/wiki/File:Marie_Curie_c._1920s.jpg' },
     equation: 'E = Δm·c²',
+    tex: 'E = \\Delta m\\,c^2',
     equationNote: {
       en: "The energy released in a nuclear reaction equals the lost mass Δm times the speed of light squared.",
       zh: "核反应释放的能量等于损失的质量 Δm 乘以光速的平方。"
@@ -658,7 +673,7 @@ globalThis.PhysicsFieldGuides = Object.freeze({
     },
     concepts: [
       {
-        mark: 'N = N₀ e^(−λt)',
+        mark: 'N = N₀ e^(−λt)', markTex: 'N = N_0\\,\\mathrm{e}^{-\\lambda t}',
         title: { en: "Radioactive decay", zh: "放射性衰变" },
         body: {
           en: "Unstable nuclei decay at random, but a huge population thins on a fixed timescale, the half-life, which underlies both radiometric dating and medical tracers.",
@@ -727,7 +742,9 @@ globalThis.PhysicsFieldGuides = Object.freeze({
   },
 
   'condensed': {
+    media: { file: 'Hydrogen_Density_Plots_1280.jpg', kind: 'model', caption: { en: "Calculated hydrogen probability densities. The same quantum states, repeated through a lattice, broaden into the energy bands that decide whether a solid conducts.", zh: "氢原子的计算概率密度。同样的量子态在晶格中重复，展宽为决定固体导电与否的能带。" }, source: 'https://commons.wikimedia.org/wiki/File:Hydrogen_Density_Plots.png' },
     equation: 'ψ = e^(ik·r) u(r)',
+    tex: '\\psi = \\mathrm{e}^{i\\vec{k}\\cdot\\vec{r}}\\,u(\\vec{r})',
     equationNote: {
       en: "In a crystal, an electron's wavefunction is a plane wave modulated by the lattice's periodic pattern u(r).",
       zh: "在晶体中，电子波函数是平面波与晶格周期函数 u(r) 的乘积。"
@@ -741,7 +758,7 @@ globalThis.PhysicsFieldGuides = Object.freeze({
         mark: 'bands & gaps',
         title: { en: "Energy bands", zh: "能带" },
         body: {
-          en: "In a crystal, allowed electron energies broaden into bands separated by gaps. Whether the highest occupied band is full or partly filled decides metal versus insulator.",
+          en: "In a crystal, allowed electron energies broaden into bands separated by gaps. In simple band theory a partly filled or overlapping band conducts and a filled band below a gap insulates, though strong interactions can overturn that.",
           zh: "在晶体中，允许的电子能量展宽为能带，能带之间有能隙。最高的被占据能带是填满还是部分填充，决定了是金属还是绝缘体。"
         }
       },
@@ -807,7 +824,9 @@ globalThis.PhysicsFieldGuides = Object.freeze({
   },
 
   'particle': {
+    media: { file: 'ATLAS_4muon_Higgs_2012.jpg', kind: 'reconstruction', caption: { en: "Reconstructed ATLAS four-muon candidate, 2012. Detector readout becomes tracks and energy deposits; this is not a photograph of particles.", zh: "ATLAS 对 2012 年四缪子候选事例的重建显示。探测器读出被转换为径迹与能量沉积，并非粒子照片。" }, source: 'https://commons.wikimedia.org/wiki/File:Event_display_of_a_4-muon_candidate_in_the_ATLAS_detector.png' },
     equation: '(iγ^μ ∂_μ − m)ψ = 0',
+    tex: '\\left(i\\gamma^\\mu \\partial_\\mu - m\\right)\\psi = 0',
     equationNote: {
       en: "Dirac's relativistic wave equation for the electron, which predicted antimatter.",
       zh: "狄拉克描述电子的相对论性波动方程，它预言了反物质。"
@@ -821,8 +840,8 @@ globalThis.PhysicsFieldGuides = Object.freeze({
         mark: 'e⁻ + e⁺ → γγ',
         title: { en: "Antimatter", zh: "反物质" },
         body: {
-          en: "Every matter particle has an antiparticle of opposite charge. When the two meet they annihilate into energy, usually high-energy photons.",
-          zh: "每种物质粒子都有一个电荷相反的反粒子。二者相遇会湮灭为能量，通常是高能光子。"
+          en: "Every matter particle has an antiparticle with its charges reversed, and a few neutral particles are their own. A pair that meets can annihilate into other particles, typically photons for an electron and positron.",
+          zh: "每种物质粒子都有各种荷相反的反粒子，少数中性粒子的反粒子就是自身。粒子与反粒子相遇可以湮灭成其他粒子，电子与正电子通常给出光子。"
         }
       },
       {
@@ -853,7 +872,7 @@ globalThis.PhysicsFieldGuides = Object.freeze({
       {
         title: { en: "Known unknowns remain", zh: "仍有已知的未知" },
         body: {
-          en: "The current framework says nothing about what dark matter is, why matter outweighs antimatter in the cosmos, or how gravity fits in.",
+          en: "The current framework does not identify dark matter, does not successfully account for the cosmic matter-antimatter imbalance, and does not include gravity.",
           zh: "现有框架无法说明暗物质是什么、宇宙中物质为何多于反物质，也无法说明引力如何纳入其中。"
         }
       }
@@ -887,7 +906,9 @@ globalThis.PhysicsFieldGuides = Object.freeze({
   },
 
   'plasma': {
+    media: { file: 'WMAP_2012_1280.jpg', kind: 'reconstruction', caption: { en: "WMAP all-sky map. Before recombination the universe was a hot plasma; these temperature fluctuations are the imprint it left. Color is not visible light.", zh: "WMAP 全天图。复合之前宇宙是炽热等离子体，这些温度涨落正是它留下的印记。颜色并非可见光。" }, source: 'https://commons.wikimedia.org/wiki/File:WMAP_2012.png' },
     equation: 'v_A = B/√(μ₀ρ)',
+    tex: 'v_A = \\frac{B}{\\sqrt{\\mu_0\\rho}}',
     equationNote: {
       en: "The speed of magnetic (Alfven) waves in a plasma, set by magnetic field B and mass density ρ.",
       zh: "等离子体中磁流体波（阿尔芬波）的速度，由磁场 B 与质量密度 ρ 决定。"
@@ -968,9 +989,10 @@ globalThis.PhysicsFieldGuides = Object.freeze({
 
   'biophysics': {
     equation: 'V = (RT/zF)·ln(c_o/c_i)',
+    tex: 'V = \\frac{RT}{zF}\\,\\mathrm{ln}\\frac{c_o}{c_i}',
     equationNote: {
-      en: "A membrane voltage V set by the ratio of ion concentrations outside (c_o) and inside (c_i) a cell.",
-      zh: "细胞膜电位 V 由膜外与膜内离子浓度之比决定。"
+      en: "The equilibrium potential for one ion, set by its concentrations outside and inside the cell. It equals the membrane voltage only when that ion dominates the permeability.",
+      zh: "单一离子的平衡电位，由该离子在膜外与膜内的浓度决定；只有当它主导膜通透性时，才等于实际膜电位。"
     },
     lede: {
       en: "The use of physics to measure and model living systems, from single molecules to whole cells. It asks how mechanics, thermodynamics, and electricity operate inside organisms without anything beyond them. It explains how the double helix of DNA was read from X-ray diffraction in the 1950s.",
@@ -978,7 +1000,7 @@ globalThis.PhysicsFieldGuides = Object.freeze({
     },
     concepts: [
       {
-        mark: 'F = 6πηrv',
+        mark: 'F = 6πηrv', markTex: 'F = 6\\pi\\eta r v',
         title: { en: "Life at low Reynolds", zh: "低雷诺数下的生命" },
         body: {
           en: "For a swimming bacterium, water feels thick and viscosity dominates inertia, so it cannot coast and must use non-reciprocal strokes to move.",
@@ -1048,9 +1070,10 @@ globalThis.PhysicsFieldGuides = Object.freeze({
 
   'nonlinear': {
     equation: 'δ(t) ≈ δ₀ e^(λt)',
+    tex: '\\delta(t) \\approx \\delta_0\\,\\mathrm{e}^{\\lambda t}',
     equationNote: {
-      en: "Nearby states separate exponentially fast when the Lyapunov exponent λ is positive; that is chaos.",
-      zh: "当李雅普诺夫指数 λ 为正时，邻近状态以指数速度分离，这就是混沌。"
+      en: "Nearby states separate exponentially while they stay close; in a bounded system a positive λ is the standard signature of chaos.",
+      zh: "邻近状态在仍然接近时按指数分离；对有界系统，λ 为正是混沌的标准判据。"
     },
     lede: {
       en: "The study of systems whose parts influence each other in non-additive ways, so small causes can have outsized effects. It asks why some simple, deterministic rules produce behavior that looks random and defies forecasting. It explains why weather is predictable for days but not months.",
@@ -1127,7 +1150,9 @@ globalThis.PhysicsFieldGuides = Object.freeze({
   },
 
   'standard-model': {
+    media: { file: 'ATLAS_4muon_Higgs_2012.jpg', kind: 'reconstruction', caption: { en: "The four-muon event class used in the 2012 Higgs boson discovery, reconstructed from ATLAS detector readout rather than photographed.", zh: "2012 年希格斯玻色子发现所用的四缪子事例类型，由 ATLAS 探测器读出重建而成，并非拍摄所得。" }, source: 'https://commons.wikimedia.org/wiki/File:Event_display_of_a_4-muon_candidate_in_the_ATLAS_detector.png' },
     equation: 'SU(3)×SU(2)×U(1)',
+    tex: '\\mathrm{SU}(3)\\times\\mathrm{SU}(2)\\times\\mathrm{U}(1)',
     equationNote: {
       en: "The symmetry groups whose gauge fields give the strong, weak, and electromagnetic forces.",
       zh: "标准模型的规范对称群，其规范场分别给出强、弱和电磁相互作用。"
@@ -1154,11 +1179,11 @@ globalThis.PhysicsFieldGuides = Object.freeze({
         }
       },
       {
-        mark: 'H gives mass',
+        mark: 'nonzero ⟨H⟩',
         title: { en: "Higgs mechanism", zh: "希格斯机制" },
         body: {
-          en: "A field filling space resists the motion of certain particles, and that resistance is what we measure as their mass; its excitation, the Higgs boson, was confirmed in 2012.",
-          zh: "一个弥漫空间的场会阻滞某些粒子，这种阻滞正是我们测到的质量；其激发即希格斯玻色子，已于 2012 年确认。"
+          en: "A field with a nonzero value everywhere couples to the W and Z bosons and to elementary fermions, and that coupling is what we measure as their rest mass. It does not slow them down; its excitation, the Higgs boson, was confirmed in 2012.",
+          zh: "一个在全空间取非零值的场与 W、Z 玻色子及基本费米子耦合，这种耦合正是我们测到的静质量。它并不会使粒子减速；其激发即希格斯玻色子，已于 2012 年确认。"
         }
       }
     ],
@@ -1207,10 +1232,12 @@ globalThis.PhysicsFieldGuides = Object.freeze({
   },
 
   'quantum-information': {
+    media: { file: 'Hydrogen_Density_Plots_1280.jpg', kind: 'model', caption: { en: "Calculated hydrogen probability densities. Superposition of states like these is the resource a qubit encodes.", zh: "氢原子的计算概率密度。类似状态的叠加，正是量子比特所编码的资源。" }, source: 'https://commons.wikimedia.org/wiki/File:Hydrogen_Density_Plots.png' },
     equation: '|ψ⟩ = α|0⟩ + β|1⟩',
+    tex: '|\\psi\\rangle = \\alpha|0\\rangle + \\beta|1\\rangle',
     equationNote: {
-      en: "A quantum bit can be any superposition of 0 and 1, with complex weights α and β.",
-      zh: "量子比特可以是 0 与 1 的任意叠加，α 与 β 为复振幅。"
+      en: "A qubit is a normalized superposition of 0 and 1, with complex amplitudes obeying |α|² + |β|² = 1.",
+      zh: "量子比特是 0 与 1 的归一化叠加，其复振幅满足 |α|² + |β|² = 1。"
     },
     lede: {
       en: "The study of how information behaves when it is stored and processed in quantum systems. It asks what new forms of computing, communication, and cryptography become possible once bits can superpose and entangle. It explains why an unknown quantum state cannot be perfectly copied.",
@@ -1288,6 +1315,7 @@ globalThis.PhysicsFieldGuides = Object.freeze({
 
   'soft-matter': {
     equation: 'E ∼ k_B T',
+    tex: 'E \\sim k_B T',
     equationNote: {
       en: "Soft materials have structures whose energies are close to thermal energy, so heat alone reshapes them.",
       zh: "软物质的结构能量与热能相当，因此仅靠热运动就能使其显著变形。"

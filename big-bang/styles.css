@@ -10,7 +10,7 @@
   --cold:#5aa8ff;
 }
 *{box-sizing:border-box;margin:0;padding:0}
-html,body{background:var(--bg);color:var(--text);font-family:'Space Grotesk','Noto Sans SC',system-ui,sans-serif;min-height:100vh;overflow-x:hidden}
+html,body{background:var(--bg);color:var(--text);font-family:'Space Grotesk','PingFang SC','Microsoft YaHei','Hiragino Sans GB','Noto Sans SC',system-ui,sans-serif;min-height:100vh;overflow-x:hidden}
 html[lang="zh-CN"] body{font-family:'Noto Sans SC','Space Grotesk',system-ui,sans-serif}
 body{
   background:

@@ -45,29 +45,17 @@ for (const [name, path, sticky] of [
       await page.setViewportSize(viewport);
       await preparePage(page, path, 'en');
 
-      // Font availability changes how the bar wraps, so assert the resolved
-      // sticky offset rather than relying on a particular wrapped layout.
-      const geometry = await page.evaluate(selector => {
-        const bar = document.querySelector(selector);
-        const controls = document.querySelector('.site-controls').getBoundingClientRect();
-        return {
-          controlsBottom: controls.bottom,
-          position: getComputedStyle(bar).position,
-          stickyTop: parseFloat(getComputedStyle(bar).top)
-        };
-      }, sticky);
+      // The bar now shares the row with the fixed cluster and reserves space for
+      // it, so the invariant is that no interactive child ever sits underneath.
+      const position = await page.evaluate(
+        selector => getComputedStyle(document.querySelector(selector)).position,
+        sticky
+      );
 
       // A static bar scrolls away from the cluster like any other content, so
       // the invariant only binds when the bar is actually pinned.
-      if (geometry.position !== 'sticky') return;
+      if (position !== 'sticky') return;
 
-      expect(
-        geometry.stickyTop,
-        'the sticky bar must come to rest below the fixed control cluster'
-      ).toBeGreaterThanOrEqual(geometry.controlsBottom);
-
-      // Belt and braces: no interactive child may sit under the cluster at any
-      // scroll offset the visitor can reach.
       const overlap = await page.locator(sticky).evaluate(async bar => {
         const controls = document.querySelector('.site-controls').getBoundingClientRect();
         const hits = new Set();
@@ -75,11 +63,18 @@ for (const [name, path, sticky] of [
         for (let offset = 0; offset <= document.body.scrollHeight; offset += step) {
           scrollTo(0, offset);
           await new Promise(resolve => requestAnimationFrame(resolve));
+          // The bar scrolls horizontally, so a child's layout rect can extend
+          // past the clip. Compare only the part the visitor can actually see.
+          const clip = bar.getBoundingClientRect();
           for (const item of bar.querySelectorAll('button, a, input')) {
             const rect = item.getBoundingClientRect();
-            if (rect.width > 0 && rect.height > 0 &&
-              rect.left < controls.right && rect.right > controls.left &&
-              rect.top < controls.bottom && rect.bottom > controls.top) {
+            const left = Math.max(rect.left, clip.left);
+            const right = Math.min(rect.right, clip.right);
+            const top = Math.max(rect.top, clip.top);
+            const bottom = Math.min(rect.bottom, clip.bottom);
+            if (right > left && bottom > top &&
+              left < controls.right && right > controls.left &&
+              top < controls.bottom && bottom > controls.top) {
               hits.add(item.textContent.trim() || item.id);
             }
           }
@@ -709,7 +704,14 @@ test('Periodic Table motion control resumes canvases and stops timed views', asy
   await page.waitForTimeout(250);
   expect(await fingerprint()).toBe(pausedFrame);
   await page.locator('#cosmicPlayBtn').click();
-  await expect(page.locator('#cosmicBanner')).toHaveCount(0);
+  // Starting the cosmic timeline now resumes motion rather than silently
+  // refusing, so the visitor does not have to un-pause separately.
+  await expect(page.locator('#motionToggle')).toHaveAttribute('data-state', 'playing');
+  await expect(page.locator('#cosmicBanner')).toHaveClass(/on/);
+  await page.locator('#cosmicPlayBtn').click();
+  await expect(page.locator('#cosmicBanner')).not.toHaveClass(/on/);
+  await page.locator('#motionToggle').click();
+  await expect(page.locator('#motionToggle')).toHaveAttribute('data-state', 'paused');
 
   await page.locator('#motionToggle').click();
   await expect(page.locator('#motionToggle')).toHaveAttribute('data-state', 'playing');

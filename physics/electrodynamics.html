@@ -12,9 +12,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="An interactive bilingual guide to classical electrodynamics, Cherenkov radiation, phase and group velocity, apparent superluminal effects, and Doppler, gravitational and cosmological redshift.">
   <title>Light &amp; Signals — Physics Field Atlas</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Noto+Sans+SC:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/fonts/fonts.css">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body data-topic="light">
@@ -42,7 +40,7 @@
            data-copy-zh="麦克斯韦方程预言了以某一特定速度传播的波，这一预言后来成为相对论的基石。但光在介质中更慢，波包拥有几种不同的速度，而穿越宇宙而来的信号早已被改变。区分这些概念，构成了本主题的大部分内容。">
           Maxwell's equations predict waves that travel at one particular speed, and that prediction became the foundation of relativity. But light in matter is slower, wave packets have several distinct speeds, and a signal crossing the universe arrives changed. Telling these apart is most of the subject.
         </p>
-        <span class="hero-equation">∇ × B = μ₀J + μ₀ε₀ ∂E/∂t</span>
+        <span class="hero-equation" data-tex="\nabla \times \vec{B} = \mu_0\vec{J} + \mu_0\varepsilon_0\frac{\partial \vec{E}}{\partial t}">nabla x B = mu_0 J + mu_0 epsilon_0 dE/dt</span>
         <div class="hero-actions">
           <a class="primary-action" href="#cherenkov" data-copy-en="Outrun light in water" data-copy-zh="在水中超过光速">Outrun light in water</a>
           <a class="secondary-action" href="#velocities" data-copy-en="Which speed is the signal?" data-copy-zh="哪个速度才是信号速度？">Which speed is the signal?</a>
@@ -161,7 +159,7 @@
         <div class="derivations">
           <article class="derivation">
             <h3 data-copy-en="Phase velocity" data-copy-zh="相速度">Phase velocity</h3>
-            <p class="derivation-lede">v<sub>p</sub> = ω / k</p>
+            <p class="derivation-lede" data-tex="v_p = \frac{\omega}{k}">v_p = omega / k</p>
             <ol>
               <li data-copy-en="The speed of a surface of constant phase, such as one particular crest."
                   data-copy-zh="等相位面的传播速度，例如某一个特定波峰的推进速度。">The speed of a surface of constant phase, such as one particular crest.</li>
@@ -176,7 +174,7 @@
 
           <article class="derivation">
             <h3 data-copy-en="Group velocity" data-copy-zh="群速度">Group velocity</h3>
-            <p class="derivation-lede">v<sub>g</sub> = dω / dk</p>
+            <p class="derivation-lede" data-tex="v_g = \frac{d\omega}{dk}">v_g = d omega / dk</p>
             <ol>
               <li data-copy-en="The speed of the envelope of a packet built from a narrow band of frequencies."
                   data-copy-zh="由窄频带合成的波包，其包络的传播速度。">The speed of the envelope of a packet built from a narrow band of frequencies.</li>
@@ -351,6 +349,8 @@
       <span><a href="../LICENSES/THIRD-PARTY-MEDIA.md" data-copy-en="Media licenses" data-copy-zh="媒体许可">Media licenses</a> · <a href="./index.html#genealogy" data-copy-en="Return to the field atlas" data-copy-zh="返回领域图谱">Return to the field atlas</a></span>
     </footer>
   </div>
+
+  <script src="formula.js"></script>
 
   <script src="common.js"></script>
   <script src="light.js"></script>

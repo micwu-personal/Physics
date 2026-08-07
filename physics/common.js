@@ -71,6 +71,15 @@
     document.dispatchEvent(new CustomEvent('physics-motion', { detail: { paused } }));
   }
 
+  // Explicitly starting an animation should not also require un-pausing motion.
+  function requestMotion() {
+    if (!motionPaused()) return false;
+    motionPreference = 'play';
+    writePreference('physics.motion', motionPreference);
+    applyMotion();
+    return true;
+  }
+
   function getAudioContext() {
     if (!audioContext) {
       const AudioContextClass = window.AudioContext || window.webkitAudioContext;
@@ -128,6 +137,7 @@
       return language;
     },
     motionPaused,
-    playTone
+    playTone,
+    requestMotion
   });
 })();
