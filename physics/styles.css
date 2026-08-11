@@ -25,6 +25,7 @@
 html {
   min-width: 320px;
   scroll-behavior: smooth;
+  scroll-padding-top: 92px;
   background: var(--ink);
 }
 
@@ -92,17 +93,15 @@ button {
 }
 
 .site-controls {
-  position: fixed;
-  top: max(12px, env(safe-area-inset-top));
-  right: max(12px, env(safe-area-inset-right));
-  z-index: 60;
+  position: relative;
+  z-index: 1;
   display: flex;
+  flex: 0 0 auto;
   gap: 3px;
   padding: 4px;
   border: 1px solid var(--line);
   border-radius: 999px;
-  background: rgba(9, 13, 29, 0.95);
-  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.45);
+  background: #090d1d;
 }
 .site-controls button {
   min-width: 44px;
@@ -147,13 +146,19 @@ button {
 }
 
 .route-bar {
+  position: sticky;
+  top: max(0px, env(safe-area-inset-top));
+  z-index: 60;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   gap: 16px;
-  min-height: 78px;
-  padding-right: 285px;
+  min-height: 70px;
+  padding-block: 8px;
   border-bottom: 1px solid var(--line);
+  background: rgba(5, 6, 13, 0.94);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(14px);
 }
 
 .route-home {
@@ -182,6 +187,8 @@ button {
 
 .route-links {
   display: flex;
+  min-width: 0;
+  margin-left: auto;
   gap: 16px;
   color: var(--muted);
   font-size: 13px;
@@ -195,6 +202,10 @@ button {
 .route-links a:hover {
   color: var(--paper);
   text-decoration-color: currentColor;
+}
+
+.route-bar .site-controls {
+  margin-left: 4px;
 }
 
 .hero-map {
@@ -511,14 +522,12 @@ button {
 
 .atlas-tools {
   position: sticky;
-  /* Shares the row with the fixed control cluster; the reserved right padding
-     keeps the filters clear of it. */
-  top: max(12px, env(safe-area-inset-top));
+  top: calc(max(0px, env(safe-area-inset-top)) + 78px);
   z-index: 35;
   display: grid;
   grid-template-columns: minmax(220px, 1fr) 2fr;
   gap: 12px;
-  margin-right: 250px;
+  margin-right: 0;
   padding: 12px;
   border: 1px solid var(--line);
   border-radius: 12px;
@@ -583,7 +592,7 @@ button {
   position: relative;
   display: grid;
   grid-template-columns: 92px minmax(0, 1fr);
-  min-height: 1680px;
+  min-height: 1840px;
   margin-top: 30px;
   overflow: hidden;
   border: 1px solid var(--line);
@@ -1043,15 +1052,12 @@ math {
 
 .topic-index {
   position: sticky;
-  /* Shares the row with the fixed control cluster instead of stacking below it,
-     which keeps a whole bar's height of content visible while scrolling. */
-  top: max(12px, env(safe-area-inset-top));
+  top: calc(max(0px, env(safe-area-inset-top)) + 78px);
   z-index: 30;
   display: flex;
   gap: 6px;
-  /* Reserve the cluster's width so section links never slide underneath it. */
   margin-bottom: 50px;
-  margin-right: 250px;
+  margin-right: 0;
   padding: 10px;
   overflow-x: auto;
   border: 1px solid var(--line);
@@ -1076,6 +1082,10 @@ math {
 .topic-index a:hover {
   color: var(--paper);
   background: var(--panel);
+}
+
+body:has(.topic-index) .topic-section[id] {
+  scroll-margin-top: 154px;
 }
 
 .topic-section {
@@ -1424,6 +1434,14 @@ body[data-topic="light"] {
   --topic: var(--pink);
 }
 
+body[data-topic="phase-transitions"] {
+  --topic: var(--green);
+}
+
+body[data-topic="entropy-information"] {
+  --topic: var(--violet);
+}
+
 .reason-chain {
   display: grid;
   gap: 1px;
@@ -1725,6 +1743,340 @@ body[data-topic="light"] {
   margin-bottom: 0;
 }
 
+/* --- cross-science bridges, deep-topic ledgers, and official references --- */
+
+.science-continuum {
+  margin-block: 72px 110px;
+  padding: clamp(26px, 5vw, 54px);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--deep);
+}
+
+.science-continuum > header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(300px, .9fr);
+  gap: 40px;
+  align-items: end;
+}
+
+.science-continuum h2 {
+  margin: 0;
+  font-size: clamp(2rem, 4vw, 3rem);
+  line-height: .98;
+  letter-spacing: -.035em;
+}
+
+.science-continuum > header p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+.science-bridge {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-top: 42px;
+  border-block: 1px solid var(--line);
+}
+
+.science-domain {
+  min-height: 310px;
+  display: flex;
+  flex-direction: column;
+  padding: 30px 26px;
+  border-right: 1px solid var(--line);
+}
+
+.science-domain:last-child {
+  border-right: 0;
+}
+
+.science-domain h3 {
+  margin: 0 0 12px;
+  font-size: 1.5rem;
+}
+
+.science-domain p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.65;
+}
+
+.science-domain a {
+  margin-top: auto;
+  padding-top: 24px;
+  color: var(--topic);
+  font-weight: 650;
+  text-underline-offset: 5px;
+}
+
+.bridge-notes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 22px;
+}
+
+.bridge-notes a {
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--paper);
+  background: var(--enamel);
+  text-decoration: none;
+  font-size: .75rem;
+}
+
+.bridge-notes a:hover {
+  border-color: var(--topic);
+}
+
+.status-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-block: 28px 0;
+}
+
+.science-status {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  padding: 5px 9px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--muted);
+  background: var(--deep);
+  font-size: .75rem;
+  font-weight: 650;
+}
+
+.science-status.established {
+  color: var(--green);
+}
+
+.science-status.inferred {
+  color: var(--cyan);
+}
+
+.science-status.model {
+  color: var(--gold);
+}
+
+.science-status.speculative {
+  color: var(--pink);
+}
+
+.classification-grid,
+.entropy-ledger {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.classification,
+.entropy-entry,
+.theory-fence {
+  padding: 26px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--deep);
+}
+
+.classification h3,
+.entropy-entry h3,
+.theory-fence h3 {
+  margin: 12px 0 10px;
+  font-size: 1.5rem;
+}
+
+.classification p,
+.entropy-entry p,
+.theory-fence p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.66;
+}
+
+.classification .formula,
+.entropy-entry .formula {
+  display: block;
+  margin-top: 20px;
+  overflow-x: auto;
+  color: var(--topic);
+  font: 600 1.25rem/1.4 "JetBrains Mono", monospace;
+}
+
+.spectrum {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-top: 34px;
+  border-block: 1px solid var(--line);
+}
+
+.spectrum article {
+  min-height: 230px;
+  padding: 24px 20px;
+  border-right: 1px solid var(--line);
+}
+
+.spectrum article:last-child {
+  border-right: 0;
+}
+
+.spectrum h3 {
+  margin: 0 0 10px;
+  font-size: 1.25rem;
+}
+
+.spectrum strong {
+  display: block;
+  margin-bottom: 16px;
+  color: var(--topic);
+  font: 600 .75rem/1.4 "JetBrains Mono", monospace;
+}
+
+.spectrum p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.formation-timeline,
+.cosmic-phase-ladder,
+.entropy-spine {
+  position: relative;
+  display: grid;
+  gap: 1px;
+  margin: 34px 0 0;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  overflow: hidden;
+  background: var(--line);
+  list-style: none;
+}
+
+.formation-timeline li,
+.cosmic-phase-ladder li,
+.entropy-spine li {
+  display: grid;
+  grid-template-columns: minmax(150px, .36fr) minmax(0, 1fr);
+  gap: 26px;
+  padding: 24px 26px;
+  background: var(--deep);
+}
+
+.formation-timeline strong,
+.cosmic-phase-ladder strong,
+.entropy-spine strong {
+  color: var(--paper);
+  font-size: 1.25rem;
+}
+
+.formation-timeline span,
+.cosmic-phase-ladder span,
+.entropy-spine span {
+  color: var(--muted);
+  line-height: 1.65;
+}
+
+.formation-timeline time,
+.cosmic-phase-ladder time {
+  display: block;
+  margin-top: 7px;
+  color: var(--topic);
+  font: 600 .75rem/1.4 "JetBrains Mono", monospace;
+}
+
+.theory-fence {
+  margin-top: 28px;
+  border-color: color-mix(in srgb, var(--pink) 45%, var(--line));
+}
+
+.theory-fence .science-status {
+  margin-bottom: 2px;
+}
+
+.compare-equations {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1px;
+  margin-block: 30px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--line);
+}
+
+.compare-equations article {
+  padding: 24px;
+  background: var(--deep);
+}
+
+.compare-equations strong {
+  display: block;
+  color: var(--topic);
+  font: 600 1.25rem/1.45 "JetBrains Mono", monospace;
+}
+
+.compare-equations span {
+  display: block;
+  margin-top: 14px;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.reference-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.reference-entry a {
+  min-height: 220px;
+  display: flex;
+  flex-direction: column;
+  padding: 24px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  color: var(--paper);
+  background: var(--deep);
+  text-decoration: none;
+}
+
+.reference-entry a:hover {
+  border-color: var(--topic);
+}
+
+.reference-institution {
+  color: var(--topic);
+  font: 600 .75rem/1.4 "JetBrains Mono", monospace;
+}
+
+.reference-entry strong {
+  margin-top: 18px;
+  font-size: 1.25rem;
+  line-height: 1.2;
+}
+
+.reference-description {
+  margin-top: auto;
+  padding-top: 28px;
+  color: var(--muted);
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.deep-topic-canvas {
+  min-height: 610px;
+}
+
 /* --- shared field guide shell --- */
 
 .field-kicker {
@@ -1936,7 +2288,7 @@ body[data-topic="light"] {
   }
 
   .route-bar {
-    padding-right: 0;
+    gap: 10px;
   }
 
   .route-links {
@@ -1991,7 +2343,8 @@ body[data-topic="light"] {
   }
 
   .limit-grid,
-  .relation-map {
+  .relation-map,
+  .reference-grid {
     grid-template-columns: 1fr;
   }
 
@@ -2019,8 +2372,31 @@ body[data-topic="light"] {
   }
 
   .limit,
-  .relation-map a {
+  .relation-map a,
+  .reference-entry a {
     min-height: 0;
+  }
+
+  .science-continuum > header {
+    grid-template-columns: 1fr;
+  }
+
+  .science-bridge,
+  .spectrum,
+  .compare-equations {
+    grid-template-columns: 1fr;
+  }
+
+  .science-domain,
+  .spectrum article {
+    min-height: 0;
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .science-domain:last-child,
+  .spectrum article:last-child {
+    border-bottom: 0;
   }
 }
 
@@ -2031,8 +2407,8 @@ body[data-topic="light"] {
   }
 
   .site-controls {
-    top: 8px;
-    right: 8px;
+    margin-left: auto;
+    padding: 3px;
   }
 
   .site-controls .motion-toggle {
@@ -2058,7 +2434,17 @@ body[data-topic="light"] {
   }
 
   .route-bar {
-    min-height: 66px;
+    min-height: 62px;
+    gap: 8px;
+  }
+
+  .route-home {
+    min-width: 0;
+    font-size: 12px;
+  }
+
+  .route-home::before {
+    flex: 0 0 auto;
   }
 
   .hero-map,
@@ -2126,7 +2512,7 @@ body[data-topic="light"] {
 
   .field-genealogy {
     grid-template-columns: 58px minmax(0, 1fr);
-    min-height: 2850px;
+    min-height: 3100px;
     background:
       linear-gradient(90deg, transparent 57px, var(--line) 58px, transparent 59px),
       var(--deep);
@@ -2194,11 +2580,23 @@ body[data-topic="light"] {
   }
 
   .topic-index {
-    /* The control cluster is narrower on phones, so reserve less. */
+    top: calc(max(0px, env(safe-area-inset-top)) + 70px);
     margin-left: -13px;
-    margin-right: 150px;
+    margin-right: -13px;
     border-inline: 0;
     border-radius: 0;
+  }
+
+  .classification-grid,
+  .entropy-ledger {
+    grid-template-columns: 1fr;
+  }
+
+  .formation-timeline li,
+  .cosmic-phase-ladder li,
+  .entropy-spine li {
+    grid-template-columns: 1fr;
+    gap: 10px;
   }
 
   .evidence-pair {

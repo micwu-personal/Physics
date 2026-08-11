@@ -8,6 +8,8 @@ export const entries = [
   { id: 'quantum-mechanics', app: 'physics-area', path: '/physics/quantum.html', generated: false },
   { id: 'astrophysics', app: 'physics-astro', path: '/physics/astrophysics.html', generated: false },
   { id: 'electrodynamics', app: 'physics-light', path: '/physics/electrodynamics.html', generated: false },
+  { id: 'phase-transitions', app: 'physics-phase', path: '/physics/phase-transitions.html', generated: false },
+  { id: 'entropy-information', app: 'physics-entropy', path: '/physics/entropy-information.html', generated: false },
   { id: 'field-guide', app: 'physics-field', path: '/physics/field.html?id=thermodynamics', generated: false },
   { id: 'big-bang', app: 'big-bang', path: '/big-bang/', generated: false },
   { id: 'big-bang-mobile', app: 'big-bang', path: '/big-bang/mobile/index.html', generated: true },

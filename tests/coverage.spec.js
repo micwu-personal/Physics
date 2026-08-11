@@ -1,6 +1,6 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import { expect, test } from '@playwright/test';
-import { exerciseBigBang, exerciseLanding, exerciseParticleZoo, exercisePeriodicTable, exercisePhysicsArea, exercisePhysicsAstro, exercisePhysicsAtlas, exercisePhysicsField, exercisePhysicsLight } from './helpers/journeys.js';
+import { exerciseBigBang, exerciseLanding, exerciseParticleZoo, exercisePeriodicTable, exercisePhysicsArea, exercisePhysicsAstro, exercisePhysicsAtlas, exercisePhysicsEntropy, exercisePhysicsField, exercisePhysicsLight, exercisePhysicsPhase } from './helpers/journeys.js';
 import {
   blockExternalAssets,
   installDeterminism,
@@ -17,6 +17,8 @@ const journeys = [
   { id: 'physics-quantum', path: '/physics/quantum.html', run: exercisePhysicsArea },
   { id: 'physics-astro', path: '/physics/astrophysics.html', run: exercisePhysicsAstro },
   { id: 'physics-light', path: '/physics/electrodynamics.html', run: exercisePhysicsLight },
+  { id: 'physics-phase', path: '/physics/phase-transitions.html', run: exercisePhysicsPhase },
+  { id: 'physics-entropy', path: '/physics/entropy-information.html', run: exercisePhysicsEntropy },
   { id: 'physics-field', path: '/physics/field.html?id=thermodynamics', run: exercisePhysicsField },
   { id: 'big-bang', path: '/big-bang/', run: exerciseBigBang },
   { id: 'periodic-table', path: '/periodic-table/', run: exercisePeriodicTable },
@@ -529,7 +531,9 @@ test('physics field authored diagram and equation fallback coverage', async ({ p
 
 for (const [id, path] of [
   ['astro', '/physics/astrophysics.html'],
-  ['light', '/physics/electrodynamics.html']
+  ['light', '/physics/electrodynamics.html'],
+  ['phase', '/physics/phase-transitions.html'],
+  ['entropy', '/physics/entropy-information.html']
 ]) {
   test(`physics ${id} instrument lifecycle coverage`, async ({ page }) => {
     await collectCoverage(page, `physics-${id}-lifecycle`, async () => {
@@ -568,6 +572,35 @@ for (const [id, path] of [
     });
   });
 }
+
+test('physics reference renderer fallback and failure coverage', async ({ page }) => {
+  await collectCoverage(page, 'physics-reference-branches', async () => {
+    await preparePage(page, '/physics/entropy-information.html', 'en');
+    const result = await page.evaluate(() => {
+      renderPhysicsReferences('thermodynamics', null);
+      const host = document.createElement('div');
+      host.dataset.referenceKey = 'thermodynamics';
+      renderPhysicsReferences(undefined, host);
+      let error = '';
+      try {
+        renderPhysicsReferences('not-a-reference-set', host);
+      } catch (caught) {
+        error = caught.message;
+      }
+      host.dataset.referenceKey = 'not-a-dataset-reference-set';
+      let datasetError = '';
+      try {
+        renderPhysicsReferences(undefined, host);
+      } catch (caught) {
+        datasetError = caught.message;
+      }
+      return { count: host.children.length, datasetError, error };
+    });
+    expect(result.count).toBeGreaterThanOrEqual(2);
+    expect(result.error).toContain('Missing official references');
+    expect(result.datasetError).toContain('Missing official references');
+  });
+});
 
 /* Every field guide renders from the same shell, so walking all of them covers
    the branches for fields with and without listed ancestors or descendants. */

@@ -377,6 +377,31 @@ globalThis.PhysicsFieldList = Object.freeze([
       }
     },
     {
+      id: 'phase-transitions',
+      page: './phase-transitions.html',
+      year: 1937,
+      y: 74,
+      x: 91,
+      lineage: 'matter',
+      color: '#7ee8c5',
+      signature: 'phase',
+      parents: ['thermodynamics', 'statistical', 'condensed'],
+      en: {
+        name: 'Phase transitions',
+        short: 'Free energy, symmetry, topology, and fluctuations reorganize collective matter.',
+        detail: 'Phase-transition physics explains first-order nucleation, continuous criticality, topological change, quantum phases, biological phase separation, and model-dependent transitions in the early universe.',
+        shift: 'Collective change became classifiable across materials, fields, chemistry, and living matter.',
+        people: 'Lev Landau, Lars Onsager, Kenneth Wilson, John Kosterlitz'
+      },
+      zh: {
+        name: '相变',
+        short: '自由能、对称性、拓扑与涨落重组集体物质。',
+        detail: '相变物理解释一级成核、连续临界性、拓扑变化、量子相、生物相分离，以及依赖模型的早期宇宙转变。',
+        shift: '材料、场、化学与生命物质中的集体变化获得统一分类语言。',
+        people: '朗道、昂萨格、威尔逊、科斯特利茨'
+      }
+    },
+    {
       id: 'particle',
       page: './field.html?id=particle',
       year: 1932,
@@ -427,6 +452,31 @@ globalThis.PhysicsFieldList = Object.freeze([
       }
     },
     {
+      id: 'information-theory',
+      page: './entropy-information.html',
+      year: 1948,
+      y: 81,
+      x: 28,
+      lineage: 'systems',
+      color: '#7c5cff',
+      signature: 'information',
+      parents: ['statistical', 'electrodynamics'],
+      en: {
+        name: 'Entropy & information theory',
+        short: 'Probability becomes a limit on coding, communication, records, and physical information.',
+        detail: 'Information theory quantifies uncertainty, compression, dependence, and noisy channels. Its mathematical entropy connects to statistical mechanics, while Landauer, quantum information, and black-hole thermodynamics make the physical assumptions explicit.',
+        shift: 'Uncertainty became measurable without being confused with a material substance.',
+        people: 'Claude Shannon, Rolf Landauer, John von Neumann, Jacob Bekenstein'
+      },
+      zh: {
+        name: '熵与信息论',
+        short: '概率成为编码、通信、记录与物理信息的极限。',
+        detail: '信息论量化不确定性、压缩、依赖关系与有噪信道。它的数学熵连接统计力学，而兰道尔原理、量子信息与黑洞热力学明确了各自的物理假设。',
+        shift: '不确定性成为可测量的量，而不再被误作某种物质。',
+        people: '香农、兰道尔、冯·诺伊曼、贝肯斯坦'
+      }
+    },
+    {
       id: 'biophysics',
       page: './field.html?id=biophysics',
       year: 1953,
@@ -435,7 +485,7 @@ globalThis.PhysicsFieldList = Object.freeze([
       lineage: 'life',
       color: '#7ee8c5',
       signature: 'dna',
-      parents: ['thermodynamics', 'fluids', 'quantum-mechanics'],
+      parents: ['thermodynamics', 'fluids', 'quantum-mechanics', 'information-theory'],
       en: {
         name: 'Biophysics',
         short: 'Energy, forces, information, and fluctuations animate living systems.',
@@ -510,7 +560,7 @@ globalThis.PhysicsFieldList = Object.freeze([
       lineage: 'quantum',
       color: '#7c5cff',
       signature: 'qubit',
-      parents: ['quantum-mechanics', 'statistical'],
+      parents: ['quantum-mechanics', 'statistical', 'information-theory'],
       en: {
         name: 'Quantum information',
         short: 'Superposition and entanglement become resources for processing information.',
@@ -535,7 +585,7 @@ globalThis.PhysicsFieldList = Object.freeze([
       lineage: 'matter',
       color: '#7ee8c5',
       signature: 'soft',
-      parents: ['condensed', 'fluids', 'statistical'],
+      parents: ['condensed', 'fluids', 'statistical', 'phase-transitions'],
       en: {
         name: 'Soft matter & active matter',
         short: 'Polymers, foams, grains, and self-driven units organize between solid and fluid.',
@@ -563,6 +613,8 @@ globalThis.physicsSignatureMarkup = function signatureMarkup(kind) {
       heat: `<path ${common} d="M13 50c-8-8 7-13 0-22s8-13 2-21M29 50c-8-8 7-13 0-22s8-13 2-21M45 50c-8-8 7-13 0-22s8-13 2-21"/>`,
       field: `<path ${common} d="M5 16c14-12 34-12 48 0M5 42c14 12 34 12 48 0M5 29h48"/><circle cx="8" cy="29" r="4" fill="currentColor"/><circle cx="50" cy="29" r="4" fill="currentColor"/>`,
       probability: `<path ${common} d="M4 48h50M7 48c4-2 6-18 11-18s6 18 11 18c5 0 7-35 12-35s7 33 13 35"/><circle cx="41" cy="13" r="2.5" fill="currentColor"/>`,
+      phase: `<path ${common} d="M5 45c8-3 10-13 16-13s8 13 15 13 9-13 17-13M5 14c10 0 11 13 20 13s10-13 28-13"/><circle cx="29" cy="27" r="4" fill="currentColor"/>`,
+      information: `<path ${common} d="M5 47h48M9 47V26h8v21M24 47V12h8v35M39 47V20h8v27"/><path ${common} opacity=".48" d="M7 8l44 44M51 8L7 52"/>`,
       layers: `<path ${common} d="M4 42c12-2 15-10 26-10s17 9 24 10M6 32c10-2 14-9 24-9s16 7 22 9M12 22c7-2 10-7 18-7s12 5 17 7"/>`,
       quanta: `<path ${common} d="M6 46h10V35h10V25h10V15h16"/><circle cx="16" cy="35" r="3" fill="currentColor"/><circle cx="36" cy="15" r="3" fill="currentColor"/>`,
       spacetime: `<path ${common} d="M4 15c13 0 17 7 25 7s12-7 25-7M4 43c13 0 17-7 25-7s12 7 25 7M15 4c0 13 7 17 7 25s-7 12-7 25M43 4c0 13-7 17-7 25s7 12 7 25"/><circle cx="29" cy="29" r="4" fill="currentColor"/>`,
