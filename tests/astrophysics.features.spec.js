@@ -131,9 +131,15 @@ for (const language of locales) {
     await setRange(compactMass, 5);
     await expect(page.locator('#compactSupport')).toContainText(language === 'en' ? 'causal boundary' : '因果边界');
 
-    expect(await page.locator('.claim-links .claim-chip[href]').count()).toBeGreaterThan(18);
-    await expect(page.locator('#coplanarity .claim-chip[href*="annurev.aa.19.090181.000245"]')).toHaveCount(1);
-    await expect(page.locator('#black-holes .claim-chip[href*="1973A%26A....24..337S"]')).toHaveCount(2);
+    expect(await page.locator('.claim-links .claim-chip[href]').count()).toBeGreaterThan(19);
+    await expect(page.locator('#coplanarity .reason-chain li').first().locator('h3')).toContainText(
+      language === 'en' ? 'Real collapsing clouds usually retain some net rotation' : '真实塌缩云通常保留一定净自转'
+    );
+    await expect(page.locator('.claim-chip[href*="annurev.aa.19.090181.000245"]')).toHaveCount(0);
+    await expect(page.locator('.claim-chip[href*="annurev.aa.19.090181.001033"]')).toHaveCount(4);
+    await expect(page.locator('#black-holes .claim-chip[href*="1973A%26A....24..337S"]')).toHaveCount(1);
+    await expect(page.locator('#black-holes .claim-chip[href*="annurev-astro-082812-141003"]')).toHaveCount(1);
+    await expect(page.locator('#black-holes .claim-chip[href*="10.1086/166683"]')).toHaveCount(1);
     await expect(page.locator('#jets .claim-chip[href*="179.3.433"]')).toHaveCount(1);
     await expect(page.locator('#jets .claim-chip[href*="199.4.883"]')).toHaveCount(1);
     expect(await page.locator('#references .reference-entry').count()).toBeGreaterThanOrEqual(11);
