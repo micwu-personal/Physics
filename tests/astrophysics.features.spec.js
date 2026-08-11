@@ -32,6 +32,7 @@ const compactSpecs = {
     maxOut: '12.0 M☉',
     min: '3',
     minOut: '3.0 M☉',
+    noteNeedle: { en: 'illustrative low-mass stellar-black-hole plotting window', zh: '低质量恒星级黑洞的示意绘图区间' },
     rangeText: '3.0–12.0 M☉',
     step: '0.1'
   }
@@ -102,6 +103,9 @@ for (const language of locales) {
       expect(Number(state.value)).toBeCloseTo(Number(spec.defaultValue), 5);
       await expect(page.locator('#compactRangeNote')).toContainText(spec.rangeText);
       await expect(page.locator('#compactMassOut')).toHaveText(`${spec.defaultValue} M☉`);
+      if (spec.noteNeedle) {
+        await expect(page.locator('#compactRangeNote')).toContainText(spec.noteNeedle[language === 'en' ? 'en' : 'zh']);
+      }
 
       await setRange(compactMass, spec.max);
       await expect(page.locator('#compactMassOut')).toHaveText(spec.maxOut);
@@ -128,6 +132,10 @@ for (const language of locales) {
     await expect(page.locator('#compactSupport')).toContainText(language === 'en' ? 'causal boundary' : '因果边界');
 
     expect(await page.locator('.claim-links .claim-chip[href]').count()).toBeGreaterThan(18);
+    await expect(page.locator('#coplanarity .claim-chip[href*="annurev.aa.19.090181.000245"]')).toHaveCount(1);
+    await expect(page.locator('#black-holes .claim-chip[href*="1973A%26A....24..337S"]')).toHaveCount(2);
+    await expect(page.locator('#jets .claim-chip[href*="179.3.433"]')).toHaveCount(1);
+    await expect(page.locator('#jets .claim-chip[href*="199.4.883"]')).toHaveCount(1);
     expect(await page.locator('#references .reference-entry').count()).toBeGreaterThanOrEqual(11);
     await assertNoErrors(errors);
   });

@@ -871,8 +871,8 @@
       max: 12.0,
       min: 3.0,
       rangeNote: {
-        en: 'Supported teaching range here: 3.0–12.0 M☉ for representative stellar-mass black holes. This is an observed teaching window, not a claim of a fundamental lower or upper black-hole mass law.',
-        zh: '这里采用的教学范围是 3.0–12.0 M☉，对应代表性的恒星级黑洞。它只是观测上便于教学的窗口，并不是黑洞质量存在绝对上下限的定律。'
+        en: 'Supported teaching range here: 3.0–12.0 M☉ as an illustrative low-mass stellar-black-hole plotting window. It is not meant to represent the full stellar-mass population or a fundamental lower/upper black-hole mass law.',
+        zh: '这里采用的教学范围是 3.0–12.0 M☉，只是一个“低质量恒星级黑洞的示意绘图区间”。它并不代表全部恒星级黑洞人群，也不是黑洞质量存在绝对上下限的定律。'
       },
       step: 0.1
     }
