@@ -60,17 +60,17 @@ export default defineConfig({
     },
     {
       name: 'features',
-      testMatch: /features\.spec\.js/,
+      testMatch: /(?:^|[\\/])(?:features|astrophysics)\.spec\.js$/,
       use: { viewport: { width: 1440, height: 1000 } }
     },
     {
       name: 'visual-desktop',
-      testMatch: /(?:^|[\\/])visual\.spec\.js$/,
+      testMatch: /(?:^|[\\/])(?:visual|astrophysics\.visual)\.spec\.js$/,
       use: { viewport: { width: 1440, height: 1000 } }
     },
     {
       name: 'visual-mobile',
-      testMatch: /(?:^|[\\/])visual\.spec\.js$/,
+      testMatch: /(?:^|[\\/])(?:visual|astrophysics\.visual)\.spec\.js$/,
       use: { ...devices['Pixel 7'], browserName: 'chromium' }
     },
     {
