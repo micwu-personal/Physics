@@ -23,6 +23,8 @@
     claim: t('Supported claim', '有依据的论断')
   };
 
+  const visualStateCache = new Map();
+
   const create = (tag, className, text) => {
     const node = document.createElement(tag);
     if (className) node.className = className;
@@ -73,14 +75,19 @@
     'nasa-wave-behaviors': source('Wave behaviors', 'NASA', 'https://science.nasa.gov/ems/03_behaviors/', 'Official guide to reflection, refraction, diffraction, and scattering.', '反射、折射、衍射与散射的官方导览。'),
     'nasa-bernoulli': source("Bernoulli's equation", 'NASA Glenn', 'https://www1.grc.nasa.gov/beginners-guide-to-aeronautics/bernoullis-equation-1/', 'A derivation of the pressure-speed relation and the assumptions behind it.', '推导压强—速度关系，并说明其成立条件。'),
     'nasa-lift': source('What is lift?', 'NASA Glenn', 'https://www1.grc.nasa.gov/beginners-guide-to-aeronautics/what-is-lift/', 'Why a complete account of lift requires fluid turning and momentum, not one slogan.', '解释完整的升力理论为何需要流体偏转与动量，而不是一句口号。'),
+    'nasa-sphere-drag': source('Drag of a Sphere', 'NASA Glenn Research Center', 'https://www1.grc.nasa.gov/beginners-guide-to-aeronautics/drag-of-a-sphere/', 'Uses bluff-body flow around a sphere to connect Reynolds number, separation, wake growth, and the fact that roughness can shift transition.', '用球体绕流把雷诺数、分离、尾迹增长，以及粗糙度会改变转捩这件事联系起来。'),
+    'reynolds-1883': source('XXIX. An experimental investigation of the circumstances which determine whether the motion of water shall be direct or sinuous, and of the law of resistance in parallel channels', 'The Royal Society', 'https://doi.org/10.1098/rstl.1883.0029', 'Osborne Reynolds’s primary dye-streak pipe-flow experiment showing how orderly and sinuous regimes separate in a geometry-specific way.', 'Osborne Reynolds 关于染料丝管流实验的原始论文，展示了平直与弯曲流态如何以几何相关的方式分离出来。'),
     'noaa-sound': source('Sound in the ocean', 'NOAA', 'https://oceanservice.noaa.gov/facts/sound.html', 'How sound propagates and refracts through a material medium.', '说明声音如何在物质介质中传播与折射。'),
     'nih-hear': source('How do we hear?', 'NIH / NIDCD', 'https://www.nidcd.nih.gov/health/how-do-we-hear', 'How pressure waves become traveling waves and then electrical signals.', '说明压强波如何变成行波，再转化为电信号。'),
+    'unsw-pipes': source('Pipes and harmonics: cylindrical and conical bores', 'University of New South Wales', 'https://newt.phys.unsw.edu.au/jw/pipes.html', 'Explains why open-open pipes support all harmonics while one-end-closed pipes support only the odd sequence in the ideal air-column model.', '解释理想空气柱模型里为何两端开口的管支持全部谐波，而一端封闭的管只支持奇次序列。'),
     'nist-temperature': source('SI units: temperature', 'NIST', 'https://www.nist.gov/pml/owm/si-units-temperature', 'The kelvin, thermodynamic temperature, and the meaning of absolute zero.', '开尔文、热力学温度与绝对零度的含义。'),
     'nist-boltzmann': source('Boltzmann constant', 'NIST', 'https://physics.nist.gov/cgi-bin/cuu/Value?k', 'The standard constant linking microscopic energy scales to temperature and entropy.', '连接微观能量尺度、温度与熵的标准常数。'),
+    'utexas-heat-engines': source('Heat engines', 'University of Texas at Austin', 'https://farside.ph.utexas.edu/teaching/sm1/lectures/node57.html', 'Derives the heat-engine efficiency bound and shows that a reversible engine reaches the Carnot form 1 − T_c/T_h.', '推导热机效率上限，并说明可逆热机达到卡诺形式 1 − T_c/T_h。'),
     'doe-em-force': source('The electromagnetic force', 'U.S. Department of Energy', 'https://www.energy.gov/science/doe-explainsthe-electromagnetic-force', 'Electric charge, fields, moving charges, magnetism, and induction.', '介绍电荷、场、运动电荷、磁性与电磁感应。'),
     'nasa-spectrum': source('The electromagnetic spectrum', 'NASA', 'https://science.nasa.gov/ems/01_intro/', 'How electromagnetic fields propagate across the full spectrum.', '说明电磁场如何在完整电磁谱中传播。'),
     'nist-entropy': source('Boltzmann constant and entropy', 'NIST', 'https://www.nist.gov/pml/special-publication-330/sp-330-section-2', 'The SI account of the Boltzmann constant and microscopic state counting.', '国际单位制对玻尔兹曼常数与微观状态计数的说明。'),
     'sep-statmech': source('Statistical mechanics', 'Stanford Encyclopedia of Philosophy', 'https://plato.stanford.edu/entries/statphys-statmech/', 'A scholarly account of equilibrium, irreversibility, and the bridge between scales.', '关于平衡、不可逆性与跨尺度联系的学术综述。'),
+    'utexas-boltzmann': source('Boltzmann distributions', 'University of Texas at Austin', 'https://farside.ph.utexas.edu/teaching/sm1/lectures/node61.html', 'Derives the canonical Boltzmann factor and the equilibrium weighting exp(−E/kT).', '推导正则系综中的玻尔兹曼因子以及平衡权重 exp(−E/kT)。'),
     'noaa-tectonics': source('Tectonic shift', 'NOAA', 'https://oceanservice.noaa.gov/facts/tectonics.html', 'How moving plates continually reshape Earth\'s crust.', '说明运动的板块如何持续重塑地壳。'),
     'nasa-insight': source('InSight science', 'NASA', 'https://science.nasa.gov/mission/insight/science/', 'How seismic signals reconstruct the inaccessible interiors of rocky planets.', '说明地震信号如何重建无法直接抵达的岩石行星内部。'),
     'nobel-1918': source('The 1918 Nobel Prize in Physics', 'Nobel Prize Outreach', 'https://www.nobelprize.org/prizes/physics/1918/summary/', 'Planck\'s discovery of energy quanta.', '普朗克发现能量量子的官方资料。'),
@@ -93,7 +100,13 @@
     'doe-accelerators': source('Particle accelerators', 'U.S. Department of Energy', 'https://www.energy.gov/science/doe-explainsparticle-accelerators', 'How controlled collisions reveal short-lived particles and interactions.', '说明受控碰撞如何揭示短寿命粒子与相互作用。'),
     'doe-plasma': source('Plasma', 'U.S. Department of Energy', 'https://www.energy.gov/science/doe-explainsplasma', 'Ionized matter, collective behavior, and plasma across the universe.', '介绍电离物质、集体行为与宇宙中的等离子体。'),
     'doe-plasma-confinement': source('Plasma confinement', 'U.S. Department of Energy', 'https://www.energy.gov/science/doe-explainsplasma-confinement', 'How magnetic and inertial confinement hold fusion plasmas.', '说明磁约束与惯性约束如何限制聚变等离子体。'),
+    'utexas-debye-shielding': source('Debye Shielding', 'University of Texas at Austin', 'https://farside.ph.utexas.edu/teaching/plasma/Plasmahtml/node7.html', 'Explains how mobile charges build a screening cloud and define the Debye length.', '解释可移动电荷如何建立屏蔽云并定义德拜长度。'),
+    'utexas-magnetized-plasmas': source('Magnetized Plasmas', 'University of Texas at Austin', 'https://farside.ph.utexas.edu/teaching/plasma/Plasmahtml/node10.html', 'Explains gyromotion, cyclotron frequency, and gyroradius for charged particles in magnetic fields.', '解释带电粒子在磁场中的回旋运动、回旋频率和回旋半径。'),
     'nih-dna': source('DNA fact sheet', 'NIH / NHGRI', 'https://www.genome.gov/about-genomics/fact-sheets/Deoxyribonucleic-Acid-Fact-Sheet', 'DNA structure, base pairing, replication, and molecular information.', '介绍 DNA 结构、碱基配对、复制与分子信息。'),
+    'ncbi-membrane-potentials': source('The Forces that Create Membrane Potentials', 'NCBI Bookshelf', 'https://www.ncbi.nlm.nih.gov/books/NBK11102/', 'Textbook treatment of concentration gradients, selective permeability, and the Nernst relation for equilibrium membrane voltages.', '教科书式介绍浓度梯度、选择性通透性以及平衡膜电位的能斯特关系。'),
+    'ncbi-resting-potential': source('The Ionic Basis of the Resting Membrane Potential', 'NCBI Bookshelf', 'https://www.ncbi.nlm.nih.gov/books/NBK10931/', 'Textbook discussion of how ion gradients and permeability measurements support resting-potential physics in real cells.', '教科书式讨论离子梯度和通透性测量如何支撑真实细胞中的静息膜电位物理。'),
+    'nature-thymonucleate': source('Molecular Configuration in Sodium Thymonucleate', 'Nature', 'https://doi.org/10.1038/171740a0', 'Franklin and Gosling’s X-ray diffraction evidence for the molecular configuration of DNA.', 'Franklin 与 Gosling 关于 DNA 分子构型的 X 射线衍射证据。'),
+    'nature-dna-structure': source('Molecular Structure of Nucleic Acids: A Structure for Deoxyribose Nucleic Acid', 'Nature', 'https://doi.org/10.1038/171737a0', 'Watson and Crick’s structure paper linking diffraction constraints to the double-helix model.', 'Watson 与 Crick 把衍射约束连接到双螺旋模型的结构论文。'),
     'cell-condensates': source('Biomolecular condensates', 'PubMed / Cell', 'https://pubmed.ncbi.nlm.nih.gov/25288112/', 'A peer-reviewed foundation for liquid-like compartments formed by phase separation.', '关于相分离形成液态细胞区室的同行评审基础文献。'),
     'sep-chaos': source('Chaos', 'Stanford Encyclopedia of Philosophy', 'https://plato.stanford.edu/entries/chaos/', 'Deterministic chaos, sensitive dependence, and predictability.', '介绍确定性混沌、初值敏感性与可预测性。'),
     'ams-lorenz': source('Lorenz and modular flows', 'American Mathematical Society', 'https://www.ams.org/publicoutreach/feature-column/fcarc-lorenz', 'A visual mathematical introduction to Lorenz\'s strange attractor.', '洛伦兹奇异吸引子的可视化数学导览。'),
@@ -140,6 +153,7 @@
 
   function rangeControl(definition, state, rerender) {
     const group = create('div', 'field-control-group');
+    group.dataset.controlKey = definition.key;
     const label = document.createElement('label');
     label.htmlFor = `field-control-${definition.key}`;
     label.append(create('span', null, pick(definition.label)));
@@ -151,6 +165,7 @@
     const input = document.createElement('input');
     input.type = 'range';
     input.id = label.htmlFor;
+    input.dataset.controlKey = definition.key;
     input.min = definition.min;
     input.max = definition.max;
     input.step = definition.step;
@@ -166,11 +181,14 @@
 
   function toggleControl(definition, state, rerender) {
     const wrapper = create('div', 'field-control-group');
+    wrapper.dataset.controlKey = definition.key;
     wrapper.append(create('label', null, pick(definition.label)));
     const host = create('div', 'field-toggle');
+    host.dataset.controlKey = definition.key;
     for (const option of definition.options) {
       const button = document.createElement('button');
       button.type = 'button';
+      button.dataset.controlValue = option.value;
       button.textContent = pick(option.label);
       const sync = () => button.setAttribute('aria-pressed', String(state[definition.key] === option.value));
       sync();
@@ -1057,7 +1075,7 @@
             { type: 'range', key: 'density', min: 0.4, max: 2.4, step: 0.05, value: 1, label: t('Relative density', '相对密度'), formatter: value => value.toFixed(2) },
             { type: 'range', key: 'field', min: 0.4, max: 2.2, step: 0.05, value: 1, label: t('Relative magnetic field', '相对磁场'), formatter: value => value.toFixed(2) }
           ],
-          sources: ['doe-plasma', 'doe-plasma-confinement', 'doe-standard-model']
+          sources: ['doe-plasma', 'utexas-debye-shielding', 'utexas-magnetized-plasmas']
         },
         experiment: experimentCard('model', 'Confinement experiments and space-plasma measurements both show that charged matter and fields must often be solved together.', '约束实验与空间等离子体测量都表明：带电物质与电磁场常常必须一起求解。', 'In fusion devices the plasma changes the confining field, and in space plasmas the field guides bulk flows and waves. Neither side is a passive backdrop for the other.', '在聚变装置里，等离子体会反过来改变约束它的场；在空间等离子体里，场又会引导整体流动和波。双方都不是对方的被动背景。', 'This is a regime claim: some plasmas can be treated fluidly, but not all of them can.', '这是一条关于适用区域的陈述：有些等离子体可以流体化处理，但绝不是全部。', ['doe-plasma', 'doe-plasma-confinement']),
         mechanism: {
@@ -1077,7 +1095,7 @@
           body: t('Magnetic reconnection, edge turbulence in fusion devices, solar-wind heating, and collisionless shocks all live in the awkward middle where neither a single-fluid cartoon nor a simple particle sketch is enough.', '磁重联、聚变装置边缘湍流、太阳风加热和无碰撞激波，都活在一个尴尬中间地带：无论单流体卡通，还是简单单粒子图，都不够解释它们。')
         },
         claims: [
-          claimCard('Plasma screening is a collective effect, not just many independent Coulomb problems piled together.', '等离子体屏蔽是一种集体效应，而不是无数独立库仑问题的简单叠加。', 'A test charge in plasma does not keep its unscreened long-range field because nearby mobile charges rearrange in response.', '等离子体中的测试电荷不会保留未被屏蔽的长程电场，因为附近可移动电荷会立即重排并作出响应。', 'That rearrangement is what makes plasma physics fundamentally different from a rare gas of isolated charged particles.', '正是这种重排，使得等离子体物理学从根本上不同于一个由孤立带电粒子组成的稀薄气体。', ['doe-plasma']),
+          claimCard('Plasma screening is a collective effect, not just many independent Coulomb problems piled together.', '等离子体屏蔽是一种集体效应，而不是无数独立库仑问题的简单叠加。', 'A test charge in plasma does not keep its unscreened long-range field because nearby mobile charges rearrange in response.', '等离子体中的测试电荷不会保留未被屏蔽的长程电场，因为附近可移动电荷会立即重排并作出响应。', 'That rearrangement is what makes plasma physics fundamentally different from a rare gas of isolated charged particles.', '正是这种重排，使得等离子体物理学从根本上不同于一个由孤立带电粒子组成的稀薄气体。', ['utexas-debye-shielding', 'doe-plasma']),
           claimCard('Frozen-in flux language is useful only in the right regime.', '“磁冻结”只在合适区域里才有用。', 'Well-conducting plasmas can drag magnetic structure with the bulk flow, but that statement is not universal across all kinetic, resistive, or reconnection-dominated situations.', '在导电良好的等离子体中，整体流动确实可能拖着磁结构一起走，但这并不是对所有动理学、阻性或重联主导情形都成立的普适真理。', 'Keeping the caveat visible prevents a useful MHD picture from becoming a misleading slogan.', '把这个前提条件保留下来，才能避免一个有用的磁流体图像滑向误导性的口号。', ['doe-plasma-confinement', 'doe-plasma'])
         ]
       },
@@ -1124,9 +1142,9 @@
         controls: [
           { type: 'range', key: 'reynolds', min: 50, max: 4000, step: 10, value: 280, label: t('Reynolds number Re', '雷诺数 Re'), formatter: value => format(value, 0) }
         ],
-        sources: ['nasa-bernoulli', 'nasa-lift']
+        sources: ['nasa-sphere-drag']
       },
-      experiment: experimentCard('observation', 'Dye streaks in pipe flow showed that “smooth” and “turbulent” are distinct regimes, not moods.', '管流中的染料条纹表明“平滑”和“湍流”是不同区域，而不是模糊印象。', 'Injecting a thin dye filament into water revealed when neighbouring fluid layers stayed coherent and when disturbances amplified into mixing. The experiment gave fluid mechanics one of its clearest regime pictures.', '把细染料丝注入水流，能直接看见相邻流层何时保持相干，何时扰动被放大并导致混合。这个实验给了流体力学最清楚的区域图像之一。', 'The visual regime boundary depends on geometry and disturbance level, so the picture is diagnostic rather than universal.', '可见的区域边界还取决于几何和扰动水平，因此它更像诊断工具，而不是普适常数。', ['nasa-bernoulli', 'nasa-lift']),
+      experiment: experimentCard('observation', 'Dye streaks in pipe flow showed that “smooth” and “turbulent” are distinct regimes, not moods.', '管流中的染料条纹表明“平滑”和“湍流”是不同区域，而不是模糊印象。', 'Injecting a thin dye filament into water revealed when neighbouring fluid layers stayed coherent and when disturbances amplified into mixing. The experiment gave fluid mechanics one of its clearest regime pictures.', '把细染料丝注入水流，能直接看见相邻流层何时保持相干，何时扰动被放大并导致混合。这个实验给了流体力学最清楚的区域图像之一。', 'The visual regime boundary depends on geometry and disturbance level, so the picture is diagnostic rather than universal.', '可见的区域边界还取决于几何和扰动水平，因此它更像诊断工具，而不是普适常数。', ['reynolds-1883']),
       mechanism: {
         title: t('Why a boundary layer can decide the whole flow', '为什么薄薄的边界层能决定整股流动'),
         steps: [
@@ -1144,7 +1162,7 @@
         body: t('Engineering often relies on clever closures, wall models, and experiments rather than a single first-principles solution that works across scales. Multiphase, rough-wall, rotating, and reactive turbulence remain especially stubborn.', '工程上常常依赖精巧的闭合模型、壁面模型和实验，而不是一套跨尺度通吃的第一性原理解法。多相、粗糙壁面、旋转和反应湍流尤其顽固。')
       },
       claims: [
-        claimCard('Reynolds number is a regime guide, not a universal oracle.', '雷诺数是区域导向，而不是万能神谕。', 'Reynolds number compares inertia to viscosity and therefore helps organize laminar, transitional, and wake-dominated behavior, but geometry and disturbance history still matter.', '雷诺数比较惯性与黏性，因此能帮助组织层流、转捩和尾迹主导等行为，但几何和扰动历史依然重要。', 'That is why the same nominal Re can look tame in one setup and unstable in another. The ratio is essential, yet never the only story.', '这就是为何相同名义上的 Re 在一种装置里看起来温和，在另一种装置里却可能不稳定。这个比值非常重要，但从来不是唯一故事。', ['nasa-bernoulli', 'nasa-lift']),
+        claimCard('Reynolds number is a regime guide, not a universal oracle.', '雷诺数是区域导向，而不是万能神谕。', 'Reynolds number compares inertia to viscosity and therefore helps organize laminar, transitional, and wake-dominated behavior, but geometry, roughness, and disturbance history still matter.', '雷诺数比较惯性与黏性，因此能帮助组织层流、转捩和尾迹主导等行为，但几何、粗糙度和扰动历史依然重要。', 'That is why the same nominal Re can look tame in one setup and unstable in another. The ratio is essential, yet never the only story.', '这就是为何相同名义上的 Re 在一种装置里看起来温和，在另一种装置里却可能不稳定。这个比值非常重要，但从来不是唯一故事。', ['nasa-sphere-drag', 'reynolds-1883']),
         claimCard('A wing’s lift needs flow turning and momentum, not just a slogan about fast air.', '机翼升力需要气流转向与动量，而不是一句“上快下慢”的口号。', 'Pressure differences over a wing are real, but a complete explanation must include how the wing and boundary layer redirect the flow and create a trailing wake.', '机翼上下的压强差当然真实存在，但完整解释必须包括机翼和边界层如何让气流转向并形成尾迹。', 'Bernoulli’s relation is part of the bookkeeping, not a substitute for momentum conservation and boundary conditions.', '伯努利关系是记账的一部分，而不能代替动量守恒和边界条件。', ['nasa-lift', 'nasa-bernoulli'])
       ]
     },
@@ -1170,9 +1188,9 @@
           { type: 'toggle', key: 'boundary', value: 'open-open', label: t('Boundary condition', '边界条件'), options: [{ value: 'open-open', label: t('Open-open', '两端开口') }, { value: 'open-closed', label: t('Open-closed', '一端封闭') }] },
           { type: 'range', key: 'mode', min: 1, max: 5, step: 1, value: 2, label: t('Mode index', '模态序号'), formatter: value => format(value, 0) }
         ],
-        sources: ['noaa-sound', 'nih-hear']
+        sources: ['unsw-pipes']
       },
-      experiment: experimentCard('observation', 'Resonance in strings, pipes, and cavities made sound visibly measurable.', '弦、管和腔体中的共振让声音第一次变得“看得见、量得着”。', 'By sweeping frequency and watching which patterns grow, experimenters could map nodes, antinodes, and resonant peaks. That turned pitch and timbre into geometry plus boundary conditions.', '通过扫描频率并观察哪些图样被放大，实验者能够描出节点、腹部和共振峰，从而把音高与音色化成几何与边界条件的问题。', 'The displayed mode shapes are idealized; real resonators broaden and shift because of damping and coupling to their surroundings.', '图中的模态形状经过理想化处理；真实共振器会因阻尼和环境耦合而展宽、偏移。', ['noaa-sound', 'nih-hear']),
+      experiment: experimentCard('observation', 'Resonance in strings, pipes, and cavities made sound visibly measurable.', '弦、管和腔体中的共振让声音第一次变得“看得见、量得着”。', 'By sweeping frequency and watching which patterns grow, experimenters could map nodes, antinodes, and resonant peaks. That turned pitch and timbre into geometry plus boundary conditions.', '通过扫描频率并观察哪些图样被放大，实验者能够描出节点、腹部和共振峰，从而把音高与音色化成几何与边界条件的问题。', 'The displayed mode shapes are idealized; real resonators broaden and shift because of damping and coupling to their surroundings.', '图中的模态形状经过理想化处理；真实共振器会因阻尼和环境耦合而展宽、偏移。', ['unsw-pipes']),
       mechanism: {
         title: t('From vibrating source to heard pitch', '从振动声源到被听见的音高'),
         steps: [
@@ -1190,7 +1208,7 @@
         body: t('Urban soundscapes, biological tissue, and the ocean all combine scattering, absorption, and changing backgrounds. The open problem is not writing a wave equation, but reliably inferring sources or structures through messy propagation.', '城市声场、生物组织和海洋都会把散射、吸收与变化中的背景叠加在一起。难题不是写下波动方程，而是如何穿过这些混乱传播过程，可靠地反推声源或结构。')
       },
       claims: [
-        claimCard('Boundaries quantize allowed modes.', '边界会把允许模态量子化为离散家族。', 'A pipe or cavity does not support arbitrary pressure patterns at equal strength. Only phase relations compatible with its boundaries become resonant standing waves.', '管道或腔体并不会等强度地支持任意压强图样。只有与边界条件相容的相位关系，才会成长为共振驻波。', 'This is why changing whether an end is open or closed changes the harmonic ladder, even when the material and the source stay the same.', '这就是为何即便材料和声源不变，只要把端点从开口改成封闭，谐波阶梯就会改变。', ['noaa-sound']),
+        claimCard('Boundaries quantize allowed modes.', '边界会把允许模态量子化为离散家族。', 'A pipe or cavity does not support arbitrary pressure patterns at equal strength. Only phase relations compatible with its boundaries become resonant standing waves.', '管道或腔体并不会等强度地支持任意压强图样。只有与边界条件相容的相位关系，才会成长为共振驻波。', 'This is why changing whether an end is open or closed changes the harmonic ladder, even when the material and the source stay the same.', '这就是为何即便材料和声源不变，只要把端点从开口改成封闭，谐波阶梯就会改变。', ['unsw-pipes']),
         claimCard('Hearing is a mechanical-to-electrical conversion problem.', '听觉本质上是机械到电信号的转换。', 'Pressure waves do not become perception directly; the ear first turns them into mechanical motion and then into neural signals.', '压强波并不会直接变成知觉；耳朵必须先把它们转成机械运动，再转成神经信号。', 'That conversion is why sound can be analyzed with the same care as any other transduction chain, from microphone calibration to auditory physiology.', '也正因为如此，声音可以像其他换能链一样被严谨分析，从麦克风定标一直到听觉生理。', ['nih-hear'])
       ]
     },
@@ -1216,7 +1234,7 @@
           { type: 'range', key: 'hot', min: 350, max: 900, step: 10, value: 700, label: t('Hot reservoir T_h', '高温热源 T_h'), formatter: value => `${format(value, 0)} K` },
           { type: 'range', key: 'cold', min: 120, max: 420, step: 10, value: 290, label: t('Cold reservoir T_c', '低温热源 T_c'), formatter: value => `${format(value, 0)} K` }
         ],
-        sources: ['nist-temperature', 'nist-boltzmann']
+        sources: ['utexas-heat-engines', 'nist-boltzmann']
       },
       experiment: experimentCard('model', 'Modern temperature metrology ties the kelvin to microscopic energy, not to one specific material sample.', '现代温度计量把开尔文直接连到微观能量尺度，而不是某一份特定样品。', 'The kelvin and the Boltzmann constant anchor thermal measurements in a way that lets engine limits, heat capacities, and molecular energies speak the same language.', '开尔文与玻尔兹曼常数为热学测量提供了统一锚点，使热机上限、热容和分子能量能够说同一种语言。', 'This card is about metrological grounding rather than a single laboratory apparatus.', '这张卡片强调的是计量学基础，而不是某一台独立实验装置。', ['nist-temperature', 'nist-boltzmann']),
       mechanism: {
@@ -1236,7 +1254,7 @@
         body: t('Cells, nanoscale devices, driven colloids, and information-bearing memories all produce entropy while fluctuating strongly. The frontier is to keep thermodynamic accounting sharp even when averages are not enough.', '细胞、纳米器件、受驱胶体和携带信息的存储系统都会在强烈涨落中产生熵。前沿任务是：当简单平均值已不够用时，仍能把热力学的记账做得清楚。')
       },
       claims: [
-        claimCard('The Carnot efficiency depends only on reservoir temperatures.', '卡诺效率只取决于两个热源温度。', 'For a reversible engine, the maximum possible efficiency is fixed by 1 − T_c/T_h, not by the working substance.', '对可逆热机而言，最大可能效率由 1 − T_c/T_h 决定，而不是由工质名字决定。', 'That is why steam, gas, or any other substance can be compared against one universal ceiling once the hot and cold temperatures are specified.', '这就是为什么一旦给定高温和低温，蒸汽、气体或任何其他工质都能拿同一个上限来比较。', ['nist-temperature']),
+        claimCard('The Carnot efficiency depends only on reservoir temperatures.', '卡诺效率只取决于两个热源温度。', 'For a reversible engine, the maximum possible efficiency is fixed by 1 − T_c/T_h, not by the working substance.', '对可逆热机而言，最大可能效率由 1 − T_c/T_h 决定，而不是由工质名字决定。', 'That is why steam, gas, or any other substance can be compared against one universal ceiling once the hot and cold temperatures are specified.', '这就是为什么一旦给定高温和低温，蒸汽、气体或任何其他工质都能拿同一个上限来比较。', ['utexas-heat-engines']),
         claimCard('Microscopic energy and macroscopic temperature are linked by the Boltzmann constant.', '微观能量尺度与宏观温度通过玻尔兹曼常数相连。', 'The Boltzmann constant is what lets thermal energy, entropy, and molecular-scale excitations be written in one consistent unit system.', '玻尔兹曼常数使热能、熵和分子尺度激发能够放进同一个一致的单位体系里书写。', 'That link is why thermodynamic temperature is not just a subjective warmth scale but a physically grounded measure of energy distribution.', '也正因如此，热力学温度并不只是“冷暖感受”的刻度，而是对能量分布有物理基础的测量。', ['nist-boltzmann', 'nist-temperature'])
       ]
     },
@@ -1308,9 +1326,9 @@
           { type: 'range', key: 'gap', min: 0.2, max: 2.4, step: 0.05, value: 1, label: t('Level spacing ΔE/k', '能级间隔 ΔE/k'), formatter: value => value.toFixed(2) },
           { type: 'range', key: 'temperature', min: 0.2, max: 2.2, step: 0.05, value: 1, label: t('Temperature T', '温度 T'), formatter: value => value.toFixed(2) }
         ],
-        sources: ['nist-entropy', 'sep-statmech']
+        sources: ['utexas-boltzmann', 'sep-statmech']
       },
-      experiment: experimentCard('model', 'Measurable bulk regularity comes from state counting, not from tracking every molecule.', '可测的宏观规律来自状态计数，而不是逐个追踪每个分子。', 'Heat capacities, equations of state, and equilibrium populations become predictable once the overwhelming majority of microscopic arrangements are counted statistically rather than followed individually.', '一旦改用统计计数而不是逐一跟踪，热容、状态方程和平衡占据就会变得可预测。', 'This card emphasizes the inferential method: ensemble reasoning is itself the landmark move.', '这张卡片强调的是方法论上的里程碑：系综推理本身就是关键转变。', ['nist-entropy', 'sep-statmech']),
+      experiment: experimentCard('model', 'Measurable bulk regularity comes from state counting, not from tracking every molecule.', '可测的宏观规律来自状态计数，而不是逐个追踪每个分子。', 'Heat capacities, equations of state, and equilibrium populations become predictable once the overwhelming majority of microscopic arrangements are counted statistically rather than followed individually.', '一旦改用统计计数而不是逐一跟踪，热容、状态方程和平衡占据就会变得可预测。', 'This card emphasizes the inferential method: ensemble reasoning is itself the landmark move.', '这张卡片强调的是方法论上的里程碑：系综推理本身就是关键转变。', ['utexas-boltzmann', 'sep-statmech']),
       mechanism: {
         title: t('Why hot-to-cold flow is overwhelmingly likely', '为什么热量几乎必然从高温流向低温'),
         steps: [
@@ -1328,7 +1346,7 @@
         body: t('Driven quantum matter, active materials, glasses, and turbulent transport all ask what survives once equilibrium ensembles no longer close the story. The frontier is to predict collective behavior without the comfort of near-equilibrium averaging.', '受驱量子物质、活性材料、玻璃态和湍流输运都在追问：一旦平衡系综讲不完故事，还有什么规律能保留下来？前沿任务是在没有近平衡平均值护栏的情况下，仍然预测集体行为。')
       },
       claims: [
-        claimCard('Boltzmann weighting suppresses higher-energy states exponentially.', '玻尔兹曼权重会指数式压低高能态。', 'At equilibrium, the probability of a state falls as exp(−E/kT), so the same energy gap matters very differently at low and high temperature.', '在平衡态下，状态概率按 exp(−E/kT) 衰减，因此同一个能级间隔在低温和高温时会表现得完全不同。', 'This is the practical bridge from microscopic energies to macroscopic observables such as heat capacity, occupancy, and population inversion thresholds.', '这条关系正是从微观能量跨到热容、占据数和反转阈值等宏观可观测量的实用桥梁。', ['nist-entropy']),
+        claimCard('Boltzmann weighting suppresses higher-energy states exponentially.', '玻尔兹曼权重会指数式压低高能态。', 'At equilibrium, the probability of a state falls as exp(−E/kT), so the same energy gap matters very differently at low and high temperature.', '在平衡态下，状态概率按 exp(−E/kT) 衰减，因此同一个能级间隔在低温和高温时会表现得完全不同。', 'This is the practical bridge from microscopic energies to macroscopic observables such as heat capacity, occupancy, and population inversion thresholds.', '这条关系正是从微观能量跨到热容、占据数和反转阈值等宏观可观测量的实用桥梁。', ['utexas-boltzmann']),
         claimCard('Macroscopic smoothness emerges because relative fluctuations shrink with system size.', '宏观平滑性来自相对涨落随系统规模缩小。', 'Large systems still fluctuate, but their relative fluctuations scale down so strongly that temperature and pressure become sharp operational concepts.', '大系统依然在涨落，但它们的相对涨落会如此显著地缩小，以至于温度和压强变成了操作上非常锐利的概念。', 'That is why a cup of water can have a stable thermometer reading even though its molecules never stop jostling.', '这就是为什么一杯水可以有稳定的温度计读数，尽管其中的分子从未停止碰撞。', ['sep-statmech', 'nist-entropy'])
       ]
     },
@@ -1353,9 +1371,9 @@
         controls: [
           { type: 'range', key: 'ratio', min: 0.25, max: 8, step: 0.05, value: 2.2, label: t('Concentration ratio cₒ/cᵢ', '浓度比 cₒ/cᵢ'), formatter: value => value.toFixed(2) }
         ],
-        sources: ['nih-dna', 'purcell-low-re']
+        sources: ['ncbi-membrane-potentials', 'purcell-low-re']
       },
-      experiment: experimentCard('model', 'X-ray diffraction and molecular-scale measurement showed that biological structure can be inferred physically, not guessed metaphorically.', 'X 射线衍射和分子尺度测量表明，生物结构可以被物理地推断，而不是靠比喻猜测。', 'The double helix became credible because diffraction patterns, bond geometry, and chemical constraints converged on the same structure. Biophysics turns life into a measurement problem rather than a purely descriptive one.', 'DNA 双螺旋之所以可信，是因为衍射图样、键长几何和化学约束收敛到同一个结构上。生物物理学把生命问题转成了测量问题，而不是纯描述问题。', 'The measurement is indirect but physically constrained, much like other inverse problems in science.', '这种测量是间接的，但受到严格物理约束，与科学中的其他反问题类似。', ['nih-dna']),
+      experiment: experimentCard('reconstruction', 'X-ray diffraction and molecular-scale measurement showed that biological structure can be inferred physically, not guessed metaphorically.', 'X 射线衍射和分子尺度测量表明，生物结构可以被物理地推断，而不是靠比喻猜测。', 'The double helix became credible because diffraction patterns, bond geometry, and chemical constraints converged on the same structure. Biophysics turns life into a measurement problem rather than a purely descriptive one.', 'DNA 双螺旋之所以可信，是因为衍射图样、键长几何和化学约束收敛到同一个结构上。生物物理学把生命问题转成了测量问题，而不是纯描述问题。', 'The measurement is indirect but physically constrained, much like other inverse problems in science.', '这种测量是间接的，但受到严格物理约束，与科学中的其他反问题类似。', ['nature-thymonucleate', 'nature-dna-structure']),
       mechanism: {
         title: t('How an ion gradient becomes an electrical signal', '离子浓度梯度如何变成电信号'),
         steps: [
@@ -1373,7 +1391,7 @@
         body: t('Molecular motors, condensates, membrane mechanics, and active tissues are all physically tractable, yet full biological function still depends on chemistry, evolution, and regulation layered on top of that physics.', '分子马达、凝聚体、膜力学和活性组织都可以被物理地处理，但完整的生物功能仍然依赖叠加其上的化学、进化和调控。')
       },
       claims: [
-        claimCard('Membrane voltage can emerge directly from an ion concentration imbalance.', '膜电压可以直接从离子浓度失衡中涌现出来。', 'If one ion species dominates membrane permeability, the voltage that balances its diffusive tendency is set by the concentration ratio across the membrane.', '如果某一种离子主导膜的通透性，那么抵消其扩散趋势的电压就由膜两侧的浓度比决定。', 'That is why concentration gradients are not just chemical facts; they are also electrical resources.', '这就是为什么浓度梯度不仅是化学事实，也是电学资源。', ['nih-dna']),
+        claimCard('Membrane voltage can emerge directly from an ion concentration imbalance.', '膜电压可以直接从离子浓度失衡中涌现出来。', 'If one ion species dominates membrane permeability, the voltage that balances its diffusive tendency is set by the concentration ratio across the membrane.', '如果某一种离子主导膜的通透性，那么抵消其扩散趋势的电压就由膜两侧的浓度比决定。', 'That is why concentration gradients are not just chemical facts; they are also electrical resources.', '这就是为什么浓度梯度不仅是化学事实，也是电学资源。', ['ncbi-membrane-potentials', 'ncbi-resting-potential']),
         claimCard('Small swimmers live in a viscosity-dominated world.', '小尺度游动体生活在一个黏性主导的世界里。', 'At low Reynolds number, inertia fades and reversible strokes cannot produce net propulsion. Biological motion at that scale must exploit nonreciprocal cycles and constant energy input.', '在低雷诺数区域，惯性淡出，往复式动作也无法产生净推进。那个尺度上的生命运动必须依赖非往复循环和持续能量输入。', 'This is one of the clearest ways scale rewrites intuition between everyday mechanics and cellular biophysics.', '这是“尺度如何重写直觉”的最清楚例子之一：日常力学直觉在细胞尺度上会失灵。', ['purcell-low-re'])
       ]
     },
@@ -1667,7 +1685,7 @@
     }
   }
 
-  function renderVisual(host, field, visual) {
+  function renderVisual(host, fieldId, field, visual) {
     host.innerHTML = '';
     const card = create('article', 'field-visual-card');
     card.style.setProperty('--topic', field.color);
@@ -1683,13 +1701,15 @@
     const stage = create('div', 'field-visual-stage');
     const controls = create('div', 'field-visual-controls');
     controls.append(create('h3', null, zh() ? '控制参数' : 'Controls'));
-    const state = Object.fromEntries((visual.controls || []).map(control => [control.key, control.value]));
+    const defaultState = Object.fromEntries((visual.controls || []).map(control => [control.key, control.value]));
+    const state = Object.assign(defaultState, visualStateCache.get(fieldId));
+    visualStateCache.set(fieldId, state);
     const render = () => {
       const renderer = visualRenderers[visual.type];
       if (!renderer) throw new Error(`Missing field visual renderer ${visual.type}`);
       const result = renderer(state);
       stage.innerHTML = result.svg;
-      if (status) status.textContent = result.status;
+      status.textContent = result.status;
     };
     for (const control of visual.controls || []) {
       controls.append((control.type === 'toggle' ? toggleControl : rangeControl)(control, state, render));
@@ -1714,7 +1734,7 @@
     if (!def) return;
     renderQuestionGrid(document.getElementById('questionGrid'), def.questions);
     renderScaleGrid(document.getElementById('scaleGrid'), def.scales);
-    renderVisual(document.getElementById('fieldVisualHost'), field, def.visual);
+    renderVisual(document.getElementById('fieldVisualHost'), fieldId, field, def.visual);
     renderExperiment(document.getElementById('fieldExperiment'), def.experiment);
     renderMechanism(document.getElementById('fieldMechanism'), def.mechanism);
     renderLimitGrid(document.getElementById('fieldMythFrontier'), def);

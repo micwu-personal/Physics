@@ -1,6 +1,11 @@
 import { expect, test } from '@playwright/test';
 import { assertNoErrors, watchPage } from './helpers/assertions.js';
 import {
+  applyFieldVisualState,
+  fieldVisualScenarios,
+  readFieldVisualState
+} from './helpers/field-visuals.js';
+import {
   assertBigBangSourceLinksRerender,
   exerciseBigBang,
   exercisePhysicsArea,
@@ -23,6 +28,83 @@ const journeys = [
   { name: 'Big Bang', path: '/big-bang/', run: exerciseBigBang },
   { name: 'Periodic Table', path: '/periodic-table/', run: exercisePeriodicTable },
   { name: 'Particle Zoo', path: '/particle-zoo/', run: exerciseParticleZoo }
+];
+
+const auditedFieldSourceCatalog = {
+  'nasa-sphere-drag': {
+    title: 'Drag of a Sphere',
+    institution: 'NASA Glenn Research Center',
+    url: 'https://www1.grc.nasa.gov/beginners-guide-to-aeronautics/drag-of-a-sphere/'
+  },
+  'reynolds-1883': {
+    title: 'XXIX. An experimental investigation of the circumstances which determine whether the motion of water shall be direct or sinuous, and of the law of resistance in parallel channels',
+    institution: 'The Royal Society',
+    url: 'https://doi.org/10.1098/rstl.1883.0029'
+  },
+  'unsw-pipes': {
+    title: 'Pipes and harmonics: cylindrical and conical bores',
+    institution: 'University of New South Wales',
+    url: 'https://newt.phys.unsw.edu.au/jw/pipes.html'
+  },
+  'utexas-heat-engines': {
+    title: 'Heat engines',
+    institution: 'University of Texas at Austin',
+    url: 'https://farside.ph.utexas.edu/teaching/sm1/lectures/node57.html'
+  },
+  'utexas-boltzmann': {
+    title: 'Boltzmann distributions',
+    institution: 'University of Texas at Austin',
+    url: 'https://farside.ph.utexas.edu/teaching/sm1/lectures/node61.html'
+  },
+  'ncbi-membrane-potentials': {
+    title: 'The Forces that Create Membrane Potentials',
+    institution: 'NCBI Bookshelf',
+    url: 'https://www.ncbi.nlm.nih.gov/books/NBK11102/'
+  },
+  'ncbi-resting-potential': {
+    title: 'The Ionic Basis of the Resting Membrane Potential',
+    institution: 'NCBI Bookshelf',
+    url: 'https://www.ncbi.nlm.nih.gov/books/NBK10931/'
+  },
+  'nature-thymonucleate': {
+    title: 'Molecular Configuration in Sodium Thymonucleate',
+    institution: 'Nature',
+    url: 'https://doi.org/10.1038/171740a0'
+  },
+  'nature-dna-structure': {
+    title: 'Molecular Structure of Nucleic Acids: A Structure for Deoxyribose Nucleic Acid',
+    institution: 'Nature',
+    url: 'https://doi.org/10.1038/171737a0'
+  },
+  'utexas-debye-shielding': {
+    title: 'Debye Shielding',
+    institution: 'University of Texas at Austin',
+    url: 'https://farside.ph.utexas.edu/teaching/plasma/Plasmahtml/node7.html'
+  },
+  'utexas-magnetized-plasmas': {
+    title: 'Magnetized Plasmas',
+    institution: 'University of Texas at Austin',
+    url: 'https://farside.ph.utexas.edu/teaching/plasma/Plasmahtml/node10.html'
+  }
+};
+
+const auditedFieldSourceMappings = [
+  { fieldId: 'fluids', part: 'visual', sources: ['nasa-sphere-drag'] },
+  { fieldId: 'fluids', part: 'experiment', sources: ['reynolds-1883'] },
+  { fieldId: 'fluids', part: 'claims', index: 0, sources: ['nasa-sphere-drag', 'reynolds-1883'] },
+  { fieldId: 'acoustics', part: 'visual', sources: ['unsw-pipes'] },
+  { fieldId: 'acoustics', part: 'experiment', sources: ['unsw-pipes'] },
+  { fieldId: 'acoustics', part: 'claims', index: 0, sources: ['unsw-pipes'] },
+  { fieldId: 'thermodynamics', part: 'visual', sources: ['utexas-heat-engines', 'nist-boltzmann'] },
+  { fieldId: 'thermodynamics', part: 'claims', index: 0, sources: ['utexas-heat-engines'] },
+  { fieldId: 'statistical', part: 'visual', sources: ['utexas-boltzmann', 'sep-statmech'] },
+  { fieldId: 'statistical', part: 'experiment', sources: ['utexas-boltzmann', 'sep-statmech'] },
+  { fieldId: 'statistical', part: 'claims', index: 0, sources: ['utexas-boltzmann'] },
+  { fieldId: 'biophysics', part: 'visual', sources: ['ncbi-membrane-potentials', 'purcell-low-re'] },
+  { fieldId: 'biophysics', part: 'experiment', sources: ['nature-thymonucleate', 'nature-dna-structure'], kind: 'reconstruction' },
+  { fieldId: 'biophysics', part: 'claims', index: 0, sources: ['ncbi-membrane-potentials', 'ncbi-resting-potential'] },
+  { fieldId: 'plasma', part: 'visual', sources: ['doe-plasma', 'utexas-debye-shielding', 'utexas-magnetized-plasmas'], absent: ['doe-standard-model'] },
+  { fieldId: 'plasma', part: 'claims', index: 0, sources: ['utexas-debye-shielding', 'doe-plasma'] }
 ];
 
 for (const journey of journeys) {
@@ -190,6 +272,69 @@ test('Every shared field guide exposes enrichment copy, controls, and claim-link
     });
   });
   expect(problems).toEqual([]);
+});
+
+test('Shared field guide visuals preserve control state across language rerenders', async ({ page }) => {
+  await preparePage(page, '/physics/', 'en');
+  for (const [fieldId, scenarios] of Object.entries(fieldVisualScenarios)) {
+    await page.goto(`/physics/field.html?id=${fieldId}`, { waitUntil: 'load' });
+    await expect(page.locator('#fieldVisualHost .field-visual-card')).toBeVisible();
+    const chosen = scenarios[scenarios.length - 1];
+    await applyFieldVisualState(page, chosen.state);
+    const before = await readFieldVisualState(page);
+    await page.locator('[data-lang="zh-CN"]').click();
+    await expect(page.locator('#fieldVisualHost .field-visual-card')).toBeVisible();
+    expect(await readFieldVisualState(page)).toEqual(before);
+    await page.locator('[data-lang="en"]').click();
+    await expect(page.locator('#fieldVisualHost .field-visual-card')).toBeVisible();
+    expect(await readFieldVisualState(page)).toEqual(before);
+  }
+});
+
+test('Shared field guide source mappings stay claim-specific and honest', async ({ page }) => {
+  await preparePage(page, '/physics/field.html?id=thermodynamics', 'en');
+  const issues = await page.evaluate(({ catalog, mappings }) => {
+    const problems = [];
+    for (const [sourceId, expected] of Object.entries(catalog)) {
+      const source = PhysicsFieldEnrichmentSources[sourceId];
+      if (!source) {
+        problems.push(`missing catalog source ${sourceId}`);
+        continue;
+      }
+      for (const key of ['title', 'institution', 'url']) {
+        if (source[key] !== expected[key]) problems.push(`${sourceId}: wrong ${key}`);
+      }
+    }
+    const readSources = expectation => {
+      const entry = PhysicsFieldEnrichments[expectation.fieldId];
+      if (!entry) return null;
+      if (expectation.part === 'visual') return entry.visual?.sources ?? null;
+      if (expectation.part === 'experiment') return entry.experiment?.sources ?? null;
+      if (expectation.part === 'claims') return entry.claims?.[expectation.index]?.sources ?? null;
+      return null;
+    };
+    for (const expectation of mappings) {
+      const entry = PhysicsFieldEnrichments[expectation.fieldId];
+      if (!entry) {
+        problems.push(`missing enrichment ${expectation.fieldId}`);
+        continue;
+      }
+      const actualSources = readSources(expectation);
+      if (JSON.stringify(actualSources) !== JSON.stringify(expectation.sources)) {
+        problems.push(`${expectation.fieldId} ${expectation.part}${expectation.index ?? ''}: wrong nearby sources`);
+      }
+      for (const sourceId of expectation.absent || []) {
+        if (actualSources?.includes(sourceId)) {
+          problems.push(`${expectation.fieldId} ${expectation.part}${expectation.index ?? ''}: still includes ${sourceId}`);
+        }
+      }
+      if (expectation.kind && entry.experiment?.kind !== expectation.kind) {
+        problems.push(`${expectation.fieldId} experiment: wrong evidence label`);
+      }
+    }
+    return problems;
+  }, { catalog: auditedFieldSourceCatalog, mappings: auditedFieldSourceMappings });
+  expect(issues).toEqual([]);
 });
 
 /* Structural invariants the periodic-table feature modules rely on instead of
