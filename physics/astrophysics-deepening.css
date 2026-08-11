@@ -123,6 +123,10 @@ body[data-topic="astrophysics"] .focus-instrument > canvas {
   margin-top: 30px;
 }
 
+.compact-range-note {
+  margin-top: 12px;
+}
+
 .classification .claim-links,
 .derivation .claim-links {
   margin-top: 18px;

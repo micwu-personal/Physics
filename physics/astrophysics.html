@@ -403,8 +403,8 @@
           <div class="lab-controls">
             <h3 data-copy-en="Compact objects: what is known, and what still depends on the equation of state"
                 data-copy-zh="致密天体：哪些已知，哪些仍依赖状态方程">Compact objects: what is known, and what still depends on the equation of state</h3>
-            <p data-copy-en="Switch families, then slide the mass. White-dwarf mass-radius behavior is comparatively robust. Neutron-star radii and their true maximum mass are constrained by pulsars, X-rays, and mergers, but they still depend on dense-matter physics. For black holes, the horizon size is known once the mass is known; the uncertain part is the threshold at which collapse becomes unavoidable."
-               data-copy-zh="切换家族，再拖动质量。白矮星的质量—半径关系相对稳固；中子星半径和真正的最大质量受到脉冲星、X 射线与并合事件约束，但仍依赖致密物质物理。对黑洞而言，一旦质量给定，视界尺寸就确定；真正不确定的是塌缩何时变得不可避免。">Switch families, then slide the mass. White-dwarf mass-radius behavior is comparatively robust. Neutron-star radii and their true maximum mass are constrained by pulsars, X-rays, and mergers, but they still depend on dense-matter physics. For black holes, the horizon size is known once the mass is known; the uncertain part is the threshold at which collapse becomes unavoidable.</p>
+            <p data-copy-en="Switch families, then slide the mass. White-dwarf mass-radius behavior is comparatively robust. Neutron-star radii and their true maximum mass are constrained by pulsars, X-rays, and mergers, but they still depend on dense-matter physics. For black holes, the horizon size is known once the mass is known; the uncertain part is the threshold at which collapse becomes unavoidable. The slider swaps between supported teaching ranges for each family, not fundamental forbidden-mass rules for nature."
+               data-copy-zh="切换家族，再拖动质量。白矮星的质量—半径关系相对稳固；中子星半径和真正的最大质量受到脉冲星、X 射线与并合事件约束，但仍依赖致密物质物理。对黑洞而言，一旦质量给定，视界尺寸就确定；真正不确定的是塌缩何时变得不可避免。这个滑块会为不同家族切换到“教学上有支撑的范围”，而不是宣称自然界存在绝对禁止的质量区间。">Switch families, then slide the mass. White-dwarf mass-radius behavior is comparatively robust. Neutron-star radii and their true maximum mass are constrained by pulsars, X-rays, and mergers, but they still depend on dense-matter physics. For black holes, the horizon size is known once the mass is known; the uncertain part is the threshold at which collapse becomes unavoidable. The slider swaps between supported teaching ranges for each family, not fundamental forbidden-mass rules for nature.</p>
             <div class="mode-switch" role="group" aria-label="Compact object family" data-aria-en="Compact object family" data-aria-zh="致密天体家族">
               <button type="button" class="mode-chip active" data-compact-mode="white-dwarf" aria-pressed="true" data-copy-en="White dwarf" data-copy-zh="白矮星">White dwarf</button>
               <button type="button" class="mode-chip" data-compact-mode="neutron-star" aria-pressed="false" data-copy-en="Neutron star" data-copy-zh="中子星">Neutron star</button>
@@ -412,8 +412,9 @@
             </div>
             <div class="control-group">
               <label for="compactMass"><span data-copy-en="Selected mass" data-copy-zh="选定质量">Selected mass</span><output id="compactMassOut" for="compactMass">1.00 M☉</output></label>
-              <input id="compactMass" type="range" min="0.4" max="12" value="1" step="0.01">
+              <input id="compactMass" type="range" min="0.45" max="1.38" value="1" step="0.01">
             </div>
+            <p id="compactRangeNote" class="lab-note compact-range-note">Supported teaching range here: 0.45–1.38 M☉ for cold carbon-oxygen white dwarfs. This instructional span is representative, not a claim that every other compact-object mass is forbidden.</p>
             <dl id="compactDetail" class="stage-detail">
               <dt data-copy-en="Radius trend" data-copy-zh="半径趋势">Radius trend</dt>
               <dd id="compactRadius">Cold white dwarfs get smaller as they approach the electron-degeneracy limit.</dd>
@@ -422,8 +423,8 @@
               <dt data-copy-en="What is firm vs model-dependent" data-copy-zh="哪些稳固，哪些依赖模型">What is firm vs model-dependent</dt>
               <dd id="compactKnown">The white-dwarf branch is well understood. The exact neutron-star collapse threshold is not.</dd>
             </dl>
-            <p class="lab-note"><span class="rep-badge model" data-copy-en="Known curve + uncertain band" data-copy-zh="已知曲线 + 不确定带">Known curve + uncertain band</span><br><span data-copy-en="The white-dwarf and Schwarzschild-radius tracks are formula-led teaching curves. The neutron-star band is intentionally broad because radius and maximum-mass predictions still depend on the dense-matter equation of state, rotation, and thermal support."
-              data-copy-zh="白矮星与史瓦西半径轨迹是由公式引导的教学曲线。中子星带被故意画宽，因为其半径与最大质量预测仍依赖致密物质状态方程、自转与热支撑。">The white-dwarf and Schwarzschild-radius tracks are formula-led teaching curves. The neutron-star band is intentionally broad because radius and maximum-mass predictions still depend on the dense-matter equation of state, rotation, and thermal support.</span></p>
+            <p class="lab-note"><span class="rep-badge model" data-copy-en="Known curve + uncertain band" data-copy-zh="已知曲线 + 不确定带">Known curve + uncertain band</span><br><span data-copy-en="The white-dwarf and Schwarzschild-radius tracks are formula-led teaching curves. The neutron-star band is intentionally broad because radius and maximum-mass predictions still depend on the dense-matter equation of state, rotation, and thermal support. The mode-specific slider windows are supported teaching ranges, not claims of exact universal cutoffs."
+              data-copy-zh="白矮星与史瓦西半径轨迹是由公式引导的教学曲线。中子星带被故意画宽，因为其半径与最大质量预测仍依赖致密物质状态方程、自转与热支撑。不同模式下的滑块范围只是“教学上有支撑的区间”，并不是宣称自然界存在精确而普适的绝对截断。">The white-dwarf and Schwarzschild-radius tracks are formula-led teaching curves. The neutron-star band is intentionally broad because radius and maximum-mass predictions still depend on the dense-matter equation of state, rotation, and thermal support. The mode-specific slider windows are supported teaching ranges, not claims of exact universal cutoffs.</span></p>
             <p class="claim-links"><span class="claim-label" data-copy-en="Claim links" data-copy-zh="对应来源">Claim links</span><a class="claim-chip" href="https://arxiv.org/abs/1401.0819">WD mass-radius</a><a class="claim-chip" href="https://arxiv.org/abs/1512.07820">NS EOS review</a><a class="claim-chip" href="https://arxiv.org/abs/1904.10002">GW170817 EOS review</a></p>
           </div>
         </div>
@@ -555,7 +556,7 @@
             <h3 data-copy-en="Mass, spin, and charge" data-copy-zh="质量、自旋与电荷">Mass, spin, and charge</h3>
             <p data-copy-en="A stationary classical black-hole exterior is characterized by mass M, angular momentum J, and electric charge Q. Schwarzschild is non-spinning and uncharged; Kerr spins and is the standard astrophysical model; Kerr-Newman also carries charge."
                data-copy-zh="稳定经典黑洞的外部由质量 M、角动量 J 与电荷 Q 表征。史瓦西黑洞不旋转且不带电；克尔黑洞旋转，是标准天体模型；克尔—纽曼黑洞还带电。">A stationary classical black-hole exterior is characterized by mass M, angular momentum J, and electric charge Q. Schwarzschild is non-spinning and uncharged; Kerr spins and is the standard astrophysical model; Kerr-Newman also carries charge.</p>
-            <span class="formula">M · J · Q</span>
+            <span class="formula">M, J, Q</span>
           </article>
           <article class="classification">
             <span class="science-status inferred" data-copy-en="Astrophysical expectation" data-copy-zh="天体物理预期">Astrophysical expectation</span>

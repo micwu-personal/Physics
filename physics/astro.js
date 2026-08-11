@@ -837,17 +837,55 @@
   }
 
   /* ----------------------------------------------------- 7. compact graph -- */
+  const COMPACT_AXIS_MIN = 0.4;
+  const COMPACT_AXIS_MAX = 12;
   const compactModes = {
     'white-dwarf': {
-      color: palette.green
+      color: palette.green,
+      defaultMass: 1.0,
+      digits: 2,
+      max: 1.38,
+      min: 0.45,
+      rangeNote: {
+        en: 'Supported teaching range here: 0.45–1.38 M☉ for cold carbon-oxygen white dwarfs. This is a representative instructional span, not a fundamental forbidden-mass rule.',
+        zh: '这里采用的教学范围是 0.45–1.38 M☉，对应冷碳氧白矮星。它只是有依据的教学区间，并不是自然界的绝对禁区。'
+      },
+      step: 0.01
     },
     'neutron-star': {
-      color: palette.cyan
+      color: palette.cyan,
+      defaultMass: 1.4,
+      digits: 2,
+      max: 2.3,
+      min: 1.1,
+      rangeNote: {
+        en: 'Supported teaching range here: 1.10–2.30 M☉, spanning well-measured neutron stars through the EOS-sensitive high-mass regime. It is not a claim that every other compact-object mass is impossible.',
+        zh: '这里采用的教学范围是 1.10–2.30 M☉，覆盖观测扎实的中子星到依赖状态方程的高质量区间。它并不是在宣称其他致密天体质量都不可能存在。'
+      },
+      step: 0.01
     },
     'black-hole': {
-      color: palette.violet
+      color: palette.violet,
+      defaultMass: 5.0,
+      digits: 1,
+      max: 12.0,
+      min: 3.0,
+      rangeNote: {
+        en: 'Supported teaching range here: 3.0–12.0 M☉ for representative stellar-mass black holes. This is an observed teaching window, not a claim of a fundamental lower or upper black-hole mass law.',
+        zh: '这里采用的教学范围是 3.0–12.0 M☉，对应代表性的恒星级黑洞。它只是观测上便于教学的窗口，并不是黑洞质量存在绝对上下限的定律。'
+      },
+      step: 0.1
     }
   };
+
+  function compactSpec(mode) {
+    return compactModes[mode] || compactModes['white-dwarf'];
+  }
+
+  function formatCompactMass(value, mode) {
+    const spec = compactSpec(mode);
+    return `${value.toFixed(spec.digits)} M☉`;
+  }
 
   function neutronBand(mass) {
     const center = 12.2 - 0.55 * (mass - 1.4);
@@ -864,7 +902,7 @@
     const bottom = height - 36;
     const yMin = Math.log10(2);
     const yMax = Math.log10(20000);
-    const toX = mass => left + (mass - 0.4) / (12 - 0.4) * (right - left);
+    const toX = mass => left + (mass - COMPACT_AXIS_MIN) / (COMPACT_AXIS_MAX - COMPACT_AXIS_MIN) * (right - left);
     const toY = radiusKm => bottom - (Math.log10(radiusKm) - yMin) / (yMax - yMin) * (bottom - top);
 
     line(ctx, left, top, left, bottom, 'rgba(174,184,216,.32)');
@@ -943,11 +981,12 @@
     label(ctx, zh() ? '黑洞视界尺度' : 'black-hole horizon scale', toX(4.4), toY(14), '#c77dff', 10);
 
     const mode = scene.mode;
-    const mass = scene.mass;
+    const spec = compactSpec(mode);
+    const mass = clamp(scene.mass, spec.min, spec.max);
     let pointRadius = 5;
     let x = toX(mass);
     let y;
-    let color = compactModes[mode].color;
+    let color = spec.color;
     if (mode === 'white-dwarf') {
       const stableMass = Math.min(mass, 1.42);
       y = toY(Math.max(25, whiteDwarfRadiusKm(stableMass)));
@@ -1077,8 +1116,8 @@
 
   function renderCompactDetail() {
     const mode = compactScene.mode;
+    syncCompactMassControl(false);
     const mass = compactScene.mass;
-    compactMassOut.textContent = `${mass.toFixed(2)} M☉`;
     if (mode === 'white-dwarf') {
       const stableMass = Math.min(mass, 1.42);
       const radius = whiteDwarfRadiusKm(stableMass);
@@ -1148,6 +1187,34 @@
     compactKnown.textContent = zh()
       ? '给定质量后的视界尺度是经典广义相对论的稳固结论；前身星怎样越过阈值则依赖自转、热状态、吸积与状态方程。'
       : 'The horizon scale for a given mass is a robust prediction of classical general relativity; how progenitors cross the threshold depends on rotation, thermal state, accretion, and the equation of state.';
+  }
+
+  function syncCompactMassControl(resetMass) {
+    const spec = compactSpec(compactScene.mode);
+    compactMass.min = String(spec.min);
+    compactMass.max = String(spec.max);
+    compactMass.step = String(spec.step);
+    const nextMass = clamp(
+      resetMass ? spec.defaultMass : compactScene.mass,
+      spec.min,
+      spec.max
+    );
+    compactScene.mass = nextMass;
+    compactMass.value = nextMass.toFixed(spec.digits);
+    compactMassOut.textContent = formatCompactMass(nextMass, compactScene.mode);
+    compactRangeNote.textContent = zh() ? spec.rangeNote.zh : spec.rangeNote.en;
+  }
+
+  function applyCompactMode(mode, resetMass) {
+    compactScene.mode = compactModes[mode] ? mode : 'white-dwarf';
+    for (const peer of document.querySelectorAll('[data-compact-mode]')) {
+      const active = peer.dataset.compactMode === compactScene.mode;
+      peer.classList.toggle('active', active);
+      peer.setAttribute('aria-pressed', String(active));
+    }
+    syncCompactMassControl(resetMass);
+    renderCompactDetail();
+    renderAll(0);
   }
 
   function renderTypeIaDetail() {
@@ -1303,26 +1370,21 @@
 
   const compactMass = document.getElementById('compactMass');
   const compactMassOut = document.getElementById('compactMassOut');
+  const compactRangeNote = document.getElementById('compactRangeNote');
   const compactHeadline = document.getElementById('compactHeadline');
   const compactSecondary = document.getElementById('compactSecondary');
   const compactRadius = document.getElementById('compactRadius');
   const compactSupport = document.getElementById('compactSupport');
   const compactKnown = document.getElementById('compactKnown');
   compactMass.addEventListener('input', () => {
-    compactScene.mass = Number(compactMass.value);
+    const spec = compactSpec(compactScene.mode);
+    compactScene.mass = clamp(Number(compactMass.value), spec.min, spec.max);
     renderCompactDetail();
     renderAll(0);
   });
   for (const button of document.querySelectorAll('[data-compact-mode]')) {
     button.addEventListener('click', () => {
-      compactScene.mode = button.dataset.compactMode;
-      for (const peer of document.querySelectorAll('[data-compact-mode]')) {
-        const active = peer === button;
-        peer.classList.toggle('active', active);
-        peer.setAttribute('aria-pressed', String(active));
-      }
-      renderCompactDetail();
-      renderAll(0);
+      applyCompactMode(button.dataset.compactMode, true);
     });
   }
 
@@ -1399,7 +1461,7 @@
   collapseOutput.textContent = `${Math.round(collapseScene.progress * 100)}%`;
   evolutionScene.mass = Number(massSlider.value);
   limitsScene.mass = Number(limitSlider.value);
-  compactScene.mass = Number(compactMass.value);
+  compactScene.mode = document.querySelector('[data-compact-mode][aria-pressed="true"]')?.dataset.compactMode || 'white-dwarf';
   typeIaScene.stage = Number(typeIaStage.value);
   blackHoleScene.stage = Number(blackHoleSlider.value);
   blackHoleScene.spin = Number(blackHoleSpin.value);
@@ -1409,7 +1471,7 @@
   renderCollapseReadout();
   renderStageDetail();
   renderLimitDetail();
-  renderCompactDetail();
+  applyCompactMode(compactScene.mode, true);
   renderTypeIaDetail();
   renderBlackHoleReadout();
   renderJetDetail();
