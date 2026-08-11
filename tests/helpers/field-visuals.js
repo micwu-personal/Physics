@@ -16,7 +16,7 @@ export const fieldVisualScenarios = {
     { state: { boundary: 'open-closed', mode: 4 }, expect: 'open-closed pipe: odd modes only' }
   ],
   thermodynamics: [
-    { state: { hot: 350, cold: 420 }, expect: 'T_h = 350 K, T_c = 345 K' },
+    { state: { hot: 350, cold: 420 }, expect: 'T_h = 350 K, T_c = 345 K', expectedState: { hot: 350, cold: 345 } },
     { state: { hot: 900, cold: 120 }, expect: 'Carnot ceiling = 0.867' }
   ],
   electromagnetism: [
@@ -105,5 +105,9 @@ export async function expectVisualScenario(page, fieldId, scenario) {
   }
   const status = page.locator('#fieldVisualHost .field-visual-note').last();
   await expect(status).not.toHaveText('');
-  return readFieldVisualState(page);
+  const actualState = await readFieldVisualState(page);
+  if (scenario.expectedState) {
+    expect(actualState).toEqual(expect.objectContaining(scenario.expectedState));
+  }
+  return actualState;
 }

@@ -100,9 +100,10 @@ const auditedFieldSourceMappings = [
   { fieldId: 'statistical', part: 'visual', sources: ['utexas-boltzmann', 'sep-statmech'] },
   { fieldId: 'statistical', part: 'experiment', sources: ['utexas-boltzmann', 'sep-statmech'] },
   { fieldId: 'statistical', part: 'claims', index: 0, sources: ['utexas-boltzmann'] },
-  { fieldId: 'biophysics', part: 'visual', sources: ['ncbi-membrane-potentials', 'purcell-low-re'] },
+  { fieldId: 'biophysics', part: 'visual', sources: ['ncbi-membrane-potentials', 'ncbi-resting-potential'], absent: ['purcell-low-re'] },
   { fieldId: 'biophysics', part: 'experiment', sources: ['nature-thymonucleate', 'nature-dna-structure'], kind: 'reconstruction' },
   { fieldId: 'biophysics', part: 'claims', index: 0, sources: ['ncbi-membrane-potentials', 'ncbi-resting-potential'] },
+  { fieldId: 'biophysics', part: 'claims', index: 1, sources: ['purcell-low-re'] },
   { fieldId: 'plasma', part: 'visual', sources: ['doe-plasma', 'utexas-debye-shielding', 'utexas-magnetized-plasmas'], absent: ['doe-standard-model'] },
   { fieldId: 'plasma', part: 'claims', index: 0, sources: ['utexas-debye-shielding', 'doe-plasma'] }
 ];
@@ -289,6 +290,41 @@ test('Shared field guide visuals preserve control state across language rerender
     await expect(page.locator('#fieldVisualHost .field-visual-card')).toBeVisible();
     expect(await readFieldVisualState(page)).toEqual(before);
   }
+});
+
+test('Thermodynamics visual clamps crossing reservoir values and preserves the normalized state across language rerenders', async ({ page }) => {
+  await preparePage(page, '/physics/field.html?id=thermodynamics', 'en');
+  const readControlSurface = () => page.evaluate(() => Object.fromEntries(
+    [...document.querySelectorAll('#fieldVisualHost .field-control-group[data-control-key]')].map(group => {
+      const range = group.querySelector('input[type="range"]');
+      return [group.dataset.controlKey, {
+        value: Number(range.value),
+        min: Number(range.min),
+        max: Number(range.max),
+        output: group.querySelector('output')?.textContent ?? ''
+      }];
+    })
+  ));
+  await applyFieldVisualState(page, { hot: 430, cold: 420 });
+  await expect(page.locator('#fieldVisualHost input[data-control-key="hot"]')).toHaveAttribute('min', '425');
+  await page.goto('/physics/field.html?id=thermodynamics', { waitUntil: 'load' });
+  await expect(page.locator('#fieldVisualHost .field-visual-card')).toBeVisible();
+  await applyFieldVisualState(page, { hot: 350, cold: 420 });
+  const expectedSurface = {
+    hot: { value: 350, min: 350, max: 900, output: '350 K' },
+    cold: { value: 345, min: 120, max: 345, output: '345 K' }
+  };
+  expect(await readControlSurface()).toEqual(expectedSurface);
+  await expect(page.locator('#fieldVisualHost')).toContainText('T_h = 350 K, T_c = 345 K');
+  expect(await readFieldVisualState(page)).toEqual({ hot: 350, cold: 345 });
+  await page.locator('[data-lang="zh-CN"]').click();
+  await expect(page.locator('#fieldVisualHost .field-visual-card')).toBeVisible();
+  expect(await readControlSurface()).toEqual(expectedSurface);
+  await expect(page.locator('#fieldVisualHost')).toContainText('T_h = 350 K, T_c = 345 K');
+  expect(await readFieldVisualState(page)).toEqual({ hot: 350, cold: 345 });
+  await page.locator('[data-lang="en"]').click();
+  await expect(page.locator('#fieldVisualHost .field-visual-card')).toBeVisible();
+  expect(await readControlSurface()).toEqual(expectedSurface);
 });
 
 test('Shared field guide source mappings stay claim-specific and honest', async ({ page }) => {

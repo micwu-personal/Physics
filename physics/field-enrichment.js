@@ -151,7 +151,24 @@
     return points.map((point, index) => `${index ? 'L' : 'M'}${point[0].toFixed(2)},${point[1].toFixed(2)}`).join(' ');
   }
 
-  function rangeControl(definition, state, rerender) {
+  function controlMinimum(definition, state) {
+    return definition.minFromState ? definition.minFromState(state) : definition.min;
+  }
+
+  function controlMaximum(definition, state) {
+    const min = controlMinimum(definition, state);
+    const max = definition.maxFromState ? definition.maxFromState(state) : definition.max;
+    return Math.max(min, max);
+  }
+
+  function clampControlState(definition, state) {
+    const min = controlMinimum(definition, state);
+    const max = controlMaximum(definition, state);
+    state[definition.key] = clamp(Number(state[definition.key]), min, max);
+    return { min, max, value: state[definition.key] };
+  }
+
+  function rangeControl(definition, state, rerender, registerSync) {
     const group = create('div', 'field-control-group');
     group.dataset.controlKey = definition.key;
     const label = document.createElement('label');
@@ -160,19 +177,23 @@
     const output = document.createElement('output');
     output.htmlFor = label.htmlFor;
     const read = value => definition.formatter ? definition.formatter(value) : format(value, definition.digits ?? 2);
-    output.textContent = read(state[definition.key]);
     label.append(output);
     const input = document.createElement('input');
     input.type = 'range';
     input.id = label.htmlFor;
     input.dataset.controlKey = definition.key;
-    input.min = definition.min;
-    input.max = definition.max;
     input.step = definition.step;
-    input.value = state[definition.key];
+    const sync = () => {
+      const { min, max, value } = clampControlState(definition, state);
+      input.min = String(min);
+      input.max = String(max);
+      input.value = String(value);
+      output.textContent = read(value);
+    };
+    sync();
+    registerSync?.(sync);
     input.addEventListener('input', () => {
       state[definition.key] = Number(input.value);
-      output.textContent = read(state[definition.key]);
       rerender();
     });
     group.append(label, input);
@@ -1230,9 +1251,34 @@
         lede: t('Move the hot and cold reservoirs to see two linked ideas at once: the efficiency ceiling for a reversible engine, and the broader energy spread available at higher temperature.', '拖动高温与低温热源，可以同时看到两个相连的想法：可逆热机的效率上限，以及更高温度下更宽的微观能量分布。'),
         limitations: t('The bars are a toy equilibrium distribution, not a molecular simulation, and the engine sketch suppresses every practical loss besides the thermodynamic ceiling.', '这些柱形图只是玩具式平衡分布，而非分子模拟；热机示意图也省略了除热力学上限之外的一切工程损耗。'),
         reducedMotion: t('The full argument is visible in a static state because the relevant quantities are state variables, not moving trajectories.', '相关论证在静态状态下就完整可见，因为这里关键的是状态变量，而不是运动轨迹。'),
+        normalizeState(state) {
+          state.hot = clamp(Number(state.hot), 350, 900);
+          state.cold = clamp(Number(state.cold), 120, 420);
+          state.cold = Math.min(state.cold, state.hot - 5);
+        },
         controls: [
-          { type: 'range', key: 'hot', min: 350, max: 900, step: 10, value: 700, label: t('Hot reservoir T_h', '高温热源 T_h'), formatter: value => `${format(value, 0)} K` },
-          { type: 'range', key: 'cold', min: 120, max: 420, step: 10, value: 290, label: t('Cold reservoir T_c', '低温热源 T_c'), formatter: value => `${format(value, 0)} K` }
+          {
+            type: 'range',
+            key: 'hot',
+            min: 350,
+            max: 900,
+            minFromState: state => Math.max(350, state.cold + 5),
+            step: 5,
+            value: 700,
+            label: t('Hot reservoir T_h', '高温热源 T_h'),
+            formatter: value => `${format(value, 0)} K`
+          },
+          {
+            type: 'range',
+            key: 'cold',
+            min: 120,
+            max: 420,
+            maxFromState: state => Math.min(420, state.hot - 5),
+            step: 5,
+            value: 290,
+            label: t('Cold reservoir T_c', '低温热源 T_c'),
+            formatter: value => `${format(value, 0)} K`
+          }
         ],
         sources: ['utexas-heat-engines', 'nist-boltzmann']
       },
@@ -1371,7 +1417,7 @@
         controls: [
           { type: 'range', key: 'ratio', min: 0.25, max: 8, step: 0.05, value: 2.2, label: t('Concentration ratio cₒ/cᵢ', '浓度比 cₒ/cᵢ'), formatter: value => value.toFixed(2) }
         ],
-        sources: ['ncbi-membrane-potentials', 'purcell-low-re']
+        sources: ['ncbi-membrane-potentials', 'ncbi-resting-potential']
       },
       experiment: experimentCard('reconstruction', 'X-ray diffraction and molecular-scale measurement showed that biological structure can be inferred physically, not guessed metaphorically.', 'X 射线衍射和分子尺度测量表明，生物结构可以被物理地推断，而不是靠比喻猜测。', 'The double helix became credible because diffraction patterns, bond geometry, and chemical constraints converged on the same structure. Biophysics turns life into a measurement problem rather than a purely descriptive one.', 'DNA 双螺旋之所以可信，是因为衍射图样、键长几何和化学约束收敛到同一个结构上。生物物理学把生命问题转成了测量问题，而不是纯描述问题。', 'The measurement is indirect but physically constrained, much like other inverse problems in science.', '这种测量是间接的，但受到严格物理约束，与科学中的其他反问题类似。', ['nature-thymonucleate', 'nature-dna-structure']),
       mechanism: {
@@ -1702,9 +1748,12 @@
     const controls = create('div', 'field-visual-controls');
     controls.append(create('h3', null, zh() ? '控制参数' : 'Controls'));
     const defaultState = Object.fromEntries((visual.controls || []).map(control => [control.key, control.value]));
-    const state = Object.assign(defaultState, visualStateCache.get(fieldId));
-    visualStateCache.set(fieldId, state);
+    const state = { ...defaultState, ...(visualStateCache.get(fieldId) || {}) };
+    const syncControls = [];
     const render = () => {
+      visual.normalizeState?.(state);
+      for (const syncControl of syncControls) syncControl();
+      visualStateCache.set(fieldId, { ...state });
       const renderer = visualRenderers[visual.type];
       if (!renderer) throw new Error(`Missing field visual renderer ${visual.type}`);
       const result = renderer(state);
@@ -1712,7 +1761,12 @@
       status.textContent = result.status;
     };
     for (const control of visual.controls || []) {
-      controls.append((control.type === 'toggle' ? toggleControl : rangeControl)(control, state, render));
+      controls.append((control.type === 'toggle' ? toggleControl : rangeControl)(
+        control,
+        state,
+        render,
+        sync => syncControls.push(sync)
+      ));
     }
     const note = create('p', 'field-visual-note', pick(visual.limitations));
     const reduced = create('p', 'field-visual-note', pick(visual.reducedMotion));
