@@ -124,6 +124,8 @@ export async function exercisePhysicsAstro(page) {
     await setRange(control, await control.getAttribute('min'));
     await setRange(control, await control.getAttribute('value'));
   }
+  await setRange(page.locator('#limitMass'), 1.3);
+  await expect(page.locator('#limitBridge')).toContainText(await inChinese() ? '钱德拉塞卡极限' : 'Chandrasekhar mass');
   // The stalled-shock branch and optional collapsar jet each require a combined
   // stage/spin state rather than independent extrema.
   await setRange(page.locator('#blackHoleStage'), 2);
@@ -156,10 +158,14 @@ export async function exercisePhysicsAstro(page) {
     await expect(compactMass).toHaveValue(spec.clamped);
   }
 
+  await setRange(page.locator('#typeIaStage'), 0);
+  await expect(page.locator('#typeIaReadout')).toContainText(await inChinese() ? '非简并伴星开始向白矮星输送物质' : 'Accretion begins from a non-degenerate donor');
   await setRange(page.locator('#typeIaStage'), 2);
   await expect(page.locator('#typeIaReadout')).toContainText(await inChinese() ? '近钱德拉塞卡核心' : 'near-Chandrasekhar core');
-  await setRange(page.locator('#typeIaStage'), 4);
-  await expect(page.locator('#typeIaReadout')).toContainText(await inChinese() ? '湍流化的湍燃前锋' : 'turbulent deflagration');
+  await setRange(page.locator('#typeIaStage'), 3.4);
+  await expect(page.locator('#typeIaReadout')).toContainText(await inChinese() ? '中心碳点火开始了' : 'Central carbon ignition starts');
+  await setRange(page.locator('#typeIaStage'), 4.6);
+  await expect(page.locator('#typeIaReadout')).toContainText(await inChinese() ? '延迟爆轰' : 'delayed detonation');
   await setRange(page.locator('#typeIaStage'), 6);
   await expect(page.locator('#typeIaProducts')).toContainText(await inChinese() ? '镍-56' : 'nickel-56');
 
@@ -169,6 +175,9 @@ export async function exercisePhysicsAstro(page) {
   await setRange(page.locator('#jetSpeed'), 0.98);
   await setRange(page.locator('#jetAngle'), 10);
   await expect(page.locator('#jetInvariant')).toContainText(await inChinese() ? '不会超过光速' : 'outrun light');
+  await setRange(page.locator('#jetSpeed'), 0.995);
+  await setRange(page.locator('#jetAngle'), 3);
+  await expect(page.locator('#jetContext')).toContainText(await inChinese() ? '表观超光速' : 'apparent-superluminal');
 
   await expect(page.locator('#stageDetail dt')).toHaveCount(3);
   await page.locator('[data-lang="zh-CN"]').click();

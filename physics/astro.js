@@ -43,17 +43,21 @@
     ctx.fillRect(0, 0, width, height);
   }
 
+  function readPalette(style) {
+    return {
+      paper: style.getPropertyValue('--paper').trim() || '#eef2ff',
+      muted: style.getPropertyValue('--muted').trim() || '#aeb8d8',
+      gold: style.getPropertyValue('--gold').trim() || '#ffd166',
+      green: style.getPropertyValue('--green').trim() || '#7ee8c5',
+      cyan: style.getPropertyValue('--cyan').trim() || '#00d4ff',
+      pink: style.getPropertyValue('--pink').trim() || '#ff6b9d',
+      violet: style.getPropertyValue('--violet').trim() || '#7c5cff',
+      deep: style.getPropertyValue('--deep').trim() || '#090d1d'
+    };
+  }
+
   const rootStyle = getComputedStyle(document.documentElement);
-  const palette = {
-    paper: rootStyle.getPropertyValue('--paper').trim() || '#eef2ff',
-    muted: rootStyle.getPropertyValue('--muted').trim() || '#aeb8d8',
-    gold: rootStyle.getPropertyValue('--gold').trim() || '#ffd166',
-    green: rootStyle.getPropertyValue('--green').trim() || '#7ee8c5',
-    cyan: rootStyle.getPropertyValue('--cyan').trim() || '#00d4ff',
-    pink: rootStyle.getPropertyValue('--pink').trim() || '#ff6b9d',
-    violet: rootStyle.getPropertyValue('--violet').trim() || '#7c5cff',
-    deep: rootStyle.getPropertyValue('--deep').trim() || '#090d1d'
-  };
+  const palette = readPalette(rootStyle);
 
   function glow(ctx, x, y, radius, rgb) {
     const gradient = ctx.createRadialGradient(x, y, 0, x, y, radius);
@@ -887,10 +891,53 @@
     return `${value.toFixed(spec.digits)} M☉`;
   }
 
+  function normalizeCompactMode(mode) {
+    return compactModes[mode] ? mode : 'white-dwarf';
+  }
+
+  function selectedCompactMode() {
+    return document.querySelector('[data-compact-mode][aria-pressed="true"]')?.dataset.compactMode || 'white-dwarf';
+  }
+
   function neutronBand(mass) {
     const center = 12.2 - 0.55 * (mass - 1.4);
     const halfWidth = 1.15 + 0.18 * Math.abs(mass - 1.6);
     return [center - halfWidth, center + halfWidth];
+  }
+
+  function compactGlowRgb(mode) {
+    return mode === 'white-dwarf'
+      ? '126,232,197'
+      : mode === 'neutron-star'
+        ? '125,211,255'
+        : '199,125,255';
+  }
+
+  function compactThresholdMarker(mode, mass) {
+    if (mode === 'white-dwarf' && mass > 1.42) {
+      return {
+        mass: 1.42,
+        label: zh() ? '电子支撑到此为止' : 'electron support ends here'
+      };
+    }
+    if (mode === 'neutron-star' && mass > 2.35) {
+      return {
+        mass: 2.35,
+        label: zh() ? '可能的塌缩阈值区' : 'likely collapse-threshold zone'
+      };
+    }
+    return null;
+  }
+
+  function drawCompactThreshold(ctx, x, top, bottom, threshold) {
+    if (!threshold) return;
+    line(ctx, x, top + 18, x, bottom - 18, 'rgba(255,107,157,.52)', 1.5, [6, 5]);
+    label(ctx, threshold.label, x + 8, top + 26, '#ff6b9d', 10);
+  }
+
+  function compactThresholdX(currentX, threshold, projectMass) {
+    if (!threshold) return currentX;
+    return projectMass(threshold.mass);
   }
 
   function drawCompact(scene) {
@@ -990,25 +1037,19 @@
     if (mode === 'white-dwarf') {
       const stableMass = Math.min(mass, 1.42);
       y = toY(Math.max(25, whiteDwarfRadiusKm(stableMass)));
-      if (mass > 1.42) {
-        line(ctx, toX(1.42), top + 18, toX(1.42), bottom - 18, 'rgba(255,107,157,.52)', 1.5, [6, 5]);
-        label(ctx, zh() ? '电子支撑到此为止' : 'electron support ends here', toX(1.42) + 8, top + 26, '#ff6b9d', 10);
-      }
     } else if (mode === 'neutron-star') {
       const [low, high] = neutronBand(Math.min(Math.max(mass, 1.0), 2.35));
       y = toY((low + high) / 2);
-      if (mass > 2.35) {
-        x = toX(2.35);
-        line(ctx, x, top + 18, x, bottom - 18, 'rgba(255,107,157,.52)', 1.5, [6, 5]);
-        label(ctx, zh() ? '可能的塌缩阈值区' : 'likely collapse-threshold zone', x + 8, top + 26, '#ff6b9d', 10);
-      }
     } else {
       y = toY(Math.max(2.1, 2.95 * mass));
       pointRadius = 6;
     }
 
-    glow(ctx, x, y, 24, color.replace('#', '') === '7ee8c5' ? '126,232,197' :
-      color.replace('#', '') === '7dd3ff' ? '125,211,255' : '199,125,255');
+    const threshold = compactThresholdMarker(mode, mass);
+    x = compactThresholdX(x, threshold, toX);
+    drawCompactThreshold(ctx, x, top, bottom, threshold);
+
+    glow(ctx, x, y, 24, compactGlowRgb(mode));
     ctx.fillStyle = color;
     ctx.beginPath();
     ctx.arc(x, y, pointRadius, 0, Math.PI * 2);
@@ -1114,79 +1155,91 @@
     limitBridge.textContent = snapshot.bridge;
   }
 
-  function renderCompactDetail() {
-    const mode = compactScene.mode;
-    syncCompactMassControl(false);
-    const mass = compactScene.mass;
+  function compactDetailSnapshot(mode, mass) {
     if (mode === 'white-dwarf') {
       const stableMass = Math.min(mass, 1.42);
       const radius = whiteDwarfRadiusKm(stableMass);
-      compactHeadline.textContent = zh()
-        ? '白矮星越重越小。'
-        : 'White-dwarf radii fall as mass rises.';
-      compactSecondary.textContent = zh()
-        ? '电子简并压决定这条分支，直到接近钱德拉塞卡极限。'
-        : 'Electron degeneracy sets this branch until the Chandrasekhar limit is approached.';
-      compactRadius.textContent = mass <= 1.42
-        ? (zh()
-          ? `这个质量对应的冷白矮星半径量级约为 ${Math.round(radius)} km。`
-          : `A cold white dwarf at this mass sits at a radius scale of about ${Math.round(radius)} km.`)
-        : (zh()
-          ? '超过近钱德拉塞卡质量后，就没有稳定的冷白矮星半径了。'
-          : 'Beyond the near-Chandrasekhar mass, there is no stable cold white-dwarf radius.');
-      compactSupport.textContent = zh()
-        ? '支撑来自电子简并压；电子越被约束，费米动量就越高。'
-        : 'Support comes from electron degeneracy; stronger confinement means higher Fermi momentum.';
-      compactKnown.textContent = zh()
-        ? '白矮星分支本身理解得相对扎实；真正不确定的是不同双星怎样把系统推离这条分支。'
-        : 'The white-dwarf branch itself is comparatively secure; the uncertainty lies in which binary histories push systems off it.';
-      return;
+      return {
+        headline: zh()
+          ? '白矮星越重越小。'
+          : 'White-dwarf radii fall as mass rises.',
+        secondary: zh()
+          ? '电子简并压决定这条分支，直到接近钱德拉塞卡极限。'
+          : 'Electron degeneracy sets this branch until the Chandrasekhar limit is approached.',
+        radius: mass <= 1.42
+          ? (zh()
+            ? `这个质量对应的冷白矮星半径量级约为 ${Math.round(radius)} km。`
+            : `A cold white dwarf at this mass sits at a radius scale of about ${Math.round(radius)} km.`)
+          : (zh()
+            ? '超过近钱德拉塞卡质量后，就没有稳定的冷白矮星半径了。'
+            : 'Beyond the near-Chandrasekhar mass, there is no stable cold white-dwarf radius.'),
+        support: zh()
+          ? '支撑来自电子简并压；电子越被约束，费米动量就越高。'
+          : 'Support comes from electron degeneracy; stronger confinement means higher Fermi momentum.',
+        known: zh()
+          ? '白矮星分支本身理解得相对扎实；真正不确定的是不同双星怎样把系统推离这条分支。'
+          : 'The white-dwarf branch itself is comparatively secure; the uncertainty lies in which binary histories push systems off it.'
+      };
     }
 
     if (mode === 'neutron-star') {
       const [low, high] = neutronBand(Math.min(Math.max(mass, 1.0), 2.35));
-      compactHeadline.textContent = zh()
-        ? '中子星半径落在一条观测约束下的不确定带里。'
-        : 'Neutron-star radii live inside an observationally constrained uncertainty band.';
-      compactSecondary.textContent = zh()
-        ? '真正的最大质量取决于致密物质状态方程。'
-        : 'The true maximum mass depends on the dense-matter equation of state.';
-      compactRadius.textContent = zh()
-        ? `这个质量附近的典型半径大致落在 ${low.toFixed(1)}–${high.toFixed(1)} km。`
-        : `At this mass, a typical radius lies around ${low.toFixed(1)}–${high.toFixed(1)} km.`;
-      compactSupport.textContent = zh()
-        ? '支撑来自中子简并压、短程核排斥，以及 TOV 平衡；不是“电子换成中子”这么简单。'
-        : 'Support comes from neutron degeneracy, short-range nuclear repulsion, and TOV balance; it is not just “electrons replaced by neutrons.”';
-      compactKnown.textContent = mass <= 2.05
-        ? (zh()
-          ? '接近 2 个太阳质量的脉冲星说明这类中子星可以稳定存在。'
-          : 'Pulsars near 2 solar masses show that stars in this range can be stable.')
-        : mass <= 2.35
+      return {
+        headline: zh()
+          ? '中子星半径落在一条观测约束下的不确定带里。'
+          : 'Neutron-star radii live inside an observationally constrained uncertainty band.',
+        secondary: zh()
+          ? '真正的最大质量取决于致密物质状态方程。'
+          : 'The true maximum mass depends on the dense-matter equation of state.',
+        radius: zh()
+          ? `这个质量附近的典型半径大致落在 ${low.toFixed(1)}–${high.toFixed(1)} km。`
+          : `At this mass, a typical radius lies around ${low.toFixed(1)}–${high.toFixed(1)} km.`,
+        support: zh()
+          ? '支撑来自中子简并压、短程核排斥，以及 TOV 平衡；不是“电子换成中子”这么简单。'
+          : 'Support comes from neutron degeneracy, short-range nuclear repulsion, and TOV balance; it is not just “electrons replaced by neutrons.”',
+        known: mass <= 2.05
           ? (zh()
-            ? '这里已经逼近模型依赖的最大质量区间；再多一点质量就可能塌成黑洞。'
-            : 'This is already in the model-dependent maximum-mass regime; a little more mass can force collapse to a black hole.')
-          : (zh()
-            ? '这个质量通常被视为黑洞更自然的区域；热支撑或自转只能暂时推迟塌缩。'
-            : 'At this mass, black-hole collapse is usually the more natural outcome; thermal support or rotation can only delay it temporarily.');
-      return;
+            ? '接近 2 个太阳质量的脉冲星说明这类中子星可以稳定存在。'
+            : 'Pulsars near 2 solar masses show that stars in this range can be stable.')
+          : mass <= 2.35
+            ? (zh()
+              ? '这里已经逼近模型依赖的最大质量区间；再多一点质量就可能塌成黑洞。'
+              : 'This is already in the model-dependent maximum-mass regime; a little more mass can force collapse to a black hole.')
+            : (zh()
+              ? '这个质量通常被视为黑洞更自然的区域；热支撑或自转只能暂时推迟塌缩。'
+              : 'At this mass, black-hole collapse is usually the more natural outcome; thermal support or rotation can only delay it temporarily.')
+      };
     }
 
     const radius = 2.95 * mass;
-    compactHeadline.textContent = zh()
-      ? '一旦形成黑洞，视界尺度就由质量直接给出。'
-      : 'Once a black hole exists, the horizon scale is fixed directly by mass.';
-    compactSecondary.textContent = zh()
-      ? '真正不确定的是“何时形成黑洞”，而不是“给定质量时视界多大”。'
-      : 'The uncertain part is when collapse forms a black hole, not how large the horizon is once the mass is known.';
-    compactRadius.textContent = zh()
-      ? `这个质量的史瓦西尺度约为 ${radius.toFixed(1)} km。`
-      : `The Schwarzschild scale at this mass is about ${radius.toFixed(1)} km.`;
-    compactSupport.textContent = zh()
-      ? '黑洞不是另一种被压强支撑的恒星分支；它的视界是因果边界，而不是物质表面。'
-      : 'A black hole is not another pressure-supported stellar branch; its horizon is a causal boundary, not a material surface.';
-    compactKnown.textContent = zh()
-      ? '给定质量后的视界尺度是经典广义相对论的稳固结论；前身星怎样越过阈值则依赖自转、热状态、吸积与状态方程。'
-      : 'The horizon scale for a given mass is a robust prediction of classical general relativity; how progenitors cross the threshold depends on rotation, thermal state, accretion, and the equation of state.';
+    return {
+      headline: zh()
+        ? '一旦形成黑洞，视界尺度就由质量直接给出。'
+        : 'Once a black hole exists, the horizon scale is fixed directly by mass.',
+      secondary: zh()
+        ? '真正不确定的是“何时形成黑洞”，而不是“给定质量时视界多大”。'
+        : 'The uncertain part is when collapse forms a black hole, not how large the horizon is once the mass is known.',
+      radius: zh()
+        ? `这个质量的史瓦西尺度约为 ${radius.toFixed(1)} km。`
+        : `The Schwarzschild scale at this mass is about ${radius.toFixed(1)} km.`,
+      support: zh()
+        ? '黑洞不是另一种被压强支撑的恒星分支；它的视界是因果边界，而不是物质表面。'
+        : 'A black hole is not another pressure-supported stellar branch; its horizon is a causal boundary, not a material surface.',
+      known: zh()
+        ? '给定质量后的视界尺度是经典广义相对论的稳固结论；前身星怎样越过阈值则依赖自转、热状态、吸积与状态方程。'
+        : 'The horizon scale for a given mass is a robust prediction of classical general relativity; how progenitors cross the threshold depends on rotation, thermal state, accretion, and the equation of state.'
+    };
+  }
+
+  function renderCompactDetail() {
+    const mode = compactScene.mode;
+    syncCompactMassControl(false);
+    const snapshot = compactDetailSnapshot(mode, compactScene.mass);
+    compactHeadline.textContent = snapshot.headline;
+    compactSecondary.textContent = snapshot.secondary;
+    compactRadius.textContent = snapshot.radius;
+    compactSupport.textContent = snapshot.support;
+    compactKnown.textContent = snapshot.known;
   }
 
   function syncCompactMassControl(resetMass) {
@@ -1206,7 +1259,7 @@
   }
 
   function applyCompactMode(mode, resetMass) {
-    compactScene.mode = compactModes[mode] ? mode : 'white-dwarf';
+    compactScene.mode = normalizeCompactMode(mode);
     for (const peer of document.querySelectorAll('[data-compact-mode]')) {
       const active = peer.dataset.compactMode === compactScene.mode;
       peer.classList.toggle('active', active);
@@ -1325,13 +1378,15 @@
     renderAll(0);
   }
 
-  const observer = new ResizeObserver(entries => {
+  function handleResizeEntries(entries) {
     for (const entry of entries) {
       const scene = [...scenes.values()].find(item => item.canvas === entry.target);
       if (scene) resize(scene);
     }
     renderAll(0);
-  });
+  }
+
+  const observer = new ResizeObserver(handleResizeEntries);
   for (const scene of scenes.values()) {
     resize(scene);
     observer.observe(scene.canvas);
@@ -1461,7 +1516,7 @@
   collapseOutput.textContent = `${Math.round(collapseScene.progress * 100)}%`;
   evolutionScene.mass = Number(massSlider.value);
   limitsScene.mass = Number(limitSlider.value);
-  compactScene.mode = document.querySelector('[data-compact-mode][aria-pressed="true"]')?.dataset.compactMode || 'white-dwarf';
+  compactScene.mode = selectedCompactMode();
   typeIaScene.stage = Number(typeIaStage.value);
   blackHoleScene.stage = Number(blackHoleSlider.value);
   blackHoleScene.spin = Number(blackHoleSpin.value);
@@ -1475,6 +1530,35 @@
   renderTypeIaDetail();
   renderBlackHoleReadout();
   renderJetDetail();
+
+  if (window.__enableAstroTestHooks) {
+    window.__astroTestHooks = Object.freeze({
+      compactSpec,
+      drawCompactForTest(mode, mass) {
+        drawCompact({ ...compactScene, mode, mass });
+      },
+      compactDetailSnapshot,
+      handleResizeEntries,
+      limitSnapshot,
+      compactThresholdMarker,
+      compactThresholdX,
+      drawCompactThresholdForTest(mode, mass) {
+        const threshold = compactThresholdMarker(mode, mass);
+        drawCompactThreshold(compactScene.ctx, compactScene.width * 0.5, 24, compactScene.height - 36, threshold);
+      },
+      normalizeCompactMode,
+      readPalette,
+      renderCollapseReadout,
+      resizeById(id) {
+        const scene = scenes.get(id);
+        if (scene) resize(scene);
+        return Boolean(scene);
+      },
+      selectedCompactMode,
+      setup,
+      whiteDwarfRadiusKm
+    });
+  }
 
   if (PhysicsUI.motionPaused()) renderAll(0);
   else start();
