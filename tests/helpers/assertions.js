@@ -63,6 +63,61 @@ export async function assertLayout(page) {
     }))
   );
   expect(clipped, 'critical UI should not be clipped horizontally').toEqual([]);
+
+  const instrumentCollisions = await page.locator('.instrument-label').evaluateAll(labels =>
+    labels.flatMap(label => {
+      const problems = [];
+      const labelRect = label.getBoundingClientRect();
+      const children = [...label.children].filter(child => {
+        const style = getComputedStyle(child);
+        return style.display !== 'none' && style.visibility !== 'hidden';
+      });
+      for (let left = 0; left < children.length; left++) {
+        for (let right = left + 1; right < children.length; right++) {
+          const a = children[left].getBoundingClientRect();
+          const b = children[right].getBoundingClientRect();
+          const overlapWidth = Math.min(a.right, b.right) - Math.max(a.left, b.left);
+          const overlapHeight = Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top);
+          if (overlapWidth > 1 && overlapHeight > 1) {
+            problems.push(`caption children overlap by ${overlapWidth.toFixed(1)}×${overlapHeight.toFixed(1)}px`);
+          }
+        }
+      }
+      const canvas = label.parentElement.querySelector(':scope > canvas');
+      if (canvas) {
+        const canvasRect = canvas.getBoundingClientRect();
+        const overlapWidth = Math.min(canvasRect.right, labelRect.right) - Math.max(canvasRect.left, labelRect.left);
+        const overlapHeight = Math.min(canvasRect.bottom, labelRect.bottom) - Math.max(canvasRect.top, labelRect.top);
+        if (overlapWidth > 1 && overlapHeight > 1) {
+          problems.push(`canvas overlaps caption dock by ${overlapWidth.toFixed(1)}×${overlapHeight.toFixed(1)}px`);
+        }
+      }
+      return problems.map(problem => ({
+        problem,
+        parentClass: label.parentElement.className
+      }));
+    })
+  );
+  expect(instrumentCollisions, 'instrument captions should not overlap canvases or sibling text').toEqual([]);
+
+  const heroCollisions = await page.locator('.topic-hero').evaluateAll(heroes =>
+    heroes.flatMap(hero => {
+      const title = hero.querySelector('.topic-title h1');
+      const instrument = hero.querySelector('.hero-instrument');
+      if (!title || !instrument) return [];
+      const titleRect = title.getBoundingClientRect();
+      const instrumentRect = instrument.getBoundingClientRect();
+      const overlapWidth = Math.min(titleRect.right, instrumentRect.right) - Math.max(titleRect.left, instrumentRect.left);
+      const overlapHeight = Math.min(titleRect.bottom, instrumentRect.bottom) - Math.max(titleRect.top, instrumentRect.top);
+      return overlapWidth > 1 && overlapHeight > 1
+        ? [{
+            problem: `hero title overlaps instrument by ${overlapWidth.toFixed(1)}×${overlapHeight.toFixed(1)}px`,
+            title: title.textContent.trim()
+          }]
+        : [];
+    })
+  );
+  expect(heroCollisions, 'hero titles should not overlap their instruments').toEqual([]);
 }
 
 export async function assertNoErrors(errors) {

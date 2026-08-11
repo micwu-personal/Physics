@@ -965,10 +965,12 @@ button {
 }
 
 .topic-title h1 {
+  max-width: 100%;
   margin: 0;
-  font-size: clamp(3.8rem, 8vw, 6rem);
+  font-size: clamp(3rem, 5.6vw, 4.25rem);
   line-height: 0.91;
   letter-spacing: -0.04em;
+  overflow-wrap: break-word;
   text-wrap: balance;
 }
 
@@ -1031,17 +1033,52 @@ math {
 
 .instrument-label {
   position: absolute;
-  left: 18px;
-  right: 18px;
-  bottom: 16px;
+  left: 12px;
+  right: 12px;
+  bottom: 12px;
   display: flex;
-  align-items: end;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 20px;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
   color: var(--muted);
+  background: var(--deep);
   font-size: 12px;
   line-height: 1.5;
   pointer-events: none;
+}
+
+.hero-instrument:has(> canvas) {
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+}
+
+.hero-instrument:has(> canvas) > canvas {
+  position: relative;
+  inset: auto;
+  grid-row: 1;
+  min-height: 0;
+}
+
+.hero-instrument:has(> canvas) > .instrument-label {
+  position: relative;
+  left: auto;
+  right: auto;
+  bottom: auto;
+  grid-row: 2;
+  border-width: 1px 0 0;
+  border-radius: 0;
+}
+
+.instrument-label > span:first-child {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.instrument-label > .rep-badge {
+  flex: 0 0 auto;
 }
 
 .instrument-label strong {
@@ -2096,7 +2133,7 @@ body[data-topic="entropy-information"] {
 .lineage-instrument {
   display: flex;
   align-items: stretch;
-  padding: 26px 26px 78px;
+  padding: 26px 26px 118px;
 }
 
 .lineage-map {
@@ -2577,6 +2614,11 @@ body[data-topic="entropy-information"] {
   .lab-stage,
   .lab {
     min-height: 520px;
+  }
+
+  .instrument-label {
+    flex-direction: column;
+    gap: 10px;
   }
 
   .topic-index {
