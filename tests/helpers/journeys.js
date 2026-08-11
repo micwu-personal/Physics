@@ -154,10 +154,21 @@ export async function exercisePhysicsLight(page) {
 export async function exercisePhysicsField(page) {
   await expect(page.locator('#fieldName')).not.toHaveText('');
   await expect(page.locator('#conceptRibbon .concept')).toHaveCount(3);
+  await expect(page.locator('#questionGrid .field-question-card')).toHaveCount(2);
+  await expect(page.locator('#scaleGrid .field-scale-card')).toHaveCount(3);
+  await expect(page.locator('#fieldVisualHost svg')).toHaveCount(1);
+  await expect(page.locator('#fieldExperiment h3')).not.toHaveText('');
+  await expect(page.locator('#fieldMechanism .field-mechanism-list li')).toHaveCount(3);
   await expect(page.locator('#boundaryGrid .limit')).toHaveCount(2);
+  await expect(page.locator('#fieldMythFrontier .field-limit-card')).toHaveCount(2);
+  await expect(page.locator('#claimReferenceLedger .claim-card')).toHaveCount(2);
   expect(await page.locator('#officialReferences .reference-entry').count()).toBeGreaterThanOrEqual(2);
   await expect(page.locator('#relationMap a')).toHaveCount(3);
   await expect(page.locator('#lineageMap .lineage-column')).toHaveCount(3);
+  const controls = page.locator('#fieldVisualHost input[type="range"]');
+  if (await controls.count()) {
+    await setRange(controls.first(), await controls.first().getAttribute('max'));
+  }
   await page.locator('[data-lang="zh-CN"]').click();
   await expect(page.locator('html')).toHaveAttribute('lang', 'zh-CN');
   await page.locator('[data-lang="en"]').click();

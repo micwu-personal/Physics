@@ -515,6 +515,9 @@ test('physics field authored diagram and equation fallback coverage', async ({ p
   await collectCoverage(page, 'physics-field-fallbacks', async () => {
     await preparePage(page, '/physics/field.html?id=fluids', 'zh-CN');
     await expect(page.locator('#fieldMedia')).toHaveAttribute('data-kind', 'diagram');
+    await expect(page.locator('#fieldVisualHost svg')).toHaveCount(1);
+    await expect(page.locator('#claimReferenceLedger .claim-card')).toHaveCount(2);
+    await setRange(page.locator('#fieldVisualHost input[type="range"]').first(), '4000');
     const equation = await page.evaluate(() => {
       const guide = PhysicsFieldGuides.fluids;
       const tex = guide.tex;
@@ -614,6 +617,11 @@ test('physics every field guide renders coverage', async ({ page }) => {
     for (const id of ids) {
       await page.goto(`/physics/field.html?id=${id}`, { waitUntil: 'load' });
       await expect(page.locator('#fieldName')).not.toHaveText('');
+      await expect(page.locator('#questionGrid .field-question-card')).toHaveCount(2);
+      await expect(page.locator('#scaleGrid .field-scale-card')).toHaveCount(3);
+      await expect(page.locator('#fieldVisualHost svg')).toHaveCount(1);
+      await expect(page.locator('#fieldMythFrontier .field-limit-card')).toHaveCount(2);
+      await expect(page.locator('#claimReferenceLedger .claim-card')).toHaveCount(2);
     }
     // An unknown id must fall back rather than render an empty guide.
     await page.goto('/physics/field.html?id=not-a-field', { waitUntil: 'load' });

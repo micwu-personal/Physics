@@ -163,6 +163,35 @@ test('Every physics field has concrete authoritative references', async ({ page 
   expect(missing).toEqual([]);
 });
 
+test('Every shared field guide exposes enrichment copy, controls, and claim-linked sources', async ({ page }) => {
+  await preparePage(page, '/physics/field.html?id=thermodynamics', 'en');
+  const problems = await page.evaluate(() => {
+    return Object.entries(PhysicsFieldEnrichments).flatMap(([fieldId, entry]) => {
+      const issues = [];
+      if (!Array.isArray(entry.questions) || entry.questions.length < 2) issues.push(`${fieldId}: missing questions`);
+      if (!Array.isArray(entry.scales) || entry.scales.length < 3) issues.push(`${fieldId}: missing scales`);
+      if (!entry.visual?.type || !Array.isArray(entry.visual.controls) || !entry.visual.controls.length) {
+        issues.push(`${fieldId}: missing visual controls`);
+      }
+      if (!entry.experiment?.sources?.length) issues.push(`${fieldId}: missing experiment sources`);
+      if (!entry.mechanism?.steps || entry.mechanism.steps.length < 3) issues.push(`${fieldId}: missing mechanism steps`);
+      if (!entry.misconception?.body?.en || !entry.frontier?.body?.en) issues.push(`${fieldId}: missing misconception/frontier`);
+      if (!Array.isArray(entry.claims) || entry.claims.length < 2) issues.push(`${fieldId}: missing claims`);
+      for (const claim of entry.claims || []) {
+        if (!claim.sources?.length) issues.push(`${fieldId}: claim without sources`);
+        for (const sourceId of claim.sources || []) {
+          const source = PhysicsFieldEnrichmentSources[sourceId];
+          if (!sourceId) issues.push(`${fieldId}: blank source id`);
+          if (!source) issues.push(`${fieldId}: missing source ${sourceId}`);
+          if (source && !source.url.startsWith('https://')) issues.push(`${fieldId}: non-https source ${sourceId}`);
+        }
+      }
+      return issues;
+    });
+  });
+  expect(problems).toEqual([]);
+});
+
 /* Structural invariants the periodic-table feature modules rely on instead of
    re-checking them defensively on every render. */
 test('Periodic Table exposes the anchors its feature modules require', async ({ page }) => {
