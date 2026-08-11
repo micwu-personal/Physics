@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!--
+  THESIS: Entropy is a family of precisely related quantities, not a synonym for disorder; information becomes physics only through a physical carrier and operation.
+  OWN-WORLD: The Evidence Observatory becomes a ledger that compares heat, microstates, messages, quantum states, and horizon area without erasing their different units.
+  STORY: Begin with thermodynamic bookkeeping, derive statistical entropy, cross into Shannon and Landauer, then reach quantum, black-hole, biological, and cosmological limits.
+  FIRST VIEWPORT: One probability distribution drives two side-by-side calculations while a warning names what the shared mathematics does and does not identify.
+  FORM: A hub-and-spokes entropy spine with one interactive comparator and an evidence-fenced gravitational frontier.
+  -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="A bilingual interactive guide to thermodynamic, statistical, information, quantum, black-hole, gravitational, biological, and cosmological entropy.">
+  <title>Entropy &amp; Information — Physics Field Atlas</title>
+  <link rel="stylesheet" href="../assets/fonts/fonts.css">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-topic="entropy-information">
+  <a class="skip-link" href="#main" data-copy-en="Skip to entropy and information" data-copy-zh="跳到熵与信息内容">Skip to entropy and information</a>
+  <div class="topic-shell">
+    <nav class="route-bar" aria-label="Entropy and information routes" data-aria-en="Entropy and information routes" data-aria-zh="熵与信息路线">
+      <a class="route-home" href="./index.html#genealogy" data-copy-en="Back to the field atlas" data-copy-zh="返回物理领域图谱">Back to the field atlas</a>
+      <div class="route-links">
+        <a href="./field.html?id=thermodynamics" data-copy-en="Thermodynamics" data-copy-zh="热力学">Thermodynamics</a>
+        <a href="./phase-transitions.html" data-copy-en="Phase transitions" data-copy-zh="相变">Phase transitions</a>
+        <a href="./astrophysics.html#black-holes" data-copy-en="Black holes" data-copy-zh="黑洞">Black holes</a>
+      </div>
+      <div class="site-controls" aria-label="Page controls" data-aria-en="Page controls" data-aria-zh="页面控制">
+        <button class="motion-toggle" type="button" aria-pressed="false">Pause motion</button>
+        <button type="button" data-lang="en" aria-pressed="true">EN</button>
+        <button type="button" data-lang="zh-CN" aria-pressed="false">中文</button>
+      </div>
+    </nav>
+
+    <header class="topic-hero">
+      <div class="topic-title">
+        <h1 data-copy-en="Entropy & information" data-copy-zh="熵与信息">Entropy &amp; information</h1>
+        <p data-copy-en="Entropy appears in engines, probability, coding, quantum states, living systems, and black holes. The formulas resemble one another because they all summarize distributions, but their physical referents, units, and operational meanings are not interchangeable."
+           data-copy-zh="熵出现在热机、概率、编码、量子态、生命系统与黑洞中。这些公式相似，是因为它们都概括分布；但它们所指的物理对象、单位与操作含义不能互换。">
+          Entropy appears in engines, probability, coding, quantum states, living systems, and black holes. The formulas resemble one another because they all summarize distributions, but their physical referents, units, and operational meanings are not interchangeable.
+        </p>
+        <span class="hero-equation">S = k<sub>B</sub> ln W · H = -Σp log<sub>2</sub>p · S<sub>BH</sub> = k<sub>B</sub>A/(4ℓ<sub>P</sub>²)</span>
+        <div class="hero-actions">
+          <a class="primary-action" href="#comparator" data-copy-en="Compare microstates and messages" data-copy-zh="比较微观态与消息">Compare microstates and messages</a>
+          <a class="secondary-action" href="#black-hole-entropy" data-copy-en="Reach the black-hole paradox" data-copy-zh="进入黑洞信息悖论">Reach the black-hole paradox</a>
+        </div>
+      </div>
+      <div class="hero-instrument deep-topic-canvas">
+        <canvas id="entropyCanvas" aria-label="Calculated comparison of one probability distribution used for statistical and information entropy" data-aria-en="Calculated comparison of one probability distribution used for statistical and information entropy" data-aria-zh="同一概率分布用于统计熵与信息熵计算的对照图">Probability bars feed statistical and Shannon entropy readouts with different units.</canvas>
+        <div class="instrument-label">
+          <span><strong data-copy-en="Same probability structure; different physical question." data-copy-zh="相同的概率结构，不同的物理问题。">Same probability structure; different physical question.</strong><span data-copy-en="The left ledger uses kB; the right uses bits. Neither bar chart is a microscopic photograph." data-copy-zh="左侧账本使用 kB，右侧使用比特；柱形图都不是微观照片。">The left ledger uses kB; the right uses bits. Neither bar chart is a microscopic photograph.</span></span>
+          <span class="rep-badge model" data-copy-en="Calculated probability model" data-copy-zh="计算概率模型">Calculated probability model</span>
+        </div>
+      </div>
+    </header>
+
+    <nav class="topic-index" aria-label="Entropy and information sections" data-aria-en="Entropy and information sections" data-aria-zh="熵与信息章节">
+      <a href="#spine" data-copy-en="Entropy spine" data-copy-zh="熵的主线">Entropy spine</a>
+      <a href="#thermodynamic" data-copy-en="Thermodynamic" data-copy-zh="热力学熵">Thermodynamic</a>
+      <a href="#statistical" data-copy-en="Statistical" data-copy-zh="统计熵">Statistical</a>
+      <a href="#shannon" data-copy-en="Shannon" data-copy-zh="信息熵">Shannon</a>
+      <a href="#quantum" data-copy-en="Quantum" data-copy-zh="量子熵">Quantum</a>
+      <a href="#black-hole-entropy" data-copy-en="Black holes" data-copy-zh="黑洞熵">Black holes</a>
+      <a href="#life-cosmos" data-copy-en="Life & cosmos" data-copy-zh="生命与宇宙">Life &amp; cosmos</a>
+      <a href="#references" data-copy-en="References" data-copy-zh="参考资料">References</a>
+    </nav>
+
+    <main id="main">
+      <section id="spine" class="topic-section">
+        <header>
+          <h2 data-copy-en="One word, eight connected questions." data-copy-zh="一个词，八个相连但不同的问题。">One word, eight connected questions.</h2>
+          <p data-copy-en="Follow the sequence in order. Each step inherits a mathematical idea from the previous one, then adds a new physical interpretation or operational task."
+             data-copy-zh="请按顺序追踪。每一步都继承前一步的数学思想，再加入新的物理解释或操作任务。">Follow the sequence in order. Each step inherits a mathematical idea from the previous one, then adds a new physical interpretation or operational task.</p>
+        </header>
+        <ol class="entropy-spine">
+          <li><strong data-copy-en="Thermodynamics" data-copy-zh="热力学">Thermodynamics</strong><span data-copy-en="How much entropy enters, leaves, and is produced while heat, work, and matter flow?" data-copy-zh="当热、功与物质流动时，多少熵进入、离开，并在内部产生？">How much entropy enters, leaves, and is produced while heat, work, and matter flow?</span></li>
+          <li><strong data-copy-en="Statistical mechanics" data-copy-zh="统计力学">Statistical mechanics</strong><span data-copy-en="How many microscopic states or probability weights are compatible with the same macroscopic description?" data-copy-zh="有多少微观状态或概率权重与同一种宏观描述相容？">How many microscopic states or probability weights are compatible with the same macroscopic description?</span></li>
+          <li><strong data-copy-en="Information theory" data-copy-zh="信息论">Information theory</strong><span data-copy-en="How uncertain is a message source, how short can its code be, and how much can a noisy channel carry reliably?" data-copy-zh="消息源有多不确定、编码能压缩到多短、有噪信道能可靠传输多少信息？">How uncertain is a message source, how short can its code be, and how much can a noisy channel carry reliably?</span></li>
+          <li><strong data-copy-en="Information thermodynamics" data-copy-zh="信息热力学">Information thermodynamics</strong><span data-copy-en="What thermodynamic cost follows when physical memory is measured, controlled, or logically erased?" data-copy-zh="物理存储器被测量、控制或逻辑擦除时，会产生什么热力学代价？">What thermodynamic cost follows when physical memory is measured, controlled, or logically erased?</span></li>
+          <li><strong data-copy-en="Quantum information" data-copy-zh="量子信息">Quantum information</strong><span data-copy-en="How do mixed states, entanglement, decoherence, channels, no-cloning, and error correction constrain quantum records?" data-copy-zh="混态、纠缠、退相干、量子信道、不可克隆与纠错如何约束量子记录？">How do mixed states, entanglement, decoherence, channels, no-cloning, and error correction constrain quantum records?</span></li>
+          <li><strong data-copy-en="Black-hole thermodynamics" data-copy-zh="黑洞热力学">Black-hole thermodynamics</strong><span data-copy-en="Why does horizon area behave like entropy, and can evaporation preserve quantum information?" data-copy-zh="为什么视界面积表现得像熵，蒸发过程能否保留量子信息？">Why does horizon area behave like entropy, and can evaporation preserve quantum information?</span></li>
+          <li><strong data-copy-en="Gravitational and cosmological entropy" data-copy-zh="引力与宇宙学熵">Gravitational and cosmological entropy</strong><span data-copy-en="Why was the early universe gravitationally low-entropy, and how can clumping accompany total entropy growth?" data-copy-zh="为什么早期宇宙在引力意义上低熵，物质聚集又为何能与总熵增长并存？">Why was the early universe gravitationally low-entropy, and how can clumping accompany total entropy growth?</span></li>
+          <li><strong data-copy-en="Life and complex matter" data-copy-zh="生命与复杂物质">Life and complex matter</strong><span data-copy-en="How do open systems maintain local organization by consuming free energy and exporting entropy?" data-copy-zh="开放系统如何通过消耗自由能并输出熵来维持局域组织？">How do open systems maintain local organization by consuming free energy and exporting entropy?</span></li>
+        </ol>
+      </section>
+
+      <section id="thermodynamic" class="topic-section">
+        <header>
+          <h2 data-copy-en="Thermodynamic entropy is a state function and a balance law." data-copy-zh="热力学熵是状态函数，也是一条收支定律。">Thermodynamic entropy is a state function and a balance law.</h2>
+          <p data-copy-en="For reversible heat transfer, dS = δQrev/T defines the entropy change. Real processes add entropy production. The second law constrains the total entropy of an isolated system; it does not demand that every subsystem become less organized at every instant."
+             data-copy-zh="对可逆传热，dS = δQrev/T 定义熵变；真实过程还会产生熵。第二定律约束孤立系统的总熵，并不要求每个子系统在每一时刻都变得更无序。">For reversible heat transfer, dS = δQrev/T defines the entropy change. Real processes add entropy production. The second law constrains the total entropy of an isolated system; it does not demand that every subsystem become less organized at every instant.</p>
+        </header>
+        <div class="compare-equations">
+          <article><strong>dS = δQ<sub>rev</sub>/T</strong><span data-copy-en="A reversible path defines the state-function difference. Heat is path-dependent; entropy change is not." data-copy-zh="可逆路径定义状态函数之差。热量依赖路径，熵变不依赖。">A reversible path defines the state-function difference. Heat is path-dependent; entropy change is not.</span></article>
+          <article><strong>ΔS<sub>sys</sub> = S<sub>in</sub> - S<sub>out</sub> + S<sub>gen</sub></strong><span data-copy-en="Open systems carry entropy with heat and matter. Internal irreversibility contributes Sgen ≥ 0." data-copy-zh="开放系统通过热与物质携带熵；内部不可逆性贡献 Sgen ≥ 0。">Open systems carry entropy with heat and matter. Internal irreversibility contributes Sgen ≥ 0.</span></article>
+          <article><strong>ΔS<sub>isolated</sub> ≥ 0</strong><span data-copy-en="Equality is the reversible ideal. Friction, diffusion, viscous flow, finite-temperature heat transfer, and chemical reaction produce entropy." data-copy-zh="等号对应理想可逆过程；摩擦、扩散、黏性流动、有限温差传热与化学反应都会产生熵。">Equality is the reversible ideal. Friction, diffusion, viscous flow, finite-temperature heat transfer, and chemical reaction produce entropy.</span></article>
+        </div>
+        <div class="theory-fence">
+          <span class="science-status established" data-copy-en="Common myth corrected" data-copy-zh="常见误解纠正">Common myth corrected</span>
+          <h3 data-copy-en="Local entropy can decrease." data-copy-zh="局域熵可以降低。">Local entropy can decrease.</h3>
+          <p data-copy-en="A refrigerator cools its interior, a crystal orders as it grows, and a cell builds structures. Each is an open subsystem. The surroundings gain at least as much entropy as the subsystem loses once energy and matter flows are counted."
+             data-copy-zh="冰箱降低内部温度，晶体生长时形成有序结构，细胞构建复杂组织。它们都是开放子系统；计入能量与物质流后，环境增加的熵至少抵消子系统减少的熵。">A refrigerator cools its interior, a crystal orders as it grows, and a cell builds structures. Each is an open subsystem. The surroundings gain at least as much entropy as the subsystem loses once energy and matter flows are counted.</p>
+        </div>
+      </section>
+
+      <section id="statistical" class="topic-section">
+        <header>
+          <h2 data-copy-en="Statistical entropy explains why macroscopic irreversibility emerges." data-copy-zh="统计熵解释宏观不可逆性如何涌现。">Statistical entropy explains why macroscopic irreversibility emerges.</h2>
+          <p data-copy-en="Microscopic equations can be reversible while overwhelmingly many compatible microstates look macroscopically equilibrated. Coarse-graining records the variables we resolve and groups the rest into macrostates; it is part of the physical description, not a trick."
+             data-copy-zh="微观方程可以可逆，而绝大多数相容微观态在宏观上都呈现平衡。粗粒化记录可分辨变量，并把其余细节归入宏观态；这是物理描述的一部分，不是取巧。">Microscopic equations can be reversible while overwhelmingly many compatible microstates look macroscopically equilibrated. Coarse-graining records the variables we resolve and groups the rest into macrostates; it is part of the physical description, not a trick.</p>
+        </header>
+        <div class="entropy-ledger">
+          <article class="entropy-entry"><span class="science-status established" data-copy-en="Equal-weight microstates" data-copy-zh="等权微观态">Equal-weight microstates</span><h3 data-copy-en="Boltzmann entropy" data-copy-zh="玻尔兹曼熵">Boltzmann entropy</h3><p data-copy-en="W counts microscopic arrangements compatible with the same macrostate. A macrostate with enormously more compatible arrangements is overwhelmingly more likely." data-copy-zh="W 统计与同一宏观态相容的微观排列数；拥有极多相容排列的宏观态在统计上占压倒性优势。">W counts microscopic arrangements compatible with the same macrostate. A macrostate with enormously more compatible arrangements is overwhelmingly more likely.</p><span class="formula">S = k<sub>B</sub> ln W</span></article>
+          <article class="entropy-entry"><span class="science-status established" data-copy-en="Probability distributions" data-copy-zh="概率分布">Probability distributions</span><h3 data-copy-en="Gibbs entropy" data-copy-zh="吉布斯熵">Gibbs entropy</h3><p data-copy-en="The Gibbs form weights states by probability. Microcanonical, canonical, and grand-canonical ensembles differ by which quantities are fixed and which may fluctuate." data-copy-zh="吉布斯形式按概率给各状态加权。微正则、正则与巨正则系综的区别在于哪些量固定、哪些量允许涨落。">The Gibbs form weights states by probability. Microcanonical, canonical, and grand-canonical ensembles differ by which quantities are fixed and which may fluctuate.</p><span class="formula">S = -k<sub>B</sub>Σp<sub>i</sub> ln p<sub>i</sub></span></article>
+          <article class="entropy-entry"><span class="science-status inferred" data-copy-en="Identity matters" data-copy-zh="粒子同一性很重要">Identity matters</span><h3 data-copy-en="Mixing and the Gibbs paradox" data-copy-zh="混合与吉布斯佯谬">Mixing and the Gibbs paradox</h3><p data-copy-en="Mixing distinguishable gases adds entropy; merely removing a partition between truly identical gases does not add the same term. Quantum indistinguishability makes the counting consistent." data-copy-zh="混合可区分气体会增加熵；只移除完全相同气体之间的隔板则不会产生同样熵项。量子不可分辨性使计数保持一致。">Mixing distinguishable gases adds entropy; merely removing a partition between truly identical gases does not add the same term. Quantum indistinguishability makes the counting consistent.</p></article>
+          <article class="entropy-entry"><span class="science-status established" data-copy-en="Small systems fluctuate" data-copy-zh="小系统会涨落">Small systems fluctuate</span><h3 data-copy-en="Fluctuation theorems" data-copy-zh="涨落定理">Fluctuation theorems</h3><p data-copy-en="Small systems can briefly show entropy-decreasing trajectories. Jarzynski and Crooks relations quantify those rare fluctuations while preserving the statistical content of the second law." data-copy-zh="小系统可以短暂出现熵减少轨迹。Jarzynski 与 Crooks 关系定量描述这些稀有涨落，同时保持第二定律的统计含义。">Small systems can briefly show entropy-decreasing trajectories. Jarzynski and Crooks relations quantify those rare fluctuations while preserving the statistical content of the second law.</p></article>
+        </div>
+      </section>
+
+      <section id="comparator" class="topic-section">
+        <header>
+          <h2 data-copy-en="The same distribution can answer a physics question or a coding question." data-copy-zh="同一分布既可回答物理问题，也可回答编码问题。">The same distribution can answer a physics question or a coding question.</h2>
+          <p data-copy-en="Adjust the bias. The numerical shape changes in parallel, but the left result is entropy per Boltzmann constant for a physical ensemble while the right result is uncertainty in bits for a message source."
+             data-copy-zh="调节偏置。两侧数值形状会同步变化，但左侧结果是物理系综中以玻尔兹曼常数为单位的熵，右侧结果是消息源以比特为单位的不确定性。">Adjust the bias. The numerical shape changes in parallel, but the left result is entropy per Boltzmann constant for a physical ensemble while the right result is uncertainty in bits for a message source.</p>
+        </header>
+        <div class="scrub-panel">
+          <div class="scrub-copy">
+            <h3 data-copy-en="Microstates ↔ messages comparator" data-copy-zh="微观态 ↔ 消息对照器">Microstates ↔ messages comparator</h3>
+            <p data-copy-en="A uniform four-symbol source has maximum uncertainty and needs the longest average code. A heavily biased source is more predictable and compressible. The statistical ledger reads the same probabilities as weights over physical states."
+               data-copy-zh="均匀的四符号消息源不确定性最大，平均编码最长；高度偏置的消息源更可预测，也更易压缩。统计账本则把同一组概率理解为物理状态权重。">A uniform four-symbol source has maximum uncertainty and needs the longest average code. A heavily biased source is more predictable and compressible. The statistical ledger reads the same probabilities as weights over physical states.</p>
+          </div>
+          <div class="scrub-control">
+            <div class="control-group">
+              <label for="entropyBias"><span data-copy-en="Source bias" data-copy-zh="消息源偏置">Source bias</span><output id="entropyBiasOut" for="entropyBias">0.00</output></label>
+              <input id="entropyBias" type="range" min="0" max="0.9" value="0" step="0.01">
+            </div>
+            <p class="lab-note"><span class="rep-badge model" data-copy-en="Exact calculation" data-copy-zh="精确计算">Exact calculation</span><br><span data-copy-en="Bars are a probability model. Log base 2 gives bits; natural logarithms paired with kB give thermodynamic units only when the probabilities describe physical states under the required assumptions."
+               data-copy-zh="柱形图表示概率模型。以 2 为底的对数给出比特；只有当概率在相应假设下描述物理状态时，自然对数与 kB 的组合才具有热力学单位。">Bars are a probability model. Log base 2 gives bits; natural logarithms paired with kB give thermodynamic units only when the probabilities describe physical states under the required assumptions.</span></p>
+          </div>
+        </div>
+      </section>
+
+      <section id="shannon" class="topic-section">
+        <header>
+          <h2 data-copy-en="Information theory measures uncertainty, dependence, and reliable communication." data-copy-zh="信息论测量不确定性、依赖关系与可靠通信。">Information theory measures uncertainty, dependence, and reliable communication.</h2>
+          <p data-copy-en="Shannon entropy is not a substance stored in a message. It is a property of a probability model. Coding theorems turn that model into limits on compression and noisy communication."
+             data-copy-zh="香农熵不是储存在消息中的某种物质，而是概率模型的性质。编码定理把这种模型转化为压缩与有噪通信的极限。">Shannon entropy is not a substance stored in a message. It is a property of a probability model. Coding theorems turn that model into limits on compression and noisy communication.</p>
+        </header>
+        <div class="classification-grid">
+          <article class="classification"><span class="science-status established" data-copy-en="Source coding" data-copy-zh="信源编码">Source coding</span><h3 data-copy-en="Shannon entropy" data-copy-zh="香农熵">Shannon entropy</h3><p data-copy-en="H is the minimum asymptotic average description length for an ideal code matched to a source. It is measured in bits for log2 and nats for ln." data-copy-zh="H 是与消息源匹配的理想编码在渐近条件下的最小平均描述长度。log2 对应比特，ln 对应奈特。">H is the minimum asymptotic average description length for an ideal code matched to a source. It is measured in bits for log2 and nats for ln.</p><span class="formula">H(X) = -Σp(x)log p(x)</span></article>
+          <article class="classification"><span class="science-status established" data-copy-en="Dependence" data-copy-zh="依赖关系">Dependence</span><h3 data-copy-en="Mutual and conditional information" data-copy-zh="互信息与条件熵">Mutual and conditional information</h3><p data-copy-en="Conditional entropy asks what uncertainty remains after another variable is known. Mutual information asks how much knowing one variable reduces uncertainty about the other." data-copy-zh="条件熵询问已知另一个变量后还剩多少不确定性；互信息询问知道一个变量能让另一个变量的不确定性减少多少。">Conditional entropy asks what uncertainty remains after another variable is known. Mutual information asks how much knowing one variable reduces uncertainty about the other.</p><span class="formula">I(X;Y)=H(X)-H(X|Y)</span></article>
+          <article class="classification"><span class="science-status established" data-copy-en="Noisy communication" data-copy-zh="有噪通信">Noisy communication</span><h3 data-copy-en="Channel capacity" data-copy-zh="信道容量">Channel capacity</h3><p data-copy-en="Capacity is the greatest rate at which a channel can carry information with arbitrarily small error using sufficiently long, well-designed codes. It is not the raw symbol rate." data-copy-zh="信道容量是在编码足够长且设计合理时，能以任意小错误率传输信息的最高速率，并不等于原始符号速率。">Capacity is the greatest rate at which a channel can carry information with arbitrarily small error using sufficiently long, well-designed codes. It is not the raw symbol rate.</p><span class="formula">C = max I(X;Y)</span></article>
+          <article class="classification"><span class="science-status established" data-copy-en="Comparing models" data-copy-zh="比较模型">Comparing models</span><h3 data-copy-en="Relative entropy and data processing" data-copy-zh="相对熵与数据处理">Relative entropy and data processing</h3><p data-copy-en="KL divergence measures how distinguishable one distribution is from another; it is asymmetric and not a metric. Local post-processing cannot create new information about the original source." data-copy-zh="KL 散度衡量两个分布的可区分程度；它不对称，也不是距离度量。局域后处理不能凭空增加关于原始信源的信息。">KL divergence measures how distinguishable one distribution is from another; it is asymmetric and not a metric. Local post-processing cannot create new information about the original source.</p><span class="formula">D<sub>KL</sub>(P||Q) ≥ 0</span></article>
+        </div>
+      </section>
+
+      <section id="landauer" class="topic-section">
+        <header>
+          <h2 data-copy-en="Information becomes thermodynamic when a physical operation makes it so." data-copy-zh="当物理操作把信息带入热力学时，两者才真正相遇。">Information becomes thermodynamic when a physical operation makes it so.</h2>
+          <p data-copy-en="Information must be represented by physical states, but information is not itself energy or matter. Landauer's principle concerns the heat cost of logically irreversible erasure in a thermal environment—not a universal energy stored inside each bit."
+             data-copy-zh="信息必须由物理状态承载，但信息本身不是能量或物质。兰道尔原理讨论热环境中逻辑不可逆擦除的散热下限，而不是每个比特内部都储存一份固定能量。">Information must be represented by physical states, but information is not itself energy or matter. Landauer's principle concerns the heat cost of logically irreversible erasure in a thermal environment—not a universal energy stored inside each bit.</p>
+        </header>
+        <div class="concept-ribbon">
+          <article class="concept"><div class="concept-mark">Q ≥ k<sub>B</sub>T ln 2</div><h3 data-copy-en="Landauer bound" data-copy-zh="兰道尔下限">Landauer bound</h3><p data-copy-en="Resetting one unknown bit to a standard value while coupled to a bath dissipates at least kBT ln 2 in the quasistatic ideal. Faster or imperfect hardware usually costs more." data-copy-zh="把一个未知比特在与热浴耦合时重置为标准值，在准静态理想极限下至少耗散 kBT ln 2；更快或不完美的硬件通常耗散更多。">Resetting one unknown bit to a standard value while coupled to a bath dissipates at least kBT ln 2 in the quasistatic ideal. Faster or imperfect hardware usually costs more.</p></article>
+          <article class="concept"><div class="concept-mark">measure → use → reset</div><h3 data-copy-en="Maxwell's demon" data-copy-zh="麦克斯韦妖">Maxwell's demon</h3><p data-copy-en="A demon can correlate memory with molecules and use feedback, but a reusable cycle must eventually manage and reset memory. Full accounting restores the second law." data-copy-zh="妖可以让存储器与分子建立相关并利用反馈，但可重复循环最终必须管理并重置存储器；完整记账恢复第二定律。">A demon can correlate memory with molecules and use feedback, but a reusable cycle must eventually manage and reset memory. Full accounting restores the second law.</p></article>
+          <article class="concept"><div class="concept-mark">physical carrier ≠ information</div><h3 data-copy-en="Information is physical" data-copy-zh="信息是物理的">Information is physical</h3><p data-copy-en="The phrase means records require physical degrees of freedom and obey physical dynamics. It does not mean information is a fifth form of matter, or that every bit automatically contains kBT ln 2 of energy." data-copy-zh="这句话意味着记录需要物理自由度并服从物理动力学；它不意味着信息是第五种物质，也不意味着每个比特自动包含 kBT ln 2 的能量。">The phrase means records require physical degrees of freedom and obey physical dynamics. It does not mean information is a fifth form of matter, or that every bit automatically contains kBT ln 2 of energy.</p></article>
+        </div>
+      </section>
+
+      <section id="quantum" class="topic-section">
+        <header>
+          <h2 data-copy-en="Quantum entropy distinguishes total purity from local uncertainty." data-copy-zh="量子熵区分整体纯度与局域不确定性。">Quantum entropy distinguishes total purity from local uncertainty.</h2>
+          <p data-copy-en="The density matrix describes pure states, classical mixtures, and subsystems of entangled states in one language. A total entangled state can be pure while either subsystem is mixed."
+             data-copy-zh="密度矩阵用统一语言描述纯态、经典混合态与纠缠态的子系统。整体纠缠态可以是纯态，而任一子系统却是混态。">The density matrix describes pure states, classical mixtures, and subsystems of entangled states in one language. A total entangled state can be pure while either subsystem is mixed.</p>
+        </header>
+        <div class="entropy-ledger">
+          <article class="entropy-entry"><span class="science-status established" data-copy-en="Quantum state entropy" data-copy-zh="量子态熵">Quantum state entropy</span><h3 data-copy-en="von Neumann entropy" data-copy-zh="冯·诺伊曼熵">von Neumann entropy</h3><p data-copy-en="A pure state has zero von Neumann entropy. A mixed state has positive entropy set by the eigenvalues of its density matrix." data-copy-zh="纯态的冯·诺伊曼熵为零；混态的熵为正，其大小由密度矩阵本征值决定。">A pure state has zero von Neumann entropy. A mixed state has positive entropy set by the eigenvalues of its density matrix.</p><span class="formula">S(ρ) = -Tr(ρ log ρ)</span></article>
+          <article class="entropy-entry"><span class="science-status established" data-copy-en="Correlations across a cut" data-copy-zh="跨分割的关联">Correlations across a cut</span><h3 data-copy-en="Entanglement entropy" data-copy-zh="纠缠熵">Entanglement entropy</h3><p data-copy-en="Tracing out one part of an entangled pure state leaves a mixed reduced state. Its entropy measures entanglement for a bipartite pure state and often scales with boundary area in many-body ground states." data-copy-zh="对纠缠纯态的一部分取偏迹后，剩余约化态成为混态。对二分纯态，它的熵衡量纠缠；许多多体基态中还常随边界面积标度。">Tracing out one part of an entangled pure state leaves a mixed reduced state. Its entropy measures entanglement for a bipartite pure state and often scales with boundary area in many-body ground states.</p></article>
+          <article class="entropy-entry"><span class="science-status established" data-copy-en="Open quantum dynamics" data-copy-zh="开放量子动力学">Open quantum dynamics</span><h3 data-copy-en="Decoherence and channels" data-copy-zh="退相干与量子信道">Decoherence and channels</h3><p data-copy-en="Entanglement with an environment suppresses accessible interference and creates classical-looking records. A quantum channel describes noise, loss, environment, or measurement; decoherence alone is not a complete interpretation of measurement." data-copy-zh="系统与环境纠缠会抑制可观测干涉并产生经典外观的记录。量子信道描述噪声、损耗、环境或测量；退相干本身并不是完整的测量诠释。">Entanglement with an environment suppresses accessible interference and creates classical-looking records. A quantum channel describes noise, loss, environment, or measurement; decoherence alone is not a complete interpretation of measurement.</p></article>
+          <article class="entropy-entry"><span class="science-status established" data-copy-en="Information constraints" data-copy-zh="信息约束">Information constraints</span><h3 data-copy-en="No-cloning and error correction" data-copy-zh="不可克隆与量子纠错">No-cloning and error correction</h3><p data-copy-en="An unknown quantum state cannot be copied perfectly. Quantum error correction instead spreads logical information nonlocally across many physical qubits so local errors can be diagnosed without reading the encoded state directly." data-copy-zh="未知量子态不能被完美复制。量子纠错转而把逻辑信息非局域地分布到多个物理量子比特上，从而在不直接读取编码态的情况下诊断局域错误。">An unknown quantum state cannot be copied perfectly. Quantum error correction instead spreads logical information nonlocally across many physical qubits so local errors can be diagnosed without reading the encoded state directly.</p></article>
+        </div>
+      </section>
+
+      <section id="black-hole-entropy" class="topic-section">
+        <header>
+          <h2 data-copy-en="A black hole turns geometry into thermodynamics." data-copy-zh="黑洞把几何转化为热力学。">A black hole turns geometry into thermodynamics.</h2>
+          <p data-copy-en="Classical horizon area never decreases in ordinary processes. Quantum field theory on curved spacetime assigns the hole a temperature and entropy. The result is among the deepest clues that spacetime and information share microscopic structure."
+             data-copy-zh="在普通经典过程中，视界面积不会减少。弯曲时空量子场论赋予黑洞温度与熵。这一结果是时空与信息共享微观结构的最深线索之一。">Classical horizon area never decreases in ordinary processes. Quantum field theory on curved spacetime assigns the hole a temperature and entropy. The result is among the deepest clues that spacetime and information share microscopic structure.</p>
+        </header>
+        <div class="compare-equations">
+          <article><strong>S<sub>BH</sub> = k<sub>B</sub>A/(4ℓ<sub>P</sub>²)</strong><span data-copy-en="Bekenstein-Hawking entropy scales with horizon area, not interior volume. For astrophysical holes it is enormous." data-copy-zh="贝肯斯坦—霍金熵随视界面积而非内部体积标度；对天体黑洞而言数值极其巨大。">Bekenstein-Hawking entropy scales with horizon area, not interior volume. For astrophysical holes it is enormous.</span></article>
+          <article><strong>T<sub>H</sub> = ℏc³/(8πGMk<sub>B</sub>)</strong><span data-copy-en="Larger black holes are colder. Hawking radiation is a semiclassical prediction and has not been directly observed from an astrophysical black hole." data-copy-zh="黑洞越大，温度越低。霍金辐射是半经典预言，尚未从天体黑洞直接观测到。">Larger black holes are colder. Hawking radiation is a semiclassical prediction and has not been directly observed from an astrophysical black hole.</span></article>
+          <article><strong>Δ(S<sub>outside</sub>+S<sub>BH</sub>) ≥ 0</strong><span data-copy-en="The generalized second law combines ordinary exterior entropy with black-hole entropy." data-copy-zh="广义第二定律把外部普通熵与黑洞熵合并记账。">The generalized second law combines ordinary exterior entropy with black-hole entropy.</span></article>
+        </div>
+        <div class="classification-grid">
+          <article class="classification"><span class="science-status inferred" data-copy-en="Semiclassical theory" data-copy-zh="半经典理论">Semiclassical theory</span><h3 data-copy-en="The information paradox" data-copy-zh="信息悖论">The information paradox</h3><p data-copy-en="Hawking's calculation makes the outgoing radiation look thermal. Complete evaporation would then seem to erase distinctions among initial quantum states, conflicting with unitary quantum evolution." data-copy-zh="霍金计算使出射辐射看起来近似热辐射；若黑洞完全蒸发，初始量子态之间的差别似乎会被抹去，从而与幺正量子演化冲突。">Hawking's calculation makes the outgoing radiation look thermal. Complete evaporation would then seem to erase distinctions among initial quantum states, conflicting with unitary quantum evolution.</p></article>
+          <article class="classification"><span class="science-status model" data-copy-en="Theoretical benchmark" data-copy-zh="理论基准">Theoretical benchmark</span><h3 data-copy-en="The Page curve" data-copy-zh="佩奇曲线">The Page curve</h3><p data-copy-en="If evaporation is unitary, radiation entropy should rise, turn over near the Page time, and eventually fall. The curve is not an astronomical measurement." data-copy-zh="若蒸发保持幺正，辐射熵应先上升，在佩奇时间附近转折，最终下降。这条曲线并非天文观测结果。">If evaporation is unitary, radiation entropy should rise, turn over near the Page time, and eventually fall. The curve is not an astronomical measurement.</p></article>
+          <article class="classification"><span class="science-status model" data-copy-en="Quantum-gravity approaches" data-copy-zh="量子引力方案">Quantum-gravity approaches</span><h3 data-copy-en="Complementarity, firewalls, islands" data-copy-zh="互补性、防火墙与岛公式">Complementarity, firewalls, islands</h3><p data-copy-en="These frameworks reorganize where information is encoded and which semiclassical regions count in the entropy. They are active theory, not observed structures near a horizon." data-copy-zh="这些框架重新组织信息编码位置，以及熵计算中哪些半经典区域应被计入。它们是活跃理论，并非视界附近已观测到的结构。">These frameworks reorganize where information is encoded and which semiclassical regions count in the entropy. They are active theory, not observed structures near a horizon.</p></article>
+          <article class="classification"><span class="science-status model" data-copy-en="Motivating principle" data-copy-zh="启发性原理">Motivating principle</span><h3 data-copy-en="Area laws and holography" data-copy-zh="面积律与全息">Area laws and holography</h3><p data-copy-en="Horizon entropy and entanglement area laws helped motivate the holographic principle: a quantum-gravity description of a region may encode information according to its boundary. This is not the claim that our everyday world is a literal projection screen." data-copy-zh="视界熵与纠缠面积律推动了全息原理：一个区域的量子引力描述可能按其边界编码信息。这不意味着日常世界是字面意义上的投影屏幕。">Horizon entropy and entanglement area laws helped motivate the holographic principle: a quantum-gravity description of a region may encode information according to its boundary. This is not the claim that our everyday world is a literal projection screen.</p></article>
+        </div>
+      </section>
+
+      <section id="life-cosmos" class="topic-section">
+        <header>
+          <h2 data-copy-en="Life exports entropy; gravity changes what high entropy looks like." data-copy-zh="生命输出熵；引力改变高熵状态的外观。">Life exports entropy; gravity changes what high entropy looks like.</h2>
+          <p data-copy-en="These are the places where the word 'disorder' fails most dramatically. A cell can become organized while dissipating free energy, and gravitating matter can clump while the total accessible entropy rises."
+             data-copy-zh="这些地方最能暴露“熵就是无序”的局限。细胞可以在耗散自由能时建立组织；受引力作用的物质可以聚集，同时可及总熵仍然上升。">These are the places where the word 'disorder' fails most dramatically. A cell can become organized while dissipating free energy, and gravitating matter can clump while the total accessible entropy rises.</p>
+        </header>
+        <div class="case-grid">
+          <article class="case"><h3 data-copy-en="Chemistry" data-copy-zh="化学">Chemistry</h3><p class="case-scale" data-copy-en="Free energy, mixing, reaction affinity" data-copy-zh="自由能、混合、反应亲和势">Free energy, mixing, reaction affinity</p><p data-copy-en="Reaction direction at fixed temperature and pressure follows Gibbs free energy, not entropy alone. Enthalpy and entropy compete, while catalysts alter rates without changing the equilibrium free-energy difference." data-copy-zh="恒温恒压下的反应方向由吉布斯自由能而非熵单独决定。焓与熵相互竞争；催化剂改变速率，却不改变平衡自由能差。">Reaction direction at fixed temperature and pressure follows Gibbs free energy, not entropy alone. Enthalpy and entropy compete, while catalysts alter rates without changing the equilibrium free-energy difference.</p></article>
+          <article class="case"><h3 data-copy-en="Molecular biology" data-copy-zh="分子生物学">Molecular biology</h3><p class="case-scale" data-copy-en="Open, driven, nonequilibrium systems" data-copy-zh="开放、受驱动、非平衡系统">Open, driven, nonequilibrium systems</p><p data-copy-en="Cells maintain gradients, copy molecular information, fold proteins, and build membranes by consuming chemical free energy and releasing heat and waste. Life does not evade the second law." data-copy-zh="细胞通过消耗化学自由能并释放热与废物来维持梯度、复制分子信息、折叠蛋白质与构建膜。生命并未逃避第二定律。">Cells maintain gradients, copy molecular information, fold proteins, and build membranes by consuming chemical free energy and releasing heat and waste. Life does not evade the second law.</p></article>
+          <article class="case"><h3 data-copy-en="Soft and active matter" data-copy-zh="软物质与活性物质">Soft and active matter</h3><p class="case-scale" data-copy-en="Entropic elasticity and self-assembly" data-copy-zh="熵弹性与自组装">Entropic elasticity and self-assembly</p><p data-copy-en="Stretching a polymer removes possible conformations, producing an entropic restoring force. Crowding, depletion, and solvent entropy can drive organized structures even when energy alone does not favor them." data-copy-zh="拉伸聚合物会减少可用构象，从而产生熵回复力。拥挤、耗尽作用与溶剂熵可在能量本身并不偏好时驱动有序结构。">Stretching a polymer removes possible conformations, producing an entropic restoring force. Crowding, depletion, and solvent entropy can drive organized structures even when energy alone does not favor them.</p></article>
+          <article class="case"><h3 data-copy-en="The universe" data-copy-zh="宇宙">The universe</h3><p class="case-scale" data-copy-en="Low-entropy beginning, structure, horizons" data-copy-zh="低熵开端、结构与视界">Low-entropy beginning, structure, horizons</p><p data-copy-en="The early universe was hot and smooth yet gravitationally low-entropy relative to later possibilities. Structure formation and black-hole growth raise gravitational entropy. No universally accepted local gravitational entropy density exists outside special settings." data-copy-zh="早期宇宙炽热且光滑，但相对后来的引力可能性而言处于低熵。结构形成与黑洞增长提高引力熵；在特殊情形之外，尚无普遍公认的局域引力熵密度。">The early universe was hot and smooth yet gravitationally low-entropy relative to later possibilities. Structure formation and black-hole growth raise gravitational entropy. No universally accepted local gravitational entropy density exists outside special settings.</p></article>
+        </div>
+        <div class="theory-fence">
+          <span class="science-status model" data-copy-en="Interpretive frontier" data-copy-zh="解释前沿">Interpretive frontier</span>
+          <h3 data-copy-en="There may be more than one useful arrow of time." data-copy-zh="时间之箭可能有不止一种有效表述。">There may be more than one useful arrow of time.</h3>
+          <p data-copy-en="Thermodynamic irreversibility, radiation, records, cosmological expansion, and psychological memory are connected but not simply identical. The low-entropy boundary condition of the early universe remains central to explaining why macroscopic time has a preferred direction."
+             data-copy-zh="热力学不可逆性、辐射、记录、宇宙膨胀与心理记忆彼此相关，却不能简单视为同一件事。早期宇宙的低熵边界条件仍是解释宏观时间为何具有优选方向的核心。">Thermodynamic irreversibility, radiation, records, cosmological expansion, and psychological memory are connected but not simply identical. The low-entropy boundary condition of the early universe remains central to explaining why macroscopic time has a preferred direction.</p>
+        </div>
+      </section>
+
+      <section id="connections" class="topic-section">
+        <header>
+          <h2 data-copy-en="Continue along the science continuum." data-copy-zh="沿科学连续谱继续前进。">Continue along the science continuum.</h2>
+          <p data-copy-en="Entropy and information are useful precisely because they cross domains without erasing the distinctions among physical law, chemical organization, biological function, and computation."
+             data-copy-zh="熵与信息之所以有用，正因为它们能跨越领域，同时保留物理规律、化学组织、生物功能与计算之间的区别。">Entropy and information are useful precisely because they cross domains without erasing the distinctions among physical law, chemical organization, biological function, and computation.</p>
+        </header>
+        <div class="relation-map">
+          <a href="./phase-transitions.html"><strong data-copy-en="Phase transitions" data-copy-zh="相变">Phase transitions</strong><span data-copy-en="Free energy balances energy and entropy; criticality turns microscopic fluctuations into macroscopic organization." data-copy-zh="自由能权衡能量与熵；临界性把微观涨落转化为宏观组织。">Free energy balances energy and entropy; criticality turns microscopic fluctuations into macroscopic organization.</span></a>
+          <a href="./astrophysics.html#black-holes"><strong data-copy-en="Black holes" data-copy-zh="黑洞">Black holes</strong><span data-copy-en="Follow horizon formation, accretion, interiors, and the observational boundary before returning to the information paradox." data-copy-zh="追踪视界形成、吸积、内部与观测边界，再回到信息悖论。">Follow horizon formation, accretion, interiors, and the observational boundary before returning to the information paradox.</span></a>
+          <a href="./field.html?id=biophysics"><strong data-copy-en="Biophysics" data-copy-zh="生物物理">Biophysics</strong><span data-copy-en="See how molecular machines, membranes, signals, and cells operate as open nonequilibrium systems." data-copy-zh="了解分子机器、膜、信号与细胞如何作为开放非平衡系统运行。">See how molecular machines, membranes, signals, and cells operate as open nonequilibrium systems.</span></a>
+        </div>
+      </section>
+
+      <section id="references" class="topic-section">
+        <header>
+          <h2 data-copy-en="Primary and official paths into entropy." data-copy-zh="沿原始与官方资料继续探索熵。">Primary and official paths into entropy.</h2>
+          <p data-copy-en="These references anchor the SI thermodynamic definition, Shannon's communication theory, and modern black-hole thermodynamics."
+             data-copy-zh="这些资料分别为国际单位制热力学定义、香农通信理论与现代黑洞热力学提供依据。">These references anchor the SI thermodynamic definition, Shannon's communication theory, and modern black-hole thermodynamics.</p>
+        </header>
+        <div class="reference-grid" data-reference-key="entropy-information"></div>
+      </section>
+    </main>
+
+    <footer class="topic-footer">
+      <span data-copy-en="Shared formulas do not erase differences in units, physical carriers, assumptions, or observational status." data-copy-zh="公式相似并不会抹去单位、物理载体、假设与观测状态的差异。">Shared formulas do not erase differences in units, physical carriers, assumptions, or observational status.</span>
+      <span><a href="./phase-transitions.html" data-copy-en="Phase transitions" data-copy-zh="相变">Phase transitions</a> · <a href="./index.html#genealogy" data-copy-en="Field atlas" data-copy-zh="领域图谱">Field atlas</a></span>
+    </footer>
+  </div>
+
+  <script src="common.js"></script>
+  <script src="references.js"></script>
+  <script src="entropy.js"></script>
+</body>
+</html>

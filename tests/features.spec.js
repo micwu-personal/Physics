@@ -5,6 +5,8 @@ import {
   exerciseBigBang,
   exercisePhysicsArea,
   exercisePhysicsAtlas,
+  exercisePhysicsEntropy,
+  exercisePhysicsPhase,
   exerciseParticleZoo,
   exercisePeriodicTable
 } from './helpers/journeys.js';
@@ -16,6 +18,8 @@ const journeys = [
   { name: 'Newtonian Mechanics', path: '/physics/newtonian.html', run: exercisePhysicsArea },
   { name: 'Relativity', path: '/physics/relativity.html', run: exercisePhysicsArea },
   { name: 'Quantum Mechanics', path: '/physics/quantum.html', run: exercisePhysicsArea },
+  { name: 'Phase Transitions', path: '/physics/phase-transitions.html', run: exercisePhysicsPhase },
+  { name: 'Entropy and Information', path: '/physics/entropy-information.html', run: exercisePhysicsEntropy },
   { name: 'Big Bang', path: '/big-bang/', run: exerciseBigBang },
   { name: 'Periodic Table', path: '/periodic-table/', run: exercisePeriodicTable },
   { name: 'Particle Zoo', path: '/particle-zoo/', run: exerciseParticleZoo }
@@ -32,57 +36,63 @@ for (const journey of journeys) {
   }
 }
 
-/* The control cluster is fixed to the viewport, so every sticky bar on the
-   physics routes must come to rest below it and stay clickable. */
-for (const [name, path, sticky] of [
-  ['Physics Atlas', '/physics/', '.atlas-tools'],
-  ['Newtonian Mechanics', '/physics/newtonian.html', '.topic-index'],
-  ['Relativity', '/physics/relativity.html', '.topic-index'],
-  ['Quantum Mechanics', '/physics/quantum.html', '.topic-index']
+/* Every physics route keeps wayfinding, motion, and language in one sticky row.
+   A secondary section rail, when present, must settle below that shared row. */
+for (const [name, path] of [
+  ['Physics Atlas', '/physics/'],
+  ['Field Guide', '/physics/field.html?id=thermodynamics'],
+  ['Newtonian Mechanics', '/physics/newtonian.html'],
+  ['Relativity', '/physics/relativity.html'],
+  ['Quantum Mechanics', '/physics/quantum.html'],
+  ['Astrophysics', '/physics/astrophysics.html'],
+  ['Electrodynamics', '/physics/electrodynamics.html'],
+  ['Phase Transitions', '/physics/phase-transitions.html'],
+  ['Entropy and Information', '/physics/entropy-information.html']
 ]) {
   for (const viewport of [{ width: 1440, height: 1000 }, { width: 412, height: 915 }]) {
-    test(`${name} sticky bar clears the controls at ${viewport.width}px`, async ({ page }) => {
+    test(`${name} shares one sticky route and control row at ${viewport.width}px`, async ({ page }) => {
       await page.setViewportSize(viewport);
       await preparePage(page, path, 'en');
-
-      // The bar now shares the row with the fixed cluster and reserves space for
-      // it, so the invariant is that no interactive child ever sits underneath.
-      const position = await page.evaluate(
-        selector => getComputedStyle(document.querySelector(selector)).position,
-        sticky
-      );
-
-      // A static bar scrolls away from the cluster like any other content, so
-      // the invariant only binds when the bar is actually pinned.
-      if (position !== 'sticky') return;
-
-      const overlap = await page.locator(sticky).evaluate(async bar => {
-        const controls = document.querySelector('.site-controls').getBoundingClientRect();
-        const hits = new Set();
-        const step = Math.round(innerHeight / 3);
-        for (let offset = 0; offset <= document.body.scrollHeight; offset += step) {
-          scrollTo(0, offset);
-          await new Promise(resolve => requestAnimationFrame(resolve));
-          // The bar scrolls horizontally, so a child's layout rect can extend
-          // past the clip. Compare only the part the visitor can actually see.
-          const clip = bar.getBoundingClientRect();
-          for (const item of bar.querySelectorAll('button, a, input')) {
-            const rect = item.getBoundingClientRect();
-            const left = Math.max(rect.left, clip.left);
-            const right = Math.min(rect.right, clip.right);
-            const top = Math.max(rect.top, clip.top);
-            const bottom = Math.min(rect.bottom, clip.bottom);
-            if (right > left && bottom > top &&
-              left < controls.right && right > controls.left &&
-              top < controls.bottom && bottom > controls.top) {
-              hits.add(item.textContent.trim() || item.id);
-            }
-          }
-        }
-        scrollTo(0, 0);
-        return [...hits];
+      const route = page.locator('.route-bar');
+      await expect(route.locator(':scope > .site-controls')).toHaveCount(1);
+      expect(await route.evaluate(element => getComputedStyle(element).position)).toBe('sticky');
+      await page.evaluate(() => scrollTo(0, Math.min(document.body.scrollHeight - innerHeight, 1200)));
+      const row = await route.evaluate(element => {
+        const routeRect = element.getBoundingClientRect();
+        const controlsRect = element.querySelector('.site-controls').getBoundingClientRect();
+        return {
+          routeTop: routeRect.top,
+          routeBottom: routeRect.bottom,
+          controlsTop: controlsRect.top,
+          controlsBottom: controlsRect.bottom
+        };
       });
-      expect(overlap, 'no sticky control sits under the fixed cluster').toEqual([]);
+      expect(row.routeTop).toBeGreaterThanOrEqual(0);
+      expect(row.controlsTop).toBeGreaterThanOrEqual(row.routeTop);
+      expect(row.controlsBottom).toBeLessThanOrEqual(row.routeBottom);
+      const sectionRail = page.locator('.topic-index, .atlas-tools').first();
+      if (await sectionRail.count()) {
+        await sectionRail.scrollIntoViewIfNeeded();
+        const overlap = await page.evaluate(() => {
+          const routeRect = document.querySelector('.route-bar').getBoundingClientRect();
+          const railRect = document.querySelector('.topic-index, .atlas-tools').getBoundingClientRect();
+          return Math.max(0, routeRect.bottom - railRect.top);
+        });
+        expect(overlap).toBeLessThanOrEqual(1);
+      }
+      const topicRail = page.locator('.topic-index');
+      if (await topicRail.count()) {
+        const anchor = topicRail.locator('a[href^="#"]').last();
+        const targetId = (await anchor.getAttribute('href')).slice(1);
+        await anchor.click();
+        await page.waitForFunction(id => location.hash === `#${id}`, targetId);
+        const targetOverlap = await page.evaluate(id => {
+          const railRect = document.querySelector('.topic-index').getBoundingClientRect();
+          const targetRect = document.getElementById(id).getBoundingClientRect();
+          return Math.max(0, railRect.bottom - targetRect.top);
+        }, targetId);
+        expect(targetOverlap).toBeLessThanOrEqual(1);
+      }
     });
   }
 }
@@ -122,6 +132,35 @@ test('Physics Atlas renders a resolved lineage for every field', async ({ page }
   await page.keyboard.press('Escape');
   await expect(page.locator('#fieldInspector')).not.toHaveClass(/open/);
   await assertNoErrors(errors);
+});
+
+test('Every physics field has concrete authoritative references', async ({ page }) => {
+  await preparePage(page, '/physics/field.html?id=thermodynamics', 'en');
+  const missing = await page.evaluate(() => {
+    const standaloneKeys = {
+      mechanics: 'newtonian',
+      relativity: 'relativity',
+      'quantum-mechanics': 'quantum',
+      astrophysics: 'astrophysics',
+      electrodynamics: 'light',
+      'phase-transitions': 'phase-transitions',
+      'information-theory': 'entropy-information'
+    };
+    return PhysicsFieldList.flatMap(field => {
+      const key = standaloneKeys[field.id] || field.id;
+      const references = PhysicsReferences[key];
+      if (!references || references.length < 2) return [`${field.id}: fewer than two references`];
+      return references.flatMap(reference => {
+        const problems = [];
+        if (!reference.url.startsWith('https://')) problems.push(`${field.id}: non-HTTPS reference`);
+        if (!reference.institution || !reference.title || !reference.en || !reference.zh) {
+          problems.push(`${field.id}: incomplete bilingual reference`);
+        }
+        return problems;
+      });
+    });
+  });
+  expect(missing).toEqual([]);
 });
 
 /* Structural invariants the periodic-table feature modules rely on instead of

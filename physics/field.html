@@ -17,18 +17,17 @@
 </head>
 <body data-topic="field">
   <a class="skip-link" href="#main" data-copy-en="Skip to the field guide" data-copy-zh="跳到领域导览">Skip to the field guide</a>
-  <div class="site-controls" aria-label="Page controls" data-aria-en="Page controls" data-aria-zh="页面控制">
-    <button class="motion-toggle" type="button" aria-pressed="false">Pause motion</button>
-    <button type="button" data-lang="en" aria-pressed="true">EN</button>
-    <button type="button" data-lang="zh-CN" aria-pressed="false">中文</button>
-  </div>
-
   <div class="topic-shell">
     <nav class="route-bar" aria-label="Field guide routes" data-aria-en="Field guide routes" data-aria-zh="领域导览路线">
       <a class="route-home" href="./index.html#genealogy" data-copy-en="Back to the field atlas" data-copy-zh="返回物理领域图谱">Back to the field atlas</a>
       <div class="route-links">
         <a id="previousField" href="./index.html#genealogy"></a>
         <a id="nextField" href="./index.html#genealogy"></a>
+      </div>
+      <div class="site-controls" aria-label="Page controls" data-aria-en="Page controls" data-aria-zh="页面控制">
+        <button class="motion-toggle" type="button" aria-pressed="false">Pause motion</button>
+        <button type="button" data-lang="en" aria-pressed="true">EN</button>
+        <button type="button" data-lang="zh-CN" aria-pressed="false">中文</button>
       </div>
     </nav>
 
@@ -91,6 +90,18 @@
         <div id="boundaryGrid" class="limit-grid"></div>
       </section>
 
+      <section id="references" class="topic-section">
+        <header>
+          <h2 data-copy-en="Official paths into the evidence."
+              data-copy-zh="沿官方资料继续追踪证据。">Official paths into the evidence.</h2>
+          <p data-copy-en="These links lead to public science agencies, research institutions, standards bodies, or scholarly primary material that support the concepts in this guide."
+             data-copy-zh="以下链接来自公共科学机构、研究机构、标准组织或学术原始资料，为本导览中的概念提供依据。">
+            These links lead to public science agencies, research institutions, standards bodies, or scholarly primary material that support the concepts in this guide.
+          </p>
+        </header>
+        <div id="officialReferences" class="reference-grid"></div>
+      </section>
+
       <section class="topic-section">
         <header>
           <h2 data-copy-en="Continue exploring."
@@ -114,6 +125,7 @@
   <script src="fields-data.js"></script>
   <script src="formula.js"></script>
   <script src="common.js"></script>
+  <script src="references.js"></script>
   <script src="field.js"></script>
 </body>
 </html>

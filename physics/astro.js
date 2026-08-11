@@ -1,9 +1,10 @@
 /* Deep-dive instruments for the astrophysics guide.
-   Four independent canvases, each pausable and complete when static:
+   Five independent canvases, each pausable and complete when static:
    1. collapse   - why rotating clouds flatten into disks
    2. evolution  - stellar life tracks by initial mass
    3. limits     - Chandrasekhar / TOV / Eddington ceilings
-   4. candles    - why certain sources have knowable luminosity */
+   4. candles    - why certain sources have knowable luminosity
+   5. black hole - a staged core-collapse branch with optional disk and jet */
 (() => {
   const scenes = new Map();
   let frameHandle = 0;
@@ -391,11 +392,151 @@
     );
   }
 
+  /* ------------------------------------------------------- 5. black hole --
+     A stage scrubber exposes the causal sequence rather than treating black-hole
+     formation as one instantaneous explosion. Sizes and colors are schematic;
+     the timing labels and branch conditions carry the physical constraints. */
+  function drawBlackHole(scene) {
+    const { ctx, width, height } = scene;
+    clear(ctx, width, height, '#03050c');
+    const stage = scene.stage;
+    const cx = width * 0.5;
+    const cy = height * 0.49;
+    const baseRadius = Math.min(width, height) * 0.31;
+    const collapse = Math.max(0, Math.min(1, stage / 5));
+    const radius = baseRadius * (1 - collapse * 0.78);
+
+    // Onion-shell burning remains visible until implosion erases the stellar core.
+    if (stage < 2.25) {
+      const shells = [
+        ['255,107,157', 1],
+        ['255,209,102', 0.78],
+        ['0,212,255', 0.55],
+        ['238,242,255', 0.32]
+      ];
+      for (const [rgb, scale] of shells) {
+        glow(ctx, cx, cy, radius * scale * 1.15, rgb);
+        ctx.fillStyle = `rgba(${rgb},${0.18 + scale * 0.22})`;
+        ctx.beginPath();
+        ctx.arc(cx, cy, radius * scale, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      label(ctx, zh() ? '铁核' : 'iron core', cx - 18, cy + 4, '#eef2ff', 10);
+    }
+
+    // Infall vectors accelerate and tighten as the core approaches bounce.
+    if (stage >= 0.75 && stage < 3.4) {
+      const strength = Math.min(1, (stage - 0.75) / 1.5);
+      ctx.strokeStyle = `rgba(255,209,102,${0.3 + strength * 0.55})`;
+      ctx.lineWidth = 2;
+      for (let index = 0; index < 14; index++) {
+        const angle = index / 14 * Math.PI * 2 + scene.elapsed * 0.06;
+        const outer = radius + 62 + (index % 3) * 11;
+        const inner = Math.max(radius + 8, outer - 28 - strength * 20);
+        ctx.beginPath();
+        ctx.moveTo(cx + Math.cos(angle) * outer, cy + Math.sin(angle) * outer);
+        ctx.lineTo(cx + Math.cos(angle) * inner, cy + Math.sin(angle) * inner);
+        ctx.stroke();
+      }
+    }
+
+    // The proto-neutron star and shock are distinct; the shock stalls instead of
+    // being drawn as a guaranteed supernova.
+    if (stage >= 1.6 && stage < 5.15) {
+      const coreRadius = Math.max(11, baseRadius * (0.14 - Math.min(stage, 4.8) * 0.008));
+      glow(ctx, cx, cy, coreRadius * 3.5, '0,212,255');
+      ctx.fillStyle = '#d9fbff';
+      ctx.beginPath();
+      ctx.arc(cx, cy, coreRadius, 0, Math.PI * 2);
+      ctx.fill();
+
+      const bounce = Math.min(1, Math.max(0, stage - 1.6));
+      const stalled = stage > 2.7 ? 0.15 * Math.sin(scene.elapsed * 1.4) : bounce;
+      const shockRadius = baseRadius * (0.35 + bounce * 0.46 + stalled * 0.035);
+      ctx.strokeStyle = stage > 2.7 ? 'rgba(255,107,157,.72)' : 'rgba(255,209,102,.8)';
+      ctx.lineWidth = 3;
+      ctx.setLineDash(stage > 2.7 ? [7, 6] : []);
+      ctx.beginPath();
+      ctx.arc(cx, cy, shockRadius, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Neutrino energy leaves in every direction; dots are status cues, not
+      // simulated neutrino trajectories.
+      ctx.fillStyle = 'rgba(126,232,197,.72)';
+      for (let index = 0; index < 18; index++) {
+        const angle = index / 18 * Math.PI * 2;
+        const distance = coreRadius * 2.2 + ((scene.elapsed * 26 + index * 17) % Math.max(40, shockRadius - coreRadius * 2));
+        ctx.beginPath();
+        ctx.arc(cx + Math.cos(angle) * distance, cy + Math.sin(angle) * distance, 1.4, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    // Once the horizon appears, interior detail is intentionally hidden.
+    if (stage >= 4.8) {
+      const horizonProgress = Math.min(1, (stage - 4.8) / 0.55);
+      const horizon = baseRadius * (0.08 + horizonProgress * 0.09);
+      glow(ctx, cx, cy, horizon * 3.2, '124,92,255');
+      ctx.fillStyle = '#000';
+      ctx.beginPath();
+      ctx.arc(cx, cy, horizon, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(238,242,255,.8)';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.arc(cx, cy, horizon + 2, 0, Math.PI * 2);
+      ctx.stroke();
+      label(ctx, zh() ? '事件视界' : 'event horizon', cx + horizon + 10, cy - 4, '#eef2ff', 10);
+    }
+
+    // A disk and jets only appear when both stage and retained angular momentum
+    // are high enough. Low-spin collapse remains almost spherical.
+    if (stage >= 5.35 && scene.spin > 0.42) {
+      const diskStrength = Math.min(1, (stage - 5.35) / 0.65) * (scene.spin - 0.42) / 0.58;
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(-0.12);
+      ctx.strokeStyle = `rgba(255,209,102,${0.35 + diskStrength * 0.6})`;
+      ctx.lineWidth = 4;
+      for (let ring = 0; ring < 5; ring++) {
+        ctx.beginPath();
+        ctx.ellipse(0, 0, baseRadius * (0.34 + ring * 0.1), baseRadius * (0.035 + ring * 0.011), 0, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+      ctx.restore();
+      if (scene.spin > 0.72) {
+        ctx.strokeStyle = `rgba(0,212,255,${(scene.spin - 0.72) / 0.28})`;
+        ctx.lineWidth = 5;
+        ctx.beginPath();
+        ctx.moveTo(cx, cy - baseRadius * 0.12);
+        ctx.lineTo(cx - baseRadius * 0.08, cy - baseRadius * 0.95);
+        ctx.moveTo(cx, cy + baseRadius * 0.12);
+        ctx.lineTo(cx + baseRadius * 0.08, cy + baseRadius * 0.95);
+        ctx.stroke();
+      }
+    }
+
+    const labels = [
+      [zh() ? '洋葱壳层燃烧与铁核' : 'onion-shell burning + iron core', zh() ? '坍缩前' : 'before collapse'],
+      [zh() ? '电子俘获与光致裂解' : 'electron capture + photodisintegration', '~0.1–0.3 s'],
+      [zh() ? '核心反弹与激波发射' : 'core bounce + shock launch', zh() ? '毫秒至约 0.1 秒' : 'milliseconds to ~0.1 s'],
+      [zh() ? '原中子星与停滞激波' : 'proto-neutron star + stalled shock', '~0.1–1 s'],
+      [zh() ? '爆炸成功或继续吸积' : 'successful explosion or continued accretion', zh() ? '分支点' : 'branch point'],
+      [zh() ? '事件视界形成' : 'event horizon forms', zh() ? '某些模型中反弹后约 0.6–1.3 秒' : '~0.6–1.3 s after bounce in some models'],
+      [zh() ? '可选：盘、喷流与继续吸积' : 'optional disk, jet, and continued accretion', zh() ? '数秒及以后' : 'seconds and later']
+    ];
+    const active = labels[Math.min(6, Math.max(0, Math.round(stage)))];
+    label(ctx, active[0], 18, 28, '#eef2ff', 12);
+    label(ctx, active[1], 18, 47, '#aeb8d8', 10);
+  }
+
   /* ------------------------------------------------------------ lifecycle */
   const collapseScene = setup('collapseCanvas', drawCollapse, { progress: 0.5 });
   const evolutionScene = setup('evolutionCanvas', drawEvolution, { mass: 1 });
   const limitsScene = setup('limitsCanvas', drawLimits, { mass: 1 });
   const candleScene = setup('candleCanvas', drawCandles);
+  const blackHoleScene = setup('blackHoleCanvas', drawBlackHole, { stage: 3.2, spin: 0.55 });
 
   seedCloud();
 
@@ -483,8 +624,54 @@
     renderAll(0);
   });
 
+  const blackHoleSlider = document.getElementById('blackHoleStage');
+  const blackHoleStageOutput = document.getElementById('blackHoleStageOut');
+  const blackHoleSpin = document.getElementById('blackHoleSpin');
+  const blackHoleSpinOutput = document.getElementById('blackHoleSpinOut');
+  const blackHoleReadout = document.getElementById('blackHoleReadout');
+  const blackHoleTime = document.getElementById('blackHoleTime');
+
+  function renderBlackHoleReadout() {
+    const stage = Math.min(6, Math.max(0, Math.round(blackHoleScene.stage)));
+    const rows = zh()
+      ? [
+          ['洋葱壳层燃烧与铁核', '塌缩前'],
+          ['电子俘获与光致裂解', '约 0.1–0.3 秒'],
+          ['核心反弹与激波发射', '毫秒至约 0.1 秒'],
+          ['原中子星与停滞激波', '约 0.1–1 秒'],
+          ['爆炸成功或继续吸积', '分支点'],
+          ['事件视界形成', '某些模型中反弹后约 0.6–1.3 秒'],
+          ['可选的盘与喷流', '数秒及以后']
+        ]
+      : [
+          ['Onion-shell burning + iron core', 'before collapse'],
+          ['Electron capture + photodisintegration', '~0.1–0.3 s'],
+          ['Core bounce + shock launch', 'milliseconds to ~0.1 s'],
+          ['Proto-neutron star + stalled shock', '~0.1–1 s'],
+          ['Successful explosion or continued accretion', 'branch point'],
+          ['Event horizon forms', '~0.6–1.3 s after bounce in some models'],
+          ['Optional disk and jet', 'seconds and later']
+        ];
+    blackHoleReadout.textContent = rows[stage][0];
+    blackHoleTime.textContent = rows[stage][1];
+    blackHoleStageOutput.textContent = `${blackHoleScene.stage.toFixed(2)} / 6`;
+    blackHoleSpinOutput.textContent = blackHoleScene.spin.toFixed(2);
+  }
+
+  blackHoleSlider.addEventListener('input', () => {
+    blackHoleScene.stage = Number(blackHoleSlider.value);
+    renderBlackHoleReadout();
+    renderAll(0);
+  });
+  blackHoleSpin.addEventListener('input', () => {
+    blackHoleScene.spin = Number(blackHoleSpin.value);
+    renderBlackHoleReadout();
+    renderAll(0);
+  });
+
   document.addEventListener('physics-language', () => {
     renderStageDetail();
+    renderBlackHoleReadout();
     renderAll(0);
   });
   document.addEventListener('physics-motion', event => {
@@ -501,7 +688,10 @@
   evolutionScene.mass = Number(massSlider.value);
   limitsScene.mass = Number(limitSlider.value);
   limitOutput.textContent = `${limitsScene.mass.toFixed(2)} M☉`;
+  blackHoleScene.stage = Number(blackHoleSlider.value);
+  blackHoleScene.spin = Number(blackHoleSpin.value);
   renderStageDetail();
+  renderBlackHoleReadout();
 
   if (PhysicsUI.motionPaused()) renderAll(0);
   else start();

@@ -204,6 +204,7 @@
 
     renderLineageMap();
     renderMedia();
+    renderPhysicsReferences(activeId, document.getElementById('officialReferences'));
   }
 
   document.addEventListener('physics-language', renderCopy);

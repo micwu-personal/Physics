@@ -27,5 +27,8 @@
   "physics/fields-data.js",
   "physics/formula.js",
   "physics/labs.js",
-  "physics/light.js"
+  "physics/light.js",
+  "physics/phase.js",
+  "physics/entropy.js",
+  "physics/references.js"
 ]

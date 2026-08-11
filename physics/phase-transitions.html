@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!--
+  THESIS: A phase transition is a collective reorganization of matter or fields, not merely any sudden change.
+  OWN-WORLD: The Evidence Observatory becomes a free-energy instrument with green landscapes, domain maps, and status-coded cosmic history.
+  STORY: Learn the language, watch nucleation and criticality, compare matter and life, then separate measured transitions from cosmic inference and vacuum speculation.
+  FIRST VIEWPORT: A live free-energy landscape and coarsening domain map face the definition that keeps every later example honest.
+  FORM: A causal laboratory followed by a material spectrum and an evidence-ranked cosmic ladder.
+  -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="A bilingual interactive guide to phase transitions, criticality, unusual phases of matter, biological phase separation, vacuum transitions, and the cooling early universe.">
+  <title>Phase Transitions — Physics Field Atlas</title>
+  <link rel="stylesheet" href="../assets/fonts/fonts.css">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-topic="phase-transitions">
+  <a class="skip-link" href="#main" data-copy-en="Skip to phase transitions" data-copy-zh="跳到相变内容">Skip to phase transitions</a>
+  <div class="topic-shell">
+    <nav class="route-bar" aria-label="Phase-transition routes" data-aria-en="Phase-transition routes" data-aria-zh="相变路线">
+      <a class="route-home" href="./index.html#genealogy" data-copy-en="Back to the field atlas" data-copy-zh="返回物理领域图谱">Back to the field atlas</a>
+      <div class="route-links">
+        <a href="./field.html?id=thermodynamics" data-copy-en="Thermodynamics" data-copy-zh="热力学">Thermodynamics</a>
+        <a href="./field.html?id=condensed" data-copy-en="Condensed matter" data-copy-zh="凝聚态">Condensed matter</a>
+        <a href="./entropy-information.html" data-copy-en="Entropy & information" data-copy-zh="熵与信息">Entropy &amp; information</a>
+      </div>
+      <div class="site-controls" aria-label="Page controls" data-aria-en="Page controls" data-aria-zh="页面控制">
+        <button class="motion-toggle" type="button" aria-pressed="false">Pause motion</button>
+        <button type="button" data-lang="en" aria-pressed="true">EN</button>
+        <button type="button" data-lang="zh-CN" aria-pressed="false">中文</button>
+      </div>
+    </nav>
+
+    <header class="topic-hero">
+      <div class="topic-title">
+        <h1 data-copy-en="Phase transitions" data-copy-zh="相变">Phase transitions</h1>
+        <p data-copy-en="A phase transition is a collective change in the stable macroscopic description of matter or fields. The useful questions are not only what changed, but which variable distinguishes the phases, which symmetry or topology changed, whether a barrier had to be crossed, and what evidence makes the classification real."
+           data-copy-zh="相变是物质或场的稳定宏观描述发生集体改变。关键问题不只是“变了什么”，还包括：什么变量区分两种相、哪种对称性或拓扑发生变化、系统是否必须跨越势垒，以及什么证据让这种分类成立。">
+          A phase transition is a collective change in the stable macroscopic description of matter or fields. The useful questions are not only what changed, but which variable distinguishes the phases, which symmetry or topology changed, whether a barrier had to be crossed, and what evidence makes the classification real.
+        </p>
+        <span class="hero-equation">F(T,V,N) = U - TS · G(T,p,N) = H - TS</span>
+        <div class="hero-actions">
+          <a class="primary-action" href="#landscape" data-copy-en="Run the free-energy lab" data-copy-zh="运行自由能实验台">Run the free-energy lab</a>
+          <a class="secondary-action" href="#cosmic" data-copy-en="Cool the early universe" data-copy-zh="沿早期宇宙降温">Cool the early universe</a>
+        </div>
+        <div class="status-legend" aria-label="Scientific status legend" data-aria-en="Scientific status legend" data-aria-zh="科学状态图例">
+          <span class="science-status established" data-copy-en="Established in laboratory" data-copy-zh="实验确立">Established in laboratory</span>
+          <span class="science-status inferred" data-copy-en="Standard theory + strong evidence" data-copy-zh="标准理论 + 强证据">Standard theory + strong evidence</span>
+          <span class="science-status model" data-copy-en="Model-dependent" data-copy-zh="模型依赖">Model-dependent</span>
+          <span class="science-status speculative" data-copy-en="Hypothetical" data-copy-zh="假设性">Hypothetical</span>
+        </div>
+      </div>
+      <div class="hero-instrument deep-topic-canvas">
+        <canvas id="phaseCanvas" aria-label="Calculated free-energy landscape paired with a teaching schematic of domains changing phase" data-aria-en="Calculated free-energy landscape paired with a teaching schematic of domains changing phase" data-aria-zh="自由能景观计算图与相畴变化教学示意">A free-energy curve changes shape while domains nucleate and coarsen.</canvas>
+        <div class="instrument-label">
+          <span><strong data-copy-en="Landscape above; collective outcome below." data-copy-zh="上方是自由能景观，下方是集体结果。">Landscape above; collective outcome below.</strong><span data-copy-en="The curve is a reduced model and the domains are qualitative—not a molecular simulation." data-copy-zh="曲线是约化模型，相畴为定性示意，并非分子模拟。">The curve is a reduced model and the domains are qualitative—not a molecular simulation.</span></span>
+          <span class="rep-badge model" data-copy-en="Calculated teaching model" data-copy-zh="计算教学模型">Calculated teaching model</span>
+        </div>
+      </div>
+    </header>
+
+    <nav class="topic-index" aria-label="Phase-transition sections" data-aria-en="Phase-transition sections" data-aria-zh="相变章节">
+      <a href="#language" data-copy-en="Core language" data-copy-zh="核心语言">Core language</a>
+      <a href="#landscape" data-copy-en="Landscape lab" data-copy-zh="景观实验台">Landscape lab</a>
+      <a href="#matter" data-copy-en="Matter spectrum" data-copy-zh="物质相谱">Matter spectrum</a>
+      <a href="#life" data-copy-en="Chemistry & life" data-copy-zh="化学与生命">Chemistry &amp; life</a>
+      <a href="#vacuum" data-copy-en="Vacuum" data-copy-zh="真空">Vacuum</a>
+      <a href="#cosmic" data-copy-en="Early universe" data-copy-zh="早期宇宙">Early universe</a>
+      <a href="#references" data-copy-en="References" data-copy-zh="参考资料">References</a>
+    </nav>
+
+    <main id="main">
+      <section id="language" class="topic-section">
+        <header>
+          <h2 data-copy-en="Four ideas keep the subject precise." data-copy-zh="四个概念让相变不再含糊。">Four ideas keep the subject precise.</h2>
+          <p data-copy-en="In an infinitely large equilibrium system, a true transition appears as a non-analytic change in free energy. Real samples are finite, so singularities are rounded; experiments infer the transition from scaling, coexistence, response peaks, domain structure, and reproducible limits."
+             data-copy-zh="在无限大的平衡系统中，真正的相变表现为自由能的非解析变化。真实样品有限，因此数学奇点会被抹圆；实验通过标度、共存、响应峰、相畴结构与可重复极限来判定相变。">
+            In an infinitely large equilibrium system, a true transition appears as a non-analytic change in free energy. Real samples are finite, so singularities are rounded; experiments infer the transition from scaling, coexistence, response peaks, domain structure, and reproducible limits.
+          </p>
+        </header>
+        <div class="concept-ribbon">
+          <article class="concept">
+            <div class="concept-mark">min F or min G</div>
+            <h3 data-copy-en="Free energy" data-copy-zh="自由能">Free energy</h3>
+            <p data-copy-en="At fixed temperature and volume, equilibrium minimizes Helmholtz free energy F; at fixed temperature and pressure it minimizes Gibbs free energy G. A Landau landscape is a coarse-grained function, not a literal molecular potential."
+               data-copy-zh="在温度、体积固定时，平衡态使亥姆霍兹自由能 F 最小；温度、压强固定时则使吉布斯自由能 G 最小。朗道景观是粗粒化函数，并非真实分子势能。">At fixed temperature and volume, equilibrium minimizes Helmholtz free energy F; at fixed temperature and pressure it minimizes Gibbs free energy G. A Landau landscape is a coarse-grained function, not a literal molecular potential.</p>
+          </article>
+          <article class="concept">
+            <div class="concept-mark">m, ρ, ψ, n̂</div>
+            <h3 data-copy-en="Order parameter" data-copy-zh="序参量">Order parameter</h3>
+            <p data-copy-en="Magnetization, density difference, condensate phase, or molecular alignment can distinguish phases. Not every transition has a simple local order parameter: BKT and topological transitions are the important warning."
+               data-copy-zh="磁化强度、密度差、凝聚态相位或分子取向都可区分不同相。并非所有相变都有简单局域序参量；BKT 与拓扑相变就是重要例外。">Magnetization, density difference, condensate phase, or molecular alignment can distinguish phases. Not every transition has a simple local order parameter: BKT and topological transitions are the important warning.</p>
+          </article>
+          <article class="concept">
+            <div class="concept-mark">ξ → large</div>
+            <h3 data-copy-en="Criticality" data-copy-zh="临界性">Criticality</h3>
+            <p data-copy-en="Near a continuous transition, fluctuations correlate across growing distances. Power laws and critical exponents reveal universality: very different materials can share the same large-scale behavior."
+               data-copy-zh="接近连续相变时，涨落在越来越大的距离上相关。幂律与临界指数揭示普适性：微观上不同的材料可以共享同一种大尺度行为。">Near a continuous transition, fluctuations correlate across growing distances. Power laws and critical exponents reveal universality: very different materials can share the same large-scale behavior.</p>
+          </article>
+        </div>
+      </section>
+
+      <section id="landscape" class="topic-section">
+        <header>
+          <h2 data-copy-en="First-order transitions cross a barrier; continuous transitions reshape it." data-copy-zh="一级相变跨越势垒，连续相变重塑势垒。">First-order transitions cross a barrier; continuous transitions reshape it.</h2>
+          <p data-copy-en="The same visual language separates nucleation, spinodal decomposition, and continuous ordering. Hysteresis often appears because a metastable phase survives while a barrier remains, but hysteresis is kinetic and is not itself the definition of first order."
+             data-copy-zh="同一套视觉语言可以区分成核、旋节分解与连续有序化。只要势垒仍在，亚稳相就可能延续并产生滞后；但滞后是动力学现象，并不是一级相变本身的定义。">
+            The same visual language separates nucleation, spinodal decomposition, and continuous ordering. Hysteresis often appears because a metastable phase survives while a barrier remains, but hysteresis is kinetic and is not itself the definition of first order.
+          </p>
+        </header>
+        <div class="scrub-panel">
+          <div class="scrub-copy">
+            <h3 data-copy-en="Choose the mechanism" data-copy-zh="选择相变机制">Choose the mechanism</h3>
+            <p data-copy-en="Continuous mode splits one minimum smoothly. First-order mode creates two competing minima and a nucleation barrier. Spinodal mode removes the barrier so fluctuations grow everywhere. Cosmic mode labels cooling events by evidential status instead of pretending the universe was a laboratory sample."
+               data-copy-zh="连续模式让一个极小值平滑分裂；一级模式产生两个竞争极小值与成核势垒；旋节模式移除势垒，使涨落在各处增长；宇宙模式按证据状态标记冷却事件，而不把宇宙伪装成实验室样品。">Continuous mode splits one minimum smoothly. First-order mode creates two competing minima and a nucleation barrier. Spinodal mode removes the barrier so fluctuations grow everywhere. Cosmic mode labels cooling events by evidential status instead of pretending the universe was a laboratory sample.</p>
+          </div>
+          <div class="scrub-control">
+            <div class="lab-buttons">
+              <button type="button" data-phase-mode="continuous" aria-pressed="true" data-copy-en="Continuous" data-copy-zh="连续">Continuous</button>
+              <button type="button" data-phase-mode="first" aria-pressed="false" data-copy-en="First-order" data-copy-zh="一级">First-order</button>
+              <button type="button" data-phase-mode="spinodal" aria-pressed="false" data-copy-en="Spinodal" data-copy-zh="旋节">Spinodal</button>
+              <button type="button" data-phase-mode="cosmic" aria-pressed="false" data-copy-en="Cosmic cooling" data-copy-zh="宇宙冷却">Cosmic cooling</button>
+            </div>
+            <div class="control-group">
+              <label for="phaseControl"><span data-copy-en="Control parameter" data-copy-zh="控制参量">Control parameter</span><output id="phaseOutput" for="phaseControl">0.20</output></label>
+              <input id="phaseControl" type="range" min="-1" max="1" value="0.2" step="0.01">
+            </div>
+            <p class="lab-note"><span class="rep-badge model" data-copy-en="Calculated teaching model" data-copy-zh="计算教学模型">Calculated teaching model</span><br><span data-copy-en="The polynomial landscape is dimensionless. Domain motion illustrates nucleation and coarsening qualitatively; it is not molecular dynamics and carries no literal time or length scale."
+               data-copy-zh="多项式景观使用无量纲量。相畴运动仅定性展示成核与粗化，并非分子动力学，也不代表真实时间或长度尺度。">The polynomial landscape is dimensionless. Domain motion illustrates nucleation and coarsening qualitatively; it is not molecular dynamics and carries no literal time or length scale.</span></p>
+          </div>
+        </div>
+        <div class="classification-grid" style="margin-top:18px">
+          <article class="classification">
+            <span class="science-status established" data-copy-en="Established framework" data-copy-zh="已建立框架">Established framework</span>
+            <h3 data-copy-en="First-order" data-copy-zh="一级相变">First-order</h3>
+            <p data-copy-en="A first derivative of free energy jumps in the thermodynamic limit. Latent heat, phase coexistence, metastability, and nucleation are characteristic. Inside the unstable spinodal region, no critical nucleus is needed."
+               data-copy-zh="在热力学极限下，自由能的一阶导数发生跃变。潜热、相共存、亚稳态与成核是典型特征；进入不稳定旋节区后，不再需要临界晶核。">A first derivative of free energy jumps in the thermodynamic limit. Latent heat, phase coexistence, metastability, and nucleation are characteristic. Inside the unstable spinodal region, no critical nucleus is needed.</p>
+            <span class="formula">L = TΔS</span>
+          </article>
+          <article class="classification">
+            <span class="science-status established" data-copy-en="Established framework" data-copy-zh="已建立框架">Established framework</span>
+            <h3 data-copy-en="Continuous and critical" data-copy-zh="连续相变与临界现象">Continuous and critical</h3>
+            <p data-copy-en="No latent heat is required. The order parameter changes continuously while susceptibility, heat capacity, and correlation length can diverge or follow sharp scaling. Ehrenfest's derivative classification was historically useful but does not fit every modern transition."
+               data-copy-zh="无需潜热。序参量连续变化，而磁化率、热容与关联长度可能发散或遵循尖锐标度。埃伦费斯特的导数分类在历史上很有用，但无法容纳所有现代相变。">No latent heat is required. The order parameter changes continuously while susceptibility, heat capacity, and correlation length can diverge or follow sharp scaling. Ehrenfest's derivative classification was historically useful but does not fit every modern transition.</p>
+            <span class="formula">ξ ∝ |T-Tc|<sup>-ν</sup></span>
+          </article>
+        </div>
+      </section>
+
+      <section id="matter" class="topic-section">
+        <header>
+          <h2 data-copy-en="Matter has more ways to reorganize than solid, liquid, and gas." data-copy-zh="物质的重组方式远不止固、液、气。">Matter has more ways to reorganize than solid, liquid, and gas.</h2>
+          <p data-copy-en="The most useful taxonomy records what orders, what drives the change, and what caveat prevents a familiar label from becoming misleading."
+             data-copy-zh="最有用的分类会记录：什么发生有序化、什么驱动变化，以及哪条边界能防止熟悉的标签造成误导。">The most useful taxonomy records what orders, what drives the change, and what caveat prevents a familiar label from becoming misleading.</p>
+        </header>
+        <div class="spectrum">
+          <article><h3 data-copy-en="Fluid phases" data-copy-zh="流体相">Fluid phases</h3><strong>ρ, V, latent heat</strong><p data-copy-en="Melting, boiling, and sublimation are commonly first-order. The liquid-gas coexistence line ends at a critical point; beyond it, a supercritical fluid has no sharp liquid-gas boundary." data-copy-zh="熔化、沸腾与升华通常是一级相变。液—气共存线终止于临界点；越过临界点后，超临界流体不再有清晰液—气边界。">Melting, boiling, and sublimation are commonly first-order. The liquid-gas coexistence line ends at a critical point; beyond it, a supercritical fluid has no sharp liquid-gas boundary.</p></article>
+          <article><h3 data-copy-en="Magnets & liquid crystals" data-copy-zh="磁体与液晶">Magnets &amp; liquid crystals</h3><strong>M, orientational order</strong><p data-copy-en="The Curie transition is the canonical symmetry-breaking example. Isotropic-to-nematic liquid-crystal transitions order molecular directions and are often weakly first-order." data-copy-zh="居里相变是对称性破缺的经典例子。各向同性—向列型液晶相变使分子方向有序，且常为弱一级相变。">The Curie transition is the canonical symmetry-breaking example. Isotropic-to-nematic liquid-crystal transitions order molecular directions and are often weakly first-order.</p></article>
+          <article><h3 data-copy-en="Quantum collective phases" data-copy-zh="量子集体相">Quantum collective phases</h3><strong>ψ, phase coherence</strong><p data-copy-en="Superconductors expel magnetic flux and conduct without resistance; superfluids flow without ordinary viscosity; Bose-Einstein condensation and superfluidity are related but not identical." data-copy-zh="超导体排斥磁通并实现零电阻；超流体没有普通黏性；玻色—爱因斯坦凝聚与超流相关但并不等同。">Superconductors expel magnetic flux and conduct without resistance; superfluids flow without ordinary viscosity; Bose-Einstein condensation and superfluidity are related but not identical.</p></article>
+          <article><h3 data-copy-en="Topology & zero-temperature change" data-copy-zh="拓扑与零温变化">Topology &amp; zero-temperature change</h3><strong>vortices, topology, ground state</strong><p data-copy-en="BKT transitions unbind vortex pairs without a simple local order parameter. Quantum phase transitions occur at T = 0 as pressure, field, or coupling changes the ground state; finite-temperature behavior is usually a crossover fan." data-copy-zh="BKT 相变通过涡旋对解绑定发生，没有简单局域序参量。量子相变在 T=0 时由压强、外场或耦合改变基态；有限温度下通常形成交叉扇区。">BKT transitions unbind vortex pairs without a simple local order parameter. Quantum phase transitions occur at T = 0 as pressure, field, or coupling changes the ground state; finite-temperature behavior is usually a crossover fan.</p></article>
+        </div>
+        <div class="theory-fence">
+          <span class="science-status model" data-copy-en="Classification remains subtle" data-copy-zh="分类仍有微妙之处">Classification remains subtle</span>
+          <h3 data-copy-en="A glass transition is not simple equilibrium freezing." data-copy-zh="玻璃化转变不是简单的平衡凝固。">A glass transition is not simple equilibrium freezing.</h3>
+          <p data-copy-en="As a liquid is cooled, its relaxation time can outgrow the experiment and motion becomes arrested. The result is reproducible and dramatic, but whether and how it corresponds to an underlying equilibrium transition remains an active question."
+             data-copy-zh="液体冷却时，弛豫时间可能长到超过实验时间尺度，运动因此被“冻结”。这种变化可重复且显著，但它是否、以及如何对应某个潜在平衡相变，仍是活跃问题。">As a liquid is cooled, its relaxation time can outgrow the experiment and motion becomes arrested. The result is reproducible and dramatic, but whether and how it corresponds to an underlying equilibrium transition remains an active question.</p>
+        </div>
+      </section>
+
+      <section id="life" class="topic-section">
+        <header>
+          <h2 data-copy-en="Chemistry and biology inherit phase physics—but finite, active systems need caveats." data-copy-zh="化学与生物学继承相变物理，但有限且主动的系统需要额外边界。">Chemistry and biology inherit phase physics—but finite, active systems need caveats.</h2>
+          <p data-copy-en="Molecular interactions, solvent, salt, sequence, and energy-consuming cellular machinery all reshape a free-energy landscape. Equilibrium phase language remains powerful, provided it is not applied more literally than the system allows."
+             data-copy-zh="分子相互作用、溶剂、盐浓度、序列与持续耗能的细胞机器都会重塑自由能景观。平衡相语言依然强大，但不能比系统本身允许的程度更字面化。">Molecular interactions, solvent, salt, sequence, and energy-consuming cellular machinery all reshape a free-energy landscape. Equilibrium phase language remains powerful, provided it is not applied more literally than the system allows.</p>
+        </header>
+        <div class="case-grid">
+          <article class="case"><h3 data-copy-en="DNA melting" data-copy-zh="DNA 熔解">DNA melting</h3><p class="case-scale" data-copy-en="Cooperative helix-coil transition" data-copy-zh="协同性螺旋—线团转变">Cooperative helix-coil transition</p><p data-copy-en="Heating separates the double helix into strands. The melting curve depends strongly on sequence, length, salt, and concentration rather than one universal temperature." data-copy-zh="加热使双螺旋解链。熔解曲线强烈依赖序列、长度、盐浓度与分子浓度，并不存在唯一通用温度。">Heating separates the double helix into strands. The melting curve depends strongly on sequence, length, salt, and concentration rather than one universal temperature.</p></article>
+          <article class="case"><h3 data-copy-en="Lipid membranes" data-copy-zh="脂质膜">Lipid membranes</h3><p class="case-scale" data-copy-en="Gel · liquid-ordered · liquid-disordered" data-copy-zh="凝胶 · 液态有序 · 液态无序">Gel · liquid-ordered · liquid-disordered</p><p data-copy-en="Model membranes show genuine coexistence among phases with different packing and mobility. Living membranes are compositionally controlled, curved, and active, so a clean equilibrium diagram is an approximation." data-copy-zh="模型膜可在堆积与流动性不同的相之间真实共存。活细胞膜受组成调控、具有曲率且处于主动状态，因此整洁的平衡相图只是近似。">Model membranes show genuine coexistence among phases with different packing and mobility. Living membranes are compositionally controlled, curved, and active, so a clean equilibrium diagram is an approximation.</p></article>
+          <article class="case"><h3 data-copy-en="Protein folding" data-copy-zh="蛋白质折叠">Protein folding</h3><p class="case-scale" data-copy-en="Finite free-energy landscape" data-copy-zh="有限系统自由能景观">Finite free-energy landscape</p><p data-copy-en="Folding can be sharply cooperative, but one protein is a finite system: it has no literal bulk singularity. Multiple pathways, intermediates, solvent, and chaperones reshape the landscape." data-copy-zh="折叠可以高度协同，但单个蛋白质是有限系统，不存在字面意义上的体相奇点。多条路径、中间态、溶剂与伴侣蛋白都会改变景观。">Folding can be sharply cooperative, but one protein is a finite system: it has no literal bulk singularity. Multiple pathways, intermediates, solvent, and chaperones reshape the landscape.</p></article>
+          <article class="case"><h3 data-copy-en="Biomolecular condensates" data-copy-zh="生物分子凝聚体">Biomolecular condensates</h3><p class="case-scale" data-copy-en="Liquid-liquid phase separation" data-copy-zh="液—液相分离">Liquid-liquid phase separation</p><p data-copy-en="Proteins and RNA can demix into dense liquid-like compartments without membranes. In cells, reactions, transport, and active turnover mean equilibrium liquid-liquid phase separation is a starting model, not the whole story." data-copy-zh="蛋白质与 RNA 可以去混合，形成无膜的致密液态区室。在细胞中，反应、运输与主动更新使平衡液—液相分离只成为起点模型，而非完整故事。">Proteins and RNA can demix into dense liquid-like compartments without membranes. In cells, reactions, transport, and active turnover mean equilibrium liquid-liquid phase separation is a starting model, not the whole story.</p></article>
+        </div>
+      </section>
+
+      <section id="vacuum" class="topic-section">
+        <header>
+          <h2 data-copy-en="A quantum-field vacuum is a state, not empty nothingness." data-copy-zh="量子场真空是一种状态，而不是空无。">A quantum-field vacuum is a state, not empty nothingness.</h2>
+          <p data-copy-en="A vacuum is a lowest-energy field configuration under specified conditions. A false vacuum is only a local minimum; quantum tunneling can, in theory, nucleate bubbles of a lower-energy state. The mechanism is precise, but its historical role in our universe is not automatically established."
+             data-copy-zh="真空是在给定条件下能量最低的场构型。假真空只是局域极小值；理论上，量子隧穿可以成核出更低能态的气泡。机制本身精确，但它在真实宇宙历史中的作用并不会因此自动得到证实。">A vacuum is a lowest-energy field configuration under specified conditions. A false vacuum is only a local minimum; quantum tunneling can, in theory, nucleate bubbles of a lower-energy state. The mechanism is precise, but its historical role in our universe is not automatically established.</p>
+        </header>
+        <div class="classification-grid">
+          <article class="classification"><span class="science-status inferred" data-copy-en="Standard quantum field theory" data-copy-zh="标准量子场论">Standard quantum field theory</span><h3 data-copy-en="Metastability and tunneling" data-copy-zh="亚稳态与隧穿">Metastability and tunneling</h3><p data-copy-en="A barrier can make a local minimum long-lived. A first-order transition proceeds when a critical bubble gains more volume energy than it costs in surface energy, then expands." data-copy-zh="势垒可以让局域极小值长期存在。一级相变在临界气泡的体积能收益超过表面能代价后继续进行，气泡随后扩张。">A barrier can make a local minimum long-lived. A first-order transition proceeds when a critical bubble gains more volume energy than it costs in surface energy, then expands.</p><span class="formula">ΔF(R)=4πR²σ-(4π/3)R³Δp</span></article>
+          <article class="classification"><span class="science-status speculative" data-copy-en="Cosmological application is model-dependent" data-copy-zh="宇宙学应用依赖模型">Cosmological application is model-dependent</span><h3 data-copy-en="False-vacuum decay" data-copy-zh="假真空衰变">False-vacuum decay</h3><p data-copy-en="Vacuum decay is a serious theoretical possibility, not an observed event. Standard-Model parameter fits may place the Higgs vacuum in a metastable region only after extrapolating far beyond measured energies." data-copy-zh="真空衰变是严肃的理论可能性，却不是已观测事件。标准模型参数拟合可能把希格斯真空置于亚稳区，但这需要远远外推到未测能标。">Vacuum decay is a serious theoretical possibility, not an observed event. Standard-Model parameter fits may place the Higgs vacuum in a metastable region only after extrapolating far beyond measured energies.</p><span class="formula">Γ/V ∼ Ae<sup>-B/ℏ</sup></span></article>
+        </div>
+      </section>
+
+      <section id="cosmic" class="topic-section">
+        <header>
+          <h2 data-copy-en="The early universe cooled through transitions, crossovers, and freeze-outs—not one continuous transformation." data-copy-zh="早期宇宙经历相变、连续过渡与冻结退出，而不是一场连续变形。">The early universe cooled through transitions, crossovers, and freeze-outs—not one continuous transformation.</h2>
+          <p data-copy-en="Temperatures are better constrained than the corresponding times. Every rung below states whether it is measured indirectly through standard theory, reconstructed with lattice calculations, or still hypothetical."
+             data-copy-zh="温度通常比对应时刻更可靠。下列每一级都说明：它是由标准理论间接支持、由格点计算重建，还是仍属假设。">Temperatures are better constrained than the corresponding times. Every rung below states whether it is measured indirectly through standard theory, reconstructed with lattice calculations, or still hypothetical.</p>
+        </header>
+        <ol class="cosmic-phase-ladder">
+          <li><div><strong data-copy-en="Inflation and reheating" data-copy-zh="暴胀与再加热">Inflation and reheating</strong><time data-copy-en="before the hot Big Bang · timing model-dependent" data-copy-zh="热大爆炸之前 · 时刻依赖模型">before the hot Big Bang · timing model-dependent</time></div><span><span class="science-status model" data-copy-en="Model-dependent" data-copy-zh="模型依赖">Model-dependent</span><br><span data-copy-en="CMB observations support an early source of nearly scale-invariant perturbations, but the inflaton, reheating mechanism, and detailed energy scale remain unknown." data-copy-zh="CMB 观测支持早期存在近标度不变扰动源，但暴胀场、再加热机制与具体能标仍未知。">CMB observations support an early source of nearly scale-invariant perturbations, but the inflaton, reheating mechanism, and detailed energy scale remain unknown.</span></span></li>
+          <li><div><strong data-copy-en="Possible GUT transition" data-copy-zh="可能的大统一相变">Possible GUT transition</strong><time>~10<sup>15</sup>–10<sup>16</sup> GeV · ~10<sup>-36</sup>–10<sup>-32</sup> s</time></div><span><span class="science-status speculative" data-copy-en="Hypothetical" data-copy-zh="假设性">Hypothetical</span><br><span data-copy-en="Grand-unified symmetry breaking is theory-dependent and has not been experimentally confirmed." data-copy-zh="大统一对称性破缺依赖具体理论，尚未得到实验确认。">Grand-unified symmetry breaking is theory-dependent and has not been experimentally confirmed.</span></span></li>
+          <li><div><strong data-copy-en="Electroweak crossover" data-copy-zh="电弱连续过渡">Electroweak crossover</strong><time>159.5 ± 1.5 GeV · order 10<sup>-11</sup> s</time></div><span><span class="science-status inferred" data-copy-en="Standard Model + lattice" data-copy-zh="标准模型 + 格点计算">Standard Model + lattice</span><br><span data-copy-en="With the measured Higgs mass, the Standard Model predicts a smooth crossover—not a first-order electroweak phase transition. Some beyond-Standard-Model theories change that result." data-copy-zh="在实测希格斯质量下，标准模型预言的是平滑连续过渡，而非一级电弱相变；某些超出标准模型的理论会改变这一结论。">With the measured Higgs mass, the Standard Model predicts a smooth crossover—not a first-order electroweak phase transition. Some beyond-Standard-Model theories change that result.</span></span></li>
+          <li><div><strong data-copy-en="QCD crossover" data-copy-zh="QCD 连续过渡">QCD crossover</strong><time>~155 MeV · order 10<sup>-5</sup> s</time></div><span><span class="science-status inferred" data-copy-en="Lattice-QCD supported" data-copy-zh="格点 QCD 支持">Lattice-QCD supported</span><br><span data-copy-en="At near-zero baryon chemical potential and physical quark masses, quark-gluon matter changes smoothly into hadron-dominated matter. A critical point at higher density remains unconfirmed." data-copy-zh="在近零重子化学势与真实夸克质量下，夸克—胶子物质平滑转为强子主导物质；更高密度下是否存在临界点仍未确认。">At near-zero baryon chemical potential and physical quark masses, quark-gluon matter changes smoothly into hadron-dominated matter. A critical point at higher density remains unconfirmed.</span></span></li>
+          <li><div><strong data-copy-en="Neutrino decoupling and e⁺e⁻ annihilation" data-copy-zh="中微子退耦与正负电子湮灭">Neutrino decoupling and e⁺e⁻ annihilation</strong><time>~1–0.5 MeV · around 1 s</time></div><span><span class="science-status inferred" data-copy-en="Freeze-out, not a phase transition" data-copy-zh="冻结退出，并非相变">Freeze-out, not a phase transition</span><br><span data-copy-en="Interaction rates fall below expansion, then electron-positron annihilation transfers entropy mainly to photons. These are crucial thermal-history events but not symmetry-breaking phase transitions." data-copy-zh="相互作用速率降到膨胀率以下，随后正负电子湮灭主要把熵转移给光子。这些是关键热史事件，却不是对称性破缺相变。">Interaction rates fall below expansion, then electron-positron annihilation transfers entropy mainly to photons. These are crucial thermal-history events but not symmetry-breaking phase transitions.</span></span></li>
+          <li><div><strong data-copy-en="Recombination" data-copy-zh="复合">Recombination</strong><time>~3000 K · ~380,000 years</time></div><span><span class="science-status inferred" data-copy-en="Plasma-to-neutral transition; not strict equilibrium PT" data-copy-zh="等离子体转中性；非严格平衡相变">Plasma-to-neutral transition; not strict equilibrium PT</span><br><span data-copy-en="Electrons bind to nuclei and photons begin to travel freely. It changes the observable universe, but it is not usually classified like boiling or Curie ordering." data-copy-zh="电子与原子核结合，光子开始自由传播。它改变了可观测宇宙，却通常不被归类为沸腾或居里有序化那样的相变。">Electrons bind to nuclei and photons begin to travel freely. It changes the observable universe, but it is not usually classified like boiling or Curie ordering.</span></span></li>
+        </ol>
+      </section>
+
+      <section id="connections" class="topic-section">
+        <header>
+          <h2 data-copy-en="Phase language is a bridge across sciences." data-copy-zh="相变语言是一座跨科学桥梁。">Phase language is a bridge across sciences.</h2>
+          <p data-copy-en="The same constrained vocabulary links engines, magnets, quantum matter, chemical mixtures, membranes, field theory, and cosmic cooling without pretending their evidence is identical."
+             data-copy-zh="同一套受约束的语言连接热机、磁体、量子物质、化学混合物、膜、场论与宇宙冷却，同时不假装它们的证据完全相同。">The same constrained vocabulary links engines, magnets, quantum matter, chemical mixtures, membranes, field theory, and cosmic cooling without pretending their evidence is identical.</p>
+        </header>
+        <div class="relation-map">
+          <a href="./entropy-information.html"><strong data-copy-en="Entropy & information" data-copy-zh="熵与信息">Entropy &amp; information</strong><span data-copy-en="See how free energy balances energy against entropy, and why information entropy shares mathematics without automatically becoming thermodynamic entropy." data-copy-zh="了解自由能如何权衡能量与熵，以及信息熵为何共享数学结构却不会自动等同热力学熵。">See how free energy balances energy against entropy, and why information entropy shares mathematics without automatically becoming thermodynamic entropy.</span></a>
+          <a href="../periodic-table/index.html"><strong data-copy-en="Chemistry" data-copy-zh="化学">Chemistry</strong><span data-copy-en="Follow quantum structure into bonding, reaction energetics, materials, and molecular organization." data-copy-zh="追踪量子结构如何进入成键、反应能量学、材料与分子组织。">Follow quantum structure into bonding, reaction energetics, materials, and molecular organization.</span></a>
+          <a href="./field.html?id=biophysics"><strong data-copy-en="Molecular biology" data-copy-zh="分子生物学">Molecular biology</strong><span data-copy-en="Connect phase separation, folding, membranes, molecular information, and active nonequilibrium organization." data-copy-zh="连接相分离、折叠、膜、分子信息与主动非平衡组织。">Connect phase separation, folding, membranes, molecular information, and active nonequilibrium organization.</span></a>
+        </div>
+      </section>
+
+      <section id="references" class="topic-section">
+        <header>
+          <h2 data-copy-en="Official and primary paths into the evidence." data-copy-zh="沿官方与原始资料追踪证据。">Official and primary paths into the evidence.</h2>
+          <p data-copy-en="These references anchor critical phenomena, material data, and the Standard Model's early-universe crossover. Further scholarly links are named in context throughout the guide."
+             data-copy-zh="这些资料为临界现象、材料数据与标准模型早期宇宙连续过渡提供依据；其他学术资料已在相应语境中说明。">These references anchor critical phenomena, material data, and the Standard Model's early-universe crossover. Further scholarly links are named in context throughout the guide.</p>
+        </header>
+        <div class="reference-grid" data-reference-key="phase-transitions"></div>
+      </section>
+    </main>
+
+    <footer class="topic-footer">
+      <span data-copy-en="Landscapes and domains are reduced teaching models; cosmic transition labels state their evidential status." data-copy-zh="自由能景观与相畴均为约化教学模型；宇宙相变标签明确标注证据状态。">Landscapes and domains are reduced teaching models; cosmic transition labels state their evidential status.</span>
+      <span><a href="./entropy-information.html" data-copy-en="Next: entropy & information" data-copy-zh="下一站：熵与信息">Next: entropy &amp; information</a> · <a href="./index.html#genealogy" data-copy-en="Field atlas" data-copy-zh="领域图谱">Field atlas</a></span>
+    </footer>
+  </div>
+
+  <script src="common.js"></script>
+  <script src="references.js"></script>
+  <script src="phase.js"></script>
+</body>
+</html>

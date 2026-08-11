@@ -17,19 +17,18 @@
 </head>
 <body data-topic="astrophysics">
   <a class="skip-link" href="#main" data-copy-en="Skip to astrophysics" data-copy-zh="跳到天体物理内容">Skip to astrophysics</a>
-  <div class="site-controls" aria-label="Page controls" data-aria-en="Page controls" data-aria-zh="页面控制">
-    <button class="motion-toggle" type="button" aria-pressed="false">Pause motion</button>
-    <button type="button" data-lang="en" aria-pressed="true">EN</button>
-    <button type="button" data-lang="zh-CN" aria-pressed="false">中文</button>
-  </div>
-
   <div class="topic-shell">
     <nav class="route-bar" aria-label="Astrophysics routes" data-aria-en="Astrophysics routes" data-aria-zh="天体物理路线">
       <a class="route-home" href="./index.html#genealogy" data-copy-en="Back to the field atlas" data-copy-zh="返回物理领域图谱">Back to the field atlas</a>
       <div class="route-links">
         <a href="./newtonian.html" data-copy-en="Orbits" data-copy-zh="轨道">Orbits</a>
-        <a href="./electrodynamics.html#redshift" data-copy-en="Redshift" data-copy-zh="红移">Redshift</a>
-        <a href="../big-bang/index.html" data-copy-en="Cosmic history" data-copy-zh="宇宙历史">Cosmic history</a>
+        <a href="./relativity.html" data-copy-en="Relativity" data-copy-zh="相对论">Relativity</a>
+        <a href="./entropy-information.html#black-hole-entropy" data-copy-en="Black-hole entropy" data-copy-zh="黑洞熵">Black-hole entropy</a>
+      </div>
+      <div class="site-controls" aria-label="Page controls" data-aria-en="Page controls" data-aria-zh="页面控制">
+        <button class="motion-toggle" type="button" aria-pressed="false">Pause motion</button>
+        <button type="button" data-lang="en" aria-pressed="true">EN</button>
+        <button type="button" data-lang="zh-CN" aria-pressed="false">中文</button>
       </div>
     </nav>
 
@@ -60,6 +59,7 @@
       <a href="#cases" data-copy-en="Four flat systems" data-copy-zh="四个扁平系统">Four flat systems</a>
       <a href="#evolution" data-copy-en="Stellar evolution" data-copy-zh="恒星演化">Stellar evolution</a>
       <a href="#limits" data-copy-en="Mass limits" data-copy-zh="质量极限">Mass limits</a>
+      <a href="#black-holes" data-copy-en="Black holes" data-copy-zh="黑洞">Black holes</a>
       <a href="#candles" data-copy-en="Standard candles" data-copy-zh="标准烛光">Standard candles</a>
       <a href="#connections" data-copy-en="Continue exploring" data-copy-zh="继续探索">Continue exploring</a>
     </nav>
@@ -349,6 +349,133 @@
         </div>
       </section>
 
+      <section id="black-holes" class="topic-section">
+        <header>
+          <h2 data-copy-en="A black hole forms when collapse outruns every known pressure."
+              data-copy-zh="当塌缩压倒所有已知支撑，黑洞形成。">A black hole forms when collapse outruns every known pressure.</h2>
+          <p data-copy-en="A black hole is a region bounded by an event horizon: future-directed light inside cannot reach distant observers. It is not a material surface, a cosmic vacuum cleaner, or automatically a tunnel. The story begins with stellar structure, then divides into observations, classical relativity, quantum open questions, and explicitly speculative mathematics."
+             data-copy-zh="黑洞是由事件视界围成的区域：视界内面向未来传播的光无法抵达远方观察者。它不是物质表面，不是宇宙吸尘器，也不会自动成为隧道。完整故事从恒星结构开始，再分为观测证据、经典相对论、量子开放问题与明确标注的推测性数学。">
+            A black hole is a region bounded by an event horizon: future-directed light inside cannot reach distant observers. It is not a material surface, a cosmic vacuum cleaner, or automatically a tunnel. The story begins with stellar structure, then divides into observations, classical relativity, quantum open questions, and explicitly speculative mathematics.
+          </p>
+        </header>
+
+        <div class="lab">
+          <div class="lab-stage">
+            <canvas id="blackHoleCanvas" aria-label="Scrubbable teaching model of a massive stellar core collapsing through a stalled shock to an event horizon" data-aria-en="Scrubbable teaching model of a massive stellar core collapsing through a stalled shock to an event horizon" data-aria-zh="大质量恒星核心经停滞激波塌缩形成事件视界的可拖动教学模型">A cutaway star collapses through an iron core, stalled shock, proto-neutron star, and event horizon.</canvas>
+            <div class="lab-overlay">
+              <span id="blackHoleReadout" class="lab-readout">Proto-neutron star + stalled shock</span>
+              <span id="blackHoleTime" class="lab-readout secondary">~0.1–1 s after bounce</span>
+            </div>
+          </div>
+          <div class="lab-controls">
+            <h3 data-copy-en="Core-collapse timeline" data-copy-zh="核塌缩时间线">Core-collapse timeline</h3>
+            <p data-copy-en="Scrub through one black-hole-forming branch. Increase angular momentum to reveal the optional collapsar disk and jet; neither is automatic."
+               data-copy-zh="拖动查看一条形成黑洞的分支。提高角动量会出现可选的坍缩星吸积盘与喷流；二者都不是自动形成的。">Scrub through one black-hole-forming branch. Increase angular momentum to reveal the optional collapsar disk and jet; neither is automatic.</p>
+            <div class="control-group">
+              <label for="blackHoleStage"><span data-copy-en="Collapse stage" data-copy-zh="塌缩阶段">Collapse stage</span><output id="blackHoleStageOut" for="blackHoleStage">3.20 / 6</output></label>
+              <input id="blackHoleStage" type="range" min="0" max="6" value="3.2" step="0.01">
+            </div>
+            <div class="control-group">
+              <label for="blackHoleSpin"><span data-copy-en="Retained angular momentum" data-copy-zh="保留角动量">Retained angular momentum</span><output id="blackHoleSpinOut" for="blackHoleSpin">0.55</output></label>
+              <input id="blackHoleSpin" type="range" min="0" max="1" value="0.55" step="0.01">
+            </div>
+            <p class="lab-note"><span class="rep-badge model" data-copy-en="Simulation-constrained teaching model" data-copy-zh="受模拟约束的教学模型">Simulation-constrained teaching model</span><br><span data-copy-en="Times are compressed and progenitor-dependent. This is not a hydrodynamic or neutrino-transport calculation. Not every core collapse makes a black hole; disk and jet formation require sufficient angular momentum."
+               data-copy-zh="时间经过压缩且依赖前身星。本图不是流体动力学或中微子输运计算。并非每次核塌缩都形成黑洞；吸积盘与喷流需要足够角动量。">Times are compressed and progenitor-dependent. This is not a hydrodynamic or neutrino-transport calculation. Not every core collapse makes a black hole; disk and jet formation require sufficient angular momentum.</span></p>
+          </div>
+        </div>
+
+        <ol class="formation-timeline">
+          <li><div><strong data-copy-en="Late massive star" data-copy-zh="大质量恒星晚期">Late massive star</strong><time data-copy-en="millions of years → final day" data-copy-zh="数百万年 → 最后一天">millions of years → final day</time></div><span data-copy-en="Successive fusion builds an onion-like sequence of burning shells around an iron-group core. Iron fusion cannot release further binding energy." data-copy-zh="逐级聚变在铁族核心周围形成洋葱式燃烧壳层。继续聚变铁元素无法再释放结合能。">Successive fusion builds an onion-like sequence of burning shells around an iron-group core. Iron fusion cannot release further binding energy.</span></li>
+          <li><div><strong data-copy-en="Core implosion" data-copy-zh="核心内爆">Core implosion</strong><time>~0.1–0.3 s</time></div><span data-copy-en="Electron capture removes pressure and photodisintegration consumes energy. The inner core falls inward while neutrinos begin carrying away most of the released gravitational energy." data-copy-zh="电子俘获削弱压强，光致裂解吸收能量。内核向内坠落，中微子开始带走释放的大部分引力能。">Electron capture removes pressure and photodisintegration consumes energy. The inner core falls inward while neutrinos begin carrying away most of the released gravitational energy.</span></li>
+          <li><div><strong data-copy-en="Bounce and shock" data-copy-zh="反弹与激波">Bounce and shock</strong><time data-copy-en="milliseconds → ~0.1 s" data-copy-zh="毫秒 → 约 0.1 秒">milliseconds → ~0.1 s</time></div><span data-copy-en="Nuclear-density matter stiffens, the inner core rebounds, and a shock launches. Photodisintegration and neutrino losses usually stall it; a clean immediate explosion is not guaranteed." data-copy-zh="物质达到核密度后变硬，内核反弹并发出激波。光致裂解与中微子损失通常使激波停滞；并不会必然立刻产生干净爆炸。">Nuclear-density matter stiffens, the inner core rebounds, and a shock launches. Photodisintegration and neutrino losses usually stall it; a clean immediate explosion is not guaranteed.</span></li>
+          <li><div><strong data-copy-en="Proto-neutron star" data-copy-zh="原中子星">Proto-neutron star</strong><time>~0.1–1 s</time></div><span data-copy-en="A hot, lepton-rich core accretes through the stalled shock. Neutrino heating, turbulence, rotation, magnetic fields, and progenitor structure decide whether the shock revives." data-copy-zh="炽热且富轻子的核心继续通过停滞激波吸积。中微子加热、湍流、自转、磁场与前身星结构共同决定激波能否复苏。">A hot, lepton-rich core accretes through the stalled shock. Neutrino heating, turbulence, rotation, magnetic fields, and progenitor structure decide whether the shock revives.</span></li>
+          <li><div><strong data-copy-en="Branch: explosion or failure" data-copy-zh="分支：爆炸或失败">Branch: explosion or failure</strong><time data-copy-en="within seconds" data-copy-zh="数秒内">within seconds</time></div><span data-copy-en="A revived shock can leave a neutron star. Continued accretion or later fallback can instead push the core beyond its maximum mass, producing prompt or delayed black-hole formation." data-copy-zh="复苏的激波可以留下中子星；持续吸积或后续回落也可能让核心超过最大质量，形成快速或延迟黑洞。">A revived shock can leave a neutron star. Continued accretion or later fallback can instead push the core beyond its maximum mass, producing prompt or delayed black-hole formation.</span></li>
+          <li><div><strong data-copy-en="Event horizon forms" data-copy-zh="事件视界形成">Event horizon forms</strong><time data-copy-en="~0.6–1.3 s after bounce in some failed-supernova models" data-copy-zh="某些失败超新星模型中为反弹后约 0.6–1.3 秒">~0.6–1.3 s after bounce in some failed-supernova models</time></div><span data-copy-en="Once no future-directed light path from the region can escape, a horizon exists. The drawing fades the interior because no distant observation can reveal the subsequent classical collapse." data-copy-zh="一旦该区域内不存在能逃向远方的未来向光路，事件视界就已存在。图中让内部淡出，因为远方观测无法揭示之后的经典塌缩。">Once no future-directed light path from the region can escape, a horizon exists. The drawing fades the interior because no distant observation can reveal the subsequent classical collapse.</span></li>
+          <li><div><strong data-copy-en="Optional collapsar disk and jet" data-copy-zh="可选的坍缩星盘与喷流">Optional collapsar disk and jet</strong><time data-copy-en="seconds and later" data-copy-zh="数秒及以后">seconds and later</time></div><span data-copy-en="If enough angular momentum survives, infalling matter circularizes into a disk; magnetic fields can help launch jets and a long gamma-ray burst. Low-angular-momentum collapse can remain nearly spherical and make no such display." data-copy-zh="若保留足够角动量，落入物质会圆化成盘；磁场可帮助发射喷流与长伽马暴。低角动量塌缩可以接近球对称，并不产生这种景象。">If enough angular momentum survives, infalling matter circularizes into a disk; magnetic fields can help launch jets and a long gamma-ray burst. Low-angular-momentum collapse can remain nearly spherical and make no such display.</span></li>
+        </ol>
+
+        <div class="classification-grid" style="margin-top:34px">
+          <article class="classification">
+            <span class="science-status established" data-copy-en="Classical general relativity" data-copy-zh="经典广义相对论">Classical general relativity</span>
+            <h3 data-copy-en="Mass, spin, and charge" data-copy-zh="质量、自旋与电荷">Mass, spin, and charge</h3>
+            <p data-copy-en="A stationary classical black-hole exterior is characterized by mass M, angular momentum J, and electric charge Q. Schwarzschild is non-spinning and uncharged; Kerr spins and is the standard astrophysical model; Kerr-Newman also carries charge."
+               data-copy-zh="稳定经典黑洞的外部由质量 M、角动量 J 与电荷 Q 表征。史瓦西黑洞不旋转且不带电；克尔黑洞旋转，是标准天体模型；克尔—纽曼黑洞还带电。">A stationary classical black-hole exterior is characterized by mass M, angular momentum J, and electric charge Q. Schwarzschild is non-spinning and uncharged; Kerr spins and is the standard astrophysical model; Kerr-Newman also carries charge.</p>
+            <span class="formula">M · J · Q</span>
+          </article>
+          <article class="classification">
+            <span class="science-status inferred" data-copy-en="Astrophysical expectation" data-copy-zh="天体物理预期">Astrophysical expectation</span>
+            <h3 data-copy-en="Nearly neutral, usually spinning" data-copy-zh="近乎电中性，通常旋转">Nearly neutral, usually spinning</h3>
+            <p data-copy-en="Charge is mathematically allowed, but surrounding plasma rapidly supplies opposite charge, so real holes are expected to be nearly neutral. Spin is angular momentum—not a rigid surface rotating—and records formation, accretion, and merger history."
+               data-copy-zh="数学上允许黑洞带电，但周围等离子体会迅速补入反号电荷，因此真实黑洞预计近乎电中性。自旋是角动量，而不是刚性表面旋转；它记录形成、吸积与并合历史。">Charge is mathematically allowed, but surrounding plasma rapidly supplies opposite charge, so real holes are expected to be nearly neutral. Spin is angular momentum—not a rigid surface rotating—and records formation, accretion, and merger history.</p>
+            <span class="formula">a* = cJ/(GM²)</span>
+          </article>
+        </div>
+
+        <div class="spectrum">
+          <article><h3 data-copy-en="Stellar-mass" data-copy-zh="恒星级">Stellar-mass</h3><strong data-copy-en="a few to ~100 M☉" data-copy-zh="数个至约 100 M☉">a few to ~100 M☉</strong><p data-copy-en="Born from massive-star collapse or assembled through mergers. Pair instability complicates direct stellar production in a model-dependent gap roughly tens to above one hundred solar masses." data-copy-zh="由大质量恒星塌缩形成，或通过并合组装。对不稳定性使数十到百余太阳质量范围内的直接恒星形成变得复杂，边界依赖模型。">Born from massive-star collapse or assembled through mergers. Pair instability complicates direct stellar production in a model-dependent gap roughly tens to above one hundred solar masses.</p></article>
+          <article><h3 data-copy-en="Intermediate-mass" data-copy-zh="中等质量">Intermediate-mass</h3><strong>~10²–10⁵ M☉</strong><p data-copy-en="The terminology has soft boundaries. Dense-cluster runaway collisions, hierarchical black-hole mergers, and rare direct-collapse channels are candidates. GW190521 produced a remnant near 142 M☉." data-copy-zh="类别边界并不统一。致密星团中的失控碰撞、黑洞层级并合与罕见直接塌缩都是候选路径；GW190521 产生了约 142 M☉ 的遗迹。">The terminology has soft boundaries. Dense-cluster runaway collisions, hierarchical black-hole mergers, and rare direct-collapse channels are candidates. GW190521 produced a remnant near 142 M☉.</p></article>
+          <article><h3 data-copy-en="Supermassive" data-copy-zh="超大质量">Supermassive</h3><strong>~10⁵–10¹⁰ M☉</strong><p data-copy-en="Galactic-center black holes grow from uncertain seeds through gas accretion and mergers. Early quasars prove that some reached enormous mass within the first billion years; which seed channel dominated remains unresolved." data-copy-zh="星系中心黑洞从尚不确定的种子出发，经气体吸积与并合增长。早期类星体证明其中一些在十亿年内已极其巨大；主导种子路径仍未解决。">Galactic-center black holes grow from uncertain seeds through gas accretion and mergers. Early quasars prove that some reached enormous mass within the first billion years; which seed channel dominated remains unresolved.</p></article>
+          <article><h3 data-copy-en="Primordial" data-copy-zh="原初">Primordial</h3><strong data-copy-en="hypothetical · broad possible mass range" data-copy-zh="假设性 · 可能质量范围很广">hypothetical · broad possible mass range</strong><p data-copy-en="Density fluctuations or phase transitions in the early universe could, in some models, form black holes without stars. No primordial population has been confirmed; observations constrain many proposed mass windows." data-copy-zh="某些模型中，早期宇宙密度涨落或相变可在没有恒星的情况下形成黑洞。尚未确认任何原初黑洞族群；观测已限制许多候选质量窗口。">Density fluctuations or phase transitions in the early universe could, in some models, form black holes without stars. No primordial population has been confirmed; observations constrain many proposed mass windows.</p></article>
+        </div>
+
+        <div class="ladder">
+          <h3 class="ladder-title" data-copy-en="The compact-object limits are not three versions of the same ceiling." data-copy-zh="三种致密天体的质量限制并非同一种上限。">The compact-object limits are not three versions of the same ceiling.</h3>
+          <table class="physics-table">
+            <thead><tr><th data-copy-en="Object" data-copy-zh="天体">Object</th><th data-copy-en="Support or boundary" data-copy-zh="支撑或边界">Support or boundary</th><th data-copy-en="Useful mass statement" data-copy-zh="有用的质量表述">Useful mass statement</th><th data-copy-en="What happens beyond it" data-copy-zh="越过之后">What happens beyond it</th></tr></thead>
+            <tbody>
+              <tr><td data-copy-en="White dwarf" data-copy-zh="白矮星">White dwarf</td><td data-copy-en="Electron degeneracy pressure" data-copy-zh="电子简并压">Electron degeneracy pressure</td><td data-copy-en="Chandrasekhar limit ≈ 1.4 M☉, composition-dependent" data-copy-zh="钱德拉塞卡极限约 1.4 M☉，依赖组成">Chandrasekhar limit ≈ 1.4 M☉, composition-dependent</td><td data-copy-en="Collapse, thermonuclear disruption, or neutron-star formation depending on how mass is added" data-copy-zh="依增质量方式而发生塌缩、热核解体或形成中子星">Collapse, thermonuclear disruption, or neutron-star formation depending on how mass is added</td></tr>
+              <tr><td data-copy-en="Neutron star" data-copy-zh="中子星">Neutron star</td><td data-copy-en="Nuclear interactions + degeneracy in relativistic gravity" data-copy-zh="相对论引力中的核相互作用与简并压">Nuclear interactions + degeneracy in relativistic gravity</td><td data-copy-en="Firmly above 2 M☉; likely around 2.2–2.3 M☉, equation-of-state dependent" data-copy-zh="确定高于 2 M☉；很可能约 2.2–2.3 M☉，依赖状态方程">Firmly above 2 M☉; likely around 2.2–2.3 M☉, equation-of-state dependent</td><td data-copy-en="No stable neutron-star solution; an event horizon can form" data-copy-zh="不再存在稳定中子星解；可形成事件视界">No stable neutron-star solution; an event horizon can form</td></tr>
+              <tr><td data-copy-en="Black hole" data-copy-zh="黑洞">Black hole</td><td data-copy-en="No material pressure support; horizon radius grows with mass" data-copy-zh="没有物质压强支撑；视界半径随质量增长">No material pressure support; horizon radius grows with mass</td><td data-copy-en="No known intrinsic upper mass limit in classical general relativity" data-copy-zh="经典广义相对论中没有已知内禀质量上限">No known intrinsic upper mass limit in classical general relativity</td><td data-copy-en="Growth is limited in practice by fuel, feedback, mergers, environment, and cosmic time" data-copy-zh="实际增长受燃料、反馈、并合、环境与宇宙时间限制">Growth is limited in practice by fuel, feedback, mergers, environment, and cosmic time</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="classification-grid" style="margin-top:34px">
+          <article class="classification">
+            <span class="science-status established" data-copy-en="Accretion physics" data-copy-zh="吸积物理">Accretion physics</span>
+            <h3 data-copy-en="Why an accretion disk is thin—not spherical" data-copy-zh="为什么吸积盘是薄盘，而不是球体">Why an accretion disk is thin—not spherical</h3>
+            <p data-copy-en="Infalling gas almost always carries nonzero angular momentum. Magnetic stresses and turbulence transport angular momentum outward while collisions and radiation remove energy. If cooling is efficient, vertical pressure balance gives H/R ≈ cs/vK: cold gas has sound speed far below orbital speed and settles into a thin disk."
+               data-copy-zh="落入气体几乎总带有非零角动量。磁应力与湍流把角动量向外输运，碰撞与辐射则移除能量。若冷却高效，垂直压强平衡给出 H/R ≈ cs/vK：冷气体的声速远低于轨道速度，于是沉降为薄盘。">Infalling gas almost always carries nonzero angular momentum. Magnetic stresses and turbulence transport angular momentum outward while collisions and radiation remove energy. If cooling is efficient, vertical pressure balance gives H/R ≈ cs/vK: cold gas has sound speed far below orbital speed and settles into a thin disk.</p>
+            <span class="formula">H/R ≈ c<sub>s</sub>/v<sub>K</sub> ≪ 1</span>
+          </article>
+          <article class="classification">
+            <span class="science-status inferred" data-copy-en="Important exceptions" data-copy-zh="重要例外">Important exceptions</span>
+            <h3 data-copy-en="Not every flow is thin" data-copy-zh="并非所有吸积流都很薄">Not every flow is thin</h3>
+            <p data-copy-en="Hot radiatively inefficient flows retain energy and puff into thick tori. Super-Eddington or slim disks can thicken through radiation pressure and advection. Near-spherical accretion is possible only when incoming gas has exceptionally little net angular momentum."
+               data-copy-zh="炽热且辐射效率低的吸积流保留能量，会膨胀成厚环面；超爱丁顿或瘦盘可因辐射压与平流而变厚。只有入流净角动量异常小时，吸积才接近球对称。">Hot radiatively inefficient flows retain energy and puff into thick tori. Super-Eddington or slim disks can thicken through radiation pressure and advection. Near-spherical accretion is possible only when incoming gas has exceptionally little net angular momentum.</p>
+            <span class="formula" data-copy-en="A sphere is the low-angular-momentum exception." data-copy-zh="球对称是低角动量例外。">A sphere is the low-angular-momentum exception.</span>
+          </article>
+        </div>
+
+        <div class="classification-grid" style="margin-top:18px">
+          <article class="classification">
+            <span class="science-status established" data-copy-en="Classical general relativity" data-copy-zh="经典广义相对论">Classical general relativity</span>
+            <h3 data-copy-en="Horizon, interior, singularity" data-copy-zh="视界、内部与奇点">Horizon, interior, singularity</h3>
+            <p data-copy-en="The horizon is a causal boundary, not a wall. A freely falling observer crossing a sufficiently large horizon encounters nothing locally special at that instant; tidal forces can be mild there for a supermassive hole. Classical relativity predicts continued collapse to a singularity, but a singularity signals the theory's own limit rather than an object we have observed."
+               data-copy-zh="视界是因果边界，不是一堵墙。自由落体观察者穿过足够大的视界时，在该瞬间不会局域地遇到特殊事件；超大质量黑洞视界处的潮汐力甚至可能很弱。经典相对论预言塌缩继续走向奇点，但奇点标志理论自身的极限，并非已观测对象。">The horizon is a causal boundary, not a wall. A freely falling observer crossing a sufficiently large horizon encounters nothing locally special at that instant; tidal forces can be mild there for a supermassive hole. Classical relativity predicts continued collapse to a singularity, but a singularity signals the theory's own limit rather than an object we have observed.</p>
+          </article>
+          <article class="classification">
+            <span class="science-status inferred" data-copy-en="What observations establish" data-copy-zh="观测确立了什么">What observations establish</span>
+            <h3 data-copy-en="Evidence stops at the horizon" data-copy-zh="证据止于视界之外">Evidence stops at the horizon</h3>
+            <p data-copy-en="Stellar orbits reveal compact Galactic-center masses; X-rays reveal hot accretion; LIGO-Virgo-KAGRA measures inspiral, merger, and ringdown; the Event Horizon Telescope resolves horizon-scale rings and central brightness depressions. None directly images an interior or singularity."
+               data-copy-zh="恒星轨道揭示星系中心致密质量；X 射线揭示炽热吸积；LIGO—Virgo—KAGRA 测量旋近、并合与振铃；事件视界望远镜分辨视界尺度亮环与中央亮度凹陷。它们都没有直接成像内部或奇点。">Stellar orbits reveal compact Galactic-center masses; X-rays reveal hot accretion; LIGO-Virgo-KAGRA measures inspiral, merger, and ringdown; the Event Horizon Telescope resolves horizon-scale rings and central brightness depressions. None directly images an interior or singularity.</p>
+          </article>
+          <article class="classification">
+            <span class="science-status model" data-copy-en="Open quantum-gravity problem" data-copy-zh="开放的量子引力问题">Open quantum-gravity problem</span>
+            <h3 data-copy-en="Entropy and the information paradox" data-copy-zh="熵与信息悖论">Entropy and the information paradox</h3>
+            <p data-copy-en="Black-hole entropy scales with horizon area, and Hawking's semiclassical calculation assigns a temperature and evaporation. Reconciling apparently thermal radiation with unitary quantum mechanics is the information paradox. Hawking radiation, Page curves, firewalls, and islands are not direct black-hole observations."
+               data-copy-zh="黑洞熵随视界面积标度，霍金的半经典计算赋予黑洞温度与蒸发。如何让近似热辐射与幺正量子力学相容，就是信息悖论。霍金辐射、佩奇曲线、防火墙与岛公式都不是黑洞直接观测。">Black-hole entropy scales with horizon area, and Hawking's semiclassical calculation assigns a temperature and evaporation. Reconciling apparently thermal radiation with unitary quantum mechanics is the information paradox. Hawking radiation, Page curves, firewalls, and islands are not direct black-hole observations.</p>
+            <span class="formula">S<sub>BH</sub> = k<sub>B</sub>A/(4ℓ<sub>P</sub>²)</span>
+          </article>
+          <article class="classification">
+            <span class="science-status speculative" data-copy-en="Mathematical possibilities, no evidence" data-copy-zh="数学可能性，无观测证据">Mathematical possibilities, no evidence</span>
+            <h3 data-copy-en="Wormholes and white holes" data-copy-zh="虫洞与白洞">Wormholes and white holes</h3>
+            <p data-copy-en="A black hole is not automatically a wormhole. Classic traversable wormholes require exotic stress-energy that violates familiar energy conditions. White holes appear as time-reversed regions in idealized extensions or speculative quantum-remnant models. Neither traversable wormholes nor white holes have observational support."
+               data-copy-zh="黑洞不会自动成为虫洞。经典可穿越虫洞需要违反常见能量条件的奇异应力—能量。白洞出现在理想化时空延拓的时间反演区域或推测性量子遗迹模型中。可穿越虫洞与白洞都没有观测支持。">A black hole is not automatically a wormhole. Classic traversable wormholes require exotic stress-energy that violates familiar energy conditions. White holes appear as time-reversed regions in idealized extensions or speculative quantum-remnant models. Neither traversable wormholes nor white holes have observational support.</p>
+          </article>
+        </div>
+      </section>
+
       <section id="candles" class="topic-section">
         <header>
           <h2 data-copy-en="A standard candle is a source whose true brightness you can know."
@@ -426,6 +553,14 @@
           <a href="./relativity.html"><strong data-copy-en="Curved spacetime" data-copy-zh="弯曲时空">Curved spacetime</strong><span data-copy-en="Neutron stars and black holes are where Newtonian gravity fails outright and the geometric description becomes mandatory." data-copy-zh="中子星与黑洞正是牛顿引力彻底失效、必须改用几何描述的地方。">Neutron stars and black holes are where Newtonian gravity fails outright and the geometric description becomes mandatory.</span></a>
         </div>
       </section>
+      <section id="references" class="topic-section">
+        <header>
+          <h2 data-copy-en="Official paths into the high-gravity universe." data-copy-zh="沿官方资料继续探索强引力宇宙。">Official paths into the high-gravity universe.</h2>
+          <p data-copy-en="These agency and Nobel sources support the black-hole classifications, observations, and relativity used throughout this guide."
+             data-copy-zh="这些科学机构与诺贝尔奖资料，为本导览中的黑洞分类、观测与相对论提供依据。">These agency and Nobel sources support the black-hole classifications, observations, and relativity used throughout this guide.</p>
+        </header>
+        <div class="reference-grid" data-reference-key="astrophysics"></div>
+      </section>
     </main>
 
     <footer class="topic-footer">
@@ -437,6 +572,7 @@
   <script src="formula.js"></script>
 
   <script src="common.js"></script>
+  <script src="references.js"></script>
   <script src="astro.js"></script>
 </body>
 </html>
