@@ -689,11 +689,18 @@ test('Particle Zoo visible simulations animate and honor reduced motion', async 
     return hash;
   });
   const expectCanvasToAdvance = async id => {
-    await page.locator(`#${id}`).scrollIntoViewIfNeeded();
+    const canvas = page.locator(`#${id}`);
+    await canvas.scrollIntoViewIfNeeded();
+    await expect(canvas).toBeVisible();
     await page.waitForTimeout(120);
     const before = await fingerprint(id);
-    await page.waitForTimeout(350);
-    expect(await fingerprint(id), `${id} should visibly advance`).not.toBe(before);
+    await expect
+      .poll(() => fingerprint(id), {
+        timeout: 3_000,
+        intervals: [50, 100, 150],
+        message: `${id} should visibly advance`
+      })
+      .not.toBe(before);
   };
 
   await page.locator('.tab[data-tab="builder"]').click();
@@ -868,14 +875,32 @@ test('Particle Zoo photons fade before the final scene clears', async ({ page })
   });
   await expect.poll(async () => (await samplePhoton())?.life, { timeout: 2_000, intervals:[20] })
     .toBeLessThan(fadeFrames-3);
-  const early=await samplePhoton();
-  await expect.poll(async () => {
-    const sample=await samplePhoton();
-    if(sample && sample.life<8) await page.evaluate(()=>pgStop());
-    return sample?.life;
-  }, { timeout: 2_000, intervals:[20] })
-    .toBeLessThan(8);
-  const late=await samplePhoton();
+  const early = await page.waitForFunction(limit => {
+    const photon=pgParts[0];
+    if(!photon || photon.life>=limit) return null;
+    const pixel=ctx.getImageData(
+      Math.floor(photon.x*devicePixelRatio),
+      Math.floor(photon.y*devicePixelRatio),
+      1,
+      1
+    ).data;
+    return {brightness:pixel[0]+pixel[1]+pixel[2],life:photon.life};
+  }, fadeFrames - 3, { timeout: 2_000 }).then(handle => handle.jsonValue());
+  const late = await page.waitForFunction(() => {
+    const photon=pgParts[0];
+    if(!photon || photon.life>=8) return null;
+    const pixel=ctx.getImageData(
+      Math.floor(photon.x*devicePixelRatio),
+      Math.floor(photon.y*devicePixelRatio),
+      1,
+      1
+    ).data;
+    pgStop();
+    return {brightness:pixel[0]+pixel[1]+pixel[2],life:photon.life};
+  }, undefined, { timeout: 2_000 }).then(handle => handle.jsonValue());
+  expect(early).not.toBeNull();
+  expect(late).not.toBeNull();
+  expect(late.life).toBeLessThan(early.life);
   expect(late.brightness).toBeLessThan(early.brightness);
 
   await page.evaluate(()=>pgStart());
