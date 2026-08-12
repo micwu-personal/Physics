@@ -40,6 +40,8 @@
   const skyCurrent = document.getElementById('skyCurrent');
   const jetApproachAxis = document.getElementById('jetApproachAxis');
   const jetRecedeAxis = document.getElementById('jetRecedeAxis');
+  const topicIndex = document.querySelector('.topic-index');
+  const topicIndexAnchors = [...topicIndex.querySelectorAll('a[href^="#"]')];
 
   const particles = {
     electron: { restMeV: 0.51099895 },
@@ -346,6 +348,11 @@
     });
   });
   energySlider.addEventListener('input', renderEnergy);
+  topicIndexAnchors.forEach(anchor => {
+    anchor.addEventListener('focus', () => {
+      anchor.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+    });
+  });
 
   [jetBetaControl, jetAngleControl].forEach(control => {
     control.addEventListener('input', renderJetGeometry);

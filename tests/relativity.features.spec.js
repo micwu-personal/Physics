@@ -86,6 +86,7 @@ test('relativity page exposes corrected clock geometry, particle explorer, and j
     }
   }
 
+  await expect(page.locator('.relativity-hero-panel a[href="https://www.einstein-online.info/en/Light_deflection/"]')).toBeVisible();
   await expect(page.locator('#jets a[href="https://arxiv.org/abs/astro-ph/9506063"]')).toBeVisible();
   await expect(page.locator('#evidence a[href="https://doi.org/10.12942/lrr-2014-4"]')).toBeVisible();
 
@@ -99,8 +100,9 @@ test('relativity page keeps bilingual dynamic copy for new scoped instruments', 
   await expect(page.locator('#energyInterpretation')).toContainText('电子');
   await expect(page.locator('#jetBrightnessNote')).toContainText('亮度条');
   await expect(page.locator('#clockGroundHalfTick')).toContainText('L0/c');
-  await expect(page.locator('#references .reference-entry')).toHaveCount(11);
+  await expect(page.locator('#references .reference-entry')).toHaveCount(12);
   await expect(page.locator('#particle-regimes')).toContainText('300 keV 电子已经有 β ≈ 0.78');
   await expect(page.locator('#compact-objects')).toContainText('泡利不相容原理');
+  await expect(page.locator('#references a[href="https://www.einstein-online.info/en/Light_deflection/"]')).toBeVisible();
   await expect(page.locator('#references .reference-entry a').first()).toHaveText('打开来源');
 });

@@ -654,6 +654,9 @@ test('physics relativity deepening coverage', async ({ page }) => {
     await page.locator('[data-preset-particle="proton"][data-preset-mev="0"]').click();
     await page.locator('[data-preset-particle="proton"][data-preset-mev="3"]').click();
     await page.locator('[data-preset-particle="proton"][data-preset-mev="6.845098"]').click();
+    await page.evaluate(() => {
+      document.querySelectorAll('.topic-index a[href^="#"]').forEach(anchor => anchor.focus());
+    });
     await page.evaluate(() => window.__relativityDebug.setParticle('muon'));
     await setRange(page.locator('#energySlider'), -1);
     await page.evaluate(() => {
