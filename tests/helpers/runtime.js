@@ -102,9 +102,39 @@ export async function blockExternalAssets(page) {
   });
 }
 
+async function installVisualFreeze(page) {
+  await page.addInitScript(() => {
+    const css = `
+      *, *::before, *::after {
+        animation-delay: 0s !important;
+        animation-duration: 0s !important;
+        caret-color: transparent !important;
+        font-family: Arial, "Microsoft YaHei", sans-serif !important;
+        transition: none !important;
+      }
+      canvas {
+        visibility: hidden !important;
+      }
+    `;
+    const inject = () => {
+      if (document.getElementById('__visual-freeze-style')) return;
+      const style = document.createElement('style');
+      style.id = '__visual-freeze-style';
+      style.textContent = css;
+      (document.head || document.documentElement).appendChild(style);
+    };
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', inject, { once: true });
+    } else {
+      inject();
+    }
+  });
+}
+
 export async function preparePage(page, path, language, options = {}) {
   await installDeterminism(page);
   if (options.probe) await installRuntimeProbe(page);
+  if (options.visualFreeze) await installVisualFreeze(page);
   if (options.reducedMotion) await page.emulateMedia({ reducedMotion: options.reducedMotion });
   await setLanguage(page, language);
   if (options.motionPreference) await setMotionPreference(page, options.motionPreference);
@@ -143,6 +173,20 @@ export async function freezeVisuals(page) {
         image.addEventListener('error', resolve, { once: true });
       })));
     await document.fonts.ready;
+    const nextFrame = () => new Promise(resolve => requestAnimationFrame(() => resolve()));
+    const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
+    let previousHeight = -1;
+    let stableFrames = 0;
+    for (let attempt = 0; attempt < 12 && stableFrames < 3; attempt++) {
+      await nextFrame();
+      await wait(120);
+      const currentHeight = Math.max(
+        document.documentElement.scrollHeight,
+        document.body?.scrollHeight ?? 0
+      );
+      stableFrames = currentHeight === previousHeight ? stableFrames + 1 : 0;
+      previousHeight = currentHeight;
+    }
   });
   await page.waitForTimeout(100);
 }
