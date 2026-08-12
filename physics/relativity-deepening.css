@@ -1,0 +1,540 @@
+body[data-topic="relativity"] .relativity-hero-panel {
+  gap: 1rem;
+}
+
+body[data-topic="relativity"] .relativity-hero-copy {
+  align-items: flex-start;
+}
+
+body[data-topic="relativity"] .hero-legend,
+body[data-topic="relativity"] .claim-sources ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+body[data-topic="relativity"] .hero-legend {
+  display: grid;
+  gap: 0.65rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid rgba(126, 232, 197, 0.16);
+  border-radius: 18px;
+  background: rgba(8, 13, 28, 0.72);
+}
+
+body[data-topic="relativity"] .hero-legend li {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.75rem;
+  align-items: center;
+  color: rgba(232, 236, 255, 0.88);
+}
+
+body[data-topic="relativity"] .legend-swatch {
+  width: 1.8rem;
+  height: 0.65rem;
+  border-radius: 999px;
+  display: inline-block;
+}
+
+body[data-topic="relativity"] .legend-swatch.mesh {
+  background: #40ddf5;
+}
+
+body[data-topic="relativity"] .legend-swatch.ray {
+  background: #ffd166;
+}
+
+body[data-topic="relativity"] .legend-swatch.baseline {
+  background: linear-gradient(90deg, rgba(232, 236, 255, 0.78) 60%, rgba(232, 236, 255, 0.12) 60%);
+  background-size: 0.7rem 100%;
+}
+
+body[data-topic="relativity"] .legend-swatch.mass {
+  background: #00d4ff;
+}
+
+body[data-topic="relativity"] .claim-sources {
+  display: grid;
+  gap: 0.7rem;
+  padding: 1rem 1.1rem;
+  border-radius: 18px;
+  background: rgba(8, 13, 28, 0.76);
+  border: 1px solid rgba(255, 209, 102, 0.12);
+}
+
+body[data-topic="relativity"] .claim-sources.compact {
+  margin-top: 0.1rem;
+}
+
+body[data-topic="relativity"] .claim-sources strong {
+  font-size: 0.84rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #ffd166;
+}
+
+body[data-topic="relativity"] .claim-sources ul {
+  display: grid;
+  gap: 0.55rem;
+}
+
+body[data-topic="relativity"] .claim-sources li {
+  color: rgba(232, 236, 255, 0.78);
+}
+
+body[data-topic="relativity"] .claim-sources a {
+  color: #7ee8c5;
+}
+
+body[data-topic="relativity"] .principle-diagrams,
+body[data-topic="relativity"] .measurement-grid,
+body[data-topic="relativity"] .reference-grid,
+body[data-topic="relativity"] .scale-notes,
+body[data-topic="relativity"] .clock-metrics,
+body[data-topic="relativity"] .metric-grid,
+body[data-topic="relativity"] .jet-panel-notes,
+body[data-topic="relativity"] .compact-bridge {
+  display: grid;
+  gap: 1rem;
+}
+
+body[data-topic="relativity"] .principle-diagrams,
+body[data-topic="relativity"] .measurement-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+body[data-topic="relativity"] .diagram-card,
+body[data-topic="relativity"] .explorer-card,
+body[data-topic="relativity"] .bridge-link-card {
+  border: 1px solid rgba(126, 232, 197, 0.14);
+  border-radius: 22px;
+  background: linear-gradient(180deg, rgba(11, 17, 38, 0.94), rgba(7, 11, 26, 0.92));
+  box-shadow: 0 20px 48px rgba(1, 3, 10, 0.28);
+}
+
+body[data-topic="relativity"] .diagram-card {
+  display: grid;
+  gap: 0.85rem;
+  padding: 1.1rem;
+}
+
+body[data-topic="relativity"] .diagram-card h3,
+body[data-topic="relativity"] .bridge-steps strong,
+body[data-topic="relativity"] .regime-card h3,
+body[data-topic="relativity"] .beaming-card h3,
+body[data-topic="relativity"] .scale-notes h4,
+body[data-topic="relativity"] .jet-panel-notes h4,
+body[data-topic="relativity"] .bridge-link-card strong {
+  margin: 0;
+  font-size: 1rem;
+  color: #f5f7ff;
+}
+
+body[data-topic="relativity"] .diagram-card p,
+body[data-topic="relativity"] .scale-notes p,
+body[data-topic="relativity"] .jet-panel-notes p,
+body[data-topic="relativity"] .bridge-step p,
+body[data-topic="relativity"] .bridge-link-card p,
+body[data-topic="relativity"] .regime-card p,
+body[data-topic="relativity"] .beaming-card p {
+  margin: 0;
+  color: rgba(232, 236, 255, 0.82);
+}
+
+body[data-topic="relativity"] .diagram-card svg {
+  width: 100%;
+  height: auto;
+  border-radius: 16px;
+  background:
+    radial-gradient(circle at 50% 40%, rgba(64, 221, 245, 0.12), transparent 58%),
+    rgba(5, 8, 22, 0.88);
+  border: 1px solid rgba(232, 236, 255, 0.06);
+}
+
+body[data-topic="relativity"] .diagram-card svg line,
+body[data-topic="relativity"] .diagram-card svg path,
+body[data-topic="relativity"] .diagram-card svg rect,
+body[data-topic="relativity"] .diagram-card svg circle {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 4;
+}
+
+body[data-topic="relativity"] .lightlike,
+body[data-topic="relativity"] .lensed-arc,
+body[data-topic="relativity"] .gw-wave,
+body[data-topic="relativity"] .momentum.hard {
+  stroke: #ffd166;
+}
+
+body[data-topic="relativity"] .spacelike,
+body[data-topic="relativity"] .clock-path,
+body[data-topic="relativity"] .momentum.soft,
+body[data-topic="relativity"] .gw-arm {
+  stroke: rgba(232, 236, 255, 0.7);
+}
+
+body[data-topic="relativity"] .timelike,
+body[data-topic="relativity"] .rest-path,
+body[data-topic="relativity"] .fall-left,
+body[data-topic="relativity"] .fall-right,
+body[data-topic="relativity"] .lensed-arc.faint,
+body[data-topic="relativity"] .box {
+  stroke: #40ddf5;
+}
+
+body[data-topic="relativity"] .travel-path,
+body[data-topic="relativity"] .tidal,
+body[data-topic="relativity"] .spacing,
+body[data-topic="relativity"] .clock-face,
+body[data-topic="relativity"] .lens-body {
+  stroke: #7ee8c5;
+}
+
+body[data-topic="relativity"] .clock-hand,
+body[data-topic="relativity"] .spacing.tight,
+body[data-topic="relativity"] .box.narrow {
+  stroke: #ff6b9d;
+}
+
+body[data-topic="relativity"] .event-fill,
+body[data-topic="relativity"] .timelike-fill {
+  fill: #ffd166;
+  stroke: none;
+}
+
+body[data-topic="relativity"] .box.wide,
+body[data-topic="relativity"] .box.narrow,
+body[data-topic="relativity"] .clock-face,
+body[data-topic="relativity"] .lens-body {
+  fill: rgba(64, 221, 245, 0.08);
+}
+
+body[data-topic="relativity"] .explorer-grid,
+body[data-topic="relativity"] .jet-layout,
+body[data-topic="relativity"] .evidence-grid {
+  display: grid;
+  gap: 1.25rem;
+}
+
+body[data-topic="relativity"] .explorer-grid,
+body[data-topic="relativity"] .jet-layout {
+  grid-template-columns: minmax(0, 1.3fr) minmax(18rem, 0.95fr);
+}
+
+body[data-topic="relativity"] .evidence-grid {
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+}
+
+body[data-topic="relativity"] .explorer-card {
+  display: grid;
+  gap: 1rem;
+  padding: 1.25rem;
+}
+
+body[data-topic="relativity"] .explorer-card.metrics {
+  align-content: start;
+}
+
+body[data-topic="relativity"] .explorer-head,
+body[data-topic="relativity"] .toggle-row,
+body[data-topic="relativity"] .preset-row,
+body[data-topic="relativity"] .brightness-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  justify-content: space-between;
+}
+
+body[data-topic="relativity"] .toggle-row,
+body[data-topic="relativity"] .preset-row {
+  justify-content: flex-start;
+}
+
+body[data-topic="relativity"] .toggle-chip,
+body[data-topic="relativity"] .preset-chip {
+  border: 1px solid rgba(232, 236, 255, 0.16);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
+  color: #f5f7ff;
+  cursor: pointer;
+  font: inherit;
+  padding: 0.58rem 0.9rem;
+}
+
+body[data-topic="relativity"] .toggle-chip.active {
+  background: rgba(64, 221, 245, 0.18);
+  border-color: rgba(64, 221, 245, 0.42);
+}
+
+body[data-topic="relativity"] .preset-chip {
+  font-size: 0.92rem;
+}
+
+body[data-topic="relativity"] .control-group output {
+  font-weight: 700;
+  color: #ffd166;
+}
+
+body[data-topic="relativity"] .energy-bars {
+  display: grid;
+  gap: 0.9rem;
+}
+
+body[data-topic="relativity"] .energy-bar {
+  display: grid;
+  gap: 0.45rem;
+  color: rgba(232, 236, 255, 0.76);
+}
+
+body[data-topic="relativity"] .energy-bar > div,
+body[data-topic="relativity"] .brightness-bar {
+  height: 0.9rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+}
+
+body[data-topic="relativity"] #restEnergyBar,
+body[data-topic="relativity"] #kineticEnergyBar,
+body[data-topic="relativity"] #jetApproachBrightness,
+body[data-topic="relativity"] #jetRecedeBrightness {
+  height: 100%;
+  border-radius: inherit;
+}
+
+body[data-topic="relativity"] #restEnergyBar {
+  background: linear-gradient(90deg, #40ddf5, #00d4ff);
+}
+
+body[data-topic="relativity"] #kineticEnergyBar {
+  background: linear-gradient(90deg, #ffd166, #ffb347);
+}
+
+body[data-topic="relativity"] .metric-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+body[data-topic="relativity"] .clock-metrics {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+body[data-topic="relativity"] .metric-card,
+body[data-topic="relativity"] .regime-card,
+body[data-topic="relativity"] .beaming-card,
+body[data-topic="relativity"] .bridge-step,
+body[data-topic="relativity"] .bridge-link-card {
+  padding: 1rem 1.05rem;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid rgba(232, 236, 255, 0.08);
+}
+
+body[data-topic="relativity"] .metric-card {
+  display: grid;
+  gap: 0.35rem;
+}
+
+body[data-topic="relativity"] .metric-card strong {
+  color: rgba(232, 236, 255, 0.7);
+  font-size: 0.84rem;
+}
+
+body[data-topic="relativity"] .metric-card span {
+  font: 700 1.05rem/1.25 "JetBrains Mono", monospace;
+  color: #f5f7ff;
+}
+
+body[data-topic="relativity"] .scale-notes {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+body[data-topic="relativity"] .event-table {
+  width: 100%;
+  border-collapse: collapse;
+  border-spacing: 0;
+  overflow: hidden;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.025);
+}
+
+body[data-topic="relativity"] .event-table caption {
+  caption-side: top;
+  padding: 0 0 0.65rem;
+  text-align: left;
+  color: #f5f7ff;
+  font-weight: 700;
+}
+
+body[data-topic="relativity"] .event-table th,
+body[data-topic="relativity"] .event-table td {
+  padding: 0.85rem 0.9rem;
+  border: 1px solid rgba(232, 236, 255, 0.08);
+  text-align: left;
+  vertical-align: top;
+  color: rgba(232, 236, 255, 0.82);
+}
+
+body[data-topic="relativity"] .event-table td {
+  font: 500 0.94rem/1.45 "JetBrains Mono", monospace;
+}
+
+body[data-topic="relativity"] .jet-stage {
+  padding: 0.35rem;
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at 72% 14%, rgba(255, 209, 102, 0.08), transparent 28%),
+    rgba(5, 8, 22, 0.9);
+  border: 1px solid rgba(232, 236, 255, 0.08);
+}
+
+body[data-topic="relativity"] #jetDiagram {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+body[data-topic="relativity"] .jet-frame {
+  fill: rgba(10, 15, 34, 0.82);
+  stroke: rgba(232, 236, 255, 0.08);
+  stroke-width: 2;
+}
+
+body[data-topic="relativity"] .jet-sight,
+body[data-topic="relativity"] .sky-ruler {
+  stroke: rgba(232, 236, 255, 0.26);
+  stroke-width: 4;
+  stroke-linecap: round;
+}
+
+body[data-topic="relativity"] .jet-axis {
+  stroke: rgba(64, 221, 245, 0.9);
+  stroke-width: 8;
+  stroke-linecap: round;
+}
+
+body[data-topic="relativity"] .jet-axis.receding {
+  stroke: rgba(64, 221, 245, 0.28);
+}
+
+body[data-topic="relativity"] .jet-photon {
+  stroke: #ffd166;
+  stroke-width: 3;
+  stroke-dasharray: 9 7;
+  stroke-linecap: round;
+}
+
+body[data-topic="relativity"] .jet-core {
+  fill: #00d4ff;
+}
+
+body[data-topic="relativity"] .jet-observer {
+  fill: #f5f7ff;
+}
+
+body[data-topic="relativity"] .jet-event {
+  fill: #7ee8c5;
+}
+
+body[data-topic="relativity"] .jet-event.late {
+  fill: #ffd166;
+}
+
+body[data-topic="relativity"] .jet-blob {
+  fill: #ffd166;
+}
+
+body[data-topic="relativity"] .jet-blob.receding {
+  fill: rgba(255, 209, 102, 0.38);
+}
+
+body[data-topic="relativity"] .brightness-row span {
+  color: rgba(232, 236, 255, 0.8);
+  min-width: 8.4rem;
+}
+
+body[data-topic="relativity"] #jetApproachBrightness {
+  background: linear-gradient(90deg, rgba(255, 209, 102, 0.78), #ffd166);
+}
+
+body[data-topic="relativity"] #jetRecedeBrightness {
+  background: linear-gradient(90deg, rgba(64, 221, 245, 0.42), rgba(64, 221, 245, 0.82));
+}
+
+body[data-topic="relativity"] .compact-bridge {
+  grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+}
+
+body[data-topic="relativity"] .bridge-steps {
+  display: grid;
+  gap: 0.9rem;
+}
+
+body[data-topic="relativity"] .bridge-link-card {
+  display: grid;
+  gap: 0.8rem;
+  margin-top: 1rem;
+}
+
+body[data-topic="relativity"] .bridge-link-card a {
+  color: #7ee8c5;
+  font-weight: 700;
+}
+
+body[data-topic="relativity"] .document-study.wide {
+  margin: 0;
+}
+
+body[data-topic="relativity"] .document-study.wide img {
+  width: 100%;
+}
+
+body[data-topic="relativity"] .reference-entry p {
+  margin: 0 0 0.8rem;
+}
+
+body[data-topic="relativity"] .reference-entry a {
+  color: #7ee8c5;
+}
+
+@media (max-width: 1100px) {
+  body[data-topic="relativity"] .explorer-grid,
+  body[data-topic="relativity"] .jet-layout,
+  body[data-topic="relativity"] .evidence-grid,
+  body[data-topic="relativity"] .compact-bridge {
+    grid-template-columns: 1fr;
+  }
+
+  body[data-topic="relativity"] .principle-diagrams,
+  body[data-topic="relativity"] .measurement-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 900px) {
+  body[data-topic="relativity"] .clock-metrics,
+  body[data-topic="relativity"] .metric-grid,
+  body[data-topic="relativity"] .scale-notes {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  body[data-topic="relativity"] .hero-legend li {
+    grid-template-columns: 1fr;
+    gap: 0.45rem;
+  }
+
+  body[data-topic="relativity"] .hero-legend .legend-swatch {
+    width: 2.6rem;
+  }
+
+  body[data-topic="relativity"] .event-table td,
+  body[data-topic="relativity"] .event-table th {
+    font-size: 0.88rem;
+    padding: 0.75rem;
+  }
+}
