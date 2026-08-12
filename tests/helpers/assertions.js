@@ -1,5 +1,54 @@
 import { expect } from '@playwright/test';
 
+const layoutNodeSelector = [
+  '.instrument-label',
+  '.lab-overlay',
+  '.lab-readout',
+  '.viz-status',
+  '.spacetime-readout',
+  '.spacetime-control',
+  '.build-legend',
+  '.route-bar',
+  '.site-controls',
+  '.control-row',
+  '.lang-switch',
+  '.topic-index',
+  '.tabs',
+  '.legend',
+  '.detail-step',
+  '.detail-head',
+  '.hero .tag',
+  '.topic-title h1',
+  '.hero-copy h1',
+  '.preview-note',
+  '.field-map-preview p',
+  '.mol3d-caption',
+  '.mol3d-shape',
+  '.mol3d-note'
+].join(',');
+
+const componentRootSelector = [
+  '.hero-instrument',
+  '.lab-stage',
+  '.spacetime-shell',
+  '.assembly',
+  '.mol3d-card',
+  '.d-viz-card',
+  '.nucleus-viz'
+].join(',');
+
+const canvasOverlaySelector = [
+  '.instrument-label',
+  '.lab-overlay',
+  '.viz-status',
+  '.spacetime-readout',
+  '.spacetime-control',
+  '.build-legend',
+  '.mol3d-caption',
+  '.mol3d-shape',
+  '.mol3d-note'
+].join(',');
+
 export function watchPage(page) {
   const errors = [];
   page.on('console', message => {
@@ -42,7 +91,131 @@ export async function assertInternalLinks(page) {
   }
 }
 
-export async function assertLayout(page) {
+async function getLayoutScrollStops(page) {
+  const maxScroll = await page.evaluate(() =>
+    Math.max(0, document.documentElement.scrollHeight - innerHeight)
+  );
+  return [...new Set([
+    0,
+    Math.round(maxScroll * 0.2),
+    Math.round(maxScroll * 0.45),
+    Math.round(maxScroll * 0.7),
+    maxScroll
+  ])];
+}
+
+async function collectLayoutIssues(page) {
+  return page.evaluate(({ nodeSelector, overlaySelector, rootSelector }) => {
+    const issues = [];
+    const seen = new Set();
+    const visible = element => {
+      const style = getComputedStyle(element);
+      if (style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity) === 0) return false;
+      const rect = element.getBoundingClientRect();
+      return rect.width > 1 && rect.height > 1 &&
+        rect.bottom > 0 && rect.right > 0 &&
+        rect.top < innerHeight && rect.left < innerWidth;
+    };
+    const rectData = rect => ({
+      left: rect.left,
+      top: rect.top,
+      right: rect.right,
+      bottom: rect.bottom,
+      width: rect.width,
+      height: rect.height
+    });
+    const overlaps = (a, b, minWidth = 1, minHeight = 1) => {
+      const width = Math.min(a.right, b.right) - Math.max(a.left, b.left);
+      const height = Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top);
+      return width > minWidth && height > minHeight ? { width, height } : null;
+    };
+    const labelFor = element => {
+      const id = element.id ? `#${element.id}` : '';
+      const className = typeof element.className === 'string'
+        ? `.${element.className.trim().replace(/\s+/g, '.')}` : '';
+      return `${element.tagName.toLowerCase()}${id || className}`.slice(0, 120);
+    };
+    const pushIssue = (kind, detail) => {
+      const key = `${kind}:${detail}`;
+      if (seen.has(key)) return;
+      seen.add(key);
+      issues.push({ kind, detail, scrollY: Math.round(scrollY) });
+    };
+
+    const nodes = [...document.querySelectorAll(nodeSelector)].filter(visible).map(element => ({
+      element,
+      rect: rectData(element.getBoundingClientRect()),
+      label: labelFor(element),
+      position: getComputedStyle(element).position
+    }));
+
+    for (const node of nodes) {
+      const topDockedSticky = node.position === 'sticky' && node.rect.top >= -1 && node.rect.top <= 24;
+      const fixedLike = node.position === 'fixed' || topDockedSticky;
+      if (node.rect.left < -1 || node.rect.right > innerWidth + 1) {
+        pushIssue('out-of-bounds', `${node.label} extends past viewport width`);
+      }
+      if (fixedLike && (node.rect.top < -1 || node.rect.bottom > innerHeight + 1)) {
+        pushIssue('out-of-bounds', `${node.label} extends past viewport height`);
+      }
+    }
+
+    for (let left = 0; left < nodes.length; left++) {
+      for (let right = left + 1; right < nodes.length; right++) {
+        const a = nodes[left];
+        const b = nodes[right];
+        if (a.element.contains(b.element) || b.element.contains(a.element)) continue;
+        if (a.element.parentElement !== b.element.parentElement) continue;
+        const hit = overlaps(a.rect, b.rect, 4, 4);
+        if (hit) {
+          pushIssue('dom-overlap', `${a.label} overlaps ${b.label} by ${hit.width.toFixed(1)}x${hit.height.toFixed(1)}px`);
+        }
+      }
+    }
+
+    const overlays = [...document.querySelectorAll(overlaySelector)].filter(visible).map(element => ({
+      element,
+      root: element.closest(rootSelector),
+      rect: rectData(element.getBoundingClientRect()),
+      label: labelFor(element)
+    }));
+    const surfaces = [...document.querySelectorAll('canvas, svg')].filter(visible).map(element => ({
+      element,
+      root: element.closest(rootSelector),
+      rect: rectData(element.getBoundingClientRect()),
+      label: labelFor(element)
+    }));
+    for (const overlay of overlays) {
+      for (const surface of surfaces) {
+        if (!overlay.root || !surface.root || overlay.root !== surface.root) continue;
+        if (overlay.element.contains(surface.element) || surface.element.contains(overlay.element)) continue;
+        const hit = overlaps(overlay.rect, surface.rect, 8, 8);
+        if (hit) {
+          pushIssue('canvas-overlay-overlap', `${overlay.label} overlaps ${surface.label} by ${hit.width.toFixed(1)}x${hit.height.toFixed(1)}px`);
+        }
+      }
+    }
+
+    for (const hero of document.querySelectorAll('.topic-hero, .hero-map, .field-portal')) {
+      const title = hero.querySelector('.topic-title h1, .hero-copy h1');
+      const instrument = hero.querySelector('.hero-instrument, .atlas-preview, .field-map-preview');
+      if (!title || !instrument || !visible(title) || !visible(instrument)) continue;
+      const hit = overlaps(rectData(title.getBoundingClientRect()), rectData(instrument.getBoundingClientRect()), 6, 6);
+      if (hit) {
+        pushIssue('hero-collision', `${labelFor(title)} overlaps ${labelFor(instrument)} by ${hit.width.toFixed(1)}x${hit.height.toFixed(1)}px`);
+      }
+    }
+
+    return issues;
+  }, {
+    nodeSelector: layoutNodeSelector,
+    overlaySelector: canvasOverlaySelector,
+    rootSelector: componentRootSelector
+  });
+}
+
+export async function assertLayout(page, options = {}) {
+  const scrollStops = options.sweep ? await getLayoutScrollStops(page) : [await page.evaluate(() => Math.round(scrollY))];
   const overflow = await page.evaluate(() => ({
     body: document.body.scrollWidth - document.body.clientWidth,
     document: document.documentElement.scrollWidth - document.documentElement.clientWidth
@@ -118,6 +291,14 @@ export async function assertLayout(page) {
     })
   );
   expect(heroCollisions, 'hero titles should not overlap their instruments').toEqual([]);
+
+  const issues = [];
+  for (const scrollStop of scrollStops) {
+    await page.evaluate(position => window.scrollTo(0, position), scrollStop);
+    await page.waitForTimeout(50);
+    issues.push(...await collectLayoutIssues(page));
+  }
+  expect(issues, 'layout surfaces should stay docked, visible, and non-overlapping').toEqual([]);
 }
 
 export async function assertNoErrors(errors) {

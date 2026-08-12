@@ -55,16 +55,20 @@
   .controls {
     position: fixed;
     top: max(12px, env(safe-area-inset-top));
+    left: max(12px, env(safe-area-inset-left));
     right: max(12px, env(safe-area-inset-right));
     z-index: var(--control);
     display: flex;
-    gap: 4px;
+    justify-content: center;
     padding: 4px;
     border: 1px solid var(--line);
     border-radius: 999px;
     background: rgba(11,14,28,.94);
     box-shadow: 0 12px 36px rgba(0,0,0,.45);
+    overflow-x: auto;
+    scrollbar-width: none;
   }
+  .controls::-webkit-scrollbar { display: none; }
   .controls button {
     min-height: 44px;
     border: 0;

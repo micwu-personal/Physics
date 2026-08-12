@@ -1,5 +1,16 @@
 export const locales = ['en', 'zh-CN'];
 
+export const layoutViewports = [
+  { id: 'w320', width: 320, height: 568 },
+  { id: 'w360', width: 360, height: 640 },
+  { id: 'w390', width: 390, height: 720 },
+  { id: 'w412', width: 412, height: 760 },
+  { id: 'w768', width: 768, height: 640 },
+  { id: 'w1024', width: 1024, height: 720 },
+  { id: 'w1139', width: 1139, height: 720 },
+  { id: 'w1440', width: 1440, height: 900 }
+];
+
 export const entries = [
   { id: 'landing', app: 'landing', path: '/', generated: false },
   { id: 'physics-atlas', app: 'physics-atlas', path: '/physics/', generated: false },
