@@ -14,6 +14,7 @@
   <title>Field Guide — Physics Field Atlas</title>
   <link rel="stylesheet" href="../assets/fonts/fonts.css">
   <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="field-enrichment.css">
 </head>
 <body data-topic="field">
   <a class="skip-link" href="#main" data-copy-en="Skip to the field guide" data-copy-zh="跳到领域导览">Skip to the field guide</a>
@@ -52,6 +53,16 @@
       </div>
     </header>
 
+    <nav class="topic-index field-index" aria-label="Field guide sections" data-aria-en="Field guide sections" data-aria-zh="领域导览章节">
+      <a href="#concepts" data-copy-en="Core ideas" data-copy-zh="核心概念">Core ideas</a>
+      <a href="#questions" data-copy-en="Questions & scales" data-copy-zh="问题与尺度">Questions &amp; scales</a>
+      <a href="#fieldModel" data-copy-en="Field model" data-copy-zh="领域模型">Field model</a>
+      <a href="#evidenceWorkbench" data-copy-en="Evidence & mechanism" data-copy-zh="证据与机制">Evidence &amp; mechanism</a>
+      <a href="#limits" data-copy-en="Misconceptions & frontiers" data-copy-zh="误解与前沿">Misconceptions &amp; frontiers</a>
+      <a href="#references" data-copy-en="Claim ledger" data-copy-zh="论断证据">Claim ledger</a>
+      <a href="#connections" data-copy-en="Continue exploring" data-copy-zh="继续探索">Continue exploring</a>
+    </nav>
+
     <main id="main">
       <section id="concepts" class="topic-section">
         <header>
@@ -66,7 +77,32 @@
         </div>
       </section>
 
-      <section class="topic-section">
+      <section id="questions" class="topic-section">
+        <header>
+          <h2 data-copy-en="What the field asks, and which approximations it trusts."
+              data-copy-zh="这一领域在问什么，又依赖哪些近似。">What the field asks, and which approximations it trusts.</h2>
+          <p data-copy-en="Each guide now spells out the practical questions, scale choices, and simplifying assumptions that make the field work. A useful model is never just an equation; it is also a statement about what gets ignored and why that is acceptable."
+             data-copy-zh="每份导览都明确说明该领域实际在追问什么、选择了哪些尺度，以及依靠哪些简化假设。一个有用的模型从来不只是方程，它还说明了哪些东西被忽略，以及为何这种忽略仍然合理。">
+            Each guide now spells out the practical questions, scale choices, and simplifying assumptions that make the field work. A useful model is never just an equation; it is also a statement about what gets ignored and why that is acceptable.
+          </p>
+        </header>
+        <div id="questionGrid" class="field-question-grid"></div>
+        <div id="scaleGrid" class="field-scale-grid"></div>
+      </section>
+
+      <section id="fieldModel" class="topic-section">
+        <header>
+          <h2 data-copy-en="A model you can inspect."
+              data-copy-zh="一个可以亲手检查的模型。">A model you can inspect.</h2>
+          <p data-copy-en="Every guide includes one field-specific visual model or diagram. It is labelled so you know whether it represents direct observation, reconstructed evidence, a calculated model, or a teaching schematic, and it states what has been simplified."
+             data-copy-zh="每份导览都加入一个与该领域真正相关的可视模型或图示。它会明确标注自己是直接观测、重建证据、计算模型还是教学示意，并说明做了哪些简化。">
+            Every guide includes one field-specific visual model or diagram. It is labelled so you know whether it represents direct observation, reconstructed evidence, a calculated model, or a teaching schematic, and it states what has been simplified.
+          </p>
+        </header>
+        <div id="fieldVisualHost" class="field-visual-host"></div>
+      </section>
+
+      <section id="evidenceWorkbench" class="topic-section">
         <header>
           <h2 data-copy-en="What the evidence looks like."
               data-copy-zh="证据看起来是什么样子。">What the evidence looks like.</h2>
@@ -76,9 +112,13 @@
           </p>
         </header>
         <figure id="fieldMedia" class="field-media"></figure>
+        <div class="field-evidence-grid">
+          <article id="fieldExperiment" class="field-evidence-card"></article>
+          <article id="fieldMechanism" class="field-evidence-card field-mechanism"></article>
+        </div>
       </section>
 
-      <section class="topic-section">
+      <section id="limits" class="topic-section">
         <header>
           <h2 data-copy-en="Where the standard framework stops."
               data-copy-zh="标准框架在哪里失效。">Where the standard framework stops.</h2>
@@ -88,21 +128,23 @@
           </p>
         </header>
         <div id="boundaryGrid" class="limit-grid"></div>
+        <div id="fieldMythFrontier" class="field-limit-grid"></div>
       </section>
 
       <section id="references" class="topic-section">
         <header>
-          <h2 data-copy-en="Official paths into the evidence."
-              data-copy-zh="沿官方资料继续追踪证据。">Official paths into the evidence.</h2>
-          <p data-copy-en="These links lead to public science agencies, research institutions, standards bodies, or scholarly primary material that support the concepts in this guide."
-             data-copy-zh="以下链接来自公共科学机构、研究机构、标准组织或学术原始资料，为本导览中的概念提供依据。">
-            These links lead to public science agencies, research institutions, standards bodies, or scholarly primary material that support the concepts in this guide.
+          <h2 data-copy-en="Claim-by-claim paths into the evidence."
+              data-copy-zh="逐条论断对应的证据路径。">Claim-by-claim paths into the evidence.</h2>
+          <p data-copy-en="The first cards tie specific claims in this guide to public agencies, collaborations, standards bodies, or peer-reviewed literature. The second set keeps a shorter official reading list for the field as a whole."
+             data-copy-zh="前一组卡片把本导览中的具体论断直接连到公共科学机构、实验合作组、标准组织或同行评审文献；后一组保留该领域更短的官方延伸阅读。">
+            The first cards tie specific claims in this guide to public agencies, collaborations, standards bodies, or peer-reviewed literature. The second set keeps a shorter official reading list for the field as a whole.
           </p>
         </header>
+        <div id="claimReferenceLedger" class="claim-reference-ledger"></div>
         <div id="officialReferences" class="reference-grid"></div>
       </section>
 
-      <section class="topic-section">
+      <section id="connections" class="topic-section">
         <header>
           <h2 data-copy-en="Continue exploring."
               data-copy-zh="继续探索。">Continue exploring.</h2>
@@ -126,6 +168,7 @@
   <script src="formula.js"></script>
   <script src="common.js"></script>
   <script src="references.js"></script>
+  <script src="field-enrichment.js"></script>
   <script src="field.js"></script>
 </body>
 </html>
