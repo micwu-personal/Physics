@@ -7,8 +7,7 @@ const derivedPort = 50_000 + (
   Number.parseInt(createHash('sha256').update(process.cwd()).digest('hex').slice(0, 8), 16) % 10_000
 );
 const port = Number(process.env.PHYSICS_TEST_PORT || derivedPort);
-const externalBaseURL = process.env.PHYSICS_TEST_BASE_URL;
-const baseURL = externalBaseURL || `http://127.0.0.1:${port}`;
+const baseURL = `http://127.0.0.1:${port}`;
 
 export default defineConfig({
   testDir: './tests',
@@ -16,9 +15,7 @@ export default defineConfig({
   fullyParallel: false,
   timeout: 180_000,
   forbidOnly: Boolean(process.env.CI),
-  // Browser launches on a shared machine occasionally fail with transient
-  // socket errors; a permanently failing journey still fails the coverage gate.
-  retries: 1,
+  retries: 0,
   workers: 2,
   reporter: process.env.CI
     ? [['line'], ['html', { open: 'never' }], ['junit', { outputFile: 'test-results/junit.xml' }]]
@@ -41,15 +38,13 @@ export default defineConfig({
     screenshot: 'only-on-failure',
     video: 'retain-on-failure'
   },
-  ...(externalBaseURL ? {} : {
-    webServer: {
-      command: 'node scripts/static-server.mjs',
-      env: { ...process.env, PORT: String(port) },
-      url: `${baseURL}/__health`,
-      reuseExistingServer: false,
-      timeout: 10_000
-    }
-  }),
+  webServer: {
+    command: 'node scripts/static-server.mjs',
+    env: { ...process.env, PORT: String(port) },
+    url: `${baseURL}/__health`,
+    reuseExistingServer: false,
+    timeout: 10_000
+  },
   projects: [
     {
       name: 'quality-desktop',
@@ -69,25 +64,12 @@ export default defineConfig({
     {
       name: 'visual-desktop',
       testMatch: /(?:^|[\\/])visual\.spec\.js$/,
-      workers: 1,
-      use: {
-        viewport: { width: 1440, height: 1000 },
-        trace: 'off',
-        screenshot: 'off',
-        video: 'off'
-      }
+      use: { viewport: { width: 1440, height: 1000 } }
     },
     {
       name: 'visual-mobile',
       testMatch: /(?:^|[\\/])visual\.spec\.js$/,
-      workers: 1,
-      use: {
-        ...devices['Pixel 7'],
-        browserName: 'chromium',
-        trace: 'off',
-        screenshot: 'off',
-        video: 'off'
-      }
+      use: { ...devices['Pixel 7'], browserName: 'chromium' }
     },
     {
       name: 'rendering-visual',

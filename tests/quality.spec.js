@@ -129,6 +129,8 @@ for (const entry of generatedEntries) {
     test(`${entry.id} ${language} generated parity`, async ({ browser }) => {
       const sourcePage = await browser.newPage();
       const generatedPage = await browser.newPage();
+      const sourceContext = sourcePage.context();
+      const generatedContext = generatedPage.context();
 
       try {
         await preparePage(sourcePage, entry.sourcePath, language);
@@ -145,8 +147,10 @@ for (const entry of generatedEntries) {
         expect(generated.faviconHref).toMatch(/^data:image\/svg\+xml/);
         expect(generated.bundleLinks).toEqual([]);
       } finally {
-        await sourcePage.close();
-        await generatedPage.close();
+        await Promise.allSettled([
+          sourceContext.close(),
+          generatedContext.close()
+        ]);
       }
     });
   }

@@ -42,7 +42,7 @@ export async function assertInternalLinks(page) {
   }
 }
 
-async function fetchInternalLink(page, href) {
+export async function fetchInternalLink(page, href) {
   for (let attempt = 0; attempt < 2; attempt++) {
     try {
       return await page.request.fetch(href, { method: 'HEAD' });
