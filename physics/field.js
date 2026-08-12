@@ -130,6 +130,7 @@
 
   function renderCopy() {
     document.documentElement.style.setProperty('--topic', field.color);
+    document.title = `${pick(field).name} — Physics Field Atlas`;
 
     document.getElementById('fieldKicker').textContent =
       `${field.year} · ${lineageNames[field.lineage][zh() ? 'zh' : 'en']}`;

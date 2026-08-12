@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { assertInternalLinks, assertLayout, assertNoErrors, assertTranslations, watchPage } from './helpers/assertions.js';
 import { exerciseTopLevel } from './helpers/journeys.js';
-import { entries, generatedEntries, locales } from './helpers/matrix.js';
+import { entries, expectedEntryTitle, generatedEntries, locales } from './helpers/matrix.js';
 import { preparePage } from './helpers/runtime.js';
 
 function topBarSelectors(entry) {
@@ -16,6 +16,23 @@ function expectedBrandLabel(language) {
 
 function expectedBrandOrders(language) {
   return language === 'zh-CN' ? { zh: '1', en: '2' } : { zh: '2', en: '1' };
+}
+
+function firstTimelineCardMetrics() {
+  const card = document.querySelector('.ep-card');
+  const head = card?.querySelector('.ep-head');
+  const chip = card?.querySelector('.ep-time');
+  if (!card || !head || !chip) return null;
+  const cardRect = card.getBoundingClientRect();
+  const headRect = head.getBoundingClientRect();
+  const chipRect = chip.getBoundingClientRect();
+  return {
+    cardLeft: cardRect.left,
+    cardRight: cardRect.right,
+    headOverflow: head.scrollWidth - head.clientWidth,
+    chipLeft: chipRect.left,
+    chipRight: chipRect.right
+  };
 }
 
 async function readBrandOrders(page) {
@@ -67,7 +84,7 @@ for (const entry of entries) {
 
       const brandHref = new URL(await brandHome.getAttribute('href'), page.url()).pathname;
       expect(brandHref).toBe(entry.brandPath);
-      expect(await page.title()).toBe(entry.title);
+      expect(await page.title()).toBe(expectedEntryTitle(entry, language));
 
       const faviconHref = await page.locator('link[rel~="icon"]').getAttribute('href');
       expect(faviconHref).toMatch(/favicon\.svg|^data:image\/svg\+xml/);
@@ -87,10 +104,11 @@ for (const entry of entries) {
       if ((page.viewportSize()?.width ?? 0) > 560) {
         await expect.poll(() => readBrandOrders(page)).toEqual(expectedBrandOrders(alternateLanguage));
       }
-      await expect(page).toHaveTitle(entry.title);
+      await expect(page).toHaveTitle(expectedEntryTitle(entry, alternateLanguage));
       await page.locator(`[data-lang="${language}"]`).first().click();
       await expect.poll(() => page.evaluate(() => document.documentElement.lang)).toBe(language);
       await expect(brandHome).toHaveAttribute('aria-label', expectedBrandLabel(language));
+      await expect(page).toHaveTitle(expectedEntryTitle(entry, language));
 
       await exerciseTopLevel(page, entry.app);
       await assertInternalLinks(page);
@@ -130,6 +148,61 @@ for (const entry of generatedEntries) {
         await sourcePage.close();
         await generatedPage.close();
       }
+    });
+  }
+}
+
+for (const language of locales) {
+  test(`quantum mechanics ${language} 320px hero keeps the branded layout in bounds`, async ({ page }, testInfo) => {
+    if (testInfo.project.name !== 'quality-mobile') test.skip();
+
+    await page.setViewportSize({ width: 320, height: 844 });
+    const errors = watchPage(page);
+    await preparePage(page, '/physics/quantum.html', language);
+    await assertLayout(page);
+
+    const bounds = await page.evaluate(() => {
+      const title = document.querySelector('.topic-title');
+      const instrument = document.querySelector('.hero-instrument');
+      if (!title || !instrument) return null;
+      const titleRect = title.getBoundingClientRect();
+      const instrumentRect = instrument.getBoundingClientRect();
+      return {
+        titleLeft: titleRect.left,
+        titleRight: titleRect.right,
+        instrumentLeft: instrumentRect.left,
+        instrumentRight: instrumentRect.right
+      };
+    });
+    expect(bounds).not.toBeNull();
+    expect(bounds.titleLeft).toBeGreaterThanOrEqual(-1);
+    expect(bounds.titleRight).toBeLessThanOrEqual(321);
+    expect(bounds.instrumentLeft).toBeGreaterThanOrEqual(-1);
+    expect(bounds.instrumentRight).toBeLessThanOrEqual(321);
+
+    await assertNoErrors(errors);
+  });
+}
+
+for (const path of ['/big-bang/', '/big-bang/mobile/index.html']) {
+  for (const language of locales) {
+    test(`big-bang ${path.includes('/mobile/') ? 'generated' : 'source'} ${language} timeline chips stay inside cards at 320-360px`, async ({ page }, testInfo) => {
+      if (testInfo.project.name !== 'quality-mobile') test.skip();
+
+      const errors = watchPage(page);
+      for (const width of [320, 360]) {
+        await page.setViewportSize({ width, height: 844 });
+        await preparePage(page, path, language);
+        await assertLayout(page);
+
+        const metrics = await page.evaluate(firstTimelineCardMetrics);
+        expect(metrics, `${path} should render a timeline card`).not.toBeNull();
+        expect(metrics.headOverflow, `${path} ${language} ${width}px timeline header should not overflow`).toBeLessThanOrEqual(1);
+        expect(metrics.chipLeft, `${path} ${language} ${width}px chip should stay inside the card`).toBeGreaterThanOrEqual(metrics.cardLeft - 1);
+        expect(metrics.chipRight, `${path} ${language} ${width}px chip should stay inside the card`).toBeLessThanOrEqual(metrics.cardRight + 1);
+      }
+
+      await assertNoErrors(errors);
     });
   }
 }

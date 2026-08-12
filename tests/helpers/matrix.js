@@ -10,7 +10,14 @@ export const entries = [
   { id: 'electrodynamics', app: 'physics-light', path: '/physics/electrodynamics.html', generated: false, title: 'Light & Signals — Physics Field Atlas', brandPath: '/physics/index.html' },
   { id: 'phase-transitions', app: 'physics-phase', path: '/physics/phase-transitions.html', generated: false, title: 'Phase Transitions — Physics Field Atlas', brandPath: '/physics/index.html' },
   { id: 'entropy-information', app: 'physics-entropy', path: '/physics/entropy-information.html', generated: false, title: 'Entropy & Information — Physics Field Atlas', brandPath: '/physics/index.html' },
-  { id: 'field-guide', app: 'physics-field', path: '/physics/field.html?id=thermodynamics', generated: false, title: 'Field Guide — Physics Field Atlas', brandPath: '/physics/index.html' },
+  {
+    id: 'field-guide',
+    app: 'physics-field',
+    path: '/physics/field.html?id=thermodynamics',
+    generated: false,
+    title: { en: 'Thermodynamics — Physics Field Atlas', 'zh-CN': '热力学 — Physics Field Atlas' },
+    brandPath: '/physics/index.html'
+  },
   { id: 'big-bang', app: 'big-bang', path: '/big-bang/', generated: false, title: 'Big Bang — 13.8 Billion Years in an Afternoon', brandPath: '/big-bang/index.html' },
   { id: 'big-bang-mobile', app: 'big-bang', path: '/big-bang/mobile/index.html', generated: true, title: 'Big Bang — 13.8 Billion Years in an Afternoon', brandPath: '/big-bang/mobile/index.html', sourcePath: '/big-bang/' },
   { id: 'periodic-table', app: 'periodic-table', path: '/periodic-table/', generated: false, title: 'Periodic Table — An Interactive Journey into the Elements', brandPath: '/periodic-table/index.html' },
@@ -23,6 +30,10 @@ export const entries = [
 
 export const sourceEntries = entries.filter(entry => !entry.generated);
 export const generatedEntries = entries.filter(entry => entry.generated);
+
+export function expectedEntryTitle(entry, language = 'en') {
+  return typeof entry.title === 'string' ? entry.title : (entry.title[language] ?? entry.title.en);
+}
 
 export const performanceBudgets = {
   heapGrowthBytes: 12 * 1024 * 1024,

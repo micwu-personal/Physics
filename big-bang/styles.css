@@ -71,8 +71,9 @@ html[data-motion="paused"] *,html[data-motion="paused"] *::before,html[data-moti
 .ep-card:hover{transform:translateX(6px);border-color:rgba(255,107,157,0.4)}
 .ep-card::before{content:"";position:absolute;left:-46px;top:28px;width:20px;height:20px;border-radius:50%;background:var(--dot,#fff);box-shadow:0 0 16px var(--dot,#fff);border:3px solid var(--bg)}
 .ep-head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:12px;margin-bottom:12px}
-.ep-name{font-size:22px;font-weight:600;letter-spacing:-0.5px}
-.ep-time{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--accent2);padding:4px 12px;background:rgba(255,209,102,0.1);border:1px solid rgba(255,209,102,0.25);border-radius:999px;white-space:nowrap}
+.ep-head > *{min-width:0}
+.ep-name{flex:1 1 220px;min-width:0;font-size:22px;font-weight:600;letter-spacing:-0.5px}
+.ep-time{max-width:100%;font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--accent2);padding:4px 12px;background:rgba(255,209,102,0.1);border:1px solid rgba(255,209,102,0.25);border-radius:999px;white-space:nowrap}
 .ep-props{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-bottom:14px}
 .ep-prop{background:rgba(0,0,0,0.25);border:1px solid var(--panel-b);border-radius:10px;padding:10px 14px}
 .ep-prop .k{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--dim);margin-bottom:3px}
@@ -219,9 +220,11 @@ footer{text-align:center;padding:40px 20px;color:var(--dim);font-size:12px;borde
 @media(max-width:560px){
   .tabs{top:60px;padding:10px 8px}
   .control-row{left:6px;right:6px}
-  .lang-switch{gap:2px;padding:2px}
+  .lang-switch{gap:2px;padding:2px;flex-wrap:wrap;justify-content:flex-end;max-width:min(100%,220px)}
   .journey-home,.motion-pill,.lang-pill{padding-inline:6px;font-size:10px}
   .lang-pill{min-width:38px;letter-spacing:0}
+  .ep-head{align-items:flex-start}
+  .ep-time{max-width:min(100%,14rem);padding-inline:10px;white-space:normal;overflow-wrap:anywhere;text-align:left;line-height:1.35}
   #spacetimeSvg{aspect-ratio:19/16}
   .spacetime-readout{top:10px;left:10px;max-width:260px;padding:9px 10px}
   .spacetime-readout span{font-size:15px}

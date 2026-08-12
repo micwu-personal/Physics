@@ -966,9 +966,14 @@ button {
   padding-block: 70px;
 }
 
+.topic-hero > * {
+  min-width: 0;
+}
+
 .topic-title {
   position: relative;
   z-index: 2;
+  min-width: 0;
 }
 
 .topic-title h1 {
@@ -1021,6 +1026,7 @@ math {
 
 .hero-instrument {
   position: relative;
+  min-width: 0;
   min-height: 610px;
   overflow: hidden;
   border: 1px solid var(--line);
