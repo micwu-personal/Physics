@@ -18,14 +18,75 @@ export const entries = [
     title: { en: 'Thermodynamics — Physics Field Atlas', 'zh-CN': '热力学 — Physics Field Atlas' },
     brandPath: '/physics/index.html'
   },
-  { id: 'big-bang', app: 'big-bang', path: '/big-bang/', generated: false, title: 'Big Bang — 13.8 Billion Years in an Afternoon', brandPath: '/big-bang/index.html' },
-  { id: 'big-bang-mobile', app: 'big-bang', path: '/big-bang/mobile/index.html', generated: true, title: 'Big Bang — 13.8 Billion Years in an Afternoon', brandPath: '/big-bang/mobile/index.html', sourcePath: '/big-bang/' },
-  { id: 'periodic-table', app: 'periodic-table', path: '/periodic-table/', generated: false, title: 'Periodic Table — An Interactive Journey into the Elements', brandPath: '/periodic-table/index.html' },
-  { id: 'periodic-table-mobile', app: 'periodic-table', path: '/periodic-table/mobile/index.html', generated: true, title: 'Periodic Table — An Interactive Journey into the Elements', brandPath: '/periodic-table/mobile/index.html', sourcePath: '/periodic-table/' },
-  { id: 'periodic-table-offline', app: 'periodic-table', path: '/periodic-table/mobile/periodic-table.html', generated: true, title: 'Periodic Table — An Interactive Journey into the Elements', brandPath: '/periodic-table/mobile/periodic-table.html', sourcePath: '/periodic-table/' },
-  { id: 'particle-zoo', app: 'particle-zoo', path: '/particle-zoo/', generated: false, title: 'Particle Zoo — An Interactive Journey into the Standard Model', brandPath: '/particle-zoo/index.html' },
-  { id: 'particle-zoo-mobile', app: 'particle-zoo', path: '/particle-zoo/mobile/index.html', generated: true, title: 'Particle Zoo — An Interactive Journey into the Standard Model', brandPath: '/particle-zoo/mobile/index.html', sourcePath: '/particle-zoo/' },
-  { id: 'particle-zoo-offline', app: 'particle-zoo', path: '/particle-zoo/mobile/particle-zoo.html', generated: true, title: 'Particle Zoo — An Interactive Journey into the Standard Model', brandPath: '/particle-zoo/mobile/particle-zoo.html', sourcePath: '/particle-zoo/' }
+  {
+    id: 'big-bang',
+    app: 'big-bang',
+    path: '/big-bang/',
+    generated: false,
+    title: { en: 'Big Bang — 13.8 Billion Years in an Afternoon', 'zh-CN': '宇宙大爆炸 — 一个下午读完 138 亿年' },
+    brandPath: '/big-bang/index.html'
+  },
+  {
+    id: 'big-bang-mobile',
+    app: 'big-bang',
+    path: '/big-bang/mobile/index.html',
+    generated: true,
+    title: { en: 'Big Bang — 13.8 Billion Years in an Afternoon', 'zh-CN': '宇宙大爆炸 — 一个下午读完 138 亿年' },
+    brandPath: '/big-bang/mobile/index.html',
+    sourcePath: '/big-bang/'
+  },
+  {
+    id: 'periodic-table',
+    app: 'periodic-table',
+    path: '/periodic-table/',
+    generated: false,
+    title: { en: 'Periodic Table — An Interactive Journey into the Elements', 'zh-CN': '元素周期表 — 元素的交互式探索' },
+    brandPath: '/periodic-table/index.html'
+  },
+  {
+    id: 'periodic-table-mobile',
+    app: 'periodic-table',
+    path: '/periodic-table/mobile/index.html',
+    generated: true,
+    title: { en: 'Periodic Table — An Interactive Journey into the Elements', 'zh-CN': '元素周期表 — 元素的交互式探索' },
+    brandPath: '/periodic-table/mobile/index.html',
+    sourcePath: '/periodic-table/'
+  },
+  {
+    id: 'periodic-table-offline',
+    app: 'periodic-table',
+    path: '/periodic-table/mobile/periodic-table.html',
+    generated: true,
+    title: { en: 'Periodic Table — An Interactive Journey into the Elements', 'zh-CN': '元素周期表 — 元素的交互式探索' },
+    brandPath: '/periodic-table/mobile/periodic-table.html',
+    sourcePath: '/periodic-table/'
+  },
+  {
+    id: 'particle-zoo',
+    app: 'particle-zoo',
+    path: '/particle-zoo/',
+    generated: false,
+    title: { en: 'Particle Zoo — An Interactive Journey into the Standard Model', 'zh-CN': '粒子动物园 — 标准模型的交互之旅' },
+    brandPath: '/particle-zoo/index.html'
+  },
+  {
+    id: 'particle-zoo-mobile',
+    app: 'particle-zoo',
+    path: '/particle-zoo/mobile/index.html',
+    generated: true,
+    title: { en: 'Particle Zoo — An Interactive Journey into the Standard Model', 'zh-CN': '粒子动物园 — 标准模型的交互之旅' },
+    brandPath: '/particle-zoo/mobile/index.html',
+    sourcePath: '/particle-zoo/'
+  },
+  {
+    id: 'particle-zoo-offline',
+    app: 'particle-zoo',
+    path: '/particle-zoo/mobile/particle-zoo.html',
+    generated: true,
+    title: { en: 'Particle Zoo — An Interactive Journey into the Standard Model', 'zh-CN': '粒子动物园 — 标准模型的交互之旅' },
+    brandPath: '/particle-zoo/mobile/particle-zoo.html',
+    sourcePath: '/particle-zoo/'
+  }
 ];
 
 export const sourceEntries = entries.filter(entry => !entry.generated);

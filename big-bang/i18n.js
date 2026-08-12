@@ -526,6 +526,7 @@ function formatCosmicTime(tsec, lang='en'){
 function applyI18n(lang){
   const dict = LOCALES[lang] || LOCALES.en;
   document.documentElement.lang = (lang==='zh-CN' ? 'zh-CN' : 'en');
+  document.title = dict['page.title'];
   document.querySelectorAll('[data-i18n]').forEach(el=>{
     const key = el.getAttribute('data-i18n');
     if(dict[key]!==undefined) el.innerHTML = dict[key];

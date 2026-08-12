@@ -142,6 +142,18 @@ for (const language of locales) {
     await expect(page.locator('#black-holes .claim-chip[href*="10.1086/166683"]')).toHaveCount(1);
     await expect(page.locator('#jets .claim-chip[href*="179.3.433"]')).toHaveCount(1);
     await expect(page.locator('#jets .claim-chip[href*="199.4.883"]')).toHaveCount(1);
+    const chandrasekharDerivation = page.locator('.derivation').nth(0);
+    await expect(chandrasekharDerivation.locator('ol li').nth(2)).toContainText(
+      language === 'en' ? 'ultrarelativistic limit their dispersion approaches E ≈ pc' : '超相对论极限下，其色散关系趋近 E ≈ pc'
+    );
+    await expect(chandrasekharDerivation.locator('ol li').nth(2)).toContainText('P ∝ ρ^(4/3)');
+    await expect(chandrasekharDerivation.locator('.claim-chip[href*="nobelprize.org/prizes/physics/1983/chandrasekhar/lecture"]')).toHaveCount(1);
+    const oppenheimerVolkoffDerivation = page.locator('.derivation').nth(1);
+    await expect(oppenheimerVolkoffDerivation.locator('ol li').nth(3)).toContainText(
+      language === 'en' ? 'discovered and measured later' : '后来被发现并测得的中子星质量'
+    );
+    await expect(oppenheimerVolkoffDerivation.locator('ol li').nth(3)).toContainText('0.7 M☉');
+    await expect(oppenheimerVolkoffDerivation.locator('.claim-chip[href*="10.1103/PhysRev.55.374"]')).toHaveCount(1);
     expect(await page.locator('#references .reference-entry').count()).toBeGreaterThanOrEqual(11);
     await assertNoErrors(errors);
   });

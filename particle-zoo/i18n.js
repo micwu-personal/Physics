@@ -1335,6 +1335,7 @@ function t(key){
 function applyI18n(lang){
   const dict = LOCALES[lang];
   document.documentElement.lang = (lang==='zh-CN' ? 'zh-CN' : 'en');
+  document.title = dict['page.title'];
 
   // Text content
   document.querySelectorAll('[data-i18n]').forEach(el=>{

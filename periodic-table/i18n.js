@@ -250,6 +250,7 @@ const LOCALES = {
 function applyI18n(lang){
   const dict = LOCALES[lang];
   document.documentElement.lang = (lang==='zh-CN' ? 'zh-CN' : 'en');
+  document.title = dict['page.title'];
   document.querySelectorAll('[data-i18n]').forEach(el=>{
     const key = el.getAttribute('data-i18n');
     el.innerHTML = dict[key];
