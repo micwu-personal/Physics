@@ -427,7 +427,13 @@ footer{text-align:center;padding:40px 20px;color:var(--dim);font-size:12px;posit
     padding-bottom:calc(20px + env(safe-area-inset-bottom));
   }
   body.detail-open{padding-bottom:62svh}
-  .detail-step{display:flex;top:12px;right:60px}
+  .detail-step{
+    display:flex;
+    position:static;
+    justify-content:flex-end;
+    width:max-content;
+    margin:0 56px 12px auto;
+  }
   body.detail-open .detail-close{top:12px;right:12px}
 }
 

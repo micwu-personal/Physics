@@ -309,13 +309,14 @@ test('Periodic Table keeps structures element-relevant and labels model limits',
   await page.waitForTimeout(750);
   expect(await page.evaluate(()=>window.PT_REACTION_DEBUG.holdingSource)).toBe(true);
   await page.locator('#motionToggle').click();
+  await page.locator('#rxAnimBox').scrollIntoViewIfNeeded();
   await expect.poll(
     ()=>page.evaluate(()=>window.PT_REACTION_DEBUG.holdingSource),
     {timeout:5000}
   ).toBe(false);
   await page.locator('[data-lang="zh-CN"]').click();
   await expect(page.locator('img[data-i18n-alt="alt.hydrogen"]')).toHaveAttribute('alt',/氢原子计算概率密度/);
-  expect(await page.locator('.control-row').evaluate(element=>getComputedStyle(element).position)).toBe('fixed');
+  expect(await page.locator('.control-row').evaluate(element=>getComputedStyle(element).position)).toBe('relative');
   await assertNoErrors(errors);
 });
 
