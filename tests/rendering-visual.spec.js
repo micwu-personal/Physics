@@ -306,6 +306,33 @@ test.describe('deterministic scientific renderers', () => {
     });
   });
 
+  test.describe('Physics field guides', () => {
+    const ids = [
+      'astronomy-optics', 'fluids', 'acoustics', 'thermodynamics', 'electromagnetism',
+      'statistical', 'geophysics', 'quantum-theory', 'nuclear', 'condensed',
+      'particle', 'plasma', 'biophysics', 'nonlinear', 'standard-model',
+      'quantum-information', 'soft-matter'
+    ];
+
+    for (const id of ids) {
+      test(`shared field visual renders for ${id}`, async ({ page }) => {
+        await prepareRenderingPage(page, `/physics/field.html?id=${id}`, 'en');
+        const card = page.locator('#fieldVisualHost .field-visual-card');
+        await expect(card).toBeVisible();
+        const stage = card.locator('.field-visual-stage');
+        await expect(stage).toBeVisible();
+        const svg = card.locator('svg');
+        await expectSvgRendered(svg);
+        const slider = card.locator('input[type="range"]').first();
+        if (await slider.count()) {
+          await setRangeValue(slider, await slider.getAttribute('max'));
+          await expectSvgRendered(svg);
+        }
+        await captureRendering(stage, `physics-field-${id}-visual-en.png`);
+      });
+    }
+  });
+
   test.describe('Particle Zoo', () => {
     async function openParticleZoo(page, path, language) {
       await prepareRenderingPage(page, path, language);

@@ -86,9 +86,21 @@ export async function assertInternalLinks(page) {
       .filter(href => href.startsWith(location.origin) && !href.includes('#'))
   );
   for (const href of [...new Set(links)]) {
-    const response = await page.request.get(href);
+    const response = await fetchInternalLink(page, href);
     expect(response.status(), `internal link ${href}`).toBeLessThan(400);
   }
+}
+
+export async function fetchInternalLink(page, href) {
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      return await page.request.fetch(href, { method: 'HEAD' });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      if (!/ECONNRESET/i.test(message) || attempt === 1) throw error;
+    }
+  }
+  throw new Error(`Unable to reach ${href}`);
 }
 
 async function getLayoutScrollStops(page) {

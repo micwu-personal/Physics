@@ -9,6 +9,7 @@ const LOCALES = {
     'detail.step':'Move between elements','detail.prev':'Previous element','detail.next':'Next element',
     'journey.field':'Quantum',
     'aria.controls':'Page controls',
+    'aria.brandHome':"McWoods’ Universe",
     'aria.bohr':'Historical Bohr shell model teaching schematic',
     'aria.orbital':'Rotatable three-dimensional orbital or hybrid model surface',
     'alt.hydrogen':'Calculated hydrogen probability density plots for n equals 1 through 4',
@@ -131,6 +132,7 @@ const LOCALES = {
     'detail.step':'在元素之间切换','detail.prev':'上一个元素','detail.next':'下一个元素',
     'journey.field':'量子专题',
     'aria.controls':'页面控制',
+    'aria.brandHome':'米克乐的宇宙',
     'aria.bohr':'历史玻尔电子壳层教学示意图',
     'aria.orbital':'可旋转的三维原子轨道或杂化模型表面',
     'alt.hydrogen':'主量子数 n 从 1 到 4 的氢原子计算概率密度图',
@@ -248,6 +250,7 @@ const LOCALES = {
 function applyI18n(lang){
   const dict = LOCALES[lang];
   document.documentElement.lang = (lang==='zh-CN' ? 'zh-CN' : 'en');
+  document.title = dict['page.title'];
   document.querySelectorAll('[data-i18n]').forEach(el=>{
     const key = el.getAttribute('data-i18n');
     el.innerHTML = dict[key];
@@ -260,8 +263,6 @@ function applyI18n(lang){
     const key=el.getAttribute('data-i18n-aria-label');
     el.setAttribute('aria-label',dict[key]);
   });
-  const titleKey = document.querySelector('title').getAttribute('data-i18n');
-  document.title = dict[titleKey];
   document.querySelectorAll('.lang-pill').forEach(b=>{
     b.classList.toggle('active', b.dataset.lang===lang);
   });

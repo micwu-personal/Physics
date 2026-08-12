@@ -19,7 +19,7 @@ The harness separates two different completeness goals:
 
 Visual baselines are intentionally named for `win32`; CI uses `windows-latest`. The 36 route-level full-page baselines remain animation-insensitive and keep canvases hidden. `rendering-visual.spec.js` separately seeds randomness, freezes wall-clock time, controls `requestAnimationFrame`, asserts non-blank pixels and unclipped geometry, and captures deterministic element-level canvas/SVG baselines.
 
-Each worktree automatically derives an isolated static-server port. Set `PHYSICS_TEST_PORT` only to override it explicitly.
+Each worktree automatically derives an isolated static-server port. If that loopback port is blocked on the machine, set `PHYSICS_TEST_PORT` explicitly for the current run.
 
 The generated narrow Particle Zoo builder canvas is covered by non-blank pixel and unclipped-geometry assertions, while its stable result panel is snapshotted. Its curved gluon strokes exhibit Win32 subpixel raster noise at that width; the equivalent source/desktop builder canvas has exact pixel baselines in both locales.
 
@@ -50,7 +50,7 @@ Coverage is merged from two providers before a single threshold gate is applied:
 
 ### Server isolation
 
-`playwright.config.mjs` derives a worktree-specific port (`50000 + sha256(cwd) % 10000`, overridable with `PHYSICS_TEST_PORT`) and runs with `reuseExistingServer: false`, so a run always serves its own checkout and never silently attaches to another worktree's server. Every URL check in the harness and in the coverage report matches on the loopback hostname and path only, so nothing depends on the port that a given checkout happens to use.
+`playwright.config.mjs` derives a worktree-specific port (`50000 + sha256(cwd) % 10000`, overridable with `PHYSICS_TEST_PORT`) and runs with `reuseExistingServer: false`, so a run always serves its own checkout and never silently attaches to another worktree's server. Every URL check in the harness and in the coverage report matches on the loopback hostname and path only, so nothing depends on the exact port that a given checkout happens to use.
 
 ### Motion controls
 

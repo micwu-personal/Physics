@@ -359,7 +359,9 @@ function shortName(id, lang){
                  positron:'positron',anti_muon:'anti-muon',anti_tau:'anti-tau',
                  anti_nu_e:'e-antineutrino',anti_nu_mu:'μ-antineutrino',anti_nu_tau:'τ-antineutrino',
                  photon:'photon',gluon:'gluon',wboson:'W boson',zboson:'Z boson',higgs:'Higgs'};
-  return short[id] || PARTICLES[id]?.name || id;
+  const shortLabel = short[id];
+  if (shortLabel) return shortLabel;
+  return id;
 }
 
 function rebuildStandardModelTiles(){

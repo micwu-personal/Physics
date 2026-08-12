@@ -4,6 +4,7 @@ import { extname, resolve, sep } from 'node:path';
 
 const root = process.cwd();
 const port = Number(process.env.PORT || 43817);
+const sockets = new Set();
 const mime = {
   '.css': 'text/css; charset=utf-8',
   '.html': 'text/html; charset=utf-8',
@@ -69,9 +70,47 @@ const server = createServer((request, response) => {
   }
 });
 
+server.on('connection', socket => {
+  sockets.add(socket);
+  socket.on('close', () => sockets.delete(socket));
+});
+
 server.on('clientError', (_, socket) => {
   socket.destroy();
 });
+
+let isShuttingDown = false;
+const parentPid = process.ppid;
+
+function shutdown() {
+  if (isShuttingDown) return;
+  isShuttingDown = true;
+
+  server.close(() => process.exit(0));
+  if (typeof server.closeAllConnections === 'function') {
+    server.closeAllConnections();
+  }
+  for (const socket of sockets) {
+    socket.destroy();
+  }
+
+  const forceExit = setTimeout(() => process.exit(0), 1000);
+  forceExit.unref();
+}
+
+for (const signal of ['SIGINT', 'SIGTERM', 'SIGBREAK']) {
+  process.on(signal, shutdown);
+}
+process.on('disconnect', shutdown);
+
+const parentWatch = setInterval(() => {
+  try {
+    process.kill(parentPid, 0);
+  } catch {
+    shutdown();
+  }
+}, 500);
+parentWatch.unref();
 
 server.listen(port, '127.0.0.1', () => {
   console.log(`Physics test server listening on http://127.0.0.1:${port}`);

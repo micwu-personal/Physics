@@ -17,6 +17,8 @@ const scienceJs = fs.readFileSync(path.join(ROOT, 'science.js'), 'utf8');
 const sourcesJs = fs.readFileSync(path.join(ROOT, 'source-registry.js'), 'utf8');
 const dataJs = fs.readFileSync(path.join(ROOT, 'data.js'), 'utf8');
 const appJs  = fs.readFileSync(path.join(ROOT, 'app.js'), 'utf8');
+const brandCss = fs.readFileSync(path.join(ROOT, '..', 'assets', 'brand', 'brand.css'), 'utf8');
+const brandSvg = fs.readFileSync(path.join(ROOT, '..', 'assets', 'brand', 'favicon.svg')).toString('base64');
 
 function inlineMedia(source) {
   return source.replace(/\.\.\/assets\/media\/([A-Za-z0-9_.-]+)/g, (match, filename) => {
@@ -54,6 +56,8 @@ const featLigand   = fs.readFileSync(path.join(ROOT, 'features/ligand.js'), 'utf
 let out = html
   .replace(/<link\s+rel="stylesheet"\s+href="styles\.css"\s*\/?>/,     `<style>\n${css}\n${featCss}\n</style>`)
   .replace(/<link\s+rel="stylesheet"\s+href="features\/features\.css"\s*\/?>\s*/, '')
+  .replace(/<link\s+rel="stylesheet"\s+href="\.\.\/assets\/brand\/brand\.css"\s*\/?>/, `<style>\n${brandCss}\n</style>`)
+  .replace(/<link\s+rel="icon"\s+href="\.\.\/assets\/brand\/favicon\.svg"\s+type="image\/svg\+xml"\s*\/?>/, `<link rel="icon" href="data:image/svg+xml;base64,${brandSvg}" type="image/svg+xml">`)
   .replace(/<script\s+src="i18n\.js"><\/script>/, `<script>\n${i18nJs}\n</script>`)
   .replace(/<script\s+src="features\/features-i18n\.js"><\/script>/, `<script>\n${featI18n}\n</script>`)
   .replace(/<script\s+src="science\.js"><\/script>/, `<script>\n${scienceJs}\n</script>`)
@@ -67,11 +71,13 @@ let out = html
   .replace(/<script\s+src="features\/timeline\.js"><\/script>/, `<script>\n${featTimeline}\n</script>`)
   .replace(/<script\s+src="features\/ligand\.js"><\/script>/,   `<script>\n${featLigand}\n</script>`);
 out = inlineMedia(out);
+out = out.replace(/\.\.\/assets\/brand\/favicon\.svg/g, `data:image/svg+xml;base64,${brandSvg}`);
 out = inlineFonts(out);
-out = out
-  .replace(/href="\.\.\/index\.html/g, 'href="https://micwu-personal.github.io/Physics/')
-  .replace(/href="\.\.\/(big-bang|particle-zoo|periodic-table)\/index\.html/g, 'href="https://micwu-personal.github.io/Physics/$1/');
 out = out.replace(/href="\.\.\/(?!https?:)/g, 'href="../../');
+
+function withBrandHomeHref(source, href) {
+  return source.replace('<a class="brand-home" href="./index.html"', `<a class="brand-home" href="${href}"`);
+}
 
 // Strip any remaining external CDN links so the file works fully offline.
 out = out.replace(/<link\s+rel="preconnect"[^>]*>\s*/g, '');
@@ -91,8 +97,8 @@ out = out.replace(/^<!DOCTYPE html>/i, `<!DOCTYPE html>\n${banner}`);
 
 const outPath1 = path.join(OUT_DIR, 'index.html');
 const outPath2 = path.join(OUT_DIR, 'periodic-table.html');
-fs.writeFileSync(outPath1, out);
-fs.writeFileSync(outPath2, out);
+fs.writeFileSync(outPath1, withBrandHomeHref(out, './index.html'));
+fs.writeFileSync(outPath2, withBrandHomeHref(out, './periodic-table.html'));
 
 const sizeKB = (Buffer.byteLength(out, 'utf8') / 1024).toFixed(1);
 console.log(`✓ Wrote ${outPath1} (${sizeKB} KB)`);
