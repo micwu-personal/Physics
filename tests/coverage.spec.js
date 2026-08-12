@@ -573,6 +573,115 @@ for (const [id, path] of [
   });
 }
 
+test('physics astro helper fallback coverage', async ({ page }) => {
+  await collectCoverage(page, 'physics-astro-helper-fallbacks', async () => {
+    await installDeterminism(page);
+    await setLanguage(page, 'en');
+    await blockExternalAssets(page);
+    await page.addInitScript(() => {
+      window.__enableAstroTestHooks = true;
+    });
+    await page.goto('/physics/astrophysics.html');
+    await page.waitForLoadState('load');
+    await page.waitForTimeout(300);
+    const result = await page.evaluate(() => {
+      const hooks = window.__astroTestHooks;
+      const fallbackPalette = hooks.readPalette({ getPropertyValue: () => '   ' });
+      const missingScene = hooks.setup('missing-canvas-id', () => {});
+
+      const readout = document.getElementById('collapseReadout');
+      const parent = readout.parentNode;
+      const sibling = readout.nextSibling;
+      readout.remove();
+      hooks.renderCollapseReadout();
+      if (sibling) parent.insertBefore(readout, sibling);
+      else parent.appendChild(readout);
+
+      Object.defineProperty(window, 'devicePixelRatio', { configurable: true, get: () => 0 });
+      const resized = hooks.resizeById('collapseCanvas');
+      const missingResize = hooks.resizeById('missing-canvas-id');
+      hooks.handleResizeEntries([{ target: document.body }]);
+      const whiteDwarfRadius = hooks.whiteDwarfRadiusKm(1.44);
+      const fallbackSpec = hooks.compactSpec('mystery-mode');
+      const fallbackMode = hooks.normalizeCompactMode('mystery-mode');
+      const englishSnapshot = hooks.limitSnapshot(1.3);
+      const englishWhiteDwarf = hooks.compactDetailSnapshot('white-dwarf', 1.45);
+      const englishNeutronStar = hooks.compactDetailSnapshot('neutron-star', 2.4);
+      const englishWhiteDwarfThreshold = hooks.compactThresholdMarker('white-dwarf', 1.45);
+      const englishNeutronThreshold = hooks.compactThresholdMarker('neutron-star', 2.4);
+      const fallbackThresholdX = hooks.compactThresholdX(17, null, mass => mass * 2);
+      const projectedThresholdX = hooks.compactThresholdX(17, englishWhiteDwarfThreshold, mass => mass * 2);
+      const compactButtons = [...document.querySelectorAll('[data-compact-mode]')];
+      for (const button of compactButtons) button.setAttribute('aria-pressed', 'false');
+      const noPressedMode = hooks.selectedCompactMode();
+      compactButtons[0].setAttribute('aria-pressed', 'true');
+      document.querySelector('[data-lang="zh-CN"]').click();
+      const chineseSnapshot = hooks.limitSnapshot(1.3);
+      const chineseWhiteDwarf = hooks.compactDetailSnapshot('white-dwarf', 1.45);
+      const chineseNeutronStar = hooks.compactDetailSnapshot('neutron-star', 2.4);
+      const chineseWhiteDwarfThreshold = hooks.compactThresholdMarker('white-dwarf', 1.45);
+      const chineseNeutronThreshold = hooks.compactThresholdMarker('neutron-star', 2.4);
+      hooks.drawCompactForTest('white-dwarf', 1.45);
+      hooks.drawCompactForTest('neutron-star', 2.4);
+      hooks.drawCompactThresholdForTest('white-dwarf', 1.45);
+      hooks.drawCompactThresholdForTest('neutron-star', 2.4);
+
+      return {
+        chineseBridge: chineseSnapshot.bridge,
+        chineseNeutronKnown: chineseNeutronStar.known,
+        chineseNeutronThreshold: chineseNeutronThreshold.label,
+        chineseWhiteDwarfThreshold: chineseWhiteDwarfThreshold.label,
+        chineseWhiteDwarfRadius: chineseWhiteDwarf.radius,
+        englishBridge: englishSnapshot.bridge,
+        englishNeutronKnown: englishNeutronStar.known,
+        englishNeutronThreshold: englishNeutronThreshold.label,
+        englishWhiteDwarfThreshold: englishWhiteDwarfThreshold.label,
+        englishWhiteDwarfRadius: englishWhiteDwarf.radius,
+        fallbackThresholdX,
+        fallbackMode,
+        fallbackPalette,
+        fallbackSpec,
+        missingScene,
+        missingResize,
+        noPressedMode,
+        projectedThresholdX,
+        resized,
+        whiteDwarfRadius
+      };
+    });
+
+    expect(result.fallbackPalette).toEqual({
+      paper: '#eef2ff',
+      muted: '#aeb8d8',
+      gold: '#ffd166',
+      green: '#7ee8c5',
+      cyan: '#00d4ff',
+      pink: '#ff6b9d',
+      violet: '#7c5cff',
+      deep: '#090d1d'
+    });
+    expect(result.missingScene).toBeNull();
+    expect(result.resized).toBe(true);
+    expect(result.missingResize).toBe(false);
+    expect(result.whiteDwarfRadius).toBe(0);
+    expect(result.fallbackSpec.min).toBe(0.45);
+    expect(result.fallbackMode).toBe('white-dwarf');
+    expect(result.fallbackThresholdX).toBe(17);
+    expect(result.noPressedMode).toBe('white-dwarf');
+    expect(result.projectedThresholdX).toBeCloseTo(2.84, 6);
+    expect(result.englishBridge).toContain('Chandrasekhar mass');
+    expect(result.chineseBridge).toContain('钱德拉塞卡极限');
+    expect(result.englishWhiteDwarfThreshold).toBe('electron support ends here');
+    expect(result.chineseWhiteDwarfThreshold).toBe('电子支撑到此为止');
+    expect(result.englishWhiteDwarfRadius).toContain('no stable cold white-dwarf radius');
+    expect(result.chineseWhiteDwarfRadius).toContain('没有稳定的冷白矮星半径');
+    expect(result.englishNeutronThreshold).toBe('likely collapse-threshold zone');
+    expect(result.chineseNeutronThreshold).toBe('可能的塌缩阈值区');
+    expect(result.englishNeutronKnown).toContain('thermal support or rotation can only delay it temporarily');
+    expect(result.chineseNeutronKnown).toContain('热支撑或自转只能暂时推迟塌缩');
+  });
+});
+
 test('physics reference renderer fallback and failure coverage', async ({ page }) => {
   await collectCoverage(page, 'physics-reference-branches', async () => {
     await preparePage(page, '/physics/entropy-information.html', 'en');
