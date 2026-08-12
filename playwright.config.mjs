@@ -15,9 +15,7 @@ export default defineConfig({
   fullyParallel: false,
   timeout: 180_000,
   forbidOnly: Boolean(process.env.CI),
-  // Browser launches on a shared machine occasionally fail with transient
-  // socket errors; a permanently failing journey still fails the coverage gate.
-  retries: 1,
+  retries: 0,
   workers: 2,
   reporter: process.env.CI
     ? [['line'], ['html', { open: 'never' }], ['junit', { outputFile: 'test-results/junit.xml' }]]

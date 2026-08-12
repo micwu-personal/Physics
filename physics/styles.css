@@ -161,6 +161,13 @@ button {
   backdrop-filter: blur(14px);
 }
 
+.route-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+
 .route-home {
   display: inline-flex;
   align-items: center;
@@ -959,9 +966,14 @@ button {
   padding-block: 70px;
 }
 
+.topic-hero > * {
+  min-width: 0;
+}
+
 .topic-title {
   position: relative;
   z-index: 2;
+  min-width: 0;
 }
 
 .topic-title h1 {
@@ -1014,6 +1026,7 @@ math {
 
 .hero-instrument {
   position: relative;
+  min-width: 0;
   min-height: 610px;
   overflow: hidden;
   border: 1px solid var(--line);
@@ -2475,13 +2488,23 @@ body[data-topic="entropy-information"] {
     gap: 8px;
   }
 
+  .route-left {
+    flex: 1 1 auto;
+    gap: 10px;
+  }
+
   .route-home {
+    flex: 1 1 9rem;
+    max-width: min(34vw, 9rem);
     min-width: 0;
     font-size: 12px;
+    line-height: 1.2;
   }
 
   .route-home::before {
     flex: 0 0 auto;
+    width: 18px;
+    height: 10px;
   }
 
   .hero-map,
@@ -2622,7 +2645,7 @@ body[data-topic="entropy-information"] {
   }
 
   .topic-index {
-    top: calc(max(0px, env(safe-area-inset-top)) + 70px);
+    top: calc(max(0px, env(safe-area-inset-top)) + 78px);
     margin-left: -13px;
     margin-right: -13px;
     border-inline: 0;
@@ -2675,7 +2698,6 @@ body[data-topic="entropy-information"] {
 
   .topic-footer > :last-child,
   .atlas-footer > :last-child {
-    display: block;
     margin-top: 8px;
   }
 }

@@ -20,6 +20,7 @@ const LOCALES = {
     'journey.home': 'Story',
     'journey.field': 'Fields',
     'aria.controls': 'Page controls',
+    'aria.brandHome': "McWoods’ Universe",
     'aria.sections': 'Big Bang sections',
     'aria.machine': 'Interactive spacetime diagram of cosmic expansion, physical scale, and key events',
     'alt.wmap': 'False-color all-sky cosmic microwave background temperature map measured by WMAP',
@@ -123,6 +124,7 @@ const LOCALES = {
     'journey.home': '故事线',
     'journey.field': '领域',
     'aria.controls': '页面控制',
+    'aria.brandHome': '米克乐的宇宙',
     'aria.sections': '大爆炸主题分区',
     'aria.machine': '展示宇宙膨胀、物理尺度与关键事件的交互式时空图',
     'alt.wmap': 'WMAP 测得的宇宙微波背景温度涨落全天假彩色图',
@@ -524,6 +526,7 @@ function formatCosmicTime(tsec, lang='en'){
 function applyI18n(lang){
   const dict = LOCALES[lang] || LOCALES.en;
   document.documentElement.lang = (lang==='zh-CN' ? 'zh-CN' : 'en');
+  document.title = dict['page.title'];
   document.querySelectorAll('[data-i18n]').forEach(el=>{
     const key = el.getAttribute('data-i18n');
     if(dict[key]!==undefined) el.innerHTML = dict[key];
@@ -536,8 +539,6 @@ function applyI18n(lang){
     const key=el.getAttribute('data-i18n-aria-label');
     if(dict[key]!==undefined) el.setAttribute('aria-label',dict[key]);
   });
-  const titleEl = document.querySelector('title');
-  if(titleEl?.getAttribute('data-i18n')) document.title = dict[titleEl.getAttribute('data-i18n')] || document.title;
   document.querySelectorAll('.lang-pill').forEach(b=>b.classList.toggle('active', b.dataset.lang===lang));
   window.CURRENT_LANG = lang;
   if(typeof renderTimeline==='function') renderTimeline();

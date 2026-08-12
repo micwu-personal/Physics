@@ -30,6 +30,7 @@ const LOCALES = {
     'journey.home': 'Story',
     'journey.field': 'Quantum',
     'aria.controls': 'Page controls',
+    'aria.brandHome': "McWoods’ Universe",
     'aria.sections': 'Particle Zoo sections',
     'aria.detector': 'Simplified transverse cross-section of collider detector layers',
     'alt.atlas': 'ATLAS reconstructed four-muon Higgs candidate event display',
@@ -634,6 +635,7 @@ const LOCALES = {
     'journey.home': '故事线',
     'journey.field': '量子专题',
     'aria.controls': '页面控制',
+    'aria.brandHome': '米克乐的宇宙',
     'aria.sections': '粒子动物园主题分区',
     'aria.detector': '对撞机探测器各层的简化横截面',
     'alt.atlas': 'ATLAS 重建的四缪子希格斯候选事例显示',
@@ -1333,6 +1335,7 @@ function t(key){
 function applyI18n(lang){
   const dict = LOCALES[lang];
   document.documentElement.lang = (lang==='zh-CN' ? 'zh-CN' : 'en');
+  document.title = dict['page.title'];
 
   // Text content
   document.querySelectorAll('[data-i18n]').forEach(el=>{
@@ -1352,10 +1355,6 @@ function applyI18n(lang){
     const key=el.getAttribute('data-i18n-aria-label');
     el.setAttribute('aria-label',dict[key]);
   });
-  // title
-  const titleKey = document.querySelector('title').getAttribute('data-i18n');
-  document.title = dict[titleKey];
-
   // active language pill
   document.querySelectorAll('.lang-pill').forEach(b=>{
     b.classList.toggle('active', b.dataset.lang===lang);

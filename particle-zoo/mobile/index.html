@@ -11,7 +11,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title data-i18n="page.title">Particle Zoo — An Interactive Journey into the Standard Model</title>
+<title>Particle Zoo — An Interactive Journey into the Standard Model</title>
 <style>
 /*
   Self-hosted webfonts. The site previously loaded these from a font CDN, which is
@@ -454,8 +454,8 @@ footer{text-align:center;padding:40px 20px;color:var(--dim);font-size:12px;posit
 .phen-example{margin-top:8px;font-size:12px;color:var(--dim);font-style:italic}
 
 /* ---------- Language switcher ---------- */
-.control-row{position:fixed;top:8px;right:12px;z-index:100;display:flex;justify-content:flex-end;pointer-events:none}
-.lang-switch{display:flex;gap:4px;background:rgba(5,6,13,0.96);border:1px solid var(--panel-b);border-radius:999px;padding:3px;box-shadow:0 12px 34px rgba(0,0,0,.42);pointer-events:auto}
+.control-row{position:fixed;top:8px;left:12px;right:12px;z-index:100;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;pointer-events:none}
+.lang-switch{display:flex;gap:4px;margin-left:auto;background:rgba(5,6,13,0.96);border:1px solid var(--panel-b);border-radius:999px;padding:3px;box-shadow:0 12px 34px rgba(0,0,0,.42);pointer-events:auto}
 .journey-home{display:inline-flex;align-items:center;min-height:44px;color:var(--accent2);text-decoration:none;padding:6px 10px;border-right:1px solid var(--panel-b);font-size:11px;font-weight:600}
 .motion-pill{min-height:44px;background:transparent;color:var(--text);border:none;border-right:1px solid var(--panel-b);padding:6px 10px;border-radius:999px 4px 4px 999px;font-family:inherit;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap}
 .motion-pill:hover{color:var(--accent2)}
@@ -487,10 +487,173 @@ html[data-motion="playing"] #bg-stars{animation:drift-transform 180s linear infi
 }
 @media(max-width:560px){
   .tabs{top:60px;padding:10px 8px}
-  .control-row{right:6px}
-  .journey-home{padding-inline:8px}
-  .motion-pill,.lang-pill{padding-inline:8px}
+  .control-row{left:6px;right:6px}
+  .lang-switch{gap:2px;padding:2px}
+  .journey-home,.motion-pill,.lang-pill{padding-inline:6px;font-size:10px}
+  .lang-pill{min-width:38px;letter-spacing:0}
   .viz-status{position:static;padding:10px 12px}
+}
+
+</style>
+<link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCIgcm9sZT0iaW1nIiBhcmlhLWxhYmVsPSJNY1dvb2RzIFVuaXZlcnNlIG1vbm9ncmFtIj4NCiAgPHJlY3QgeD0iNCIgeT0iNCIgd2lkdGg9IjU2IiBoZWlnaHQ9IjU2IiByeD0iMTQiIGZpbGw9IiMwNjA5MTMiLz4NCiAgPHBhdGggZD0iTTIwIDE2SDQ0IiBmaWxsPSJub25lIiBzdHJva2U9IiNlZWYyZmYiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgc3Ryb2tlLXdpZHRoPSI0LjUiLz4NCiAgPHBhdGggZD0iTTMyIDE2VjM4IiBmaWxsPSJub25lIiBzdHJva2U9IiNlZWYyZmYiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgc3Ryb2tlLXdpZHRoPSI0LjUiLz4NCiAgPHBhdGggZD0iTTE1IDI4SDQ5IiBmaWxsPSJub25lIiBzdHJva2U9IiNlZWYyZmYiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgc3Ryb2tlLXdpZHRoPSI0LjUiLz4NCiAgPHBhdGggZD0iTTIwIDE5TDI4IDI4TTQ0IDE5TDM2IDI4TTIwIDM3TDI4IDI5TTQ0IDM3TDM2IDI5IiBmaWxsPSJub25lIiBzdHJva2U9IiMwMGQ0ZmYiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgc3Ryb2tlLXdpZHRoPSI0Ii8+DQogIDxwYXRoIGQ9Ik0yMSA0NVEzMiAzOSA0MyA0NSIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjZmZkMTY2IiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIHN0cm9rZS13aWR0aD0iNC41Ii8+DQogIDxwYXRoIGQ9Ik0xOSA0OVEzMiA1OCA0NSA0OSIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjZmZkMTY2IiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIHN0cm9rZS13aWR0aD0iNC41Ii8+DQogIDxjaXJjbGUgY3g9IjQ4IiBjeT0iMTYiIHI9IjMuMiIgZmlsbD0iIzdjNWNmZiIvPg0KPC9zdmc+DQo=" type="image/svg+xml">
+<style>
+.brand-home {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  flex: 0 0 auto;
+  min-width: 0;
+  min-height: 44px;
+  padding: 8px 14px 8px 8px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 16px;
+  background:
+    radial-gradient(circle at 18% 22%, rgba(0, 212, 255, 0.16), transparent 45%),
+    linear-gradient(135deg, rgba(124, 92, 255, 0.18), rgba(6, 9, 21, 0.92) 58%);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.34);
+  color: #e8ecff;
+  pointer-events: auto;
+  text-decoration: none;
+  transition: transform 160ms ease-out, border-color 160ms ease-out, box-shadow 160ms ease-out;
+}
+
+.brand-home:hover {
+  transform: translateY(-1px);
+  border-color: rgba(0, 212, 255, 0.4);
+  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.38);
+}
+
+.brand-home__icon {
+  display: block;
+  width: 42px;
+  height: 42px;
+  flex: 0 0 auto;
+}
+
+.brand-home__icon img {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.brand-home__title {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  line-height: 1;
+}
+
+.brand-home__title-zh,
+.brand-home__title-en {
+  display: block;
+  white-space: nowrap;
+  transition: color 160ms ease-out;
+}
+
+html[lang="zh-CN"] .brand-home__title-zh {
+  order: 1;
+  color: #f4f7ff;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: -0.06em;
+}
+
+html[lang="zh-CN"] .brand-home__title-en {
+  order: 2;
+  margin-top: 4px;
+  color: #9ba5c4;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+html:not([lang="zh-CN"]) .brand-home__title-en {
+  order: 1;
+  color: #f4f7ff;
+  font-size: 0.84rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+html:not([lang="zh-CN"]) .brand-home__title-zh {
+  order: 2;
+  margin-top: 4px;
+  color: #9ba5c4;
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: -0.05em;
+}
+
+.site-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px 16px;
+  text-align: left;
+}
+
+.site-footer__copy {
+  flex: 1 1 280px;
+  max-width: 72ch;
+}
+
+.site-footer__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-left: auto;
+  justify-content: flex-end;
+}
+
+.site-footer__links a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  padding: 0 12px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 999px;
+  background: rgba(6, 9, 21, 0.78);
+  color: #e8ecff;
+  text-decoration: none;
+}
+
+.site-footer__links a:hover {
+  border-color: rgba(0, 212, 255, 0.42);
+  color: #ffffff;
+}
+
+@media (max-width: 640px) {
+  .brand-home {
+    padding-inline-end: 10px;
+  }
+
+  .site-footer__links {
+    width: 100%;
+    margin-left: 0;
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 560px) {
+  .brand-home {
+    gap: 0;
+    padding: 8px;
+    border-radius: 14px;
+  }
+
+  .brand-home__title {
+    position: absolute !important;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
 }
 
 </style>
@@ -499,8 +662,15 @@ html[data-motion="playing"] #bg-stars{animation:drift-transform 180s linear infi
   <script>document.body.classList.add('render-booting');setTimeout(()=>document.body.classList.remove('render-booting'),2000)</script>
   <div id="bg-stars"></div>
   <div class="control-row" aria-label="Page controls" data-i18n-aria-label="aria.controls">
+    <a class="brand-home" href="./index.html" aria-label="McWoods’ Universe" data-i18n-aria-label="aria.brandHome">
+      <span class="brand-home__icon" aria-hidden="true"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCIgcm9sZT0iaW1nIiBhcmlhLWxhYmVsPSJNY1dvb2RzIFVuaXZlcnNlIG1vbm9ncmFtIj4NCiAgPHJlY3QgeD0iNCIgeT0iNCIgd2lkdGg9IjU2IiBoZWlnaHQ9IjU2IiByeD0iMTQiIGZpbGw9IiMwNjA5MTMiLz4NCiAgPHBhdGggZD0iTTIwIDE2SDQ0IiBmaWxsPSJub25lIiBzdHJva2U9IiNlZWYyZmYiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgc3Ryb2tlLXdpZHRoPSI0LjUiLz4NCiAgPHBhdGggZD0iTTMyIDE2VjM4IiBmaWxsPSJub25lIiBzdHJva2U9IiNlZWYyZmYiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgc3Ryb2tlLXdpZHRoPSI0LjUiLz4NCiAgPHBhdGggZD0iTTE1IDI4SDQ5IiBmaWxsPSJub25lIiBzdHJva2U9IiNlZWYyZmYiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgc3Ryb2tlLXdpZHRoPSI0LjUiLz4NCiAgPHBhdGggZD0iTTIwIDE5TDI4IDI4TTQ0IDE5TDM2IDI4TTIwIDM3TDI4IDI5TTQ0IDM3TDM2IDI5IiBmaWxsPSJub25lIiBzdHJva2U9IiMwMGQ0ZmYiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgc3Ryb2tlLXdpZHRoPSI0Ii8+DQogIDxwYXRoIGQ9Ik0yMSA0NVEzMiAzOSA0MyA0NSIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjZmZkMTY2IiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIHN0cm9rZS13aWR0aD0iNC41Ii8+DQogIDxwYXRoIGQ9Ik0xOSA0OVEzMiA1OCA0NSA0OSIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjZmZkMTY2IiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIHN0cm9rZS13aWR0aD0iNC41Ii8+DQogIDxjaXJjbGUgY3g9IjQ4IiBjeT0iMTYiIHI9IjMuMiIgZmlsbD0iIzdjNWNmZiIvPg0KPC9zdmc+DQo=" alt=""></span>
+      <span class="brand-home__title">
+        <span class="brand-home__title-zh">米克乐的宇宙</span>
+        <span class="brand-home__title-en">McWoods’ Universe</span>
+      </span>
+    </a>
     <div class="lang-switch">
-      <a class="journey-home" href="https://micwu-personal.github.io/Physics/#particles" data-i18n="journey.home">Story</a>
+      <a class="journey-home" href="../../index.html#particles" data-i18n="journey.home">Story</a>
       <a class="journey-home" href="../../physics/quantum.html#connections" data-i18n="journey.field">Quantum</a>
       <button id="motionToggle" class="motion-pill" type="button">⏸ Pause animations</button>
       <button class="lang-pill active" data-lang="en">EN</button>
@@ -953,7 +1123,7 @@ html[data-motion="playing"] #bg-stars{animation:drift-transform 180s linear infi
           <h3 data-i18n="lab.xlink.h">See also</h3>
         </div>
         <p data-i18n="lab.xlink.p">Curious how these particles emerged from the early universe? Our companion app <b>Big Bang</b> walks through the cosmic timeline from 10⁻⁴³ s to today.</p>
-        <p><a class="btn" id="bigBangLink" href="https://micwu-personal.github.io/Physics/big-bang/" data-i18n="lab.xlink.go">Open Big Bang →</a></p>
+        <p><a class="btn" id="bigBangLink" href="../../big-bang/index.html" data-i18n="lab.xlink.go">Open Big Bang →</a></p>
       </div>
     </section>
 
@@ -1202,8 +1372,12 @@ html[data-motion="playing"] #bg-stars{animation:drift-transform 180s linear infi
     </section>
   </main>
 
-  <footer>
-    <span data-i18n="footer">Built for curiosity · data from the Particle Data Group</span>
+  <footer class="site-footer">
+    <span class="site-footer__copy" data-i18n="footer">Built for curiosity · data from the Particle Data Group</span>
+    <span class="site-footer__links">
+      <a href="mailto:micwu@outlook.com" aria-label="Email micwu@outlook.com">micwu@outlook.com</a>
+      <a href="https://github.com/micwu-personal/Physics" aria-label="Open the Physics GitHub repository">GitHub</a>
+    </span>
   </footer>
 
   <script>
@@ -1579,6 +1753,7 @@ const LOCALES = {
     'journey.home': 'Story',
     'journey.field': 'Quantum',
     'aria.controls': 'Page controls',
+    'aria.brandHome': "McWoods’ Universe",
     'aria.sections': 'Particle Zoo sections',
     'aria.detector': 'Simplified transverse cross-section of collider detector layers',
     'alt.atlas': 'ATLAS reconstructed four-muon Higgs candidate event display',
@@ -2183,6 +2358,7 @@ const LOCALES = {
     'journey.home': '故事线',
     'journey.field': '量子专题',
     'aria.controls': '页面控制',
+    'aria.brandHome': '米克乐的宇宙',
     'aria.sections': '粒子动物园主题分区',
     'aria.detector': '对撞机探测器各层的简化横截面',
     'alt.atlas': 'ATLAS 重建的四缪子希格斯候选事例显示',
@@ -2882,6 +3058,7 @@ function t(key){
 function applyI18n(lang){
   const dict = LOCALES[lang];
   document.documentElement.lang = (lang==='zh-CN' ? 'zh-CN' : 'en');
+  document.title = dict['page.title'];
 
   // Text content
   document.querySelectorAll('[data-i18n]').forEach(el=>{
@@ -2901,10 +3078,6 @@ function applyI18n(lang){
     const key=el.getAttribute('data-i18n-aria-label');
     el.setAttribute('aria-label',dict[key]);
   });
-  // title
-  const titleKey = document.querySelector('title').getAttribute('data-i18n');
-  document.title = dict[titleKey];
-
   // active language pill
   document.querySelectorAll('.lang-pill').forEach(b=>{
     b.classList.toggle('active', b.dataset.lang===lang);

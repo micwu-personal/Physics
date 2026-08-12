@@ -19,6 +19,8 @@ const coreJs = fs.readFileSync(path.join(ROOT, 'physics-core.js'), 'utf8');
 const refsJs = fs.readFileSync(path.join(ROOT, 'references.js'), 'utf8');
 const i18nJs = fs.readFileSync(path.join(ROOT, 'i18n.js'), 'utf8');
 const appJs  = fs.readFileSync(path.join(ROOT, 'app.js'), 'utf8');
+const brandCss = fs.readFileSync(path.join(ROOT, '..', 'assets', 'brand', 'brand.css'), 'utf8');
+const brandSvg = fs.readFileSync(path.join(ROOT, '..', 'assets', 'brand', 'favicon.svg')).toString('base64');
 
 function inlineMedia(source) {
   return source.replace(/\.\.\/assets\/media\/([A-Za-z0-9_.-]+)/g, (match, filename) => {
@@ -47,6 +49,14 @@ let out = html.replace(
   /<link\s+rel="stylesheet"\s+href="styles\.css"\s*\/?>/,
   `<style>\n${css}\n</style>`
 );
+out = out.replace(
+  /<link\s+rel="stylesheet"\s+href="\.\.\/assets\/brand\/brand\.css"\s*\/?>/,
+  `<style>\n${brandCss}\n</style>`
+);
+out = out.replace(
+  /<link\s+rel="icon"\s+href="\.\.\/assets\/brand\/favicon\.svg"\s+type="image\/svg\+xml"\s*\/?>/,
+  `<link rel="icon" href="data:image/svg+xml;base64,${brandSvg}" type="image/svg+xml">`
+);
 
 // 1b) strip all external CDN links (Google Fonts) so the mobile build is
 //     fully offline / self-contained. CSS already falls back to system fonts.
@@ -72,11 +82,13 @@ out = out.replace(
   `<script>\n${appJs}\n</script>`
 );
 out = inlineMedia(out);
+out = out.replace(/\.\.\/assets\/brand\/favicon\.svg/g, `data:image/svg+xml;base64,${brandSvg}`);
 out = inlineFonts(out);
-out = out
-  .replace(/href="\.\.\/index\.html/g, 'href="https://micwu-personal.github.io/Physics/')
-  .replace(/href="\.\.\/(big-bang|particle-zoo|periodic-table)\/index\.html/g, 'href="https://micwu-personal.github.io/Physics/$1/');
 out = out.replace(/href="\.\.\/(?!https?:)/g, 'href="../../');
+
+function withBrandHomeHref(source, href) {
+  return source.replace('<a class="brand-home" href="./index.html"', `<a class="brand-home" href="${href}"`);
+}
 
 // 3) Inject a small banner comment at the top
 const banner =
@@ -92,8 +104,8 @@ out = out.replace(/^<!DOCTYPE html>/i, `<!DOCTYPE html>\n${banner}`);
 
 const outPath1 = path.join(OUT_DIR, 'index.html');
 const outPath2 = path.join(OUT_DIR, 'particle-zoo.html');
-fs.writeFileSync(outPath1, out);
-fs.writeFileSync(outPath2, out);
+fs.writeFileSync(outPath1, withBrandHomeHref(out, './index.html'));
+fs.writeFileSync(outPath2, withBrandHomeHref(out, './particle-zoo.html'));
 
 const sizeKB = (Buffer.byteLength(out, 'utf8') / 1024).toFixed(1);
 console.log(`✓ Wrote ${outPath1} (${sizeKB} KB)`);

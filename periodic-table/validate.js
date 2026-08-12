@@ -310,15 +310,22 @@ function validate(){
   const mobileA = path.join(ROOT, 'mobile', 'index.html');
   const mobileB = path.join(ROOT, 'mobile', 'periodic-table.html');
   if (fs.existsSync(mobileA) && fs.existsSync(mobileB)) {
-    const a = fs.readFileSync(mobileA);
-    const b = fs.readFileSync(mobileB);
-    assert.equal(Buffer.compare(a,b), 0, 'mobile bundles are byte-identical');
-    const html = a.toString('utf8');
+    const a = fs.readFileSync(mobileA, 'utf8');
+    const b = fs.readFileSync(mobileB, 'utf8');
+    assert.ok(a.includes('<a class="brand-home" href="./index.html"'), 'index bundle brand home should point to mobile/index.html');
+    assert.ok(b.includes('<a class="brand-home" href="./periodic-table.html"'), 'portable alias brand home should point to the standalone alias');
+    assert.equal(
+      a,
+      b.replace('<a class="brand-home" href="./periodic-table.html"', '<a class="brand-home" href="./index.html"'),
+      'portable alias should differ only by its self-home href'
+    );
+    const html = a;
     assert.equal(/<script\s+src=/.test(html), false, 'mobile scripts are inlined');
     assert.equal(/<link\s+rel="stylesheet"/.test(html), false, 'mobile styles are inlined');
     assert.equal(html.includes('fonts.googleapis.com'), false, 'mobile build has no font CDN');
     assert.ok(/data:image\/(png|jpeg);base64,/.test(html), 'mobile build embeds the electron-density evidence image');
-    assert.ok(html.includes('href="https://micwu-personal.github.io/Physics/#atoms"'), 'standalone journey link uses the hosted experience');
+    assert.ok(html.includes('href="../../index.html#atoms"'), 'standalone journey link stays local/offline-safe');
+    assert.equal(html.includes('https://micwu-personal.github.io/Physics/'), false, 'mobile build does not hardcode hosted Physics routes');
     assert.ok(html.includes('CNCTST 术语在线') && html.includes('NNDC NuDat 3'), 'mobile build contains structured references');
     [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].forEach((match, index) => {
       assert.doesNotThrow(()=>new Function(match[1]), `mobile inline script ${index + 1} parses`);

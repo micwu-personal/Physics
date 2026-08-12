@@ -959,6 +959,10 @@ test('physics relativity deepening bootstrap branches coverage', async ({ page }
 test('big-bang browser lifecycle coverage', async ({ page }) => {
   await collectCoverage(page, 'big-bang-lifecycle', async () => {
     await preparePage(page, '/big-bang/', 'en');
+    await page.evaluate(() => {
+      // Cover the resize branch while the time-machine tab is inactive.
+      window.dispatchEvent(new Event('resize'));
+    });
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await page.emulateMedia({ reducedMotion: 'no-preference' });
     await page.evaluate(() => {
@@ -1203,14 +1207,19 @@ test('periodic-table unavailable observer and media APIs coverage', async ({ pag
 
   test('periodic-table interrupted row narration coverage', async ({ page }) => {
     await collectCoverage(page, 'periodic-speech-interrupted', async () => {
-      await page.addInitScript(installSpeechVoices, 300);
+      await page.addInitScript(installSpeechVoices, 30);
       await preparePage(page, '/periodic-table/', 'en');
-      const rowSpeakers = page.locator('.row-speak');
-      await rowSpeakers.nth(1).click();
-      // Interrupt while the first element name is still being spoken.
-      await page.waitForTimeout(180);
-      await rowSpeakers.nth(2).click();
-      await page.waitForTimeout(500);
+      await page.evaluate(() => {
+        const rowSpeakers = [...document.querySelectorAll('.row-speak')];
+        rowSpeakers[1].click();
+        // Interrupt before the first queued element begins, so the earlier
+        // sequence exits through the superseded-at-loop-start branch.
+        setTimeout(() => rowSpeakers[2].click(), 20);
+        // Then interrupt while the replacement sequence is speaking its first
+        // element, covering the post-speak supersession branch.
+        setTimeout(() => rowSpeakers[3].click(), 90);
+      });
+      await page.waitForTimeout(260);
     });
   });
 
@@ -1250,6 +1259,30 @@ test('periodic-table unavailable observer and media APIs coverage', async ({ pag
       await page.waitForTimeout(50);
       await page.evaluate(() => window.__deliverVoices());
       await page.waitForTimeout(100);
+    });
+  });
+
+  test('periodic-table branch completion coverage', async ({ page }) => {
+    await collectCoverage(page, 'periodic-branch-completion', async () => {
+      await page.addInitScript(installSpeechVoices, 80);
+      await page.addInitScript(() => {
+        const nativeSetTimeout = window.setTimeout;
+        window.setTimeout = (callback, delay, ...args) =>
+          nativeSetTimeout(callback, Math.min(delay, 20), ...args);
+      });
+      await preparePage(page, '/periodic-table/', 'zh-CN');
+      await page.evaluate(() => {
+        window.__B1.open();
+        window.__B1.close();
+        // Cover the nuclide resize guard after the panel exists but is not active.
+        window.dispatchEvent(new Event('resize'));
+      });
+      await page.locator('.pt-frow .row-speak').first().click();
+      await page.waitForTimeout(80);
+      await page.locator('#tlToggleBtn').click();
+      await page.locator('#tlPlay').click();
+      await page.locator('.lang-pill[data-lang="en"]').click();
+      await page.waitForTimeout(80);
     });
   });
 
