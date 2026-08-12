@@ -2,18 +2,19 @@
 <html lang="en">
 <head>
   <!--
-  THESIS: Relativity is a geometry of measurement, not the slogan that “everything is relative.”
-  OWN-WORLD: Cyan spacetime grids, gold light paths, clock readouts, and eclipse evidence extend the Evidence Observatory.
-  STORY: Establish invariant light speed, compare moving clocks, see gravity bend geometry, inspect the 1919 test, then connect the theory to cosmology and particle physics.
-  FIRST VIEWPORT: A curved grid and deflected light ray face the invariant interval; the static frame explains the idea without animation.
-  FORM: A sequence of measurement instruments and historical evidence, not a biography-led article.
+  THESIS: Relativity is a geometry of measurements with exact invariants, not a slogan about "everything being relative."
+  OWN-WORLD: Explicit frame comparisons, source-tagged claims, and model badges replace ambiguous spacetime art.
+  STORY: Start with invariants, compare a transverse light clock in two frames, ask when particles need relativistic mechanics, apply the same ideas to jets, then bridge toward compact objects and observational tests.
+  FIRST VIEWPORT: A labeled lensing schematic explains every color and line before the page asks the visitor to trust an animation.
+  FORM: Measurement-first instruments and scoped caveats, not biography-led narrative.
   -->
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="An interactive bilingual guide to special and general relativity with a moving light-clock experiment, spacetime visualization, historical eclipse evidence, and links to cosmology.">
+  <meta name="description" content="A rigorous bilingual guide to relativity: invariant intervals, a corrected moving light clock, relativistic particle energies, jets, compact-object bridges, and claim-level sources.">
   <title>Relativity — Physics Field Atlas</title>
   <link rel="stylesheet" href="../assets/fonts/fonts.css">
   <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="relativity-deepening.css">
 </head>
 <body data-topic="relativity">
   <a class="skip-link" href="#main" data-copy-en="Skip to relativity" data-copy-zh="跳到相对论内容">Skip to relativity</a>
@@ -22,8 +23,8 @@
       <a class="route-home" href="./index.html#genealogy" data-copy-en="Back to the field atlas" data-copy-zh="返回物理领域图谱">Back to the field atlas</a>
       <div class="route-links">
         <a href="./newtonian.html" data-copy-en="Newtonian limit" data-copy-zh="牛顿极限">Newtonian limit</a>
-        <a href="./astrophysics.html#black-holes" data-copy-en="Black holes" data-copy-zh="黑洞">Black holes</a>
-        <a href="./quantum.html" data-copy-en="Quantum mechanics" data-copy-zh="量子力学">Quantum mechanics</a>
+        <a href="./astrophysics.html#black-holes" data-copy-en="Compact objects" data-copy-zh="致密天体">Compact objects</a>
+        <a href="../particle-zoo/index.html?tab=lab" data-copy-en="Relativistic particles" data-copy-zh="相对论性粒子">Relativistic particles</a>
       </div>
       <div class="site-controls" aria-label="Page controls" data-aria-en="Page controls" data-aria-zh="页面控制">
         <button class="motion-toggle" type="button" aria-pressed="false">Pause motion</button>
@@ -35,88 +36,154 @@
     <header class="topic-hero">
       <div class="topic-title">
         <h1 data-copy-en="Relativity" data-copy-zh="相对论">Relativity</h1>
-        <p data-copy-en="Special relativity reorganizes space and time so every inertial observer measures the same light speed. General relativity goes further: freely falling bodies follow spacetime geometry, and matter-energy helps determine that geometry."
-           data-copy-zh="狭义相对论重组空间与时间，使每个惯性观察者都测得相同光速；广义相对论更进一步：自由下落的物体沿时空几何运动，物质与能量参与决定这种几何。">
-          Special relativity reorganizes space and time so every inertial observer measures the same light speed. General relativity goes further: freely falling bodies follow spacetime geometry, and matter-energy helps determine that geometry.
+        <p data-copy-en="Special relativity fixes the same vacuum light speed for every inertial observer, so space and time must transform together. General relativity adds gravity by making free-fall motion follow spacetime geometry. The goal is not to make everything vague; it is to identify what every observer can still agree on."
+           data-copy-zh="狭义相对论要求每个惯性观察者都测得同一个真空光速，因此空间与时间必须共同变换；广义相对论进一步把引力写成时空几何中的自由下落运动。目标不是让一切都“相对化”，而是找出所有观察者在正确换算后仍然能一致同意的量。">
+          Special relativity fixes the same vacuum light speed for every inertial observer, so space and time must transform together. General relativity adds gravity by making free-fall motion follow spacetime geometry. The goal is not to make everything vague; it is to identify what every observer can still agree on.
         </p>
-        <span class="hero-equation" data-tex="\Delta s^2 = c^2\Delta t^2 - \Delta x^2 \qquad G_{\mu\nu} = \frac{8\pi G}{c^4} T_{\mu\nu}">Delta s^2 = c^2 Delta t^2 - Delta x^2, G_munu = 8 pi G T_munu / c^4</span>
+        <span class="hero-equation" data-tex="c^2\Delta\tau^2 = c^2\Delta t^2 - \Delta x^2 - \Delta y^2,\qquad p^\mu p_\mu = m^2 c^2">c^2 Delta tau^2 = c^2 Delta t^2 - Delta x^2 - Delta y^2</span>
         <div class="hero-actions">
-          <a class="primary-action" href="#clock-lab" data-copy-en="Compare moving clocks" data-copy-zh="比较运动中的时钟">Compare moving clocks</a>
-          <a class="secondary-action" href="#evidence" data-copy-en="Inspect the 1919 eclipse" data-copy-zh="查看 1919 年日食证据">Inspect the 1919 eclipse</a>
+          <a class="primary-action" href="#clock-lab" data-copy-en="Compare two frames" data-copy-zh="比较两个参考系">Compare two frames</a>
+          <a class="secondary-action" href="#particle-regimes" data-copy-en="When particles turn relativistic" data-copy-zh="粒子何时进入相对论区">When particles turn relativistic</a>
         </div>
       </div>
-      <div class="hero-instrument">
-        <canvas id="heroCanvas" aria-label="Teaching schematic of a curved spacetime grid bending a light ray" data-aria-en="Teaching schematic of a curved spacetime grid bending a light ray" data-aria-zh="弯曲时空网格使光线偏折的教学示意">A warped grid surrounds a compact mass while a light ray bends past it.</canvas>
-        <div class="instrument-label">
-          <span><strong data-copy-en="Matter changes geometry; geometry guides motion." data-copy-zh="物质改变几何，几何引导运动。">Matter changes geometry; geometry guides motion.</strong><span data-copy-en="The grid is a 2D teaching metaphor, not a literal fabric in a higher-dimensional room." data-copy-zh="网格是二维教学隐喻，并非置于更高维房间中的真实“布料”。">The grid is a 2D teaching metaphor, not a literal fabric in a higher-dimensional room.</span></span>
+      <div class="hero-instrument relativity-hero-panel">
+        <canvas id="heroCanvas" aria-label="Teaching schematic of a weak-field light-deflection path around a compact mass" data-aria-en="Teaching schematic of a weak-field light-deflection path around a compact mass" data-aria-zh="紧致质量体附近弱场光线偏折的教学示意">A compact mass sits inside a schematic coordinate mesh while a model light ray bends past it and reaches a detector.</canvas>
+        <div class="instrument-label relativity-hero-copy">
+          <span>
+            <strong data-copy-en="This hero is now a labeled lensing schematic, not an unlabeled rubber sheet." data-copy-zh="顶部图现在是带标签的引力透镜示意，而不是含糊的“橡皮膜”。">This hero is now a labeled lensing schematic, not an unlabeled rubber sheet.</strong>
+            <span data-copy-en="The cyan mesh is a 2D coordinate sketch on one slice through space, the gold curve is one exaggerated weak-field light path, the dashed gray line is the flat-space comparison, and the blue disk marks the compact mass. None of these lines is a literal photograph of spacetime."
+                  data-copy-zh="青色网格是空间某一切片上的二维坐标示意，金色曲线是一条经过夸张处理的弱场光线路径，灰色虚线是平直空间中的比较路径，蓝色圆盘表示紧致质量体。这些线条都不是“时空本身”的照片。">The cyan mesh is a 2D coordinate sketch on one slice through space, the gold curve is one exaggerated weak-field light path, the dashed gray line is the flat-space comparison, and the blue disk marks the compact mass. None of these lines is a literal photograph of spacetime.</span>
+          </span>
           <span class="rep-badge schematic" data-copy-en="Teaching schematic" data-copy-zh="教学示意">Teaching schematic</span>
+        </div>
+        <ul class="hero-legend" aria-label="Hero legend" data-aria-en="Hero legend" data-aria-zh="顶部图例">
+          <li><span class="legend-swatch mesh" aria-hidden="true"></span><span data-copy-en="Cyan mesh: schematic coordinate grid on one spatial slice." data-copy-zh="青色网格：单个空间切片上的示意坐标网格。">Cyan mesh: schematic coordinate grid on one spatial slice.</span></li>
+          <li><span class="legend-swatch ray" aria-hidden="true"></span><span data-copy-en="Gold path: model null geodesic with exaggerated visible deflection." data-copy-zh="金色路径：经过夸张可视化的模型零测地线。">Gold path: model null geodesic with exaggerated visible deflection.</span></li>
+          <li><span class="legend-swatch baseline" aria-hidden="true"></span><span data-copy-en="Gray dashed path: undeflected flat-space comparison." data-copy-zh="灰色虚线：平直空间中的未偏折比较路径。">Gray dashed path: undeflected flat-space comparison.</span></li>
+          <li><span class="legend-swatch mass" aria-hidden="true"></span><span data-copy-en="Blue disk: compact gravitating mass." data-copy-zh="蓝色圆盘：产生引力的紧致质量体。">Blue disk: compact gravitating mass.</span></li>
+        </ul>
+        <div class="claim-sources compact">
+          <strong data-copy-en="Claim sources" data-copy-zh="依据来源">Claim sources</strong>
+          <ul>
+            <li><a href="https://www.einstein-online.info/en/category/elementary/general-relativity-elementary/" target="_blank" rel="noopener noreferrer">Einstein Online / Max Planck — General relativity</a></li>
+            <li><a href="https://esahubble.org/wordbank/gravitational-lensing/" target="_blank" rel="noopener noreferrer">ESA/Hubble — Gravitational lensing</a></li>
+          </ul>
         </div>
       </div>
     </header>
 
     <nav class="topic-index" aria-label="Relativity sections" data-aria-en="Relativity sections" data-aria-zh="相对论章节">
-      <a href="#principles" data-copy-en="Core principles" data-copy-zh="核心原理">Core principles</a>
+      <a href="#principles" data-copy-en="Invariants" data-copy-zh="不变量">Invariants</a>
       <a href="#clock-lab" data-copy-en="Light-clock laboratory" data-copy-zh="光钟实验室">Light-clock laboratory</a>
-      <a href="#evidence" data-copy-en="Einstein & eclipse" data-copy-zh="爱因斯坦与日食">Einstein &amp; eclipse</a>
-      <a href="#limits" data-copy-en="What it does—and does not—say" data-copy-zh="理论边界">What it does—and does not—say</a>
+      <a href="#particle-regimes" data-copy-en="Relativistic particles" data-copy-zh="相对论性粒子">Relativistic particles</a>
+      <a href="#jets" data-copy-en="Relativistic jets" data-copy-zh="相对论喷流">Relativistic jets</a>
+      <a href="#compact-objects" data-copy-en="Compact-object bridge" data-copy-zh="致密天体桥接">Compact-object bridge</a>
+      <a href="#evidence" data-copy-en="Measurements and evidence" data-copy-zh="测量与证据">Measurements and evidence</a>
+      <a href="#limits" data-copy-en="Scope and limits" data-copy-zh="适用范围与边界">Scope and limits</a>
       <a href="#connections" data-copy-en="Continue exploring" data-copy-zh="继续探索">Continue exploring</a>
+      <a href="#references" data-copy-en="Source map" data-copy-zh="来源图谱">Source map</a>
     </nav>
 
     <main id="main">
       <section id="principles" class="topic-section">
         <header>
-          <h2 data-copy-en="Measurements change between observers; physical law does not."
-              data-copy-zh="观察者之间的测量会改变，物理规律不会。">Measurements change between observers; physical law does not.</h2>
-          <p data-copy-en="Relativity does not say every statement is equally true. It gives exact transformation rules between reference frames and identifies invariants—quantities every observer can agree on after accounting for those rules."
-             data-copy-zh="相对论并不是说所有陈述都同样正确。它给出参考系之间精确的变换规则，并识别不变量——每个观察者在正确换算后都能同意的量。">
-            Relativity does not say every statement is equally true. It gives exact transformation rules between reference frames and identifies invariants—quantities every observer can agree on after accounting for those rules.
+          <h2 data-copy-en="Relativity changes coordinates, but it protects invariants." data-copy-zh="相对论会改变坐标，却保护不变量。">Relativity changes coordinates, but it protects invariants.</h2>
+          <p data-copy-en="Observers disagree about coordinates unless they first specify a frame. They can still agree on invariant intervals, on the proper time accumulated by one clock along one worldline, and on the local rule that freely falling motion removes felt weight even when spacetime is globally curved."
+             data-copy-zh="如果不先说明参考系，观察者对坐标就会产生分歧；但他们仍能在不变量、单个时钟沿自身世界线积累的固有时，以及“自由落体会局部消除失重感”这一规则上达成一致，即使整体时空仍然是弯曲的。">
+            Observers disagree about coordinates unless they first specify a frame. They can still agree on invariant intervals, on the proper time accumulated by one clock along one worldline, and on the local rule that freely falling motion removes felt weight even when spacetime is globally curved.
           </p>
         </header>
         <div class="concept-ribbon">
           <article class="concept">
-            <div class="concept-mark">c = constant</div>
-            <h3 data-copy-en="Invariant light speed" data-copy-zh="光速不变">Invariant light speed</h3>
-            <p data-copy-en="Every inertial observer measures the same vacuum light speed c, regardless of the source’s motion. Space and time coordinates must transform together to make that possible."
-               data-copy-zh="每个惯性观察者都测得相同的真空光速 c，不依赖光源运动。要做到这一点，空间与时间坐标必须共同变换。">Every inertial observer measures the same vacuum light speed c, regardless of the source’s motion. Space and time coordinates must transform together to make that possible.</p>
+            <div class="concept-mark">c = invariant</div>
+            <h3 data-copy-en="Vacuum light speed" data-copy-zh="真空光速">Vacuum light speed</h3>
+            <p data-copy-en="The same vacuum light speed c appears in every inertial frame. That forces time and distance to transform together rather than independently."
+               data-copy-zh="同一个真空光速 c 出现在每个惯性系中，这迫使时间与距离必须共同变换，而不能彼此独立。">The same vacuum light speed c appears in every inertial frame. That forces time and distance to transform together rather than independently.</p>
           </article>
           <article class="concept">
-            <div class="concept-mark">Δτ ≤ Δt</div>
+            <div class="concept-mark">&Delta;&tau; = clock time</div>
             <h3 data-copy-en="Proper time" data-copy-zh="固有时">Proper time</h3>
-            <p data-copy-en="A clock measures time along its own path through spacetime. Different paths between reunion events can accumulate different elapsed times; experiments verify this routinely."
-               data-copy-zh="时钟测量它自身沿时空路径经过的时间。两次重逢事件之间，不同路径可以积累不同时间；实验已反复验证。">A clock measures time along its own path through spacetime. Different paths between reunion events can accumulate different elapsed times; experiments verify this routinely.</p>
+            <p data-copy-en="A clock measures the time along its own worldline. Two clocks that separate and reunite can accumulate different elapsed times because they follow different spacetime paths."
+               data-copy-zh="时钟测量的是它自身世界线上的时间。两只分开又重逢的时钟，可以因为经过的时空路径不同而积累出不同的读数。">A clock measures the time along its own worldline. Two clocks that separate and reunite can accumulate different elapsed times because they follow different spacetime paths.</p>
           </article>
           <article class="concept">
-            <div class="concept-mark">free fall = geodesic</div>
-            <h3 data-copy-en="Equivalence & curvature" data-copy-zh="等效原理与曲率">Equivalence &amp; curvature</h3>
-            <p data-copy-en="Locally, free fall removes the felt weight of gravity. Globally, tidal effects reveal curvature: neighboring free-fall paths converge or diverge."
-               data-copy-zh="局部地看，自由落体会消除对重力的“感受”；整体地看，潮汐效应揭示曲率：相邻自由落体路径会汇聚或分离。">Locally, free fall removes the felt weight of gravity. Globally, tidal effects reveal curvature: neighboring free-fall paths converge or diverge.</p>
+            <div class="concept-mark">free fall = local inertial frame</div>
+            <h3 data-copy-en="Curvature, not a force field on a fixed stage" data-copy-zh="曲率，而不是固定舞台上的额外力场">Curvature, not a force field on a fixed stage</h3>
+            <p data-copy-en="Locally, free fall removes the felt weight of gravity. Globally, tidal stretching and squeezing reveal that spacetime itself is curved."
+               data-copy-zh="在局部范围内，自由落体会消除对重力的“感受”；在整体尺度上，潮汐拉伸与压缩则揭示时空本身是弯曲的。">Locally, free fall removes the felt weight of gravity. Globally, tidal stretching and squeezing reveal that spacetime itself is curved.</p>
           </article>
+        </div>
+
+        <div class="principle-diagrams">
+          <article class="diagram-card">
+            <svg viewBox="0 0 220 160" aria-hidden="true">
+              <line x1="28" y1="136" x2="28" y2="18"></line>
+              <line x1="20" y1="128" x2="196" y2="128"></line>
+              <line x1="28" y1="128" x2="122" y2="34" class="lightlike"></line>
+              <line x1="28" y1="128" x2="122" y2="128" class="spacelike"></line>
+              <path d="M36 128 C58 104, 68 76, 86 44" class="timelike"></path>
+              <circle cx="86" cy="44" r="4" class="timelike-fill"></circle>
+            </svg>
+            <h3 data-copy-en="Interval classes" data-copy-zh="时空间隔的类别">Interval classes</h3>
+            <p data-copy-en="Lightlike paths stay on the 45° cone in units where c = 1; clocks trace timelike paths inside it. This is why causality is organized by light cones."
+               data-copy-zh="在取 c = 1 的单位下，光沿 45° 光锥传播，时钟则走在锥内的类时路径上；因果关系因此由光锥来组织。">Lightlike paths stay on the 45° cone in units where c = 1; clocks trace timelike paths inside it. This is why causality is organized by light cones.</p>
+          </article>
+          <article class="diagram-card">
+            <svg viewBox="0 0 220 160" aria-hidden="true">
+              <circle cx="44" cy="128" r="4" class="event-fill"></circle>
+              <circle cx="176" cy="28" r="4" class="event-fill"></circle>
+              <path d="M44 128 C72 104, 102 78, 132 54 S164 36, 176 28" class="rest-path"></path>
+              <path d="M44 128 L92 96 L126 104 L176 28" class="travel-path"></path>
+            </svg>
+            <h3 data-copy-en="One reunion, two clock histories" data-copy-zh="同一次重逢，两段时钟历史">One reunion, two clock histories</h3>
+            <p data-copy-en="The end events can match while the proper times differ. The straightest timelike path between nearby reunion events accumulates the most proper time."
+               data-copy-zh="起点与终点事件可以相同，但固有时却不同。对于足够接近的重逢事件，最“直”的类时路径会积累最多的固有时。">The end events can match while the proper times differ. The straightest timelike path between nearby reunion events accumulates the most proper time.</p>
+          </article>
+          <article class="diagram-card">
+            <svg viewBox="0 0 220 160" aria-hidden="true">
+              <path d="M62 30 C70 64, 74 98, 70 132" class="fall-left"></path>
+              <path d="M156 30 C148 64, 144 98, 148 132" class="fall-right"></path>
+              <line x1="86" y1="42" x2="132" y2="42" class="tidal"></line>
+              <line x1="78" y1="118" x2="140" y2="118" class="tidal"></line>
+            </svg>
+            <h3 data-copy-en="Local free fall, global tides" data-copy-zh="局部自由落体，整体潮汐效应">Local free fall, global tides</h3>
+            <p data-copy-en="Inside a small falling lab, gravity can disappear locally. Over larger separations, neighboring geodesics converge or diverge, revealing curvature."
+               data-copy-zh="在一个足够小的下落实验室里，重力可以局部“消失”；一旦把两个相邻自由落体路径拉开到更大尺度，汇聚或分离就会暴露曲率。">Inside a small falling lab, gravity can disappear locally. Over larger separations, neighboring geodesics converge or diverge, revealing curvature.</p>
+          </article>
+        </div>
+        <div class="claim-sources">
+          <strong data-copy-en="Claim sources" data-copy-zh="依据来源">Claim sources</strong>
+          <ul>
+            <li><a href="https://www.einstein-online.info/en/category/elementary/special-relativity-elementary/" target="_blank" rel="noopener noreferrer">Einstein Online / Max Planck — Special relativity</a></li>
+            <li><a href="https://www.einstein-online.info/en/category/elementary/general-relativity-elementary/" target="_blank" rel="noopener noreferrer">Einstein Online / Max Planck — General relativity</a></li>
+          </ul>
         </div>
       </section>
 
       <section id="clock-lab" class="topic-section">
         <header>
-          <h2 data-copy-en="A moving light clock traces a longer path between ticks."
-              data-copy-zh="运动中的光钟，每一“滴答”都走过更长路径。">A moving light clock traces a longer path between ticks.</h2>
-          <p data-copy-en="Inside the ship, light travels straight between two mirrors at c. From the ground, the ship moves sideways while light crosses, so the light follows a diagonal path. Because both observers measure c, the ground assigns more time between the same ticks."
-             data-copy-zh="在飞船内，光以 c 在两面镜子之间直线往返；从地面看，光横穿镜间距离时飞船也在侧向移动，因此光走对角线。由于双方都测得 c，地面会为同一对滴答分配更多时间。">
-            Inside the ship, light travels straight between two mirrors at c. From the ground, the ship moves sideways while light crosses, so the light follows a diagonal path. Because both observers measure c, the ground assigns more time between the same ticks.
+          <h2 data-copy-en="A transverse light clock is vertical in its own frame and zigzags in the ground frame." data-copy-zh="横向光钟在自身参考系中走竖直路，在地面系中走折线路。">A transverse light clock is vertical in its own frame and zigzags in the ground frame.</h2>
+          <p data-copy-en="The left panel is the clock rest frame: both mirrors stay fixed and the light pulse moves straight up and down. The right panel is the ground frame: both mirrors drift sideways while the same pulse connects the moving reflection events, so the pulse follows a polyline. The x and y scales match in the two drawn panels, so the right-hand diagonal really is longer."
+             data-copy-zh="左侧面板是光钟静止系：两面镜子固定不动，光脉冲只做上下往返；右侧面板是地面系：镜子在侧向漂移，同一脉冲连接的是一系列移动的反射事件，因此走的是折线路径。两块面板都使用一致的 x、y 比例，所以右侧的对角线确实更长。">
+            The left panel is the clock rest frame: both mirrors stay fixed and the light pulse moves straight up and down. The right panel is the ground frame: both mirrors drift sideways while the same pulse connects the moving reflection events, so the pulse follows a polyline. The x and y scales match in the two drawn panels, so the right-hand diagonal really is longer.
           </p>
         </header>
-        <div class="lab">
+        <div class="lab relativity-clock-lab">
           <div class="lab-stage">
-            <canvas id="labCanvas" aria-label="Interactive moving light-clock demonstration" data-aria-en="Interactive moving light-clock demonstration" data-aria-zh="可交互的运动光钟演示">Two mirrors move sideways while a light pulse bounces between them.</canvas>
+            <canvas id="labCanvas" aria-label="Side-by-side light-clock comparison in the ship frame and the ground frame" data-aria-en="Side-by-side light-clock comparison in the ship frame and the ground frame" data-aria-zh="并排比较飞船系与地面系中的光钟">The left panel shows a vertical light path between fixed mirrors; the right panel shows moving mirrors and a zigzag light path between reflection events.</canvas>
             <div class="lab-overlay">
-              <span id="labReadout" class="lab-readout">γ = 1.250</span>
-              <span id="labSecondaryReadout" class="lab-readout secondary">Moving clocks accumulate less proper time.</span>
+              <span id="labReadout" class="lab-readout">&beta; = 0.60 · &gamma; = 1.250</span>
+              <span id="labSecondaryReadout" class="lab-readout secondary">One ship half-tick is &Delta;&tau; = L0/c; the ground assigns &Delta;t = &gamma;L0/c.</span>
             </div>
           </div>
           <div class="lab-controls">
             <h3 data-copy-en="Light-clock controls" data-copy-zh="光钟控制">Light-clock controls</h3>
-            <p data-copy-en="Increase the ship’s speed to lengthen the ground-frame light path. The ship is repeatedly wrapped across the display; it is not accelerating back to the left."
-               data-copy-zh="提高飞船速度，地面系中的光路会变长。画面中的飞船会循环回到左侧，这只是显示方式，并非实际加速返回。">Increase the ship’s speed to lengthen the ground-frame light path. The ship is repeatedly wrapped across the display; it is not accelerating back to the left.</p>
+            <p data-copy-en="This model is the standard transverse light clock used to derive time dilation. The geometry is exact for the chosen &beta; = v/c; the only simplification is that one mirror spacing L0 stands in for any actual clock mechanism."
+               data-copy-zh="这个模型就是推导时间膨胀时使用的标准横向光钟。对于所选的 &beta; = v/c，几何关系是精确的；唯一的简化是用一段镜间距 L0 来代表真实时钟的周期机制。"
+               data-html-en="This model is the standard transverse light clock used to derive time dilation. The geometry is exact for the chosen &beta; = v/c; the only simplification is that one mirror spacing L0 stands in for any actual clock mechanism."
+               data-html-zh="这个模型就是推导时间膨胀时使用的标准横向光钟。对于所选的 &beta; = v/c，几何关系是精确的；唯一的简化是用一段镜间距 L0 来代表真实时钟的周期机制。">This model is the standard transverse light clock used to derive time dilation. The geometry is exact for the chosen &beta; = v/c; the only simplification is that one mirror spacing L0 stands in for any actual clock mechanism.</p>
             <div class="control-group">
-              <label for="primaryControl"><span data-copy-en="Ship speed" data-copy-zh="飞船速度">Ship speed</span><output id="primaryOutput" for="primaryControl">0.60 c</output></label>
+              <label for="primaryControl"><span data-copy-en="Clock speed" data-copy-zh="光钟速度">Clock speed</span><output id="primaryOutput" for="primaryControl">0.60 c</output></label>
               <input id="primaryControl" type="range" min="0" max="0.95" value="0.6" step="0.01">
             </div>
             <div class="lab-buttons">
@@ -124,110 +191,517 @@
               <button id="labReset" type="button">Reset</button>
               <button id="audioToggle" class="wide" type="button" aria-pressed="false">Enable sonification</button>
             </div>
-            <p class="lab-note"><span class="rep-badge model" data-copy-en="Calculated model" data-copy-zh="计算模型">Calculated model</span><br><span data-copy-en="The Lorentz factor γ is calculated exactly from the selected β = v/c. Distances and animation speed are compressed for teaching. Sonification marks mirror events; it is not sound propagating in vacuum."
-              data-copy-zh="洛伦兹因子 γ 由所选 β = v/c 精确计算。距离与动画速度均为教学压缩。声音映射标记镜面事件，并非真空中传播的声音。">The Lorentz factor γ is calculated exactly from the selected β = v/c. Distances and animation speed are compressed for teaching. Sonification marks mirror events; it is not sound propagating in vacuum.</span></p>
+            <div class="clock-metrics">
+              <article class="metric-card">
+                <strong>&beta; = v/c</strong>
+                <span id="clockBetaValue">0.600</span>
+              </article>
+              <article class="metric-card">
+                <strong>&gamma; = 1 / &radic;(1 - &beta;<sup>2</sup>)</strong>
+                <span id="clockGammaValue">1.250</span>
+              </article>
+              <article class="metric-card">
+                <strong data-copy-en="Ship half-tick" data-copy-zh="飞船系半个滴答">Ship half-tick</strong>
+                <span id="clockShipHalfTick">1.000 L0/c</span>
+              </article>
+              <article class="metric-card">
+                <strong data-copy-en="Ground half-tick" data-copy-zh="地面系半个滴答">Ground half-tick</strong>
+                <span id="clockGroundHalfTick">1.250 L0/c</span>
+              </article>
+              <article class="metric-card">
+                <strong data-copy-en="Ship path length" data-copy-zh="飞船系光程">Ship path length</strong>
+                <span id="clockShipPath">1.000 L0</span>
+              </article>
+              <article class="metric-card">
+                <strong data-copy-en="Ground path length" data-copy-zh="地面系光程">Ground path length</strong>
+                <span id="clockGroundPath">1.250 L0</span>
+              </article>
+            </div>
+            <table class="event-table">
+              <caption data-copy-en="Reflection events for one full tick" data-copy-zh="一个完整滴答的反射事件">Reflection events for one full tick</caption>
+              <thead>
+                <tr>
+                  <th data-copy-en="Event" data-copy-zh="事件">Event</th>
+                  <th data-copy-en="Clock rest frame" data-copy-zh="光钟静止系">Clock rest frame</th>
+                  <th data-copy-en="Ground frame" data-copy-zh="地面系">Ground frame</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th>E0</th>
+                  <td id="clockShipEventE0">x' = 0, y' = 0, t' = 0</td>
+                  <td id="clockGroundEventE0">x = 0, y = 0, t = 0</td>
+                </tr>
+                <tr>
+                  <th>E1</th>
+                  <td id="clockShipEventE1">x' = 0, y' = 1.000 L0, t' = 1.000 L0/c</td>
+                  <td id="clockGroundEventE1">x = 0.750 L0, y = 1.000 L0, t = 1.250 L0/c</td>
+                </tr>
+                <tr>
+                  <th>E2</th>
+                  <td id="clockShipEventE2">x' = 0, y' = 0, t' = 2.000 L0/c</td>
+                  <td id="clockGroundEventE2">x = 1.500 L0, y = 0, t = 2.500 L0/c</td>
+                </tr>
+              </tbody>
+            </table>
+            <p class="lab-note"><span class="rep-badge model" data-copy-en="Calculated model" data-copy-zh="计算模型">Calculated model</span><br><span data-copy-en="The event coordinates, the zigzag path, and the displayed Lorentz factor are calculated exactly from the selected &beta;. The sound marks mirror events only; it is not sound propagation in vacuum."
+              data-copy-zh="事件坐标、折线路径与显示的洛伦兹因子都由所选 &beta; 精确计算。声音只是在标记镜面事件，并不表示真空中的声波传播。"
+              data-html-en="The event coordinates, the zigzag path, and the displayed Lorentz factor are calculated exactly from the selected &beta;. The sound marks mirror events only; it is not sound propagation in vacuum."
+              data-html-zh="事件坐标、折线路径与显示的洛伦兹因子都由所选 &beta; 精确计算。声音只是在标记镜面事件，并不表示真空中的声波传播。">The event coordinates, the zigzag path, and the displayed Lorentz factor are calculated exactly from the selected &beta;. The sound marks mirror events only; it is not sound propagation in vacuum.</span></p>
+            <div class="claim-sources">
+              <strong data-copy-en="Claim sources" data-copy-zh="依据来源">Claim sources</strong>
+              <ul>
+                <li><a href="https://www.einstein-online.info/en/category/elementary/special-relativity-elementary/" target="_blank" rel="noopener noreferrer">Einstein Online / Max Planck — Special relativity</a></li>
+              </ul>
+            </div>
           </div>
+        </div>
+      </section>
+
+      <section id="particle-regimes" class="topic-section">
+        <header>
+          <h2 data-copy-en="Microscopic does not mean relativistic; the controlling ratio is energy to rest energy." data-copy-zh="“微观”不自动意味着“相对论”；关键比值是能量相对于静能有多大。">Microscopic does not mean relativistic; the controlling ratio is energy to rest energy.</h2>
+          <p data-copy-en="Relativistic mechanics becomes important when the kinetic energy K is no longer tiny compared with mc², or equivalently when &beta; approaches 1. Electrons reach that regime much sooner than protons because their rest energy is much smaller. Size by itself is not the criterion."
+             data-copy-zh="当动能 K 不再远小于 mc²，或者等价地说当 &beta; 接近 1 时，就必须使用相对论力学。电子比质子更早进入这个区域，因为电子的静能小得多；决定因素不是“物体够不够小”，而是速度与能量。"
+             data-html-en="Relativistic mechanics becomes important when the kinetic energy K is no longer tiny compared with mc&sup2;, or equivalently when &beta; approaches 1. Electrons reach that regime much sooner than protons because their rest energy is much smaller. Size by itself is not the criterion."
+             data-html-zh="当动能 K 不再远小于 mc&sup2;，或者等价地说当 &beta; 接近 1 时，就必须使用相对论力学。电子比质子更早进入这个区域，因为电子的静能小得多；决定因素不是“物体够不够小”，而是速度与能量。">Relativistic mechanics becomes important when the kinetic energy K is no longer tiny compared with mc², or equivalently when &beta; approaches 1. Electrons reach that regime much sooner than protons because their rest energy is much smaller. Size by itself is not the criterion.</p>
+        </header>
+        <div class="explorer-grid">
+          <section class="explorer-card" aria-labelledby="energyExplorerHeading">
+            <div class="explorer-head">
+              <h3 id="energyExplorerHeading" data-copy-en="Energy–speed explorer" data-copy-zh="能量—速度探索器">Energy–speed explorer</h3>
+              <span class="rep-badge model" data-copy-en="Exact kinematics" data-copy-zh="精确运动学">Exact kinematics</span>
+            </div>
+            <div class="toggle-row" role="group" aria-label="Particle choice" data-aria-en="Particle choice" data-aria-zh="粒子选择">
+              <button type="button" class="toggle-chip active" data-particle="electron" aria-pressed="true" data-copy-en="Electron" data-copy-zh="电子">Electron</button>
+              <button type="button" class="toggle-chip" data-particle="proton" aria-pressed="false" data-copy-en="Proton" data-copy-zh="质子">Proton</button>
+            </div>
+            <div class="control-group">
+              <label for="energySlider"><span data-copy-en="Kinetic energy" data-copy-zh="动能">Kinetic energy</span><output id="energyValue" for="energySlider">100 keV</output></label>
+              <input id="energySlider" type="range" min="-6" max="7" value="-1" step="0.01">
+            </div>
+            <div class="preset-row">
+              <button type="button" class="preset-chip" data-preset-particle="electron" data-preset-mev="-5" data-copy-en="10 eV electron" data-copy-zh="10 eV 电子">10 eV electron</button>
+              <button type="button" class="preset-chip" data-preset-particle="electron" data-preset-mev="-0.523" data-copy-en="300 keV electron" data-copy-zh="300 keV 电子">300 keV electron</button>
+              <button type="button" class="preset-chip" data-preset-particle="electron" data-preset-mev="0.30103" data-copy-en="2 MeV electron" data-copy-zh="2 MeV 电子">2 MeV electron</button>
+              <button type="button" class="preset-chip" data-preset-particle="proton" data-preset-mev="0" data-copy-en="1 MeV proton" data-copy-zh="1 MeV 质子">1 MeV proton</button>
+              <button type="button" class="preset-chip" data-preset-particle="proton" data-preset-mev="3" data-copy-en="1 GeV proton" data-copy-zh="1 GeV 质子">1 GeV proton</button>
+              <button type="button" class="preset-chip" data-preset-particle="proton" data-preset-mev="6.845098" data-copy-en="7 TeV proton" data-copy-zh="7 TeV 质子">7 TeV proton</button>
+            </div>
+            <div class="energy-bars" aria-hidden="true">
+              <div class="energy-bar rest">
+                <span data-copy-en="rest" data-copy-zh="静能">rest</span>
+                <div id="restEnergyBar"></div>
+              </div>
+              <div class="energy-bar kinetic">
+                <span data-copy-en="kinetic" data-copy-zh="动能">kinetic</span>
+                <div id="kineticEnergyBar"></div>
+              </div>
+            </div>
+          </section>
+
+          <section class="explorer-card metrics" aria-label="Particle readouts" data-aria-en="Particle readouts" data-aria-zh="粒子读数">
+            <div class="metric-grid">
+              <article class="metric-card">
+                <strong data-copy-en="Rest energy" data-copy-zh="静能">Rest energy</strong>
+                <span id="restEnergyValue">0.511 MeV</span>
+              </article>
+              <article class="metric-card">
+                <strong>&gamma;</strong>
+                <span id="energyGamma">1.196</span>
+              </article>
+              <article class="metric-card">
+                <strong>&beta;</strong>
+                <span id="energyBeta">0.548</span>
+              </article>
+              <article class="metric-card">
+                <strong data-copy-en="Momentum" data-copy-zh="动量">Momentum</strong>
+                <span id="energyMomentum">0.335 MeV/c</span>
+              </article>
+            </div>
+            <div class="regime-card">
+              <h3 data-copy-en="Interpretation" data-copy-zh="物理解读">Interpretation</h3>
+              <p id="energyInterpretation">An electron at this energy already needs relativistic kinematics.</p>
+            </div>
+            <div class="scale-notes">
+              <article>
+                <h4 data-copy-en="Electrons" data-copy-zh="电子">Electrons</h4>
+                <p data-copy-en="Because m<sub>e</sub>c² ≈ 0.511 MeV, even a few hundred keV pushes &beta; close to 1." data-copy-zh="因为 m<sub>e</sub>c² ≈ 0.511 MeV，几百 keV 的电子就已经把 &beta; 推到接近 1。" data-html-en="Because m<sub>e</sub>c&sup2; &asymp; 0.511 MeV, even a few hundred keV pushes &beta; close to 1." data-html-zh="因为 m<sub>e</sub>c&sup2; &asymp; 0.511 MeV，几百 keV 的电子就已经把 &beta; 推到接近 1。">Because m<sub>e</sub>c² ≈ 0.511 MeV, even a few hundred keV pushes &beta; close to 1.</p>
+              </article>
+              <article>
+                <h4 data-copy-en="Protons" data-copy-zh="质子">Protons</h4>
+                <p data-copy-en="Because m<sub>p</sub>c² ≈ 938 MeV, MeV protons are only mildly relativistic; GeV and TeV protons are deeply relativistic." data-copy-zh="因为 m<sub>p</sub>c² ≈ 938 MeV，MeV 级质子通常只算轻度相对论性；GeV 和 TeV 级质子才是强相对论性的。" data-html-en="Because m<sub>p</sub>c&sup2; &asymp; 938 MeV, MeV protons are only mildly relativistic; GeV and TeV protons are deeply relativistic." data-html-zh="因为 m<sub>p</sub>c&sup2; &asymp; 938 MeV，MeV 级质子通常只算轻度相对论性；GeV 和 TeV 级质子才是强相对论性的。">Because m<sub>p</sub>c² ≈ 938 MeV, MeV protons are only mildly relativistic; GeV and TeV protons are deeply relativistic.</p>
+              </article>
+            </div>
+            <p class="lab-note"><span class="rep-badge model" data-copy-en="Calculated model" data-copy-zh="计算模型">Calculated model</span><br><span data-copy-en="The explorer uses E = K + mc², p²c² = E² - m²c⁴, and &beta; = pc/E with rounded PDG rest-energy constants."
+              data-copy-zh="探索器使用 E = K + mc²、p²c² = E² - m²c⁴ 与 &beta; = pc/E，并采用四舍五入后的 PDG 静能常数。"
+              data-html-en="The explorer uses E = K + mc&sup2;, p&sup2;c&sup2; = E&sup2; - m&sup2;c&sup4;, and &beta; = pc/E with rounded PDG rest-energy constants."
+              data-html-zh="探索器使用 E = K + mc&sup2;、p&sup2;c&sup2; = E&sup2; - m&sup2;c&sup4; 与 &beta; = pc/E，并采用四舍五入后的 PDG 静能常数。">The explorer uses E = K + mc², p²c² = E² - m²c⁴, and &beta; = pc/E with rounded PDG rest-energy constants.</span></p>
+            <div class="claim-sources">
+              <strong data-copy-en="Claim sources" data-copy-zh="依据来源">Claim sources</strong>
+              <ul>
+                <li><a href="https://pdg.lbl.gov/2025/reviews/kinematics_and_cross_sections.html" target="_blank" rel="noopener noreferrer">Particle Data Group — Kinematics, cross-section formulae, and plots</a></li>
+              </ul>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <section id="jets" class="topic-section">
+        <header>
+          <h2 data-copy-en="Relativistic jets turn timing geometry into beaming and apparent superluminal motion." data-copy-zh="相对论喷流把时序几何转化为束射与表观超光速。">Relativistic jets turn timing geometry into beaming and apparent superluminal motion.</h2>
+          <p data-copy-en="Jets from active galactic nuclei, X-ray binaries, and gamma-ray bursts are powered by accretion and magnetic fields near compact objects, but the relativity lesson is geometric. If plasma moves toward us at large &beta; and small viewing angle &theta;, successive photons start closer to the observer than the previous ones, compressing the arrival interval. The projected sky motion can then look faster than c even though every local signal still travels at or below c."
+             data-copy-zh="活动星系核、X 射线双星和伽马暴都能产生喷流，动力学细节牵涉吸积与磁场，但相对论上的关键是一段几何学：如果等离子体以很大的 &beta;、很小的视角 &theta; 朝我们运动，后发出的光子会比先前的光子离观察者更近，从而压缩到达时间间隔。这样一来，天球上的投影运动就可能看起来超过 c，尽管任何局域信号都没有真正超光速。"
+             data-html-en="Jets from active galactic nuclei, X-ray binaries, and gamma-ray bursts are powered by accretion and magnetic fields near compact objects, but the relativity lesson is geometric. If plasma moves toward us at large &beta; and small viewing angle &theta;, successive photons start closer to the observer than the previous ones, compressing the arrival interval. The projected sky motion can then look faster than c even though every local signal still travels at or below c."
+             data-html-zh="活动星系核、X 射线双星和伽马暴都能产生喷流，动力学细节牵涉吸积与磁场，但相对论上的关键是一段几何学：如果等离子体以很大的 &beta;、很小的视角 &theta; 朝我们运动，后发出的光子会比先前的光子离观察者更近，从而压缩到达时间间隔。这样一来，天球上的投影运动就可能看起来超过 c，尽管任何局域信号都没有真正超光速。">Jets from active galactic nuclei, X-ray binaries, and gamma-ray bursts are powered by accretion and magnetic fields near compact objects, but the relativity lesson is geometric. If plasma moves toward us at large &beta; and small viewing angle &theta;, successive photons start closer to the observer than the previous ones, compressing the arrival interval. The projected sky motion can then look faster than c even though every local signal still travels at or below c.</p>
+        </header>
+        <div class="jet-layout">
+          <section class="explorer-card">
+            <div class="explorer-head">
+              <h3 data-copy-en="Jet-view explorer" data-copy-zh="喷流视角探索器">Jet-view explorer</h3>
+              <span class="rep-badge model" data-copy-en="Calculated geometry" data-copy-zh="计算几何">Calculated geometry</span>
+            </div>
+            <div class="control-group">
+              <label for="jetBetaControl"><span data-copy-en="Flow speed" data-copy-zh="流速">Flow speed</span><output id="jetBetaOutput" for="jetBetaControl">0.95 c</output></label>
+              <input id="jetBetaControl" type="range" min="0.70" max="0.995" step="0.001" value="0.95">
+            </div>
+            <div class="control-group">
+              <label for="jetAngleControl"><span data-copy-en="Viewing angle" data-copy-zh="视角">Viewing angle</span><output id="jetAngleOutput" for="jetAngleControl">10&deg;</output></label>
+              <input id="jetAngleControl" type="range" min="1" max="60" step="1" value="10">
+            </div>
+            <div class="jet-stage">
+              <svg id="jetDiagram" viewBox="0 0 720 360" aria-label="Relativistic jet side view and projected sky motion" data-aria-en="Relativistic jet side view and projected sky motion" data-aria-zh="相对论喷流的侧视图与天球投影运动">
+                <defs>
+                  <linearGradient id="jetGlow" x1="0" x2="1">
+                    <stop offset="0%" stop-color="#ffd166" stop-opacity="0.12"></stop>
+                    <stop offset="100%" stop-color="#ffd166" stop-opacity="0.72"></stop>
+                  </linearGradient>
+                </defs>
+                <rect x="18" y="18" width="684" height="210" rx="18" class="jet-frame"></rect>
+                <rect x="18" y="246" width="684" height="96" rx="18" class="jet-frame"></rect>
+                <line id="jetSightLine" x1="140" y1="124" x2="636" y2="124" class="jet-sight"></line>
+                <circle cx="140" cy="124" r="11" class="jet-core"></circle>
+                <circle cx="636" cy="124" r="8" class="jet-observer"></circle>
+                <line id="jetApproachAxis" x1="140" y1="124" x2="520" y2="72" class="jet-axis"></line>
+                <line id="jetRecedeAxis" x1="140" y1="124" x2="32" y2="202" class="jet-axis receding"></line>
+                <line id="jetPhotonA" x1="0" y1="0" x2="636" y2="124" class="jet-photon"></line>
+                <line id="jetPhotonB" x1="0" y1="0" x2="636" y2="124" class="jet-photon"></line>
+                <circle id="jetEventA" cx="0" cy="0" r="6" class="jet-event"></circle>
+                <circle id="jetEventB" cx="0" cy="0" r="6" class="jet-event late"></circle>
+                <circle id="jetApproachBlob" cx="0" cy="0" r="8" class="jet-blob"></circle>
+                <circle id="jetRecedeBlob" cx="0" cy="0" r="6" class="jet-blob receding"></circle>
+                <line x1="84" y1="294" x2="636" y2="294" class="sky-ruler"></line>
+                <circle id="skyEventA" cx="0" cy="294" r="6" class="jet-event"></circle>
+                <circle id="skyEventB" cx="0" cy="294" r="6" class="jet-event late"></circle>
+                <circle id="skyCurrent" cx="0" cy="294" r="7" class="jet-blob"></circle>
+              </svg>
+            </div>
+            <div class="jet-panel-notes">
+              <article>
+                <h4 data-copy-en="Upper panel" data-copy-zh="上方面板">Upper panel</h4>
+                <p data-copy-en="Two emission events A and B occur along the approaching jet. Their photons both move at c to the observer on the right." data-copy-zh="接近我们的喷流上发生两个发射事件 A 与 B；它们发出的光子都以 c 向右侧观察者传播。">Two emission events A and B occur along the approaching jet. Their photons both move at c to the observer on the right.</p>
+              </article>
+              <article>
+                <h4 data-copy-en="Lower panel" data-copy-zh="下方面板">Lower panel</h4>
+                <p data-copy-en="The same events are projected onto the sky. Their apparent transverse speed depends on the projected separation divided by the compressed arrival-time gap." data-copy-zh="同样的两个事件被投影到天球上。它们的表观横向速度，取决于投影分离量再除以被压缩后的到达时间间隔。">The same events are projected onto the sky. Their apparent transverse speed depends on the projected separation divided by the compressed arrival-time gap.</p>
+              </article>
+            </div>
+          </section>
+
+          <section class="explorer-card metrics">
+            <div class="metric-grid">
+              <article class="metric-card">
+                <strong>&gamma;</strong>
+                <span id="jetGamma">3.203</span>
+              </article>
+              <article class="metric-card">
+                <strong>&delta;</strong>
+                <span id="jetDoppler">4.846</span>
+              </article>
+              <article class="metric-card">
+                <strong>&beta;<sub>app</sub></strong>
+                <span id="jetApparent">3.37 c</span>
+              </article>
+              <article class="metric-card">
+                <strong data-copy-en="Arrival-gap factor" data-copy-zh="到达间隔因子">Arrival-gap factor</strong>
+                <span id="jetArrivalGap">0.064 × Δt_emit</span>
+              </article>
+            </div>
+            <div class="beaming-card">
+              <h3 data-copy-en="Approaching vs receding brightness" data-copy-zh="接近端与远离端的亮度">Approaching vs receding brightness</h3>
+              <div class="brightness-row">
+                <span data-copy-en="Approaching jet" data-copy-zh="接近端喷流">Approaching jet</span>
+                <div class="brightness-bar"><div id="jetApproachBrightness"></div></div>
+              </div>
+              <div class="brightness-row">
+                <span data-copy-en="Receding jet" data-copy-zh="远离端喷流">Receding jet</span>
+                <div class="brightness-bar"><div id="jetRecedeBrightness"></div></div>
+              </div>
+              <p id="jetBrightnessNote">Brightness bars use a schematic δ^3 beaming proxy.</p>
+            </div>
+            <div class="regime-card">
+              <h3 data-copy-en="Why no causality is broken" data-copy-zh="为什么因果律没有被破坏">Why no causality is broken</h3>
+              <p id="jetCausalityNote">The projected sky speed can exceed c because the second photon starts closer to the observer, shortening the arrival gap. No material chunk outruns its own emitted light locally.</p>
+            </div>
+            <p class="lab-note"><span class="rep-badge model" data-copy-en="Model + uncertainty label" data-copy-zh="模型 + 不确定性标签">Model + uncertainty label</span><br><span data-copy-en="The formulas for &gamma;, &delta;, the arrival-gap factor, and &beta;<sub>app</sub> are exact for the chosen bulk speed and viewing angle. The brightness bars use the pedagogical scaling I &propto; &delta;<sup>3</sup>; real jet spectra and geometries change the exponent."
+              data-copy-zh="对于所选的整体流速与视角，&gamma;、&delta;、到达间隔因子与 &beta;<sub>app</sub> 的公式是精确的。亮度条采用教学用的 I &propto; &delta;<sup>3</sup> 缩放；真实喷流的谱形与几何会改变指数。"
+              data-html-en="The formulas for &gamma;, &delta;, the arrival-gap factor, and &beta;<sub>app</sub> are exact for the chosen bulk speed and viewing angle. The brightness bars use the pedagogical scaling I &propto; &delta;<sup>3</sup>; real jet spectra and geometries change the exponent."
+              data-html-zh="对于所选的整体流速与视角，&gamma;、&delta;、到达间隔因子与 &beta;<sub>app</sub> 的公式是精确的。亮度条采用教学用的 I &propto; &delta;<sup>3</sup> 缩放；真实喷流的谱形与几何会改变指数。">The formulas for &gamma;, &delta;, the arrival-gap factor, and &beta;<sub>app</sub> are exact for the chosen bulk speed and viewing angle. The brightness bars use the pedagogical scaling I &propto; &delta;<sup>3</sup>; real jet spectra and geometries change the exponent.</span></p>
+            <div class="claim-sources">
+              <strong data-copy-en="Claim sources" data-copy-zh="依据来源">Claim sources</strong>
+              <ul>
+                <li><a href="https://imagine.gsfc.nasa.gov/science/objects/active_galaxies1.html" target="_blank" rel="noopener noreferrer">NASA Imagine the Universe — Active galaxies</a></li>
+                <li><a href="https://esahubble.org/wordbank/active-galactic-nucleus/" target="_blank" rel="noopener noreferrer">ESA/Hubble — Active galactic nucleus</a></li>
+                <li><a href="https://doi.org/10.1038/211468a0" target="_blank" rel="noopener noreferrer">Rees (1966) — Appearance of relativistically expanding radio sources</a></li>
+              </ul>
+            </div>
+          </section>
+        </div>
+        <div class="bridge-link-card">
+          <strong data-copy-en="Astrophysics link" data-copy-zh="天体物理链接">Astrophysics link</strong>
+          <p data-copy-en="This jet explorer is a relativity instrument, not a full accretion model. For where the power comes from and how black holes, disks, and outflows fit together, continue to the astrophysics deep dive."
+             data-copy-zh="这个喷流探索器强调的是相对论几何，而不是完整的吸积模型。若要继续了解能量从何而来，以及黑洞、吸积盘与外流如何结合，请转到天体物理深挖页面。">This jet explorer is a relativity instrument, not a full accretion model. For where the power comes from and how black holes, disks, and outflows fit together, continue to the astrophysics deep dive.</p>
+          <a href="./astrophysics.html#black-holes" data-copy-en="Open the black-hole and disk section →" data-copy-zh="打开黑洞与吸积盘章节 →">Open the black-hole and disk section →</a>
+        </div>
+      </section>
+
+      <section id="compact-objects" class="topic-section">
+        <header>
+          <h2 data-copy-en="Quantum statistics and relativity meet inside compact objects." data-copy-zh="量子统计与相对论在致密天体内部相遇。">Quantum statistics and relativity meet inside compact objects.</h2>
+          <p data-copy-en="Packing fermions into a smaller region raises the Fermi momentum because fewer momentum states fit below a given cutoff. In white dwarfs that drives the electron gas into the relativistic regime; in neutron stars the pressure support depends on the nuclear equation of state and full general-relativistic stellar structure. This page gives the bridge, not the full mass-limit derivation."
+             data-copy-zh="把费米子压进更小的空间，会抬高费米动量，因为某个动量截止以下可容纳的量子态更少。在白矮星中，这会把电子气体推入相对论区；在中子星中，支撑压强则取决于核物态方程以及完整的广义相对论恒星结构。本页只搭桥，不重复完整的质量极限推导。">
+            Packing fermions into a smaller region raises the Fermi momentum because fewer momentum states fit below a given cutoff. In white dwarfs that drives the electron gas into the relativistic regime; in neutron stars the pressure support depends on the nuclear equation of state and full general-relativistic stellar structure. This page gives the bridge, not the full mass-limit derivation.
+          </p>
+        </header>
+        <div class="compact-bridge">
+          <article class="diagram-card">
+            <svg viewBox="0 0 220 160" aria-hidden="true">
+              <rect x="28" y="26" width="70" height="106" rx="12" class="box wide"></rect>
+              <rect x="130" y="48" width="44" height="62" rx="10" class="box narrow"></rect>
+              <line x1="64" y1="36" x2="64" y2="120" class="spacing"></line>
+              <line x1="152" y1="54" x2="152" y2="104" class="spacing tight"></line>
+              <path d="M34 136 C64 112, 82 96, 96 82" class="momentum soft"></path>
+              <path d="M132 136 C148 104, 160 78, 172 48" class="momentum hard"></path>
+            </svg>
+            <h3 data-copy-en="Confinement raises momentum scale" data-copy-zh="约束增强会抬高动量尺度">Confinement raises momentum scale</h3>
+            <p data-copy-en="Smaller position space means a broader momentum distribution. Degeneracy pressure is therefore tied to the available phase-space volume, not to particles literally colliding like hard beads."
+               data-copy-zh="位置空间越小，动量分布就越宽。简并压强因此取决于可用相空间体积，而不是粒子像硬珠子那样频繁碰撞。">Smaller position space means a broader momentum distribution. Degeneracy pressure is therefore tied to the available phase-space volume, not to particles literally colliding like hard beads.</p>
+          </article>
+          <article class="bridge-steps">
+            <div class="bridge-step">
+              <strong data-copy-en="White dwarfs" data-copy-zh="白矮星">White dwarfs</strong>
+              <p data-copy-en="Electron degeneracy supports the star. As density rises, the electron Fermi momentum becomes relativistic, softening the equation of state and leading to the Chandrasekhar mass scale."
+                 data-copy-zh="白矮星由电子简并压支撑。随着密度升高，电子费米动量会变得相对论性，从而“软化”物态方程，并导向钱德拉塞卡质量尺度。">Electron degeneracy supports the star. As density rises, the electron Fermi momentum becomes relativistic, softening the equation of state and leading to the Chandrasekhar mass scale.</p>
+            </div>
+            <div class="bridge-step">
+              <strong data-copy-en="Neutron stars" data-copy-zh="中子星">Neutron stars</strong>
+              <p data-copy-en="Neutron degeneracy matters, but the pressure also depends on strong-interaction physics. General relativity changes hydrostatic balance, so one needs a nuclear EOS plus the Tolman–Oppenheimer–Volkoff equations."
+                 data-copy-zh="中子简并很重要，但压强也依赖强相互作用物理。广义相对论会改变静水平衡，因此需要把核物态方程与托尔曼—奥本海默—沃尔科夫方程一起考虑。">Neutron degeneracy matters, but the pressure also depends on strong-interaction physics. General relativity changes hydrostatic balance, so one needs a nuclear EOS plus the Tolman–Oppenheimer–Volkoff equations.</p>
+            </div>
+            <div class="bridge-step">
+              <strong data-copy-en="Scope note" data-copy-zh="范围说明">Scope note</strong>
+              <p data-copy-en="The exact mass limits depend on composition, temperature, rotation, and the chosen EOS. This relativity page stays qualitative and points to the astrophysics chapter for the full derivations."
+                 data-copy-zh="精确的质量极限依赖成分、温度、自转以及所采用的物态方程。本页保持定性层面，并把完整推导留给天体物理章节。">The exact mass limits depend on composition, temperature, rotation, and the chosen EOS. This relativity page stays qualitative and points to the astrophysics chapter for the full derivations.</p>
+            </div>
+          </article>
+        </div>
+        <div class="claim-sources">
+          <strong data-copy-en="Claim sources" data-copy-zh="依据来源">Claim sources</strong>
+          <ul>
+            <li><a href="https://doi.org/10.1086/143324" target="_blank" rel="noopener noreferrer">Chandrasekhar (1931) — The maximum mass of ideal white dwarfs</a></li>
+            <li><a href="https://doi.org/10.1126/science.1090720" target="_blank" rel="noopener noreferrer">Lattimer &amp; Prakash (2004) — The physics of neutron stars</a></li>
+          </ul>
+        </div>
+        <div class="bridge-link-card">
+          <strong data-copy-en="Continue in astrophysics" data-copy-zh="继续到天体物理">Continue in astrophysics</strong>
+          <p data-copy-en="The astrophysics page carries the longer Chandrasekhar, Oppenheimer–Volkoff, and black-hole collapse story with the stellar-evolution context already built around it."
+             data-copy-zh="天体物理页面已经在恒星演化背景中展开了钱德拉塞卡极限、奥本海默—沃尔科夫极限以及黑洞塌缩的更完整故事。">The astrophysics page carries the longer Chandrasekhar, Oppenheimer–Volkoff, and black-hole collapse story with the stellar-evolution context already built around it.</p>
+          <a href="./astrophysics.html#limits" data-copy-en="Open the mass-limit chapter →" data-copy-zh="打开质量极限章节 →">Open the mass-limit chapter →</a>
         </div>
       </section>
 
       <section id="evidence" class="topic-section">
         <header>
-          <h2 data-copy-en="A prediction becomes physics when nature can answer."
-              data-copy-zh="只有自然能够作答，预言才成为物理。">A prediction becomes physics when nature can answer.</h2>
-          <p data-copy-en="During the 1919 total solar eclipse, expeditions measured star positions near the darkened Sun and compared them with reference plates. The result supported general relativity’s prediction that gravity deflects light, although later measurements became much more precise."
-             data-copy-zh="1919 年日全食期间，考察队测量暗日附近恒星的位置，并与参考底片比较。结果支持广义相对论关于引力偏折光线的预言；后来的测量精度已大幅提高。">
-            During the 1919 total solar eclipse, expeditions measured star positions near the darkened Sun and compared them with reference plates. The result supported general relativity’s prediction that gravity deflects light, although later measurements became much more precise.
+          <h2 data-copy-en="Relativity survives because nature can measure it." data-copy-zh="相对论之所以成立，是因为自然界可以测量它。">Relativity survives because nature can measure it.</h2>
+          <p data-copy-en="The 1919 eclipse results mattered historically because they tested light deflection in the sky, but they were only the start. Atomic clocks, gravitational lensing, and gravitational-wave interferometers all turn relativity into quantitative measurement rather than philosophy."
+             data-copy-zh="1919 年日食的历史意义在于它把光线偏折搬到了真实天空中检验，但那只是开始。原子钟、引力透镜以及引力波干涉仪，都把相对论变成了定量测量，而不是哲学讨论。">
+            The 1919 eclipse results mattered historically because they tested light deflection in the sky, but they were only the start. Atomic clocks, gravitational lensing, and gravitational-wave interferometers all turn relativity into quantitative measurement rather than philosophy.
           </p>
         </header>
-        <div class="evidence-pair">
-          <figure class="portrait-study">
-            <img src="../assets/media/Albert_Einstein_1921.jpg" loading="lazy" decoding="async" alt="Albert Einstein photographed by Ferdinand Schmutzer in 1921" data-alt-en="Albert Einstein photographed by Ferdinand Schmutzer in 1921" data-alt-zh="费迪南德·施穆策于 1921 年拍摄的爱因斯坦">
-            <figcaption class="portrait-caption">
-              <strong data-copy-en="Albert Einstein, 1879–1955" data-copy-zh="阿尔伯特·爱因斯坦，1879–1955">Albert Einstein, 1879–1955</strong>
-              <span data-copy-en="Ferdinand Schmutzer photograph, 1921; restored by Adam Cuerden. Public domain historical photograph."
-                    data-copy-zh="费迪南德·施穆策摄于 1921 年；亚当·柯登修复。公有领域历史照片。">Ferdinand Schmutzer photograph, 1921; restored by Adam Cuerden. Public domain historical photograph.</span>
-              <a href="https://commons.wikimedia.org/wiki/File:Einstein_1921_by_F_Schmutzer_-_restoration.jpg" target="_blank" rel="noopener noreferrer" data-copy-en="Source and rights statement" data-copy-zh="来源与权利说明">Source and rights statement</a>
-            </figcaption>
-          </figure>
+        <div class="evidence-grid">
           <figure class="document-study wide">
             <img src="../assets/media/Eddington_eclipse_1919.jpg" loading="lazy" decoding="async" alt="Positive photograph of the 1919 solar eclipse used in tests of general relativity" data-alt-en="Positive photograph of the 1919 solar eclipse used in tests of general relativity" data-alt-zh="用于检验广义相对论的 1919 年日食正片">
             <figcaption>
               <span class="rep-badge observation" data-copy-en="Historical observation" data-copy-zh="历史观测">Historical observation</span>
-              <strong data-copy-en="The 1919 solar-eclipse plates" data-copy-zh="1919 年日食底片">The 1919 solar-eclipse plates</strong>
-              <span data-copy-en="Stars near the eclipsed Sun appear on the plate. Researchers estimated tiny position shifts relative to comparison images. This is a historical photographic record, not a direct photograph of curved spacetime."
-                    data-copy-zh="底片记录了日食期间太阳附近的恒星。研究者相对比较图像估计微小位置偏移。这是历史照片记录，并非“弯曲时空”的直接照片。">Stars near the eclipsed Sun appear on the plate. Researchers estimated tiny position shifts relative to comparison images. This is a historical photographic record, not a direct photograph of curved spacetime.</span>
-              <a href="https://commons.wikimedia.org/wiki/File:1919_eclipse_positive.jpg" target="_blank" rel="noopener noreferrer" data-copy-en="Source and license" data-copy-zh="来源与许可">Source and license</a>
+              <strong data-copy-en="The 1919 eclipse plates" data-copy-zh="1919 年日食底片">The 1919 eclipse plates</strong>
+              <span data-copy-en="The plates were a difficult early test of light deflection near the Sun, with much larger uncertainties than modern radio and space measurements. They remain historically important because the prediction was exposed to observation at all."
+                    data-copy-zh="这些底片是对太阳附近光偏折的一次艰难早期检验，其不确定度远大于现代射电与空间测量。它们的重要性在于：这一预言第一次真正被拿到观测面前。">The plates were a difficult early test of light deflection near the Sun, with much larger uncertainties than modern radio and space measurements. They remain historically important because the prediction was exposed to observation at all.</span>
+              <a href="https://commons.wikimedia.org/wiki/File:1919_eclipse_positive.jpg" target="_blank" rel="noopener noreferrer" data-copy-en="Image source and license" data-copy-zh="图片来源与许可">Image source and license</a>
             </figcaption>
           </figure>
+          <div class="measurement-grid">
+            <article class="diagram-card">
+              <svg viewBox="0 0 220 160" aria-hidden="true">
+                <circle cx="54" cy="86" r="20" class="clock-face"></circle>
+                <circle cx="166" cy="58" r="20" class="clock-face"></circle>
+                <path d="M78 82 Q110 64, 142 62" class="clock-path"></path>
+                <line x1="54" y1="86" x2="54" y2="72" class="clock-hand"></line>
+                <line x1="166" y1="58" x2="176" y2="66" class="clock-hand offset"></line>
+              </svg>
+              <h3 data-copy-en="Clock transport and GPS" data-copy-zh="钟表运输与 GPS">Clock transport and GPS</h3>
+              <p data-copy-en="Special- and general-relativistic clock offsets are not optional engineering corrections; navigational systems must model them to stay accurate."
+                 data-copy-zh="狭义与广义相对论带来的钟差不是可有可无的工程修补；导航系统必须显式建模这些效应，才能保持准确。">Special- and general-relativistic clock offsets are not optional engineering corrections; navigational systems must model them to stay accurate.</p>
+            </article>
+            <article class="diagram-card">
+              <svg viewBox="0 0 220 160" aria-hidden="true">
+                <circle cx="112" cy="80" r="28" class="lens-body"></circle>
+                <path d="M28 66 C72 60, 82 60, 100 72 S148 108, 192 100" class="lensed-arc"></path>
+                <path d="M28 94 C72 100, 82 100, 100 88 S148 52, 192 60" class="lensed-arc faint"></path>
+              </svg>
+              <h3 data-copy-en="Light deflection and lensing" data-copy-zh="光线偏折与引力透镜">Light deflection and lensing</h3>
+              <p data-copy-en="Modern light-deflection tests use radio interferometry, spacecraft tracking, and resolved lensing systems rather than only eclipse photography."
+                 data-copy-zh="现代的光偏折检验依赖射电干涉测量、航天器跟踪以及可分辨的透镜系统，而不再只靠日食摄影。">Modern light-deflection tests use radio interferometry, spacecraft tracking, and resolved lensing systems rather than only eclipse photography.</p>
+            </article>
+            <article class="diagram-card">
+              <svg viewBox="0 0 220 160" aria-hidden="true">
+                <line x1="42" y1="50" x2="112" y2="80" class="gw-arm"></line>
+                <line x1="42" y1="110" x2="112" y2="80" class="gw-arm"></line>
+                <path d="M120 42 C136 30, 152 54, 168 42 S200 54, 212 42" class="gw-wave"></path>
+              </svg>
+              <h3 data-copy-en="Gravitational waves" data-copy-zh="引力波">Gravitational waves</h3>
+              <p data-copy-en="Interferometers measure changing arm lengths caused by passing spacetime strain, turning another once-exotic GR prediction into a repeated observation."
+                 data-copy-zh="干涉仪测量的是经过的时空应变引起的臂长变化，这把另一个曾经显得“奇异”的广义相对论预言变成了重复出现的观测事实。">Interferometers measure changing arm lengths caused by passing spacetime strain, turning another once-exotic GR prediction into a repeated observation.</p>
+            </article>
+          </div>
+        </div>
+        <div class="claim-sources">
+          <strong data-copy-en="Claim sources" data-copy-zh="依据来源">Claim sources</strong>
+          <ul>
+            <li><a href="https://www.einstein-online.info/en/category/elementary/general-relativity-elementary/" target="_blank" rel="noopener noreferrer">Einstein Online / Max Planck — General relativity</a></li>
+            <li><a href="https://esahubble.org/wordbank/gravitational-lensing/" target="_blank" rel="noopener noreferrer">ESA/Hubble — Gravitational lensing</a></li>
+            <li><a href="https://www.ligo.caltech.edu/page/what-are-gw" target="_blank" rel="noopener noreferrer">LIGO — What are gravitational waves?</a></li>
+          </ul>
         </div>
       </section>
 
       <section id="limits" class="topic-section">
         <header>
-          <h2 data-copy-en="Relativity is exact in scope—and incomplete as a final theory."
-              data-copy-zh="相对论在适用范围内精确，却不是最终完整理论。">Relativity is exact in scope—and incomplete as a final theory.</h2>
-          <p data-copy-en="Relativity supplies stricter structure than Newtonian mechanics, but the classical geometry of general relativity has not yet been successfully unified with quantum mechanics in every regime."
-             data-copy-zh="相对论比牛顿力学提供更严格的结构，但广义相对论的经典几何尚未在所有情形下与量子力学成功统一。">
-            Relativity supplies stricter structure than Newtonian mechanics, but the classical geometry of general relativity has not yet been successfully unified with quantum mechanics in every regime.
+          <h2 data-copy-en="Relativity is exact within scope, but it is not the last word on every regime." data-copy-zh="相对论在适用范围内是精确的，但它并不是所有尺度上的最终答案。">Relativity is exact within scope, but it is not the last word on every regime.</h2>
+          <p data-copy-en="At low speeds and in weak, slowly varying fields, relativistic equations reduce to Newtonian ones. At the other extreme, we still lack a fully tested quantum theory of gravity. And neither relativity nor quantum entanglement lets us send controlled messages outside the light cone."
+             data-copy-zh="在低速、弱且缓慢变化的场中，相对论方程会化为牛顿方程；在另一端，我们仍缺少经过完整检验的量子引力理论。而且无论是相对论还是量子纠缠，都不能让我们把可控信息发到光锥之外。">
+            At low speeds and in weak, slowly varying fields, relativistic equations reduce to Newtonian ones. At the other extreme, we still lack a fully tested quantum theory of gravity. And neither relativity nor quantum entanglement lets us send controlled messages outside the light cone.
           </p>
         </header>
         <div class="limit-grid">
           <article class="limit">
             <h3 data-copy-en="The Newtonian limit" data-copy-zh="牛顿极限">The Newtonian limit</h3>
-            <p data-copy-en="At low speeds and in weak, slowly changing gravitational fields, relativistic equations reduce to Newtonian mechanics and gravity with extremely high accuracy."
-               data-copy-zh="在低速、弱且缓慢变化的引力场中，相对论方程会以极高精度化为牛顿力学与牛顿引力。">At low speeds and in weak, slowly changing gravitational fields, relativistic equations reduce to Newtonian mechanics and gravity with extremely high accuracy.</p>
+            <p data-copy-en="When β is small and gravitational potentials are weak, Newtonian mechanics and gravity give extraordinarily accurate approximations to the same underlying relativistic physics."
+               data-copy-zh="当 β 很小且引力势很弱时，牛顿力学与牛顿引力能以极高精度逼近同一套底层的相对论物理。">When β is small and gravitational potentials are weak, Newtonian mechanics and gravity give extraordinarily accurate approximations to the same underlying relativistic physics.</p>
             <a href="./newtonian.html" data-copy-en="Return to the orbital laboratory →" data-copy-zh="返回轨道实验室 →">Return to the orbital laboratory →</a>
           </article>
           <article class="limit">
-            <h3 data-copy-en="Quantum gravity" data-copy-zh="量子引力">Quantum gravity</h3>
-            <p data-copy-en="Near Planck-scale conditions or the deepest black-hole questions, treating spacetime as a smooth classical geometry is expected to fail. No experimentally confirmed complete quantum-gravity theory yet exists."
-               data-copy-zh="在普朗克尺度条件或最深层黑洞问题中，把时空视为光滑经典几何预计会失效。目前尚无经实验证实的完整量子引力理论。">Near Planck-scale conditions or the deepest black-hole questions, treating spacetime as a smooth classical geometry is expected to fail. No experimentally confirmed complete quantum-gravity theory yet exists.</p>
-            <a href="./quantum.html" data-copy-en="See how quantum prediction differs →" data-copy-zh="了解量子预测如何不同 →">See how quantum prediction differs →</a>
+            <h3 data-copy-en="Quantum gravity remains open" data-copy-zh="量子引力仍是开放问题">Quantum gravity remains open</h3>
+            <p data-copy-en="General relativity treats spacetime as a classical geometry. That description is expected to fail in sufficiently extreme quantum regimes, but no experimentally confirmed complete theory has replaced it."
+               data-copy-zh="广义相对论把时空当作经典几何来处理。在足够极端的量子条件下，这种描述预计会失效；但目前还没有经实验证实的完整替代理论。">General relativity treats spacetime as a classical geometry. That description is expected to fail in sufficiently extreme quantum regimes, but no experimentally confirmed complete theory has replaced it.</p>
+            <a href="./quantum.html" data-copy-en="Compare quantum prediction and uncertainty →" data-copy-zh="比较量子预测与不确定性 →">Compare quantum prediction and uncertainty →</a>
           </article>
           <article class="limit">
-            <h3 data-copy-en="Not faster-than-light messaging" data-copy-zh="不能超光速通信">Not faster-than-light messaging</h3>
-            <p data-copy-en="Relativity of simultaneity and quantum entanglement do not provide controllable signals faster than light. Causal influence remains constrained by light cones."
-               data-copy-zh="同时性的相对性与量子纠缠都不能提供可控的超光速信号；因果影响仍受光锥约束。">Relativity of simultaneity and quantum entanglement do not provide controllable signals faster than light. Causal influence remains constrained by light cones.</p>
-            <a href="../particle-zoo/index.html?tab=forces" data-copy-en="Compare field interactions →" data-copy-zh="比较场的相互作用 →">Compare field interactions →</a>
+            <h3 data-copy-en="No controllable faster-than-light messaging" data-copy-zh="不能进行可控的超光速通信">No controllable faster-than-light messaging</h3>
+            <p data-copy-en="Apparent superluminal motion, simultaneity shifts, and entanglement correlations do not create a channel for controllable signals outside the light cone."
+               data-copy-zh="表观超光速、同时性的变化以及纠缠关联，都不会提供一个能把可控信号送到光锥之外的通信通道。">Apparent superluminal motion, simultaneity shifts, and entanglement correlations do not create a channel for controllable signals outside the light cone.</p>
+            <a href="./electrodynamics.html" data-copy-en="Compare signal, phase, and group speeds →" data-copy-zh="比较信号速度、相速度与群速度 →">Compare signal, phase, and group speeds →</a>
           </article>
+        </div>
+        <div class="claim-sources">
+          <strong data-copy-en="Claim sources" data-copy-zh="依据来源">Claim sources</strong>
+          <ul>
+            <li><a href="https://www.einstein-online.info/en/category/elementary/special-relativity-elementary/" target="_blank" rel="noopener noreferrer">Einstein Online / Max Planck — Special relativity</a></li>
+            <li><a href="https://www.einstein-online.info/en/category/elementary/general-relativity-elementary/" target="_blank" rel="noopener noreferrer">Einstein Online / Max Planck — General relativity</a></li>
+          </ul>
         </div>
       </section>
 
       <section id="connections" class="topic-section">
         <header>
-          <h2 data-copy-en="Relativity connects the smallest clocks to the whole universe."
-              data-copy-zh="相对论把最小的时钟连接到整个宇宙。">Relativity connects the smallest clocks to the whole universe.</h2>
-          <p data-copy-en="GPS corrects relativistic clock rates. Particle accelerators require relativistic momentum. Cosmology uses general relativity to model an expanding universe. Gravitational-wave detectors measure spacetime disturbances smaller than a proton over kilometer scales."
-             data-copy-zh="GPS 修正相对论钟速；粒子加速器需要相对论动量；宇宙学用广义相对论描述膨胀宇宙；引力波探测器在公里尺度上测量远小于质子的长度变化。">
-            GPS corrects relativistic clock rates. Particle accelerators require relativistic momentum. Cosmology uses general relativity to model an expanding universe. Gravitational-wave detectors measure spacetime disturbances smaller than a proton over kilometer scales.
+          <h2 data-copy-en="Relativity links laboratory clocks, compact objects, and the observable universe." data-copy-zh="相对论把实验室中的钟、致密天体与可观测宇宙连接在一起。">Relativity links laboratory clocks, compact objects, and the observable universe.</h2>
+          <p data-copy-en="The same invariants organize accelerator tracks, GPS timing, jet beaming, black-hole environments, and the propagation of gravitational waves. Following those links is often the fastest way to see that relativity is a measurement framework, not a bag of paradoxes."
+             data-copy-zh="同一套不变量同时支配着加速器径迹、GPS 校时、喷流束射、黑洞环境以及引力波传播。顺着这些联系继续走，通常是理解“相对论是一套测量框架，而不是一袋悖论”的最快路径。">
+            The same invariants organize accelerator tracks, GPS timing, jet beaming, black-hole environments, and the propagation of gravitational waves. Following those links is often the fastest way to see that relativity is a measurement framework, not a bag of paradoxes.
           </p>
         </header>
         <div class="relation-map">
-          <a href="../big-bang/index.html"><strong data-copy-en="Cosmic history" data-copy-zh="宇宙历史">Cosmic history</strong><span data-copy-en="Follow an expanding spacetime from the hot early universe to structure formation and today’s measured acceleration." data-copy-zh="沿着膨胀时空，从炽热早期宇宙走到结构形成与今天测得的加速膨胀。">Follow an expanding spacetime from the hot early universe to structure formation and today’s measured acceleration.</span></a>
-          <a href="../particle-zoo/index.html?tab=lab"><strong data-copy-en="Relativistic particles" data-copy-zh="相对论性粒子">Relativistic particles</strong><span data-copy-en="See how collider detectors reconstruct near-light-speed tracks, energy, decays, and missing momentum." data-copy-zh="了解对撞机探测器如何重建近光速径迹、能量、衰变与缺失动量。">See how collider detectors reconstruct near-light-speed tracks, energy, decays, and missing momentum.</span></a>
-          <a href="./index.html#genealogy"><strong data-copy-en="Field genealogy" data-copy-zh="领域谱系">Field genealogy</strong><span data-copy-en="Trace relativity’s inheritance from mechanics and electrodynamics, then its influence on nuclear, particle, and astrophysical theory." data-copy-zh="追踪相对论如何继承力学与电动力学，又如何影响核物理、粒子物理与天体物理。">Trace relativity’s inheritance from mechanics and electrodynamics, then its influence on nuclear, particle, and astrophysical theory.</span></a>
+          <a href="../particle-zoo/index.html?tab=lab"><strong data-copy-en="Particle detectors" data-copy-zh="粒子探测器">Particle detectors</strong><span data-copy-en="See how collider experiments reconstruct energy, momentum, and missing transverse momentum for near-light-speed particles." data-copy-zh="了解对撞机实验如何为近光速粒子重建能量、动量与缺失横向动量。">See how collider experiments reconstruct energy, momentum, and missing transverse momentum for near-light-speed particles.</span></a>
+          <a href="./astrophysics.html#black-holes"><strong data-copy-en="Black holes and disks" data-copy-zh="黑洞与吸积盘">Black holes and disks</strong><span data-copy-en="Continue from relativistic jets to the compact engines that power them, and to the mass limits of white dwarfs and neutron stars." data-copy-zh="从相对论喷流继续走向为其供能的致密发动机，以及白矮星和中子星的质量极限。">Continue from relativistic jets to the compact engines that power them, and to the mass limits of white dwarfs and neutron stars.</span></a>
+          <a href="../big-bang/index.html"><strong data-copy-en="Cosmic spacetime" data-copy-zh="宇宙时空">Cosmic spacetime</strong><span data-copy-en="Follow how general relativity expands from local measurements to an evolving universe with horizons, relic radiation, and structure growth." data-copy-zh="继续看广义相对论如何从局域测量扩展到演化中的宇宙，包括视界、遗迹辐射与结构增长。">Follow how general relativity expands from local measurements to an evolving universe with horizons, relic radiation, and structure growth.</span></a>
         </div>
       </section>
+
       <section id="references" class="topic-section">
         <header>
-          <h2 data-copy-en="Official paths into relativity." data-copy-zh="沿官方资料继续探索相对论。">Official paths into relativity.</h2>
-          <p data-copy-en="These research-institute and collaboration sources connect the teaching diagrams to modern tests of spacetime."
-             data-copy-zh="这些研究机构与科学合作组资料，把教学示意连接到现代时空检验。">These research-institute and collaboration sources connect the teaching diagrams to modern tests of spacetime.</p>
+          <h2 data-copy-en="Source map for this page." data-copy-zh="本页来源图谱。">Source map for this page.</h2>
+          <p data-copy-en="Each entry below is used somewhere in the page-level claim lists above. The goal is not one giant bibliography, but a visible map from teaching claim to external source."
+             data-copy-zh="下列每条来源都在本页上方某处的“依据来源”列表中被实际引用。目标不是堆一个巨大的书目，而是把教学陈述和外部来源明确连接起来。">
+            Each entry below is used somewhere in the page-level claim lists above. The goal is not one giant bibliography, but a visible map from teaching claim to external source.
+          </p>
         </header>
-        <div class="reference-grid" data-reference-key="relativity"></div>
+        <div class="reference-grid">
+          <article class="reference-entry">
+            <strong>Einstein Online / Max Planck — Special relativity</strong>
+            <p data-copy-en="Frame transformations, invariant light speed, proper time, and causality." data-copy-zh="参考系变换、光速不变、固有时与因果结构。">Frame transformations, invariant light speed, proper time, and causality.</p>
+            <a href="https://www.einstein-online.info/en/category/elementary/special-relativity-elementary/" target="_blank" rel="noopener noreferrer" data-copy-en="Open source" data-copy-zh="打开来源">Open source</a>
+          </article>
+          <article class="reference-entry">
+            <strong>Einstein Online / Max Planck — General relativity</strong>
+            <p data-copy-en="Spacetime curvature, light deflection, gravity, and gravitational waves." data-copy-zh="时空曲率、光线偏折、引力与引力波。">Spacetime curvature, light deflection, gravity, and gravitational waves.</p>
+            <a href="https://www.einstein-online.info/en/category/elementary/general-relativity-elementary/" target="_blank" rel="noopener noreferrer" data-copy-en="Open source" data-copy-zh="打开来源">Open source</a>
+          </article>
+          <article class="reference-entry">
+            <strong>ESA/Hubble — Gravitational lensing</strong>
+            <p data-copy-en="Observable light deflection and lensing distortions in astronomy." data-copy-zh="天文学中可观测的光线偏折与透镜畸变。">Observable light deflection and lensing distortions in astronomy.</p>
+            <a href="https://esahubble.org/wordbank/gravitational-lensing/" target="_blank" rel="noopener noreferrer" data-copy-en="Open source" data-copy-zh="打开来源">Open source</a>
+          </article>
+          <article class="reference-entry">
+            <strong>LIGO — What are gravitational waves?</strong>
+            <p data-copy-en="The physical meaning of gravitational waves and how interferometers measure them." data-copy-zh="引力波的物理意义，以及干涉仪如何测量它们。">The physical meaning of gravitational waves and how interferometers measure them.</p>
+            <a href="https://www.ligo.caltech.edu/page/what-are-gw" target="_blank" rel="noopener noreferrer" data-copy-en="Open source" data-copy-zh="打开来源">Open source</a>
+          </article>
+          <article class="reference-entry">
+            <strong>Particle Data Group — Kinematics, cross-section formulae, and plots</strong>
+            <p data-copy-en="Relativistic energy–momentum relations and standard high-energy kinematics." data-copy-zh="相对论能量—动量关系与标准高能运动学。">Relativistic energy–momentum relations and standard high-energy kinematics.</p>
+            <a href="https://pdg.lbl.gov/2025/reviews/kinematics_and_cross_sections.html" target="_blank" rel="noopener noreferrer" data-copy-en="Open source" data-copy-zh="打开来源">Open source</a>
+          </article>
+          <article class="reference-entry">
+            <strong>NASA Imagine the Universe — Active galaxies</strong>
+            <p data-copy-en="Accretion disks, jet production, viewing-angle effects, and AGN context." data-copy-zh="吸积盘、喷流产生、视角效应以及活动星系核背景。">Accretion disks, jet production, viewing-angle effects, and AGN context.</p>
+            <a href="https://imagine.gsfc.nasa.gov/science/objects/active_galaxies1.html" target="_blank" rel="noopener noreferrer" data-copy-en="Open source" data-copy-zh="打开来源">Open source</a>
+          </article>
+          <article class="reference-entry">
+            <strong>ESA/Hubble — Active galactic nucleus</strong>
+            <p data-copy-en="Observed AGN classes, including blazars where the jet is pointed toward Earth." data-copy-zh="活动星系核的观测类别，包括喷流指向地球的耀变体。">Observed AGN classes, including blazars where the jet is pointed toward Earth.</p>
+            <a href="https://esahubble.org/wordbank/active-galactic-nucleus/" target="_blank" rel="noopener noreferrer" data-copy-en="Open source" data-copy-zh="打开来源">Open source</a>
+          </article>
+          <article class="reference-entry">
+            <strong>Rees (1966), Chandrasekhar (1931), Lattimer &amp; Prakash (2004)</strong>
+            <p data-copy-en="Peer-reviewed anchors for apparent superluminal motion, relativistic white-dwarf electrons, and neutron-star equation-of-state physics." data-copy-zh="作为表观超光速、白矮星中相对论性电子以及中子星物态方程物理的同行评审锚点。">Peer-reviewed anchors for apparent superluminal motion, relativistic white-dwarf electrons, and neutron-star equation-of-state physics.</p>
+            <a href="https://doi.org/10.1038/211468a0" target="_blank" rel="noopener noreferrer">Rees 1966</a>
+            <span aria-hidden="true"> · </span>
+            <a href="https://doi.org/10.1086/143324" target="_blank" rel="noopener noreferrer">Chandrasekhar 1931</a>
+            <span aria-hidden="true"> · </span>
+            <a href="https://doi.org/10.1126/science.1090720" target="_blank" rel="noopener noreferrer">Lattimer &amp; Prakash 2004</a>
+          </article>
+        </div>
       </section>
     </main>
 
     <footer class="topic-footer">
-      <span data-copy-en="The curved-grid picture is a teaching schematic; the eclipse plate is historical observational evidence." data-copy-zh="弯曲网格是教学示意；日食底片是历史观测证据。">The curved-grid picture is a teaching schematic; the eclipse plate is historical observational evidence.</span>
-      <span><a href="../LICENSES/THIRD-PARTY-MEDIA.md" data-copy-en="Media licenses" data-copy-zh="媒体许可">Media licenses</a> · <a href="./quantum.html" data-copy-en="Next field: quantum mechanics" data-copy-zh="下一领域：量子力学">Next field: quantum mechanics</a></span>
+      <span data-copy-en="This page labels teaching schematics, exact kinematic models, and broader qualitative bridges separately so the visitor can see what is literal, what is calculated, and what is simplified." data-copy-zh="本页把教学示意、精确运动学模型以及更宽泛的定性桥接分别标注，让读者能清楚分辨哪些是字面物理、哪些是精确计算、哪些是简化说明。">This page labels teaching schematics, exact kinematic models, and broader qualitative bridges separately so the visitor can see what is literal, what is calculated, and what is simplified.</span>
+      <span><a href="../LICENSES/THIRD-PARTY-MEDIA.md" data-copy-en="Media licenses" data-copy-zh="媒体许可">Media licenses</a> · <a href="./astrophysics.html" data-copy-en="Next field: astrophysics" data-copy-zh="下一领域：天体物理学">Next field: astrophysics</a></span>
     </footer>
   </div>
 
   <script src="formula.js"></script>
-
   <script src="common.js"></script>
-  <script src="references.js"></script>
   <script src="labs.js"></script>
+  <script src="relativity-deepening.js"></script>
 </body>
 </html>
