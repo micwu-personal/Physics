@@ -443,6 +443,14 @@ body[data-topic="relativity"] .jet-event.late {
   fill: #ffd166;
 }
 
+body[data-topic="relativity"] .jet-label {
+  fill: #f5f7ff;
+  font: 700 14px "JetBrains Mono", monospace;
+  paint-order: stroke;
+  stroke: rgba(5, 8, 22, 0.92);
+  stroke-width: 4px;
+}
+
 body[data-topic="relativity"] .jet-blob {
   fill: #ffd166;
 }

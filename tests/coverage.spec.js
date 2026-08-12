@@ -637,6 +637,107 @@ test('physics reduced-motion preference coverage', async ({ page }) => {
   });
 });
 
+test('physics relativity deepening coverage', async ({ page }) => {
+  await collectCoverage(page, 'physics-relativity-deepening', async () => {
+    await preparePage(page, '/physics/relativity.html', 'en');
+
+    await page.evaluate(() => {
+      const debug = window.__relativityDebug;
+      [1e9, 5e5, 5, 0.5, 5e-4, 1e-6].forEach(value => debug.formatEnergyMeV(value));
+      [1e9, 5e5, 500].forEach(value => debug.formatMomentumMeV(value));
+    });
+
+    await page.locator('[data-preset-particle="electron"][data-preset-mev="-5"]').click();
+    await page.locator('[data-preset-particle="electron"][data-preset-mev="-0.523"]').click();
+    await page.locator('[data-preset-particle="electron"][data-preset-mev="0.30103"]').click();
+    await page.locator('[data-particle="proton"]').click();
+    await page.locator('[data-preset-particle="proton"][data-preset-mev="0"]').click();
+    await page.locator('[data-preset-particle="proton"][data-preset-mev="3"]').click();
+    await page.locator('[data-preset-particle="proton"][data-preset-mev="6.845098"]').click();
+    await page.evaluate(() => window.__relativityDebug.setParticle('muon'));
+    await setRange(page.locator('#energySlider'), -1);
+    await page.evaluate(() => {
+      const debug = window.__relativityDebug;
+      const slider = document.getElementById('energySlider');
+      const render = (particle, logEnergy) => {
+        debug.setParticle(particle);
+        slider.value = String(logEnergy);
+        debug.renderEnergy();
+      };
+      render('electron', -5);
+      render('electron', -2);
+      render('electron', -0.523);
+      render('electron', 0.30103);
+      render('proton', 0);
+    });
+
+    await setRange(page.locator('#jetBetaControl'), 0.7);
+    await setRange(page.locator('#jetAngleControl'), 60);
+    await setRange(page.locator('#jetBetaControl'), 0.995);
+    await setRange(page.locator('#jetAngleControl'), 1);
+    await setRange(page.locator('#jetAngleControl'), 15);
+
+    await page.locator('[data-lang="zh-CN"]').click();
+    await setRange(page.locator('#jetBetaControl'), 0.7);
+    await setRange(page.locator('#jetAngleControl'), 60);
+    await page.evaluate(() => {
+      const debug = window.__relativityDebug;
+      const slider = document.getElementById('energySlider');
+      debug.setParticle('proton');
+      slider.value = '0';
+      debug.renderEnergy();
+      debug.setParticle('electron');
+      slider.value = '-2';
+      debug.renderEnergy();
+      slider.value = '-0.523';
+      debug.renderEnergy();
+      slider.value = '0.30103';
+      debug.renderEnergy();
+      debug.renderJetGeometry();
+    });
+    await page.locator('[data-lang="en"]').click();
+
+    await page.evaluate(() => {
+      window.__relativityDebug.renderEnergy();
+      window.__relativityDebug.renderJetGeometry();
+      window.__relativityDebug.stopLoop();
+      window.__relativityDebug.stopLoop();
+    });
+    await page.locator('.motion-toggle').click();
+    await page.evaluate(() => window.__relativityDebug.startLoop());
+    await page.locator('.motion-toggle').click();
+    await page.evaluate(() => {
+      window.__relativityDebug.startLoop();
+      Object.defineProperty(document, 'hidden', { configurable: true, get: () => true });
+      document.dispatchEvent(new Event('visibilitychange'));
+      Object.defineProperty(document, 'hidden', { configurable: true, get: () => false });
+      document.dispatchEvent(new Event('visibilitychange'));
+    });
+  });
+});
+
+test('physics relativity helper fallback coverage', async ({ page }) => {
+  await collectCoverage(page, 'physics-relativity-helper-fallback', async () => {
+    await preparePage(page, '/physics/newtonian.html', 'en');
+    await page.evaluate(() => {
+      window.__physicsLabsDebug.updateRelativityGeometry(0.5, 1.1547);
+    });
+  });
+});
+
+test('physics relativity deepening bootstrap branches coverage', async ({ page }) => {
+  await collectCoverage(page, 'physics-relativity-deepening-bootstrap', async () => {
+    await page.goto('/__health');
+    await page.setContent('<!doctype html><body data-topic="quantum"></body>');
+    await page.addScriptTag({ url: '/physics/relativity-deepening.js' });
+
+    await page.addInitScript(() => {
+      window.__relativityDebug = { seeded: true };
+    });
+    await preparePage(page, '/physics/relativity.html', 'en');
+  });
+});
+
 test('big-bang browser lifecycle coverage', async ({ page }) => {
   await collectCoverage(page, 'big-bang-lifecycle', async () => {
     await preparePage(page, '/big-bang/', 'en');
