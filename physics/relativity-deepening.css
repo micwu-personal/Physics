@@ -6,6 +6,21 @@ body[data-topic="relativity"] .relativity-hero-copy {
   align-items: flex-start;
 }
 
+body[data-topic="relativity"] .topic-hero > * {
+  min-inline-size: 0;
+  max-inline-size: 100%;
+}
+
+body[data-topic="relativity"] .topic-index {
+  box-sizing: border-box;
+  inline-size: 100%;
+  max-inline-size: 100%;
+  min-inline-size: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+}
+
 body[data-topic="relativity"] .hero-legend,
 body[data-topic="relativity"] .claim-sources ul {
   list-style: none;
@@ -85,6 +100,10 @@ body[data-topic="relativity"] .claim-sources li {
 
 body[data-topic="relativity"] .claim-sources a {
   color: #7ee8c5;
+}
+
+body[data-topic="relativity"] .topic-index a:focus-visible {
+  scroll-margin-inline: 12px;
 }
 
 body[data-topic="relativity"] .principle-diagrams,
@@ -443,6 +462,14 @@ body[data-topic="relativity"] .jet-event.late {
   fill: #ffd166;
 }
 
+body[data-topic="relativity"] .jet-label {
+  fill: #f5f7ff;
+  font: 700 14px "JetBrains Mono", monospace;
+  paint-order: stroke;
+  stroke: rgba(5, 8, 22, 0.92);
+  stroke-width: 4px;
+}
+
 body[data-topic="relativity"] .jet-blob {
   fill: #ffd166;
 }
@@ -523,6 +550,19 @@ body[data-topic="relativity"] .reference-entry a {
 }
 
 @media (max-width: 720px) {
+  body[data-topic="relativity"] .topic-index {
+    margin-inline: 0;
+    padding-inline: 8px;
+    border-inline: 1px solid var(--line);
+    border-radius: 12px;
+  }
+
+  body[data-topic="relativity"] .topic-index a {
+    padding: 7px 10px;
+    font-size: 11px;
+    white-space: nowrap;
+  }
+
   body[data-topic="relativity"] .hero-legend li {
     grid-template-columns: 1fr;
     gap: 0.45rem;

@@ -98,6 +98,45 @@
     return PhysicsUI.language === 'zh-CN' ? zh : en;
   }
 
+  function computeRelativityHeroGeometry(width, height) {
+    const lensX = width * 0.58;
+    const lensY = height * 0.58;
+    const radius = Math.min(width, height) * 0.11;
+    const source = { x: width * 0.09, y: height * 0.24 };
+    const observer = { x: width * 0.91, y: height * 0.3 };
+    const flatRay = [source, observer];
+    const clearance = Math.max(18, radius * 0.38);
+    const sigma = radius * 1.45;
+    const sampleCount = 160;
+    const lensT = (lensX - source.x) / (observer.x - source.x);
+    const baselineLensY = source.y + (observer.y - source.y) * lensT;
+    const closestApproachY = lensY - radius - clearance;
+    const deflectionAmplitude = Math.max(0, closestApproachY - baselineLensY);
+    const ray = [];
+    let minimumSurfaceClearance = Number.POSITIVE_INFINITY;
+
+    for (let index = 0; index <= sampleCount; index++) {
+      const t = index / sampleCount;
+      const x = source.x + (observer.x - source.x) * t;
+      const baselineY = source.y + (observer.y - source.y) * t;
+      const normalizedOffset = (x - lensX) / sigma;
+      const falloff = Math.exp(-(normalizedOffset * normalizedOffset));
+      const y = baselineY + deflectionAmplitude * falloff;
+      ray.push([x, y]);
+      minimumSurfaceClearance = Math.min(minimumSurfaceClearance, Math.hypot(x - lensX, y - lensY) - radius);
+    }
+
+    return {
+      clearance,
+      flatRay,
+      lens: { x: lensX, y: lensY, radius },
+      minimumSurfaceClearance,
+      observer,
+      ray,
+      source
+    };
+  }
+
   function drawNewtonHero(ctx, width, height, time) {
     clear(ctx, width, height);
     drawInstrumentGrid(ctx, width, height);
@@ -143,13 +182,14 @@
 
   function drawRelativityHero(ctx, width, height, time) {
     clear(ctx, width, height);
-    const lensX = width * 0.56;
-    const lensY = height * 0.54;
-    const radius = Math.min(width, height) * 0.11;
-    const source = { x: width * 0.12, y: height * 0.34 };
-    const observer = { x: width * 0.9, y: height * 0.46 };
-    const c1 = { x: width * 0.35, y: height * 0.34 };
-    const c2 = { x: width * 0.66, y: height * 0.62 };
+    const hero = computeRelativityHeroGeometry(width, height);
+    const {
+      flatRay,
+      lens: { x: lensX, y: lensY, radius },
+      observer,
+      ray,
+      source
+    } = hero;
 
     function warpPoint(x, y) {
       const dx = x - lensX;
@@ -187,27 +227,16 @@
     ctx.lineWidth = 2;
     ctx.setLineDash([8, 7]);
     ctx.beginPath();
-    ctx.moveTo(source.x, source.y);
-    ctx.lineTo(observer.x, observer.y);
+    ctx.moveTo(flatRay[0].x, flatRay[0].y);
+    ctx.lineTo(flatRay[1].x, flatRay[1].y);
     ctx.stroke();
     ctx.setLineDash([]);
 
-    const ray = [];
     ctx.strokeStyle = '#ffd166';
     ctx.lineWidth = 3;
     ctx.beginPath();
-    for (let index = 0; index <= 120; index++) {
-      const t = index / 120;
-      const omt = 1 - t;
-      const x = omt ** 3 * source.x +
-        3 * omt * omt * t * c1.x +
-        3 * omt * t * t * c2.x +
-        t ** 3 * observer.x;
-      const y = omt ** 3 * source.y +
-        3 * omt * omt * t * c1.y +
-        3 * omt * t * t * c2.y +
-        t ** 3 * observer.y;
-      ray.push([x, y]);
+    for (let index = 0; index < ray.length; index++) {
+      const [x, y] = ray[index];
       if (index === 0) ctx.moveTo(x, y);
       else ctx.lineTo(x, y);
     }
@@ -693,6 +722,16 @@
       ? (soundEnabled ? '关闭声音映射' : '开启声音映射')
       : (soundEnabled ? 'Mute sonification' : 'Enable sonification');
     audioToggle.setAttribute('aria-pressed', String(soundEnabled));
+  }
+
+  const physicsLabsDebug = window.__physicsLabsDebug || (window.__physicsLabsDebug = {});
+  Object.assign(physicsLabsDebug, {
+    computeRelativityHeroGeometry,
+    updateRelativityGeometry
+  });
+  if (topic === 'relativity') {
+    const relativityDebug = window.__relativityDebug || (window.__relativityDebug = {});
+    relativityDebug.computeHeroGeometry = computeRelativityHeroGeometry;
   }
 
   function resetLab() {

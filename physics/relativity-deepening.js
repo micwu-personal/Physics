@@ -29,6 +29,8 @@
   const jetDiagram = document.getElementById('jetDiagram');
   const jetEventA = document.getElementById('jetEventA');
   const jetEventB = document.getElementById('jetEventB');
+  const jetEventALabel = document.getElementById('jetEventALabel');
+  const jetEventBLabel = document.getElementById('jetEventBLabel');
   const jetPhotonA = document.getElementById('jetPhotonA');
   const jetPhotonB = document.getElementById('jetPhotonB');
   const jetApproachBlob = document.getElementById('jetApproachBlob');
@@ -38,6 +40,8 @@
   const skyCurrent = document.getElementById('skyCurrent');
   const jetApproachAxis = document.getElementById('jetApproachAxis');
   const jetRecedeAxis = document.getElementById('jetRecedeAxis');
+  const topicIndex = document.querySelector('.topic-index');
+  const topicIndexAnchors = [...topicIndex.querySelectorAll('a[href^="#"]')];
 
   const particles = {
     electron: { restMeV: 0.51099895 },
@@ -67,6 +71,10 @@
     if (value >= 1e6) return `${(value / 1e6).toFixed(value >= 1e8 ? 1 : 3).replace(/\.?0+$/, '')} TeV/c`;
     if (value >= 1e3) return `${(value / 1e3).toFixed(value >= 1e5 ? 1 : 3).replace(/\.?0+$/, '')} GeV/c`;
     return `${value.toFixed(value >= 100 ? 1 : 3).replace(/\.?0+$/, '')} MeV/c`;
+  }
+
+  function clamp(value, minimum, maximum) {
+    return Math.min(maximum, Math.max(minimum, value));
   }
 
   function setParticle(nextParticle) {
@@ -134,16 +142,116 @@
     element.setAttribute('y2', y2.toFixed(2));
   }
 
+  function setLabel(element, x, y, dx, dy, bounds) {
+    element.setAttribute('x', clamp(x + dx, bounds.left, bounds.right).toFixed(2));
+    element.setAttribute('y', clamp(y + dy, bounds.top, bounds.bottom).toFixed(2));
+  }
+
+  function computeJetModel(beta, thetaDeg, phase = state.jetPhase) {
+    const theta = thetaDeg * Math.PI / 180;
+    const sinTheta = Math.sin(theta);
+    const cosTheta = Math.cos(theta);
+    const gamma = 1 / Math.sqrt(1 - beta * beta);
+    const arrivalFactor = 1 - beta * cosTheta;
+    const dopplerApproach = 1 / (gamma * arrivalFactor);
+    const dopplerRecede = 1 / (gamma * (1 + beta * cosTheta));
+    const betaApp = beta * sinTheta / arrivalFactor;
+    const beamingRatio = Math.pow(dopplerApproach / dopplerRecede, 3);
+
+    const scene = {
+      coreX: 140,
+      coreY: 124,
+      lowerLeft: 84,
+      lowerRight: 636,
+      lowerY: 294,
+      observerX: 636,
+      observerY: 124,
+      upperBottom: 228,
+      upperLeft: 18,
+      upperRight: 702,
+      upperTop: 18
+    };
+    const axis = { x: cosTheta, y: -sinTheta };
+    const emissionGap = 1;
+    const emissionTimeA = 1.18;
+    const eventDistanceA = beta * emissionTimeA;
+    const eventDistanceB = beta * (emissionTimeA + emissionGap);
+    const approachBlobDistance = beta * (0.24 + phase * (emissionTimeA + emissionGap + 0.26));
+    const recedeBlobDistance = beta * (0.24 + phase * 1.1);
+    const approachRange = Math.max(eventDistanceB + 0.18, approachBlobDistance + 0.12);
+    const recedeRange = Math.max(0.72, recedeBlobDistance + 0.12);
+
+    const upwardRoom = (scene.coreY - scene.upperTop - 26) / Math.max(0.08, sinTheta);
+    const downwardRoom = (scene.upperBottom - scene.coreY - 26) / Math.max(0.08, sinTheta);
+    const rightRoom = (scene.upperRight - scene.coreX - 34) / Math.max(0.18, cosTheta);
+    const leftRoom = (scene.coreX - scene.upperLeft - 34) / Math.max(0.18, cosTheta);
+    const axisScale = Math.min(
+      165,
+      Math.max(52, Math.min(upwardRoom / approachRange, rightRoom / approachRange, downwardRoom / recedeRange, leftRoom / recedeRange))
+    );
+
+    const pointAlong = distance => ({
+      x: scene.coreX + axis.x * distance * axisScale,
+      y: scene.coreY + axis.y * distance * axisScale
+    });
+    const pointReceding = distance => ({
+      x: scene.coreX - axis.x * distance * axisScale,
+      y: scene.coreY - axis.y * distance * axisScale
+    });
+
+    const eventA = pointAlong(eventDistanceA);
+    const eventB = pointAlong(eventDistanceB);
+    const approachBlob = pointAlong(approachBlobDistance);
+    const recedeBlob = pointReceding(recedeBlobDistance);
+    const approachAxis = pointAlong(approachRange);
+    const recedeAxis = pointReceding(recedeRange);
+
+    const skyMargin = 28;
+    const skyScale = Math.min(118, (scene.lowerRight - scene.lowerLeft - skyMargin * 2) / Math.max(0.75, betaApp));
+    const skyA = scene.lowerLeft + skyMargin;
+    const skyB = skyA + betaApp * skyScale;
+    const skyCurrentX = clamp(skyA + phase * betaApp * skyScale, skyA, scene.lowerRight - skyMargin);
+
+    return {
+      arrivalFactor,
+      axisScale,
+      beamingRatio,
+      betaApp,
+      dopplerApproach,
+      dopplerRecede,
+      eventA,
+      eventB,
+      gamma,
+      scene,
+      skyA,
+      skyB,
+      skyCurrentX,
+      theta,
+      thetaDeg,
+      upperAxis: { approach: approachAxis, recede: recedeAxis },
+      upperBlobs: { approach: approachBlob, recede: recedeBlob }
+    };
+  }
+
   function renderJetGeometry() {
     const beta = Number(jetBetaControl.value);
-    const thetaDeg = Number(jetAngleControl.value);
-    const theta = thetaDeg * Math.PI / 180;
-    const gamma = 1 / Math.sqrt(1 - beta * beta);
-    const dopplerApproach = 1 / (gamma * (1 - beta * Math.cos(theta)));
-    const dopplerRecede = 1 / (gamma * (1 + beta * Math.cos(theta)));
-    const betaApp = beta * Math.sin(theta) / (1 - beta * Math.cos(theta));
-    const arrivalFactor = 1 - beta * Math.cos(theta);
-    const beamingRatio = Math.pow(dopplerApproach / dopplerRecede, 3);
+    const model = computeJetModel(beta, Number(jetAngleControl.value));
+    const {
+      arrivalFactor,
+      beamingRatio,
+      betaApp,
+      dopplerApproach,
+      gamma,
+      scene,
+      skyA,
+      skyB,
+      skyCurrentX,
+      thetaDeg,
+      upperAxis,
+      upperBlobs,
+      eventA,
+      eventB
+    } = model;
 
     jetBetaOutput.textContent = `${beta.toFixed(3)} c`;
     jetAngleOutput.textContent = `${thetaDeg}\u00B0`;
@@ -152,7 +260,7 @@
     jetApparent.textContent = `${betaApp.toFixed(2)} c`;
     jetArrivalGap.textContent = `${arrivalFactor.toFixed(3)} \u00D7 \u0394t_emit`;
 
-    const normalizedApproach = Math.min(100, 100 * Math.pow(dopplerApproach, 3) / Math.max(1, Math.pow(dopplerApproach, 3)));
+    const normalizedApproach = 100;
     const normalizedRecede = Math.max(2, 100 / Math.max(1, beamingRatio));
     jetApproachBrightness.style.width = `${normalizedApproach}%`;
     jetRecedeBrightness.style.width = `${normalizedRecede}%`;
@@ -166,48 +274,35 @@
       : (isZh()
         ? '在这个速度与视角下，投影效应还不足以把表观横向速度推到 c 以上。'
         : 'At this speed and viewing angle, projection does not compress the arrival interval enough to push the apparent transverse speed above c.');
+    setPoint(jetEventA, eventA.x, eventA.y);
+    setPoint(jetEventB, eventB.x, eventB.y);
+    setLine(jetPhotonA, eventA.x, eventA.y, scene.observerX, scene.observerY);
+    setLine(jetPhotonB, eventB.x, eventB.y, scene.observerX, scene.observerY);
+    setLabel(jetEventALabel, eventA.x, eventA.y, 12, -12, {
+      bottom: scene.upperBottom - 10,
+      left: scene.upperLeft + 12,
+      right: scene.upperRight - 12,
+      top: scene.upperTop + 12
+    });
+    setLabel(jetEventBLabel, eventB.x, eventB.y, 12, -12, {
+      bottom: scene.upperBottom - 10,
+      left: scene.upperLeft + 12,
+      right: scene.upperRight - 12,
+      top: scene.upperTop + 12
+    });
 
-    const coreX = 140;
-    const coreY = 124;
-    const observerX = 636;
-    const observerY = 124;
-    const upperJetLength = 380;
-    const lowerStart = 360;
-    const unit = 116;
+    setPoint(skyEventA, skyA, scene.lowerY);
+    setPoint(skyEventB, skyB, scene.lowerY);
+    setPoint(skyCurrent, skyCurrentX, scene.lowerY);
+    setPoint(jetApproachBlob, upperBlobs.approach.x, upperBlobs.approach.y);
+    setPoint(jetRecedeBlob, upperBlobs.recede.x, upperBlobs.recede.y);
 
-    const axisX = Math.cos(theta);
-    const axisY = -Math.sin(theta);
-    const aDistance = 1.1 * unit;
-    const bDistance = aDistance + beta * unit;
-
-    const ax = coreX + axisX * aDistance;
-    const ay = coreY + axisY * aDistance;
-    const bx = coreX + axisX * bDistance;
-    const by = coreY + axisY * bDistance;
-    setPoint(jetEventA, ax, ay);
-    setPoint(jetEventB, bx, by);
-    setLine(jetPhotonA, ax, ay, observerX, observerY);
-    setLine(jetPhotonB, bx, by, observerX, observerY);
-
-    const skyScale = 150;
-    const skyA = lowerStart;
-    const skyB = skyA + beta * Math.sin(theta) * skyScale;
-    setPoint(skyEventA, skyA, 294);
-    setPoint(skyEventB, skyB, 294);
-
-    const approachBlobDistance = 36 + state.jetPhase * upperJetLength;
-    const approachBlobX = coreX + axisX * approachBlobDistance;
-    const approachBlobY = coreY + axisY * approachBlobDistance;
-    const recedeBlobX = coreX - axisX * (24 + state.jetPhase * 118);
-    const recedeBlobY = coreY - axisY * (24 + state.jetPhase * 118);
-    setPoint(jetApproachBlob, approachBlobX, approachBlobY);
-    setPoint(jetRecedeBlob, recedeBlobX, recedeBlobY);
-    setPoint(skyCurrent, skyA + state.jetPhase * beta * Math.sin(theta) * skyScale * 2.15, 294);
-
-    jetApproachAxis.setAttribute('x2', (coreX + axisX * upperJetLength).toFixed(2));
-    jetApproachAxis.setAttribute('y2', (coreY + axisY * upperJetLength).toFixed(2));
-    jetRecedeAxis.setAttribute('x2', (coreX - axisX * 170).toFixed(2));
-    jetRecedeAxis.setAttribute('y2', (coreY - axisY * 170).toFixed(2));
+    jetApproachAxis.setAttribute('x2', upperAxis.approach.x.toFixed(2));
+    jetApproachAxis.setAttribute('y2', upperAxis.approach.y.toFixed(2));
+    jetRecedeAxis.setAttribute('x2', upperAxis.recede.x.toFixed(2));
+    jetRecedeAxis.setAttribute('y2', upperAxis.recede.y.toFixed(2));
+    jetDiagram.dataset.betaApp = betaApp.toFixed(3);
+    jetDiagram.dataset.arrivalFactor = arrivalFactor.toFixed(3);
   }
 
   function frame(now) {
@@ -231,6 +326,17 @@
     renderJetGeometry();
   }
 
+  window.__relativityDebug = {
+    computeJetModel,
+    formatEnergyMeV,
+    formatMomentumMeV,
+    renderEnergy,
+    renderJetGeometry,
+    setParticle,
+    startLoop,
+    stopLoop
+  };
+
   particleButtons.forEach(button => {
     button.addEventListener('click', () => setParticle(button.dataset.particle));
   });
@@ -242,6 +348,11 @@
     });
   });
   energySlider.addEventListener('input', renderEnergy);
+  topicIndexAnchors.forEach(anchor => {
+    anchor.addEventListener('focus', () => {
+      anchor.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+    });
+  });
 
   [jetBetaControl, jetAngleControl].forEach(control => {
     control.addEventListener('input', renderJetGeometry);
