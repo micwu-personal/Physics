@@ -24,7 +24,12 @@ function resolveRequest(url) {
   }
 }
 
-createServer((request, response) => {
+const server = createServer((request, response) => {
+  request.on('error', () => {
+    response.destroy();
+  });
+  response.on('error', () => {});
+
   if (request.url === '/__health') {
     response.writeHead(200, { 'content-type': 'text/plain' });
     response.end('ok');
@@ -48,11 +53,26 @@ createServer((request, response) => {
       'x-content-type-options': 'nosniff'
     });
     if (request.method === 'HEAD') response.end();
-    else createReadStream(file).pipe(response);
+    else {
+      const stream = createReadStream(file);
+      stream.on('error', () => {
+        if (!response.headersSent) {
+          response.writeHead(500, { 'content-type': 'text/plain; charset=utf-8' });
+        }
+        if (!response.writableEnded) response.end('Read error');
+      });
+      stream.pipe(response);
+    }
   } catch {
     response.writeHead(404, { 'content-type': 'text/plain; charset=utf-8' });
     response.end('Not found');
   }
-}).listen(port, '127.0.0.1', () => {
+});
+
+server.on('clientError', (_, socket) => {
+  socket.destroy();
+});
+
+server.listen(port, '127.0.0.1', () => {
   console.log(`Physics test server listening on http://127.0.0.1:${port}`);
 });

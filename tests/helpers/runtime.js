@@ -84,6 +84,16 @@ export async function setLanguage(page, language) {
   }, language);
 }
 
+export async function setMotionPreference(page, motionPreference) {
+  await page.addInitScript(preference => {
+    try {
+      localStorage.setItem('physics.motion', preference);
+    } catch {
+      // Init scripts also run on opaque origins (about:blank) that deny storage.
+    }
+  }, motionPreference);
+}
+
 export async function blockExternalAssets(page) {
   await page.route(/^https?:\/\//, route => {
     const url = new URL(route.request().url());
@@ -95,7 +105,9 @@ export async function blockExternalAssets(page) {
 export async function preparePage(page, path, language, options = {}) {
   await installDeterminism(page);
   if (options.probe) await installRuntimeProbe(page);
+  if (options.reducedMotion) await page.emulateMedia({ reducedMotion: options.reducedMotion });
   await setLanguage(page, language);
+  if (options.motionPreference) await setMotionPreference(page, options.motionPreference);
   await blockExternalAssets(page);
   await page.goto(path, { waitUntil: 'domcontentloaded' });
   await page.waitForLoadState('load');

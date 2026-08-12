@@ -1,0 +1,195 @@
+body[data-topic="astrophysics"] .topic-hero {
+  min-height: 0;
+  align-items: start;
+}
+
+body[data-topic="astrophysics"] .hero-instrument.focus-instrument {
+  min-height: 0;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  background:
+    radial-gradient(circle at 22% 18%, rgba(255, 209, 102, 0.18), transparent 34%),
+    radial-gradient(circle at 78% 28%, rgba(0, 212, 255, 0.16), transparent 36%),
+    #050914;
+}
+
+body[data-topic="astrophysics"] .focus-instrument > canvas {
+  display: block;
+  width: 100%;
+  height: clamp(240px, 34svh, 340px);
+}
+
+.focus-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 22px 24px 24px;
+  border-top: 1px solid var(--line);
+  background: rgba(7, 11, 24, 0.92);
+}
+
+.focus-heading {
+  display: grid;
+  gap: 8px;
+}
+
+.focus-heading strong {
+  color: var(--paper);
+}
+
+.focus-heading p,
+.focus-readout {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.66;
+}
+
+.focus-readout {
+  padding: 12px 14px;
+  border: 1px solid color-mix(in srgb, var(--topic) 24%, var(--line));
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.02);
+  font-size: 1rem;
+}
+
+.claim-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin: 14px 0 0;
+}
+
+.claim-label {
+  color: var(--muted);
+  font: 600 11px/1.4 "JetBrains Mono", monospace;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.claim-chip {
+  min-height: 34px;
+  display: inline-flex;
+  align-items: center;
+  padding: 7px 11px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--paper);
+  background: var(--enamel);
+  text-decoration: none;
+  font: 600 0.78rem/1.3 "JetBrains Mono", monospace;
+}
+
+.claim-chip:hover {
+  border-color: var(--topic);
+}
+
+.astro-stage {
+  min-height: clamp(320px, 42vw, 430px);
+}
+
+.astro-mini-grid {
+  margin-top: 30px;
+}
+
+.mode-switch {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.mode-chip {
+  min-height: 40px;
+  padding: 0 14px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--muted);
+  background: var(--enamel);
+  font: 600 0.82rem/1 "JetBrains Mono", monospace;
+}
+
+.mode-chip:hover {
+  border-color: var(--topic);
+}
+
+.mode-chip[aria-pressed="true"],
+.mode-chip.active {
+  border-color: color-mix(in srgb, var(--topic) 68%, transparent);
+  color: var(--paper);
+  background: color-mix(in srgb, var(--topic) 14%, var(--enamel));
+}
+
+.compact-object-lab {
+  margin-top: 30px;
+}
+
+.compact-range-note {
+  margin-top: 12px;
+}
+
+.classification .claim-links,
+.derivation .claim-links {
+  margin-top: 18px;
+}
+
+body[data-topic="astrophysics"] .reference-grid {
+  gap: 14px;
+}
+
+body[data-topic="astrophysics"] .reference-entry a {
+  min-height: 0;
+  gap: 0;
+}
+
+body[data-topic="astrophysics"] .reference-entry span {
+  color: var(--topic);
+  font: 600 0.74rem/1.35 "JetBrains Mono", monospace;
+}
+
+body[data-topic="astrophysics"] .reference-entry strong {
+  margin-top: 12px;
+}
+
+body[data-topic="astrophysics"] .reference-entry span:last-child {
+  margin-top: 12px;
+  color: var(--muted);
+  font: 400 0.95rem/1.62 "Space Grotesk", "Noto Sans SC", sans-serif;
+}
+
+@media (max-width: 1020px) {
+  body[data-topic="astrophysics"] .focus-instrument > canvas {
+    height: clamp(220px, 32svh, 300px);
+  }
+
+  .astro-stage {
+    min-height: 300px;
+  }
+}
+
+@media (max-width: 760px) {
+  .focus-panel {
+    gap: 14px;
+    padding: 18px;
+  }
+
+  .focus-instrument > canvas {
+    height: min(30svh, 240px);
+  }
+
+  .claim-label {
+    width: 100%;
+  }
+
+  .mode-switch {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .mode-chip {
+    width: 100%;
+  }
+
+  .astro-stage {
+    min-height: 280px;
+  }
+}

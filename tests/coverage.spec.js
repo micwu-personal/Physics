@@ -573,6 +573,115 @@ for (const [id, path] of [
   });
 }
 
+test('physics astro helper fallback coverage', async ({ page }) => {
+  await collectCoverage(page, 'physics-astro-helper-fallbacks', async () => {
+    await installDeterminism(page);
+    await setLanguage(page, 'en');
+    await blockExternalAssets(page);
+    await page.addInitScript(() => {
+      window.__enableAstroTestHooks = true;
+    });
+    await page.goto('/physics/astrophysics.html');
+    await page.waitForLoadState('load');
+    await page.waitForTimeout(300);
+    const result = await page.evaluate(() => {
+      const hooks = window.__astroTestHooks;
+      const fallbackPalette = hooks.readPalette({ getPropertyValue: () => '   ' });
+      const missingScene = hooks.setup('missing-canvas-id', () => {});
+
+      const readout = document.getElementById('collapseReadout');
+      const parent = readout.parentNode;
+      const sibling = readout.nextSibling;
+      readout.remove();
+      hooks.renderCollapseReadout();
+      if (sibling) parent.insertBefore(readout, sibling);
+      else parent.appendChild(readout);
+
+      Object.defineProperty(window, 'devicePixelRatio', { configurable: true, get: () => 0 });
+      const resized = hooks.resizeById('collapseCanvas');
+      const missingResize = hooks.resizeById('missing-canvas-id');
+      hooks.handleResizeEntries([{ target: document.body }]);
+      const whiteDwarfRadius = hooks.whiteDwarfRadiusKm(1.44);
+      const fallbackSpec = hooks.compactSpec('mystery-mode');
+      const fallbackMode = hooks.normalizeCompactMode('mystery-mode');
+      const englishSnapshot = hooks.limitSnapshot(1.3);
+      const englishWhiteDwarf = hooks.compactDetailSnapshot('white-dwarf', 1.45);
+      const englishNeutronStar = hooks.compactDetailSnapshot('neutron-star', 2.4);
+      const englishWhiteDwarfThreshold = hooks.compactThresholdMarker('white-dwarf', 1.45);
+      const englishNeutronThreshold = hooks.compactThresholdMarker('neutron-star', 2.4);
+      const fallbackThresholdX = hooks.compactThresholdX(17, null, mass => mass * 2);
+      const projectedThresholdX = hooks.compactThresholdX(17, englishWhiteDwarfThreshold, mass => mass * 2);
+      const compactButtons = [...document.querySelectorAll('[data-compact-mode]')];
+      for (const button of compactButtons) button.setAttribute('aria-pressed', 'false');
+      const noPressedMode = hooks.selectedCompactMode();
+      compactButtons[0].setAttribute('aria-pressed', 'true');
+      document.querySelector('[data-lang="zh-CN"]').click();
+      const chineseSnapshot = hooks.limitSnapshot(1.3);
+      const chineseWhiteDwarf = hooks.compactDetailSnapshot('white-dwarf', 1.45);
+      const chineseNeutronStar = hooks.compactDetailSnapshot('neutron-star', 2.4);
+      const chineseWhiteDwarfThreshold = hooks.compactThresholdMarker('white-dwarf', 1.45);
+      const chineseNeutronThreshold = hooks.compactThresholdMarker('neutron-star', 2.4);
+      hooks.drawCompactForTest('white-dwarf', 1.45);
+      hooks.drawCompactForTest('neutron-star', 2.4);
+      hooks.drawCompactThresholdForTest('white-dwarf', 1.45);
+      hooks.drawCompactThresholdForTest('neutron-star', 2.4);
+
+      return {
+        chineseBridge: chineseSnapshot.bridge,
+        chineseNeutronKnown: chineseNeutronStar.known,
+        chineseNeutronThreshold: chineseNeutronThreshold.label,
+        chineseWhiteDwarfThreshold: chineseWhiteDwarfThreshold.label,
+        chineseWhiteDwarfRadius: chineseWhiteDwarf.radius,
+        englishBridge: englishSnapshot.bridge,
+        englishNeutronKnown: englishNeutronStar.known,
+        englishNeutronThreshold: englishNeutronThreshold.label,
+        englishWhiteDwarfThreshold: englishWhiteDwarfThreshold.label,
+        englishWhiteDwarfRadius: englishWhiteDwarf.radius,
+        fallbackThresholdX,
+        fallbackMode,
+        fallbackPalette,
+        fallbackSpec,
+        missingScene,
+        missingResize,
+        noPressedMode,
+        projectedThresholdX,
+        resized,
+        whiteDwarfRadius
+      };
+    });
+
+    expect(result.fallbackPalette).toEqual({
+      paper: '#eef2ff',
+      muted: '#aeb8d8',
+      gold: '#ffd166',
+      green: '#7ee8c5',
+      cyan: '#00d4ff',
+      pink: '#ff6b9d',
+      violet: '#7c5cff',
+      deep: '#090d1d'
+    });
+    expect(result.missingScene).toBeNull();
+    expect(result.resized).toBe(true);
+    expect(result.missingResize).toBe(false);
+    expect(result.whiteDwarfRadius).toBe(0);
+    expect(result.fallbackSpec.min).toBe(0.45);
+    expect(result.fallbackMode).toBe('white-dwarf');
+    expect(result.fallbackThresholdX).toBe(17);
+    expect(result.noPressedMode).toBe('white-dwarf');
+    expect(result.projectedThresholdX).toBeCloseTo(2.84, 6);
+    expect(result.englishBridge).toContain('Chandrasekhar mass');
+    expect(result.chineseBridge).toContain('钱德拉塞卡极限');
+    expect(result.englishWhiteDwarfThreshold).toBe('electron support ends here');
+    expect(result.chineseWhiteDwarfThreshold).toBe('电子支撑到此为止');
+    expect(result.englishWhiteDwarfRadius).toContain('no stable cold white-dwarf radius');
+    expect(result.chineseWhiteDwarfRadius).toContain('没有稳定的冷白矮星半径');
+    expect(result.englishNeutronThreshold).toBe('likely collapse-threshold zone');
+    expect(result.chineseNeutronThreshold).toBe('可能的塌缩阈值区');
+    expect(result.englishNeutronKnown).toContain('thermal support or rotation can only delay it temporarily');
+    expect(result.chineseNeutronKnown).toContain('热支撑或自转只能暂时推迟塌缩');
+  });
+});
+
 test('physics reference renderer fallback and failure coverage', async ({ page }) => {
   await collectCoverage(page, 'physics-reference-branches', async () => {
     await preparePage(page, '/physics/entropy-information.html', 'en');
@@ -634,6 +743,110 @@ test('physics reduced-motion preference coverage', async ({ page }) => {
     await page.waitForTimeout(300);
     await page.locator('.motion-toggle').click();
     await page.waitForTimeout(300);
+  });
+});
+
+test('physics relativity deepening coverage', async ({ page }) => {
+  await collectCoverage(page, 'physics-relativity-deepening', async () => {
+    await preparePage(page, '/physics/relativity.html', 'en');
+
+    await page.evaluate(() => {
+      const debug = window.__relativityDebug;
+      [1e9, 5e5, 5, 0.5, 5e-4, 1e-6].forEach(value => debug.formatEnergyMeV(value));
+      [1e9, 5e5, 500].forEach(value => debug.formatMomentumMeV(value));
+    });
+
+    await page.locator('[data-preset-particle="electron"][data-preset-mev="-5"]').click();
+    await page.locator('[data-preset-particle="electron"][data-preset-mev="-0.523"]').click();
+    await page.locator('[data-preset-particle="electron"][data-preset-mev="0.30103"]').click();
+    await page.locator('[data-particle="proton"]').click();
+    await page.locator('[data-preset-particle="proton"][data-preset-mev="0"]').click();
+    await page.locator('[data-preset-particle="proton"][data-preset-mev="3"]').click();
+    await page.locator('[data-preset-particle="proton"][data-preset-mev="6.845098"]').click();
+    await page.evaluate(() => {
+      document.querySelectorAll('.topic-index a[href^="#"]').forEach(anchor => anchor.focus());
+    });
+    await page.evaluate(() => window.__relativityDebug.setParticle('muon'));
+    await setRange(page.locator('#energySlider'), -1);
+    await page.evaluate(() => {
+      const debug = window.__relativityDebug;
+      const slider = document.getElementById('energySlider');
+      const render = (particle, logEnergy) => {
+        debug.setParticle(particle);
+        slider.value = String(logEnergy);
+        debug.renderEnergy();
+      };
+      render('electron', -5);
+      render('electron', -2);
+      render('electron', -0.523);
+      render('electron', 0.30103);
+      render('proton', 0);
+    });
+
+    await setRange(page.locator('#jetBetaControl'), 0.7);
+    await setRange(page.locator('#jetAngleControl'), 60);
+    await setRange(page.locator('#jetBetaControl'), 0.995);
+    await setRange(page.locator('#jetAngleControl'), 1);
+    await setRange(page.locator('#jetAngleControl'), 15);
+
+    await page.locator('[data-lang="zh-CN"]').click();
+    await setRange(page.locator('#jetBetaControl'), 0.7);
+    await setRange(page.locator('#jetAngleControl'), 60);
+    await page.evaluate(() => {
+      const debug = window.__relativityDebug;
+      const slider = document.getElementById('energySlider');
+      debug.setParticle('proton');
+      slider.value = '0';
+      debug.renderEnergy();
+      debug.setParticle('electron');
+      slider.value = '-2';
+      debug.renderEnergy();
+      slider.value = '-0.523';
+      debug.renderEnergy();
+      slider.value = '0.30103';
+      debug.renderEnergy();
+      debug.renderJetGeometry();
+    });
+    await page.locator('[data-lang="en"]').click();
+
+    await page.evaluate(() => {
+      window.__relativityDebug.renderEnergy();
+      window.__relativityDebug.renderJetGeometry();
+      window.__relativityDebug.stopLoop();
+      window.__relativityDebug.stopLoop();
+    });
+    await page.locator('.motion-toggle').click();
+    await page.evaluate(() => window.__relativityDebug.startLoop());
+    await page.locator('.motion-toggle').click();
+    await page.evaluate(() => {
+      window.__relativityDebug.startLoop();
+      Object.defineProperty(document, 'hidden', { configurable: true, get: () => true });
+      document.dispatchEvent(new Event('visibilitychange'));
+      Object.defineProperty(document, 'hidden', { configurable: true, get: () => false });
+      document.dispatchEvent(new Event('visibilitychange'));
+    });
+  });
+});
+
+test('physics relativity helper fallback coverage', async ({ page }) => {
+  await collectCoverage(page, 'physics-relativity-helper-fallback', async () => {
+    await preparePage(page, '/physics/newtonian.html', 'en');
+    await page.evaluate(() => {
+      window.__physicsLabsDebug.updateRelativityGeometry(0.5, 1.1547);
+    });
+  });
+});
+
+test('physics relativity deepening bootstrap branches coverage', async ({ page }) => {
+  await collectCoverage(page, 'physics-relativity-deepening-bootstrap', async () => {
+    await page.goto('/__health');
+    await page.setContent('<!doctype html><body data-topic="quantum"></body>');
+    await page.addScriptTag({ url: '/physics/relativity-deepening.js' });
+
+    await page.addInitScript(() => {
+      window.__relativityDebug = { seeded: true };
+    });
+    await preparePage(page, '/physics/relativity.html', 'en');
   });
 });
 
@@ -931,6 +1144,30 @@ test('periodic-table unavailable observer and media APIs coverage', async ({ pag
       await page.waitForTimeout(50);
       await page.evaluate(() => window.__deliverVoices());
       await page.waitForTimeout(100);
+    });
+  });
+
+  test('periodic-table branch completion coverage', async ({ page }) => {
+    await collectCoverage(page, 'periodic-branch-completion', async () => {
+      await page.addInitScript(installSpeechVoices, 80);
+      await page.addInitScript(() => {
+        const nativeSetTimeout = window.setTimeout;
+        window.setTimeout = (callback, delay, ...args) =>
+          nativeSetTimeout(callback, Math.min(delay, 20), ...args);
+      });
+      await preparePage(page, '/periodic-table/', 'zh-CN');
+      await page.evaluate(() => {
+        window.__B1.open();
+        window.__B1.close();
+        // Cover the nuclide resize guard after the panel exists but is not active.
+        window.dispatchEvent(new Event('resize'));
+      });
+      await page.locator('.pt-frow .row-speak').first().click();
+      await page.waitForTimeout(80);
+      await page.locator('#tlToggleBtn').click();
+      await page.locator('#tlPlay').click();
+      await page.locator('.lang-pill[data-lang="en"]').click();
+      await page.waitForTimeout(80);
     });
   });
 

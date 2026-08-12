@@ -75,6 +75,10 @@ out = out.replace(/\.\.\/assets\/brand\/favicon\.svg/g, `data:image/svg+xml;base
 out = inlineFonts(out);
 out = out.replace(/href="\.\.\/(?!https?:)/g, 'href="../../');
 
+function withBrandHomeHref(source, href) {
+  return source.replace('<a class="brand-home" href="./index.html"', `<a class="brand-home" href="${href}"`);
+}
+
 // Strip any remaining external CDN links so the file works fully offline.
 out = out.replace(/<link\s+rel="preconnect"[^>]*>\s*/g, '');
 out = out.replace(/<link\s+href="https:\/\/fonts\.googleapis\.com[^"]*"\s+rel="stylesheet"[^>]*>\s*/g, '');
@@ -93,8 +97,8 @@ out = out.replace(/^<!DOCTYPE html>/i, `<!DOCTYPE html>\n${banner}`);
 
 const outPath1 = path.join(OUT_DIR, 'index.html');
 const outPath2 = path.join(OUT_DIR, 'periodic-table.html');
-fs.writeFileSync(outPath1, out);
-fs.writeFileSync(outPath2, out);
+fs.writeFileSync(outPath1, withBrandHomeHref(out, './index.html'));
+fs.writeFileSync(outPath2, withBrandHomeHref(out, './periodic-table.html'));
 
 const sizeKB = (Buffer.byteLength(out, 'utf8') / 1024).toFixed(1);
 console.log(`✓ Wrote ${outPath1} (${sizeKB} KB)`);

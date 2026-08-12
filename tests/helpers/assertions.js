@@ -37,7 +37,7 @@ export async function assertInternalLinks(page) {
       .filter(href => href.startsWith(location.origin) && !href.includes('#'))
   );
   for (const href of [...new Set(links)]) {
-    const response = await page.request.get(href);
+    const response = await page.request.fetch(href, { method: 'HEAD' });
     expect(response.status(), `internal link ${href}`).toBeLessThan(400);
   }
 }

@@ -246,10 +246,16 @@ for (const group of allReferenceGroups) {
 
 const mobileIndex=fs.readFileSync(path.join(root,'mobile','index.html'),'utf8');
 const mobilePortable=fs.readFileSync(path.join(root,'mobile','particle-zoo.html'),'utf8');
-assert.equal(mobileIndex,mobilePortable,'mobile bundles must be byte-identical');
+assert.ok(mobileIndex.includes('<a class="brand-home" href="./index.html"'), 'index bundle brand home should point to mobile/index.html');
+assert.ok(mobilePortable.includes('<a class="brand-home" href="./particle-zoo.html"'), 'portable alias brand home should point to the standalone alias');
+assert.equal(
+  mobileIndex,
+  mobilePortable.replace('<a class="brand-home" href="./particle-zoo.html"', '<a class="brand-home" href="./index.html"'),
+  'portable alias should differ only by its self-home href'
+);
 for (const marker of ['globalThis.PhysicsCore','globalThis.ParticleZooReferences','rel="noopener noreferrer"']) {
   assert.ok(mobileIndex.includes(marker),`mobile bundle missing ${marker}`);
 }
 for (const source of Object.values(refs.SOURCES)) assert.ok(mobileIndex.includes(source.url),`bundle missing ${source.url}`);
 
-console.log(`Validated ${refs.particleIds.length} particles, ${Object.keys(core.DECAY_TABLE).length} decay tables, ${Object.keys(refs.SOURCES).length} primary/official sources, locale parity, physics invariants, and byte-identical mobile bundles.`);
+console.log(`Validated ${refs.particleIds.length} particles, ${Object.keys(core.DECAY_TABLE).length} decay tables, ${Object.keys(refs.SOURCES).length} primary/official sources, locale parity, physics invariants, and alias-safe mobile bundles.`);

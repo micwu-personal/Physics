@@ -86,6 +86,10 @@ out = out.replace(/\.\.\/assets\/brand\/favicon\.svg/g, `data:image/svg+xml;base
 out = inlineFonts(out);
 out = out.replace(/href="\.\.\/(?!https?:)/g, 'href="../../');
 
+function withBrandHomeHref(source, href) {
+  return source.replace('<a class="brand-home" href="./index.html"', `<a class="brand-home" href="${href}"`);
+}
+
 // 3) Inject a small banner comment at the top
 const banner =
 `<!--
@@ -100,8 +104,8 @@ out = out.replace(/^<!DOCTYPE html>/i, `<!DOCTYPE html>\n${banner}`);
 
 const outPath1 = path.join(OUT_DIR, 'index.html');
 const outPath2 = path.join(OUT_DIR, 'particle-zoo.html');
-fs.writeFileSync(outPath1, out);
-fs.writeFileSync(outPath2, out);
+fs.writeFileSync(outPath1, withBrandHomeHref(out, './index.html'));
+fs.writeFileSync(outPath2, withBrandHomeHref(out, './particle-zoo.html'));
 
 const sizeKB = (Buffer.byteLength(out, 'utf8') / 1024).toFixed(1);
 console.log(`✓ Wrote ${outPath1} (${sizeKB} KB)`);

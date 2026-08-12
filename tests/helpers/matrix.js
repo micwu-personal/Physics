@@ -15,10 +15,10 @@ export const entries = [
   { id: 'big-bang-mobile', app: 'big-bang', path: '/big-bang/mobile/index.html', generated: true, title: 'Big Bang — 13.8 Billion Years in an Afternoon', brandPath: '/big-bang/mobile/index.html', sourcePath: '/big-bang/' },
   { id: 'periodic-table', app: 'periodic-table', path: '/periodic-table/', generated: false, title: 'Periodic Table — An Interactive Journey into the Elements', brandPath: '/periodic-table/index.html' },
   { id: 'periodic-table-mobile', app: 'periodic-table', path: '/periodic-table/mobile/index.html', generated: true, title: 'Periodic Table — An Interactive Journey into the Elements', brandPath: '/periodic-table/mobile/index.html', sourcePath: '/periodic-table/' },
-  { id: 'periodic-table-offline', app: 'periodic-table', path: '/periodic-table/mobile/periodic-table.html', generated: true, title: 'Periodic Table — An Interactive Journey into the Elements', brandPath: '/periodic-table/mobile/index.html', sourcePath: '/periodic-table/' },
+  { id: 'periodic-table-offline', app: 'periodic-table', path: '/periodic-table/mobile/periodic-table.html', generated: true, title: 'Periodic Table — An Interactive Journey into the Elements', brandPath: '/periodic-table/mobile/periodic-table.html', sourcePath: '/periodic-table/' },
   { id: 'particle-zoo', app: 'particle-zoo', path: '/particle-zoo/', generated: false, title: 'Particle Zoo — An Interactive Journey into the Standard Model', brandPath: '/particle-zoo/index.html' },
   { id: 'particle-zoo-mobile', app: 'particle-zoo', path: '/particle-zoo/mobile/index.html', generated: true, title: 'Particle Zoo — An Interactive Journey into the Standard Model', brandPath: '/particle-zoo/mobile/index.html', sourcePath: '/particle-zoo/' },
-  { id: 'particle-zoo-offline', app: 'particle-zoo', path: '/particle-zoo/mobile/particle-zoo.html', generated: true, title: 'Particle Zoo — An Interactive Journey into the Standard Model', brandPath: '/particle-zoo/mobile/index.html', sourcePath: '/particle-zoo/' }
+  { id: 'particle-zoo-offline', app: 'particle-zoo', path: '/particle-zoo/mobile/particle-zoo.html', generated: true, title: 'Particle Zoo — An Interactive Journey into the Standard Model', brandPath: '/particle-zoo/mobile/particle-zoo.html', sourcePath: '/particle-zoo/' }
 ];
 
 export const sourceEntries = entries.filter(entry => !entry.generated);

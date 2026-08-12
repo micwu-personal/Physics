@@ -10,6 +10,14 @@ function topBarSelectors(entry) {
   return ['.control-row > .brand-home', '.control-row .lang-switch'];
 }
 
+function expectedBrandLabel(language) {
+  return language === 'zh-CN' ? '米克乐的宇宙' : "McWoods’ Universe";
+}
+
+function expectedBrandOrders(language) {
+  return language === 'zh-CN' ? { zh: '1', en: '2' } : { zh: '2', en: '1' };
+}
+
 async function readBrandOrders(page) {
   return page.evaluate(() => {
     const zh = document.querySelector('.brand-home__title-zh');
@@ -24,6 +32,7 @@ async function readBrandOrders(page) {
 async function readParitySnapshot(page) {
   return page.evaluate(() => ({
     title: document.title,
+    brandLabel: document.querySelector('.brand-home')?.getAttribute('aria-label') ?? '',
     brandText: document.querySelector('.brand-home')?.textContent?.replace(/\s+/g, ' ').trim() ?? '',
     footerCopy: document.querySelector('.site-footer__copy')?.textContent?.replace(/\s+/g, ' ').trim() ?? '',
     mailHref: document.querySelector('.site-footer__links a[href^="mailto:"]')?.getAttribute('href') ?? '',
@@ -51,14 +60,10 @@ for (const entry of entries) {
       const errors = watchPage(page);
       await preparePage(page, entry.path, language);
       await assertTranslations(page, language);
-      await exerciseTopLevel(page, entry.app);
-      await assertInternalLinks(page);
-      await assertLayout(page);
 
       const brandHome = page.locator('.brand-home');
       await expect(brandHome).toBeVisible();
-      await expect(brandHome).toHaveAttribute('aria-label', /米克乐的宇宙/);
-      await expect(brandHome).toHaveAttribute('aria-label', /McWoods’ Universe/);
+      await expect(brandHome).toHaveAttribute('aria-label', expectedBrandLabel(language));
 
       const brandHref = new URL(await brandHome.getAttribute('href'), page.url()).pathname;
       expect(brandHref).toBe(entry.brandPath);
@@ -71,13 +76,25 @@ for (const entry of entries) {
       await expect(mailLink).toBeVisible();
       await expect(mailLink).toHaveAttribute('aria-label', 'Email micwu@outlook.com');
 
-      if (language === 'en') {
-        expect(await readBrandOrders(page)).toEqual({ zh: '2', en: '1' });
-        await page.locator('[data-lang="zh-CN"]').first().click();
-        await expect.poll(() => page.evaluate(() => document.documentElement.lang)).toBe('zh-CN');
-        await expect.poll(() => readBrandOrders(page)).toEqual({ zh: '1', en: '2' });
-        await expect(page).toHaveTitle(entry.title);
+      if ((page.viewportSize()?.width ?? 0) > 560) {
+        await expect.poll(() => readBrandOrders(page)).toEqual(expectedBrandOrders(language));
       }
+
+      const alternateLanguage = language === 'en' ? 'zh-CN' : 'en';
+      await page.locator(`[data-lang="${alternateLanguage}"]`).first().click();
+      await expect.poll(() => page.evaluate(() => document.documentElement.lang)).toBe(alternateLanguage);
+      await expect(brandHome).toHaveAttribute('aria-label', expectedBrandLabel(alternateLanguage));
+      if ((page.viewportSize()?.width ?? 0) > 560) {
+        await expect.poll(() => readBrandOrders(page)).toEqual(expectedBrandOrders(alternateLanguage));
+      }
+      await expect(page).toHaveTitle(entry.title);
+      await page.locator(`[data-lang="${language}"]`).first().click();
+      await expect.poll(() => page.evaluate(() => document.documentElement.lang)).toBe(language);
+      await expect(brandHome).toHaveAttribute('aria-label', expectedBrandLabel(language));
+
+      await exerciseTopLevel(page, entry.app);
+      await assertInternalLinks(page);
+      await assertLayout(page);
 
       await page.setViewportSize({ width: 390, height: 844 });
       await page.waitForTimeout(120);
@@ -103,6 +120,7 @@ for (const entry of generatedEntries) {
         const generated = await readParitySnapshot(generatedPage);
 
         expect(generated.title).toBe(source.title);
+        expect(generated.brandLabel).toBe(expectedBrandLabel(language));
         expect(generated.brandText).toBe(source.brandText);
         expect(generated.footerCopy).toBe(source.footerCopy);
         expect(generated.mailHref).toBe('mailto:micwu@outlook.com');
@@ -114,4 +132,61 @@ for (const entry of generatedEntries) {
       }
     });
   }
+}
+
+for (const language of locales) {
+  test(`relativity ${language} mobile topic rail stays reachable without page overflow`, async ({ page }, testInfo) => {
+    if (testInfo.project.name !== 'quality-mobile') test.skip();
+
+    const errors = watchPage(page);
+    await preparePage(page, '/physics/relativity.html', language);
+
+    const overflow = await page.evaluate(() => ({
+      body: document.body.scrollWidth - document.body.clientWidth,
+      document: document.documentElement.scrollWidth - document.documentElement.clientWidth
+    }));
+    expect(overflow.body).toBeLessThanOrEqual(1);
+    expect(overflow.document).toBeLessThanOrEqual(1);
+
+    const rail = page.locator('.topic-index');
+    await expect(rail).toBeVisible();
+    const anchors = rail.locator('a[href^="#"]');
+    await expect(anchors).toHaveCount(9);
+
+    const railMetrics = await rail.evaluate(element => ({
+      clientWidth: element.clientWidth,
+      scrollWidth: element.scrollWidth
+    }));
+    expect(railMetrics.scrollWidth).toBeGreaterThan(railMetrics.clientWidth);
+
+    const focusReachability = await page.evaluate(() => {
+      const rail = document.querySelector('.topic-index');
+      const links = [...rail.querySelectorAll('a[href^="#"]')];
+      return links.map(link => {
+        link.focus();
+        const linkRect = link.getBoundingClientRect();
+        const railRect = rail.getBoundingClientRect();
+        return {
+          href: link.getAttribute('href'),
+          left: linkRect.left - railRect.left,
+          right: railRect.right - linkRect.right
+        };
+      });
+    });
+    for (const item of focusReachability) {
+      expect(item.left, `focused ${item.href} should stay within the rail`).toBeGreaterThanOrEqual(-1);
+      expect(item.right, `focused ${item.href} should stay within the rail`).toBeGreaterThanOrEqual(-1);
+    }
+
+    for (let index = 0; index < await anchors.count(); index++) {
+      const anchor = anchors.nth(index);
+      const targetId = (await anchor.getAttribute('href')).slice(1);
+      await anchor.evaluate(element => element.scrollIntoView({ block: 'nearest', inline: 'center' }));
+      await expect(anchor).toBeInViewport();
+      await anchor.click();
+      await page.waitForFunction(id => location.hash === `#${id}`, targetId);
+    }
+
+    await assertNoErrors(errors);
+  });
 }

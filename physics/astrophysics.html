@@ -10,19 +10,20 @@
   -->
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="An interactive bilingual guide to astrophysics: why disks form, how stars evolve by mass, how the Chandrasekhar, Oppenheimer-Volkoff and Eddington limits are derived, and why standard candles work.">
+  <meta name="description" content="An interactive bilingual guide to astrophysics: why disks form, how degeneracy and relativity set compact-object limits, how one Type Ia supernova channel unfolds, and why relativistic jets can look faster than light.">
   <title>Astrophysics — Physics Field Atlas</title>
   <link rel="stylesheet" href="../assets/fonts/fonts.css">
   <link rel="stylesheet" href="styles.css">
   <link rel="icon" href="../assets/brand/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="../assets/brand/brand.css">
+  <link rel="stylesheet" href="astrophysics-deepening.css">
 </head>
 <body data-topic="astrophysics">
   <a class="skip-link" href="#main" data-copy-en="Skip to astrophysics" data-copy-zh="跳到天体物理内容">Skip to astrophysics</a>
   <div class="topic-shell">
     <nav class="route-bar" aria-label="Astrophysics routes" data-aria-en="Astrophysics routes" data-aria-zh="天体物理路线">
       <div class="route-left">
-        <a class="brand-home" href="./index.html" aria-label="米克乐的宇宙 · McWoods’ Universe">
+        <a class="brand-home" href="./index.html" aria-label="McWoods’ Universe" data-aria-en="McWoods’ Universe" data-aria-zh="米克乐的宇宙">
           <span class="brand-home__icon" aria-hidden="true"><img src="../assets/brand/favicon.svg" alt=""></span>
           <span class="brand-home__title">
             <span class="brand-home__title-zh">米克乐的宇宙</span>
@@ -52,15 +53,29 @@
         </p>
         <span class="hero-equation" data-tex="L_{\mathrm{Edd}} = \frac{4\pi GMm_p c}{\sigma_T}">L_Edd = 4 pi G M m_p c / sigma_T</span>
         <div class="hero-actions">
-          <a class="primary-action" href="#coplanarity" data-copy-en="Why is everything a disk?" data-copy-zh="为什么到处都是盘？">Why is everything a disk?</a>
-          <a class="secondary-action" href="#evolution" data-copy-en="Follow a star by its mass" data-copy-zh="按质量追踪恒星一生">Follow a star by its mass</a>
+          <a class="primary-action" href="#limits" data-copy-en="Quantum pressure under squeeze" data-copy-zh="量子压强如何失守">Quantum pressure under squeeze</a>
+          <a class="secondary-action" href="#type-ia" data-copy-en="Trace one Type Ia pathway" data-copy-zh="追踪一种 Ia 型超新星路径">Trace one Type Ia pathway</a>
         </div>
       </div>
-      <div class="hero-instrument">
+      <div class="hero-instrument focus-instrument">
         <canvas id="collapseCanvas" aria-label="Animation of a rotating cloud flattening into a disk" data-aria-en="Animation of a rotating cloud flattening into a disk" data-aria-zh="自转云塌缩成盘的动画">A rotating spherical cloud contracts along its spin axis and becomes a flat disk.</canvas>
-        <div class="instrument-label">
-          <span><strong data-copy-en="Collapse is not symmetric." data-copy-zh="塌缩并不是各向同性的。">Collapse is not symmetric.</strong><span data-copy-en="Particle count and speed are schematic; the flattening is the physical point." data-copy-zh="粒子数量与速度为示意；关键物理是扁平化过程本身。">Particle count and speed are schematic; the flattening is the physical point.</span></span>
-          <span class="rep-badge schematic" data-copy-en="Teaching schematic" data-copy-zh="教学示意">Teaching schematic</span>
+        <div class="focus-panel">
+          <div class="focus-heading">
+            <strong data-copy-en="One control, one picture." data-copy-zh="一个控件，对应一张图。">One control, one picture.</strong>
+            <p data-copy-en="Scrub the flattening here, next to the cloud it changes. Collapse erases vertical motion far more easily than it erases angular momentum, so the cloud becomes a disk instead of staying spherical."
+               data-copy-zh="就在被它控制的云旁边拖动扁平化。塌缩会更容易抹掉垂直运动，而不是抹掉角动量，因此云会变成盘，而不是保持球形。">Scrub the flattening here, next to the cloud it changes. Collapse erases vertical motion far more easily than it erases angular momentum, so the cloud becomes a disk instead of staying spherical.</p>
+          </div>
+          <div class="control-group">
+            <label for="collapseProgress"><span data-copy-en="Flattening control" data-copy-zh="扁平化控制">Flattening control</span><output id="collapseProgressOut" for="collapseProgress">50%</output></label>
+            <input id="collapseProgress" type="range" min="0" max="1" value="0.5" step="0.01">
+          </div>
+          <p id="collapseReadout" class="focus-readout">The cloud is midway through flattening: the height is collapsing while the radius changes only modestly.</p>
+          <p class="claim-links">
+            <span class="claim-label" data-copy-en="Claim links" data-copy-zh="对应来源">Claim links</span>
+            <a class="claim-chip" href="https://doi.org/10.1146/annurev.aa.19.090181.001033">Pringle 1981</a>
+          </p>
+          <p class="lab-note"><span class="rep-badge schematic" data-copy-en="Teaching schematic" data-copy-zh="教学示意">Teaching schematic</span><br><span data-copy-en="Particles are tracers, not a gravitational N-body solution. Real disk formation also involves magnetic braking, turbulence, and outward angular-momentum transport that this picture omits."
+            data-copy-zh="图中粒子只是示踪，并非引力 N 体求解。真实成盘过程还包含磁制动、湍流以及角动量向外输运，本图均未体现。">Particles are tracers, not a gravitational N-body solution. Real disk formation also involves magnetic braking, turbulence, and outward angular-momentum transport that this picture omits.</span></p>
         </div>
       </div>
     </header>
@@ -69,8 +84,10 @@
       <a href="#coplanarity" data-copy-en="Why disks form" data-copy-zh="盘为何形成">Why disks form</a>
       <a href="#cases" data-copy-en="Four flat systems" data-copy-zh="四个扁平系统">Four flat systems</a>
       <a href="#evolution" data-copy-en="Stellar evolution" data-copy-zh="恒星演化">Stellar evolution</a>
-      <a href="#limits" data-copy-en="Mass limits" data-copy-zh="质量极限">Mass limits</a>
+      <a href="#limits" data-copy-en="Degeneracy & limits" data-copy-zh="简并与极限">Degeneracy & limits</a>
+      <a href="#type-ia" data-copy-en="Type Ia channel" data-copy-zh="Ia 型通道">Type Ia channel</a>
       <a href="#black-holes" data-copy-en="Black holes" data-copy-zh="黑洞">Black holes</a>
+      <a href="#jets" data-copy-en="Relativistic jets" data-copy-zh="相对论喷流">Relativistic jets</a>
       <a href="#candles" data-copy-en="Standard candles" data-copy-zh="标准烛光">Standard candles</a>
       <a href="#connections" data-copy-en="Continue exploring" data-copy-zh="继续探索">Continue exploring</a>
     </nav>
@@ -78,20 +95,24 @@
     <main id="main">
       <section id="coplanarity" class="topic-section">
         <header>
-          <h2 data-copy-en="A cloud can shed energy. It cannot shed rotation."
-              data-copy-zh="云可以丢掉能量，却几乎丢不掉自转。">A cloud can shed energy. It cannot shed rotation.</h2>
-          <p data-copy-en="This asymmetry is the whole explanation. Radiation carries energy away freely, so a collapsing cloud cools and contracts. Angular momentum has no comparable escape route, so the spin survives. What follows is forced."
-             data-copy-zh="全部解释都来自这种不对称。辐射可以自由带走能量，因此塌缩的云会冷却并收缩；角动量却没有同样便利的输运途径，自转基本被保留下来。随后的一切都是被迫发生的。">
-            This asymmetry is the whole explanation. Radiation carries energy away freely, so a collapsing cloud cools and contracts. Angular momentum has no comparable escape route, so the spin survives. What follows is forced.
+          <h2 data-copy-en="A cloud sheds energy more readily than it loses net angular momentum."
+              data-copy-zh="云散失能量通常比去掉净角动量容易得多。">A cloud sheds energy more readily than it loses net angular momentum.</h2>
+          <p data-copy-en="That asymmetry sets the first-order tendency, not the whole story by itself. Radiation and dissipation can cool a collapsing cloud quickly, while magnetic braking, gravitational torques, turbulence, and outflows redistribute or remove angular momentum more slowly and imperfectly. Unless those torques are exceptionally effective, enough residual spin remains to push matter toward a disk."
+             data-copy-zh="这种不对称决定了首要趋势，但并不是全部故事。辐射与耗散能让塌缩云团较快降温；磁制动、引力力矩、湍流与外流则会以更慢、也不完全的方式重新分配或带走角动量。除非这些力矩异常高效，否则仍会留下足够的净自转，把物质推向盘状结构。">
+            That asymmetry sets the first-order tendency, not the whole story by itself. Radiation and dissipation can cool a collapsing cloud quickly, while magnetic braking, gravitational torques, turbulence, and outflows redistribute or remove angular momentum more slowly and imperfectly. Unless those torques are exceptionally effective, enough residual spin remains to push matter toward a disk.
+          </p>
+          <p class="claim-links">
+            <span class="claim-label" data-copy-en="Claim links" data-copy-zh="对应来源">Claim links</span>
+            <a class="claim-chip" href="https://doi.org/10.1146/annurev.aa.19.090181.001033">Pringle 1981</a>
           </p>
         </header>
 
         <ol class="reason-chain">
           <li>
             <span class="step-mark">1</span>
-            <h3 data-copy-en="Any cloud has some net rotation" data-copy-zh="任何云都带有一点净自转">Any cloud has some net rotation</h3>
-            <p data-copy-en="Turbulence and tidal torques from neighbouring matter leave every real cloud with a small, non-zero total angular momentum. Exact zero is possible in principle and essentially never realised."
-               data-copy-zh="湍流以及邻近物质施加的潮汐力矩，使每一团真实的云都带有很小但不为零的总角动量。严格为零在原理上可能，实际上几乎不会出现。">Turbulence and tidal torques from neighbouring matter leave every real cloud with a small, non-zero total angular momentum. Exact zero is possible in principle and essentially never realised.</p>
+            <h3 data-copy-en="Real collapsing clouds usually retain some net rotation" data-copy-zh="真实塌缩云通常保留一定净自转">Real collapsing clouds usually retain some net rotation</h3>
+            <p data-copy-en="Turbulence and tidal torques from neighbouring matter usually leave a collapsing cloud with a small but non-zero total angular momentum. Exact zero is possible in principle, but real star-forming clouds almost never realise that special case."
+               data-copy-zh="湍流以及邻近物质施加的潮汐力矩，通常会让塌缩中的云团保留很小但不为零的总角动量。严格为零在原理上并非不可能，但真实的恒星形成云几乎不会实现这种特例。">Turbulence and tidal torques from neighbouring matter usually leave a collapsing cloud with a small but non-zero total angular momentum. Exact zero is possible in principle, but real star-forming clouds almost never realise that special case.</p>
           </li>
           <li>
             <span class="step-mark">2</span>
@@ -119,20 +140,25 @@
           </li>
         </ol>
 
-        <div class="scrub-panel">
-          <div class="scrub-copy">
-            <h3 data-copy-en="Flattening control" data-copy-zh="扁平化控制">Flattening control</h3>
-            <p data-copy-en="Scrub from a round cloud to a settled disk and watch which direction collapses. The vertical extent shrinks; the radial extent barely changes. The animation at the top of the page responds to this control."
-               data-copy-zh="从球状云拖动到稳定的盘，观察哪个方向发生塌缩：垂直厚度不断缩小，径向尺度几乎不变。页面顶部的动画会随此控件变化。">Scrub from a round cloud to a settled disk and watch which direction collapses. The vertical extent shrinks; the radial extent barely changes. The animation at the top of the page responds to this control.</p>
-          </div>
-          <div class="scrub-control">
-            <div class="control-group">
-              <label for="collapseProgress"><span data-copy-en="Collapse progress" data-copy-zh="塌缩进度">Collapse progress</span><output id="collapseProgressOut" for="collapseProgress">50%</output></label>
-              <input id="collapseProgress" type="range" min="0" max="1" value="0.5" step="0.01">
-            </div>
-            <p class="lab-note"><span class="rep-badge schematic" data-copy-en="Teaching schematic" data-copy-zh="教学示意">Teaching schematic</span><br><span data-copy-en="Particles are tracers, not a gravitational N-body solution. Real disk formation also involves magnetic braking, turbulence, and outward angular-momentum transport that this picture omits."
-              data-copy-zh="图中粒子只是示踪，并非引力 N 体求解。真实成盘过程还包含磁制动、湍流以及角动量向外输运，本图均未体现。">Particles are tracers, not a gravitational N-body solution. Real disk formation also involves magnetic braking, turbulence, and outward angular-momentum transport that this picture omits.</span></p>
-          </div>
+        <div class="classification-grid astro-mini-grid">
+          <article class="classification">
+            <span class="science-status established" data-copy-en="Angular momentum bookkeeping" data-copy-zh="角动量守恒">Angular momentum bookkeeping</span>
+            <h3 data-copy-en="Shrinking makes spin matter more" data-copy-zh="越收缩，自转越重要">Shrinking makes spin matter more</h3>
+            <p data-copy-en="At fixed angular momentum, the characteristic orbital speed rises as the cloud contracts. Rotation that looked negligible at large radius becomes dynamically important before the cloud reaches stellar scales."
+               data-copy-zh="在角动量固定时，云越收缩，特征轨道速度就越高。远距离时看似微弱的自转，会在到达恒星尺度前变得动力学上不可忽略。">At fixed angular momentum, the characteristic orbital speed rises as the cloud contracts. Rotation that looked negligible at large radius becomes dynamically important before the cloud reaches stellar scales.</p>
+          </article>
+          <article class="classification">
+            <span class="science-status established" data-copy-en="Dissipation selects the plane" data-copy-zh="耗散选择平面">Dissipation selects the plane</span>
+            <h3 data-copy-en="Collisions cool the thickness away" data-copy-zh="碰撞会先消除厚度">Collisions cool the thickness away</h3>
+            <p data-copy-en="Gas and dust radiate away random vertical motion efficiently. Orbital motion in the shared rotation plane survives, so the system flattens instead of collapsing into a rotating sphere."
+               data-copy-zh="气体与尘埃会高效辐射掉随机的垂直运动；而共享旋转平面中的轨道运动会保留下来，因此系统会变扁，而不是变成一个旋转球体。">Gas and dust radiate away random vertical motion efficiently. Orbital motion in the shared rotation plane survives, so the system flattens instead of collapsing into a rotating sphere.</p>
+          </article>
+          <article class="classification">
+            <span class="science-status model" data-copy-en="What this picture omits" data-copy-zh="本图省略的物理">What this picture omits</span>
+            <h3 data-copy-en="Real disks transport angular momentum outward" data-copy-zh="真实盘会把角动量向外送">Real disks transport angular momentum outward</h3>
+            <p data-copy-en="Magnetic stresses, turbulence, and self-gravity control how fast matter can spiral inward after the disk forms. The flattening argument is robust; the detailed transport physics is a separate, model-rich problem."
+               data-copy-zh="磁应力、湍流与自引力决定成盘后物质能多快向内螺旋。扁平化论证本身很稳固；而细致的输运速率则是另一个模型很丰富的问题。">Magnetic stresses, turbulence, and self-gravity control how fast matter can spiral inward after the disk forms. The flattening argument is robust; the detailed transport physics is a separate, model-rich problem.</p>
+          </article>
         </div>
       </section>
 
@@ -274,88 +300,216 @@
 
       <section id="limits" class="topic-section">
         <header>
-          <h2 data-copy-en="Three ceilings, each from a scaling argument."
-              data-copy-zh="三个上限，都来自标度论证。">Three ceilings, each from a scaling argument.</h2>
-          <p data-copy-en="Every limit below appears the same way: two competing effects are compared, and their dependence on radius is found to cancel. When that happens, radius drops out of the equation and only a critical mass or luminosity remains."
-             data-copy-zh="下面每个极限的来历都相同：比较两种相互竞争的效应，发现它们对半径的依赖恰好抵消。一旦如此，半径就从方程中消失，只剩下一个临界质量或临界光度。">
-            Every limit below appears the same way: two competing effects are compared, and their dependence on radius is found to cancel. When that happens, radius drops out of the equation and only a critical mass or luminosity remains.
+          <h2 data-copy-en="Quantum pressure bends, then relativity changes the rules."
+              data-copy-zh="量子压强先变软，而相对论会改写规则。">Quantum pressure bends, then relativity changes the rules.</h2>
+          <p data-copy-en="White dwarfs and neutron stars are both tied to Fermi statistics, but not to the same particles or the same equations. In white dwarfs the support is electron degeneracy. In neutron stars it is neutron degeneracy plus short-range nuclear repulsion inside general relativity, where pressure itself gravitates."
+             data-copy-zh="白矮星与中子星都与费米统计有关，但支撑它们的粒子和方程并不相同。白矮星依靠电子简并压；中子星则依靠中子简并压、短程核排斥，以及广义相对论——在那里压强本身也会产生引力。">
+            White dwarfs and neutron stars are both tied to Fermi statistics, but not to the same particles or the same equations. In white dwarfs the support is electron degeneracy. In neutron stars it is neutron degeneracy plus short-range nuclear repulsion inside general relativity, where pressure itself gravitates.
+          </p>
+          <p class="claim-links">
+            <span class="claim-label" data-copy-en="Claim links" data-copy-zh="对应来源">Claim links</span>
+            <a class="claim-chip" href="https://www.nobelprize.org/prizes/physics/1983/chandrasekhar/lecture/">Chandrasekhar Nobel lecture</a>
+            <a class="claim-chip" href="https://arxiv.org/abs/1512.07820">NS EOS review</a>
+            <a class="claim-chip" href="https://www.ligo.caltech.edu/page/press-release-gw170817">GW170817</a>
           </p>
         </header>
 
         <div class="lab">
-          <div class="lab-stage">
-            <canvas id="limitsCanvas" aria-label="Balance between gravity and electron degeneracy pressure as mass approaches the Chandrasekhar limit" data-aria-en="Balance between gravity and electron degeneracy pressure as mass approaches the Chandrasekhar limit" data-aria-zh="随质量接近钱德拉塞卡极限，引力与电子简并压的平衡示意">A sphere shrinking as mass increases, with inward gravity arrows and outward pressure arrows.</canvas>
+          <div class="lab-stage astro-stage">
+            <canvas id="limitsCanvas" aria-label="Phase-space filling and electron degeneracy as a white dwarf approaches the Chandrasekhar limit" data-aria-en="Phase-space filling and electron degeneracy as a white dwarf approaches the Chandrasekhar limit" data-aria-zh="白矮星逼近钱德拉塞卡极限时，相空间填充与电子简并的示意">A phase-space view of electrons filling higher momentum states while a white dwarf shrinks and its pressure support softens.</canvas>
+            <div class="lab-overlay">
+              <span id="limitsState" class="lab-readout">Electron states are filling outward.</span>
+              <span id="limitsPressure" class="lab-readout secondary">At low mass the support is stiff; near the limit the relativistic electrons make it softer.</span>
+            </div>
           </div>
           <div class="lab-controls">
-            <h3 data-copy-en="Approach the Chandrasekhar mass" data-copy-zh="逼近钱德拉塞卡质量">Approach the Chandrasekhar mass</h3>
-            <p data-copy-en="A white dwarf gets smaller as you add mass, which is already unusual. Push past about 1.4 solar masses and no stable radius exists at all."
-               data-copy-zh="白矮星质量越大反而体积越小，这本身就很反常。一旦越过约 1.4 太阳质量，就不再存在任何稳定半径。">A white dwarf gets smaller as you add mass, which is already unusual. Push past about 1.4 solar masses and no stable radius exists at all.</p>
+            <h3 data-copy-en="Approach the Chandrasekhar mass with electrons"
+                data-copy-zh="用电子简并压去逼近钱德拉塞卡质量">Approach the Chandrasekhar mass with electrons</h3>
+            <p data-copy-en="This slider is explicitly a white-dwarf slider. The outward support comes from electrons filling quantum states, not from thermal gas pressure and not from neutron-star physics. Confining the same electrons to a smaller volume raises their characteristic momentum, so the star shrinks as it gains mass."
+               data-copy-zh="这个滑块明确描述的是白矮星。向外支撑来自电子填满量子态，而不是热气体压强，也不是中子星物理。把同样的电子限制在更小体积里，会抬高它们的特征动量，因此白矮星在增重时反而缩小。">This slider is explicitly a white-dwarf slider. The outward support comes from electrons filling quantum states, not from thermal gas pressure and not from neutron-star physics. Confining the same electrons to a smaller volume raises their characteristic momentum, so the star shrinks as it gains mass.</p>
             <div class="control-group">
               <label for="limitMass"><span data-copy-en="White-dwarf mass" data-copy-zh="白矮星质量">White-dwarf mass</span><output id="limitMassOut" for="limitMass">1.00 M☉</output></label>
               <input id="limitMass" type="range" min="0.2" max="1.6" value="1" step="0.01">
             </div>
-            <p class="lab-note"><span class="rep-badge model" data-copy-en="Calculated model" data-copy-zh="计算模型">Calculated model</span><br><span data-copy-en="Radius follows an illustrative non-relativistic scaling and is not an integration of the stellar structure equations."
-              data-copy-zh="半径遵循示意性的非相对论标度关系，并非对恒星结构方程的积分求解。">Radius follows an illustrative non-relativistic scaling and is not an integration of the stellar structure equations.</span></p>
+            <dl id="limitDetail" class="stage-detail">
+              <dt data-copy-en="Quantum picture" data-copy-zh="量子图像">Quantum picture</dt>
+              <dd id="limitQuantum">Electrons first fill the lowest momentum states, then progressively higher ones as the dwarf is squeezed.</dd>
+              <dt data-copy-en="Pressure law" data-copy-zh="压强标度">Pressure law</dt>
+              <dd id="limitLaw">Low-momentum electrons give the non-relativistic scaling P ∝ ρ^(5/3).</dd>
+              <dt data-copy-en="Bridge to neutron stars" data-copy-zh="通向中子星的桥">Bridge to neutron stars</dt>
+              <dd id="limitBridge">If collapse continues, electron capture and neutronization follow. The next stable family needs neutron degeneracy, nuclear forces, and the TOV equation—not electrons alone.</dd>
+            </dl>
+            <p class="lab-note"><span class="rep-badge model" data-copy-en="Calculated teaching model" data-copy-zh="计算化教学模型">Calculated teaching model</span><br><span data-copy-en="The boxes and arrows are schematic. The physical claim is the scaling: stronger confinement raises characteristic momentum, electrons become relativistic near the Chandrasekhar mass, and the support softens from the non-relativistic law to the relativistic one."
+              data-copy-zh="方格与箭头都是示意图。关键物理是标度关系：更强约束会抬高特征动量；电子在钱德拉塞卡质量附近变得相对论化；支撑从非相对论定律软化到相对论定律。">The boxes and arrows are schematic. The physical claim is the scaling: stronger confinement raises characteristic momentum, electrons become relativistic near the Chandrasekhar mass, and the support softens from the non-relativistic law to the relativistic one.</span></p>
           </div>
         </div>
 
         <div class="derivations">
           <article class="derivation">
             <h3 data-copy-en="Chandrasekhar limit ≈ 1.4 M☉" data-copy-zh="钱德拉塞卡极限 ≈ 1.4 M☉">Chandrasekhar limit ≈ 1.4 M☉</h3>
-            <p class="derivation-lede" data-copy-en="The maximum mass supportable by electron degeneracy pressure."
-               data-copy-zh="电子简并压所能支撑的最大质量。">The maximum mass supportable by electron degeneracy pressure.</p>
+            <p class="derivation-lede" data-copy-en="The maximum mass supportable by electron degeneracy pressure in a cold white dwarf."
+               data-copy-zh="冷白矮星中，电子简并压所能支撑的最大质量。">The maximum mass supportable by electron degeneracy pressure in a cold white dwarf.</p>
             <ol>
-              <li data-copy-en="The Pauli exclusion principle forbids two electrons from sharing a quantum state. Compressing the gas forces electrons into higher-momentum states, producing a pressure that does not vanish even at zero temperature."
-                  data-copy-zh="泡利不相容原理禁止两个电子占据同一量子态。压缩气体迫使电子进入更高动量的状态，由此产生的压强即使在零温下也不消失。">The Pauli exclusion principle forbids two electrons from sharing a quantum state. Compressing the gas forces electrons into higher-momentum states, producing a pressure that does not vanish even at zero temperature.</li>
-              <li data-copy-en="For slow electrons this gives P ∝ ρ^(5/3). Balancing it against gravity yields R ∝ M^(−1/3): adding mass makes the star smaller, so density climbs quickly."
-                  data-copy-zh="对低速电子，这给出 P ∝ ρ^(5/3)。与引力平衡后得到 R ∝ M^(−1/3)：增加质量反而使星体更小，密度因此迅速上升。">For slow electrons this gives P ∝ ρ^(5/3). Balancing it against gravity yields R ∝ M^(−1/3): adding mass makes the star smaller, so density climbs quickly.</li>
-              <li data-copy-en="Once electrons approach the speed of light their momentum can no longer grow without bound, and the relation softens to P ∝ ρ^(4/3)."
-                  data-copy-zh="当电子速度接近光速，其动量不能再无限增长，压强关系软化为 P ∝ ρ^(4/3)。">Once electrons approach the speed of light their momentum can no longer grow without bound, and the relation softens to P ∝ ρ^(4/3).</li>
-              <li data-copy-en="With that exponent, the outward support energy and the inward gravitational energy both scale as 1/R. Radius cancels completely, so the balance no longer selects a size; it selects a single mass."
-                  data-copy-zh="在该指数下，向外的支撑能与向内的引力能都按 1/R 标度，半径完全抵消。于是平衡条件不再挑选尺寸，而是挑选唯一的质量。">With that exponent, the outward support energy and the inward gravitational energy both scale as 1/R. Radius cancels completely, so the balance no longer selects a size; it selects a single mass.</li>
-              <li data-copy-en="That mass is M ≈ 5.83/μₑ² M☉. For carbon-oxygen matter with two nucleons per electron, μₑ = 2 and M ≈ 1.44 M☉."
-                  data-copy-zh="该质量为 M ≈ 5.83/μₑ² M☉。对每个电子对应两个核子的碳氧物质，μₑ = 2，得 M ≈ 1.44 M☉。">That mass is M ≈ 5.83/μₑ² M☉. For carbon-oxygen matter with two nucleons per electron, μₑ = 2 and M ≈ 1.44 M☉.</li>
+              <li data-copy-en="The Pauli exclusion principle forbids two electrons from sharing a quantum state. Compressing the gas forces electrons into higher-momentum states, producing a pressure that survives even at zero temperature."
+                  data-copy-zh="泡利不相容原理禁止两个电子占据同一量子态。压缩气体会迫使电子进入更高动量状态，因此即使在零温下也存在压强。">The Pauli exclusion principle forbids two electrons from sharing a quantum state. Compressing the gas forces electrons into higher-momentum states, producing a pressure that survives even at zero temperature.</li>
+              <li data-copy-en="For slow electrons this gives P ∝ ρ^(5/3). Balancing it against gravity yields R ∝ M^(−1/3): adding mass makes the star smaller, so density climbs rapidly."
+                  data-copy-zh="对低速电子，这给出 P ∝ ρ^(5/3)。与引力平衡后得到 R ∝ M^(−1/3)：增加质量反而使星体更小，因此密度会迅速升高。">For slow electrons this gives P ∝ ρ^(5/3). Balancing it against gravity yields R ∝ M^(−1/3): adding mass makes the star smaller, so density climbs rapidly.</li>
+              <li data-copy-en="Once the electron Fermi momentum approaches mₑc, the electrons are relativistic. The equation of state softens to P ∝ ρ^(4/3), so the same extra compression buys less extra support."
+                  data-copy-zh="一旦电子的费米动量逼近 mₑc，电子就进入相对论区间。状态方程软化为 P ∝ ρ^(4/3)，因此同样的额外压缩只能换来更少的额外支撑。">Once the electron Fermi momentum approaches mₑc, the electrons are relativistic. The equation of state softens to P ∝ ρ^(4/3), so the same extra compression buys less extra support.</li>
+              <li data-copy-en="At that exponent the outward support and inward gravity scale the same way with radius. Radius cancels, so equilibrium selects a single mass rather than a stable size."
+                  data-copy-zh="在这个指数下，向外支撑与向内引力对半径的标度相同。半径抵消后，平衡条件不再选出稳定尺寸，而是选出唯一的质量。">At that exponent the outward support and inward gravity scale the same way with radius. Radius cancels, so equilibrium selects a single mass rather than a stable size.</li>
+              <li data-copy-en="That mass is M ≈ 5.83/μₑ² M☉. For carbon-oxygen matter with roughly two nucleons per electron, μₑ ≈ 2 and the limit is about 1.44 M☉."
+                  data-copy-zh="该质量为 M ≈ 5.83/μₑ² M☉。对每个电子约对应两个核子的碳氧物质，μₑ ≈ 2，因此极限约为 1.44 M☉。">That mass is M ≈ 5.83/μₑ² M☉. For carbon-oxygen matter with roughly two nucleons per electron, μₑ ≈ 2 and the limit is about 1.44 M☉.</li>
             </ol>
-            <p class="derivation-note" data-copy-en="Above it, no radius satisfies equilibrium and collapse cannot be halted by electrons. This is why Type Ia supernovae are so uniform, and why every white dwarf ever weighed sits below the line."
-               data-copy-zh="超过该质量后，没有任何半径能满足平衡，电子无法阻止塌缩。这既解释了 Ia 型超新星为何如此一致，也解释了为何所有被测量过的白矮星都位于该线以下。">Above it, no radius satisfies equilibrium and collapse cannot be halted by electrons. This is why Type Ia supernovae are so uniform, and why every white dwarf ever weighed sits below the line.</p>
+            <p class="derivation-note" data-copy-en="Above it, no cold white-dwarf equilibrium supported by electrons exists. In binaries that can mean thermonuclear disruption, collapse, or merger outcomes depending on how mass is added and how ignition begins; it does not mean every Type Ia follows one universal path."
+               data-copy-zh="超过它后，就不存在由电子支撑的冷白矮星平衡。对双星系统而言，这可能意味着热核解体、塌缩或并合等不同结局，取决于增质量方式与点火起点；这并不意味着每一颗 Ia 型超新星都遵循同一条路径。">Above it, no cold white-dwarf equilibrium supported by electrons exists. In binaries that can mean thermonuclear disruption, collapse, or merger outcomes depending on how mass is added and how ignition begins; it does not mean every Type Ia follows one universal path.</p>
+            <p class="claim-links"><span class="claim-label" data-copy-en="Claim links" data-copy-zh="对应来源">Claim links</span><a class="claim-chip" href="https://www.nobelprize.org/prizes/physics/1983/chandrasekhar/lecture/">Chandrasekhar Nobel lecture</a><a class="claim-chip" href="https://arxiv.org/abs/1401.0819">WD mass-radius</a></p>
           </article>
 
           <article class="derivation">
             <h3 data-copy-en="Oppenheimer–Volkoff limit ≈ 2.2 M☉" data-copy-zh="奥本海默–沃尔科夫极限 ≈ 2.2 M☉">Oppenheimer–Volkoff limit ≈ 2.2 M☉</h3>
-            <p class="derivation-lede" data-copy-en="The maximum mass of a neutron star, and the least certain number here."
-               data-copy-zh="中子星的最大质量，也是本页最不确定的数字。">The maximum mass of a neutron star, and the least certain number here.</p>
+            <p class="derivation-lede" data-copy-en="The maximum mass of a neutron star, and the least certain number on this page."
+               data-copy-zh="中子星的最大质量，也是本页最不确定的数字。">The maximum mass of a neutron star, and the least certain number on this page.</p>
             <ol>
-              <li data-copy-en="When electron degeneracy fails, electrons are forced into protons: p + e⁻ → n + ν. The core becomes almost pure neutrons, and neutron degeneracy pressure takes over."
-                  data-copy-zh="当电子简并压失效，电子被压入质子：p + e⁻ → n + ν。核心几乎变成纯中子，转由中子简并压支撑。">When electron degeneracy fails, electrons are forced into protons: p + e⁻ → n + ν. The core becomes almost pure neutrons, and neutron degeneracy pressure takes over.</li>
-              <li data-copy-en="Neutrons are about 1839 times heavier than electrons, so they stay non-relativistic to far higher densities. That buys real additional support."
-                  data-copy-zh="中子质量约为电子的 1839 倍，因此在高得多的密度下仍保持非相对论性，这确实带来了额外的支撑能力。">Neutrons are about 1839 times heavier than electrons, so they stay non-relativistic to far higher densities. That buys real additional support.</li>
-              <li data-copy-en="Newtonian gravity is no longer adequate. In general relativity pressure itself carries energy and therefore gravitates, so adding pressure adds weight. The Tolman–Oppenheimer–Volkoff equation replaces hydrostatic equilibrium."
-                  data-copy-zh="此时牛顿引力已不适用。在广义相对论中，压强本身携带能量因而也产生引力，增加压强同时也增加了重量。托尔曼–奥本海默–沃尔科夫方程取代了通常的流体静力学平衡。">Newtonian gravity is no longer adequate. In general relativity pressure itself carries energy and therefore gravitates, so adding pressure adds weight. The Tolman–Oppenheimer–Volkoff equation replaces hydrostatic equilibrium.</li>
-              <li data-copy-en="Oppenheimer and Volkoff solved this in 1939 for a gas of free neutrons and obtained only about 0.7 M☉, below stars already known. The missing ingredient was the strong repulsion between nucleons at short range."
-                  data-copy-zh="奥本海默与沃尔科夫于 1939 年针对自由中子气求解，只得到约 0.7 M☉，低于当时已知的中子星质量。缺失的因素是核子在短程上的强排斥作用。">Oppenheimer and Volkoff solved this in 1939 for a gas of free neutrons and obtained only about 0.7 M☉, below stars already known. The missing ingredient was the strong repulsion between nucleons at short range.</li>
-              <li data-copy-en="Including nuclear forces raises the ceiling to roughly 2.2–2.3 M☉. Pulsars near 2 M☉ set a firm floor, and the merger GW170817 constrains it from above."
-                  data-copy-zh="计入核力后，上限提高到约 2.2–2.3 M☉。质量接近 2 M☉ 的脉冲星给出可靠下界，而并合事件 GW170817 从上方施加约束。">Including nuclear forces raises the ceiling to roughly 2.2–2.3 M☉. Pulsars near 2 M☉ set a firm floor, and the merger GW170817 constrains it from above.</li>
+              <li data-copy-en="When electron degeneracy fails, electrons are forced into protons: p + e⁻ → n + ν. The core becomes neutron-rich, but neutron degeneracy alone is not the full answer."
+                  data-copy-zh="当电子简并压失效，电子会被压入质子：p + e⁻ → n + ν。核心因而变得富中子，但仅有中子简并压并不是完整答案。">When electron degeneracy fails, electrons are forced into protons: p + e⁻ → n + ν. The core becomes neutron-rich, but neutron degeneracy alone is not the full answer.</li>
+              <li data-copy-en="Neutrons are much heavier than electrons, so they stay non-relativistic to much higher densities. That buys genuine extra support."
+                  data-copy-zh="中子远比电子重，因此在高得多的密度下仍可保持非相对论性，这确实带来了额外支撑。">Neutrons are much heavier than electrons, so they stay non-relativistic to much higher densities. That buys genuine extra support.</li>
+              <li data-copy-en="General relativity changes the balance because pressure itself contributes to gravity. The Tolman-Oppenheimer-Volkoff equation replaces the Newtonian hydrostatic equation."
+                  data-copy-zh="广义相对论会改写平衡，因为压强本身也参与产生引力。托尔曼—奥本海默—沃尔科夫方程取代了牛顿式静力方程。">General relativity changes the balance because pressure itself contributes to gravity. The Tolman-Oppenheimer-Volkoff equation replaces the Newtonian hydrostatic equation.</li>
+              <li data-copy-en="A free neutron gas is too soft: the original 1939 calculation produced a maximum mass below what real neutron stars clearly reach. Short-range nuclear repulsion and the dense-matter equation of state are essential."
+                  data-copy-zh="自由中子气本身太“软”：1939 年的原始计算给出的最大质量低于真实中子星显然达到的范围。短程核排斥与致密物质状态方程是必不可少的。">A free neutron gas is too soft: the original 1939 calculation produced a maximum mass below what real neutron stars clearly reach. Short-range nuclear repulsion and the dense-matter equation of state are essential.</li>
+              <li data-copy-en="Massive pulsars near 2 M☉ set a firm observational floor, while multimessenger events such as GW170817 constrain how stiff the equation of state can be. The precise collapse threshold remains model-dependent."
+                  data-copy-zh="质量接近 2 M☉ 的大质量脉冲星给出了坚实的观测下界，而 GW170817 这样的多信使事件则限制了状态方程能有多“硬”。精确的塌缩阈值仍依赖模型。">Massive pulsars near 2 M☉ set a firm observational floor, while multimessenger events such as GW170817 constrain how stiff the equation of state can be. The precise collapse threshold remains model-dependent.</li>
             </ol>
-            <p class="derivation-note" data-copy-en="Unlike the Chandrasekhar mass, this value is not derived from first principles alone. It depends on the equation of state of matter denser than an atomic nucleus, which remains an open research question."
-               data-copy-zh="与钱德拉塞卡质量不同，这一数值并非仅由第一性原理导出。它依赖于比原子核还致密的物质状态方程，而后者仍是开放的研究课题。">Unlike the Chandrasekhar mass, this value is not derived from first principles alone. It depends on the equation of state of matter denser than an atomic nucleus, which remains an open research question.</p>
+            <p class="derivation-note" data-copy-en="Unlike the Chandrasekhar mass, this value is not fixed by one clean first-principles argument. It depends on the equation of state of matter denser than an atomic nucleus, which is still an active research frontier."
+               data-copy-zh="与钱德拉塞卡质量不同，这一数值并不是由一条干净的第一性原理论证唯一固定下来的。它依赖于比原子核还致密的物质状态方程，而这仍是活跃的研究前沿。">Unlike the Chandrasekhar mass, this value is not fixed by one clean first-principles argument. It depends on the equation of state of matter denser than an atomic nucleus, which is still an active research frontier.</p>
+            <p class="claim-links"><span class="claim-label" data-copy-en="Claim links" data-copy-zh="对应来源">Claim links</span><a class="claim-chip" href="https://doi.org/10.1103/PhysRev.55.374">Oppenheimer-Volkoff 1939</a><a class="claim-chip" href="https://arxiv.org/abs/1512.07820">NS EOS review</a><a class="claim-chip" href="https://www.ligo.caltech.edu/page/press-release-gw170817">LIGO GW170817</a></p>
           </article>
 
           <article class="derivation">
             <h3 data-copy-en="Eddington luminosity" data-copy-zh="爱丁顿光度极限">Eddington luminosity</h3>
-            <p class="derivation-lede" data-copy-en="The brightest a spherical object can shine before its own light blows it apart."
-               data-copy-zh="球对称天体在被自身辐射吹散之前所能达到的最大光度。">The brightest a spherical object can shine before its own light blows it apart.</p>
+            <p class="derivation-lede" data-copy-en="The brightest a spherical source can shine before radiation pressure wins over gravity."
+               data-copy-zh="球对称天体在辐射压战胜引力之前所能达到的最亮状态。">The brightest a spherical source can shine before radiation pressure wins over gravity.</p>
             <ol>
               <li data-copy-en="Outgoing photons scatter off free electrons and push them outward. The force on one electron is L σ_T / (4π r² c), where σ_T is the Thomson cross-section."
-                  data-copy-zh="向外传播的光子被自由电子散射并将其向外推。作用在单个电子上的力为 L σ_T / (4π r² c)，其中 σ_T 为汤姆孙散射截面。">Outgoing photons scatter off free electrons and push them outward. The force on one electron is L σ_T / (4π r² c), where σ_T is the Thomson cross-section.</li>
-              <li data-copy-en="Electrons cannot leave alone; electrostatic attraction drags protons with them. So gravity must be evaluated on the pair, essentially one proton mass: G M m_p / r²."
-                  data-copy-zh="电子无法单独逃逸，静电吸引会把质子一起带走。因此引力应作用于电子-质子对，其质量基本等于一个质子质量：G M m_p / r²。">Electrons cannot leave alone; electrostatic attraction drags protons with them. So gravity must be evaluated on the pair, essentially one proton mass: G M m_p / r².</li>
-              <li data-copy-en="Both forces fall off as 1/r², so distance cancels. The balance holds everywhere at once or nowhere at all."
-                  data-copy-zh="两种力都按 1/r² 衰减，距离因此抵消。该平衡要么处处成立，要么处处不成立。">Both forces fall off as 1/r², so distance cancels. The balance holds everywhere at once or nowhere at all.</li>
+                  data-copy-zh="向外传播的光子会被自由电子散射，并把电子向外推。作用在单个电子上的力为 L σ_T / (4π r² c)，其中 σ_T 是汤姆孙散射截面。">Outgoing photons scatter off free electrons and push them outward. The force on one electron is L σ_T / (4π r² c), where σ_T is the Thomson cross-section.</li>
+              <li data-copy-en="Electrons cannot leave alone; electrostatic attraction drags ions with them. Gravity therefore acts on nearly a proton mass per electron."
+                  data-copy-zh="电子无法单独逃逸；静电吸引会把离子一起带走。因此，引力基本上作用在“每个电子对应一个质子质量”的组合上。">Electrons cannot leave alone; electrostatic attraction drags ions with them. Gravity therefore acts on nearly a proton mass per electron.</li>
+              <li data-copy-en="Both forces fall off as 1/r², so distance cancels. The balance either holds everywhere in the flow or nowhere at all."
+                  data-copy-zh="两种力都按 1/r² 衰减，因此距离会抵消。这个平衡要么在整个流体中处处成立，要么处处都不成立。">Both forces fall off as 1/r², so distance cancels. The balance either holds everywhere in the flow or nowhere at all.</li>
               <li data-copy-en="Setting them equal gives L_Edd = 4π G M m_p c / σ_T ≈ 1.26 × 10³¹ (M/M☉) watts, about 32 000 solar luminosities per solar mass."
-                  data-copy-zh="令两者相等得 L_Edd = 4π G M m_p c / σ_T ≈ 1.26 × 10³¹ (M/M☉) 瓦，约合每太阳质量 32 000 倍太阳光度。">Setting them equal gives L_Edd = 4π G M m_p c / σ_T ≈ 1.26 × 10³¹ (M/M☉) watts, about 32 000 solar luminosities per solar mass.</li>
+                  data-copy-zh="令两者相等可得 L_Edd = 4π G M m_p c / σ_T ≈ 1.26 × 10³¹ (M/M☉) 瓦，也就是每太阳质量约 32 000 倍太阳光度。">Setting them equal gives L_Edd = 4π G M m_p c / σ_T ≈ 1.26 × 10³¹ (M/M☉) watts, about 32 000 solar luminosities per solar mass.</li>
             </ol>
-            <p class="derivation-note" data-copy-en="This caps how fast a black hole can grow by spherical accretion and explains why the most massive stars shed matter in fierce winds. Real sources exceed it when geometry is not spherical, since radiation can escape through thin channels while matter falls in elsewhere."
-               data-copy-zh="它限制了黑洞通过球对称吸积增长的速度，也解释了最大质量恒星为何以剧烈星风抛射物质。当几何不是球对称时，真实天体可以超过该极限：辐射可从稀薄通道逃逸，物质则从别处继续落入。">This caps how fast a black hole can grow by spherical accretion and explains why the most massive stars shed matter in fierce winds. Real sources exceed it when geometry is not spherical, since radiation can escape through thin channels while matter falls in elsewhere.</p>
+            <p class="derivation-note" data-copy-en="This caps spherical accretion and helps explain why very massive stars shed matter in powerful winds. Real disks and jets can exceed it locally because the geometry is not spherical and radiation can escape along preferred directions."
+               data-copy-zh="它限制了球对称吸积，并帮助解释极大质量恒星为何会以强烈星风抛射物质。真实的盘和喷流可在局部超过它，因为几何并非球对称，辐射也能沿优先方向逃逸。">This caps spherical accretion and helps explain why very massive stars shed matter in powerful winds. Real disks and jets can exceed it locally because the geometry is not spherical and radiation can escape along preferred directions.</p>
+            <p class="claim-links"><span class="claim-label" data-copy-en="Claim links" data-copy-zh="对应来源">Claim links</span><a class="claim-chip" href="https://doi.org/10.1146/annurev-astro-081811-125534">Langer 2012</a><a class="claim-chip" href="https://www.nobelprize.org/uploads/2018/06/advanced-physicsprize2011-1.pdf">Nobel 2011</a></p>
+          </article>
+        </div>
+
+        <div class="lab compact-object-lab">
+          <div class="lab-stage astro-stage">
+            <canvas id="compactCanvas" aria-label="Compact-object mass-radius sketch comparing white dwarfs neutron stars and black holes" data-aria-en="Compact-object mass-radius sketch comparing white dwarfs neutron stars and black holes" data-aria-zh="比较白矮星、中子星与黑洞的致密天体质量-半径示意">A mass-radius sketch shows a white-dwarf branch shrinking with mass, a neutron-star band with uncertain radius, and a black-hole horizon radius that grows linearly with mass.</canvas>
+            <div class="lab-overlay">
+              <span id="compactHeadline" class="lab-readout">White-dwarf radii fall as mass rises.</span>
+              <span id="compactSecondary" class="lab-readout secondary">Neutron-star radii and maximum masses are constrained by data but still equation-of-state dependent.</span>
+            </div>
+          </div>
+          <div class="lab-controls">
+            <h3 data-copy-en="Compact objects: what is known, and what still depends on the equation of state"
+                data-copy-zh="致密天体：哪些已知，哪些仍依赖状态方程">Compact objects: what is known, and what still depends on the equation of state</h3>
+            <p data-copy-en="Switch families, then slide the mass. White-dwarf mass-radius behavior is comparatively robust. Neutron-star radii and their true maximum mass are constrained by pulsars, X-rays, and mergers, but they still depend on dense-matter physics. For black holes, the horizon size is known once the mass is known; the uncertain part is the threshold at which collapse becomes unavoidable. The slider swaps between supported teaching ranges for each family, not fundamental forbidden-mass rules for nature."
+               data-copy-zh="切换家族，再拖动质量。白矮星的质量—半径关系相对稳固；中子星半径和真正的最大质量受到脉冲星、X 射线与并合事件约束，但仍依赖致密物质物理。对黑洞而言，一旦质量给定，视界尺寸就确定；真正不确定的是塌缩何时变得不可避免。这个滑块会为不同家族切换到“教学上有支撑的范围”，而不是宣称自然界存在绝对禁止的质量区间。">Switch families, then slide the mass. White-dwarf mass-radius behavior is comparatively robust. Neutron-star radii and their true maximum mass are constrained by pulsars, X-rays, and mergers, but they still depend on dense-matter physics. For black holes, the horizon size is known once the mass is known; the uncertain part is the threshold at which collapse becomes unavoidable. The slider swaps between supported teaching ranges for each family, not fundamental forbidden-mass rules for nature.</p>
+            <div class="mode-switch" role="group" aria-label="Compact object family" data-aria-en="Compact object family" data-aria-zh="致密天体家族">
+              <button type="button" class="mode-chip active" data-compact-mode="white-dwarf" aria-pressed="true" data-copy-en="White dwarf" data-copy-zh="白矮星">White dwarf</button>
+              <button type="button" class="mode-chip" data-compact-mode="neutron-star" aria-pressed="false" data-copy-en="Neutron star" data-copy-zh="中子星">Neutron star</button>
+              <button type="button" class="mode-chip" data-compact-mode="black-hole" aria-pressed="false" data-copy-en="Black hole" data-copy-zh="黑洞">Black hole</button>
+            </div>
+            <div class="control-group">
+              <label for="compactMass"><span data-copy-en="Selected mass" data-copy-zh="选定质量">Selected mass</span><output id="compactMassOut" for="compactMass">1.00 M☉</output></label>
+              <input id="compactMass" type="range" min="0.45" max="1.38" value="1" step="0.01">
+            </div>
+            <p id="compactRangeNote" class="lab-note compact-range-note">Supported teaching range here: 0.45–1.38 M☉ for cold carbon-oxygen white dwarfs. This instructional span is representative, not a claim that every other compact-object mass is forbidden.</p>
+            <dl id="compactDetail" class="stage-detail">
+              <dt data-copy-en="Radius trend" data-copy-zh="半径趋势">Radius trend</dt>
+              <dd id="compactRadius">Cold white dwarfs get smaller as they approach the electron-degeneracy limit.</dd>
+              <dt data-copy-en="What sets the support" data-copy-zh="支撑来自什么">What sets the support</dt>
+              <dd id="compactSupport">Electron degeneracy sets the branch until the near-Chandrasekhar limit is reached.</dd>
+              <dt data-copy-en="What is firm vs model-dependent" data-copy-zh="哪些稳固，哪些依赖模型">What is firm vs model-dependent</dt>
+              <dd id="compactKnown">The white-dwarf branch is well understood. The exact neutron-star collapse threshold is not.</dd>
+            </dl>
+            <p class="lab-note"><span class="rep-badge model" data-copy-en="Known curve + uncertain band" data-copy-zh="已知曲线 + 不确定带">Known curve + uncertain band</span><br><span data-copy-en="The white-dwarf and Schwarzschild-radius tracks are formula-led teaching curves. The neutron-star band is intentionally broad because radius and maximum-mass predictions still depend on the dense-matter equation of state, rotation, and thermal support. The mode-specific slider windows are supported teaching ranges, not claims of exact universal cutoffs."
+              data-copy-zh="白矮星与史瓦西半径轨迹是由公式引导的教学曲线。中子星带被故意画宽，因为其半径与最大质量预测仍依赖致密物质状态方程、自转与热支撑。不同模式下的滑块范围只是“教学上有支撑的区间”，并不是宣称自然界存在精确而普适的绝对截断。">The white-dwarf and Schwarzschild-radius tracks are formula-led teaching curves. The neutron-star band is intentionally broad because radius and maximum-mass predictions still depend on the dense-matter equation of state, rotation, and thermal support. The mode-specific slider windows are supported teaching ranges, not claims of exact universal cutoffs.</span></p>
+            <p class="claim-links"><span class="claim-label" data-copy-en="Claim links" data-copy-zh="对应来源">Claim links</span><a class="claim-chip" href="https://arxiv.org/abs/1401.0819">WD mass-radius</a><a class="claim-chip" href="https://arxiv.org/abs/1512.07820">NS EOS review</a><a class="claim-chip" href="https://arxiv.org/abs/1904.10002">GW170817 EOS review</a></p>
+          </div>
+        </div>
+      </section>
+
+      <section id="type-ia" class="topic-section">
+        <header>
+          <h2 data-copy-en="One important Type Ia channel: single-degenerate, near-Chandrasekhar, and not universal."
+              data-copy-zh="一种重要的 Ia 型通道：单简并、近钱德拉塞卡，但绝非唯一。">One important Type Ia channel: single-degenerate, near-Chandrasekhar, and not universal.</h2>
+          <p data-copy-en="The animation below follows a carbon-oxygen white dwarf accreting from a non-degenerate companion. That pathway is scientifically important, but it is not the only serious contender. Double-degenerate mergers and sub-Chandrasekhar double-detonation channels are also actively studied, and the population mix remains contested."
+             data-copy-zh="下面的动画追踪一颗碳氧白矮星从一颗非简并伴星吸积的过程。这条路径在科学上非常重要，但并不是唯一有力候选。双简并并合与次钱德拉塞卡的双爆轰通道也都在被积极研究，而不同通道在人群中的占比仍有争议。">
+            The animation below follows a carbon-oxygen white dwarf accreting from a non-degenerate companion. That pathway is scientifically important, but it is not the only serious contender. Double-degenerate mergers and sub-Chandrasekhar double-detonation channels are also actively studied, and the population mix remains contested.
+          </p>
+          <p class="claim-links">
+            <span class="claim-label" data-copy-en="Claim links" data-copy-zh="对应来源">Claim links</span>
+            <a class="claim-chip" href="https://arxiv.org/abs/1312.0628">Maoz+2014</a>
+            <a class="claim-chip" href="https://arxiv.org/abs/astro-ph/0006305">Hillebrandt-Niemeyer 2000</a>
+          </p>
+        </header>
+
+        <div class="lab">
+          <div class="lab-stage astro-stage">
+            <canvas id="typeIaCanvas" aria-label="Single-degenerate Type Ia supernova pathway from accretion to thermonuclear disruption" data-aria-en="Single-degenerate Type Ia supernova pathway from accretion to thermonuclear disruption" data-aria-zh="从吸积到热核解体的单简并 Ia 型超新星路径">A carbon-oxygen white dwarf accretes from a non-degenerate companion, approaches the Chandrasekhar mass, ignites carbon near the center, and is fully disrupted in a thermonuclear supernova.</canvas>
+            <div class="lab-overlay">
+              <span id="typeIaReadout" class="lab-readout">Accretion begins from a non-degenerate donor.</span>
+              <span id="typeIaYield" class="lab-readout secondary">The star has not exploded yet; surface flashes can still expel fuel.</span>
+            </div>
+          </div>
+          <div class="lab-controls">
+            <h3 data-copy-en="Single-degenerate pathway, step by step" data-copy-zh="单简并路径，逐步展开">Single-degenerate pathway, step by step</h3>
+            <p data-copy-en="Scrub from a carbon-oxygen white dwarf plus companion through mass transfer, surface burning or nova loss, approach to a near-Chandrasekhar core, central carbon ignition, thermonuclear runaway, and complete disruption. The flame physics is drawn as a deflagration-to-detonation family because the exact transition remains model-dependent."
+               data-copy-zh="拖动查看一颗碳氧白矮星与伴星如何经历质量转移、表面燃烧或新星损失、逼近近钱德拉塞卡核心、中心碳点火、热核失控，直至完全解体。图中把火焰画成“湍燃到爆轰”的模型家族，因为精确转变机制仍依赖模型。">Scrub from a carbon-oxygen white dwarf plus companion through mass transfer, surface burning or nova loss, approach to a near-Chandrasekhar core, central carbon ignition, thermonuclear runaway, and complete disruption. The flame physics is drawn as a deflagration-to-detonation family because the exact transition remains model-dependent.</p>
+            <div class="control-group">
+              <label for="typeIaStage"><span data-copy-en="Pathway stage" data-copy-zh="路径阶段">Pathway stage</span><output id="typeIaStageOut" for="typeIaStage">0 / 6</output></label>
+              <input id="typeIaStage" type="range" min="0" max="6" value="0" step="0.01">
+            </div>
+            <dl id="typeIaDetail" class="stage-detail">
+              <dt data-copy-en="Binary state" data-copy-zh="双星状态">Binary state</dt>
+              <dd id="typeIaBinary">A non-degenerate donor overflows or sheds matter that the white dwarf can capture.</dd>
+              <dt data-copy-en="Dominant physics" data-copy-zh="主导物理">Dominant physics</dt>
+              <dd id="typeIaPhysics">Surface accretion can grow the dwarf, burn steadily, or erupt as novae that remove some of the newly arrived fuel.</dd>
+              <dt data-copy-en="Products and caveats" data-copy-zh="产物与注意事项">Products and caveats</dt>
+              <dd id="typeIaProducts">Only after central carbon ignition and runaway burning does the star synthesize large amounts of nickel-56, silicon-group material, and iron-peak ejecta.</dd>
+            </dl>
+            <p class="lab-note"><span class="rep-badge model" data-copy-en="Observed ingredients + contested ignition details" data-copy-zh="观测支持的要素 + 仍有争议的点火细节">Observed ingredients + contested ignition details</span><br><span data-copy-en="This is one progenitor and explosion family, not the whole Type Ia population. The near-Chandrasekhar trigger, the efficiency of mass retention through nova cycles, and whether a delayed detonation occurs are all areas of active work."
+              data-copy-zh="这只是 Ia 型超新星的一类前身星与爆炸家族，而不是全部人群。近钱德拉塞卡触发、经由新星循环保留多少质量，以及是否真的发生延迟爆轰，都是仍在积极研究的问题。">This is one progenitor and explosion family, not the whole Type Ia population. The near-Chandrasekhar trigger, the efficiency of mass retention through nova cycles, and whether a delayed detonation occurs are all areas of active work.</span></p>
+          </div>
+        </div>
+
+        <div class="classification-grid">
+          <article class="classification">
+            <span class="science-status model" data-copy-en="Accretion caveat" data-copy-zh="吸积注意事项">Accretion caveat</span>
+            <h3 data-copy-en="Surface flashes do not guarantee growth" data-copy-zh="表面闪光并不保证增重">Surface flashes do not guarantee growth</h3>
+            <p data-copy-en="Hydrogen or helium arriving on the white dwarf can burn stably, flash, or explode in recurrent novae. Some of that freshly accreted material can be lost again, so 'accretion from a companion' is not automatically 'steady growth to the limit.'"
+               data-copy-zh="落到白矮星表面的氢或氦，既可能稳定燃烧，也可能闪燃，或以反复新星的方式爆发。部分新到达的物质可能再次被抛走，因此“从伴星吸积”并不自动等于“稳步增重直到极限”。">Hydrogen or helium arriving on the white dwarf can burn stably, flash, or explode in recurrent novae. Some of that freshly accreted material can be lost again, so 'accretion from a companion' is not automatically 'steady growth to the limit.'</p>
+            <p class="claim-links"><span class="claim-label" data-copy-en="Claim links" data-copy-zh="对应来源">Claim links</span><a class="claim-chip" href="https://arxiv.org/abs/1110.0055">Single-degenerate review</a><a class="claim-chip" href="https://arxiv.org/abs/1312.0628">Maoz+2014</a></p>
+          </article>
+          <article class="classification">
+            <span class="science-status inferred" data-copy-en="Alternative channels" data-copy-zh="其他通道">Alternative channels</span>
+            <h3 data-copy-en="Double-degenerate and sub-Chandrasekhar routes also exist" data-copy-zh="双简并与次钱德拉塞卡路径也存在">Double-degenerate and sub-Chandrasekhar routes also exist</h3>
+            <p data-copy-en="Two white dwarfs can merge, and a helium shell on a sub-Chandrasekhar white dwarf can detonate and trigger carbon burning underneath. Different channels may contribute in different stellar populations, and the observational mix is still unresolved."
+               data-copy-zh="两颗白矮星可以并合；一颗次钱德拉塞卡白矮星表面的氦壳也可能先爆轰，再触发内部碳燃烧。不同通道可能在不同恒星族群中占比不同，而观测上的人群混合仍未解决。">Two white dwarfs can merge, and a helium shell on a sub-Chandrasekhar white dwarf can detonate and trigger carbon burning underneath. Different channels may contribute in different stellar populations, and the observational mix is still unresolved.</p>
+            <p class="claim-links"><span class="claim-label" data-copy-en="Claim links" data-copy-zh="对应来源">Claim links</span><a class="claim-chip" href="https://arxiv.org/abs/1801.04031">Alternative-channel review</a><a class="claim-chip" href="https://arxiv.org/abs/1312.0628">Maoz+2014</a></p>
+          </article>
+          <article class="classification">
+            <span class="science-status established" data-copy-en="Nucleosynthesis and light curves" data-copy-zh="核合成与光变曲线">Nucleosynthesis and light curves</span>
+            <h3 data-copy-en="The star is disrupted, leaving radioactive and intermediate-mass ejecta" data-copy-zh="恒星被完全解体，抛出放射性与中间质量元素">The star is disrupted, leaving radioactive and intermediate-mass ejecta</h3>
+            <p data-copy-en="A thermonuclear Type Ia does not leave a neutron star or black hole remnant. It synthesizes nickel-56, iron-peak material, and intermediate-mass elements such as silicon, sulfur, and calcium; the nickel-56 decay chain powers much of the light curve."
+               data-copy-zh="热核型 Ia 不会留下中子星或黑洞遗迹。它会合成镍-56、铁峰元素以及硅、硫、钙等中间质量元素；镍-56 的衰变链为光变曲线提供了大量能量。">A thermonuclear Type Ia does not leave a neutron star or black hole remnant. It synthesizes nickel-56, iron-peak material, and intermediate-mass elements such as silicon, sulfur, and calcium; the nickel-56 decay chain powers much of the light curve.</p>
+            <p class="claim-links"><span class="claim-label" data-copy-en="Claim links" data-copy-zh="对应来源">Claim links</span><a class="claim-chip" href="https://arxiv.org/abs/astro-ph/0006305">Explosion-model review</a><a class="claim-chip" href="https://doi.org/10.1086/186970">Phillips 1993</a></p>
           </article>
         </div>
       </section>
@@ -367,6 +521,12 @@
           <p data-copy-en="A black hole is a region bounded by an event horizon: future-directed light inside cannot reach distant observers. It is not a material surface, a cosmic vacuum cleaner, or automatically a tunnel. The story begins with stellar structure, then divides into observations, classical relativity, quantum open questions, and explicitly speculative mathematics."
              data-copy-zh="黑洞是由事件视界围成的区域：视界内面向未来传播的光无法抵达远方观察者。它不是物质表面，不是宇宙吸尘器，也不会自动成为隧道。完整故事从恒星结构开始，再分为观测证据、经典相对论、量子开放问题与明确标注的推测性数学。">
             A black hole is a region bounded by an event horizon: future-directed light inside cannot reach distant observers. It is not a material surface, a cosmic vacuum cleaner, or automatically a tunnel. The story begins with stellar structure, then divides into observations, classical relativity, quantum open questions, and explicitly speculative mathematics.
+          </p>
+          <p class="claim-links">
+            <span class="claim-label" data-copy-en="Claim links" data-copy-zh="对应来源">Claim links</span>
+            <a class="claim-chip" href="https://www.ligo.caltech.edu/page/press-release-gw170817">LIGO GW170817</a>
+            <a class="claim-chip" href="https://www.eso.org/public/news/eso1907/">EHT 2019</a>
+            <a class="claim-chip" href="https://www.nobelprize.org/prizes/physics/2020/press-release/">Nobel 2020</a>
           </p>
         </header>
 
@@ -411,7 +571,7 @@
             <h3 data-copy-en="Mass, spin, and charge" data-copy-zh="质量、自旋与电荷">Mass, spin, and charge</h3>
             <p data-copy-en="A stationary classical black-hole exterior is characterized by mass M, angular momentum J, and electric charge Q. Schwarzschild is non-spinning and uncharged; Kerr spins and is the standard astrophysical model; Kerr-Newman also carries charge."
                data-copy-zh="稳定经典黑洞的外部由质量 M、角动量 J 与电荷 Q 表征。史瓦西黑洞不旋转且不带电；克尔黑洞旋转，是标准天体模型；克尔—纽曼黑洞还带电。">A stationary classical black-hole exterior is characterized by mass M, angular momentum J, and electric charge Q. Schwarzschild is non-spinning and uncharged; Kerr spins and is the standard astrophysical model; Kerr-Newman also carries charge.</p>
-            <span class="formula">M · J · Q</span>
+            <span class="formula">M, J, Q</span>
           </article>
           <article class="classification">
             <span class="science-status inferred" data-copy-en="Astrophysical expectation" data-copy-zh="天体物理预期">Astrophysical expectation</span>
@@ -448,6 +608,7 @@
             <p data-copy-en="Infalling gas almost always carries nonzero angular momentum. Magnetic stresses and turbulence transport angular momentum outward while collisions and radiation remove energy. If cooling is efficient, vertical pressure balance gives H/R ≈ cs/vK: cold gas has sound speed far below orbital speed and settles into a thin disk."
                data-copy-zh="落入气体几乎总带有非零角动量。磁应力与湍流把角动量向外输运，碰撞与辐射则移除能量。若冷却高效，垂直压强平衡给出 H/R ≈ cs/vK：冷气体的声速远低于轨道速度，于是沉降为薄盘。">Infalling gas almost always carries nonzero angular momentum. Magnetic stresses and turbulence transport angular momentum outward while collisions and radiation remove energy. If cooling is efficient, vertical pressure balance gives H/R ≈ cs/vK: cold gas has sound speed far below orbital speed and settles into a thin disk.</p>
             <span class="formula">H/R ≈ c<sub>s</sub>/v<sub>K</sub> ≪ 1</span>
+            <p class="claim-links"><span class="claim-label" data-copy-en="Claim links" data-copy-zh="对应来源">Claim links</span><a class="claim-chip" href="https://doi.org/10.1146/annurev.aa.19.090181.001033">Pringle 1981</a><a class="claim-chip" href="https://ui.adsabs.harvard.edu/abs/1973A%26A....24..337S/abstract">Shakura-Sunyaev 1973</a></p>
           </article>
           <article class="classification">
             <span class="science-status inferred" data-copy-en="Important exceptions" data-copy-zh="重要例外">Important exceptions</span>
@@ -455,6 +616,7 @@
             <p data-copy-en="Hot radiatively inefficient flows retain energy and puff into thick tori. Super-Eddington or slim disks can thicken through radiation pressure and advection. Near-spherical accretion is possible only when incoming gas has exceptionally little net angular momentum."
                data-copy-zh="炽热且辐射效率低的吸积流保留能量，会膨胀成厚环面；超爱丁顿或瘦盘可因辐射压与平流而变厚。只有入流净角动量异常小时，吸积才接近球对称。">Hot radiatively inefficient flows retain energy and puff into thick tori. Super-Eddington or slim disks can thicken through radiation pressure and advection. Near-spherical accretion is possible only when incoming gas has exceptionally little net angular momentum.</p>
             <span class="formula" data-copy-en="A sphere is the low-angular-momentum exception." data-copy-zh="球对称是低角动量例外。">A sphere is the low-angular-momentum exception.</span>
+            <p class="claim-links"><span class="claim-label" data-copy-en="Claim links" data-copy-zh="对应来源">Claim links</span><a class="claim-chip" href="https://doi.org/10.1146/annurev.aa.19.090181.001033">Pringle 1981 (low-angular-momentum limit)</a><a class="claim-chip" href="https://doi.org/10.1146/annurev-astro-082812-141003">Yuan &amp; Narayan 2014 (hot flows)</a><a class="claim-chip" href="https://doi.org/10.1086/166683">Abramowicz et al. 1988 (slim disks)</a></p>
           </article>
         </div>
 
@@ -487,6 +649,71 @@
         </div>
       </section>
 
+      <section id="jets" class="topic-section">
+        <header>
+          <h2 data-copy-en="Relativistic jets can look faster than light without ever outrunning light."
+              data-copy-zh="相对论喷流看起来能超光速，但从未真的跑赢光。">Relativistic jets can look faster than light without ever outrunning light.</h2>
+          <p data-copy-en="A bright knot moving almost toward us emits later photons from a position closer to us. The arrival-time gap shrinks, so the apparent transverse speed can exceed c even though the material speed never does. Beaming also brightens the approaching jet and dims the receding one."
+             data-copy-zh="当一团明亮物质几乎朝我们运动时，后发出的光子会从离我们更近的位置出发。到达时间间隔因此变小，所以表观横向速度可以超过 c，尽管物质本身从未超光速。相对论束射还会让迎面而来的喷流更亮、远离我们的那一侧更暗。">
+            A bright knot moving almost toward us emits later photons from a position closer to us. The arrival-time gap shrinks, so the apparent transverse speed can exceed c even though the material speed never does. Beaming also brightens the approaching jet and dims the receding one.
+          </p>
+          <p class="claim-links">
+            <span class="claim-label" data-copy-en="Claim links" data-copy-zh="对应来源">Claim links</span>
+            <a class="claim-chip" href="https://doi.org/10.1038/211468a0">Rees 1966</a>
+            <a class="claim-chip" href="./relativity.html#clock-lab">Relativity lab</a>
+          </p>
+        </header>
+
+        <div class="lab">
+          <div class="lab-stage astro-stage">
+            <canvas id="jetCanvas" aria-label="Relativistic jet beaming and apparent superluminal motion" data-aria-en="Relativistic jet beaming and apparent superluminal motion" data-aria-zh="相对论喷流束射与表观超光速运动">A jet knot moves close to the line of sight; the approaching side brightens and the apparent transverse speed can exceed the speed of light without the material doing so.</canvas>
+            <div class="lab-overlay">
+              <span id="jetReadout" class="lab-readout">Approaching knots arrive with compressed timing.</span>
+              <span id="jetApparent" class="lab-readout secondary">β_app = 1.00 c, while the material speed remains below c.</span>
+            </div>
+          </div>
+          <div class="lab-controls">
+            <h3 data-copy-en="Beaming and apparent superluminal motion" data-copy-zh="束射与表观超光速">Beaming and apparent superluminal motion</h3>
+            <p data-copy-en="Increase the speed and tip the jet closer to your line of sight. The knot still moves below light speed, but the later light has less distance left to travel, so the apparent sideways speed can exceed c. This is a relativity-and-light-travel-time effect, not real faster-than-light motion."
+               data-copy-zh="提高速度，并把喷流转得更接近你的视线方向。物质本身仍低于光速，但后发出的光剩下的路程更短，因此表观横向速度可以超过 c。这是相对论加上光行时的效果，而不是真正的超光速运动。">Increase the speed and tip the jet closer to your line of sight. The knot still moves below light speed, but the later light has less distance left to travel, so the apparent sideways speed can exceed c. This is a relativity-and-light-travel-time effect, not real faster-than-light motion.</p>
+            <div class="control-group">
+              <label for="jetSpeed"><span data-copy-en="Jet speed" data-copy-zh="喷流速度">Jet speed</span><output id="jetSpeedOut" for="jetSpeed">0.90 c</output></label>
+              <input id="jetSpeed" type="range" min="0.2" max="0.995" value="0.9" step="0.001">
+            </div>
+            <div class="control-group">
+              <label for="jetAngle"><span data-copy-en="Viewing angle" data-copy-zh="视线夹角">Viewing angle</span><output id="jetAngleOut" for="jetAngle">18°</output></label>
+              <input id="jetAngle" type="range" min="3" max="75" value="18" step="0.1">
+            </div>
+            <dl id="jetDetail" class="stage-detail">
+              <dt data-copy-en="What changes" data-copy-zh="改变了什么">What changes</dt>
+              <dd id="jetTiming">Smaller viewing angles make the arrival interval between two flashes much shorter than the emission interval.</dd>
+              <dt data-copy-en="What does not change" data-copy-zh="什么没有改变">What does not change</dt>
+              <dd id="jetInvariant">No matter what the geometry is, the knot's actual speed stays below c.</dd>
+              <dt data-copy-en="Astrophysical context" data-copy-zh="天体物理背景">Astrophysical context</dt>
+              <dd id="jetContext">The same beaming that creates superluminal appearances also makes blazars and some radio jets strongly one-sided.</dd>
+            </dl>
+            <p class="lab-note"><span class="rep-badge model" data-copy-en="Light-travel-time teaching model" data-copy-zh="光行时教学模型">Light-travel-time teaching model</span><br><span data-copy-en="The knot, brightness contrast, and emission times are schematic. The relativistic statement is exact: the apparent speed follows β_app = β sinθ / (1 − β cosθ)."
+              data-copy-zh="结点、亮度对比与发光时刻都是示意。相对论结论本身是精确的：表观速度满足 β_app = β sinθ / (1 − β cosθ)。">The knot, brightness contrast, and emission times are schematic. The relativistic statement is exact: the apparent speed follows β_app = β sinθ / (1 − β cosθ).</span></p>
+          </div>
+        </div>
+
+        <div class="classification-grid">
+          <article class="classification">
+            <span class="science-status established" data-copy-en="Observed beaming effect" data-copy-zh="已观测到的束射效应">Observed beaming effect</span>
+            <h3 data-copy-en="Approaching jets are brighter" data-copy-zh="迎面喷流更亮">Approaching jets are brighter</h3>
+            <p data-copy-en="Relativistic aberration and Doppler boosting concentrate more power into the forward direction of motion. That is why jets pointed almost toward us can dominate the image while the receding side fades."
+               data-copy-zh="相对论像差与多普勒增亮会把更多能量集中到运动前方。因此，当喷流几乎朝向我们时，迎面一侧会主导整张图，而远离的一侧会迅速变暗。">Relativistic aberration and Doppler boosting concentrate more power into the forward direction of motion. That is why jets pointed almost toward us can dominate the image while the receding side fades.</p>
+          </article>
+          <article class="classification">
+            <span class="science-status model" data-copy-en="Launch and collimation" data-copy-zh="发射与准直">Launch and collimation</span>
+            <h3 data-copy-en="The central engine is magnetic, relativistic, and still model-rich" data-copy-zh="中心引擎依赖磁场、相对论，而且仍有多种模型">The central engine is magnetic, relativistic, and still model-rich</h3>
+            <p data-copy-en="Jets are widely modeled as magnetized outflows from accretion disks and/or spinning compact objects. The existence of jets is well observed; the detailed partition between disk power, spin extraction, baryon loading, and collimation physics remains an active research area."
+               data-copy-zh="喷流通常被建模为来自吸积盘和/或旋转致密天体的磁化外流。喷流的存在已经被大量观测确立；但盘功率、自旋抽取、重子负载与准直物理之间究竟如何分工，仍是活跃研究领域。">Jets are widely modeled as magnetized outflows from accretion disks and/or spinning compact objects. The existence of jets is well observed; the detailed partition between disk power, spin extraction, baryon loading, and collimation physics remains an active research area.</p>
+            <p class="claim-links"><span class="claim-label" data-copy-en="Claim links" data-copy-zh="对应来源">Claim links</span><a class="claim-chip" href="https://doi.org/10.1093/mnras/179.3.433">Blandford-Znajek 1977</a><a class="claim-chip" href="https://doi.org/10.1093/mnras/199.4.883">Blandford-Payne 1982</a></p>
+          </article>
+        </div>
+      </section>
+
       <section id="candles" class="topic-section">
         <header>
           <h2 data-copy-en="A standard candle is a source whose true brightness you can know."
@@ -494,6 +721,11 @@
           <p data-copy-en="Apparent brightness alone cannot give distance, because a faint nearby object and a brilliant distant one look identical. A standard candle breaks the tie: some locally measurable property, unaffected by distance, reveals the intrinsic luminosity."
              data-copy-zh="仅凭视亮度无法给出距离，因为近处的暗天体与远处的亮天体看起来完全一样。标准烛光打破了这种简并：某个可在本地测量、且与距离无关的性质，揭示了天体的真实光度。">
             Apparent brightness alone cannot give distance, because a faint nearby object and a brilliant distant one look identical. A standard candle breaks the tie: some locally measurable property, unaffected by distance, reveals the intrinsic luminosity.
+          </p>
+          <p class="claim-links">
+            <span class="claim-label" data-copy-en="Claim links" data-copy-zh="对应来源">Claim links</span>
+            <a class="claim-chip" href="https://doi.org/10.1086/186970">Phillips 1993</a>
+            <a class="claim-chip" href="https://www.nobelprize.org/uploads/2018/06/advanced-physicsprize2011-1.pdf">Nobel 2011</a>
           </p>
         </header>
 
@@ -523,10 +755,10 @@
           <article class="case">
             <h3 data-copy-en="Type Ia supernovae" data-copy-zh="Ia 型超新星">Type Ia supernovae</h3>
             <p class="case-scale" data-copy-en="Useful beyond 1000 Mpc" data-copy-zh="适用范围可超过 1000 Mpc">Useful beyond 1000 Mpc</p>
-            <p data-copy-en="A white dwarf accreting from a companion detonates when it nears the Chandrasekhar mass. Because that trigger mass is nearly the same everywhere, the amount of nickel-56 produced is nearly the same, and radioactive nickel decay powers the light curve."
-               data-copy-zh="从伴星吸积的白矮星在接近钱德拉塞卡质量时发生爆轰。由于这一触发质量在各处几乎相同，所生成的镍-56 数量也几乎相同，而正是放射性镍衰变驱动了光变曲线。">A white dwarf accreting from a companion detonates when it nears the Chandrasekhar mass. Because that trigger mass is nearly the same everywhere, the amount of nickel-56 produced is nearly the same, and radioactive nickel decay powers the light curve.</p>
-            <p class="case-caveat" data-copy-en="Not truly identical. They are standardised using the Phillips relation: intrinsically brighter events fade more slowly, so light-curve shape corrects the peak brightness. This is the tool that revealed accelerating expansion."
-               data-copy-zh="它们并非完全相同，而是通过菲利普斯关系加以“标准化”：本征更亮的事件衰减更慢，因此可用光变曲线形状修正峰值亮度。正是这一工具揭示了宇宙的加速膨胀。">Not truly identical. They are standardised using the Phillips relation: intrinsically brighter events fade more slowly, so light-curve shape corrects the peak brightness. This is the tool that revealed accelerating expansion.</p>
+            <p data-copy-en="See the dedicated section above for one single-degenerate pathway. As distance indicators, Type Ia events are useful because their light curves can be standardised: the brighter explosions decline more slowly, so light-curve shape predicts peak luminosity."
+               data-copy-zh="上面的专门章节展示了一条单简并路径。作为距离指示器，Ia 型超新星之所以有用，是因为它们的光变曲线可以被“标准化”：更亮的爆炸衰减得更慢，因此可由光变形状预测峰值光度。">See the dedicated section above for one single-degenerate pathway. As distance indicators, Type Ia events are useful because their light curves can be standardised: the brighter explosions decline more slowly, so light-curve shape predicts peak luminosity.</p>
+            <p class="case-caveat" data-copy-en="They are not perfect clones, and they do not all come from one progenitor channel. The Phillips relation and colour corrections are what make them powerful enough for cosmology—and they were central to the discovery of the accelerating universe."
+               data-copy-zh="它们不是完美复制品，也并非都来自同一种前身星通道。真正让它们足以用于宇宙学的是菲利普斯关系与颜色修正——而它们正是发现宇宙加速膨胀的核心工具。">They are not perfect clones, and they do not all come from one progenitor channel. The Phillips relation and colour corrections are what make them powerful enough for cosmology—and they were central to the discovery of the accelerating universe.</p>
           </article>
 
           <article class="case">
@@ -562,15 +794,105 @@
           <a href="./electrodynamics.html#redshift"><strong data-copy-en="Reading starlight" data-copy-zh="解读星光">Reading starlight</strong><span data-copy-en="Doppler, gravitational, and cosmological redshift each change the light differently, and only one of them stretches the apparent pace of distant events." data-copy-zh="多普勒红移、引力红移与宇宙学红移对光的改变各不相同，其中只有一种会拉长远方事件的表观节奏。">Doppler, gravitational, and cosmological redshift each change the light differently, and only one of them stretches the apparent pace of distant events.</span></a>
           <a href="../periodic-table/index.html?overlay=origin&amp;element=26"><strong data-copy-en="Where elements come from" data-copy-zh="元素从何而来">Where elements come from</strong><span data-copy-en="Trace each element back to the stellar or explosive process that made it, including the iron peak this page ends on." data-copy-zh="把每种元素追溯到产生它的恒星或爆发过程，包括本页最后停在的铁峰。">Trace each element back to the stellar or explosive process that made it, including the iron peak this page ends on.</span></a>
           <a href="./relativity.html"><strong data-copy-en="Curved spacetime" data-copy-zh="弯曲时空">Curved spacetime</strong><span data-copy-en="Neutron stars and black holes are where Newtonian gravity fails outright and the geometric description becomes mandatory." data-copy-zh="中子星与黑洞正是牛顿引力彻底失效、必须改用几何描述的地方。">Neutron stars and black holes are where Newtonian gravity fails outright and the geometric description becomes mandatory.</span></a>
+          <a href="./relativity.html#clock-lab"><strong data-copy-en="Why jets only look superluminal" data-copy-zh="为什么喷流只是“看似”超光速">Why jets only look superluminal</strong><span data-copy-en="The same light-travel-time geometry that sets moving-clock intuition also explains why a jet knot can appear to outrun light without doing so." data-copy-zh="建立运动时钟直觉的同一类光行时几何，也解释了为什么喷流结点能在表观上超光速，却并未真的跑赢光。">The same light-travel-time geometry that sets moving-clock intuition also explains why a jet knot can appear to outrun light without doing so.</span></a>
         </div>
       </section>
       <section id="references" class="topic-section">
         <header>
-          <h2 data-copy-en="Official paths into the high-gravity universe." data-copy-zh="沿官方资料继续探索强引力宇宙。">Official paths into the high-gravity universe.</h2>
-          <p data-copy-en="These agency and Nobel sources support the black-hole classifications, observations, and relativity used throughout this guide."
-             data-copy-zh="这些科学机构与诺贝尔奖资料，为本导览中的黑洞分类、观测与相对论提供依据。">These agency and Nobel sources support the black-hole classifications, observations, and relativity used throughout this guide.</p>
+          <h2 data-copy-en="Claim-by-claim sources for the page you just explored." data-copy-zh="为本页各项论断准备的逐项来源。">Claim-by-claim sources for the page you just explored.</h2>
+          <p data-copy-en="These reviews, original papers, and official releases are the backbone for the specific claims, caveats, and uncertainties called out above."
+             data-copy-zh="这些综述、原始论文与官方发布，是上文中各项具体论断、注意事项与不确定性的来源骨架。">These reviews, original papers, and official releases are the backbone for the specific claims, caveats, and uncertainties called out above.</p>
         </header>
-        <div class="reference-grid" data-reference-key="astrophysics"></div>
+        <div class="reference-grid">
+          <article class="reference-entry">
+            <a href="https://arxiv.org/abs/1312.0628">
+              <span>Review</span>
+              <strong>Maoz, Mannucci &amp; Nelemans (2014)</strong>
+              <span data-copy-en="Use for Type Ia progenitor channels, the single-degenerate caveat, and why the population mix remains unresolved."
+                    data-copy-zh="用于 Ia 型前身星通道、单简并路径的注意事项，以及为什么整个人群构成仍未解决。">Use for Type Ia progenitor channels, the single-degenerate caveat, and why the population mix remains unresolved.</span>
+            </a>
+          </article>
+          <article class="reference-entry">
+            <a href="https://arxiv.org/abs/astro-ph/0006305">
+              <span>Review</span>
+              <strong>Hillebrandt &amp; Niemeyer (2000)</strong>
+              <span data-copy-en="Use for thermonuclear runaway, deflagration versus detonation language, complete disruption, and Type Ia nucleosynthesis."
+                    data-copy-zh="用于热核失控、湍燃与爆轰的表述、完全解体以及 Ia 型核合成。">Use for thermonuclear runaway, deflagration versus detonation language, complete disruption, and Type Ia nucleosynthesis.</span>
+            </a>
+          </article>
+          <article class="reference-entry">
+            <a href="https://doi.org/10.1086/186970">
+              <span>Original paper</span>
+              <strong>Phillips (1993)</strong>
+              <span data-copy-en="Use for the luminosity-decline relation that standardizes Type Ia supernovae."
+                    data-copy-zh="用于把 Ia 型超新星“标准化”的光度—衰减关系。">Use for the luminosity-decline relation that standardizes Type Ia supernovae.</span>
+            </a>
+          </article>
+          <article class="reference-entry">
+            <a href="https://www.nobelprize.org/uploads/2018/06/advanced-physicsprize2011-1.pdf">
+              <span>Official background</span>
+              <strong>Nobel Prize in Physics 2011</strong>
+              <span data-copy-en="Use for the accelerating-universe discovery and the cosmological importance of standardized Type Ia supernovae."
+                    data-copy-zh="用于宇宙加速膨胀的发现，以及标准化 Ia 型超新星在宇宙学中的重要性。">Use for the accelerating-universe discovery and the cosmological importance of standardized Type Ia supernovae.</span>
+            </a>
+          </article>
+          <article class="reference-entry">
+            <a href="https://www.nobelprize.org/prizes/physics/1983/chandrasekhar/lecture/">
+              <span>Official lecture</span>
+              <strong>Chandrasekhar Nobel lecture</strong>
+              <span data-copy-en="Use for Chandrasekhar's own account of relativistic electron degeneracy and the limiting white-dwarf mass."
+                    data-copy-zh="用于钱德拉塞卡本人对相对论电子简并与白矮星极限质量的总结。">Use for Chandrasekhar's own account of relativistic electron degeneracy and the limiting white-dwarf mass.</span>
+            </a>
+          </article>
+          <article class="reference-entry">
+            <a href="https://arxiv.org/abs/1401.0819">
+              <span>Paper</span>
+              <strong>White-dwarf mass-radius paper</strong>
+              <span data-copy-en="Use for a compact discussion of white-dwarf mass-radius behavior and limiting-mass scaling."
+                    data-copy-zh="用于对白矮星质量—半径行为与极限质量标度的简明讨论。">Use for a compact discussion of white-dwarf mass-radius behavior and limiting-mass scaling.</span>
+            </a>
+          </article>
+          <article class="reference-entry">
+            <a href="https://doi.org/10.1103/PhysRev.55.374">
+              <span>Original paper</span>
+              <strong>Oppenheimer &amp; Volkoff (1939)</strong>
+              <span data-copy-en="Use for the general-relativistic neutron-star equilibrium problem and why a free-neutron gas alone is not enough."
+                    data-copy-zh="用于广义相对论下的中子星平衡问题，以及为什么仅靠自由中子气并不够。">Use for the general-relativistic neutron-star equilibrium problem and why a free-neutron gas alone is not enough.</span>
+            </a>
+          </article>
+          <article class="reference-entry">
+            <a href="https://arxiv.org/abs/1512.07820">
+              <span>Review</span>
+              <strong>Dense-matter and neutron-star EOS review</strong>
+              <span data-copy-en="Use for neutron-star masses, radii, the dense-matter equation of state, and why the maximum mass remains model-dependent."
+                    data-copy-zh="用于中子星质量、半径、致密物质状态方程，以及为什么最大质量仍依赖模型。">Use for neutron-star masses, radii, the dense-matter equation of state, and why the maximum mass remains model-dependent.</span>
+            </a>
+          </article>
+          <article class="reference-entry">
+            <a href="https://www.ligo.caltech.edu/page/press-release-gw170817">
+              <span>Official release</span>
+              <strong>LIGO-Virgo GW170817</strong>
+              <span data-copy-en="Use for multimessenger neutron-star merger constraints and heavy-element synthesis evidence."
+                    data-copy-zh="用于多信使中子星并合约束，以及重元素合成的证据。">Use for multimessenger neutron-star merger constraints and heavy-element synthesis evidence.</span>
+            </a>
+          </article>
+          <article class="reference-entry">
+            <a href="https://www.eso.org/public/news/eso1907/">
+              <span>Official release</span>
+              <strong>Event Horizon Telescope (2019)</strong>
+              <span data-copy-en="Use for horizon-scale imaging language: bright rings and central brightness depressions, not a view of an interior."
+                    data-copy-zh="用于视界尺度成像的表述：亮环与中央亮度凹陷，而不是黑洞内部图像。">Use for horizon-scale imaging language: bright rings and central brightness depressions, not a view of an interior.</span>
+            </a>
+          </article>
+          <article class="reference-entry">
+            <a href="https://doi.org/10.1038/211468a0">
+              <span>Original paper</span>
+              <strong>Rees (1966)</strong>
+              <span data-copy-en="Use for the apparent-superluminal explanation from relativistic motion and light-travel time."
+                    data-copy-zh="用于由相对论运动与光行时造成的表观超光速解释。">Use for the apparent-superluminal explanation from relativistic motion and light-travel time.</span>
+            </a>
+          </article>
+        </div>
       </section>
     </main>
 
@@ -588,7 +910,6 @@
   <script src="formula.js"></script>
 
   <script src="common.js"></script>
-  <script src="references.js"></script>
   <script src="astro.js"></script>
 </body>
 </html>
