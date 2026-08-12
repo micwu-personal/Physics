@@ -49,51 +49,53 @@ for (const [name, path] of [
   ['Phase Transitions', '/physics/phase-transitions.html'],
   ['Entropy and Information', '/physics/entropy-information.html']
 ]) {
-  for (const viewport of [{ width: 1440, height: 1000 }, { width: 412, height: 915 }]) {
-    test(`${name} shares one sticky route and control row at ${viewport.width}px`, async ({ page }) => {
-      await page.setViewportSize(viewport);
-      await preparePage(page, path, 'en');
-      const route = page.locator('.route-bar');
-      await expect(route.locator(':scope > .site-controls')).toHaveCount(1);
-      expect(await route.evaluate(element => getComputedStyle(element).position)).toBe('sticky');
-      await page.evaluate(() => scrollTo(0, Math.min(document.body.scrollHeight - innerHeight, 1200)));
-      const row = await route.evaluate(element => {
-        const routeRect = element.getBoundingClientRect();
-        const controlsRect = element.querySelector('.site-controls').getBoundingClientRect();
-        return {
-          routeTop: routeRect.top,
-          routeBottom: routeRect.bottom,
-          controlsTop: controlsRect.top,
-          controlsBottom: controlsRect.bottom
-        };
-      });
-      expect(row.routeTop).toBeGreaterThanOrEqual(0);
-      expect(row.controlsTop).toBeGreaterThanOrEqual(row.routeTop);
-      expect(row.controlsBottom).toBeLessThanOrEqual(row.routeBottom);
-      const sectionRail = page.locator('.topic-index, .atlas-tools').first();
-      if (await sectionRail.count()) {
-        await sectionRail.scrollIntoViewIfNeeded();
-        const overlap = await page.evaluate(() => {
-          const routeRect = document.querySelector('.route-bar').getBoundingClientRect();
-          const railRect = document.querySelector('.topic-index, .atlas-tools').getBoundingClientRect();
-          return Math.max(0, routeRect.bottom - railRect.top);
+  for (const language of locales) {
+    for (const viewport of [{ width: 1440, height: 1000 }, { width: 412, height: 915 }]) {
+      test(`${name} shares one sticky route and control row at ${viewport.width}px in ${language}`, async ({ page }) => {
+        await page.setViewportSize(viewport);
+        await preparePage(page, path, language);
+        const route = page.locator('.route-bar');
+        await expect(route.locator(':scope > .site-controls')).toHaveCount(1);
+        expect(await route.evaluate(element => getComputedStyle(element).position)).toBe('sticky');
+        await page.evaluate(() => scrollTo(0, Math.min(document.body.scrollHeight - innerHeight, 1200)));
+        const row = await route.evaluate(element => {
+          const routeRect = element.getBoundingClientRect();
+          const controlsRect = element.querySelector('.site-controls').getBoundingClientRect();
+          return {
+            routeTop: routeRect.top,
+            routeBottom: routeRect.bottom,
+            controlsTop: controlsRect.top,
+            controlsBottom: controlsRect.bottom
+          };
         });
-        expect(overlap).toBeLessThanOrEqual(1);
-      }
-      const topicRail = page.locator('.topic-index');
-      if (await topicRail.count()) {
-        const anchor = topicRail.locator('a[href^="#"]').last();
-        const targetId = (await anchor.getAttribute('href')).slice(1);
-        await anchor.click();
-        await page.waitForFunction(id => location.hash === `#${id}`, targetId);
-        const targetOverlap = await page.evaluate(id => {
-          const railRect = document.querySelector('.topic-index').getBoundingClientRect();
-          const targetRect = document.getElementById(id).getBoundingClientRect();
-          return Math.max(0, railRect.bottom - targetRect.top);
-        }, targetId);
-        expect(targetOverlap).toBeLessThanOrEqual(1);
-      }
-    });
+        expect(row.routeTop).toBeGreaterThanOrEqual(0);
+        expect(row.controlsTop).toBeGreaterThanOrEqual(row.routeTop);
+        expect(row.controlsBottom).toBeLessThanOrEqual(row.routeBottom);
+        const sectionRail = page.locator('.topic-index, .atlas-tools').first();
+        if (await sectionRail.count()) {
+          await sectionRail.scrollIntoViewIfNeeded();
+          const overlap = await page.evaluate(() => {
+            const routeRect = document.querySelector('.route-bar').getBoundingClientRect();
+            const railRect = document.querySelector('.topic-index, .atlas-tools').getBoundingClientRect();
+            return Math.max(0, routeRect.bottom - railRect.top);
+          });
+          expect(overlap).toBeLessThanOrEqual(1);
+        }
+        const topicRail = page.locator('.topic-index');
+        if (await topicRail.count()) {
+          const anchor = topicRail.locator('a[href^="#"]').last();
+          const targetId = (await anchor.getAttribute('href')).slice(1);
+          await anchor.click();
+          await page.waitForFunction(id => location.hash === `#${id}`, targetId);
+          const targetOverlap = await page.evaluate(id => {
+            const railRect = document.querySelector('.topic-index').getBoundingClientRect();
+            const targetRect = document.getElementById(id).getBoundingClientRect();
+            return Math.max(0, railRect.bottom - targetRect.top);
+          }, targetId);
+          expect(targetOverlap).toBeLessThanOrEqual(1);
+        }
+      });
+    }
   }
 }
 

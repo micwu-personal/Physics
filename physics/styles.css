@@ -2488,13 +2488,23 @@ body[data-topic="entropy-information"] {
     gap: 8px;
   }
 
+  .route-left {
+    flex: 1 1 auto;
+    gap: 10px;
+  }
+
   .route-home {
+    flex: 1 1 9rem;
+    max-width: min(34vw, 9rem);
     min-width: 0;
     font-size: 12px;
+    line-height: 1.2;
   }
 
   .route-home::before {
     flex: 0 0 auto;
+    width: 18px;
+    height: 10px;
   }
 
   .hero-map,
