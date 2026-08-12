@@ -5,7 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="description" content="An evidence-led interactive journey through the history of matter and the connected fields of physics." />
 <title>Physics Journey — Matter, Ideas, and the Laws of Nature</title>
+<link rel="icon" type="image/svg+xml" href="./assets/brand/favicon.svg">
 <link rel="stylesheet" href="./assets/fonts/fonts.css">
+<link rel="stylesheet" href="./assets/brand/brand.css">
 <style>
   :root {
     --bg: #05060d;
@@ -52,11 +54,21 @@
   a { color: inherit; }
   button { font: inherit; }
   :focus-visible { outline: 2px solid var(--cyan); outline-offset: 3px; }
-  .controls {
+  .page-topbar {
     position: fixed;
     top: max(12px, env(safe-area-inset-top));
-    right: max(12px, env(safe-area-inset-right));
-    z-index: var(--control);
+    left: 50%;
+    z-index: calc(var(--control) + 2);
+    width: min(1180px, calc(100% - 40px));
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    transform: translateX(-50%);
+    pointer-events: none;
+  }
+  .page-topbar > * { pointer-events: auto; }
+  .controls {
     display: flex;
     gap: 4px;
     padding: 4px;
@@ -244,9 +256,13 @@
     .chapter { grid-template-columns: 1fr; min-height: auto; padding: 64px 0; }
     .chapter:nth-child(even) .chapter-copy, .chapter:nth-child(even) .chapter-visual { order: initial; }
     .field-portal { grid-template-columns: 1fr; }
+    .page-topbar { width: min(100% - 28px, 1180px); }
     .controls { max-width: calc(100vw - 24px); }
     .controls button { padding-inline: 9px; }
     .diagram { min-height: 300px; }
+  }
+  @media (max-width: 640px) {
+    .page-topbar { width: calc(100% - 24px); }
   }
   @media (prefers-reduced-motion: reduce) {
     html:not([data-motion="playing"]) { scroll-behavior: auto; }
@@ -262,10 +278,19 @@
 </style>
 </head>
 <body>
-  <div class="controls" aria-label="Page controls" data-i18n-aria-label="aria.controls">
-    <button id="motionToggle" type="button" data-state="playing">Pause animations</button>
-    <button class="lang-pill active" data-lang="en" type="button">EN</button>
-    <button class="lang-pill" data-lang="zh-CN" type="button">中文</button>
+  <div class="page-topbar">
+    <a class="brand-home" href="./index.html" aria-label="米克乐的宇宙 / McWoods’ Universe">
+      <img class="brand-home__icon" src="./assets/brand/favicon.svg" alt="" width="42" height="42">
+      <span class="brand-home__title">
+        <span class="brand-home__title-zh">米克乐的宇宙</span>
+        <span class="brand-home__title-en">McWoods’ Universe</span>
+      </span>
+    </a>
+    <div class="controls" aria-label="Page controls" data-i18n-aria-label="aria.controls">
+      <button id="motionToggle" type="button" data-state="playing">Pause animations</button>
+      <button class="lang-pill active" data-lang="en" type="button">EN</button>
+      <button class="lang-pill" data-lang="zh-CN" type="button">中文</button>
+    </div>
   </div>
 
   <div class="shell">
@@ -454,10 +479,13 @@
       <a class="primary-action" href="#origin" data-i18n="end.restart">Return to the beginning</a>
     </section>
 
-    <footer>
-      <span data-i18n="footer.source">Scientific sources and per-image licenses appear beside each visual.</span>
-      <a href="./LICENSES/THIRD-PARTY-MEDIA.md" data-i18n="footer.licenses">Third-party media licenses</a>
-      · <a href="https://github.com/micwu-personal/Physics">GitHub</a>
+    <footer class="site-footer">
+      <span class="site-footer__copy" data-i18n="footer.source">Scientific sources and per-image licenses appear beside each visual.</span>
+      <span class="site-footer__links">
+        <a href="./LICENSES/THIRD-PARTY-MEDIA.md" data-i18n="footer.licenses">Third-party media licenses</a>
+        <a href="mailto:micwu@outlook.com" aria-label="Email micwu@outlook.com">micwu@outlook.com</a>
+        <a href="https://github.com/micwu-personal/Physics" aria-label="View the Physics repository on GitHub">GitHub</a>
+      </span>
     </footer>
   </div>
 

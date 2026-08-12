@@ -216,7 +216,7 @@ test('Landing page carries shared language, motion, and the six-chapter story in
   await expect(page.locator('.chapter')).toHaveCount(6);
   await expect(page.locator('.card')).toHaveCount(3);
   await expect(page.locator('.rep')).toHaveCount(10);
-  expect(await page.locator('.controls').evaluate(element=>getComputedStyle(element).position)).toBe('fixed');
+  expect(await page.locator('.page-topbar').evaluate(element=>getComputedStyle(element).position)).toBe('fixed');
   const media=page.locator('.media-frame img');
   for(let index=0;index<await media.count();index++){
     await media.nth(index).scrollIntoViewIfNeeded();

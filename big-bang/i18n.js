@@ -536,8 +536,6 @@ function applyI18n(lang){
     const key=el.getAttribute('data-i18n-aria-label');
     if(dict[key]!==undefined) el.setAttribute('aria-label',dict[key]);
   });
-  const titleEl = document.querySelector('title');
-  if(titleEl?.getAttribute('data-i18n')) document.title = dict[titleEl.getAttribute('data-i18n')] || document.title;
   document.querySelectorAll('.lang-pill').forEach(b=>b.classList.toggle('active', b.dataset.lang===lang));
   window.CURRENT_LANG = lang;
   if(typeof renderTimeline==='function') renderTimeline();

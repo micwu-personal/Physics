@@ -3,9 +3,11 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title data-i18n="page.title">Big Bang — 13.8 Billion Years in an Afternoon</title>
+<title>Big Bang — 13.8 Billion Years in an Afternoon</title>
 <link rel="stylesheet" href="../assets/fonts/fonts.css">
 <link rel="stylesheet" href="styles.css" />
+<link rel="icon" href="../assets/brand/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../assets/brand/brand.css">
 </head>
 <body>
   <!--
@@ -18,6 +20,13 @@
   <div id="bg-stars"></div>
   <canvas id="bgCanvas"></canvas>
   <div class="control-row" aria-label="Page controls" data-i18n-aria-label="aria.controls">
+    <a class="brand-home" href="./index.html" aria-label="米克乐的宇宙 · McWoods’ Universe">
+      <span class="brand-home__icon" aria-hidden="true"><img src="../assets/brand/favicon.svg" alt=""></span>
+      <span class="brand-home__title">
+        <span class="brand-home__title-zh">米克乐的宇宙</span>
+        <span class="brand-home__title-en">McWoods’ Universe</span>
+      </span>
+    </a>
     <div class="lang-switch">
       <a class="journey-home" href="../index.html#origin" data-i18n="journey.home">Story</a>
       <a class="journey-home" href="../physics/index.html#genealogy" data-i18n="journey.field">Fields</a>
@@ -145,7 +154,13 @@
     <div class="source-links" id="sourceLinks"></div>
   </aside>
 
-  <footer><span data-i18n="footer">Source-backed educational estimates; see the references above.</span></footer>
+  <footer class="site-footer">
+    <span class="site-footer__copy" data-i18n="footer">Source-backed educational estimates; see the references above.</span>
+    <span class="site-footer__links">
+      <a href="mailto:micwu@outlook.com" aria-label="Email micwu@outlook.com">micwu@outlook.com</a>
+      <a href="https://github.com/micwu-personal/Physics" aria-label="Open the Physics GitHub repository">GitHub</a>
+    </span>
+  </footer>
 
   <script src="core.js"></script>
   <script src="i18n.js"></script>

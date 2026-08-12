@@ -19,6 +19,8 @@ const coreJs = fs.readFileSync(path.join(ROOT, 'physics-core.js'), 'utf8');
 const refsJs = fs.readFileSync(path.join(ROOT, 'references.js'), 'utf8');
 const i18nJs = fs.readFileSync(path.join(ROOT, 'i18n.js'), 'utf8');
 const appJs  = fs.readFileSync(path.join(ROOT, 'app.js'), 'utf8');
+const brandCss = fs.readFileSync(path.join(ROOT, '..', 'assets', 'brand', 'brand.css'), 'utf8');
+const brandSvg = fs.readFileSync(path.join(ROOT, '..', 'assets', 'brand', 'favicon.svg')).toString('base64');
 
 function inlineMedia(source) {
   return source.replace(/\.\.\/assets\/media\/([A-Za-z0-9_.-]+)/g, (match, filename) => {
@@ -47,6 +49,14 @@ let out = html.replace(
   /<link\s+rel="stylesheet"\s+href="styles\.css"\s*\/?>/,
   `<style>\n${css}\n</style>`
 );
+out = out.replace(
+  /<link\s+rel="stylesheet"\s+href="\.\.\/assets\/brand\/brand\.css"\s*\/?>/,
+  `<style>\n${brandCss}\n</style>`
+);
+out = out.replace(
+  /<link\s+rel="icon"\s+href="\.\.\/assets\/brand\/favicon\.svg"\s+type="image\/svg\+xml"\s*\/?>/,
+  `<link rel="icon" href="data:image/svg+xml;base64,${brandSvg}" type="image/svg+xml">`
+);
 
 // 1b) strip all external CDN links (Google Fonts) so the mobile build is
 //     fully offline / self-contained. CSS already falls back to system fonts.
@@ -72,10 +82,8 @@ out = out.replace(
   `<script>\n${appJs}\n</script>`
 );
 out = inlineMedia(out);
+out = out.replace(/\.\.\/assets\/brand\/favicon\.svg/g, `data:image/svg+xml;base64,${brandSvg}`);
 out = inlineFonts(out);
-out = out
-  .replace(/href="\.\.\/index\.html/g, 'href="https://micwu-personal.github.io/Physics/')
-  .replace(/href="\.\.\/(big-bang|particle-zoo|periodic-table)\/index\.html/g, 'href="https://micwu-personal.github.io/Physics/$1/');
 out = out.replace(/href="\.\.\/(?!https?:)/g, 'href="../../');
 
 // 3) Inject a small banner comment at the top

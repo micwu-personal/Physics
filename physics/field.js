@@ -129,7 +129,6 @@
   }
 
   function renderCopy() {
-    document.title = `${pick(field).name} — Physics Field Atlas`;
     document.documentElement.style.setProperty('--topic', field.color);
 
     document.getElementById('fieldKicker').textContent =

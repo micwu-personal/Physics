@@ -44,7 +44,8 @@ const mobilePath=path.join(root,'mobile','index.html');
 if(fs.existsSync(mobilePath)){
   const mobileSource=fs.readFileSync(mobilePath,'utf8');
   assert.ok(/data:image\/(png|jpeg);base64,/.test(mobileSource), 'mobile bundle embeds the ATLAS evidence image');
-  assert.ok(mobileSource.includes('href="https://micwu-personal.github.io/Physics/#particles"'), 'standalone journey link uses the hosted experience');
+  assert.ok(mobileSource.includes('href="../../index.html#particles"'), 'standalone journey link stays local/offline-safe');
+  assert.equal(mobileSource.includes('https://micwu-personal.github.io/Physics/'), false, 'mobile build does not hardcode hosted Physics routes');
 }
 for (const required of [
   "mass:'80.369 GeV/c²'", "mass:'91.188 GeV/c²'", "mass:'125.20 GeV/c²'",

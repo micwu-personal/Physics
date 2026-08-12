@@ -1352,10 +1352,6 @@ function applyI18n(lang){
     const key=el.getAttribute('data-i18n-aria-label');
     el.setAttribute('aria-label',dict[key]);
   });
-  // title
-  const titleKey = document.querySelector('title').getAttribute('data-i18n');
-  document.title = dict[titleKey];
-
   // active language pill
   document.querySelectorAll('.lang-pill').forEach(b=>{
     b.classList.toggle('active', b.dataset.lang===lang);
