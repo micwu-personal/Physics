@@ -58,6 +58,32 @@ test.describe('deterministic scientific renderers', () => {
     });
   });
 
+  test.describe('Relativity', () => {
+    test('hero canvas and jet extremes render deterministically', async ({ page }) => {
+      await prepareRenderingPage(page, '/physics/relativity.html', 'en');
+      await stepVisualClock(page, 32, 3);
+
+      const hero = page.locator('#heroCanvas');
+      await expectCanvasRendered(hero, 120);
+      await captureRendering(page.locator('.relativity-hero-panel'), 'relativity-hero-panel-en.png');
+
+      const jetStage = page.locator('.jet-stage');
+      const jetDiagram = page.locator('#jetDiagram');
+
+      await setRangeValue(page.locator('#jetBetaControl'), 0.995);
+      await setRangeValue(page.locator('#jetAngleControl'), 1);
+      await stepVisualClock(page, 48, 2);
+      await expectSvgRendered(jetDiagram);
+      await captureRendering(jetStage, 'relativity-jet-small-angle-en.png');
+
+      await setRangeValue(page.locator('#jetBetaControl'), 0.7);
+      await setRangeValue(page.locator('#jetAngleControl'), 60);
+      await stepVisualClock(page, 48, 2);
+      await expectSvgRendered(jetDiagram);
+      await captureRendering(jetStage, 'relativity-jet-wide-angle-en.png');
+    });
+  });
+
   test.describe('Periodic Table', () => {
     async function openIron(page, path, language) {
       await prepareRenderingPage(page, path, language);

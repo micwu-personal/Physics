@@ -34,6 +34,21 @@
     hits: []
   };
 
+  const relativityDom = topic === 'relativity' ? {
+    betaValue: document.getElementById('clockBetaValue'),
+    gammaValue: document.getElementById('clockGammaValue'),
+    shipHalfTick: document.getElementById('clockShipHalfTick'),
+    groundHalfTick: document.getElementById('clockGroundHalfTick'),
+    shipPath: document.getElementById('clockShipPath'),
+    groundPath: document.getElementById('clockGroundPath'),
+    shipEventE0: document.getElementById('clockShipEventE0'),
+    shipEventE1: document.getElementById('clockShipEventE1'),
+    shipEventE2: document.getElementById('clockShipEventE2'),
+    groundEventE0: document.getElementById('clockGroundEventE0'),
+    groundEventE1: document.getElementById('clockGroundEventE1'),
+    groundEventE2: document.getElementById('clockGroundEventE2')
+  } : null;
+
   function resizeCanvas(canvas) {
     const rect = canvas.getBoundingClientRect();
     const ratio = Math.min(window.devicePixelRatio || 1, 2);
@@ -77,6 +92,49 @@
     ctx.beginPath();
     ctx.arc(x, y, radius, 0, Math.PI * 2);
     ctx.fill();
+  }
+
+  function copy(en, zh) {
+    return PhysicsUI.language === 'zh-CN' ? zh : en;
+  }
+
+  function computeRelativityHeroGeometry(width, height) {
+    const lensX = width * 0.58;
+    const lensY = height * 0.58;
+    const radius = Math.min(width, height) * 0.11;
+    const source = { x: width * 0.09, y: height * 0.24 };
+    const observer = { x: width * 0.91, y: height * 0.3 };
+    const flatRay = [source, observer];
+    const clearance = Math.max(18, radius * 0.38);
+    const sigma = radius * 1.45;
+    const sampleCount = 160;
+    const lensT = (lensX - source.x) / (observer.x - source.x);
+    const baselineLensY = source.y + (observer.y - source.y) * lensT;
+    const closestApproachY = lensY - radius - clearance;
+    const deflectionAmplitude = Math.max(0, closestApproachY - baselineLensY);
+    const ray = [];
+    let minimumSurfaceClearance = Number.POSITIVE_INFINITY;
+
+    for (let index = 0; index <= sampleCount; index++) {
+      const t = index / sampleCount;
+      const x = source.x + (observer.x - source.x) * t;
+      const baselineY = source.y + (observer.y - source.y) * t;
+      const normalizedOffset = (x - lensX) / sigma;
+      const falloff = Math.exp(-(normalizedOffset * normalizedOffset));
+      const y = baselineY + deflectionAmplitude * falloff;
+      ray.push([x, y]);
+      minimumSurfaceClearance = Math.min(minimumSurfaceClearance, Math.hypot(x - lensX, y - lensY) - radius);
+    }
+
+    return {
+      clearance,
+      flatRay,
+      lens: { x: lensX, y: lensY, radius },
+      minimumSurfaceClearance,
+      observer,
+      ray,
+      source
+    };
   }
 
   function drawNewtonHero(ctx, width, height, time) {
@@ -124,61 +182,93 @@
 
   function drawRelativityHero(ctx, width, height, time) {
     clear(ctx, width, height);
-    const cx = width * 0.55;
-    const cy = height * 0.5;
-    const radius = Math.min(width, height) * 0.13;
+    const hero = computeRelativityHeroGeometry(width, height);
+    const {
+      flatRay,
+      lens: { x: lensX, y: lensY, radius },
+      observer,
+      ray,
+      source
+    } = hero;
+
+    function warpPoint(x, y) {
+      const dx = x - lensX;
+      const dy = y - lensY;
+      const distance2 = dx * dx + dy * dy + radius * radius * 0.45;
+      const scale = Math.min(18, (radius * radius * 0.7) / distance2);
+      return {
+        x: x - dx * scale,
+        y: y - dy * scale
+      };
+    }
+
+    ctx.strokeStyle = 'rgba(64,221,245,.2)';
     ctx.lineWidth = 1;
-    for (let gx = -7; gx <= 7; gx++) {
-      ctx.strokeStyle = 'rgba(64,221,245,.18)';
+    for (let gx = 34; gx < width - 28; gx += 42) {
       ctx.beginPath();
-      for (let step = -9; step <= 9; step++) {
-        const x = cx + gx * 42;
-        const y = cy + step * 42;
-        const dx = x - cx;
-        const dy = y - cy;
-        const distance = Math.max(28, Math.hypot(dx, dy));
-        const warp = Math.min(44, 1300 / distance);
-        const px = x - (dx / distance) * warp;
-        const py = y - (dy / distance) * warp;
-        if (step === -9) ctx.moveTo(px, py);
-        else ctx.lineTo(px, py);
+      for (let y = 18; y <= height - 18; y += 6) {
+        const warped = warpPoint(gx, y);
+        if (y === 18) ctx.moveTo(warped.x, warped.y);
+        else ctx.lineTo(warped.x, warped.y);
       }
       ctx.stroke();
     }
-    for (let gy = -8; gy <= 8; gy++) {
+    for (let gy = 26; gy < height - 18; gy += 42) {
       ctx.beginPath();
-      for (let step = -8; step <= 8; step++) {
-        const x = cx + step * 42;
-        const y = cy + gy * 42;
-        const dx = x - cx;
-        const dy = y - cy;
-        const distance = Math.max(28, Math.hypot(dx, dy));
-        const warp = Math.min(44, 1300 / distance);
-        const px = x - (dx / distance) * warp;
-        const py = y - (dy / distance) * warp;
-        if (step === -8) ctx.moveTo(px, py);
-        else ctx.lineTo(px, py);
+      for (let x = 18; x <= width - 18; x += 6) {
+        const warped = warpPoint(x, gy);
+        if (x === 18) ctx.moveTo(warped.x, warped.y);
+        else ctx.lineTo(warped.x, warped.y);
       }
       ctx.stroke();
     }
-    drawGlow(ctx, cx, cy, radius * 1.8, 'rgba(64,221,245,1)');
+
+    ctx.strokeStyle = 'rgba(232,236,255,.32)';
+    ctx.lineWidth = 2;
+    ctx.setLineDash([8, 7]);
+    ctx.beginPath();
+    ctx.moveTo(flatRay[0].x, flatRay[0].y);
+    ctx.lineTo(flatRay[1].x, flatRay[1].y);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    ctx.strokeStyle = '#ffd166';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    for (let index = 0; index < ray.length; index++) {
+      const [x, y] = ray[index];
+      if (index === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+
+    const pulseIndex = Math.floor((((time * 0.18) % 1) + 1) % 1 * (ray.length - 1));
+    const [pulseX, pulseY] = ray[pulseIndex];
+    drawGlow(ctx, pulseX, pulseY, 26, 'rgba(255,209,102,1)');
+    ctx.fillStyle = '#ffd166';
+    ctx.beginPath();
+    ctx.arc(pulseX, pulseY, 5.5, 0, Math.PI * 2);
+    ctx.fill();
+
+    drawGlow(ctx, lensX, lensY, radius * 1.55, 'rgba(0,212,255,1)');
     ctx.fillStyle = '#07101f';
     ctx.beginPath();
-    ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+    ctx.arc(lensX, lensY, radius, 0, Math.PI * 2);
     ctx.fill();
     ctx.strokeStyle = '#00d4ff';
     ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.arc(cx, cy, radius + 2, 0, Math.PI * 2);
+    ctx.arc(lensX, lensY, radius + 2, 0, Math.PI * 2);
     ctx.stroke();
 
-    const rayY = cy - radius * 1.7 + Math.sin(time * 0.8) * 8;
-    ctx.strokeStyle = '#ffd166';
-    ctx.lineWidth = 3;
+    ctx.fillStyle = '#7ee8c5';
     ctx.beginPath();
-    ctx.moveTo(0, rayY);
-    ctx.quadraticCurveTo(cx, rayY + radius * 1.6, width, rayY + radius * 0.22);
-    ctx.stroke();
+    ctx.arc(source.x, source.y, 5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#f5f7ff';
+    ctx.beginPath();
+    ctx.arc(observer.x, observer.y, 5, 0, Math.PI * 2);
+    ctx.fill();
   }
 
   function drawQuantumHero(ctx, width, height, time) {
@@ -309,64 +399,199 @@
     }
   }
 
+  function updateRelativityGeometry(beta, gamma) {
+    if (!relativityDom) return;
+    const horizontalHalf = beta * gamma;
+    const horizontalFull = 2 * horizontalHalf;
+    relativityDom.betaValue.textContent = beta.toFixed(3);
+    relativityDom.gammaValue.textContent = gamma.toFixed(3);
+    relativityDom.shipHalfTick.textContent = '1.000 L0/c';
+    relativityDom.groundHalfTick.textContent = `${gamma.toFixed(3)} L0/c`;
+    relativityDom.shipPath.textContent = '1.000 L0';
+    relativityDom.groundPath.textContent = `${gamma.toFixed(3)} L0`;
+    relativityDom.shipEventE0.textContent = "x' = 0, y' = 0, t' = 0";
+    relativityDom.shipEventE1.textContent = "x' = 0, y' = 1.000 L0, t' = 1.000 L0/c";
+    relativityDom.shipEventE2.textContent = "x' = 0, y' = 0, t' = 2.000 L0/c";
+    relativityDom.groundEventE0.textContent = 'x = 0, y = 0, t = 0';
+    relativityDom.groundEventE1.textContent =
+      `x = ${horizontalHalf.toFixed(3)} L0, y = 1.000 L0, t = ${gamma.toFixed(3)} L0/c`;
+    relativityDom.groundEventE2.textContent =
+      `x = ${horizontalFull.toFixed(3)} L0, y = 0, t = ${(2 * gamma).toFixed(3)} L0/c`;
+  }
+
   function drawRelativityLab(ctx, width, height) {
     clear(ctx, width, height);
-    drawInstrumentGrid(ctx, width, height, 'rgba(64,221,245,.06)', 46);
+    drawInstrumentGrid(ctx, width, height, 'rgba(64,221,245,.055)', 52);
     const beta = Number(primary.value);
     const gamma = 1 / Math.sqrt(1 - beta * beta);
-    const period = 2.4;
-    const phase = (elapsed % period) / period;
-    const shipX = width * (0.16 + 0.68 * ((elapsed * 0.13) % 1));
-    const top = height * 0.25;
-    const bottom = height * 0.75;
-    const lightY = phase < 0.5
-      ? bottom - (bottom - top) * phase * 2
-      : top + (bottom - top) * (phase - 0.5) * 2;
-    const localPhase = phase < 0.5 ? phase * 2 : (phase - 0.5) * 2;
-    const direction = phase < 0.5 ? 1 : -1;
-    const diagonal = beta * (bottom - top) * 0.42;
-    const lightX = shipX + direction * (localPhase - 0.5) * diagonal;
+    updateRelativityGeometry(beta, gamma);
 
-    ctx.strokeStyle = 'rgba(238,242,255,.28)';
-    ctx.lineWidth = 6;
-    ctx.beginPath();
-    ctx.moveTo(shipX - 58, top);
-    ctx.lineTo(shipX + 58, top);
-    ctx.moveTo(shipX - 58, bottom);
-    ctx.lineTo(shipX + 58, bottom);
-    ctx.stroke();
-    ctx.strokeStyle = '#00d4ff';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(shipX - diagonal * 0.5, bottom);
-    ctx.lineTo(shipX + diagonal * 0.5, top);
-    ctx.lineTo(shipX - diagonal * 0.5, bottom);
-    ctx.stroke();
-    drawGlow(ctx, lightX, lightY, 36, 'rgba(255,209,102,1)');
-    ctx.fillStyle = '#ffd166';
-    ctx.beginPath();
-    ctx.arc(lightX, lightY, 7, 0, Math.PI * 2);
-    ctx.fill();
+    const period = 3.2;
+    const cycle = (elapsed % period) / period;
+    const panelTop = 30;
+    const panelBottom = height - 84;
+    const panelHeight = panelBottom - panelTop;
+    const margin = 26;
+    const gap = 22;
+    const panelWidth = (width - margin * 2 - gap) / 2;
+    const leftPanelX = margin;
+    const rightPanelX = leftPanelX + panelWidth + gap;
+    const unit = Math.min(panelHeight * 0.34, panelWidth * 0.64 / Math.max(1.25, 2 * beta * gamma));
+    const topY = panelTop + panelHeight * 0.22;
+    const bottomY = topY + unit;
+    const mirrorHalf = Math.max(22, unit * 0.52);
+    const leftX = leftPanelX + panelWidth * 0.5;
+    const rightOriginX = rightPanelX + panelWidth * 0.18;
+    const event0 = { x: rightOriginX, y: bottomY };
+    const event1 = { x: rightOriginX + beta * gamma * unit, y: topY };
+    const event2 = { x: rightOriginX + 2 * beta * gamma * unit, y: bottomY };
+    const path = [event0, event1, event2];
 
-    const baselineY = height - 54;
-    ctx.strokeStyle = '#e8ecff';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(34, baselineY);
-    ctx.lineTo(width - 34, baselineY);
-    ctx.stroke();
-    for (let x = 50; x < width - 40; x += 52) {
+    function drawPanelFrame(x, title, subtitle) {
+      ctx.fillStyle = 'rgba(8,13,28,.84)';
+      ctx.strokeStyle = 'rgba(232,236,255,.1)';
+      ctx.lineWidth = 1.5;
       ctx.beginPath();
-      ctx.moveTo(x, baselineY - 5);
-      ctx.lineTo(x, baselineY + 5);
+      ctx.roundRect(x, panelTop, panelWidth, panelHeight, 18);
+      ctx.fill();
       ctx.stroke();
+      ctx.fillStyle = '#f5f7ff';
+      ctx.font = '700 14px "JetBrains Mono", monospace';
+      ctx.fillText(title, x + 16, panelTop + 22);
+      ctx.fillStyle = 'rgba(232,236,255,.68)';
+      ctx.font = '500 11px "JetBrains Mono", monospace';
+      ctx.fillText(subtitle, x + 16, panelTop + 40);
     }
 
+    drawPanelFrame(
+      leftPanelX,
+      copy('Clock rest frame', '光钟静止系'),
+      copy("mirrors fixed, path vertical", '镜子固定，路径竖直')
+    );
+    drawPanelFrame(
+      rightPanelX,
+      copy('Ground frame', '地面系'),
+      copy('mirrors translate, path is zigzag', '镜子平移，路径为折线')
+    );
+
+    ctx.strokeStyle = 'rgba(232,236,255,.24)';
+    ctx.lineWidth = 1;
+    for (const px of [leftPanelX, rightPanelX]) {
+      for (let y = panelTop + 58; y < panelBottom - 14; y += 24) {
+        ctx.beginPath();
+        ctx.moveTo(px + 12, y);
+        ctx.lineTo(px + panelWidth - 12, y);
+        ctx.stroke();
+      }
+    }
+
+    ctx.strokeStyle = 'rgba(238,242,255,.32)';
+    ctx.lineWidth = 6;
+    ctx.beginPath();
+    ctx.moveTo(leftX - mirrorHalf, topY);
+    ctx.lineTo(leftX + mirrorHalf, topY);
+    ctx.moveTo(leftX - mirrorHalf, bottomY);
+    ctx.lineTo(leftX + mirrorHalf, bottomY);
+    ctx.stroke();
+
+    const shipPath = [
+      { x: leftX, y: bottomY },
+      { x: leftX, y: topY },
+      { x: leftX, y: bottomY }
+    ];
+    ctx.strokeStyle = '#00d4ff';
+    ctx.lineWidth = 2.4;
+    ctx.beginPath();
+    ctx.moveTo(shipPath[0].x, shipPath[0].y);
+    ctx.lineTo(shipPath[1].x, shipPath[1].y);
+    ctx.lineTo(shipPath[2].x, shipPath[2].y);
+    ctx.stroke();
+
+    const halfCycle = cycle < 0.5 ? cycle * 2 : (cycle - 0.5) * 2;
+    const shipPulse = cycle < 0.5
+      ? { x: leftX, y: bottomY - (bottomY - topY) * halfCycle }
+      : { x: leftX, y: topY + (bottomY - topY) * halfCycle };
+    drawGlow(ctx, shipPulse.x, shipPulse.y, 26, 'rgba(255,209,102,1)');
+    ctx.fillStyle = '#ffd166';
+    ctx.beginPath();
+    ctx.arc(shipPulse.x, shipPulse.y, 6, 0, Math.PI * 2);
+    ctx.fill();
+
+    const mirrorPairs = [
+      { x: event0.x, alpha: 0.35 },
+      { x: event1.x, alpha: 0.55 },
+      { x: event2.x, alpha: 0.8 }
+    ];
+    mirrorPairs.forEach(pair => {
+      ctx.strokeStyle = `rgba(238,242,255,${pair.alpha})`;
+      ctx.lineWidth = 6;
+      ctx.beginPath();
+      ctx.moveTo(pair.x - mirrorHalf, topY);
+      ctx.lineTo(pair.x + mirrorHalf, topY);
+      ctx.moveTo(pair.x - mirrorHalf, bottomY);
+      ctx.lineTo(pair.x + mirrorHalf, bottomY);
+      ctx.stroke();
+    });
+
+    ctx.strokeStyle = 'rgba(64,221,245,.38)';
+    ctx.lineWidth = 1.4;
+    ctx.setLineDash([6, 6]);
+    ctx.beginPath();
+    ctx.moveTo(event0.x, bottomY);
+    ctx.lineTo(event2.x, bottomY);
+    ctx.moveTo(event0.x, topY);
+    ctx.lineTo(event2.x, topY);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    ctx.strokeStyle = '#00d4ff';
+    ctx.lineWidth = 2.4;
+    ctx.beginPath();
+    ctx.moveTo(event0.x, event0.y);
+    ctx.lineTo(event1.x, event1.y);
+    ctx.lineTo(event2.x, event2.y);
+    ctx.stroke();
+
+    path.forEach((eventPoint, index) => {
+      ctx.fillStyle = index === 1 ? '#7ee8c5' : '#f5f7ff';
+      ctx.beginPath();
+      ctx.arc(eventPoint.x, eventPoint.y, 4.8, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#f5f7ff';
+      ctx.font = '600 11px "JetBrains Mono", monospace';
+      ctx.fillText(`E${index}`, eventPoint.x + 8, eventPoint.y - 10);
+    });
+
+    const totalSegments = [Math.hypot(event1.x - event0.x, event1.y - event0.y), Math.hypot(event2.x - event1.x, event2.y - event1.y)];
+    const totalLength = totalSegments[0] + totalSegments[1];
+    let pulseDistance = cycle * totalLength;
+    let groundPulse;
+    if (pulseDistance <= totalSegments[0]) {
+      const t = pulseDistance / totalSegments[0];
+      groundPulse = {
+        x: event0.x + (event1.x - event0.x) * t,
+        y: event0.y + (event1.y - event0.y) * t
+      };
+    } else {
+      pulseDistance -= totalSegments[0];
+      const t = pulseDistance / totalSegments[1];
+      groundPulse = {
+        x: event1.x + (event2.x - event1.x) * t,
+        y: event1.y + (event2.y - event1.y) * t
+      };
+    }
+    drawGlow(ctx, groundPulse.x, groundPulse.y, 26, 'rgba(255,209,102,1)');
+    ctx.fillStyle = '#ffd166';
+    ctx.beginPath();
+    ctx.arc(groundPulse.x, groundPulse.y, 6, 0, Math.PI * 2);
+    ctx.fill();
+
     primaryOutput.textContent = `${beta.toFixed(2)} c`;
-    readout.textContent = `γ = ${gamma.toFixed(3)}`;
-    secondaryReadout.textContent = PhysicsUI.language === 'zh-CN'
-      ? `飞船每经历 1.000 s，地面系经历 ${gamma.toFixed(3)} s`
-      : `For each 1.000 s aboard, the ground frame assigns ${gamma.toFixed(3)} s`;
+    readout.textContent = `β = ${beta.toFixed(2)} · γ = ${gamma.toFixed(3)}`;
+    secondaryReadout.textContent = copy(
+      `One ship half-tick is Δτ = L0/c; the ground assigns Δt = ${gamma.toFixed(3)} L0/c`,
+      `飞船系半个滴答是 Δτ = L0/c；地面系对应 Δt = ${gamma.toFixed(3)} L0/c`
+    );
     const bounceIndex = Math.floor(elapsed / (period / 2));
     if (soundEnabled && bounceIndex !== lastSound) {
       PhysicsUI.playTone(320 + beta * 260, 0.07, 0.018, 'triangle');
@@ -497,6 +722,16 @@
       ? (soundEnabled ? '关闭声音映射' : '开启声音映射')
       : (soundEnabled ? 'Mute sonification' : 'Enable sonification');
     audioToggle.setAttribute('aria-pressed', String(soundEnabled));
+  }
+
+  const physicsLabsDebug = window.__physicsLabsDebug || (window.__physicsLabsDebug = {});
+  Object.assign(physicsLabsDebug, {
+    computeRelativityHeroGeometry,
+    updateRelativityGeometry
+  });
+  if (topic === 'relativity') {
+    const relativityDebug = window.__relativityDebug || (window.__relativityDebug = {});
+    relativityDebug.computeHeroGeometry = computeRelativityHeroGeometry;
   }
 
   function resetLab() {

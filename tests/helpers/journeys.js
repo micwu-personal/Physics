@@ -85,16 +85,47 @@ export async function exercisePhysicsArea(page) {
 }
 
 export async function exercisePhysicsAstro(page) {
-  await expect(page.locator('#collapseCanvas')).toBeVisible();
-  await expect(page.locator('#blackHoleCanvas')).toBeVisible();
-  await expectCanvasRendered(page.locator('#collapseCanvas'));
-  await expectCanvasRendered(page.locator('#blackHoleCanvas'));
+  const inChinese = async () => (await page.locator('html').getAttribute('lang')) === 'zh-CN';
+  const setInvalidRangeValue = async (locator, next) => {
+    await locator.evaluate((element, value) => {
+      element.value = String(value);
+      element.dispatchEvent(new Event('input', { bubbles: true }));
+      element.dispatchEvent(new Event('change', { bubbles: true }));
+    }, next);
+  };
+  const expectAstroCanvas = async selector => {
+    const canvas = page.locator(selector);
+    await canvas.evaluate(element => element.scrollIntoView({ block: 'center' }));
+    await expect(canvas).toBeVisible();
+    const metrics = await canvas.evaluate(element => {
+      const context = element.getContext('2d');
+      const { data, width, height } = context.getImageData(0, 0, element.width, element.height);
+      const stride = Math.max(1, Math.floor((width * height) / 200000));
+      let painted = 0;
+      const colors = new Set();
+      for (let pixel = 0; pixel < width * height; pixel += stride) {
+        const offset = pixel * 4;
+        if (data[offset + 3] === 0) continue;
+        painted++;
+        colors.add(`${data[offset] >> 3},${data[offset + 1] >> 3},${data[offset + 2] >> 3},${data[offset + 3] >> 5}`);
+      }
+      return { colors: colors.size, painted };
+    });
+    expect(metrics.painted).toBeGreaterThan(32);
+    expect(metrics.colors).toBeGreaterThan(1);
+  };
+
+  for (const selector of ['#collapseCanvas', '#compactCanvas', '#typeIaCanvas', '#blackHoleCanvas', '#jetCanvas']) {
+    await expectAstroCanvas(selector);
+  }
   for (const selector of ['#collapseProgress', '#starMass', '#limitMass', '#blackHoleStage', '#blackHoleSpin']) {
     const control = page.locator(selector);
     await setRange(control, await control.getAttribute('max'));
     await setRange(control, await control.getAttribute('min'));
     await setRange(control, await control.getAttribute('value'));
   }
+  await setRange(page.locator('#limitMass'), 1.3);
+  await expect(page.locator('#limitBridge')).toContainText(await inChinese() ? '钱德拉塞卡极限' : 'Chandrasekhar mass');
   // The stalled-shock branch and optional collapsar jet each require a combined
   // stage/spin state rather than independent extrema.
   await setRange(page.locator('#blackHoleStage'), 2);
@@ -104,6 +135,50 @@ export async function exercisePhysicsAstro(page) {
   for (const mass of [0.05, 0.3, 3, 18, 90]) {
     await setRange(page.locator('#starMass'), mass);
   }
+
+  const compactMass = page.locator('#compactMass');
+  for (const spec of [
+    { mode: 'white-dwarf', min: '0.45', max: '1.38', step: '0.01', invalid: 2, clamped: '1.38' },
+    { mode: 'neutron-star', min: '1.1', max: '2.3', step: '0.01', invalid: 12, clamped: '2.3' },
+    { mode: 'black-hole', min: '3', max: '12', step: '0.1', invalid: 1, clamped: '3' }
+  ]) {
+    await page.locator(`[data-compact-mode="${spec.mode}"]`).click();
+    await expect(page.locator(`[data-compact-mode="${spec.mode}"]`)).toHaveAttribute('aria-pressed', 'true');
+    const state = await compactMass.evaluate(element => ({
+      min: element.min,
+      max: element.max,
+      step: element.step
+    }));
+    expect(Number(state.min)).toBeCloseTo(Number(spec.min), 5);
+    expect(Number(state.max)).toBeCloseTo(Number(spec.max), 5);
+    expect(state.step).toBe(spec.step);
+    await setRange(compactMass, spec.max);
+    await setRange(compactMass, spec.min);
+    await setInvalidRangeValue(compactMass, spec.invalid);
+    await expect(compactMass).toHaveValue(spec.clamped);
+  }
+
+  await setRange(page.locator('#typeIaStage'), 0);
+  await expect(page.locator('#typeIaReadout')).toContainText(await inChinese() ? '非简并伴星开始向白矮星输送物质' : 'Accretion begins from a non-degenerate donor');
+  await setRange(page.locator('#typeIaStage'), 2);
+  await expect(page.locator('#typeIaReadout')).toContainText(await inChinese() ? '近钱德拉塞卡核心' : 'near-Chandrasekhar core');
+  await setRange(page.locator('#typeIaStage'), 3.4);
+  await expect(page.locator('#typeIaReadout')).toContainText(await inChinese() ? '中心碳点火开始了' : 'Central carbon ignition starts');
+  await setRange(page.locator('#typeIaStage'), 4.6);
+  await expect(page.locator('#typeIaReadout')).toContainText(await inChinese() ? '延迟爆轰' : 'delayed detonation');
+  await setRange(page.locator('#typeIaStage'), 6);
+  await expect(page.locator('#typeIaProducts')).toContainText(await inChinese() ? '镍-56' : 'nickel-56');
+
+  await setRange(page.locator('#jetSpeed'), 0.2);
+  await setRange(page.locator('#jetAngle'), 75);
+  await expect(page.locator('#jetReadout')).toContainText(await inChinese() ? '还没有超过 c' : 'below c');
+  await setRange(page.locator('#jetSpeed'), 0.98);
+  await setRange(page.locator('#jetAngle'), 10);
+  await expect(page.locator('#jetInvariant')).toContainText(await inChinese() ? '不会超过光速' : 'outrun light');
+  await setRange(page.locator('#jetSpeed'), 0.995);
+  await setRange(page.locator('#jetAngle'), 3);
+  await expect(page.locator('#jetContext')).toContainText(await inChinese() ? '表观超光速' : 'apparent-superluminal');
+
   await expect(page.locator('#stageDetail dt')).toHaveCount(3);
   await page.locator('[data-lang="zh-CN"]').click();
   await expect(page.locator('html')).toHaveAttribute('lang', 'zh-CN');
