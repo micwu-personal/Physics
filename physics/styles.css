@@ -965,6 +965,11 @@ button {
   padding-block: 70px;
 }
 
+.hero-map > *,
+.topic-hero > * {
+  min-width: 0;
+}
+
 .topic-title {
   position: relative;
   z-index: 2;

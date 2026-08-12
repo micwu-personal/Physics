@@ -10,37 +10,37 @@ export async function exerciseLanding(page) {
   await expect(page.locator('html')).toHaveAttribute('lang', 'en');
 }
 
-export async function exerciseTopLevel(page, app) {
+export async function exerciseTopLevel(page, app, options = {}) {
   if (app === 'landing') {
-    await exerciseLanding(page);
+    await exerciseLanding(page, options);
     return;
   }
   if (app === 'physics-atlas') {
-    await exercisePhysicsAtlas(page);
+    await exercisePhysicsAtlas(page, options);
     return;
   }
   if (app === 'physics-area') {
-    await exercisePhysicsArea(page);
+    await exercisePhysicsArea(page, options);
     return;
   }
   if (app === 'physics-astro') {
-    await exercisePhysicsAstro(page);
+    await exercisePhysicsAstro(page, options);
     return;
   }
   if (app === 'physics-light') {
-    await exercisePhysicsLight(page);
+    await exercisePhysicsLight(page, options);
     return;
   }
   if (app === 'physics-field') {
-    await exercisePhysicsField(page);
+    await exercisePhysicsField(page, options);
     return;
   }
   if (app === 'physics-phase') {
-    await exercisePhysicsPhase(page);
+    await exercisePhysicsPhase(page, options);
     return;
   }
   if (app === 'physics-entropy') {
-    await exercisePhysicsEntropy(page);
+    await exercisePhysicsEntropy(page, options);
     return;
   }
   const tabs = page.locator('.tab');

@@ -84,7 +84,7 @@ body{
     linear-gradient(180deg,#02030a 0%,#08091c 100%);
   background-attachment:fixed;
 }
-#bgCanvas{position:fixed;inset:0;z-index:0;pointer-events:none;width:100vw;height:100vh}
+#bgCanvas{position:fixed;inset:0;z-index:0;pointer-events:none;width:100%;height:100%}
 #bg-stars{
   position:fixed;inset:0;pointer-events:none;z-index:0;
   background-image:
@@ -200,7 +200,7 @@ html[data-motion="paused"] *,html[data-motion="paused"] *::before,html[data-moti
 #timeSlider:focus-visible{outline:2px solid #00d4ff;outline-offset:6px}
 
 /* ---------- Composition ---------- */
-.comp-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:20px;max-width:1200px;margin:0 auto}
+.comp-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:20px;max-width:1200px;margin:0 auto}
 .comp-card{background:var(--panel);border:1px solid var(--panel-b);border-radius:16px;padding:24px;text-align:center;backdrop-filter:blur(12px)}
 .comp-card h3{font-size:16px;margin-bottom:16px;color:var(--accent2);font-family:'JetBrains Mono',monospace;letter-spacing:0.5px}
 .pie-holder{width:220px;height:220px;margin:0 auto 16px;position:relative}
@@ -233,7 +233,7 @@ html[data-motion="paused"] *,html[data-motion="paused"] *::before,html[data-moti
 .scale-jump:focus-visible{outline:2px solid #00d4ff;outline-offset:2px}
 
 /* ---------- Fates ---------- */
-.fates-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:20px;max-width:1300px;margin:0 auto}
+.fates-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:20px;max-width:1300px;margin:0 auto}
 .fate-card{background:var(--panel);border:1px solid var(--panel-b);border-radius:16px;padding:26px;backdrop-filter:blur(12px);position:relative;overflow:hidden;transition:transform .2s}
 .fate-card:hover{transform:translateY(-4px)}
 .fate-card::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent),var(--accent2))}
@@ -243,7 +243,7 @@ html[data-motion="paused"] *,html[data-motion="paused"] *::before,html[data-moti
 .fate-desc{color:#c8cff0;font-size:14px;line-height:1.7}
 
 /* ---------- Mysteries ---------- */
-.myst-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:16px;max-width:1300px;margin:0 auto}
+.myst-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:16px;max-width:1300px;margin:0 auto}
 .myst-card{background:var(--panel);border:1px solid var(--panel-b);border-radius:14px;padding:22px;backdrop-filter:blur(12px);transition:transform .2s}
 .myst-card:hover{transform:translateY(-3px);border-color:var(--accent)}
 .myst-q{font-size:18px;font-weight:600;margin-bottom:10px;color:#fff}
@@ -285,6 +285,9 @@ footer{text-align:center;padding:40px 20px;color:var(--dim);font-size:12px;borde
   .tabs{top:12px;padding:10px 8px}
   .journey-home,.motion-pill,.lang-pill{padding-inline:8px}
   .hero{padding-top:48px}
+  .ep-time{max-width:100%;white-space:normal;overflow-wrap:anywhere;line-height:1.35}
+  .comp-grid,.fates-grid,.myst-grid{grid-template-columns:minmax(0,1fr)}
+  .comp-card,.fate-card,.myst-card{min-width:0}
   #spacetimeSvg{aspect-ratio:19/16}
   .spacetime-readout{max-width:100%;padding:9px 10px}
   .spacetime-readout span{font-size:15px}
