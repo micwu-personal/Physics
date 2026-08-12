@@ -204,6 +204,9 @@
 
     renderLineageMap();
     renderMedia();
+    if (globalThis.renderPhysicsFieldEnrichment) {
+      globalThis.renderPhysicsFieldEnrichment({ fieldId: activeId, field, guide });
+    }
     renderPhysicsReferences(activeId, document.getElementById('officialReferences'));
   }
 

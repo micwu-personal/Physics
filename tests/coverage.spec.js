@@ -1,5 +1,6 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import { expect, test } from '@playwright/test';
+import { expectVisualScenario, fieldVisualScenarios, readFieldVisualState } from './helpers/field-visuals.js';
 import { exerciseBigBang, exerciseLanding, exerciseParticleZoo, exercisePeriodicTable, exercisePhysicsArea, exercisePhysicsAstro, exercisePhysicsAtlas, exercisePhysicsEntropy, exercisePhysicsField, exercisePhysicsLight, exercisePhysicsPhase } from './helpers/journeys.js';
 import {
   blockExternalAssets,
@@ -515,6 +516,9 @@ test('physics field authored diagram and equation fallback coverage', async ({ p
   await collectCoverage(page, 'physics-field-fallbacks', async () => {
     await preparePage(page, '/physics/field.html?id=fluids', 'zh-CN');
     await expect(page.locator('#fieldMedia')).toHaveAttribute('data-kind', 'diagram');
+    await expect(page.locator('#fieldVisualHost svg')).toHaveCount(1);
+    await expect(page.locator('#claimReferenceLedger .claim-card')).toHaveCount(2);
+    await setRange(page.locator('#fieldVisualHost input[type="range"]').first(), '4000');
     const equation = await page.evaluate(() => {
       const guide = PhysicsFieldGuides.fluids;
       const tex = guide.tex;
@@ -526,6 +530,17 @@ test('physics field authored diagram and equation fallback coverage', async ({ p
       return { expected: guide.equation, text };
     });
     expect(equation.text).toBe(equation.expected);
+    const enrichmentFallback = await page.evaluate(() => {
+      const renderer = globalThis.renderPhysicsFieldEnrichment;
+      document.getElementById('fieldVisualHost').innerHTML = '';
+      delete globalThis.renderPhysicsFieldEnrichment;
+      document.dispatchEvent(new Event('physics-language'));
+      const hasVisual = !!document.querySelector('#fieldVisualHost .field-visual-card');
+      globalThis.renderPhysicsFieldEnrichment = renderer;
+      document.dispatchEvent(new Event('physics-language'));
+      return hasVisual;
+    });
+    expect(enrichmentFallback).toBe(false);
   });
 });
 
@@ -723,12 +738,103 @@ test('physics every field guide renders coverage', async ({ page }) => {
     for (const id of ids) {
       await page.goto(`/physics/field.html?id=${id}`, { waitUntil: 'load' });
       await expect(page.locator('#fieldName')).not.toHaveText('');
+      await expect(page.locator('#questionGrid .field-question-card')).toHaveCount(2);
+      await expect(page.locator('#scaleGrid .field-scale-card')).toHaveCount(3);
+      await expect(page.locator('#fieldVisualHost svg')).toHaveCount(1);
+      await expect(page.locator('#fieldMythFrontier .field-limit-card')).toHaveCount(2);
+      await expect(page.locator('#claimReferenceLedger .claim-card')).toHaveCount(2);
     }
     // An unknown id must fall back rather than render an empty guide.
     await page.goto('/physics/field.html?id=not-a-field', { waitUntil: 'load' });
     await expect(page.locator('#fieldName')).not.toHaveText('');
     await page.locator('[data-lang="zh-CN"]').click();
     await page.locator('[data-lang="en"]').click();
+  });
+});
+
+test('physics field-enrichment alternate branches and language persistence coverage', async ({ page }) => {
+  test.slow();
+  await collectCoverage(page, 'physics-field-enrichment-branches', async () => {
+    await preparePage(page, '/physics/', 'en');
+    for (const [fieldId, scenarios] of Object.entries(fieldVisualScenarios)) {
+      await page.goto(`/physics/field.html?id=${fieldId}`, { waitUntil: 'load' });
+      await expect(page.locator('#fieldVisualHost .field-visual-card')).toBeVisible();
+      for (const scenario of scenarios) {
+        const state = await expectVisualScenario(page, fieldId, scenario);
+        await page.locator('[data-lang="zh-CN"]').click();
+        await expect(page.locator('#fieldVisualHost .field-visual-card')).toBeVisible();
+        expect(await readFieldVisualState(page)).toEqual(state);
+        await page.locator('[data-lang="en"]').click();
+        await expect(page.locator('#fieldVisualHost .field-visual-card')).toBeVisible();
+      }
+    }
+    await page.evaluate(() => renderPhysicsFieldEnrichment({
+      fieldId: 'not-a-field',
+      field: PhysicsFieldList.find(candidate => candidate.id === 'thermodynamics')
+    }));
+    const edgeCases = await page.evaluate(() => {
+      const messages = {};
+      const renderFor = fieldId => renderPhysicsFieldEnrichment({
+        fieldId,
+        field: PhysicsFieldList.find(candidate => candidate.id === fieldId),
+        guide: PhysicsFieldGuides[fieldId]
+      });
+      const standardModel = PhysicsFieldEnrichments['standard-model'];
+      const nonlinear = PhysicsFieldEnrichments.nonlinear;
+      const thermodynamics = PhysicsFieldEnrichments.thermodynamics;
+      const originalStandardControls = standardModel.visual.controls;
+      const originalStandardSources = standardModel.visual.sources;
+      const originalStandardType = standardModel.visual.type;
+      const originalFormatter = nonlinear.visual.controls[0].formatter;
+      const originalClaimSources = [...thermodynamics.claims[0].sources];
+      const originalSecondClaimSources = thermodynamics.claims[1].sources;
+      const originalExperimentSources = thermodynamics.experiment.sources;
+      standardModel.visual.controls = undefined;
+      renderFor('standard-model');
+      messages.noControls = document.querySelectorAll('#fieldVisualHost .field-control-group').length;
+      standardModel.visual.sources = undefined;
+      renderFor('standard-model');
+      messages.noVisualSources = document.querySelectorAll('#fieldVisualHost .field-visual-sources .field-source-item').length;
+      delete nonlinear.visual.controls[0].formatter;
+      renderFor('nonlinear');
+      messages.defaultFormatter = document.querySelector('#fieldVisualHost output')?.textContent || '';
+      standardModel.visual.type = 'missing-visual';
+      try {
+        renderFor('standard-model');
+      } catch (error) {
+        messages.missingRenderer = error.message;
+      }
+      thermodynamics.claims[0].sources = ['missing-source'];
+      try {
+        renderFor('thermodynamics');
+      } catch (error) {
+        messages.missingSource = error.message;
+      }
+      thermodynamics.claims[0].sources = originalClaimSources;
+      thermodynamics.claims[1].sources = undefined;
+      renderFor('thermodynamics');
+      messages.noClaimSources = document.querySelectorAll('#claimReferenceLedger .claim-card')[1]
+        ?.querySelectorAll('.claim-source-list .field-source-item').length ?? -1;
+      thermodynamics.experiment.sources = undefined;
+      renderFor('thermodynamics');
+      messages.noExperimentSources = document.querySelectorAll('#fieldExperiment .claim-source-list .field-source-item').length;
+      standardModel.visual.controls = originalStandardControls;
+      standardModel.visual.sources = originalStandardSources;
+      standardModel.visual.type = originalStandardType;
+      nonlinear.visual.controls[0].formatter = originalFormatter;
+      thermodynamics.claims[1].sources = originalSecondClaimSources;
+      thermodynamics.experiment.sources = originalExperimentSources;
+      return messages;
+    });
+    expect(edgeCases).toEqual({
+      noControls: 0,
+      noVisualSources: 0,
+      defaultFormatter: '3.2',
+      missingRenderer: 'Missing field visual renderer missing-visual',
+      missingSource: 'Missing field-enrichment source missing-source',
+      noClaimSources: 0,
+      noExperimentSources: 0
+    });
   });
 });
 
@@ -2310,6 +2416,21 @@ test('particle-zoo playground clear branch coverage', async ({ page }) => {
       shortFallback:'electron',
       particleName:'proton',
       idFallback:'missing-particle'
+    });
+  });
+});
+
+test('particle-zoo direct short-name fallback coverage', async ({ page }) => {
+  await collectCoverage(page,'particle-short-name-direct',async()=>{
+    await preparePage(page,'/particle-zoo/','en');
+    expect(await page.evaluate(() => ({
+      short: shortName('electron', 'en'),
+      particle: shortName('proton', 'missing-locale'),
+      fallback: shortName('__coverage_unknown__', 'en')
+    }))).toEqual({
+      short: 'electron',
+      particle: 'proton',
+      fallback: '__coverage_unknown__'
     });
   });
 });
