@@ -10,7 +10,7 @@
     "build:mobile": "npm --prefix big-bang run build && npm --prefix periodic-table run build && npm --prefix particle-zoo run build",
     "check:generated": "node scripts/check-generated.mjs",
     "test:apps": "npm --prefix big-bang test --if-present && npm --prefix periodic-table test --if-present && npm --prefix particle-zoo test --if-present",
-    "test:e2e": "playwright test --project=quality-desktop --project=quality-mobile --project=features",
+    "test:e2e": "playwright test --project=quality-desktop --project=quality-mobile --project=features --project=layout-matrix",
     "test:visual": "playwright test --project=visual-desktop --project=visual-mobile",
     "test:visual:update": "playwright test --project=visual-desktop --project=visual-mobile --update-snapshots",
     "test:rendering": "playwright test --project=rendering-visual",
