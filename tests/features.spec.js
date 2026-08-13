@@ -791,6 +791,7 @@ test('Particle Zoo visible simulations animate and honor reduced motion', async 
     return {
       framesBefore: snapshot.frames.lab,
       drawsBefore: snapshot.draws['lab:decay'] || 0,
+      startTimeBefore: LAB.decay?.startTime || 0,
       nodesBefore: (() => {
         const state = LAB.decay;
         if (!state?.tree) return 0;
@@ -807,16 +808,17 @@ test('Particle Zoo visible simulations animate and honor reduced motion', async 
       })(),
     };
   });
-  const decayFingerprintBefore = await fingerprint('decayCanvas');
+  const decayImageBefore = await page.locator('#decayCanvas').evaluate(canvas => canvas.toDataURL());
   await page.locator('#decayRestart').click();
   await expect
-    .poll(async () => {
-      const fingerprintAfter = await fingerprint('decayCanvas');
-      const state = await page.evaluate(({ framesBefore, drawsBefore, nodesBefore }) => {
+    .poll(() => page.evaluate(({ framesBefore, drawsBefore, startTimeBefore, nodesBefore, imageBefore }) => {
+        const canvas = document.getElementById('decayCanvas');
         const snapshot = window.PZ_PERF.snapshot();
         return {
           framesAdvanced: snapshot.frames.lab > framesBefore,
           drawsAdvanced: (snapshot.draws['lab:decay'] || 0) > drawsBefore,
+          restarted: (LAB.decay?.startTime || 0) > startTimeBefore,
+          imageChanged: canvas.toDataURL() !== imageBefore,
           nodesAdvanced: (() => {
             const state = LAB.decay;
             if (!state?.tree) return false;
@@ -832,10 +834,10 @@ test('Particle Zoo visible simulations animate and honor reduced motion', async 
             return visible > nodesBefore;
           })(),
         };
-      }, decayBefore);
-      return state.framesAdvanced && state.drawsAdvanced && state.nodesAdvanced &&
-        fingerprintAfter !== decayFingerprintBefore;
-    }, {
+      }, { ...decayBefore, imageBefore: decayImageBefore }).then(state =>
+        state.framesAdvanced && state.drawsAdvanced && state.restarted &&
+        state.nodesAdvanced && state.imageChanged
+      ), {
       timeout: 3_000,
       intervals: [50, 100, 150],
       message: 'decayCanvas should advance after restart'
