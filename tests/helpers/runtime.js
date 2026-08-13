@@ -232,12 +232,14 @@ export async function lockViewportSensitiveHeights(page) {
         seen.add(element);
         const rect = element.getBoundingClientRect();
         if (rect.height <= 0 || rect.width <= 0) continue;
-        element.style.minHeight = `${rect.height}px`;
-        element.style.maxHeight = `${rect.height}px`;
-        element.style.height = `${rect.height}px`;
-        element.style.minWidth = `${rect.width}px`;
-        element.style.maxWidth = `${rect.width}px`;
-        element.style.width = `${rect.width}px`;
+        const lockedHeight = Math.max(1, Math.round(rect.height));
+        const lockedWidth = Math.max(1, Math.round(rect.width));
+        element.style.minHeight = `${lockedHeight}px`;
+        element.style.maxHeight = `${lockedHeight}px`;
+        element.style.height = `${lockedHeight}px`;
+        element.style.minWidth = `${lockedWidth}px`;
+        element.style.maxWidth = `${lockedWidth}px`;
+        element.style.width = `${lockedWidth}px`;
       }
     }
   });

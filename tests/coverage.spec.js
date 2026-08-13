@@ -916,10 +916,16 @@ test('physics relativity deepening coverage', async ({ page }) => {
     await page.locator('[data-lang="en"]').click();
 
     await page.evaluate(() => {
-      window.__relativityDebug.renderEnergy();
-      window.__relativityDebug.renderJetGeometry();
-      window.__relativityDebug.stopLoop();
-      window.__relativityDebug.stopLoop();
+      const debug = window.__relativityDebug;
+      debug.renderEnergy();
+      debug.renderJetGeometry();
+      debug.getFrameHandle();
+      debug.setJetPhase(0.83);
+      debug.getJetPhase();
+      debug.stopLoop({ freezeFrame: true });
+      debug.getJetPhase();
+      debug.stopLoop({ freezeFrame: true });
+      debug.stopLoop();
     });
     await page.locator('.motion-toggle').click();
     await page.evaluate(() => window.__relativityDebug.startLoop());
