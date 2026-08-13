@@ -321,19 +321,27 @@
 
   function stopLoop(options = {}) {
     const { freezeFrame = false } = options;
-    if (!state.frameHandle) return;
-    cancelAnimationFrame(state.frameHandle);
-    state.frameHandle = 0;
+    const shouldRender = freezeFrame || Boolean(state.frameHandle);
+    if (state.frameHandle) {
+      cancelAnimationFrame(state.frameHandle);
+      state.frameHandle = 0;
+    }
     if (freezeFrame) state.jetPhase = 0;
-    renderJetGeometry();
+    if (shouldRender) renderJetGeometry();
   }
 
   window.__relativityDebug = {
     computeJetModel,
     formatEnergyMeV,
+    getFrameHandle: () => state.frameHandle,
+    getJetPhase: () => state.jetPhase,
     formatMomentumMeV,
     renderEnergy,
     renderJetGeometry,
+    setJetPhase: phase => {
+      state.jetPhase = ((Number(phase) % 1) + 1) % 1;
+      renderJetGeometry();
+    },
     setParticle,
     startLoop,
     stopLoop

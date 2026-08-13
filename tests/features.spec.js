@@ -940,20 +940,27 @@ test('Particle Zoo photons fade before the final scene clears', async ({ page })
     pgRAF !== null && window.PZ_PERF.snapshot().frames.playground > before
   ), playgroundFramesBeforeFade, { timeout: 2_000 });
   const fadeFrames=await page.evaluate(() => PHOTON_FADE_FRAMES);
-  const waitForPhotonSample = (maxLifeExclusive, stop = false) => page.waitForFunction(({ maxLifeExclusive, stop }) => {
-    const photon=pgParts[0];
-    if(!photon || photon.life>=maxLifeExclusive) return null;
-    const pixel=ctx.getImageData(
-      Math.floor(photon.x*devicePixelRatio),
-      Math.floor(photon.y*devicePixelRatio),
+  const { early, late } = await page.waitForFunction(fadeFrames => {
+    const samples = window.__pgPhotonFadeSamples || (window.__pgPhotonFadeSamples = {
+      early: null,
+      late: null,
+    });
+    const photon = pgParts[0];
+    if (!photon) return samples.early && samples.late ? samples : null;
+    const pixel = ctx.getImageData(
+      Math.floor(photon.x * devicePixelRatio),
+      Math.floor(photon.y * devicePixelRatio),
       1,
       1
     ).data;
-    if(stop) pgStop();
-    return {brightness:pixel[0]+pixel[1]+pixel[2],life:photon.life};
-  }, { maxLifeExclusive, stop }, { timeout: 2_000 }).then(handle => handle.jsonValue());
-  const early = await waitForPhotonSample(fadeFrames - 3);
-  const late = await waitForPhotonSample(8, true);
+    const sample = { brightness: pixel[0] + pixel[1] + pixel[2], life: photon.life };
+    if (!samples.early && photon.life < fadeFrames - 3) samples.early = sample;
+    if (!samples.late && photon.life < 8) {
+      samples.late = sample;
+      pgStop();
+    }
+    return samples.early && samples.late ? samples : null;
+  }, fadeFrames, { timeout: 4_000 }).then(handle => handle.jsonValue());
   expect(early).not.toBeNull();
   expect(late).not.toBeNull();
   expect(late.life).toBeLessThan(early.life);

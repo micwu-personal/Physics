@@ -106,3 +106,63 @@ test('relativity page keeps bilingual dynamic copy for new scoped instruments', 
   await expect(page.locator('#references a[href="https://www.einstein-online.info/en/Light_deflection/"]')).toBeVisible();
   await expect(page.locator('#references .reference-entry a').first()).toHaveText('打开来源');
 });
+
+test('relativity freezeFrame rewinds the jet explorer even after the loop is already stopped', async ({ page }) => {
+  const errors = watchPage(page);
+  await preparePage(page, '/physics/relativity.html', 'en');
+
+  await setRange(page.locator('#jetBetaControl'), 0.97);
+  await setRange(page.locator('#jetAngleControl'), 18);
+
+  const captureFreezeState = phase => page.evaluate(phaseValue => {
+    const debug = window.__relativityDebug;
+    const readSvg = () => ({
+      approachBlobCx: document.getElementById('jetApproachBlob').getAttribute('cx'),
+      approachBlobCy: document.getElementById('jetApproachBlob').getAttribute('cy'),
+      recedeBlobCx: document.getElementById('jetRecedeBlob').getAttribute('cx'),
+      recedeBlobCy: document.getElementById('jetRecedeBlob').getAttribute('cy'),
+      skyCurrentCx: document.getElementById('skyCurrent').getAttribute('cx'),
+      skyCurrentCy: document.getElementById('skyCurrent').getAttribute('cy')
+    });
+    const readouts = () => ({
+      apparent: document.getElementById('jetApparent').textContent,
+      arrivalGap: document.getElementById('jetArrivalGap').textContent,
+      brightnessNote: document.getElementById('jetBrightnessNote').textContent,
+      causalityNote: document.getElementById('jetCausalityNote').textContent
+    });
+
+    debug.stopLoop();
+    debug.setJetPhase(phaseValue);
+    const before = {
+      frameHandle: debug.getFrameHandle(),
+      jetPhase: debug.getJetPhase(),
+      readouts: readouts(),
+      svg: readSvg()
+    };
+
+    document.dispatchEvent(new CustomEvent('physics-motion', { detail: { paused: true, freezeFrame: true } }));
+    const frozen = {
+      frameHandle: debug.getFrameHandle(),
+      jetPhase: debug.getJetPhase(),
+      readouts: readouts(),
+      svg: readSvg()
+    };
+
+    return { before, frozen };
+  }, phase);
+
+  const first = await captureFreezeState(0.17);
+  const second = await captureFreezeState(0.83);
+
+  expect(first.before.jetPhase).toBeCloseTo(0.17, 6);
+  expect(second.before.jetPhase).toBeCloseTo(0.83, 6);
+  expect(first.before.svg).not.toEqual(second.before.svg);
+
+  expect(first.frozen.frameHandle).toBe(0);
+  expect(second.frozen.frameHandle).toBe(0);
+  expect(first.frozen.jetPhase).toBe(0);
+  expect(second.frozen.jetPhase).toBe(0);
+  expect(first.frozen).toEqual(second.frozen);
+
+  await assertNoErrors(errors);
+});
