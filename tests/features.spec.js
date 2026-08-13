@@ -898,6 +898,10 @@ test('Particle Zoo photons fade before the final scene clears', async ({ page })
     photon.life=PHOTON_FADE_FRAMES;
     pgStart();
   });
+  const playgroundFramesBeforeFade = await page.evaluate(() => window.PZ_PERF.snapshot().frames.playground);
+  await page.waitForFunction(before => (
+    pgRAF !== null && window.PZ_PERF.snapshot().frames.playground > before
+  ), playgroundFramesBeforeFade, { timeout: 2_000 });
   const fadeFrames=await page.evaluate(() => PHOTON_FADE_FRAMES);
   const waitForPhotonSample = (maxLifeExclusive, stop = false) => page.waitForFunction(({ maxLifeExclusive, stop }) => {
     const photon=pgParts[0];
