@@ -134,8 +134,21 @@ export async function freezeVisuals(page) {
   // resolve mid-capture and change the document height. Force them all in
   // before measuring so the captured layout is deterministic.
   await page.evaluate(async () => {
+    const root = document.scrollingElement || document.documentElement;
+    const step = Math.max(Math.floor(window.innerHeight * 0.8), 240);
+    const maxScrollTop = Math.max(0, root.scrollHeight - window.innerHeight);
+    for (let scrollTop = 0; scrollTop <= maxScrollTop; scrollTop += step) {
+      window.scrollTo(0, scrollTop);
+      await new Promise(resolve => setTimeout(resolve, 50));
+    }
+    window.scrollTo(0, maxScrollTop);
+    await new Promise(resolve => setTimeout(resolve, 50));
+
     const images = [...document.images];
-    for (const image of images) image.loading = 'eager';
+    for (const image of images) {
+      image.loading = 'eager';
+      image.decoding = 'sync';
+    }
     await Promise.all(images.map(image => image.complete
       ? Promise.resolve()
       : new Promise(resolve => {
@@ -143,6 +156,8 @@ export async function freezeVisuals(page) {
         image.addEventListener('error', resolve, { once: true });
       })));
     await document.fonts.ready;
+    window.scrollTo(0, 0);
+    await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
   });
   await page.evaluate(async () => {
     const root = document.scrollingElement || document.documentElement;
