@@ -511,18 +511,24 @@ test('Periodic Table keeps structures element-relevant and labels model limits',
   });
   expect(closeHitTarget).toBe('detailClose');
   await page.locator('#dReactionsBlock').scrollIntoViewIfNeeded();
-  await page.locator('.rx-play').first().click();
+  await page.locator('#motionToggle').click();
+  await page.locator('.rx-play').first().evaluate(button => {
+    button.removeAttribute('data-motion-start');
+    button.click();
+  });
   await page.locator('#rxAnimBox').scrollIntoViewIfNeeded();
   expect(await page.evaluate(()=>window.PT_REACTION_DEBUG)).toMatchObject({
     sourceHoldMs:500,
     effects:{heat:true,light:true,lightColor:'#d7193f'}
   });
-  await page.locator('#motionToggle').click();
   await expect.poll(
     ()=>page.evaluate(()=>window.PT_REACTION_DEBUG.holdingSource),
     {timeout:3000, intervals:[50,100,150]}
   ).toBe(true);
-  await page.locator('#motionToggle').click();
+  await page.locator('.rx-play').first().evaluate(button => {
+    button.setAttribute('data-motion-start', '');
+  });
+  await page.locator('.rx-play').first().click();
   await page.locator('#rxAnimBox').scrollIntoViewIfNeeded();
   await expect.poll(
     ()=>page.evaluate(()=>window.PT_REACTION_DEBUG.holdingSource),
