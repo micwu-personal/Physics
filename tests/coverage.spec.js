@@ -2420,6 +2420,28 @@ test('particle-zoo playground clear branch coverage', async ({ page }) => {
   });
 });
 
+test('particle-zoo forces interaction loop coverage', async ({ page }) => {
+  await collectCoverage(page, 'particle-forces-loop', async () => {
+    await preparePage(page, '/particle-zoo/?motion=play', 'en');
+    await page.locator('.tab[data-tab="forces"]').click();
+    await page.locator('.ix-card').first().scrollIntoViewIfNeeded();
+    await expect(page.locator('.ix-card svg').first()).toBeVisible();
+    await expect
+      .poll(() => page.evaluate(() => ixRAF !== null ? 'running' : 'stopped'), {
+        timeout: 2_000,
+        intervals: [50, 100, 150]
+      })
+      .toBe('running');
+    await expect
+      .poll(() => page.evaluate(() => window.PZ_PERF.snapshot().frames.interactions), {
+        timeout: 2_000,
+        intervals: [50, 100, 150]
+      })
+      .toBeGreaterThan(1);
+    await page.locator('.tab[data-tab="chart"]').click();
+  });
+});
+
 test('particle-zoo direct short-name fallback coverage', async ({ page }) => {
   await collectCoverage(page,'particle-short-name-direct',async()=>{
     await preparePage(page,'/particle-zoo/','en');

@@ -144,6 +144,21 @@ export async function freezeVisuals(page) {
       })));
     await document.fonts.ready;
   });
+  await page.evaluate(async () => {
+    const root = document.scrollingElement || document.documentElement;
+    let stableFrames = 0;
+    let previousHeight = -1;
+    let previousWidth = -1;
+    while (stableFrames < 3) {
+      await new Promise(resolve => setTimeout(resolve, 50));
+      const nextHeight = root.scrollHeight;
+      const nextWidth = root.scrollWidth;
+      if (nextHeight === previousHeight && nextWidth === previousWidth) stableFrames++;
+      else stableFrames = 0;
+      previousHeight = nextHeight;
+      previousWidth = nextWidth;
+    }
+  });
   await page.waitForTimeout(100);
 }
 

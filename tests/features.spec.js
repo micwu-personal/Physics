@@ -708,6 +708,20 @@ test('Particle Zoo visible simulations animate and honor reduced motion', async 
       })
       .not.toBe(before);
   };
+  const visibleDecayNodes = () => page.evaluate(() => {
+    const state = LAB.decay;
+    if (!state?.tree) return 0;
+    const elapsed = (performance.now() - state.startTime) * state.speed;
+    const virtualNow = state.startTime + elapsed;
+    let visible = 0;
+    const walk = node => {
+      if (virtualNow < node.revealAt) return;
+      visible++;
+      node.children.forEach(walk);
+    };
+    walk(state.tree);
+    return visible;
+  });
 
   await page.locator('.tab[data-tab="builder"]').click();
   for (const part of ['u', 'u', 'd', 'e']) {
@@ -758,7 +772,14 @@ test('Particle Zoo visible simulations animate and honor reduced motion', async 
   await page.locator('#decayCanvas').scrollIntoViewIfNeeded();
   await expect(page.locator('#decayCanvas')).toBeVisible();
   await page.locator('#decayRestart').click();
-  await expectCanvasToAdvance('decayCanvas');
+  const visibleNodesBefore = await visibleDecayNodes();
+  await expect
+    .poll(() => visibleDecayNodes(), {
+      timeout: 3_000,
+      intervals: [50, 100, 150],
+      message: 'decayCanvas should reveal additional decay nodes'
+    })
+    .toBeGreaterThan(visibleNodesBefore);
 
   await page.locator('.tab[data-tab="playground"]').click();
   await expectCanvasToAdvance('pgCanvas');
