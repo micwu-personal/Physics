@@ -118,6 +118,9 @@ export async function freezeVisuals(page) {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.addStyleTag({
     content: `
+      html {
+        scrollbar-gutter: stable both-edges;
+      }
       *, *::before, *::after {
         animation-delay: 0s !important;
         animation-duration: 0s !important;
@@ -129,6 +132,25 @@ export async function freezeVisuals(page) {
         visibility: hidden !important;
       }
     `
+  });
+  await page.evaluate(() => {
+    const button = document.querySelector('.motion-toggle');
+    if (!button) return;
+    try {
+      localStorage.setItem('physics.motion', 'pause');
+    } catch {
+      // Visual pages can still freeze motion even when storage is unavailable.
+    }
+    document.documentElement.dataset.motion = 'paused';
+    button.setAttribute('aria-pressed', 'true');
+    const text = document.documentElement.lang === 'zh-CN' ? '播放动画' : 'Play motion';
+    button.textContent = text;
+    button.setAttribute('aria-label', text);
+    document.dispatchEvent(new CustomEvent('physics-motion', { detail: { paused: true, freezeFrame: true } }));
+  });
+  await page.waitForFunction(() => {
+    const button = document.querySelector('.motion-toggle');
+    return !button || button.getAttribute('aria-pressed') === 'true';
   });
   // A full-page screenshot scrolls the viewport, so lazily loaded images can
   // resolve mid-capture and change the document height. Force them all in
@@ -186,6 +208,15 @@ export async function freezeVisuals(page) {
 export async function lockViewportSensitiveHeights(page) {
   await page.evaluate(() => {
     const selectors = [
+      '.route-bar',
+      '.route-left',
+      '.brand-home',
+      '.brand-home__title',
+      '.route-home',
+      '.topic-index',
+      '.topic-title',
+      '.hero-copy',
+      '.hero-equation',
       '.topic-hero',
       '.hero-map',
       '.atlas-preview',
@@ -204,10 +235,9 @@ export async function lockViewportSensitiveHeights(page) {
         element.style.minHeight = `${rect.height}px`;
         element.style.maxHeight = `${rect.height}px`;
         element.style.height = `${rect.height}px`;
-        if (selector === 'canvas') {
-          element.style.width = `${rect.width}px`;
-          element.style.maxWidth = `${rect.width}px`;
-        }
+        element.style.minWidth = `${rect.width}px`;
+        element.style.maxWidth = `${rect.width}px`;
+        element.style.width = `${rect.width}px`;
       }
     }
   });
@@ -215,8 +245,8 @@ export async function lockViewportSensitiveHeights(page) {
 
 export async function waitForStableDocumentHeight(page, options = {}) {
   const {
-    consecutiveSamples = 4,
-    intervalMs = 75,
+    consecutiveSamples = 6,
+    intervalMs = 100,
   } = options;
   await page.evaluate(async ({ consecutiveSamples, intervalMs }) => {
     const root = document.scrollingElement || document.documentElement;

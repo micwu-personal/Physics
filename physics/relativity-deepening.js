@@ -319,10 +319,12 @@
     state.frameHandle = requestAnimationFrame(frame);
   }
 
-  function stopLoop() {
+  function stopLoop(options = {}) {
+    const { freezeFrame = false } = options;
     if (!state.frameHandle) return;
     cancelAnimationFrame(state.frameHandle);
     state.frameHandle = 0;
+    if (freezeFrame) state.jetPhase = 0;
     renderJetGeometry();
   }
 
@@ -363,7 +365,7 @@
     renderJetGeometry();
   });
   document.addEventListener('physics-motion', event => {
-    if (event.detail.paused) stopLoop();
+    if (event.detail.paused) stopLoop({ freezeFrame: Boolean(event.detail.freezeFrame) });
     else startLoop();
   });
   document.addEventListener('visibilitychange', () => {

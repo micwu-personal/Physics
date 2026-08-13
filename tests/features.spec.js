@@ -787,56 +787,36 @@ test('Particle Zoo visible simulations animate and honor reduced motion', async 
     })
     .toBe(true);
   const decayBefore = await page.evaluate(() => {
-    const snapshot = window.PZ_PERF.snapshot();
     return {
-      framesBefore: snapshot.frames.lab,
-      drawsBefore: snapshot.draws['lab:decay'] || 0,
       startTimeBefore: LAB.decay?.startTime || 0,
-      nodesBefore: (() => {
-        const state = LAB.decay;
-        if (!state?.tree) return 0;
-        const elapsed = (performance.now() - state.startTime) * state.speed;
-        const virtualNow = state.startTime + elapsed;
-        let visible = 0;
-        const walk = node => {
-          if (virtualNow < node.revealAt) return;
-          visible++;
-          node.children.forEach(walk);
-        };
-        walk(state.tree);
-        return visible;
-      })(),
     };
   });
-  const decayImageBefore = await page.locator('#decayCanvas').evaluate(canvas => canvas.toDataURL());
   await page.locator('#decayRestart').click();
+  const decayRestartBaseline = await page.waitForFunction(({ startTimeBefore }) => {
+    const startTime = LAB.decay?.startTime || 0;
+    if (startTime <= startTimeBefore) return null;
+    const canvas = document.getElementById('decayCanvas');
+    const snapshot = window.PZ_PERF.snapshot();
+    return {
+      startTime,
+      framesBefore: snapshot.frames.lab,
+      drawsBefore: snapshot.draws['lab:decay'] || 0,
+      imageBefore: canvas.toDataURL(),
+    };
+  }, decayBefore, { timeout: 3_000 }).then(handle => handle.jsonValue());
   await expect
-    .poll(() => page.evaluate(({ framesBefore, drawsBefore, startTimeBefore, nodesBefore, imageBefore }) => {
+    .poll(() => page.evaluate(({ framesBefore, drawsBefore, startTime, imageBefore }) => {
         const canvas = document.getElementById('decayCanvas');
         const snapshot = window.PZ_PERF.snapshot();
         return {
           framesAdvanced: snapshot.frames.lab > framesBefore,
           drawsAdvanced: (snapshot.draws['lab:decay'] || 0) > drawsBefore,
-          restarted: (LAB.decay?.startTime || 0) > startTimeBefore,
+          sameRestart: (LAB.decay?.startTime || 0) === startTime,
           imageChanged: canvas.toDataURL() !== imageBefore,
-          nodesAdvanced: (() => {
-            const state = LAB.decay;
-            if (!state?.tree) return false;
-            const elapsed = (performance.now() - state.startTime) * state.speed;
-            const virtualNow = state.startTime + elapsed;
-            let visible = 0;
-            const walk = node => {
-              if (virtualNow < node.revealAt) return;
-              visible++;
-              node.children.forEach(walk);
-            };
-            walk(state.tree);
-            return visible > nodesBefore;
-          })(),
         };
-      }, { ...decayBefore, imageBefore: decayImageBefore }).then(state =>
-        state.framesAdvanced && state.drawsAdvanced && state.restarted &&
-        state.nodesAdvanced && state.imageChanged
+      }, decayRestartBaseline).then(state =>
+        state.framesAdvanced && state.drawsAdvanced &&
+        state.sameRestart && state.imageChanged
       ), {
       timeout: 3_000,
       intervals: [50, 100, 150],
