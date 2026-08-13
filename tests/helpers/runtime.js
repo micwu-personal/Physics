@@ -135,30 +135,50 @@ export async function freezeVisuals(page) {
   // before measuring so the captured layout is deterministic.
   await page.evaluate(async () => {
     const root = document.scrollingElement || document.documentElement;
-    const step = Math.max(Math.floor(window.innerHeight * 0.8), 240);
-    const maxScrollTop = Math.max(0, root.scrollHeight - window.innerHeight);
-    for (let scrollTop = 0; scrollTop <= maxScrollTop; scrollTop += step) {
-      window.scrollTo(0, scrollTop);
+    let previousHeight = -1;
+    for (let pass = 0; pass < 4; pass++) {
+      const step = Math.max(Math.floor(window.innerHeight * 0.8), 240);
+      const maxScrollTop = Math.max(0, root.scrollHeight - window.innerHeight);
+      for (let scrollTop = 0; scrollTop <= maxScrollTop; scrollTop += step) {
+        window.scrollTo(0, scrollTop);
+        await new Promise(resolve => setTimeout(resolve, 50));
+      }
+      window.scrollTo(0, maxScrollTop);
       await new Promise(resolve => setTimeout(resolve, 50));
-    }
-    window.scrollTo(0, maxScrollTop);
-    await new Promise(resolve => setTimeout(resolve, 50));
 
-    const images = [...document.images];
-    for (const image of images) {
-      image.loading = 'eager';
-      image.decoding = 'sync';
+      const images = [...document.images];
+      for (const image of images) {
+        image.loading = 'eager';
+        image.decoding = 'sync';
+        image.fetchPriority = 'high';
+      }
+      await Promise.all(images.map(async image => {
+        image.scrollIntoView({ block: 'center', inline: 'center' });
+        await new Promise(resolve => setTimeout(resolve, 50));
+        if (!image.complete) {
+          await new Promise(resolve => {
+            image.addEventListener('load', resolve, { once: true });
+            image.addEventListener('error', resolve, { once: true });
+          });
+        }
+        if (typeof image.decode === 'function') {
+          try {
+            await image.decode();
+          } catch {
+            // Broken or blocked images still count as settled for layout.
+          }
+        }
+      }));
+      await document.fonts.ready;
+      window.scrollTo(0, 0);
+      await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+
+      const currentHeight = root.scrollHeight;
+      if (currentHeight === previousHeight) break;
+      previousHeight = currentHeight;
     }
-    await Promise.all(images.map(image => image.complete
-      ? Promise.resolve()
-      : new Promise(resolve => {
-        image.addEventListener('load', resolve, { once: true });
-        image.addEventListener('error', resolve, { once: true });
-      })));
-    await document.fonts.ready;
-    window.scrollTo(0, 0);
-    await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
   });
+  await lockViewportSensitiveHeights(page);
   await page.evaluate(async () => {
     const root = document.scrollingElement || document.documentElement;
     let stableFrames = 0;
@@ -175,6 +195,36 @@ export async function freezeVisuals(page) {
     }
   });
   await page.waitForTimeout(100);
+}
+
+export async function lockViewportSensitiveHeights(page) {
+  await page.evaluate(() => {
+    const selectors = [
+      '.topic-hero',
+      '.hero-map',
+      '.atlas-preview',
+      '.hero-instrument',
+      '.lab-stage',
+      '.focus-instrument',
+      'canvas'
+    ];
+    const seen = new Set();
+    for (const selector of selectors) {
+      for (const element of document.querySelectorAll(selector)) {
+        if (seen.has(element)) continue;
+        seen.add(element);
+        const rect = element.getBoundingClientRect();
+        if (rect.height <= 0 || rect.width <= 0) continue;
+        element.style.minHeight = `${rect.height}px`;
+        element.style.maxHeight = `${rect.height}px`;
+        element.style.height = `${rect.height}px`;
+        if (selector === 'canvas') {
+          element.style.width = `${rect.width}px`;
+          element.style.maxWidth = `${rect.width}px`;
+        }
+      }
+    }
+  });
 }
 
 export async function setRange(locator, value) {
