@@ -1,7 +1,7 @@
 import { test } from '@playwright/test';
 import { locales } from '../helpers/matrix.js';
 import { captureRendering } from '../helpers/rendering.js';
-import { lockViewportSensitiveHeights, preparePage, setRange } from '../helpers/runtime.js';
+import { lockViewportSensitiveHeights, preparePage, setRange, waitForStableDocumentHeight } from '../helpers/runtime.js';
 
 const astroPath = '/physics/astrophysics.html';
 
@@ -36,6 +36,7 @@ async function setAstroSnapshotState(page) {
     await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
   });
   await lockViewportSensitiveHeights(page);
+  await waitForStableDocumentHeight(page);
 }
 
 for (const language of locales) {

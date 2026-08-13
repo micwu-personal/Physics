@@ -179,21 +179,7 @@ export async function freezeVisuals(page) {
     }
   });
   await lockViewportSensitiveHeights(page);
-  await page.evaluate(async () => {
-    const root = document.scrollingElement || document.documentElement;
-    let stableFrames = 0;
-    let previousHeight = -1;
-    let previousWidth = -1;
-    while (stableFrames < 3) {
-      await new Promise(resolve => setTimeout(resolve, 50));
-      const nextHeight = root.scrollHeight;
-      const nextWidth = root.scrollWidth;
-      if (nextHeight === previousHeight && nextWidth === previousWidth) stableFrames++;
-      else stableFrames = 0;
-      previousHeight = nextHeight;
-      previousWidth = nextWidth;
-    }
-  });
+  await waitForStableDocumentHeight(page);
   await page.waitForTimeout(100);
 }
 
@@ -225,6 +211,35 @@ export async function lockViewportSensitiveHeights(page) {
       }
     }
   });
+}
+
+export async function waitForStableDocumentHeight(page, options = {}) {
+  const {
+    consecutiveSamples = 4,
+    intervalMs = 75,
+  } = options;
+  await page.evaluate(async ({ consecutiveSamples, intervalMs }) => {
+    const root = document.scrollingElement || document.documentElement;
+    const body = document.body;
+    let stableSamples = 0;
+    let previousSignature = '';
+    while (stableSamples < consecutiveSamples) {
+      await new Promise(resolve => setTimeout(resolve, intervalMs));
+      const documentRect = document.documentElement.getBoundingClientRect();
+      const bodyRect = body ? body.getBoundingClientRect() : { height: 0, width: 0 };
+      const signature = [
+        root.scrollHeight,
+        root.scrollWidth,
+        Math.round(documentRect.height * 100) / 100,
+        Math.round(documentRect.width * 100) / 100,
+        Math.round(bodyRect.height * 100) / 100,
+        Math.round(bodyRect.width * 100) / 100,
+      ].join(':');
+      if (signature === previousSignature) stableSamples++;
+      else stableSamples = 0;
+      previousSignature = signature;
+    }
+  }, { consecutiveSamples, intervalMs });
 }
 
 export async function setRange(locator, value) {

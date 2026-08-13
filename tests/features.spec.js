@@ -714,20 +714,15 @@ test('Particle Zoo visible simulations animate and honor reduced motion', async 
       })
       .not.toBe(before);
   };
-  const visibleDecayNodes = () => page.evaluate(() => {
-    const state = LAB.decay;
-    if (!state?.tree) return 0;
-    const elapsed = (performance.now() - state.startTime) * state.speed;
-    const virtualNow = state.startTime + elapsed;
-    let visible = 0;
-    const walk = node => {
-      if (virtualNow < node.revealAt) return;
-      visible++;
-      node.children.forEach(walk);
-    };
-    walk(state.tree);
-    return visible;
-  });
+  const decayCanvasIsActive = baseline => page.evaluate(({ framesBefore, drawsBefore }) => {
+    const canvas = document.getElementById('decayCanvas');
+    if (!canvas) return false;
+    const rect = canvas.getBoundingClientRect();
+    const snapshot = window.PZ_PERF.snapshot();
+    return rect.top < innerHeight && rect.bottom > 0 &&
+      snapshot.frames.lab > framesBefore &&
+      (snapshot.draws['lab:decay'] || 0) > drawsBefore;
+  }, baseline);
 
   await page.locator('.tab[data-tab="builder"]').click();
   for (const part of ['u', 'u', 'd', 'e']) {
@@ -775,17 +770,77 @@ test('Particle Zoo visible simulations animate and honor reduced motion', async 
   const advancedLabTab = page.locator('.lab-subtab[data-lab-sub="advanced"]');
   await advancedLabTab.click();
   await expect(advancedLabTab).toHaveClass(/active/);
+  const decayActivationBaseline = await page.evaluate(() => {
+    const snapshot = window.PZ_PERF.snapshot();
+    return {
+      framesBefore: snapshot.frames.lab,
+      drawsBefore: snapshot.draws['lab:decay'] || 0,
+    };
+  });
   await page.locator('#decayCanvas').scrollIntoViewIfNeeded();
   await expect(page.locator('#decayCanvas')).toBeVisible();
-  await page.locator('#decayRestart').click();
-  const visibleNodesBefore = await visibleDecayNodes();
   await expect
-    .poll(() => visibleDecayNodes(), {
+    .poll(() => decayCanvasIsActive(decayActivationBaseline), {
       timeout: 3_000,
       intervals: [50, 100, 150],
-      message: 'decayCanvas should reveal additional decay nodes'
+      message: 'decayCanvas should be active before restart'
     })
-    .toBeGreaterThan(visibleNodesBefore);
+    .toBe(true);
+  const decayBefore = await page.evaluate(() => {
+    const snapshot = window.PZ_PERF.snapshot();
+    return {
+      framesBefore: snapshot.frames.lab,
+      drawsBefore: snapshot.draws['lab:decay'] || 0,
+      nodesBefore: (() => {
+        const state = LAB.decay;
+        if (!state?.tree) return 0;
+        const elapsed = (performance.now() - state.startTime) * state.speed;
+        const virtualNow = state.startTime + elapsed;
+        let visible = 0;
+        const walk = node => {
+          if (virtualNow < node.revealAt) return;
+          visible++;
+          node.children.forEach(walk);
+        };
+        walk(state.tree);
+        return visible;
+      })(),
+    };
+  });
+  const decayFingerprintBefore = await fingerprint('decayCanvas');
+  await page.locator('#decayRestart').click();
+  await expect
+    .poll(async () => {
+      const fingerprintAfter = await fingerprint('decayCanvas');
+      const state = await page.evaluate(({ framesBefore, drawsBefore, nodesBefore }) => {
+        const snapshot = window.PZ_PERF.snapshot();
+        return {
+          framesAdvanced: snapshot.frames.lab > framesBefore,
+          drawsAdvanced: (snapshot.draws['lab:decay'] || 0) > drawsBefore,
+          nodesAdvanced: (() => {
+            const state = LAB.decay;
+            if (!state?.tree) return false;
+            const elapsed = (performance.now() - state.startTime) * state.speed;
+            const virtualNow = state.startTime + elapsed;
+            let visible = 0;
+            const walk = node => {
+              if (virtualNow < node.revealAt) return;
+              visible++;
+              node.children.forEach(walk);
+            };
+            walk(state.tree);
+            return visible > nodesBefore;
+          })(),
+        };
+      }, decayBefore);
+      return state.framesAdvanced && state.drawsAdvanced && state.nodesAdvanced &&
+        fingerprintAfter !== decayFingerprintBefore;
+    }, {
+      timeout: 3_000,
+      intervals: [50, 100, 150],
+      message: 'decayCanvas should advance after restart'
+    })
+    .toBe(true);
 
   await page.locator('.tab[data-tab="playground"]').click();
   await expectCanvasToAdvance('pgCanvas');
