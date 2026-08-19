@@ -35,7 +35,7 @@ async function setAstroSnapshotState(page) {
     await document.fonts.ready;
     await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
   });
-  await lockViewportSensitiveHeights(page);
+  await lockViewportSensitiveHeights(page, { integer: true });
   await waitForStableDocumentHeight(page);
 }
 

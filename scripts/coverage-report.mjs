@@ -3,7 +3,7 @@ import { join } from 'node:path';
 import MCR from 'monocart-coverage-reports';
 
 const reportOnly = process.argv.includes('--report-only');
-const browserRawDir = './test-results/coverage-raw';
+const browserRawDir = `./test-results/coverage-raw${process.env.PHYSICS_TEST_PORT ? `-${process.env.PHYSICS_TEST_PORT}` : ''}`;
 const nodeRawDir = './.coverage-raw/node';
 const browserRawFiles = await readdir(browserRawDir);
 const nodeRawFiles = await readdir(nodeRawDir);

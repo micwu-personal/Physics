@@ -729,11 +729,6 @@
     computeRelativityHeroGeometry,
     updateRelativityGeometry
   });
-  if (topic === 'relativity') {
-    const relativityDebug = window.__relativityDebug || (window.__relativityDebug = {});
-    relativityDebug.computeHeroGeometry = computeRelativityHeroGeometry;
-  }
-
   function resetLab() {
     if (topic === 'newtonian') resetOrbit();
     if (topic === 'quantum') resetQuantum();
