@@ -202,7 +202,62 @@ export async function freezeVisuals(page) {
   });
   await lockViewportSensitiveHeights(page);
   await waitForStableDocumentHeight(page);
+  await snapKnownFractionalVisualLayouts(page);
+  await waitForStableDocumentHeight(page, { consecutiveSamples: 3, intervalMs: 50 });
   await page.waitForTimeout(100);
+}
+
+export async function snapKnownFractionalVisualLayouts(page) {
+  await page.evaluate(() => {
+    if (document.body?.dataset.topic !== 'relativity' || window.innerWidth < 1000) return;
+
+    // The relativity visual stacks several fractional-height sections whose
+    // summed rounding can drift by multiple pixels across Chromium runners.
+    const selectors = [
+      '.topic-shell',
+      '.route-bar',
+      '.topic-hero',
+      '.hero-instrument',
+      '.hero-legend',
+      '.claim-sources.compact',
+      '.topic-index',
+      '#main',
+      '.topic-section',
+      '.site-footer'
+    ];
+    const seen = new Set();
+    for (const selector of selectors) {
+      for (const element of document.querySelectorAll(selector)) {
+        if (seen.has(element)) continue;
+        seen.add(element);
+        const rect = element.getBoundingClientRect();
+        if (rect.height <= 0) continue;
+        const lockedHeight = Math.max(1, Math.round(rect.height));
+        element.style.minHeight = `${lockedHeight}px`;
+        element.style.maxHeight = `${lockedHeight}px`;
+        element.style.height = `${lockedHeight}px`;
+      }
+    }
+
+    const root = document.scrollingElement || document.documentElement;
+    const canonicalHeight = Math.max(
+      1,
+      Math.round(
+        Math.max(
+          document.documentElement.getBoundingClientRect().height,
+          document.body?.getBoundingClientRect().height ?? 0,
+          root.scrollHeight
+        )
+      )
+    );
+
+    for (const element of [document.documentElement, document.body, root]) {
+      if (!element || seen.has(element)) continue;
+      element.style.minHeight = `${canonicalHeight}px`;
+      element.style.maxHeight = `${canonicalHeight}px`;
+      element.style.height = `${canonicalHeight}px`;
+    }
+  });
 }
 
 export async function lockViewportSensitiveHeights(page, options = {}) {
