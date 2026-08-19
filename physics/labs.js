@@ -781,11 +781,6 @@
     computeRelativityHeroGeometry,
     updateRelativityGeometry
   });
-  if (topic === 'relativity') {
-    const relativityDebug = window.__relativityDebug || (window.__relativityDebug = {});
-    relativityDebug.computeHeroGeometry = computeRelativityHeroGeometry;
-  }
-
   function resetLab() {
     if (topic === 'newtonian') resetOrbit();
     if (topic === 'quantum') resetQuantum();
@@ -825,10 +820,13 @@
     frameHandle = requestAnimationFrame(frame);
   }
 
-  function stopLoop() {
-    if (!frameHandle) return;
-    cancelAnimationFrame(frameHandle);
-    frameHandle = 0;
+  function stopLoop(options = {}) {
+    const { freezeFrame = false } = options;
+    if (frameHandle) {
+      cancelAnimationFrame(frameHandle);
+      frameHandle = 0;
+    }
+    if (freezeFrame) elapsed = 0;
     render(0);
   }
 
@@ -880,7 +878,7 @@
     render(0);
   });
   document.addEventListener('physics-motion', event => {
-    if (event.detail.paused) stopLoop();
+    if (event.detail.paused) stopLoop({ freezeFrame: Boolean(event.detail.freezeFrame) });
     else startLoop();
   });
   document.addEventListener('visibilitychange', () => {

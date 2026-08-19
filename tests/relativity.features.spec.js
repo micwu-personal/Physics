@@ -106,3 +106,52 @@ test('relativity page keeps bilingual dynamic copy for new scoped instruments', 
   await expect(page.locator('#references a[href="https://www.einstein-online.info/en/Light_deflection/"]')).toBeVisible();
   await expect(page.locator('#references .reference-entry a').first()).toHaveText('打开来源');
 });
+
+test('relativity freezeFrame rewinds the jet explorer even after the loop is already stopped', async ({ page }) => {
+  const errors = watchPage(page);
+  await preparePage(page, '/physics/relativity.html', 'en');
+
+  await setRange(page.locator('#jetBetaControl'), 0.97);
+  await setRange(page.locator('#jetAngleControl'), 18);
+
+  const readJetState = () => page.evaluate(() => {
+    const readSvg = () => ({
+      approachBlobCx: document.getElementById('jetApproachBlob').getAttribute('cx'),
+      approachBlobCy: document.getElementById('jetApproachBlob').getAttribute('cy'),
+      recedeBlobCx: document.getElementById('jetRecedeBlob').getAttribute('cx'),
+      recedeBlobCy: document.getElementById('jetRecedeBlob').getAttribute('cy'),
+      skyCurrentCx: document.getElementById('skyCurrent').getAttribute('cx'),
+      skyCurrentCy: document.getElementById('skyCurrent').getAttribute('cy')
+    });
+    const readouts = () => ({
+      apparent: document.getElementById('jetApparent').textContent,
+      arrivalGap: document.getElementById('jetArrivalGap').textContent,
+      brightnessNote: document.getElementById('jetBrightnessNote').textContent,
+      causalityNote: document.getElementById('jetCausalityNote').textContent
+    });
+    return { readouts: readouts(), svg: readSvg() };
+  });
+  const dispatchMotion = detail => page.evaluate(nextDetail => {
+    document.dispatchEvent(new CustomEvent('physics-motion', { detail: nextDetail }));
+  }, detail);
+
+  const initial = await readJetState();
+  await expect.poll(async () => (await readJetState()).svg.approachBlobCx).not.toBe(initial.svg.approachBlobCx);
+
+  await dispatchMotion({ paused: true, freezeFrame: true });
+  const frozenWhileRunning = await readJetState();
+
+  await dispatchMotion({ paused: false });
+  await expect.poll(async () => (await readJetState()).svg.approachBlobCx).not.toBe(frozenWhileRunning.svg.approachBlobCx);
+
+  await dispatchMotion({ paused: true });
+  const stoppedWithoutFreeze = await readJetState();
+  expect(stoppedWithoutFreeze.svg).not.toEqual(frozenWhileRunning.svg);
+
+  await dispatchMotion({ paused: true, freezeFrame: true });
+  const frozenWhileStopped = await readJetState();
+  expect(frozenWhileStopped.readouts).toEqual(frozenWhileRunning.readouts);
+  expect(frozenWhileStopped.svg).toEqual(frozenWhileRunning.svg);
+
+  await assertNoErrors(errors);
+});
