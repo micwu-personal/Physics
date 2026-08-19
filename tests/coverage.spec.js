@@ -433,6 +433,85 @@ test('physics prefixed audio context coverage', async ({ page }) => {
   });
 });
 
+test('physics interrupted audio coverage', async ({ page }) => {
+  await collectCoverage(page, 'physics-interrupted-audio', async () => {
+    await installDeterminism(page);
+    await setLanguage(page, 'zh-CN');
+    await blockExternalAssets(page);
+    await page.addInitScript(() => {
+      let instanceCount = 0;
+      const audioParam = {
+        exponentialRampToValueAtTime() {},
+        setValueAtTime() {}
+      };
+
+      window.AudioContext = class InterruptingAudioContext {
+        constructor() {
+          this.id = ++instanceCount;
+          this.currentTime = 0;
+          this.destination = {};
+          this.state = this.id === 1 ? 'running' : 'suspended';
+        }
+
+        resume() {
+          return Promise.reject(new DOMException('Audio output was interrupted.', 'NotAllowedError'));
+        }
+
+        createOscillator() {
+          const owner = this;
+          return {
+            type: 'sine',
+            frequency: audioParam,
+            connect() {},
+            start() {
+              if (owner.id === 1) setTimeout(() => { owner.state = 'closed'; });
+            },
+            stop() {}
+          };
+        }
+
+        createGain() {
+          return {
+            gain: audioParam,
+            connect() {}
+          };
+        }
+      };
+    });
+    await page.goto('/physics/newtonian.html');
+    await page.waitForLoadState('load');
+    await page.locator('#audioToggle').click();
+    await expect(page.locator('#audioToggle')).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.locator('#audioToggle')).toContainText('重试', { timeout: 2_000 });
+    await expect(page.locator('#audioToggle')).toHaveAttribute('aria-pressed', 'false');
+  });
+});
+
+test('physics audio that remains suspended coverage', async ({ page }) => {
+  await collectCoverage(page, 'physics-still-suspended-audio', async () => {
+    await installDeterminism(page);
+    await setLanguage(page, 'en');
+    await blockExternalAssets(page);
+    await page.addInitScript(() => {
+      localStorage.setItem('physics.motion', 'pause');
+      window.AudioContext = class SuspendedAudioContext {
+        constructor() {
+          this.state = 'suspended';
+        }
+
+        resume() {
+          return Promise.resolve();
+        }
+      };
+    });
+    await page.goto('/physics/quantum.html');
+    await page.waitForLoadState('load');
+    await page.locator('#audioToggle').click();
+    await expect(page.locator('#audioToggle')).toContainText('retry');
+    await expect(page.locator('#audioToggle')).toHaveAttribute('aria-pressed', 'false');
+  });
+});
+
 for (const storedMotion of ['pause', 'play']) {
   test(`physics stored ${storedMotion} motion coverage`, async ({ page }) => {
     await collectCoverage(page, `physics-stored-motion-${storedMotion}`, async () => {

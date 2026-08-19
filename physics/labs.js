@@ -125,7 +125,7 @@
         type: 'triangle'
       };
     }
-    const height = context.get(labCanvas)?.height || 1;
+    const height = context.get(labCanvas).height;
     const latest = quantum.hits.at(-1);
     return {
       frequency: quantumToneFrequency(latest?.y ?? height / 2, height),
