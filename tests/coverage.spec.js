@@ -398,6 +398,8 @@ test('physics unavailable platform APIs coverage', async ({ page }) => {
     await page.goto('/physics/newtonian.html');
     await page.waitForLoadState('load');
     await page.locator('#audioToggle').click();
+    await expect(page.locator('#audioToggle')).toHaveAttribute('aria-pressed', 'false');
+    await expect(page.locator('#audioToggle')).toContainText('retry');
     await page.waitForTimeout(300);
   });
 });
