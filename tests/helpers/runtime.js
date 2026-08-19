@@ -205,8 +205,9 @@ export async function freezeVisuals(page) {
   await page.waitForTimeout(100);
 }
 
-export async function lockViewportSensitiveHeights(page) {
-  await page.evaluate(() => {
+export async function lockViewportSensitiveHeights(page, options = {}) {
+  const { integer = false } = options;
+  await page.evaluate(({ integer }) => {
     const selectors = [
       '.route-bar',
       '.route-left',
@@ -232,8 +233,8 @@ export async function lockViewportSensitiveHeights(page) {
         seen.add(element);
         const rect = element.getBoundingClientRect();
         if (rect.height <= 0 || rect.width <= 0) continue;
-        const lockedHeight = Math.max(1, Math.round(rect.height));
-        const lockedWidth = Math.max(1, Math.round(rect.width));
+        const lockedHeight = integer ? Math.max(1, Math.round(rect.height)) : rect.height;
+        const lockedWidth = integer ? Math.max(1, Math.round(rect.width)) : rect.width;
         element.style.minHeight = `${lockedHeight}px`;
         element.style.maxHeight = `${lockedHeight}px`;
         element.style.height = `${lockedHeight}px`;
@@ -242,7 +243,7 @@ export async function lockViewportSensitiveHeights(page) {
         element.style.width = `${lockedWidth}px`;
       }
     }
-  });
+  }, { integer });
 }
 
 export async function waitForStableDocumentHeight(page, options = {}) {

@@ -25,13 +25,14 @@ const journeys = [
   { id: 'periodic-table', path: '/periodic-table/', run: exercisePeriodicTable },
   { id: 'particle-zoo', path: '/particle-zoo/', run: exerciseParticleZoo }
 ];
+const browserCoverageDir = `test-results/coverage-raw${process.env.PHYSICS_TEST_PORT ? `-${process.env.PHYSICS_TEST_PORT}` : ''}`;
 
 async function collectCoverage(page, id, run) {
   await page.coverage.startJSCoverage({ resetOnNavigation: false });
   await run();
   const coverage = await page.coverage.stopJSCoverage();
-  await mkdir('test-results/coverage-raw', { recursive: true });
-  await writeFile(`test-results/coverage-raw/${id}.json`, `${JSON.stringify(coverage)}\n`);
+  await mkdir(browserCoverageDir, { recursive: true });
+  await writeFile(`${browserCoverageDir}/${id}.json`, `${JSON.stringify(coverage)}\n`);
 }
 
 // Holds macro-tasks scheduled with a zero delay so the staged renderer's chunk
@@ -856,82 +857,111 @@ test('physics relativity deepening coverage', async ({ page }) => {
   await collectCoverage(page, 'physics-relativity-deepening', async () => {
     await preparePage(page, '/physics/relativity.html', 'en');
 
-    await page.evaluate(() => {
-      const debug = window.__relativityDebug;
-      [1e9, 5e5, 5, 0.5, 5e-4, 1e-6].forEach(value => debug.formatEnergyMeV(value));
-      [1e9, 5e5, 500].forEach(value => debug.formatMomentumMeV(value));
-    });
-
     await page.locator('[data-preset-particle="electron"][data-preset-mev="-5"]').click();
+    await expect(page.locator('#energyValue')).toHaveText('10 eV');
+    await expect(page.locator('#restEnergyValue')).toHaveText(/keV$/);
+    await expect(page.locator('#energyInterpretation')).toContainText('low-speed limit');
+    await expect(page.locator('#energyMomentum')).toHaveText(/MeV\/c$/);
+
+    await setRange(page.locator('#energySlider'), -2);
+    await expect(page.locator('#energyValue')).toHaveText('10 keV');
+    await expect(page.locator('#energyInterpretation')).toContainText('relativistic corrections matter');
+
+    await setRange(page.locator('#energySlider'), -3.5);
+    await expect(page.locator('#energyValue')).toHaveText(/eV$/);
+
     await page.locator('[data-preset-particle="electron"][data-preset-mev="-0.523"]').click();
+    await expect(page.locator('#energyValue')).toHaveText(/keV$/);
+    await expect(page.locator('#energyInterpretation')).toContainText('distinctly relativistic');
+
     await page.locator('[data-preset-particle="electron"][data-preset-mev="0.30103"]').click();
+    await expect(page.locator('#energyValue')).toHaveText(/MeV$/);
+    await expect(page.locator('#energyMomentum')).toHaveText(/MeV\/c$/);
+    await expect(page.locator('#energyInterpretation')).toContainText('strongly relativistic');
+
+    await page.locator('[data-particle="proton"]').click();
+    await page.evaluate(() => {
+      const protonButton = document.querySelector('[data-particle="proton"]');
+      protonButton.dataset.particle = 'muon';
+      protonButton.click();
+      protonButton.dataset.particle = 'proton';
+    });
+    await expect(page.locator('[data-particle="electron"]')).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.locator('#restEnergyValue')).toHaveText(/keV$/);
+
     await page.locator('[data-particle="proton"]').click();
     await page.locator('[data-preset-particle="proton"][data-preset-mev="0"]').click();
+    await expect(page.locator('#energyValue')).toHaveText('1 MeV');
+    await expect(page.locator('#restEnergyValue')).toHaveText(/MeV$/);
+    await expect(page.locator('#energyMomentum')).toHaveText(/MeV\/c$/);
+    await expect(page.locator('#energyInterpretation')).toContainText('low-speed limit');
+
+    await setRange(page.locator('#energySlider'), 1.5);
+    await expect(page.locator('#energyMomentum')).toHaveText(/MeV\/c$/);
+
     await page.locator('[data-preset-particle="proton"][data-preset-mev="3"]').click();
+    await expect(page.locator('#energyValue')).toHaveText('1 GeV');
+    await expect(page.locator('#energyMomentum')).toHaveText(/GeV\/c$/);
+    await expect(page.locator('#energyInterpretation')).toContainText('strongly relativistic');
+
+    await page.locator('#energySlider').evaluate(slider => {
+      slider.max = '9';
+    });
+    await setRange(page.locator('#energySlider'), 5.30103);
+    await expect(page.locator('#energyValue')).toHaveText(/GeV$/);
+    await expect(page.locator('#energyMomentum')).toHaveText(/GeV\/c$/);
+
     await page.locator('[data-preset-particle="proton"][data-preset-mev="6.845098"]').click();
+    await expect(page.locator('#energyValue')).toHaveText(/TeV$/);
+    await expect(page.locator('#energyMomentum')).toHaveText(/TeV\/c$/);
+
+    await setRange(page.locator('#energySlider'), 8.30103);
+    await expect(page.locator('#energyValue')).toHaveText(/TeV$/);
+    await expect(page.locator('#energyMomentum')).toHaveText(/TeV\/c$/);
     await page.evaluate(() => {
       document.querySelectorAll('.topic-index a[href^="#"]').forEach(anchor => anchor.focus());
-    });
-    await page.evaluate(() => window.__relativityDebug.setParticle('muon'));
-    await setRange(page.locator('#energySlider'), -1);
-    await page.evaluate(() => {
-      const debug = window.__relativityDebug;
-      const slider = document.getElementById('energySlider');
-      const render = (particle, logEnergy) => {
-        debug.setParticle(particle);
-        slider.value = String(logEnergy);
-        debug.renderEnergy();
-      };
-      render('electron', -5);
-      render('electron', -2);
-      render('electron', -0.523);
-      render('electron', 0.30103);
-      render('proton', 0);
     });
 
     await setRange(page.locator('#jetBetaControl'), 0.7);
     await setRange(page.locator('#jetAngleControl'), 60);
+    await expect(page.locator('#jetCausalityNote')).toContainText('does not compress the arrival interval enough');
     await setRange(page.locator('#jetBetaControl'), 0.995);
     await setRange(page.locator('#jetAngleControl'), 1);
     await setRange(page.locator('#jetAngleControl'), 15);
+    await expect(page.locator('#jetCausalityNote')).toContainText('can exceed c');
 
     await page.locator('[data-lang="zh-CN"]').click();
     await setRange(page.locator('#jetBetaControl'), 0.7);
     await setRange(page.locator('#jetAngleControl'), 60);
-    await page.evaluate(() => {
-      const debug = window.__relativityDebug;
-      const slider = document.getElementById('energySlider');
-      debug.setParticle('proton');
-      slider.value = '0';
-      debug.renderEnergy();
-      debug.setParticle('electron');
-      slider.value = '-2';
-      debug.renderEnergy();
-      slider.value = '-0.523';
-      debug.renderEnergy();
-      slider.value = '0.30103';
-      debug.renderEnergy();
-      debug.renderJetGeometry();
-    });
+    await page.locator('[data-particle="proton"]').click();
+    await page.locator('[data-preset-particle="proton"][data-preset-mev="0"]').click();
+    await expect(page.locator('#energyInterpretation')).toContainText('经典低速极限');
+    await page.locator('[data-particle="electron"]').click();
+    await setRange(page.locator('#energySlider'), -2);
+    await expect(page.locator('#energyInterpretation')).toContainText('牛顿近似仍抓住大体趋势');
+    await page.locator('[data-preset-particle="electron"][data-preset-mev="-0.523"]').click();
+    await expect(page.locator('#energyInterpretation')).toContainText('已明显进入相对论区');
+    await page.locator('[data-preset-particle="electron"][data-preset-mev="0.30103"]').click();
+    await expect(page.locator('#energyInterpretation')).toContainText('强相对论性的');
+    await expect(page.locator('#jetBrightnessNote')).toContainText('亮度条采用示意性的');
+    await expect(page.locator('#jetCausalityNote')).toContainText('还不足以把表观横向速度推到 c 以上');
     await page.locator('[data-lang="en"]').click();
-
     await page.evaluate(() => {
-      const debug = window.__relativityDebug;
-      debug.renderEnergy();
-      debug.renderJetGeometry();
-      debug.getFrameHandle();
-      debug.setJetPhase(0.83);
-      debug.getJetPhase();
-      debug.stopLoop({ freezeFrame: true });
-      debug.getJetPhase();
-      debug.stopLoop({ freezeFrame: true });
-      debug.stopLoop();
+      document.dispatchEvent(new CustomEvent('physics-motion', { detail: { paused: true, freezeFrame: true } }));
+      window.__relativityFrozenBlobCx = document.getElementById('jetApproachBlob').getAttribute('cx');
+      document.dispatchEvent(new CustomEvent('physics-motion', { detail: { paused: false } }));
+    });
+    await page.waitForFunction(() =>
+      document.getElementById('jetApproachBlob').getAttribute('cx') !== window.__relativityFrozenBlobCx
+    );
+    await page.evaluate(() => {
+      document.dispatchEvent(new CustomEvent('physics-motion', { detail: { paused: true } }));
+      document.dispatchEvent(new CustomEvent('physics-motion', { detail: { paused: true, freezeFrame: true } }));
+      document.dispatchEvent(new CustomEvent('physics-motion', { detail: { paused: false } }));
     });
     await page.locator('.motion-toggle').click();
-    await page.evaluate(() => window.__relativityDebug.startLoop());
     await page.locator('.motion-toggle').click();
     await page.evaluate(() => {
-      window.__relativityDebug.startLoop();
       Object.defineProperty(document, 'hidden', { configurable: true, get: () => true });
       document.dispatchEvent(new Event('visibilitychange'));
       Object.defineProperty(document, 'hidden', { configurable: true, get: () => false });
@@ -954,10 +984,6 @@ test('physics relativity deepening bootstrap branches coverage', async ({ page }
     await page.goto('/__health');
     await page.setContent('<!doctype html><body data-topic="quantum"></body>');
     await page.addScriptTag({ url: '/physics/relativity-deepening.js' });
-
-    await page.addInitScript(() => {
-      window.__relativityDebug = { seeded: true };
-    });
     await preparePage(page, '/physics/relativity.html', 'en');
   });
 });

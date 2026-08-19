@@ -114,8 +114,7 @@ test('relativity freezeFrame rewinds the jet explorer even after the loop is alr
   await setRange(page.locator('#jetBetaControl'), 0.97);
   await setRange(page.locator('#jetAngleControl'), 18);
 
-  const captureFreezeState = phase => page.evaluate(phaseValue => {
-    const debug = window.__relativityDebug;
+  const readJetState = () => page.evaluate(() => {
     const readSvg = () => ({
       approachBlobCx: document.getElementById('jetApproachBlob').getAttribute('cx'),
       approachBlobCy: document.getElementById('jetApproachBlob').getAttribute('cy'),
@@ -130,39 +129,29 @@ test('relativity freezeFrame rewinds the jet explorer even after the loop is alr
       brightnessNote: document.getElementById('jetBrightnessNote').textContent,
       causalityNote: document.getElementById('jetCausalityNote').textContent
     });
+    return { readouts: readouts(), svg: readSvg() };
+  });
+  const dispatchMotion = detail => page.evaluate(nextDetail => {
+    document.dispatchEvent(new CustomEvent('physics-motion', { detail: nextDetail }));
+  }, detail);
 
-    debug.stopLoop();
-    debug.setJetPhase(phaseValue);
-    const before = {
-      frameHandle: debug.getFrameHandle(),
-      jetPhase: debug.getJetPhase(),
-      readouts: readouts(),
-      svg: readSvg()
-    };
+  const initial = await readJetState();
+  await expect.poll(async () => (await readJetState()).svg.approachBlobCx).not.toBe(initial.svg.approachBlobCx);
 
-    document.dispatchEvent(new CustomEvent('physics-motion', { detail: { paused: true, freezeFrame: true } }));
-    const frozen = {
-      frameHandle: debug.getFrameHandle(),
-      jetPhase: debug.getJetPhase(),
-      readouts: readouts(),
-      svg: readSvg()
-    };
+  await dispatchMotion({ paused: true, freezeFrame: true });
+  const frozenWhileRunning = await readJetState();
 
-    return { before, frozen };
-  }, phase);
+  await dispatchMotion({ paused: false });
+  await expect.poll(async () => (await readJetState()).svg.approachBlobCx).not.toBe(frozenWhileRunning.svg.approachBlobCx);
 
-  const first = await captureFreezeState(0.17);
-  const second = await captureFreezeState(0.83);
+  await dispatchMotion({ paused: true });
+  const stoppedWithoutFreeze = await readJetState();
+  expect(stoppedWithoutFreeze.svg).not.toEqual(frozenWhileRunning.svg);
 
-  expect(first.before.jetPhase).toBeCloseTo(0.17, 6);
-  expect(second.before.jetPhase).toBeCloseTo(0.83, 6);
-  expect(first.before.svg).not.toEqual(second.before.svg);
-
-  expect(first.frozen.frameHandle).toBe(0);
-  expect(second.frozen.frameHandle).toBe(0);
-  expect(first.frozen.jetPhase).toBe(0);
-  expect(second.frozen.jetPhase).toBe(0);
-  expect(first.frozen).toEqual(second.frozen);
+  await dispatchMotion({ paused: true, freezeFrame: true });
+  const frozenWhileStopped = await readJetState();
+  expect(frozenWhileStopped.readouts).toEqual(frozenWhileRunning.readouts);
+  expect(frozenWhileStopped.svg).toEqual(frozenWhileRunning.svg);
 
   await assertNoErrors(errors);
 });

@@ -59,18 +59,22 @@
     return window.PhysicsUI?.language === 'zh-CN';
   }
 
+  function formatScaled(value, divisor, unit) {
+    return `${Number((value / divisor).toPrecision(3))} ${unit}`;
+  }
+
   function formatEnergyMeV(value) {
-    if (value >= 1e6) return `${(value / 1e6).toFixed(value >= 1e8 ? 1 : 3).replace(/\.?0+$/, '')} TeV`;
-    if (value >= 1e3) return `${(value / 1e3).toFixed(value >= 1e5 ? 1 : 3).replace(/\.?0+$/, '')} GeV`;
-    if (value >= 1) return `${value.toFixed(value >= 100 ? 1 : 3).replace(/\.?0+$/, '')} MeV`;
-    if (value >= 1e-3) return `${(value * 1e3).toFixed(value >= 0.1 ? 1 : 3).replace(/\.?0+$/, '')} keV`;
-    return `${(value * 1e6).toFixed(value >= 1e-4 ? 1 : 3).replace(/\.?0+$/, '')} eV`;
+    if (value >= 1e6) return formatScaled(value, 1e6, 'TeV');
+    if (value >= 1e3) return formatScaled(value, 1e3, 'GeV');
+    if (value >= 1) return formatScaled(value, 1, 'MeV');
+    if (value >= 1e-3) return formatScaled(value, 1e-3, 'keV');
+    return formatScaled(value, 1e-6, 'eV');
   }
 
   function formatMomentumMeV(value) {
-    if (value >= 1e6) return `${(value / 1e6).toFixed(value >= 1e8 ? 1 : 3).replace(/\.?0+$/, '')} TeV/c`;
-    if (value >= 1e3) return `${(value / 1e3).toFixed(value >= 1e5 ? 1 : 3).replace(/\.?0+$/, '')} GeV/c`;
-    return `${value.toFixed(value >= 100 ? 1 : 3).replace(/\.?0+$/, '')} MeV/c`;
+    if (value >= 1e6) return formatScaled(value, 1e6, 'TeV/c');
+    if (value >= 1e3) return formatScaled(value, 1e3, 'GeV/c');
+    return formatScaled(value, 1, 'MeV/c');
   }
 
   function clamp(value, minimum, maximum) {
@@ -329,23 +333,6 @@
     if (freezeFrame) state.jetPhase = 0;
     if (shouldRender) renderJetGeometry();
   }
-
-  window.__relativityDebug = {
-    computeJetModel,
-    formatEnergyMeV,
-    getFrameHandle: () => state.frameHandle,
-    getJetPhase: () => state.jetPhase,
-    formatMomentumMeV,
-    renderEnergy,
-    renderJetGeometry,
-    setJetPhase: phase => {
-      state.jetPhase = ((Number(phase) % 1) + 1) % 1;
-      renderJetGeometry();
-    },
-    setParticle,
-    startLoop,
-    stopLoop
-  };
 
   particleButtons.forEach(button => {
     button.addEventListener('click', () => setParticle(button.dataset.particle));

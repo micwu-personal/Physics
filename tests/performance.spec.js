@@ -41,6 +41,10 @@ for (const entry of sourceEntries) {
     const probeEnd = await page.evaluate(() => ({ ...window.__qualityProbe }));
     await session.send('HeapProfiler.collectGarbage');
     const heapAfter = (await session.send('Runtime.getHeapUsage')).usedSize;
+    const longTaskCount = probeEnd.longTasks.length - probeStart.longTasks.length;
+    const longTaskTotalMs = probeEnd.longTasks
+      .slice(probeStart.longTasks.length)
+      .reduce((sum, duration) => sum + duration, 0);
 
     const metrics = {
       duplicateListeners: probeEnd.duplicateListeners,
@@ -48,8 +52,8 @@ for (const entry of sourceEntries) {
       interactionP95Ms: percentile(interactionTimes, 0.95),
       listenerGrowth: probeEnd.listenerAdds - listenerBefore,
       loadMs,
-      longTaskCount: probeEnd.longTasks.length,
-      longTaskTotalMs: probeEnd.longTasks.reduce((sum, duration) => sum + duration, 0),
+      longTaskCount,
+      longTaskTotalMs,
       rafPerSecond: probeEnd.rafCallbacks - probeStart.rafCallbacks
     };
     await mkdir('test-results/performance-metrics', { recursive: true });

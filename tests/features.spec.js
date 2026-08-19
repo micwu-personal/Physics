@@ -955,7 +955,8 @@ test('Particle Zoo photons fade before the final scene clears', async ({ page })
     ).data;
     const sample = { brightness: pixel[0] + pixel[1] + pixel[2], life: photon.life };
     if (!samples.early && photon.life < fadeFrames - 3) samples.early = sample;
-    if (!samples.late && photon.life < 8) {
+    const lateThreshold = samples.early ? Math.min(8, samples.early.life - 0.5) : 8;
+    if (!samples.late && photon.life < lateThreshold) {
       samples.late = sample;
       pgStop();
     }
