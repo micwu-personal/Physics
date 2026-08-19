@@ -16,6 +16,8 @@
   const context = new Map();
   let playing = !PhysicsUI.motionPaused();
   let soundEnabled = false;
+  let soundStarting = false;
+  let soundFailed = false;
   let frameHandle = 0;
   let lastTime = performance.now();
   let elapsed = 0;
@@ -96,6 +98,48 @@
 
   function copy(en, zh) {
     return PhysicsUI.language === 'zh-CN' ? zh : en;
+  }
+
+  function orbitToneFrequency(speed) {
+    return 240 + speed * 120;
+  }
+
+  function relativityToneFrequency(beta) {
+    return 320 + beta * 260;
+  }
+
+  function quantumToneFrequency(y, height) {
+    return 220 + (1 - y / height) * 540;
+  }
+
+  function sonificationPreview() {
+    if (topic === 'newtonian') {
+      return {
+        frequency: orbitToneFrequency(Math.hypot(orbit.vx, orbit.vy)),
+        type: 'sine'
+      };
+    }
+    if (topic === 'relativity') {
+      return {
+        frequency: relativityToneFrequency(Number(primary.value)),
+        type: 'triangle'
+      };
+    }
+    const height = context.get(labCanvas).height;
+    const latest = quantum.hits.at(-1);
+    return {
+      frequency: quantumToneFrequency(latest?.y ?? height / 2, height),
+      type: 'sine'
+    };
+  }
+
+  function playLabTone(frequency, duration, volume, type = 'sine') {
+    PhysicsUI.playTone(frequency, duration, volume, type).then(started => {
+      if (started || !soundEnabled) return;
+      soundEnabled = false;
+      soundFailed = true;
+      updateButtonCopy();
+    });
   }
 
   function computeRelativityHeroGeometry(width, height) {
@@ -393,8 +437,8 @@
       ? (PhysicsUI.language === 'zh-CN' ? '开放轨道：物体将逃逸' : 'Open trajectory: the body can escape')
       : (PhysicsUI.language === 'zh-CN' ? '束缚轨道：总能量小于零' : 'Bound orbit: total energy is negative');
     secondaryReadout.textContent = `${state} · E = ${energy.toFixed(3)}`;
-    if (soundEnabled && Math.abs(orbit.y) < 0.015 && orbit.x > 0 && elapsed - lastSound > 0.4) {
-      PhysicsUI.playTone(240 + speed * 120, 0.09, 0.018);
+    if (soundEnabled && elapsed - lastSound > 0.35) {
+      playLabTone(orbitToneFrequency(speed), 0.1, 0.04);
       lastSound = elapsed;
     }
   }
@@ -594,7 +638,7 @@
     );
     const bounceIndex = Math.floor(elapsed / (period / 2));
     if (soundEnabled && bounceIndex !== lastSound) {
-      PhysicsUI.playTone(320 + beta * 260, 0.07, 0.018, 'triangle');
+      playLabTone(relativityToneFrequency(beta), 0.11, 0.045, 'triangle');
       lastSound = bounceIndex;
     }
   }
@@ -708,7 +752,7 @@
       : 'Individual hits are unpredictable; the interference distribution emerges in aggregate';
     if (soundEnabled && quantum.hits.length && elapsed - lastSound > 0.12) {
       const latest = quantum.hits.at(-1);
-      PhysicsUI.playTone(220 + (1 - latest.y / height) * 540, 0.035, 0.01, 'sine');
+      playLabTone(quantumToneFrequency(latest.y, height), 0.055, 0.025);
       lastSound = elapsed;
     }
   }
@@ -718,9 +762,17 @@
       ? (playing ? '暂停实验' : '继续实验')
       : (playing ? 'Pause experiment' : 'Resume experiment');
     reset.textContent = PhysicsUI.language === 'zh-CN' ? '重置' : 'Reset';
-    audioToggle.textContent = PhysicsUI.language === 'zh-CN'
-      ? (soundEnabled ? '关闭声音映射' : '开启声音映射')
-      : (soundEnabled ? 'Mute sonification' : 'Enable sonification');
+    if (soundStarting) {
+      audioToggle.textContent = PhysicsUI.language === 'zh-CN' ? '正在开启声音映射...' : 'Starting sonification...';
+    } else if (soundFailed) {
+      audioToggle.textContent = PhysicsUI.language === 'zh-CN' ? '声音映射不可用 - 重试' : 'Sonification unavailable - retry';
+    } else {
+      audioToggle.textContent = PhysicsUI.language === 'zh-CN'
+        ? (soundEnabled ? '关闭声音映射' : '开启声音映射')
+        : (soundEnabled ? 'Mute sonification' : 'Enable sonification');
+    }
+    audioToggle.disabled = soundStarting;
+    audioToggle.setAttribute('aria-busy', String(soundStarting));
     audioToggle.setAttribute('aria-pressed', String(soundEnabled));
   }
 
@@ -801,9 +853,24 @@
     render(0);
   });
   reset.addEventListener('click', resetLab);
-  audioToggle.addEventListener('click', () => {
-    soundEnabled = !soundEnabled;
-    if (soundEnabled) PhysicsUI.playTone(440, 0.09, 0.02);
+  audioToggle.addEventListener('click', async () => {
+    if (soundEnabled) {
+      soundEnabled = false;
+      soundFailed = false;
+      updateButtonCopy();
+      return;
+    }
+    soundStarting = true;
+    soundFailed = false;
+    updateButtonCopy();
+    const preview = sonificationPreview();
+    const started = await PhysicsUI.playTone(preview.frequency, 0.16, 0.06, preview.type);
+    soundStarting = false;
+    soundEnabled = started;
+    soundFailed = !started;
+    if (started) {
+      lastSound = topic === 'relativity' ? Math.floor(elapsed / 1.6) : elapsed;
+    }
     updateButtonCopy();
   });
   document.addEventListener('physics-language', () => {

@@ -80,18 +80,25 @@
     return true;
   }
 
-  function getAudioContext() {
+  async function getAudioContext() {
+    if (audioContext?.state === 'closed') audioContext = null;
     if (!audioContext) {
       const AudioContextClass = window.AudioContext || window.webkitAudioContext;
       if (!AudioContextClass) return null;
       audioContext = new AudioContextClass();
     }
-    if (audioContext.state === 'suspended') audioContext.resume();
-    return audioContext;
+    if (audioContext.state !== 'running') {
+      try {
+        await audioContext.resume();
+      } catch {
+        return null;
+      }
+    }
+    return audioContext.state === 'running' ? audioContext : null;
   }
 
-  function playTone(frequency, duration, volume, type = 'sine') {
-    const context = getAudioContext();
+  async function playTone(frequency, duration, volume, type = 'sine') {
+    const context = await getAudioContext();
     if (!context) return false;
     const oscillator = context.createOscillator();
     const gain = context.createGain();

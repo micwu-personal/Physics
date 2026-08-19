@@ -30,6 +30,63 @@ const journeys = [
   { name: 'Particle Zoo', path: '/particle-zoo/', run: exerciseParticleZoo }
 ];
 
+async function installAudioProbe(page) {
+  await page.addInitScript(() => {
+    window.__audioEvents = [];
+
+    class AudioParamProbe {
+      constructor(kind) {
+        this.kind = kind;
+      }
+
+      setValueAtTime(value, time) {
+        window.__audioEvents.push({ kind: this.kind, operation: 'set', value, time });
+      }
+
+      exponentialRampToValueAtTime(value, time) {
+        window.__audioEvents.push({ kind: this.kind, operation: 'ramp', value, time });
+      }
+    }
+
+    window.AudioContext = class AudioContextProbe {
+      constructor() {
+        this.currentTime = 1;
+        this.destination = {};
+        this.state = 'suspended';
+      }
+
+      async resume() {
+        window.__audioEvents.push({ kind: 'resume-start' });
+        await new Promise(resolve => setTimeout(resolve, 25));
+        this.state = 'running';
+        window.__audioEvents.push({ kind: 'resume-end' });
+      }
+
+      createOscillator() {
+        return {
+          type: 'sine',
+          frequency: new AudioParamProbe('frequency'),
+          connect() {},
+          start(time) {
+            window.__audioEvents.push({ kind: 'oscillator-start', time });
+          },
+          stop(time) {
+            window.__audioEvents.push({ kind: 'oscillator-stop', time });
+          }
+        };
+      }
+
+      createGain() {
+        return {
+          gain: new AudioParamProbe('gain'),
+          connect() {}
+        };
+      }
+    };
+    delete window.webkitAudioContext;
+  });
+}
+
 const auditedFieldSourceCatalog = {
   'nasa-sphere-drag': {
     title: 'Drag of a Sphere',
@@ -117,6 +174,38 @@ for (const journey of journeys) {
       await assertNoErrors(errors);
     });
   }
+}
+
+for (const sonification of [
+  { name: 'Newtonian Mechanics', path: '/physics/newtonian.html', minFrequency: 359, maxFrequency: 361, wait: 650 },
+  { name: 'Relativity', path: '/physics/relativity.html', minFrequency: 475, maxFrequency: 477, wait: 1_800 },
+  { name: 'Quantum Mechanics', path: '/physics/quantum.html', minFrequency: 220, maxFrequency: 760, wait: 650 }
+]) {
+  test(`${sonification.name} sonification resumes audio before emitting mapped cues`, async ({ page }) => {
+    await installAudioProbe(page);
+    await preparePage(page, sonification.path, 'en');
+    await page.locator('#audioToggle').click();
+    await expect(page.locator('#audioToggle')).toHaveAttribute('aria-pressed', 'true');
+    await page.waitForTimeout(sonification.wait);
+
+    const events = await page.evaluate(() => window.__audioEvents);
+    const resumeEnd = events.findIndex(event => event.kind === 'resume-end');
+    const firstStart = events.findIndex(event => event.kind === 'oscillator-start');
+    const frequencies = events
+      .filter(event => event.kind === 'frequency' && event.operation === 'set')
+      .map(event => event.value);
+    const peakGain = Math.max(...events
+      .filter(event => event.kind === 'gain' && event.operation === 'ramp')
+      .map(event => event.value));
+
+    expect(resumeEnd).toBeGreaterThanOrEqual(0);
+    expect(firstStart).toBeGreaterThan(resumeEnd);
+    expect(frequencies.some(frequency =>
+      frequency >= sonification.minFrequency && frequency <= sonification.maxFrequency
+    )).toBe(true);
+    expect(peakGain).toBeGreaterThanOrEqual(0.06);
+    expect(events.filter(event => event.kind === 'oscillator-start').length).toBeGreaterThanOrEqual(2);
+  });
 }
 
 /* Every physics route keeps wayfinding, motion, and language in one sticky row.
