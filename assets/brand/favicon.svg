@@ -1,10 +1,58 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="McWoods Universe monogram">
-  <rect x="4" y="4" width="56" height="56" rx="14" fill="#060913"/>
-  <path d="M20 16H44" fill="none" stroke="#eef2ff" stroke-linecap="round" stroke-linejoin="round" stroke-width="4.5"/>
-  <path d="M32 16V38" fill="none" stroke="#eef2ff" stroke-linecap="round" stroke-linejoin="round" stroke-width="4.5"/>
-  <path d="M15 28H49" fill="none" stroke="#eef2ff" stroke-linecap="round" stroke-linejoin="round" stroke-width="4.5"/>
-  <path d="M20 19L28 28M44 19L36 28M20 37L28 29M44 37L36 29" fill="none" stroke="#00d4ff" stroke-linecap="round" stroke-linejoin="round" stroke-width="4"/>
-  <path d="M21 45Q32 39 43 45" fill="none" stroke="#ffd166" stroke-linecap="round" stroke-linejoin="round" stroke-width="4.5"/>
-  <path d="M19 49Q32 58 45 49" fill="none" stroke="#ffd166" stroke-linecap="round" stroke-linejoin="round" stroke-width="4.5"/>
-  <circle cx="48" cy="16" r="3.2" fill="#7c5cff"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="McWoods Universe monogram">
+  <defs>
+    <radialGradient id="bg" cx="40%" cy="29%" r="79%">
+      <stop stop-color="#20336a"/>
+      <stop offset=".55" stop-color="#0b142d"/>
+      <stop offset="1" stop-color="#04060d"/>
+    </radialGradient>
+    <linearGradient id="mw" x1="19" y1="18" x2="109" y2="110">
+      <stop stop-color="#ffffff"/>
+      <stop offset=".36" stop-color="#62edff"/>
+      <stop offset=".7" stop-color="#8b70ff"/>
+      <stop offset="1" stop-color="#ff75aa"/>
+    </linearGradient>
+    <linearGradient id="disk" x1="18" y1="80" x2="110" y2="49">
+      <stop stop-color="#ff6b9d"/>
+      <stop offset=".38" stop-color="#ffd166"/>
+      <stop offset=".72" stop-color="#66eaff"/>
+      <stop offset="1" stop-color="#8b70ff"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="2" result="b"/>
+      <feMerge>
+        <feMergeNode in="b"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <circle cx="64" cy="64" r="59" fill="url(#bg)"/>
+  <path
+    d="M22 96C27 70 28 45 35 26C48 37 54 48 58 56C60 60 68 60 71 56C75 48 81 37 94 26C101 45 102 70 107 96"
+    fill="none"
+    stroke="url(#mw)"
+    stroke-linecap="round"
+    stroke-width="9"
+  />
+  <path
+    d="M22 34C36 54 42 74 49 101C56 91 60 79 64 72C68 79 72 91 79 101C86 74 92 54 107 34"
+    fill="none"
+    stroke="#eef2ff"
+    stroke-linecap="round"
+    stroke-width="6"
+  />
+  <path d="M21 64C35 48 50 44 58 52M107 64C93 80 78 84 70 76" fill="none" stroke="#5be7ff" stroke-width="4"/>
+  <ellipse
+    cx="64"
+    cy="67"
+    rx="45"
+    ry="12"
+    fill="none"
+    stroke="url(#disk)"
+    stroke-width="7"
+    transform="rotate(-12 64 67)"
+    filter="url(#glow)"
+  />
+  <ellipse cx="64" cy="67" rx="12" ry="9" fill="#0a1729" stroke="#ffd166" stroke-width="3"/>
+  <path d="M52 60C56 51 72 51 78 60" fill="none" stroke="#ffe39a" stroke-width="3"/>
+  <circle cx="102" cy="24" r="4" fill="#ffd166"/>
 </svg>

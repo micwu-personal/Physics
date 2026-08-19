@@ -18,6 +18,8 @@ function expectedBrandOrders(language) {
   return language === 'zh-CN' ? { zh: '1', en: '2' } : { zh: '2', en: '1' };
 }
 
+const canonicalIconSizes = [16, 32, 64];
+
 function firstTimelineCardMetrics() {
   const card = document.querySelector('.ep-card');
   const head = card?.querySelector('.ep-head');
@@ -44,6 +46,65 @@ async function readBrandOrders(page) {
       en: en ? getComputedStyle(en).order : null
     };
   });
+}
+
+async function readIconParity(page) {
+  return page.evaluate(async requestedSizes => {
+    async function renderIcon(url, size) {
+      const image = new Image();
+      image.src = url;
+      if (!image.complete) {
+        await new Promise((resolve, reject) => {
+          image.addEventListener('load', resolve, { once: true });
+          image.addEventListener('error', () => reject(new Error(`Failed to load icon: ${url}`)), { once: true });
+        });
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = size;
+      canvas.height = size;
+      const context = canvas.getContext('2d');
+      context.clearRect(0, 0, size, size);
+      context.drawImage(image, 0, 0, size, size);
+      return canvas.toDataURL();
+    }
+
+    const faviconHref = document.querySelector('link[rel~="icon"]')?.href ?? '';
+    const brandImage = document.querySelector('.brand-home img');
+    if (!faviconHref) throw new Error('Favicon link missing');
+    if (!(brandImage instanceof HTMLImageElement)) throw new Error('Brand icon image missing');
+
+    const brandHref = brandImage.currentSrc || brandImage.getAttribute('src') || '';
+    const bounds = brandImage.getBoundingClientRect();
+    const navSize = Math.max(1, Math.round(Math.max(bounds.width, bounds.height)));
+    const sizes = [...new Set([...requestedSizes, navSize])];
+    const sourceHref = new URL('/assets/brand/favicon.svg', window.location.href).href;
+    const source = {};
+    const favicon = {};
+    const brand = {};
+
+    for (const size of sizes) {
+      source[size] = await renderIcon(sourceHref, size);
+      favicon[size] = await renderIcon(faviconHref, size);
+      brand[size] = await renderIcon(brandHref, size);
+    }
+
+    return { brand, brandHref, favicon, faviconHref, navSize, source, sizes };
+  }, canonicalIconSizes);
+}
+
+async function assertIconParity(page, entry, language, viewportLabel) {
+  const parity = await readIconParity(page);
+  expect(parity.navSize, `${entry.id} ${language} ${viewportLabel} brand icon should render at nav scale`).toBeGreaterThan(0);
+  for (const size of parity.sizes) {
+    expect(
+      parity.favicon[size],
+      `${entry.id} ${language} ${viewportLabel} favicon should match assets/brand/favicon.svg at ${size}px`
+    ).toBe(parity.source[size]);
+    expect(
+      parity.brand[size],
+      `${entry.id} ${language} ${viewportLabel} brand icon should match assets/brand/favicon.svg at ${size}px`
+    ).toBe(parity.source[size]);
+  }
 }
 
 async function readParitySnapshot(page) {
@@ -88,6 +149,8 @@ for (const entry of entries) {
 
       const faviconHref = await page.locator('link[rel~="icon"]').getAttribute('href');
       expect(faviconHref).toMatch(/favicon\.svg|^data:image\/svg\+xml/);
+      await brandHome.scrollIntoViewIfNeeded();
+      await assertIconParity(page, entry, language, `${page.viewportSize()?.width ?? 0}px`);
 
       const mailLink = page.locator('.site-footer__links a[href="mailto:micwu@outlook.com"]');
       await expect(mailLink).toBeVisible();
@@ -113,6 +176,12 @@ for (const entry of entries) {
       await exerciseTopLevel(page, entry.app);
       await assertInternalLinks(page);
       await assertLayout(page);
+
+      await page.setViewportSize({ width: 320, height: 844 });
+      await page.waitForTimeout(120);
+      await brandHome.scrollIntoViewIfNeeded();
+      await expect(brandHome).toBeVisible();
+      await assertIconParity(page, entry, language, '320px');
 
       await page.setViewportSize({ width: 390, height: 844 });
       await page.waitForTimeout(120);
