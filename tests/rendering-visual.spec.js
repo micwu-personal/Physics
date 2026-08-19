@@ -10,8 +10,83 @@ import {
 } from './helpers/rendering.js';
 
 const locales = ['en', 'zh-CN'];
+const physicsTopicRenderings = [
+  {
+    id: 'newtonian',
+    path: '/physics/newtonian.html',
+    heroCanvas: '#heroCanvas',
+    frame: '.topic-hero',
+    labCanvas: '#labCanvas',
+    labFrame: '#orbit-lab .lab'
+  },
+  {
+    id: 'relativity',
+    path: '/physics/relativity.html',
+    heroCanvas: '#heroCanvas',
+    frame: '.topic-hero',
+    labCanvas: '#labCanvas',
+    labFrame: '#clock-lab .lab'
+  },
+  {
+    id: 'quantum',
+    path: '/physics/quantum.html',
+    heroCanvas: '#heroCanvas',
+    frame: '.topic-hero',
+    labCanvas: '#labCanvas',
+    labFrame: '#slit-lab .lab'
+  },
+  {
+    id: 'astrophysics',
+    path: '/physics/astrophysics.html',
+    heroCanvas: '#collapseCanvas',
+    frame: '.topic-hero',
+    labCanvas: '#blackHoleCanvas',
+    labFrame: '#black-holes .lab'
+  },
+  {
+    id: 'electrodynamics',
+    path: '/physics/electrodynamics.html',
+    heroCanvas: '#cherenkovCanvas',
+    frame: '.topic-hero'
+  },
+  {
+    id: 'phase-transitions',
+    path: '/physics/phase-transitions.html',
+    heroCanvas: '#phaseCanvas',
+    frame: '.topic-hero'
+  },
+  {
+    id: 'entropy-information',
+    path: '/physics/entropy-information.html',
+    heroCanvas: '#entropyCanvas',
+    frame: '.topic-hero'
+  }
+];
 
 test.describe('deterministic scientific renderers', () => {
+  test.describe('Physics topics', () => {
+    test.describe.configure({ mode: 'serial' });
+
+    for (const topic of physicsTopicRenderings) {
+      test(`${topic.id} hero and lab render in zh-CN`, async ({ page }) => {
+        await prepareRenderingPage(page, topic.path, 'zh-CN');
+        await stepVisualClock(page, 16, 4);
+        await expectCanvasRendered(page.locator(topic.heroCanvas));
+        await captureRendering(page.locator(topic.frame), `${topic.id}-hero-zh-CN.png`);
+
+        if (topic.labCanvas && topic.labFrame) {
+          const labCanvas = page.locator(topic.labCanvas);
+          await labCanvas.evaluate(element => element.scrollIntoView({ block: 'center' }));
+          await page.waitForTimeout(80);
+          await page.evaluate(() => dispatchEvent(new Event('resize')));
+          await stepVisualClock(page, 16, 4);
+          await expectCanvasRendered(labCanvas);
+          await captureRendering(page.locator(topic.labFrame), `${topic.id}-lab-zh-CN.png`);
+        }
+      });
+    }
+  });
+
   test.describe('Big Bang', () => {
     for (const language of locales) {
       test(`time machine, composition, and scale in ${language}`, async ({ page }) => {

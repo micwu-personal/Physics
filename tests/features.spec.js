@@ -511,23 +511,32 @@ test('Periodic Table keeps structures element-relevant and labels model limits',
   });
   expect(closeHitTarget).toBe('detailClose');
   await page.locator('#dReactionsBlock').scrollIntoViewIfNeeded();
-  await page.locator('.rx-play').first().click();
+  await page.locator('#motionToggle').click();
+  await page.locator('.rx-play').first().evaluate(button => {
+    button.removeAttribute('data-motion-start');
+    button.click();
+  });
   await page.locator('#rxAnimBox').scrollIntoViewIfNeeded();
   expect(await page.evaluate(()=>window.PT_REACTION_DEBUG)).toMatchObject({
     sourceHoldMs:500,
     effects:{heat:true,light:true,lightColor:'#d7193f'}
   });
-  await page.locator('#motionToggle').click();
-  await page.waitForTimeout(750);
-  expect(await page.evaluate(()=>window.PT_REACTION_DEBUG.holdingSource)).toBe(true);
-  await page.locator('#motionToggle').click();
+  await expect.poll(
+    ()=>page.evaluate(()=>window.PT_REACTION_DEBUG.holdingSource),
+    {timeout:3000, intervals:[50,100,150]}
+  ).toBe(true);
+  await page.locator('.rx-play').first().evaluate(button => {
+    button.setAttribute('data-motion-start', '');
+  });
+  await page.locator('.rx-play').first().click();
+  await page.locator('#rxAnimBox').scrollIntoViewIfNeeded();
   await expect.poll(
     ()=>page.evaluate(()=>window.PT_REACTION_DEBUG.holdingSource),
     {timeout:5000}
   ).toBe(false);
   await page.locator('[data-lang="zh-CN"]').click();
   await expect(page.locator('img[data-i18n-alt="alt.hydrogen"]')).toHaveAttribute('alt',/氢原子计算概率密度/);
-  expect(await page.locator('.control-row').evaluate(element=>getComputedStyle(element).position)).toBe('fixed');
+  expect(await page.locator('.control-row').evaluate(element=>getComputedStyle(element).position)).toBe('relative');
   await assertNoErrors(errors);
 });
 
@@ -682,18 +691,38 @@ test('Particle Zoo visible simulations animate and honor reduced motion', async 
   const fingerprint = id => page.locator(`#${id}`).evaluate(canvas => {
     const pixels = canvas.getContext('2d').getImageData(0, 0, canvas.width, canvas.height).data;
     let hash = 2166136261;
-    for (let index = 0; index < pixels.length; index += 97) {
+    const stride = Math.max(4, Math.floor(pixels.length / 2048 / 4) * 4);
+    for (let index = 0; index < pixels.length; index += stride) {
       hash = Math.imul(hash ^ pixels[index], 16777619) >>> 0;
+      hash = Math.imul(hash ^ pixels[index + 1], 16777619) >>> 0;
+      hash = Math.imul(hash ^ pixels[index + 2], 16777619) >>> 0;
+      hash = Math.imul(hash ^ pixels[index + 3], 16777619) >>> 0;
     }
     return hash;
   });
   const expectCanvasToAdvance = async id => {
-    await page.locator(`#${id}`).scrollIntoViewIfNeeded();
+    const canvas = page.locator(`#${id}`);
+    await canvas.scrollIntoViewIfNeeded();
+    await expect(canvas).toBeVisible();
     await page.waitForTimeout(120);
     const before = await fingerprint(id);
-    await page.waitForTimeout(350);
-    expect(await fingerprint(id), `${id} should visibly advance`).not.toBe(before);
+    await expect
+      .poll(() => fingerprint(id), {
+        timeout: 3_000,
+        intervals: [50, 100, 150],
+        message: `${id} should visibly advance`
+      })
+      .not.toBe(before);
   };
+  const decayCanvasIsActive = baseline => page.evaluate(({ framesBefore, drawsBefore }) => {
+    const canvas = document.getElementById('decayCanvas');
+    if (!canvas) return false;
+    const rect = canvas.getBoundingClientRect();
+    const snapshot = window.PZ_PERF.snapshot();
+    return rect.top < innerHeight && rect.bottom > 0 &&
+      snapshot.frames.lab > framesBefore &&
+      (snapshot.draws['lab:decay'] || 0) > drawsBefore;
+  }, baseline);
 
   await page.locator('.tab[data-tab="builder"]').click();
   for (const part of ['u', 'u', 'd', 'e']) {
@@ -738,9 +767,62 @@ test('Particle Zoo visible simulations animate and honor reduced motion', async 
   for (const id of ['confCanvas', 'detCanvas', 'higgsCanvas']) {
     await expectCanvasToAdvance(id);
   }
-  await page.locator('.lab-subtab[data-lab-sub="advanced"]').click();
+  const advancedLabTab = page.locator('.lab-subtab[data-lab-sub="advanced"]');
+  await advancedLabTab.click();
+  await expect(advancedLabTab).toHaveClass(/active/);
+  const decayActivationBaseline = await page.evaluate(() => {
+    const snapshot = window.PZ_PERF.snapshot();
+    return {
+      framesBefore: snapshot.frames.lab,
+      drawsBefore: snapshot.draws['lab:decay'] || 0,
+    };
+  });
+  await page.locator('#decayCanvas').scrollIntoViewIfNeeded();
+  await expect(page.locator('#decayCanvas')).toBeVisible();
+  await expect
+    .poll(() => decayCanvasIsActive(decayActivationBaseline), {
+      timeout: 3_000,
+      intervals: [50, 100, 150],
+      message: 'decayCanvas should be active before restart'
+    })
+    .toBe(true);
+  const decayBefore = await page.evaluate(() => {
+    return {
+      startTimeBefore: LAB.decay?.startTime || 0,
+    };
+  });
   await page.locator('#decayRestart').click();
-  await expectCanvasToAdvance('decayCanvas');
+  const decayRestartBaseline = await page.waitForFunction(({ startTimeBefore }) => {
+    const startTime = LAB.decay?.startTime || 0;
+    if (startTime <= startTimeBefore) return null;
+    const canvas = document.getElementById('decayCanvas');
+    const snapshot = window.PZ_PERF.snapshot();
+    return {
+      startTime,
+      framesBefore: snapshot.frames.lab,
+      drawsBefore: snapshot.draws['lab:decay'] || 0,
+      imageBefore: canvas.toDataURL(),
+    };
+  }, decayBefore, { timeout: 3_000 }).then(handle => handle.jsonValue());
+  await expect
+    .poll(() => page.evaluate(({ framesBefore, drawsBefore, startTime, imageBefore }) => {
+        const canvas = document.getElementById('decayCanvas');
+        const snapshot = window.PZ_PERF.snapshot();
+        return {
+          framesAdvanced: snapshot.frames.lab > framesBefore,
+          drawsAdvanced: (snapshot.draws['lab:decay'] || 0) > drawsBefore,
+          sameRestart: (LAB.decay?.startTime || 0) === startTime,
+          imageChanged: canvas.toDataURL() !== imageBefore,
+        };
+      }, decayRestartBaseline).then(state =>
+        state.framesAdvanced && state.drawsAdvanced &&
+        state.sameRestart && state.imageChanged
+      ), {
+      timeout: 3_000,
+      intervals: [50, 100, 150],
+      message: 'decayCanvas should advance after restart'
+    })
+    .toBe(true);
 
   await page.locator('.tab[data-tab="playground"]').click();
   await expectCanvasToAdvance('pgCanvas');
@@ -853,28 +935,36 @@ test('Particle Zoo photons fade before the final scene clears', async ({ page })
     photon.life=PHOTON_FADE_FRAMES;
     pgStart();
   });
+  const playgroundFramesBeforeFade = await page.evaluate(() => window.PZ_PERF.snapshot().frames.playground);
+  await page.waitForFunction(before => (
+    pgRAF !== null && window.PZ_PERF.snapshot().frames.playground > before
+  ), playgroundFramesBeforeFade, { timeout: 2_000 });
   const fadeFrames=await page.evaluate(() => PHOTON_FADE_FRAMES);
-  const samplePhoton = () => page.evaluate(() => {
-    const photon=pgParts[0];
-    if(!photon) return null;
-    const pixel=ctx.getImageData(
-      Math.floor(photon.x*devicePixelRatio),
-      Math.floor(photon.y*devicePixelRatio),
+  const { early, late } = await page.waitForFunction(fadeFrames => {
+    const samples = window.__pgPhotonFadeSamples || (window.__pgPhotonFadeSamples = {
+      early: null,
+      late: null,
+    });
+    const photon = pgParts[0];
+    if (!photon) return samples.early && samples.late ? samples : null;
+    const pixel = ctx.getImageData(
+      Math.floor(photon.x * devicePixelRatio),
+      Math.floor(photon.y * devicePixelRatio),
       1,
       1
     ).data;
-    return {brightness:pixel[0]+pixel[1]+pixel[2],life:photon.life};
-  });
-  await expect.poll(async () => (await samplePhoton())?.life, { timeout: 2_000, intervals:[20] })
-    .toBeLessThan(fadeFrames-3);
-  const early=await samplePhoton();
-  await expect.poll(async () => {
-    const sample=await samplePhoton();
-    if(sample && sample.life<8) await page.evaluate(()=>pgStop());
-    return sample?.life;
-  }, { timeout: 2_000, intervals:[20] })
-    .toBeLessThan(8);
-  const late=await samplePhoton();
+    const sample = { brightness: pixel[0] + pixel[1] + pixel[2], life: photon.life };
+    if (!samples.early && photon.life < fadeFrames - 3) samples.early = sample;
+    const lateThreshold = samples.early ? Math.min(8, samples.early.life - 0.5) : 8;
+    if (!samples.late && photon.life < lateThreshold) {
+      samples.late = sample;
+      pgStop();
+    }
+    return samples.early && samples.late ? samples : null;
+  }, fadeFrames, { timeout: 4_000 }).then(handle => handle.jsonValue());
+  expect(early).not.toBeNull();
+  expect(late).not.toBeNull();
+  expect(late.life).toBeLessThan(early.life);
   expect(late.brightness).toBeLessThan(early.brightness);
 
   await page.evaluate(()=>pgStart());

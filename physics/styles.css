@@ -171,12 +171,17 @@ button {
 .route-home {
   display: inline-flex;
   align-items: center;
+  min-width: 0;
+  max-width: clamp(132px, 48vw, 280px);
   gap: 10px;
   min-height: 44px;
   color: var(--muted);
   text-decoration: none;
   font-size: 14px;
   font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .route-home::before {
@@ -228,6 +233,7 @@ button {
 .hero-copy {
   position: relative;
   z-index: 3;
+  min-width: 0;
 }
 
 .hero-copy h1 {
@@ -966,6 +972,7 @@ button {
   padding-block: 70px;
 }
 
+.hero-map > *,
 .topic-hero > * {
   min-width: 0;
 }
@@ -1183,12 +1190,30 @@ body:has(.topic-index) .topic-section[id] {
 }
 
 .lab-overlay {
-  position: absolute;
-  left: 18px;
-  top: 18px;
+  position: relative;
   display: grid;
   gap: 5px;
   pointer-events: none;
+}
+
+.lab-stage:has(> canvas):has(> .lab-overlay) {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+}
+
+.lab-stage:has(> canvas):has(> .lab-overlay) > canvas {
+  position: relative;
+  inset: auto;
+  grid-row: 2;
+  min-height: 0;
+}
+
+.lab-stage:has(> canvas):has(> .lab-overlay) > .lab-overlay {
+  grid-row: 1;
+  padding: 14px 18px 12px;
+  border-bottom: 1px solid var(--line);
+  background:
+    linear-gradient(180deg, rgba(9, 13, 29, 0.96), rgba(9, 13, 29, 0.9));
 }
 
 .lab-readout {
@@ -2325,7 +2350,20 @@ body[data-topic="entropy-information"] {
   white-space: nowrap;
 }
 
-@media (max-width: 1020px) {
+@media (max-height: 920px) and (min-width: 1181px) {
+  .hero-map,
+  .topic-hero {
+    min-height: auto;
+    padding-block: 32px;
+  }
+
+  .atlas-preview,
+  .hero-instrument {
+    min-height: 532px;
+  }
+}
+
+@media (max-width: 1180px) {
   .hero-map,
   .topic-hero {
     grid-template-columns: 1fr;
@@ -2675,6 +2713,33 @@ body[data-topic="entropy-information"] {
 
   .topic-footer,
   .atlas-footer {
+    display: block;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-copy h1,
+  .topic-title h1 {
+    font-size: clamp(2rem, 9.8vw, 3rem);
+    letter-spacing: -0.03em;
+  }
+}
+
+@media (max-width: 760px), (max-height: 760px) {
+  .field-inspector {
+    position: static;
+    width: auto;
+    max-height: none;
+    margin-top: 16px;
+    padding: 18px;
+    transform: none;
+    display: none;
+    visibility: visible;
+    pointer-events: auto;
+    opacity: 1;
+  }
+
+  .field-inspector.open {
     display: block;
   }
 

@@ -118,6 +118,9 @@ export async function freezeVisuals(page) {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.addStyleTag({
     content: `
+      html {
+        scrollbar-gutter: stable both-edges;
+      }
       *, *::before, *::after {
         animation-delay: 0s !important;
         animation-duration: 0s !important;
@@ -130,21 +133,146 @@ export async function freezeVisuals(page) {
       }
     `
   });
+  await page.evaluate(() => {
+    const button = document.querySelector('.motion-toggle');
+    if (!button) return;
+    try {
+      localStorage.setItem('physics.motion', 'pause');
+    } catch {
+      // Visual pages can still freeze motion even when storage is unavailable.
+    }
+    document.documentElement.dataset.motion = 'paused';
+    button.setAttribute('aria-pressed', 'true');
+    const text = document.documentElement.lang === 'zh-CN' ? '播放动画' : 'Play motion';
+    button.textContent = text;
+    button.setAttribute('aria-label', text);
+    document.dispatchEvent(new CustomEvent('physics-motion', { detail: { paused: true, freezeFrame: true } }));
+  });
+  await page.waitForFunction(() => {
+    const button = document.querySelector('.motion-toggle');
+    return !button || button.getAttribute('aria-pressed') === 'true';
+  });
   // A full-page screenshot scrolls the viewport, so lazily loaded images can
   // resolve mid-capture and change the document height. Force them all in
   // before measuring so the captured layout is deterministic.
   await page.evaluate(async () => {
-    const images = [...document.images];
-    for (const image of images) image.loading = 'eager';
-    await Promise.all(images.map(image => image.complete
-      ? Promise.resolve()
-      : new Promise(resolve => {
-        image.addEventListener('load', resolve, { once: true });
-        image.addEventListener('error', resolve, { once: true });
-      })));
-    await document.fonts.ready;
+    const root = document.scrollingElement || document.documentElement;
+    let previousHeight = -1;
+    for (let pass = 0; pass < 4; pass++) {
+      const step = Math.max(Math.floor(window.innerHeight * 0.8), 240);
+      const maxScrollTop = Math.max(0, root.scrollHeight - window.innerHeight);
+      for (let scrollTop = 0; scrollTop <= maxScrollTop; scrollTop += step) {
+        window.scrollTo(0, scrollTop);
+        await new Promise(resolve => setTimeout(resolve, 50));
+      }
+      window.scrollTo(0, maxScrollTop);
+      await new Promise(resolve => setTimeout(resolve, 50));
+
+      const images = [...document.images];
+      for (const image of images) {
+        image.loading = 'eager';
+        image.decoding = 'sync';
+        image.fetchPriority = 'high';
+      }
+      await Promise.all(images.map(async image => {
+        image.scrollIntoView({ block: 'center', inline: 'center' });
+        await new Promise(resolve => setTimeout(resolve, 50));
+        if (!image.complete) {
+          await new Promise(resolve => {
+            image.addEventListener('load', resolve, { once: true });
+            image.addEventListener('error', resolve, { once: true });
+          });
+        }
+        if (typeof image.decode === 'function') {
+          try {
+            await image.decode();
+          } catch {
+            // Broken or blocked images still count as settled for layout.
+          }
+        }
+      }));
+      await document.fonts.ready;
+      window.scrollTo(0, 0);
+      await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+
+      const currentHeight = root.scrollHeight;
+      if (currentHeight === previousHeight) break;
+      previousHeight = currentHeight;
+    }
   });
+  await lockViewportSensitiveHeights(page);
+  await waitForStableDocumentHeight(page);
   await page.waitForTimeout(100);
+}
+
+export async function lockViewportSensitiveHeights(page, options = {}) {
+  const { integer = false } = options;
+  await page.evaluate(({ integer }) => {
+    const selectors = [
+      '.route-bar',
+      '.route-left',
+      '.brand-home',
+      '.brand-home__title',
+      '.route-home',
+      '.topic-index',
+      '.topic-title',
+      '.hero-copy',
+      '.hero-equation',
+      '.topic-hero',
+      '.hero-map',
+      '.atlas-preview',
+      '.hero-instrument',
+      '.lab-stage',
+      '.focus-instrument',
+      'canvas'
+    ];
+    const seen = new Set();
+    for (const selector of selectors) {
+      for (const element of document.querySelectorAll(selector)) {
+        if (seen.has(element)) continue;
+        seen.add(element);
+        const rect = element.getBoundingClientRect();
+        if (rect.height <= 0 || rect.width <= 0) continue;
+        const lockedHeight = integer ? Math.max(1, Math.round(rect.height)) : rect.height;
+        const lockedWidth = integer ? Math.max(1, Math.round(rect.width)) : rect.width;
+        element.style.minHeight = `${lockedHeight}px`;
+        element.style.maxHeight = `${lockedHeight}px`;
+        element.style.height = `${lockedHeight}px`;
+        element.style.minWidth = `${lockedWidth}px`;
+        element.style.maxWidth = `${lockedWidth}px`;
+        element.style.width = `${lockedWidth}px`;
+      }
+    }
+  }, { integer });
+}
+
+export async function waitForStableDocumentHeight(page, options = {}) {
+  const {
+    consecutiveSamples = 6,
+    intervalMs = 100,
+  } = options;
+  await page.evaluate(async ({ consecutiveSamples, intervalMs }) => {
+    const root = document.scrollingElement || document.documentElement;
+    const body = document.body;
+    let stableSamples = 0;
+    let previousSignature = '';
+    while (stableSamples < consecutiveSamples) {
+      await new Promise(resolve => setTimeout(resolve, intervalMs));
+      const documentRect = document.documentElement.getBoundingClientRect();
+      const bodyRect = body ? body.getBoundingClientRect() : { height: 0, width: 0 };
+      const signature = [
+        root.scrollHeight,
+        root.scrollWidth,
+        Math.round(documentRect.height * 100) / 100,
+        Math.round(documentRect.width * 100) / 100,
+        Math.round(bodyRect.height * 100) / 100,
+        Math.round(bodyRect.width * 100) / 100,
+      ].join(':');
+      if (signature === previousSignature) stableSamples++;
+      else stableSamples = 0;
+      previousSignature = signature;
+    }
+  }, { consecutiveSamples, intervalMs });
 }
 
 export async function setRange(locator, value) {

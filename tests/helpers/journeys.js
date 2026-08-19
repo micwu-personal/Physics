@@ -10,37 +10,37 @@ export async function exerciseLanding(page) {
   await expect(page.locator('html')).toHaveAttribute('lang', 'en');
 }
 
-export async function exerciseTopLevel(page, app) {
+export async function exerciseTopLevel(page, app, options = {}) {
   if (app === 'landing') {
-    await exerciseLanding(page);
+    await exerciseLanding(page, options);
     return;
   }
   if (app === 'physics-atlas') {
-    await exercisePhysicsAtlas(page);
+    await exercisePhysicsAtlas(page, options);
     return;
   }
   if (app === 'physics-area') {
-    await exercisePhysicsArea(page);
+    await exercisePhysicsArea(page, options);
     return;
   }
   if (app === 'physics-astro') {
-    await exercisePhysicsAstro(page);
+    await exercisePhysicsAstro(page, options);
     return;
   }
   if (app === 'physics-light') {
-    await exercisePhysicsLight(page);
+    await exercisePhysicsLight(page, options);
     return;
   }
   if (app === 'physics-field') {
-    await exercisePhysicsField(page);
+    await exercisePhysicsField(page, options);
     return;
   }
   if (app === 'physics-phase') {
-    await exercisePhysicsPhase(page);
+    await exercisePhysicsPhase(page, options);
     return;
   }
   if (app === 'physics-entropy') {
-    await exercisePhysicsEntropy(page);
+    await exercisePhysicsEntropy(page, options);
     return;
   }
   const tabs = page.locator('.tab');
@@ -84,7 +84,7 @@ export async function exercisePhysicsArea(page) {
   await expect(page.locator('#audioToggle')).toHaveAttribute('aria-pressed', 'true');
 }
 
-export async function exercisePhysicsAstro(page) {
+export async function exercisePhysicsAstro(page, options = {}) {
   const inChinese = async () => (await page.locator('html').getAttribute('lang')) === 'zh-CN';
   const setInvalidRangeValue = async (locator, next) => {
     await locator.evaluate((element, value) => {
@@ -115,8 +115,12 @@ export async function exercisePhysicsAstro(page) {
     expect(metrics.colors).toBeGreaterThan(1);
   };
 
-  for (const selector of ['#collapseCanvas', '#compactCanvas', '#typeIaCanvas', '#blackHoleCanvas', '#jetCanvas']) {
-    await expectAstroCanvas(selector);
+  await expect(page.locator('#collapseCanvas')).toBeVisible();
+  await expect(page.locator('#blackHoleCanvas')).toBeVisible();
+  if (!options.keepViewport) {
+    for (const selector of ['#collapseCanvas', '#compactCanvas', '#typeIaCanvas', '#blackHoleCanvas', '#jetCanvas']) {
+      await expectAstroCanvas(selector);
+    }
   }
   for (const selector of ['#collapseProgress', '#starMass', '#limitMass', '#blackHoleStage', '#blackHoleSpin']) {
     const control = page.locator(selector);
@@ -185,9 +189,11 @@ export async function exercisePhysicsAstro(page) {
   await page.locator('[data-lang="en"]').click();
 }
 
-export async function exercisePhysicsPhase(page) {
+export async function exercisePhysicsPhase(page, options = {}) {
   await expect(page.locator('#phaseCanvas')).toBeVisible();
-  await expectCanvasRendered(page.locator('#phaseCanvas'));
+  if (!options.keepViewport) {
+    await expectCanvasRendered(page.locator('#phaseCanvas'));
+  }
   const modes = page.locator('[data-phase-mode]');
   await expect(modes).toHaveCount(4);
   for (let index = 0; index < await modes.count(); index++) {
@@ -202,9 +208,11 @@ export async function exercisePhysicsPhase(page) {
   await page.locator('[data-lang="en"]').click();
 }
 
-export async function exercisePhysicsEntropy(page) {
+export async function exercisePhysicsEntropy(page, options = {}) {
   await expect(page.locator('#entropyCanvas')).toBeVisible();
-  await expectCanvasRendered(page.locator('#entropyCanvas'));
+  if (!options.keepViewport) {
+    await expectCanvasRendered(page.locator('#entropyCanvas'));
+  }
   const control = page.locator('#entropyBias');
   await setRange(control, await control.getAttribute('max'));
   await expect(page.locator('#entropyBiasOut')).toHaveText('0.90');
