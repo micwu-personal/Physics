@@ -1,6 +1,7 @@
-import { expect, test } from '@playwright/test';
+import { test } from '@playwright/test';
 import { locales } from '../helpers/matrix.js';
-import { preparePage, setRange } from '../helpers/runtime.js';
+import { captureRendering } from '../helpers/rendering.js';
+import { lockViewportSensitiveHeights, preparePage, setRange, waitForStableDocumentHeight } from '../helpers/runtime.js';
 
 const astroPath = '/physics/astrophysics.html';
 
@@ -34,6 +35,8 @@ async function setAstroSnapshotState(page) {
     await document.fonts.ready;
     await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
   });
+  await lockViewportSensitiveHeights(page, { integer: true });
+  await waitForStableDocumentHeight(page);
 }
 
 for (const language of locales) {
@@ -43,7 +46,7 @@ for (const language of locales) {
     await setAstroSnapshotState(page);
     const hero = page.locator('.focus-instrument');
     await hero.scrollIntoViewIfNeeded();
-    await expect(hero).toHaveScreenshot(`astrophysics-hero-${language}.png`);
+    await captureRendering(hero, `astrophysics-hero-${language}.png`);
   });
 
   test(`Astrophysics limits snapshot ${language}`, async ({ page }) => {
@@ -52,7 +55,7 @@ for (const language of locales) {
     await setAstroSnapshotState(page);
     const limits = page.locator('#limits');
     await limits.scrollIntoViewIfNeeded();
-    await expect(limits).toHaveScreenshot(`astrophysics-limits-${language}.png`);
+    await captureRendering(limits, `astrophysics-limits-${language}.png`);
   });
 
   test(`Astrophysics Type Ia snapshot ${language}`, async ({ page }) => {
@@ -61,7 +64,7 @@ for (const language of locales) {
     await setAstroSnapshotState(page);
     const typeIa = page.locator('#type-ia');
     await typeIa.scrollIntoViewIfNeeded();
-    await expect(typeIa).toHaveScreenshot(`astrophysics-type-ia-${language}.png`);
+    await captureRendering(typeIa, `astrophysics-type-ia-${language}.png`);
   });
 
   test(`Astrophysics jets snapshot ${language}`, async ({ page }) => {
@@ -70,6 +73,6 @@ for (const language of locales) {
     await setAstroSnapshotState(page);
     const jets = page.locator('#jets');
     await jets.scrollIntoViewIfNeeded();
-    await expect(jets).toHaveScreenshot(`astrophysics-jets-${language}.png`);
+    await captureRendering(jets, `astrophysics-jets-${language}.png`);
   });
 }

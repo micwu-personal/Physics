@@ -82,6 +82,17 @@ export default defineConfig({
       }
     },
     {
+      name: 'layout-matrix',
+      testMatch: /(?:^|[\\/])layout-matrix\.spec\.js$/,
+      workers: 2,
+      use: {
+        browserName: 'chromium',
+        trace: 'retain-on-failure',
+        video: 'retain-on-failure',
+        viewport: { width: 1440, height: 900 }
+      }
+    },
+    {
       name: 'performance',
       testMatch: /performance\.spec\.js/,
       workers: 1,
