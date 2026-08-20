@@ -934,46 +934,46 @@
         ctx.lineTo(cx + baseRadius * 0.08, cy + baseRadius * 0.95);
         ctx.stroke();
       }
-
-      const orbitRadius = baseRadius * (0.18 + spin * 0.5) * (0.55 + collapseProgress * 0.45);
-      ctx.save();
-      ctx.translate(cx, cy);
-      ctx.rotate(-0.12);
-      ctx.strokeStyle = `rgba(255,209,102,${0.18 + spin * 0.55})`;
-      ctx.lineWidth = 2;
-      ctx.setLineDash([5, 5]);
-      ctx.beginPath();
-      ctx.ellipse(0, 0, orbitRadius, Math.max(5, orbitRadius * (0.16 - flattening * 0.18)), 0, 0, Math.PI * 2);
-      ctx.stroke();
-      ctx.setLineDash([]);
-      ctx.restore();
-      if (spin > 0.04) {
-        const markerAngle = scene.elapsed * (0.3 + 1.7 * spin);
-        const markerX = cx + Math.cos(markerAngle) * orbitRadius;
-        const markerY = cy + Math.sin(markerAngle) * orbitRadius * 0.14;
-        glow(ctx, markerX, markerY, 12, '255,209,102');
-        ctx.fillStyle = palette.gold;
-        ctx.beginPath();
-        ctx.arc(markerX, markerY, 3.5, 0, Math.PI * 2);
-        ctx.fill();
-      }
-
-      line(ctx, 24, height - 34, 154, height - 34, 'rgba(174,184,216,.28)', 5);
-      line(ctx, 24, height - 34, 24 + 130 * spin, height - 34, palette.gold, 5);
-      label(ctx, zh() ? `保留角动量 J：${spin.toFixed(2)}` : `retained angular momentum J: ${spin.toFixed(2)}`, 24, height - 48, '#ffd166', 10);
-      label(
-        ctx,
-        spin < 0.25
-          ? (zh() ? '近球对称落入' : 'nearly spherical infall')
-          : spin < 0.72
-            ? (zh() ? '赤道方向落入受阻' : 'equatorial infall is impeded')
-            : (zh() ? '盘与磁化喷流分支成为可能' : 'disk + magnetized-jet branch becomes possible'),
-        170,
-        height - 30,
-        '#e8ecff',
-        10
-      );
     }
+
+    const orbitRadius = baseRadius * (0.18 + spin * 0.5) * (0.55 + collapseProgress * 0.45);
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(-0.12);
+    ctx.strokeStyle = `rgba(255,209,102,${0.18 + spin * 0.55})`;
+    ctx.lineWidth = 2;
+    ctx.setLineDash([5, 5]);
+    ctx.beginPath();
+    ctx.ellipse(0, 0, orbitRadius, Math.max(5, orbitRadius * (0.16 - flattening * 0.18)), 0, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.restore();
+    if (spin > 0.04) {
+      const markerAngle = scene.elapsed * (0.3 + 1.7 * spin);
+      const markerX = cx + Math.cos(markerAngle) * orbitRadius;
+      const markerY = cy + Math.sin(markerAngle) * orbitRadius * 0.14;
+      glow(ctx, markerX, markerY, 12, '255,209,102');
+      ctx.fillStyle = palette.gold;
+      ctx.beginPath();
+      ctx.arc(markerX, markerY, 3.5, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    line(ctx, 24, height - 34, 154, height - 34, 'rgba(174,184,216,.28)', 5);
+    line(ctx, 24, height - 34, 24 + 130 * spin, height - 34, palette.gold, 5);
+    label(ctx, zh() ? `保留角动量 J：${spin.toFixed(2)}` : `retained angular momentum J: ${spin.toFixed(2)}`, 24, height - 48, '#ffd166', 10);
+    label(
+      ctx,
+      spin < 0.25
+        ? (zh() ? '近球对称落入' : 'nearly spherical infall')
+        : spin < 0.72
+          ? (zh() ? '赤道方向落入受阻' : 'equatorial infall is impeded')
+          : (zh() ? '盘与磁化喷流分支成为可能' : 'disk + magnetized-jet branch becomes possible'),
+      170,
+      height - 30,
+      '#e8ecff',
+      10
+    );
 
     const labels = [
       [zh() ? '塌缩前' : 'before collapse', 0],
@@ -1938,8 +1938,19 @@
   if (window.__enableAstroTestHooks) {
     window.__astroTestHooks = Object.freeze({
       compactSpec,
+      drawBlackHoleForTest(stage, spin) {
+        drawBlackHole({ ...blackHoleScene, stage, spin });
+      },
       drawCompactForTest(mode, mass) {
         drawCompact({ ...compactScene, mode, mass });
+      },
+      drawEvolutionForTest(mass, width = evolutionScene.width) {
+        drawEvolution({ ...evolutionScene, mass, width });
+      },
+      drawPulsarForTest(tilt, view, elapsed = 0) {
+        pulsarScene.tilt = tilt;
+        pulsarScene.view = view;
+        drawPulsar({ ...pulsarScene, elapsed, tilt, view });
       },
       compactDetailSnapshot,
       handleResizeEntries,
@@ -1952,6 +1963,10 @@
       },
       normalizeCompactMode,
       readPalette,
+      renderBlackHoleForTest(spin) {
+        blackHoleScene.spin = spin;
+        renderBlackHoleReadout();
+      },
       renderCollapseReadout,
       resizeById(id) {
         const scene = scenes.get(id);

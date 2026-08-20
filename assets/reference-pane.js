@@ -41,13 +41,12 @@
     <p id="referencePaneNotice" class="reference-pane__notice"></p>
     <div class="reference-pane__frame-wrap">
       <div id="referencePaneStatus" class="reference-pane__status" role="status"></div>
-      <iframe id="referencePaneFrame"
-              sandbox="allow-downloads allow-forms allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"></iframe>
+      <div id="referencePaneFrameHost" class="reference-pane__frame-host"></div>
     </div>
   `;
   document.body.append(pane);
 
-  const frame = pane.querySelector('#referencePaneFrame');
+  const frameHost = pane.querySelector('#referencePaneFrameHost');
   const closeButton = pane.querySelector('#referencePaneClose');
   const externalLink = pane.querySelector('#referencePaneExternal');
   const title = pane.querySelector('#referencePaneTitle');
@@ -57,6 +56,7 @@
   const status = pane.querySelector('#referencePaneStatus');
   let returnFocus = null;
   let currentTitle = '';
+  let frame = null;
 
   function applyLanguage() {
     const strings = copy[language()];
@@ -65,15 +65,29 @@
     externalLink.textContent = strings.external;
     notice.textContent = strings.notice;
     status.textContent = strings.loading;
-    frame.title = strings.frameTitle;
+    if (frame) frame.title = strings.frameTitle;
     title.textContent = currentTitle || strings.frameTitle;
+  }
+
+  function ensureFrame() {
+    if (frame) return frame;
+    frame = document.createElement('iframe');
+    frame.id = 'referencePaneFrame';
+    frame.sandbox = 'allow-downloads allow-forms allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts';
+    frame.addEventListener('load', () => {
+      status.hidden = true;
+    });
+    frameHost.append(frame);
+    applyLanguage();
+    return frame;
   }
 
   function closePane({ restoreFocus = true } = {}) {
     if (!document.body.classList.contains('reference-pane-open')) return;
     document.body.classList.remove('reference-pane-open');
     pane.setAttribute('aria-hidden', 'true');
-    frame.src = 'about:blank';
+    frame?.remove();
+    frame = null;
     if (restoreFocus && returnFocus?.isConnected) returnFocus.focus();
     returnFocus = null;
   }
@@ -86,7 +100,7 @@
     host.textContent = url.hostname.replace(/^www\./, '');
     externalLink.href = url.href;
     status.hidden = false;
-    frame.src = url.href;
+    ensureFrame().src = url.href;
     pane.setAttribute('aria-hidden', 'false');
     document.body.classList.add('reference-pane-open');
     closeButton.focus();
@@ -103,9 +117,6 @@
   });
 
   closeButton.addEventListener('click', () => closePane());
-  frame.addEventListener('load', () => {
-    if (frame.src !== 'about:blank') status.hidden = true;
-  });
   document.addEventListener('keydown', event => {
     if (event.key === 'Escape') closePane();
   });
