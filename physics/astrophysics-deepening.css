@@ -127,6 +127,36 @@ body[data-topic="astrophysics"] .focus-instrument > canvas {
   margin-top: 12px;
 }
 
+.spin-effect,
+.science-bridge-link {
+  margin: 0;
+  padding: 14px;
+  border: 1px solid color-mix(in srgb, var(--gold) 22%, var(--line));
+  border-radius: 12px;
+  color: var(--muted);
+  background: color-mix(in srgb, var(--gold) 5%, var(--deep));
+  line-height: 1.58;
+}
+
+.science-bridge-link {
+  display: grid;
+  gap: 8px;
+}
+
+.science-bridge-link strong {
+  color: var(--paper);
+}
+
+.science-bridge-link p {
+  margin: 0;
+}
+
+.science-bridge-link a {
+  color: var(--cyan);
+  font-weight: 700;
+  text-underline-offset: 4px;
+}
+
 .classification .claim-links,
 .derivation .claim-links {
   margin-top: 18px;

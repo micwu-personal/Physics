@@ -174,16 +174,21 @@
       max: 0.08,
       color: palette.muted,
       rgb: '174,184,216',
+      remnantKind: 'brown-dwarf',
       en: {
         name: 'Brown dwarf', life: 'never leaves', support: 'Electron degeneracy pressure',
         burn: 'Deuterium only, briefly. Hydrogen fusion never ignites.',
         end: 'Cools forever as a fading substellar object.',
+        remnant: 'Cooling brown dwarf',
+        remnantScale: 'No stellar remnant transition; it remains roughly Jupiter-sized, about 140,000 km across.',
         makes: 'No new elements released.'
       },
       zh: {
         name: '褐矮星', life: '始终未点燃', support: '电子简并压',
         burn: '仅短暂燃烧氘，氢聚变从未点燃。',
         end: '作为逐渐变暗的亚恒星天体持续冷却。',
+        remnant: '持续冷却的褐矮星',
+        remnantScale: '不会经历恒星遗迹转变；大小仍大致接近木星，直径约 14 万千米。',
         makes: '不释放新元素。'
       }
     },
@@ -191,16 +196,21 @@
       max: 0.5,
       color: palette.pink,
       rgb: '255,122,92',
+      remnantKind: 'white-dwarf',
       en: {
         name: 'Red dwarf', life: '> 10¹² yr', support: 'Gas pressure, fully convective',
         burn: 'Proton-proton chain, hydrogen to helium.',
         end: 'Becomes a helium white dwarf. None has had time to do so yet.',
+        remnant: 'Helium white dwarf (far future)',
+        remnantScale: 'Earth-sized: a characteristic diameter is about 20,000 km; none has formed this way yet.',
         makes: 'Helium, retained rather than expelled.'
       },
       zh: {
         name: '红矮星', life: '> 10¹² 年', support: '气体压强，整体对流',
         burn: '质子-质子链，氢聚变为氦。',
         end: '最终成为氦白矮星；宇宙年龄内尚无一颗完成。',
+        remnant: '氦白矮星（遥远未来）',
+        remnantScale: '地球尺度：特征直径约 2 万千米；目前还没有红矮星通过这条路径形成它。',
         makes: '氦，且基本被保留而非抛出。'
       }
     },
@@ -208,16 +218,21 @@
       max: 8,
       color: palette.gold,
       rgb: '255,209,102',
+      remnantKind: 'white-dwarf',
       en: {
         name: 'Sun-like star', life: '10¹⁰ yr', support: 'Gas pressure, then electron degeneracy',
         burn: 'Hydrogen, then helium in a core flash; carbon never ignites.',
         end: 'Planetary nebula, leaving a carbon-oxygen white dwarf.',
+        remnant: 'Carbon–oxygen white dwarf',
+        remnantScale: 'Earth-sized: commonly about 10,000–15,000 km across.',
         makes: 'Carbon, nitrogen, and s-process elements dredged to the surface.'
       },
       zh: {
         name: '类太阳恒星', life: '10¹⁰ 年', support: '气体压强，随后为电子简并压',
         burn: '先烧氢，随后氦闪点燃氦；碳始终未点燃。',
         end: '抛出行星状星云，留下碳氧白矮星。',
+        remnant: '碳氧白矮星',
+        remnantScale: '地球尺度：直径通常约 1 万至 1.5 万千米。',
         makes: '碳、氮，以及被上翻到表面的 s 过程元素。'
       }
     },
@@ -225,16 +240,21 @@
       max: 25,
       color: palette.cyan,
       rgb: '0,212,255',
+      remnantKind: 'neutron-star',
       en: {
         name: 'Massive star', life: '10⁷ yr', support: 'Radiation pressure grows important',
         burn: 'Onion shells: H, He, C, Ne, O, Si. Silicon burning lasts about a day.',
         end: 'Iron core exceeds the electron-degeneracy limit and collapses, leaving a neutron star if it does not keep accreting.',
+        remnant: 'Likely neutron star in this branch',
+        remnantScale: 'City-sized: typically about 20–26 km across; fallback can instead produce a black hole.',
         makes: 'Oxygen, neon, magnesium, silicon, and iron-peak elements.'
       },
       zh: {
         name: '大质量恒星', life: '10⁷ 年', support: '辐射压变得重要',
         burn: '洋葱壳结构：氢、氦、碳、氖、氧、硅；硅燃烧只持续大约一天。',
         end: '铁核超过电子简并所能支撑的范围而塌缩；若后续吸积不过量，就能留下中子星。',
+        remnant: '此简化分支中可能留下中子星',
+        remnantScale: '城市尺度：直径通常约 20–26 千米；回落吸积也可能使其转为黑洞。',
         makes: '氧、氖、镁、硅以及铁峰元素。'
       }
     },
@@ -242,16 +262,21 @@
       max: 300,
       color: palette.violet,
       rgb: '124,92,255',
+      remnantKind: 'black-hole',
       en: {
         name: 'Very massive star', life: '10⁶ yr', support: 'Radiation pressure dominates; near the Eddington ceiling',
         burn: 'Same shells, far hotter, with heavy mass loss through radiation-driven winds.',
         end: 'Collapse can exceed the neutron-star limit and form a black hole, sometimes with little visible explosion.',
+        remnant: 'Black-hole-forming branch',
+        remnantScale: 'No solid surface. A non-spinning 10 M☉ example has a horizon about 59 km across; final mass is not birth mass.',
         makes: 'Depends strongly on how much mass the winds removed first.'
       },
       zh: {
         name: '极大质量恒星', life: '10⁶ 年', support: '辐射压主导，接近爱丁顿上限',
         burn: '壳层结构相同但温度高得多，辐射驱动星风造成剧烈质量损失。',
         end: '塌缩可超过中子星极限而形成黑洞，有时几乎没有明显爆发。',
+        remnant: '可能形成黑洞的分支',
+        remnantScale: '没有固体表面。以非旋转 10 M☉ 黑洞为例，视界直径约 59 千米；最终质量并不等于初始质量。',
         makes: '强烈依赖此前星风带走了多少质量。'
       }
     }
@@ -281,22 +306,102 @@
     }
     label(ctx, zh() ? '初始质量 (M☉)' : 'initial mass (M☉)', left, axisY + 36, '#aeb8d8', 11);
 
-    const cx = width * 0.5;
-    const cy = height * 0.4;
-    const radius = Math.max(14, Math.min(height * 0.24, 16 * Math.pow(mass, 0.42)));
-    glow(ctx, cx, cy, radius * 2.4 * (1 + 0.03 * Math.sin(scene.elapsed * 1.6)), stage.rgb);
+    const starX = width * 0.29;
+    const remnantX = width * 0.73;
+    const cy = height * 0.43;
+    const compact = width < 1000;
+    const radius = Math.max(14, Math.min(height * 0.2, 15 * Math.pow(mass, 0.4)));
+    const dividerX = width * 0.51;
+    line(ctx, dividerX, 34, dividerX, axisY - 28, 'rgba(174,184,216,.18)', 1, [5, 6]);
+    label(
+      ctx,
+      compact ? (zh() ? '初生恒星' : 'BIRTH STAR') : (zh() ? '初生恒星 · 近似主序尺度' : 'BIRTH STAR · APPROX. MAIN-SEQUENCE SCALE'),
+      18,
+      28,
+      '#aeb8d8',
+      10
+    );
+    label(
+      ctx,
+      compact ? (zh() ? '最终天体' : 'FINAL OBJECT') : (zh() ? '可能遗迹 · 独立显示尺度' : 'LIKELY REMNANT · SEPARATE DISPLAY SCALE'),
+      dividerX + 18,
+      28,
+      '#aeb8d8',
+      10
+    );
+
+    glow(ctx, starX, cy, radius * 2.4 * (1 + 0.03 * Math.sin(scene.elapsed * 1.6)), stage.rgb);
     ctx.fillStyle = stage.color;
     ctx.beginPath();
-    ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+    ctx.arc(starX, cy, radius, 0, Math.PI * 2);
     ctx.fill();
+
+    const arrowStart = starX + radius + 16;
+    const arrowEnd = remnantX - 44;
+    line(ctx, arrowStart, cy, arrowEnd, cy, 'rgba(232,236,255,.34)', 1.5, [6, 5]);
+    ctx.fillStyle = 'rgba(232,236,255,.5)';
+    ctx.beginPath();
+    ctx.moveTo(arrowEnd, cy);
+    ctx.lineTo(arrowEnd - 8, cy - 5);
+    ctx.lineTo(arrowEnd - 8, cy + 5);
+    ctx.closePath();
+    ctx.fill();
+    label(ctx, zh() ? '可能结局' : 'likely outcome', (arrowStart + arrowEnd) / 2, cy - 10, '#aeb8d8', 10, 'center');
+
+    const remnantRadius = stage.remnantKind === 'brown-dwarf'
+      ? 28
+      : stage.remnantKind === 'white-dwarf'
+        ? 24
+        : stage.remnantKind === 'neutron-star'
+          ? 13
+          : 20;
+    const remnantRgb = stage.remnantKind === 'white-dwarf'
+      ? '126,232,197'
+      : stage.remnantKind === 'neutron-star'
+        ? '0,212,255'
+        : stage.remnantKind === 'black-hole'
+          ? '124,92,255'
+          : stage.rgb;
+    glow(ctx, remnantX, cy, remnantRadius * 2.8, remnantRgb);
+    if (stage.remnantKind === 'black-hole') {
+      ctx.fillStyle = '#000';
+      ctx.strokeStyle = palette.violet;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(remnantX, cy, remnantRadius, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+    } else {
+      ctx.fillStyle = stage.remnantKind === 'white-dwarf' ? palette.green : stage.color;
+      ctx.beginPath();
+      ctx.arc(remnantX, cy, remnantRadius, 0, Math.PI * 2);
+      ctx.fill();
+    }
 
     const marker = toX(mass);
     line(ctx, marker, axisY - 13, marker, axisY + 13, stage.color, 2);
 
     const copy = zh() ? stage.zh : stage.en;
-    label(ctx, copy.name, 18, 28, '#e8ecff', 15);
-    label(ctx, `${zh() ? '主序寿命' : 'main-sequence life'}: ${copy.life}`, 18, 48, '#aeb8d8', 11);
-    label(ctx, `${zh() ? '支撑' : 'held up by'}: ${copy.support}`, 18, 66, '#aeb8d8', 11);
+    label(ctx, copy.name, starX, cy + radius + 28, '#e8ecff', 13, 'center');
+    label(ctx, `${zh() ? '寿命' : 'life'}: ${copy.life}`, starX, cy + radius + 47, '#aeb8d8', 10, 'center');
+    label(ctx, copy.remnant, remnantX, cy + remnantRadius + 28, '#e8ecff', 12, 'center');
+    const scaleLabel = stage.remnantKind === 'brown-dwarf'
+      ? (zh() ? '直径约 14 万 km' : '~140,000 km across')
+      : stage.remnantKind === 'white-dwarf'
+        ? (zh() ? '直径约 1–2 万 km' : '~10,000–20,000 km across')
+        : stage.remnantKind === 'neutron-star'
+          ? (zh() ? '直径约 20–26 km' : '~20–26 km across')
+          : (zh() ? '示例视界直径约 59 km' : 'example horizon ~59 km across');
+    label(ctx, scaleLabel, remnantX, cy + remnantRadius + 47, '#aeb8d8', 10, 'center');
+    label(
+      ctx,
+      compact ? (zh() ? '两侧采用独立尺度' : 'SEPARATE DISPLAY SCALES') : (zh() ? '圆盘大小不可直接互比' : 'disc sizes are not directly comparable'),
+      width - 18,
+      axisY - 18,
+      '#ffd166',
+      10,
+      'right'
+    );
   }
 
   /* ------------------------------------------------------------ 3. limits -- */
@@ -720,11 +825,13 @@
     const { ctx, width, height } = scene;
     clear(ctx, width, height, '#03050c');
     const stage = scene.stage;
+    const spin = scene.spin;
     const cx = width * 0.5;
     const cy = height * 0.49;
     const baseRadius = Math.min(width, height) * 0.31;
     const collapseProgress = Math.max(0, Math.min(1, stage / 5));
     const radius = baseRadius * (1 - collapseProgress * 0.78);
+    const flattening = spin * collapseProgress * 0.34;
 
     if (stage < 2.25) {
       const shells = [
@@ -737,7 +844,7 @@
         glow(ctx, cx, cy, radius * scale * 1.15, rgb);
         ctx.fillStyle = `rgba(${rgb},${0.18 + scale * 0.22})`;
         ctx.beginPath();
-        ctx.arc(cx, cy, radius * scale, 0, Math.PI * 2);
+        ctx.ellipse(cx, cy, radius * scale, radius * scale * (1 - flattening), 0, 0, Math.PI * 2);
         ctx.fill();
       }
       label(ctx, zh() ? '铁核' : 'iron core', cx - 18, cy + 4, '#eef2ff', 10);
@@ -751,9 +858,10 @@
         const angle = index / 14 * Math.PI * 2 + scene.elapsed * 0.06;
         const outer = radius + 62 + (index % 3) * 11;
         const inner = Math.max(radius + 8, outer - 28 - strength * 20);
+        const innerAngle = angle + spin * collapseProgress * 0.75;
         ctx.beginPath();
         ctx.moveTo(cx + Math.cos(angle) * outer, cy + Math.sin(angle) * outer);
-        ctx.lineTo(cx + Math.cos(angle) * inner, cy + Math.sin(angle) * inner);
+        ctx.lineTo(cx + Math.cos(innerAngle) * inner, cy + Math.sin(innerAngle) * inner);
         ctx.stroke();
       }
     }
@@ -826,6 +934,45 @@
         ctx.lineTo(cx + baseRadius * 0.08, cy + baseRadius * 0.95);
         ctx.stroke();
       }
+
+      const orbitRadius = baseRadius * (0.18 + spin * 0.5) * (0.55 + collapseProgress * 0.45);
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(-0.12);
+      ctx.strokeStyle = `rgba(255,209,102,${0.18 + spin * 0.55})`;
+      ctx.lineWidth = 2;
+      ctx.setLineDash([5, 5]);
+      ctx.beginPath();
+      ctx.ellipse(0, 0, orbitRadius, Math.max(5, orbitRadius * (0.16 - flattening * 0.18)), 0, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.restore();
+      if (spin > 0.04) {
+        const markerAngle = scene.elapsed * (0.3 + 1.7 * spin);
+        const markerX = cx + Math.cos(markerAngle) * orbitRadius;
+        const markerY = cy + Math.sin(markerAngle) * orbitRadius * 0.14;
+        glow(ctx, markerX, markerY, 12, '255,209,102');
+        ctx.fillStyle = palette.gold;
+        ctx.beginPath();
+        ctx.arc(markerX, markerY, 3.5, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      line(ctx, 24, height - 34, 154, height - 34, 'rgba(174,184,216,.28)', 5);
+      line(ctx, 24, height - 34, 24 + 130 * spin, height - 34, palette.gold, 5);
+      label(ctx, zh() ? `保留角动量 J：${spin.toFixed(2)}` : `retained angular momentum J: ${spin.toFixed(2)}`, 24, height - 48, '#ffd166', 10);
+      label(
+        ctx,
+        spin < 0.25
+          ? (zh() ? '近球对称落入' : 'nearly spherical infall')
+          : spin < 0.72
+            ? (zh() ? '赤道方向落入受阻' : 'equatorial infall is impeded')
+            : (zh() ? '盘与磁化喷流分支成为可能' : 'disk + magnetized-jet branch becomes possible'),
+        170,
+        height - 30,
+        '#e8ecff',
+        10
+      );
     }
 
     const labels = [
@@ -1056,7 +1203,178 @@
     ctx.fill();
   }
 
-  /* -------------------------------------------------------------- 8. jets -- */
+  /* ----------------------------------------------------------- 8. pulsars -- */
+  function pulsarSnapshot(scene) {
+    const alpha = scene.tilt * Math.PI / 180;
+    const zeta = scene.view * Math.PI / 180;
+    const phase = scene.elapsed * 1.15;
+    const separationAt = phaseValue => Math.acos(clamp(
+      Math.cos(alpha) * Math.cos(zeta) +
+      Math.sin(alpha) * Math.sin(zeta) * Math.cos(phaseValue),
+      -1,
+      1
+    ));
+    const nearSeparation = separationAt(phase);
+    const farSeparation = Math.PI - nearSeparation;
+    const separation = Math.min(nearSeparation, farSeparation);
+    const beamHalfWidth = 12 * Math.PI / 180;
+    const intensity = Math.exp(-Math.pow(separation / beamHalfWidth, 4));
+    const aligned = scene.tilt < 0.5;
+    const beamVisible = separation <= beamHalfWidth;
+    return {
+      aligned,
+      beamHalfWidth,
+      beamVisible,
+      intensity,
+      phase,
+      separation,
+      separationAt,
+      visible: beamVisible && !aligned
+    };
+  }
+
+  function drawPulsar(scene) {
+    const { ctx, width, height } = scene;
+    clear(ctx, width, height, '#030611');
+    const snapshot = pulsarSnapshot(scene);
+    const alpha = scene.tilt * Math.PI / 180;
+    const zeta = scene.view * Math.PI / 180;
+    const cx = width * 0.34;
+    const cy = height * 0.52;
+    const axisLength = Math.min(height * 0.32, width * 0.23);
+    const starRadius = Math.max(22, Math.min(38, height * 0.09));
+    const chartLeft = width * 0.7;
+    const chartRight = width - 24;
+
+    function project(vector) {
+      return {
+        x: vector.x + vector.y * 0.48,
+        y: -vector.z + vector.y * 0.3
+      };
+    }
+
+    function normalized(vector) {
+      const length = Math.max(1e-6, Math.hypot(vector.x, vector.y));
+      return { x: vector.x / length, y: vector.y / length };
+    }
+
+    function drawBeam(direction, alphaValue) {
+      const angle = Math.atan2(direction.y, direction.x);
+      const half = 0.16;
+      const reach = axisLength * 1.2;
+      ctx.fillStyle = `rgba(255,209,102,${alphaValue})`;
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.lineTo(cx + Math.cos(angle - half) * reach, cy + Math.sin(angle - half) * reach);
+      ctx.lineTo(cx + Math.cos(angle + half) * reach, cy + Math.sin(angle + half) * reach);
+      ctx.closePath();
+      ctx.fill();
+      line(
+        ctx,
+        cx,
+        cy,
+        cx + direction.x * reach,
+        cy + direction.y * reach,
+        `rgba(255,209,102,${Math.min(1, alphaValue + 0.3)})`,
+        2
+      );
+    }
+
+    const magnetic3d = {
+      x: Math.sin(alpha) * Math.cos(snapshot.phase),
+      y: Math.sin(alpha) * Math.sin(snapshot.phase),
+      z: Math.cos(alpha)
+    };
+    const magnetic = normalized(project(magnetic3d));
+    const sightline = normalized(project({ x: Math.sin(zeta), y: 0, z: Math.cos(zeta) }));
+
+    ctx.strokeStyle = 'rgba(0,212,255,.2)';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.ellipse(cx, cy, axisLength * Math.sin(alpha), axisLength * Math.sin(alpha) * 0.32, 0, 0, Math.PI * 2);
+    ctx.stroke();
+
+    line(ctx, cx, cy + axisLength, cx, cy - axisLength, 'rgba(0,212,255,.86)', 3);
+    label(ctx, zh() ? '自转 Ω' : 'spin Ω', cx + 10, cy - axisLength + 12, '#00d4ff', 11);
+
+    const observerDistance = axisLength * 1.42;
+    const observerX = cx + sightline.x * observerDistance;
+    const observerY = cy + sightline.y * observerDistance;
+    line(ctx, cx, cy, observerX, observerY, 'rgba(238,242,255,.68)', 1.5, [6, 5]);
+    ctx.fillStyle = '#eef2ff';
+    ctx.beginPath();
+    ctx.arc(observerX, observerY, 6, 0, Math.PI * 2);
+    ctx.fill();
+    label(ctx, zh() ? '地球 ζ' : 'Earth ζ', observerX + 8, observerY - 8, '#eef2ff', 10);
+
+    drawBeam(magnetic, snapshot.visible ? 0.34 : 0.17);
+    drawBeam({ x: -magnetic.x, y: -magnetic.y }, snapshot.visible ? 0.26 : 0.12);
+    label(
+      ctx,
+      zh() ? `磁轴 μ · α=${scene.tilt.toFixed(0)}°` : `magnetic μ · α=${scene.tilt.toFixed(0)}°`,
+      cx - axisLength * 0.62,
+      cy - axisLength * 0.34,
+      '#ffd166',
+      10,
+      'left'
+    );
+
+    glow(ctx, cx, cy, starRadius * 2.5, '0,212,255');
+    ctx.fillStyle = '#d9fbff';
+    ctx.beginPath();
+    ctx.arc(cx, cy, starRadius, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(0,80,120,.75)';
+    ctx.lineWidth = 2;
+    for (let offset = -0.5; offset <= 0.5; offset += 0.5) {
+      ctx.beginPath();
+      ctx.ellipse(cx, cy, starRadius * Math.cos(offset), starRadius * 0.28, snapshot.phase + offset, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+
+    line(ctx, width * 0.66, 30, width * 0.66, height - 28, 'rgba(174,184,216,.16)', 1);
+    label(ctx, zh() ? '望远镜记录' : 'TELESCOPE RECORD', chartLeft, 34, '#aeb8d8', 10);
+    const baselineY = height * 0.62;
+    line(ctx, chartLeft, baselineY, chartRight, baselineY, 'rgba(174,184,216,.35)', 1);
+    const chartWidth = chartRight - chartLeft;
+    ctx.strokeStyle = '#ff6b9d';
+    ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    for (let index = 0; index <= 120; index++) {
+      const x = chartLeft + index / 120 * chartWidth;
+      const localPhase = snapshot.phase - Math.PI * 3 + index / 120 * Math.PI * 6;
+      const near = snapshot.separationAt(localPhase);
+      const localSeparation = Math.min(near, Math.PI - near);
+      const profile = snapshot.aligned
+        ? (snapshot.beamVisible ? 0.28 : 0)
+        : Math.exp(-Math.pow(localSeparation / snapshot.beamHalfWidth, 4));
+      const y = baselineY - profile * height * 0.3;
+      if (index === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+    ctx.fillStyle = snapshot.visible ? '#ff6b9d' : '#aeb8d8';
+    ctx.beginPath();
+    ctx.arc(chartLeft + chartWidth * 0.5, height * 0.28, 8 + snapshot.intensity * 9, 0, Math.PI * 2);
+    ctx.fill();
+    label(
+      ctx,
+      snapshot.aligned && snapshot.beamVisible
+        ? (zh() ? '持续辐射：没有灯塔脉冲' : 'STEADY BEAM · NO LIGHTHOUSE PULSE')
+        : snapshot.visible
+          ? (zh() ? '脉冲到达' : 'PULSE RECEIVED')
+          : (zh() ? '辐射束未扫过地球' : 'BEAM MISSES EARTH'),
+      chartLeft,
+      height * 0.2,
+      snapshot.visible ? '#ff6b9d' : '#aeb8d8',
+      11
+    );
+    label(ctx, zh() ? '时间 →' : 'time →', chartRight - 42, baselineY + 22, '#aeb8d8', 10);
+
+    renderPulsarDetail(snapshot);
+  }
+
+  /* -------------------------------------------------------------- 9. jets -- */
   function drawJet(scene) {
     const { ctx, width, height } = scene;
     clear(ctx, width, height, '#04070f');
@@ -1134,6 +1452,8 @@
     const rows = [
       [zh() ? '核聚变阶段' : 'Fusion stages', copy.burn],
       [zh() ? '最终结局' : 'Final state', copy.end],
+      [zh() ? '可能的最终天体' : 'Likely final object', copy.remnant],
+      [zh() ? '最终天体的特征大小' : 'Characteristic final size', copy.remnantScale],
       [zh() ? '产生的元素' : 'Elements produced', copy.makes]
     ];
     for (const [term, description] of rows) {
@@ -1281,6 +1601,41 @@
     typeIaProducts.textContent = copy.products;
   }
 
+  function renderPulsarDetail(snapshot = pulsarSnapshot(pulsarScene)) {
+    const separationDegrees = snapshot.separation * 180 / Math.PI;
+    pulsarTiltOut.textContent = `${pulsarScene.tilt.toFixed(0)}°`;
+    pulsarViewOut.textContent = `${pulsarScene.view.toFixed(0)}°`;
+    pulsarReadout.textContent = snapshot.visible
+      ? (zh() ? '辐射束扫过：收到脉冲' : 'Beam crossing: pulse received')
+      : snapshot.aligned && snapshot.beamVisible
+        ? (zh() ? '视线始终在束内：持续信号，没有灯塔脉冲' : 'Sightline stays inside the beam: steady signal, no lighthouse pulse')
+        : (zh() ? '辐射束错过地球：此刻无脉冲' : 'Beam misses Earth: no pulse at this phase');
+    pulsarSeparation.textContent = zh()
+      ? `辐射束—视线夹角 ${separationDegrees.toFixed(1)}° · 束半宽 12°`
+      : `Beam–sightline separation ${separationDegrees.toFixed(1)}° · beam half-width 12°`;
+    pulsarDetection.textContent = snapshot.visible
+      ? (zh()
+        ? '一个磁极的发射锥正在扫过地球视线，因此望远镜记录到一次脉冲。'
+        : "One magnetic pole's emission cone is crossing Earth's line of sight, so the telescope records a pulse.")
+      : snapshot.aligned && snapshot.beamVisible
+        ? (zh()
+          ? '磁轴与自转轴重合，地球视线始终留在束内；望远镜会看到近似持续信号，而不是随自转出现的灯塔脉冲。'
+          : 'Magnetic and spin axes align, so Earth remains inside the beam; the telescope sees an approximately steady signal, not a rotation-driven lighthouse pulse.')
+      : (zh()
+        ? '中子星仍在旋转并持续发射，但两个发射锥此刻都没有指向地球。'
+        : 'The neutron star still rotates and emits, but neither emission cone points toward Earth at this phase.');
+    pulsarGeometry.textContent = zh()
+      ? pulsarScene.tilt < 1
+        ? 'α 接近 0° 时磁轴与自转轴重合，辐射束不再扫出圆锥；仅靠自转不会产生灯塔式脉冲。'
+        : '磁倾角与自转共同产生周期扫掠；并不需要整颗中子星朝向地球。'
+      : pulsarScene.tilt < 1
+        ? 'With α near 0°, magnetic and spin axes align and the beam no longer sweeps a cone; rotation alone does not make a lighthouse pulse.'
+        : 'Magnetic tilt plus rotation produces the repeating sweep; the whole neutron star never needs to point at Earth.';
+    pulsarOrigin.textContent = zh()
+      ? '精确的诞生倾角取决于塌缩、磁场放大、不对称动力学与后续力矩；目前没有一个已确立的普适机制。'
+      : 'The exact birth tilt depends on collapse, field amplification, asymmetric dynamics, and later torques; no single universal mechanism is established.';
+  }
+
   function renderBlackHoleReadout() {
     const stage = Math.min(6, Math.max(0, Math.round(blackHoleScene.stage)));
     const rows = zh()
@@ -1305,14 +1660,35 @@
     blackHoleReadout.textContent = rows[stage][0];
     blackHoleTime.textContent = rows[stage][1];
     blackHoleStageOut.textContent = `${blackHoleScene.stage.toFixed(2)} / 6`;
-    blackHoleSpinOut.textContent = blackHoleScene.spin.toFixed(2);
+    const spin = blackHoleScene.spin;
+    const spinBand = spin < 0.25
+      ? (zh() ? '低' : 'low')
+      : spin < 0.72
+        ? (zh() ? '中等' : 'moderate')
+        : (zh() ? '高' : 'high');
+    blackHoleSpinOut.textContent = `${spin.toFixed(2)} · ${spinBand}`;
+    blackHoleSpinEffect.textContent = zh()
+      ? spin < 0.25
+        ? '保留角动量很低：落入近似球对称；此教学分支不会形成离心支撑盘。'
+        : spin < 0.42
+          ? '自转已使落入轨迹弯曲并使核心扁率增加，但比角动量仍低于本示意的成盘阈值。'
+          : spin < 0.72
+            ? '中等保留角动量会阻碍赤道方向落入并产生圆化势垒；清晰的盘只在这一分支后期出现。'
+            : '高保留角动量让外围落入物质更容易圆化成盘；足够强的磁场还可能帮助发射喷流，但并非自动发生。'
+      : spin < 0.25
+        ? 'Very little angular momentum survives: infall stays nearly spherical and this teaching branch forms no centrifugally supported disk.'
+        : spin < 0.42
+          ? 'Rotation now curves the infall and increases flattening, but the specific angular momentum remains below this schematic disk threshold.'
+          : spin < 0.72
+            ? 'Moderate retained angular momentum impedes equatorial infall and creates a circularization barrier; a clear disk appears only late in this branch.'
+            : 'High retained angular momentum lets outer infall circularize into a disk; sufficiently strong magnetic fields may then help launch a jet, but neither outcome is automatic.';
   }
 
   function renderJetDetail() {
     const beta = jetScene.beta;
     const thetaDeg = jetScene.angle * 180 / Math.PI;
     const betaApp = beta * Math.sin(jetScene.angle) / Math.max(1e-3, 1 - beta * Math.cos(jetScene.angle));
-    jetSpeedOut.textContent = `${beta.toFixed(3)} c`;
+    jetSpeedOut.textContent = `β = ${beta.toFixed(3)}`;
     jetAngleOut.textContent = `${thetaDeg.toFixed(1)}°`;
     jetReadout.textContent = zh()
       ? betaApp > 1
@@ -1337,6 +1713,7 @@
       : betaApp > 1
         ? 'This is the classic apparent-superluminal regime seen in many radio jets.'
         : 'Aim the jet even closer to the line of sight, or speed it up further, and it enters the familiar apparent-superluminal regime.';
+    jetRelativityLink.href = `./relativity.html?beta=${beta.toFixed(3)}&theta=${thetaDeg.toFixed(1)}#jets`;
   }
 
   /* ------------------------------------------------------------ lifecycle -- */
@@ -1347,6 +1724,7 @@
   const typeIaScene = setup('typeIaCanvas', drawTypeIa, { stage: 0 });
   const blackHoleScene = setup('blackHoleCanvas', drawBlackHole, { stage: 3.2, spin: 0.55 });
   const compactScene = setup('compactCanvas', drawCompact, { mass: 1, mode: 'white-dwarf' });
+  const pulsarScene = setup('pulsarCanvas', drawPulsar, { tilt: 32, view: 36 });
   const jetScene = setup('jetCanvas', drawJet, { beta: 0.9, angle: 18 * Math.PI / 180 });
 
   seedCloud();
@@ -1443,6 +1821,26 @@
     });
   }
 
+  const pulsarTilt = document.getElementById('pulsarTilt');
+  const pulsarTiltOut = document.getElementById('pulsarTiltOut');
+  const pulsarView = document.getElementById('pulsarView');
+  const pulsarViewOut = document.getElementById('pulsarViewOut');
+  const pulsarReadout = document.getElementById('pulsarReadout');
+  const pulsarSeparation = document.getElementById('pulsarSeparation');
+  const pulsarDetection = document.getElementById('pulsarDetection');
+  const pulsarGeometry = document.getElementById('pulsarGeometry');
+  const pulsarOrigin = document.getElementById('pulsarOrigin');
+  pulsarTilt.addEventListener('input', () => {
+    pulsarScene.tilt = Number(pulsarTilt.value);
+    renderPulsarDetail();
+    renderAll(0);
+  });
+  pulsarView.addEventListener('input', () => {
+    pulsarScene.view = Number(pulsarView.value);
+    renderPulsarDetail();
+    renderAll(0);
+  });
+
   const typeIaStage = document.getElementById('typeIaStage');
   const typeIaStageOut = document.getElementById('typeIaStageOut');
   const typeIaReadout = document.getElementById('typeIaReadout');
@@ -1460,6 +1858,7 @@
   const blackHoleStageOut = document.getElementById('blackHoleStageOut');
   const blackHoleSpin = document.getElementById('blackHoleSpin');
   const blackHoleSpinOut = document.getElementById('blackHoleSpinOut');
+  const blackHoleSpinEffect = document.getElementById('blackHoleSpinEffect');
   const blackHoleReadout = document.getElementById('blackHoleReadout');
   const blackHoleTime = document.getElementById('blackHoleTime');
   blackHoleSlider.addEventListener('input', () => {
@@ -1482,6 +1881,7 @@
   const jetTiming = document.getElementById('jetTiming');
   const jetInvariant = document.getElementById('jetInvariant');
   const jetContext = document.getElementById('jetContext');
+  const jetRelativityLink = document.getElementById('jetRelativityLink');
   jetSpeed.addEventListener('input', () => {
     jetScene.beta = Number(jetSpeed.value);
     renderJetDetail();
@@ -1498,6 +1898,7 @@
     renderStageDetail();
     renderLimitDetail();
     renderCompactDetail();
+    renderPulsarDetail();
     renderTypeIaDetail();
     renderBlackHoleReadout();
     renderJetDetail();
@@ -1517,6 +1918,8 @@
   evolutionScene.mass = Number(massSlider.value);
   limitsScene.mass = Number(limitSlider.value);
   compactScene.mode = selectedCompactMode();
+  pulsarScene.tilt = Number(pulsarTilt.value);
+  pulsarScene.view = Number(pulsarView.value);
   typeIaScene.stage = Number(typeIaStage.value);
   blackHoleScene.stage = Number(blackHoleSlider.value);
   blackHoleScene.spin = Number(blackHoleSpin.value);
@@ -1527,6 +1930,7 @@
   renderStageDetail();
   renderLimitDetail();
   applyCompactMode(compactScene.mode, true);
+  renderPulsarDetail();
   renderTypeIaDetail();
   renderBlackHoleReadout();
   renderJetDetail();

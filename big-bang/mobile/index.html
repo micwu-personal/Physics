@@ -465,6 +465,153 @@ html:not([lang="zh-CN"]) .brand-home__title-zh {
 }
 
 </style>
+<style>
+.reference-pane {
+  position: fixed;
+  z-index: 120;
+  inset: 0 0 0 auto;
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr);
+  width: min(720px, 48vw);
+  min-width: 420px;
+  border-left: 1px solid var(--line, rgba(238, 242, 255, 0.16));
+  color: var(--paper, #eef2ff);
+  background: var(--deep, #090d1d);
+  box-shadow: -24px 0 70px rgba(0, 0, 0, 0.45);
+  transform: translateX(102%);
+  transition: transform 240ms cubic-bezier(.22, 1, .36, 1);
+  visibility: hidden;
+}
+
+.reference-pane-open .reference-pane {
+  transform: translateX(0);
+  visibility: visible;
+}
+
+.reference-pane__header {
+  display: flex;
+  gap: 18px;
+  align-items: center;
+  justify-content: space-between;
+  min-width: 0;
+  padding: 16px 18px;
+  border-bottom: 1px solid var(--line, rgba(238, 242, 255, 0.16));
+  background: var(--ink, #05060d);
+}
+
+.reference-pane__identity {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.reference-pane__label,
+.reference-pane__host {
+  color: var(--muted, #9ba5c4);
+  font: 600 0.7rem/1.3 "JetBrains Mono", ui-monospace, monospace;
+}
+
+.reference-pane__label {
+  color: var(--cyan, #00d4ff);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.reference-pane__identity strong,
+.reference-pane__host {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.reference-pane__actions {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 8px;
+}
+
+.reference-pane__actions a,
+.reference-pane__actions button {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 12px;
+  border: 1px solid var(--line, rgba(238, 242, 255, 0.16));
+  border-radius: 8px;
+  color: var(--paper, #eef2ff);
+  background: var(--panel, #12162d);
+  font: 650 0.78rem/1.2 "Space Grotesk", system-ui, sans-serif;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.reference-pane__actions a:hover,
+.reference-pane__actions button:hover {
+  border-color: var(--cyan, #00d4ff);
+}
+
+.reference-pane__notice {
+  margin: 0;
+  padding: 10px 18px;
+  border-bottom: 1px solid var(--line, rgba(238, 242, 255, 0.16));
+  color: var(--muted, #9ba5c4);
+  background: var(--enamel, #0d1530);
+  font-size: 0.78rem;
+  line-height: 1.45;
+}
+
+.reference-pane__frame-wrap {
+  position: relative;
+  min-height: 0;
+  background: #fff;
+}
+
+.reference-pane__frame-wrap iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: #fff;
+}
+
+.reference-pane__status {
+  position: absolute;
+  z-index: 1;
+  inset: 18px auto auto 18px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  color: var(--paper, #eef2ff);
+  background: var(--deep, #090d1d);
+  font-size: 0.75rem;
+}
+
+@media (max-width: 760px) {
+  .reference-pane {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .reference-pane__header {
+    align-items: flex-start;
+  }
+
+  .reference-pane__actions {
+    flex-direction: column-reverse;
+  }
+
+  .reference-pane__actions a,
+  .reference-pane__actions button {
+    min-width: 92px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reference-pane {
+    transition: none;
+  }
+}
+
+</style>
 </head>
 <body>
   <!--
@@ -1848,6 +1995,126 @@ updateMotionControl();
 const requestedTab=new URLSearchParams(location.search).get('tab');
 const requestedTabButton=requestedTab && document.querySelector(`.tab[data-tab="${requestedTab}"]`);
 if(requestedTabButton) requestedTabButton.click();
+
+</script>
+  <script>
+(() => {
+  if (globalThis.__referencePaneInitialized) return;
+  globalThis.__referencePaneInitialized = true;
+
+  const copy = {
+    en: {
+      close: 'Close',
+      external: 'Open original ↗',
+      frameTitle: 'External reference',
+      label: 'Reference viewer',
+      loading: 'Loading source…',
+      notice: 'The site stays open behind this panel. Some publishers block embedded viewing; use “Open original” if the page does not appear.'
+    },
+    'zh-CN': {
+      close: '关闭',
+      external: '打开原网页 ↗',
+      frameTitle: '外部参考资料',
+      label: '参考资料侧栏',
+      loading: '正在加载来源…',
+      notice: '本站会保留在此侧栏后方。部分出版商会禁止嵌入显示；若页面未出现，请使用“打开原网页”。'
+    }
+  };
+  const language = () => document.documentElement.lang.toLowerCase().startsWith('zh') ? 'zh-CN' : 'en';
+
+  const pane = document.createElement('aside');
+  pane.className = 'reference-pane';
+  pane.setAttribute('aria-hidden', 'true');
+  pane.setAttribute('aria-labelledby', 'referencePaneTitle');
+  pane.innerHTML = `
+    <div class="reference-pane__header">
+      <div class="reference-pane__identity">
+        <span id="referencePaneLabel" class="reference-pane__label"></span>
+        <strong id="referencePaneTitle"></strong>
+        <span id="referencePaneHost" class="reference-pane__host"></span>
+      </div>
+      <div class="reference-pane__actions">
+        <a id="referencePaneExternal" href="#" target="_blank" rel="noopener noreferrer" data-open-external="true"></a>
+        <button id="referencePaneClose" type="button"></button>
+      </div>
+    </div>
+    <p id="referencePaneNotice" class="reference-pane__notice"></p>
+    <div class="reference-pane__frame-wrap">
+      <div id="referencePaneStatus" class="reference-pane__status" role="status"></div>
+      <iframe id="referencePaneFrame"
+              sandbox="allow-downloads allow-forms allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"></iframe>
+    </div>
+  `;
+  document.body.append(pane);
+
+  const frame = pane.querySelector('#referencePaneFrame');
+  const closeButton = pane.querySelector('#referencePaneClose');
+  const externalLink = pane.querySelector('#referencePaneExternal');
+  const title = pane.querySelector('#referencePaneTitle');
+  const host = pane.querySelector('#referencePaneHost');
+  const label = pane.querySelector('#referencePaneLabel');
+  const notice = pane.querySelector('#referencePaneNotice');
+  const status = pane.querySelector('#referencePaneStatus');
+  let returnFocus = null;
+  let currentTitle = '';
+
+  function applyLanguage() {
+    const strings = copy[language()];
+    label.textContent = strings.label;
+    closeButton.textContent = strings.close;
+    externalLink.textContent = strings.external;
+    notice.textContent = strings.notice;
+    status.textContent = strings.loading;
+    frame.title = strings.frameTitle;
+    title.textContent = currentTitle || strings.frameTitle;
+  }
+
+  function closePane({ restoreFocus = true } = {}) {
+    if (!document.body.classList.contains('reference-pane-open')) return;
+    document.body.classList.remove('reference-pane-open');
+    pane.setAttribute('aria-hidden', 'true');
+    frame.src = 'about:blank';
+    if (restoreFocus && returnFocus?.isConnected) returnFocus.focus();
+    returnFocus = null;
+  }
+
+  function openPane(link) {
+    const url = new URL(link.href, window.location.href);
+    returnFocus = link;
+    currentTitle = link.textContent.trim() || url.hostname;
+    title.textContent = currentTitle;
+    host.textContent = url.hostname.replace(/^www\./, '');
+    externalLink.href = url.href;
+    status.hidden = false;
+    frame.src = url.href;
+    pane.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('reference-pane-open');
+    closeButton.focus();
+  }
+
+  document.addEventListener('click', event => {
+    if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    const link = event.target.closest('a[href]');
+    if (!link || link.dataset.openExternal === 'true' || link.hasAttribute('download')) return;
+    const url = new URL(link.href, window.location.href);
+    if (!/^https?:$/.test(url.protocol) || url.origin === window.location.origin) return;
+    event.preventDefault();
+    openPane(link);
+  });
+
+  closeButton.addEventListener('click', () => closePane());
+  frame.addEventListener('load', () => {
+    if (frame.src !== 'about:blank') status.hidden = true;
+  });
+  document.addEventListener('keydown', event => {
+    if (event.key === 'Escape') closePane();
+  });
+  new MutationObserver(applyLanguage).observe(document.documentElement, {
+    attributeFilter: ['lang'],
+    attributes: true
+  });
+  applyLanguage();
+})();
 
 </script>
 </body>
