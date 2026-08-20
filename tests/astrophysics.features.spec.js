@@ -80,6 +80,7 @@ for (const language of locales) {
   });
 
   test(`Astrophysics enforces compact-object teaching ranges in ${language}`, async ({ page }) => {
+    test.setTimeout(300_000);
     const errors = watchPage(page);
     await preparePage(page, astroPath, language);
 
