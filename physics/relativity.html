@@ -175,9 +175,9 @@
       <section id="clock-lab" class="topic-section">
         <header>
           <h2 data-copy-en="A transverse light clock is vertical in its own frame and zigzags in the ground frame." data-copy-zh="横向光钟在自身参考系中走竖直路，在地面系中走折线路。">A transverse light clock is vertical in its own frame and zigzags in the ground frame.</h2>
-          <p data-copy-en="The left panel is the clock rest frame: both mirrors stay fixed and the light pulse moves straight up and down. The right panel is the ground frame: both mirrors drift sideways while the same pulse connects the moving reflection events, so the pulse follows a polyline. The x and y scales match in the two drawn panels, so the right-hand diagonal really is longer."
-             data-copy-zh="左侧面板是光钟静止系：两面镜子固定不动，光脉冲只做上下往返；右侧面板是地面系：镜子在侧向漂移，同一脉冲连接的是一系列移动的反射事件，因此走的是折线路径。两块面板都使用一致的 x、y 比例，所以右侧的对角线确实更长。">
-            The left panel is the clock rest frame: both mirrors stay fixed and the light pulse moves straight up and down. The right panel is the ground frame: both mirrors drift sideways while the same pulse connects the moving reflection events, so the pulse follows a polyline. The x and y scales match in the two drawn panels, so the right-hand diagonal really is longer.
+          <p data-copy-en="The left panel uses the clock's own coordinates: the mirrors are fixed and light travels vertically at c. The right panel uses ground coordinates: the mirrors move at v = βc, while that same light still has total speed c, split into horizontal component βc and vertical component c/γ. The animation aligns the same reflection events E0, E1, and E2; its matching dot heights are event synchronization, not a claim that the two frames share one clock or one coordinate-time speed."
+             data-copy-zh="左侧面板采用光钟自身坐标：镜子固定，光以 c 竖直传播。右侧采用地面坐标：镜子以 v = βc 横向运动，而同一束光的总速度仍为 c，只是分成横向分量 βc 与竖直分量 c/γ。动画把同一组反射事件 E0、E1、E2 对齐；两个光点高度相同表示事件同步，并不意味着两个参考系共用一只钟或同一种坐标时间速度。">
+            The left panel uses the clock's own coordinates: the mirrors are fixed and light travels vertically at c. The right panel uses ground coordinates: the mirrors move at v = βc, while that same light still has total speed c, split into horizontal component βc and vertical component c/γ. The animation aligns the same reflection events E0, E1, and E2; its matching dot heights are event synchronization, not a claim that the two frames share one clock or one coordinate-time speed.
           </p>
         </header>
         <div class="lab relativity-clock-lab">
@@ -194,6 +194,11 @@
                data-copy-zh="这个模型就是推导时间膨胀时使用的标准横向光钟。对于所选的 &beta; = v/c，几何关系是精确的；唯一的简化是用一段镜间距 L0 来代表真实时钟的周期机制。"
                data-html-en="This model is the standard transverse light clock used to derive time dilation. The geometry is exact for the chosen &beta; = v/c; the only simplification is that one mirror spacing L0 stands in for any actual clock mechanism."
                data-html-zh="这个模型就是推导时间膨胀时使用的标准横向光钟。对于所选的 &beta; = v/c，几何关系是精确的；唯一的简化是用一段镜间距 L0 来代表真实时钟的周期机制。">This model is the standard transverse light clock used to derive time dilation. The geometry is exact for the chosen &beta; = v/c; the only simplification is that one mirror spacing L0 stands in for any actual clock mechanism.</p>
+            <div class="frame-explainer" aria-label="How to compare the animation" data-aria-en="How to compare the animation" data-aria-zh="如何比较动画">
+              <strong data-copy-en="How to read the synchronized motion" data-copy-zh="如何理解同步运动">How to read the synchronized motion</strong>
+              <p data-copy-en="Screen progress runs from one shared event to the next. The left clock advances by Δτ while the ground coordinates advance by the longer Δt = γΔτ. In each frame, dividing that frame's path length by that frame's elapsed time still gives c."
+                data-copy-zh="屏幕进度从一个共同事件推进到下一个共同事件。左侧光钟经过 Δτ，而地面坐标经过更长的 Δt = γΔτ。在每个参考系内，用该参考系的光程除以该参考系的经过时间，结果仍然都是 c。">Screen progress runs from one shared event to the next. The left clock advances by Δτ while the ground coordinates advance by the longer Δt = γΔτ. In each frame, dividing that frame's path length by that frame's elapsed time still gives c.</p>
+            </div>
             <div class="control-group">
               <label for="primaryControl"><span data-copy-en="Clock speed" data-copy-zh="光钟速度">Clock speed</span><output id="primaryOutput" for="primaryControl">0.60 c</output></label>
               <input id="primaryControl" type="range" min="0" max="0.95" value="0.6" step="0.01">
@@ -227,6 +232,14 @@
               <article class="metric-card">
                 <strong data-copy-en="Ground path length" data-copy-zh="地面系光程">Ground path length</strong>
                 <span id="clockGroundPath">1.250 L0</span>
+              </article>
+              <article class="metric-card">
+                <strong data-copy-en="Ground horizontal component" data-copy-zh="地面系横向分量">Ground horizontal component</strong>
+                <span id="clockGroundHorizontalSpeed">0.600 c</span>
+              </article>
+              <article class="metric-card">
+                <strong data-copy-en="Ground vertical component" data-copy-zh="地面系竖直分量">Ground vertical component</strong>
+                <span id="clockGroundVerticalSpeed">0.800 c</span>
               </article>
             </div>
             <table class="event-table">
@@ -374,7 +387,7 @@
               <span class="rep-badge model" data-copy-en="Calculated geometry" data-copy-zh="计算几何">Calculated geometry</span>
             </div>
             <div class="control-group">
-              <label for="jetBetaControl"><span data-copy-en="Flow speed" data-copy-zh="流速">Flow speed</span><output id="jetBetaOutput" for="jetBetaControl">0.95 c</output></label>
+              <label for="jetBetaControl"><span data-copy-en="Flow speed β = v/c" data-copy-zh="流速 β = v/c">Flow speed β = v/c</span><output id="jetBetaOutput" for="jetBetaControl">β = 0.950</output></label>
               <input id="jetBetaControl" type="range" min="0.70" max="0.995" step="0.001" value="0.95">
             </div>
             <div class="control-group">
@@ -382,7 +395,10 @@
               <input id="jetAngleControl" type="range" min="1" max="60" step="1" value="10">
             </div>
             <div class="jet-stage">
-              <svg id="jetDiagram" viewBox="0 0 720 360" aria-label="Relativistic jet side view and projected sky motion" data-aria-en="Relativistic jet side view and projected sky motion" data-aria-zh="相对论喷流的侧视图与天球投影运动">
+              <svg id="jetDiagram" viewBox="0 0 720 360" role="img" aria-label="Relativistic jet side view and the distant observer's reconstructed sky motion" data-aria-en="Relativistic jet side view and the distant observer's reconstructed sky motion" data-aria-zh="相对论喷流侧视图与远方观察者重建的天球运动">
+                <title data-copy-en="How emission timing produces apparent superluminal motion" data-copy-zh="发射时序如何产生表观超光速运动">How emission timing produces apparent superluminal motion</title>
+                <desc data-copy-en="The upper panel is a teaching side view. A plasma knot moves at constant beta from fixed emission event A to fixed event B. Both photons travel at c to the white observer. The lower panel is what that observer reconstructs on the sky from photon arrival times."
+                      data-copy-zh="上方面板是教学侧视图。等离子体亮斑以恒定 β 从固定发射事件 A 运动到固定事件 B；两束光子都以 c 到达白色观察者。下方面板表示观察者根据光子到达时刻在天球上重建的运动。">The upper panel is a teaching side view. A plasma knot moves at constant beta from fixed emission event A to fixed event B. Both photons travel at c to the white observer. The lower panel is what that observer reconstructs on the sky from photon arrival times.</desc>
                 <defs>
                   <linearGradient id="jetGlow" x1="0" x2="1">
                     <stop offset="0%" stop-color="#ffd166" stop-opacity="0.12"></stop>
@@ -391,9 +407,14 @@
                 </defs>
                 <rect x="18" y="18" width="684" height="210" rx="18" class="jet-frame"></rect>
                 <rect x="18" y="246" width="684" height="96" rx="18" class="jet-frame"></rect>
+                <text x="34" y="44" class="jet-panel-title" data-copy-en="Teaching side view · not what the telescope photographs" data-copy-zh="教学侧视图 · 不是望远镜直接拍到的视角">Teaching side view · not what the telescope photographs</text>
+                <text x="34" y="272" class="jet-panel-title" data-copy-en="Observer's sky plane · positions reconstructed by arrival time" data-copy-zh="观察者的天球平面 · 按到达时刻重建位置">Observer's sky plane · positions reconstructed by arrival time</text>
                 <line id="jetSightLine" x1="140" y1="124" x2="636" y2="124" class="jet-sight"></line>
                 <circle cx="140" cy="124" r="11" class="jet-core"></circle>
                 <circle cx="636" cy="124" r="8" class="jet-observer"></circle>
+                <text x="116" y="151" class="jet-label subtle" data-copy-en="jet source" data-copy-zh="喷流源">jet source</text>
+                <text x="603" y="151" class="jet-label subtle" data-copy-en="observer" data-copy-zh="观察者">observer</text>
+                <text x="363" y="113" class="jet-label subtle" data-copy-en="line of sight" data-copy-zh="视线">line of sight</text>
                 <line id="jetApproachAxis" x1="140" y1="124" x2="520" y2="72" class="jet-axis"></line>
                 <line id="jetRecedeAxis" x1="140" y1="124" x2="32" y2="202" class="jet-axis receding"></line>
                 <line id="jetPhotonA" x1="0" y1="0" x2="636" y2="124" class="jet-photon"></line>
@@ -410,14 +431,23 @@
                 <circle id="skyCurrent" cx="0" cy="294" r="7" class="jet-blob"></circle>
               </svg>
             </div>
+            <p id="jetPhaseNote" class="jet-phase-note" aria-live="polite">The yellow plasma knot moves at one constant β from A to B. A and B stay fixed because they mark emission events, not obstacles.</p>
+            <ul class="visual-legend" aria-label="Jet diagram legend" data-aria-en="Jet diagram legend" data-aria-zh="喷流图例">
+              <li><span class="visual-key dot gold" aria-hidden="true"></span><span data-copy-en="Yellow moving dots: paired plasma features traveling at constant β. The bright approaching feature crosses A and B; the faint one shows the receding side." data-copy-zh="黄色移动点：一对以恒定 β 运动的等离子体亮斑。较亮的接近端经过 A、B；较暗的点表示远离端。">Yellow moving dots: paired plasma features traveling at constant β. The bright approaching feature crosses A and B; the faint one shows the receding side.</span></li>
+              <li><span class="visual-key dot green" aria-hidden="true"></span><span data-copy-en="Green A and gold B: two fixed emission events along the knot's path." data-copy-zh="绿色 A 与金色 B：亮斑路径上的两个固定发射事件。">Green A and gold B: two fixed emission events along the knot's path.</span></li>
+              <li><span class="visual-key dashed gold" aria-hidden="true"></span><span data-copy-en="Gold dashed lines: complete photon paths from A and B, each traveled at c; the lines are not physical rods that shrink." data-copy-zh="金色虚线：从 A 与 B 到观察者的完整光子路径，光都以 c 传播；它们不是会缩短的实体杆。">Gold dashed lines: complete photon paths from A and B, each traveled at c; the lines are not physical rods that shrink.</span></li>
+              <li><span class="visual-key dot paper" aria-hidden="true"></span><span data-copy-en="White dot: the distant observer and telescope receiving both photons." data-copy-zh="白点：接收两束光子的远方观察者与望远镜。">White dot: the distant observer and telescope receiving both photons.</span></li>
+              <li><span class="visual-key cyan" aria-hidden="true"></span><span data-copy-en="Cyan line: the jet axis and plasma path, not a light ray." data-copy-zh="青色线：喷流轴与等离子体路径，不是光线。">Cyan line: the jet axis and plasma path, not a light ray.</span></li>
+              <li><span class="visual-key gold" aria-hidden="true"></span><span data-copy-en="Lower yellow dot: the position inferred on the observer's sky as arrival time advances." data-copy-zh="下方黄点：随着到达时刻推进，观察者在天球上推断的位置。">Lower yellow dot: the position inferred on the observer's sky as arrival time advances.</span></li>
+            </ul>
             <div class="jet-panel-notes">
               <article>
                 <h4 data-copy-en="Upper panel" data-copy-zh="上方面板">Upper panel</h4>
-                <p data-copy-en="Two emission events A and B occur along the approaching jet. Their photons both move at c to the observer on the right." data-copy-zh="接近我们的喷流上发生两个发射事件 A 与 B；它们发出的光子都以 c 向右侧观察者传播。">Two emission events A and B occur along the approaching jet. Their photons both move at c to the observer on the right.</p>
+                <p data-copy-en="This is an explanatory side view. A and B are fixed spacetime events. The yellow knot crosses them at constant β, while the full dashed paths show how far each photon must travel at c." data-copy-zh="这是解释用侧视图。A 与 B 是固定的时空事件。黄色亮斑以恒定 β 经过它们；完整虚线路径表示两束光子分别要以 c 传播多远。">This is an explanatory side view. A and B are fixed spacetime events. The yellow knot crosses them at constant β, while the full dashed paths show how far each photon must travel at c.</p>
               </article>
               <article>
                 <h4 data-copy-en="Lower panel" data-copy-zh="下方面板">Lower panel</h4>
-                <p data-copy-en="The lower strip rewrites that motion in observer-time units. Because the arrival gap shrinks by the factor 1 - &beta;cos&theta;, the sky spacing grows with &beta;<sub>app</sub> instead of the raw projected speed &beta;sin&theta;." data-copy-zh="下方面板把同一段运动改写到“观察者时间”刻度上。由于到达间隔会被因子 1 - &beta;cos&theta; 压缩，天球上的间距会随 &beta;<sub>app</sub> 增大，而不是只跟原始投影速度 &beta;sin&theta; 成正比。">The lower strip rewrites that motion in observer-time units. Because the arrival gap shrinks by the factor 1 - &beta;cos&theta;, the sky spacing grows with &beta;<sub>app</sub> instead of the raw projected speed &beta;sin&theta;.</p>
+                <p data-copy-en="A real telescope sees only incoming light and angular positions, not the upper side view. It compares the received A and B images. Because their arrival gap is reduced by 1 - &beta;cos&theta;, dividing projected separation by arrival time gives &beta;<sub>app</sub>, which may exceed 1." data-copy-zh="真实望远镜只接收来光与角位置，看不到上方侧视图。它比较收到的 A、B 图像；由于到达间隔缩短为 1 - &beta;cos&theta; 倍，用投影间距除以到达时间会得到 &beta;<sub>app</sub>，它可能大于 1。">A real telescope sees only incoming light and angular positions, not the upper side view. It compares the received A and B images. Because their arrival gap is reduced by 1 - &beta;cos&theta;, dividing projected separation by arrival time gives &beta;<sub>app</sub>, which may exceed 1.</p>
               </article>
             </div>
           </section>

@@ -115,6 +115,9 @@
     return true;
   }
 
+  const referencePaneScript = document.createElement('script');
+  referencePaneScript.src = new URL('../assets/reference-pane.js', document.baseURI).href;
+  document.body.append(referencePaneScript);
   language = readPreference(
     'physics.lang',
     navigator.language.startsWith('zh') ? 'zh-CN' : 'en'

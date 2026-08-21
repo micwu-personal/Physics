@@ -681,6 +681,10 @@ test('physics astro helper fallback coverage', async ({ page }) => {
     await page.goto('/physics/astrophysics.html');
     await page.waitForLoadState('load');
     await page.waitForTimeout(300);
+    await setRange(page.locator('#pulsarTilt'), 0);
+    await setRange(page.locator('#pulsarView'), 0);
+    await setRange(page.locator('#pulsarTilt'), 36);
+    await setRange(page.locator('#pulsarView'), 36);
     const result = await page.evaluate(() => {
       const hooks = window.__astroTestHooks;
       const fallbackPalette = hooks.readPalette({ getPropertyValue: () => '   ' });
@@ -712,6 +716,20 @@ test('physics astro helper fallback coverage', async ({ page }) => {
       for (const button of compactButtons) button.setAttribute('aria-pressed', 'false');
       const noPressedMode = hooks.selectedCompactMode();
       compactButtons[0].setAttribute('aria-pressed', 'true');
+      for (const mass of [0.05, 1, 12, 50]) hooks.drawEvolutionForTest(mass, 1200);
+      hooks.drawEvolutionForTest(1, 500);
+      for (const spin of [0, 0.1, 0.3, 0.55, 0.9]) {
+        hooks.drawBlackHoleForTest(5.8, spin);
+        hooks.renderBlackHoleForTest(spin);
+      }
+      for (const [tilt, view, elapsed] of [
+        [0, 0, 0],
+        [0, 36, 0],
+        [36, 36, 0],
+        [36, 90, Math.PI]
+      ]) {
+        hooks.drawPulsarForTest(tilt, view, elapsed);
+      }
       document.querySelector('[data-lang="zh-CN"]').click();
       const chineseSnapshot = hooks.limitSnapshot(1.3);
       const chineseWhiteDwarf = hooks.compactDetailSnapshot('white-dwarf', 1.45);
@@ -722,6 +740,20 @@ test('physics astro helper fallback coverage', async ({ page }) => {
       hooks.drawCompactForTest('neutron-star', 2.4);
       hooks.drawCompactThresholdForTest('white-dwarf', 1.45);
       hooks.drawCompactThresholdForTest('neutron-star', 2.4);
+      for (const mass of [0.05, 1, 12, 50]) hooks.drawEvolutionForTest(mass, 1200);
+      hooks.drawEvolutionForTest(1, 500);
+      for (const spin of [0, 0.1, 0.3, 0.55, 0.9]) {
+        hooks.drawBlackHoleForTest(5.8, spin);
+        hooks.renderBlackHoleForTest(spin);
+      }
+      for (const [tilt, view, elapsed] of [
+        [0, 0, 0],
+        [0, 36, 0],
+        [36, 36, 0],
+        [36, 90, Math.PI]
+      ]) {
+        hooks.drawPulsarForTest(tilt, view, elapsed);
+      }
 
       return {
         chineseBridge: chineseSnapshot.bridge,
@@ -1065,7 +1097,9 @@ test('physics relativity deepening bootstrap branches coverage', async ({ page }
     await page.goto('/__health');
     await page.setContent('<!doctype html><body data-topic="quantum"></body>');
     await page.addScriptTag({ url: '/physics/relativity-deepening.js' });
-    await preparePage(page, '/physics/relativity.html', 'en');
+    await preparePage(page, '/physics/relativity.html?beta=0.91&theta=12', 'en');
+    await expect(page.locator('#jetBetaOutput')).toHaveText('β = 0.910');
+    await expect(page.locator('#jetAngleOutput')).toHaveText('12°');
   });
 });
 

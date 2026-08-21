@@ -10,7 +10,7 @@
   -->
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="An interactive bilingual guide to astrophysics: why disks form, how degeneracy and relativity set compact-object limits, how one Type Ia supernova channel unfolds, and why relativistic jets can look faster than light.">
+  <meta name="description" content="An interactive bilingual guide to astrophysics: why disks form, how stars leave compact remnants, why pulsars sweep beams across the sky, how black holes form, and why relativistic jets can look faster than light.">
   <title>Astrophysics — Physics Field Atlas</title>
   <link rel="stylesheet" href="../assets/fonts/fonts.css">
   <link rel="stylesheet" href="styles.css">
@@ -85,6 +85,7 @@
       <a href="#cases" data-copy-en="Four flat systems" data-copy-zh="四个扁平系统">Four flat systems</a>
       <a href="#evolution" data-copy-en="Stellar evolution" data-copy-zh="恒星演化">Stellar evolution</a>
       <a href="#limits" data-copy-en="Degeneracy & limits" data-copy-zh="简并与极限">Degeneracy & limits</a>
+      <a href="#pulsars" data-copy-en="Pulsar lighthouse" data-copy-zh="脉冲星灯塔">Pulsar lighthouse</a>
       <a href="#type-ia" data-copy-en="Type Ia channel" data-copy-zh="Ia 型通道">Type Ia channel</a>
       <a href="#black-holes" data-copy-en="Black holes" data-copy-zh="黑洞">Black holes</a>
       <a href="#jets" data-copy-en="Relativistic jets" data-copy-zh="相对论喷流">Relativistic jets</a>
@@ -217,22 +218,22 @@
 
       <section id="evolution" class="topic-section">
         <header>
-          <h2 data-copy-en="Give me a star's birth mass and I can tell you how it dies."
-              data-copy-zh="只要给出恒星的初始质量，就能说出它将如何终结。">Give me a star's birth mass and I can tell you how it dies.</h2>
-          <p data-copy-en="Mass sets the central pressure, the central pressure sets the temperature, and the temperature decides which nuclear reactions can run. Everything else, lifetime, colour, size, final remnant, and the elements returned to space, follows from that chain."
-             data-copy-zh="质量决定中心压强，中心压强决定温度，而温度决定哪些核反应能够进行。其余的一切，包括寿命、颜色、尺寸、最终遗迹以及归还给星际空间的元素，都由这条链条决定。">
-            Mass sets the central pressure, the central pressure sets the temperature, and the temperature decides which nuclear reactions can run. Everything else, lifetime, colour, size, final remnant, and the elements returned to space, follows from that chain.
+          <h2 data-copy-en="A star's birth mass gives the first prediction of how it may die."
+              data-copy-zh="恒星的初始质量，给出它可能如何终结的第一项预测。">A star's birth mass gives the first prediction of how it may die.</h2>
+          <p data-copy-en="Mass sets the central pressure and temperature, which determine which nuclear reactions can run. The instrument pairs the birth star with its likely final object, but the boundaries are not destiny: metallicity, rotation, mass loss, and binary interaction can redirect the outcome."
+             data-copy-zh="质量决定中心压强与温度，进而决定哪些核反应能够进行。下方仪器把初生恒星与其可能的最终天体并列显示，但分界并非命定：金属丰度、自转、质量损失与双星相互作用都可能改写结局。">
+            Mass sets the central pressure and temperature, which determine which nuclear reactions can run. The instrument pairs the birth star with its likely final object, but the boundaries are not destiny: metallicity, rotation, mass loss, and binary interaction can redirect the outcome.
           </p>
         </header>
 
         <div class="lab">
           <div class="lab-stage">
-            <canvas id="evolutionCanvas" aria-label="Star size and class as a function of initial mass" data-aria-en="Star size and class as a function of initial mass" data-aria-zh="恒星尺寸与类型随初始质量变化的示意">A star disc whose size and colour change with the selected initial mass, above a logarithmic mass axis.</canvas>
+            <canvas id="evolutionCanvas" aria-label="Birth star and likely final remnant shown side by side as initial mass changes" data-aria-en="Birth star and likely final remnant shown side by side as initial mass changes" data-aria-zh="初始质量改变时并列显示初生恒星与可能的最终遗迹">A birth star and its likely final remnant are shown side by side, with separate size encodings and a logarithmic birth-mass axis.</canvas>
           </div>
           <div class="lab-controls">
             <h3 data-copy-en="Initial mass" data-copy-zh="初始质量">Initial mass</h3>
-            <p data-copy-en="Drawn radius follows an approximate mass-radius scaling for main-sequence stars. Colour indicates surface temperature, from cool brown through solar yellow to hot blue."
-               data-copy-zh="所绘半径遵循主序星的近似质量-半径标度；颜色表示表面温度，从低温的褐色，经太阳的黄色，到高温的蓝色。">Drawn radius follows an approximate mass-radius scaling for main-sequence stars. Colour indicates surface temperature, from cool brown through solar yellow to hot blue.</p>
+            <p data-copy-en="The left radius follows an approximate main-sequence scaling. The right object names the likely endpoint and gives a characteristic physical diameter. Because remnants can be millions of times smaller than their progenitors, the two discs use separate visual scales and say so explicitly."
+               data-copy-zh="左侧半径遵循近似主序星标度。右侧天体给出可能终点及其特征物理直径。由于遗迹可能比前身星小数百万倍，两侧圆盘采用不同视觉尺度，并明确标注这一点。">The left radius follows an approximate main-sequence scaling. The right object names the likely endpoint and gives a characteristic physical diameter. Because remnants can be millions of times smaller than their progenitors, the two discs use separate visual scales and say so explicitly.</p>
             <div class="control-group">
               <label for="starMass"><span data-copy-en="Birth mass" data-copy-zh="初始质量">Birth mass</span><output id="starMassOut" for="starMass">1.00 M☉</output></label>
               <input id="starMass" type="range" min="0.02" max="120" value="1" step="0.01">
@@ -445,6 +446,54 @@
         </div>
       </section>
 
+      <section id="pulsars" class="topic-section">
+        <header>
+          <h2 data-copy-en="A pulsar flashes only when a tilted magnetic beam sweeps across our line of sight."
+              data-copy-zh="只有倾斜的磁束扫过我们的视线时，脉冲星才会闪现。">A pulsar flashes only when a tilted magnetic beam sweeps across our line of sight.</h2>
+          <p data-copy-en="A neutron star's spin axis and magnetic axis are independent directions: no symmetry forces exact alignment, and many observed pulse profiles require a tilt. Turbulent collapse, field amplification, asymmetric birth dynamics, and later torques are plausible contributors, but the detailed origin and evolution of the angle remain active research questions. What is firmly measured is the lighthouse geometry: rotation carries magnetic-pole emission cones around the spin axis, and Earth records a pulse only when one cone crosses our line of sight."
+             data-copy-zh="中子星的自转轴与磁轴是两个独立方向：没有对称性强迫它们严格重合，而且许多观测到的脉冲轮廓都需要一定倾角。湍动塌缩、磁场放大、不对称诞生动力学与后续力矩都可能参与，但倾角究竟如何形成并演化，仍是活跃研究问题。已经被牢固测量的是“灯塔几何”：自转带着磁极发射锥绕自转轴转动，只有当某个锥扫过地球视线时，我们才记录到一次脉冲。">A neutron star's spin axis and magnetic axis are independent directions: no symmetry forces exact alignment, and many observed pulse profiles require a tilt. Turbulent collapse, field amplification, asymmetric birth dynamics, and later torques are plausible contributors, but the detailed origin and evolution of the angle remain active research questions. What is firmly measured is the lighthouse geometry: rotation carries magnetic-pole emission cones around the spin axis, and Earth records a pulse only when one cone crosses our line of sight.</p>
+        </header>
+        <div class="lab">
+          <div class="lab-stage astro-stage">
+            <canvas id="pulsarCanvas" aria-label="Rotating neutron star with misaligned spin and magnetic axes, sweeping emission beams, and an observer line of sight" data-aria-en="Rotating neutron star with misaligned spin and magnetic axes, sweeping emission beams, and an observer line of sight" data-aria-zh="具有不重合自转轴与磁轴、扫掠发射束和观察者视线的旋转中子星">A neutron star rotates around a fixed spin axis. A tilted magnetic axis carries two emission cones around it; a pulse appears when a cone crosses the observer's line of sight.</canvas>
+            <div class="lab-overlay">
+              <span id="pulsarReadout" class="lab-readout">Beam crossing: pulse received</span>
+              <span id="pulsarSeparation" class="lab-readout secondary">Beam–sightline separation 4.0° · beam half-width 12°</span>
+            </div>
+          </div>
+          <div class="lab-controls">
+            <h3 data-copy-en="Build the lighthouse geometry" data-copy-zh="构建灯塔几何">Build the lighthouse geometry</h3>
+            <p data-copy-en="Change the magnetic tilt α and your viewing angle ζ. The blue spin axis stays fixed; the gold magnetic axis rotates around it. A visible pulse is a selection effect: many neutron stars may beam elsewhere and never appear as pulsars from Earth."
+               data-copy-zh="改变磁倾角 α 与观察视角 ζ。蓝色自转轴保持固定，金色磁轴绕它旋转。能否看到脉冲是一种选择效应：许多中子星的辐射束可能指向别处，因此从地球看并不表现为脉冲星。">Change the magnetic tilt α and your viewing angle ζ. The blue spin axis stays fixed; the gold magnetic axis rotates around it. A visible pulse is a selection effect: many neutron stars may beam elsewhere and never appear as pulsars from Earth.</p>
+            <div class="control-group">
+              <label for="pulsarTilt"><span data-copy-en="Magnetic tilt α" data-copy-zh="磁倾角 α">Magnetic tilt α</span><output id="pulsarTiltOut" for="pulsarTilt">32°</output></label>
+              <input id="pulsarTilt" type="range" min="0" max="80" value="32" step="1">
+            </div>
+            <div class="control-group">
+              <label for="pulsarView"><span data-copy-en="Observer angle ζ" data-copy-zh="观察者角度 ζ">Observer angle ζ</span><output id="pulsarViewOut" for="pulsarView">36°</output></label>
+              <input id="pulsarView" type="range" min="0" max="90" value="36" step="1">
+            </div>
+            <dl class="stage-detail">
+              <dt data-copy-en="What makes the pulse" data-copy-zh="脉冲如何产生">What makes the pulse</dt>
+              <dd id="pulsarDetection">The near magnetic pole is sweeping through Earth's line of sight.</dd>
+              <dt data-copy-en="What the drawing proves" data-copy-zh="图中能够说明什么">What the drawing proves</dt>
+              <dd id="pulsarGeometry">A tilt plus rotation produces a repeating sweep; it does not require the whole star to point at Earth.</dd>
+              <dt data-copy-en="What remains uncertain" data-copy-zh="仍不确定的部分">What remains uncertain</dt>
+              <dd id="pulsarOrigin">The exact birth tilt depends on collapse, field generation, and later torques; no single universal mechanism is established.</dd>
+            </dl>
+            <ul class="visual-legend" aria-label="Pulsar diagram legend" data-aria-en="Pulsar diagram legend" data-aria-zh="脉冲星图例">
+              <li><span class="visual-key cyan" aria-hidden="true"></span><span data-copy-en="Cyan: fixed spin axis." data-copy-zh="青色：固定的自转轴。">Cyan: fixed spin axis.</span></li>
+              <li><span class="visual-key gold" aria-hidden="true"></span><span data-copy-en="Gold: magnetic axis and emission cones." data-copy-zh="金色：磁轴与发射锥。">Gold: magnetic axis and emission cones.</span></li>
+              <li><span class="visual-key dashed paper" aria-hidden="true"></span><span data-copy-en="White dashed line: Earth's line of sight." data-copy-zh="白色虚线：地球视线。">White dashed line: Earth's line of sight.</span></li>
+              <li><span class="visual-key pink" aria-hidden="true"></span><span data-copy-en="Pink trace: telescope pulse when a beam crosses the sightline." data-copy-zh="粉色轨迹：辐射束扫过视线时的望远镜脉冲。">Pink trace: telescope pulse when a beam crosses the sightline.</span></li>
+            </ul>
+            <p class="lab-note"><span class="rep-badge schematic" data-copy-en="3D geometry projected into 2D" data-copy-zh="三维几何的二维投影">3D geometry projected into 2D</span><br><span data-copy-en="Beam width and pulse shape are schematic. Real radio emission altitude, magnetic-field structure, relativistic aberration, and plasma physics make pulse profiles more complex. The model demonstrates viewing geometry, not a settled emission mechanism."
+               data-copy-zh="辐射束宽度与脉冲形状均为示意。真实射电发射高度、磁场结构、相对论像差与等离子体物理会让脉冲轮廓复杂得多。本模型说明的是观察几何，而不是已经定论的发射机制。">Beam width and pulse shape are schematic. Real radio emission altitude, magnetic-field structure, relativistic aberration, and plasma physics make pulse profiles more complex. The model demonstrates viewing geometry, not a settled emission mechanism.</span></p>
+            <p class="claim-links"><span class="claim-label" data-copy-en="Claim links" data-copy-zh="对应来源">Claim links</span><a class="claim-chip" href="https://science.nasa.gov/mission/hubble/science/science-behind-the-discoveries/hubble-pulsars/">NASA/Hubble pulsars</a><a class="claim-chip" href="https://imagine.gsfc.nasa.gov/science/objects/neutron_stars1.html">NASA/GSFC neutron stars</a></p>
+          </div>
+        </div>
+      </section>
+
       <section id="type-ia" class="topic-section">
         <header>
           <h2 data-copy-en="One important Type Ia channel: single-degenerate, near-Chandrasekhar, and not universal."
@@ -550,6 +599,13 @@
               <label for="blackHoleSpin"><span data-copy-en="Retained angular momentum" data-copy-zh="保留角动量">Retained angular momentum</span><output id="blackHoleSpinOut" for="blackHoleSpin">0.55</output></label>
               <input id="blackHoleSpin" type="range" min="0" max="1" value="0.55" step="0.01">
             </div>
+            <p id="blackHoleSpinEffect" class="spin-effect" aria-live="polite">Moderate retained angular momentum flattens the infall and creates a circularization barrier; a clear disk appears only late in this branch.</p>
+            <ul class="visual-legend" aria-label="Collapse diagram legend" data-aria-en="Collapse diagram legend" data-aria-zh="塌缩图例">
+              <li><span class="visual-key cyan" aria-hidden="true"></span><span data-copy-en="Cyan core: proto-neutron star before horizon formation." data-copy-zh="青色核心：视界形成前的原中子星。">Cyan core: proto-neutron star before horizon formation.</span></li>
+              <li><span class="visual-key gold" aria-hidden="true"></span><span data-copy-en="Gold orbit marks: retained rotation and the growing circularization tendency." data-copy-zh="金色轨道标记：保留的自转与逐渐增强的圆化趋势。">Gold orbit marks: retained rotation and the growing circularization tendency.</span></li>
+              <li><span class="visual-key dashed pink" aria-hidden="true"></span><span data-copy-en="Pink dashed ring: stalled shock, not a material shell." data-copy-zh="粉色虚线环：停滞激波，不是物质外壳。">Pink dashed ring: stalled shock, not a material shell.</span></li>
+              <li><span class="visual-key paper" aria-hidden="true"></span><span data-copy-en="White rim around black center: event horizon boundary in the teaching cutaway." data-copy-zh="黑色中心外的白色边缘：教学剖面中的事件视界边界。">White rim around black center: event horizon boundary in the teaching cutaway.</span></li>
+            </ul>
             <p class="lab-note"><span class="rep-badge model" data-copy-en="Simulation-constrained teaching model" data-copy-zh="受模拟约束的教学模型">Simulation-constrained teaching model</span><br><span data-copy-en="Times are compressed and progenitor-dependent. This is not a hydrodynamic or neutrino-transport calculation. Not every core collapse makes a black hole; disk and jet formation require sufficient angular momentum."
                data-copy-zh="时间经过压缩且依赖前身星。本图不是流体动力学或中微子输运计算。并非每次核塌缩都形成黑洞；吸积盘与喷流需要足够角动量。">Times are compressed and progenitor-dependent. This is not a hydrodynamic or neutrino-transport calculation. Not every core collapse makes a black hole; disk and jet formation require sufficient angular momentum.</span></p>
           </div>
@@ -660,7 +716,7 @@
           <p class="claim-links">
             <span class="claim-label" data-copy-en="Claim links" data-copy-zh="对应来源">Claim links</span>
             <a class="claim-chip" href="https://doi.org/10.1038/211468a0">Rees 1966</a>
-            <a class="claim-chip" href="./relativity.html#clock-lab">Relativity lab</a>
+            <a class="claim-chip" href="./relativity.html#jets">Relativity jet geometry</a>
           </p>
         </header>
 
@@ -677,7 +733,7 @@
             <p data-copy-en="Increase the speed and tip the jet closer to your line of sight. The knot still moves below light speed, but the later light has less distance left to travel, so the apparent sideways speed can exceed c. This is a relativity-and-light-travel-time effect, not real faster-than-light motion."
                data-copy-zh="提高速度，并把喷流转得更接近你的视线方向。物质本身仍低于光速，但后发出的光剩下的路程更短，因此表观横向速度可以超过 c。这是相对论加上光行时的效果，而不是真正的超光速运动。">Increase the speed and tip the jet closer to your line of sight. The knot still moves below light speed, but the later light has less distance left to travel, so the apparent sideways speed can exceed c. This is a relativity-and-light-travel-time effect, not real faster-than-light motion.</p>
             <div class="control-group">
-              <label for="jetSpeed"><span data-copy-en="Jet speed" data-copy-zh="喷流速度">Jet speed</span><output id="jetSpeedOut" for="jetSpeed">0.90 c</output></label>
+              <label for="jetSpeed"><span data-copy-en="Jet speed β = v/c" data-copy-zh="喷流速度 β = v/c">Jet speed β = v/c</span><output id="jetSpeedOut" for="jetSpeed">β = 0.900</output></label>
               <input id="jetSpeed" type="range" min="0.2" max="0.995" value="0.9" step="0.001">
             </div>
             <div class="control-group">
@@ -692,6 +748,18 @@
               <dt data-copy-en="Astrophysical context" data-copy-zh="天体物理背景">Astrophysical context</dt>
               <dd id="jetContext">The same beaming that creates superluminal appearances also makes blazars and some radio jets strongly one-sided.</dd>
             </dl>
+            <ul class="visual-legend" aria-label="Astrophysical jet diagram legend" data-aria-en="Astrophysical jet diagram legend" data-aria-zh="天体喷流图例">
+              <li><span class="visual-key cyan" aria-hidden="true"></span><span data-copy-en="Cyan jet: approaching, Doppler-brightened side." data-copy-zh="青色喷流：接近并受多普勒增亮的一侧。">Cyan jet: approaching, Doppler-brightened side.</span></li>
+              <li><span class="visual-key pink" aria-hidden="true"></span><span data-copy-en="Pink jet: receding, Doppler-dimmed side." data-copy-zh="粉色喷流：远离并受多普勒变暗的一侧。">Pink jet: receding, Doppler-dimmed side.</span></li>
+              <li><span class="visual-key dashed gold" aria-hidden="true"></span><span data-copy-en="Gold dashed paths: light emitted at two knot positions." data-copy-zh="金色虚线路径：亮斑在两个位置发出的光。">Gold dashed paths: light emitted at two knot positions.</span></li>
+              <li><span class="visual-key dot paper" aria-hidden="true"></span><span data-copy-en="White observer: receives the later photon after a shorter trip." data-copy-zh="白色观察者：后发光子经过更短路程后到达。">White observer: receives the later photon after a shorter trip.</span></li>
+            </ul>
+            <div class="science-bridge-link">
+              <strong data-copy-en="One model, two lessons" data-copy-zh="同一模型，两层含义">One model, two lessons</strong>
+              <p data-copy-en="This page supplies the astrophysical context: beaming, one-sided jets, and central engines. The relativity page opens the same β and θ settings as fixed emission events, photon paths, and the observer's sky reconstruction."
+                 data-copy-zh="本页提供天体物理背景：束射、单侧喷流与中心引擎。相对论页面会用相同的 β 与 θ 设置，把它拆解为固定发射事件、光子路径和观察者的天球重建。">This page supplies the astrophysical context: beaming, one-sided jets, and central engines. The relativity page opens the same β and θ settings as fixed emission events, photon paths, and the observer's sky reconstruction.</p>
+              <a id="jetRelativityLink" href="./relativity.html?beta=0.900&theta=18.0#jets" data-copy-en="Open these settings in the relativity explorer →" data-copy-zh="在相对论探索器中打开当前设置 →">Open these settings in the relativity explorer →</a>
+            </div>
             <p class="lab-note"><span class="rep-badge model" data-copy-en="Light-travel-time teaching model" data-copy-zh="光行时教学模型">Light-travel-time teaching model</span><br><span data-copy-en="The knot, brightness contrast, and emission times are schematic. The relativistic statement is exact: the apparent speed follows β_app = β sinθ / (1 − β cosθ)."
               data-copy-zh="结点、亮度对比与发光时刻都是示意。相对论结论本身是精确的：表观速度满足 β_app = β sinθ / (1 − β cosθ)。">The knot, brightness contrast, and emission times are schematic. The relativistic statement is exact: the apparent speed follows β_app = β sinθ / (1 − β cosθ).</span></p>
           </div>
@@ -794,7 +862,7 @@
           <a href="./electrodynamics.html#redshift"><strong data-copy-en="Reading starlight" data-copy-zh="解读星光">Reading starlight</strong><span data-copy-en="Doppler, gravitational, and cosmological redshift each change the light differently, and only one of them stretches the apparent pace of distant events." data-copy-zh="多普勒红移、引力红移与宇宙学红移对光的改变各不相同，其中只有一种会拉长远方事件的表观节奏。">Doppler, gravitational, and cosmological redshift each change the light differently, and only one of them stretches the apparent pace of distant events.</span></a>
           <a href="../periodic-table/index.html?overlay=origin&amp;element=26"><strong data-copy-en="Where elements come from" data-copy-zh="元素从何而来">Where elements come from</strong><span data-copy-en="Trace each element back to the stellar or explosive process that made it, including the iron peak this page ends on." data-copy-zh="把每种元素追溯到产生它的恒星或爆发过程，包括本页最后停在的铁峰。">Trace each element back to the stellar or explosive process that made it, including the iron peak this page ends on.</span></a>
           <a href="./relativity.html"><strong data-copy-en="Curved spacetime" data-copy-zh="弯曲时空">Curved spacetime</strong><span data-copy-en="Neutron stars and black holes are where Newtonian gravity fails outright and the geometric description becomes mandatory." data-copy-zh="中子星与黑洞正是牛顿引力彻底失效、必须改用几何描述的地方。">Neutron stars and black holes are where Newtonian gravity fails outright and the geometric description becomes mandatory.</span></a>
-          <a href="./relativity.html#clock-lab"><strong data-copy-en="Why jets only look superluminal" data-copy-zh="为什么喷流只是“看似”超光速">Why jets only look superluminal</strong><span data-copy-en="The same light-travel-time geometry that sets moving-clock intuition also explains why a jet knot can appear to outrun light without doing so." data-copy-zh="建立运动时钟直觉的同一类光行时几何，也解释了为什么喷流结点能在表观上超光速，却并未真的跑赢光。">The same light-travel-time geometry that sets moving-clock intuition also explains why a jet knot can appear to outrun light without doing so.</span></a>
+          <a href="./relativity.html#jets"><strong data-copy-en="Why jets only look superluminal" data-copy-zh="为什么喷流只是“看似”超光速">Why jets only look superluminal</strong><span data-copy-en="Open the matching event-and-arrival-time explorer to separate the knot's constant physical speed from the faster apparent sky motion." data-copy-zh="打开对应的事件—到达时间探索器，把亮斑恒定的真实速度与更快的天球表观运动明确区分开。">Open the matching event-and-arrival-time explorer to separate the knot's constant physical speed from the faster apparent sky motion.</span></a>
         </div>
       </section>
       <section id="references" class="topic-section">

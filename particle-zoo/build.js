@@ -20,6 +20,8 @@ const refsJs = fs.readFileSync(path.join(ROOT, 'references.js'), 'utf8');
 const i18nJs = fs.readFileSync(path.join(ROOT, 'i18n.js'), 'utf8');
 const appJs  = fs.readFileSync(path.join(ROOT, 'app.js'), 'utf8');
 const brandCss = fs.readFileSync(path.join(ROOT, '..', 'assets', 'brand', 'brand.css'), 'utf8');
+const referencePaneCss = fs.readFileSync(path.join(ROOT, '..', 'assets', 'reference-pane.css'), 'utf8');
+const referencePaneJs = fs.readFileSync(path.join(ROOT, '..', 'assets', 'reference-pane.js'), 'utf8');
 const brandSvg = fs.readFileSync(path.join(ROOT, '..', 'assets', 'brand', 'favicon.svg')).toString('base64');
 
 function inlineMedia(source) {
@@ -54,6 +56,10 @@ out = out.replace(
   `<style>\n${brandCss}\n</style>`
 );
 out = out.replace(
+  /<link\s+rel="stylesheet"\s+href="\.\.\/assets\/reference-pane\.css"\s*\/?>/,
+  `<style>\n${referencePaneCss}\n</style>`
+);
+out = out.replace(
   /<link\s+rel="icon"\s+href="\.\.\/assets\/brand\/favicon\.svg"\s+type="image\/svg\+xml"\s*\/?>/,
   `<link rel="icon" href="data:image/svg+xml;base64,${brandSvg}" type="image/svg+xml">`
 );
@@ -80,6 +86,10 @@ out = out.replace(
 out = out.replace(
   /<script\s+src="app\.js"><\/script>/,
   `<script>\n${appJs}\n</script>`
+);
+out = out.replace(
+  /<script\s+src="\.\.\/assets\/reference-pane\.js"><\/script>/,
+  `<script>\n${referencePaneJs}\n</script>`
 );
 out = inlineMedia(out);
 out = out.replace(/\.\.\/assets\/brand\/favicon\.svg/g, `data:image/svg+xml;base64,${brandSvg}`);

@@ -183,7 +183,7 @@ export async function exercisePhysicsAstro(page, options = {}) {
   await setRange(page.locator('#jetAngle'), 3);
   await expect(page.locator('#jetContext')).toContainText(await inChinese() ? '表观超光速' : 'apparent-superluminal');
 
-  await expect(page.locator('#stageDetail dt')).toHaveCount(3);
+  await expect(page.locator('#stageDetail dt')).toHaveCount(5);
   await page.locator('[data-lang="zh-CN"]').click();
   await expect(page.locator('html')).toHaveAttribute('lang', 'zh-CN');
   await page.locator('[data-lang="en"]').click();

@@ -25,12 +25,15 @@ async function stabilizeAstroVisuals(page) {
 async function setAstroSnapshotState(page) {
   await page.waitForFunction(() => document.documentElement.dataset.motion === 'paused');
   await setRange(page.locator('#collapseProgress'), 0.5);
+  await setRange(page.locator('#starMass'), 1);
   await setRange(page.locator('#limitMass'), 1);
   await page.locator('[data-compact-mode="white-dwarf"]').click();
   await setRange(page.locator('#compactMass'), 1);
   await setRange(page.locator('#typeIaStage'), 0);
   await setRange(page.locator('#jetSpeed'), 0.9);
   await setRange(page.locator('#jetAngle'), 18);
+  await setRange(page.locator('#pulsarTilt'), 32);
+  await setRange(page.locator('#pulsarView'), 36);
   await page.evaluate(async () => {
     await document.fonts.ready;
     await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
@@ -56,6 +59,24 @@ for (const language of locales) {
     const limits = page.locator('#limits');
     await limits.scrollIntoViewIfNeeded();
     await captureRendering(limits, `astrophysics-limits-${language}.png`);
+  });
+
+  test(`Astrophysics stellar-remnant snapshot ${language}`, async ({ page }) => {
+    await preparePage(page, astroPath, language, { motionPreference: 'pause', reducedMotion: 'reduce' });
+    await stabilizeAstroVisuals(page);
+    await setAstroSnapshotState(page);
+    const evolution = page.locator('#evolution .lab');
+    await evolution.scrollIntoViewIfNeeded();
+    await captureRendering(evolution, `astrophysics-stellar-remnant-${language}.png`);
+  });
+
+  test(`Astrophysics pulsar snapshot ${language}`, async ({ page }) => {
+    await preparePage(page, astroPath, language, { motionPreference: 'pause', reducedMotion: 'reduce' });
+    await stabilizeAstroVisuals(page);
+    await setAstroSnapshotState(page);
+    const pulsar = page.locator('#pulsars .lab');
+    await pulsar.scrollIntoViewIfNeeded();
+    await captureRendering(pulsar, `astrophysics-pulsar-${language}.png`);
   });
 
   test(`Astrophysics Type Ia snapshot ${language}`, async ({ page }) => {

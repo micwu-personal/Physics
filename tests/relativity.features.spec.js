@@ -33,6 +33,9 @@ test('relativity page exposes corrected clock geometry, particle explorer, and j
   await expect(page.locator('#clockGammaValue')).toHaveText('1.667');
   await expect(page.locator('#clockGroundEventE1')).toContainText('x = 1.333 L0');
   await expect(page.locator('#clockGroundHalfTick')).toHaveText('1.667 L0/c');
+  await expect(page.locator('#clockGroundHorizontalSpeed')).toHaveText('0.800 c');
+  await expect(page.locator('#clockGroundVerticalSpeed')).toHaveText('0.600 c');
+  await expect(page.locator('.frame-explainer')).toContainText('event');
 
   await page.locator('#labToggle').click();
   await expect(page.locator('#labReadout')).toContainText('β = 0.80');
@@ -52,7 +55,10 @@ test('relativity page exposes corrected clock geometry, particle explorer, and j
   const apparent = await page.locator('#jetApparent').textContent();
   expect(Number.parseFloat(apparent)).toBeGreaterThan(1);
   await expect(page.locator('#jetCausalityNote')).toContainText('closer to the observer');
-  await expect(page.locator('#jets')).toContainText('observer-time units');
+  await expect(page.locator('#jets')).toContainText("observer's sky");
+  await expect(page.locator('label[for="jetBetaControl"]')).toContainText('β = v/c');
+  await expect(page.locator('#jets .visual-legend')).toContainText('fixed emission events');
+  await expect(page.locator('#jetDiagram')).toContainText("Observer's sky plane");
 
   for (const [beta, angle] of [[0.7, 60], [0.7, 1], [0.995, 60], [0.995, 1]]) {
     await setRange(page.locator('#jetBetaControl'), beta);
@@ -89,6 +95,50 @@ test('relativity page exposes corrected clock geometry, particle explorer, and j
   await expect(page.locator('.relativity-hero-panel a[href="https://www.einstein-online.info/en/Light_deflection/"]')).toBeVisible();
   await expect(page.locator('#jets a[href="https://arxiv.org/abs/astro-ph/9506063"]')).toBeVisible();
   await expect(page.locator('#evidence a[href="https://doi.org/10.12942/lrr-2014-4"]')).toBeVisible();
+
+  await assertNoErrors(errors);
+});
+
+test('external physics references open in the in-page side viewer', async ({ page }) => {
+  const errors = watchPage(page);
+  await preparePage(page, '/physics/relativity.html', 'en');
+  const source = page.locator('.relativity-hero-panel a[href*="einstein-online.info"]').first();
+  const originalUrl = page.url();
+
+  await source.click();
+
+  await expect(page).toHaveURL(originalUrl);
+  await expect(page.locator('.reference-pane')).toHaveAttribute('aria-hidden', 'false');
+  await expect(page.locator('#referencePaneFrame')).toHaveAttribute('src', /einstein-online\.info/);
+  await expect(page.locator('#referencePaneExternal')).toHaveAttribute('href', /einstein-online\.info/);
+
+  await page.keyboard.press('Escape');
+  await expect(page.locator('.reference-pane')).toHaveAttribute('aria-hidden', 'true');
+  await assertNoErrors(errors);
+});
+
+test('the reference side viewer is shared by every main learning app', async ({ page }) => {
+  const errors = watchPage(page);
+  await preparePage(page, '/', 'en');
+
+  for (const path of [
+    '/',
+    '/big-bang/',
+    '/big-bang/mobile/index.html',
+    '/periodic-table/',
+    '/periodic-table/mobile/index.html',
+    '/particle-zoo/',
+    '/particle-zoo/mobile/index.html'
+  ]) {
+    await page.goto(path, { waitUntil: 'load' });
+    const source = page.locator('a[href^="https://"]').first();
+    await expect(source).toBeAttached();
+    await source.click();
+    await expect(page.locator('.reference-pane')).toHaveAttribute('aria-hidden', 'false');
+    await expect(page.locator('#referencePaneFrame')).toHaveAttribute('src', /^https:\/\//);
+    await page.keyboard.press('Escape');
+    await expect(page.locator('.reference-pane')).toHaveAttribute('aria-hidden', 'true');
+  }
 
   await assertNoErrors(errors);
 });

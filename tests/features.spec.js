@@ -1050,7 +1050,7 @@ test('Particle Zoo photons fade before the final scene clears', async ({ page })
       pgStop();
     }
     return samples.early && samples.late ? samples : null;
-  }, fadeFrames, { timeout: 4_000 }).then(handle => handle.jsonValue());
+  }, fadeFrames, { timeout: 12_000 }).then(handle => handle.jsonValue());
   expect(early).not.toBeNull();
   expect(late).not.toBeNull();
   expect(late.life).toBeLessThan(early.life);

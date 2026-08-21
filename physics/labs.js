@@ -43,6 +43,8 @@
     groundHalfTick: document.getElementById('clockGroundHalfTick'),
     shipPath: document.getElementById('clockShipPath'),
     groundPath: document.getElementById('clockGroundPath'),
+    groundHorizontalSpeed: document.getElementById('clockGroundHorizontalSpeed'),
+    groundVerticalSpeed: document.getElementById('clockGroundVerticalSpeed'),
     shipEventE0: document.getElementById('clockShipEventE0'),
     shipEventE1: document.getElementById('clockShipEventE1'),
     shipEventE2: document.getElementById('clockShipEventE2'),
@@ -453,6 +455,8 @@
     relativityDom.groundHalfTick.textContent = `${gamma.toFixed(3)} L0/c`;
     relativityDom.shipPath.textContent = '1.000 L0';
     relativityDom.groundPath.textContent = `${gamma.toFixed(3)} L0`;
+    relativityDom.groundHorizontalSpeed.textContent = `${beta.toFixed(3)} c`;
+    relativityDom.groundVerticalSpeed.textContent = `${(1 / gamma).toFixed(3)} c`;
     relativityDom.shipEventE0.textContent = "x' = 0, y' = 0, t' = 0";
     relativityDom.shipEventE1.textContent = "x' = 0, y' = 1.000 L0, t' = 1.000 L0/c";
     relativityDom.shipEventE2.textContent = "x' = 0, y' = 0, t' = 2.000 L0/c";
@@ -605,6 +609,34 @@
       ctx.font = '600 11px "JetBrains Mono", monospace';
       ctx.fillText(`E${index}`, eventPoint.x + 8, eventPoint.y - 10);
     });
+
+    const vectorOriginX = rightPanelX + 24;
+    const vectorOriginY = panelBottom + 54;
+    const vectorScale = Math.min(62, panelWidth * 0.22);
+    const vectorWidth = beta * vectorScale;
+    const vectorHeight = vectorScale / gamma;
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = '#ffd166';
+    ctx.beginPath();
+    ctx.moveTo(vectorOriginX, vectorOriginY);
+    ctx.lineTo(vectorOriginX + vectorWidth, vectorOriginY);
+    ctx.lineTo(vectorOriginX + vectorWidth, vectorOriginY - vectorHeight);
+    ctx.closePath();
+    ctx.stroke();
+    ctx.fillStyle = '#ffd166';
+    ctx.font = '600 10px "JetBrains Mono", monospace';
+    ctx.fillText(`uₓ = βc = ${beta.toFixed(2)}c`, vectorOriginX, vectorOriginY + 16);
+    ctx.fillText(`uᵧ = c/γ = ${(1 / gamma).toFixed(2)}c`, vectorOriginX + vectorWidth + 6, vectorOriginY - vectorHeight * 0.45);
+    ctx.fillStyle = '#eef2ff';
+    ctx.fillText('|u| = c', vectorOriginX + vectorWidth * 0.12, vectorOriginY - vectorHeight - 7);
+
+    ctx.fillStyle = 'rgba(232,236,255,.7)';
+    ctx.font = '600 10px "JetBrains Mono", monospace';
+    ctx.fillText(
+      copy('Event-synchronized playback: equal screen height ≠ equal coordinate time', '按事件同步播放：屏幕高度相同 ≠ 坐标时间相同'),
+      leftPanelX + 4,
+      height - 12
+    );
 
     const totalSegments = [Math.hypot(event1.x - event0.x, event1.y - event0.y), Math.hypot(event2.x - event1.x, event2.y - event1.y)];
     const totalLength = totalSegments[0] + totalSegments[1];

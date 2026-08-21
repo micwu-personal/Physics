@@ -80,6 +80,7 @@ for (const language of locales) {
   });
 
   test(`Astrophysics enforces compact-object teaching ranges in ${language}`, async ({ page }) => {
+    test.setTimeout(300_000);
     const errors = watchPage(page);
     await preparePage(page, astroPath, language);
 
@@ -135,6 +136,9 @@ for (const language of locales) {
     await expect(page.locator('#coplanarity .reason-chain li').first().locator('h3')).toContainText(
       language === 'en' ? 'Real collapsing clouds usually retain some net rotation' : '真实塌缩云通常保留一定净自转'
     );
+    await expect(page.locator('#evolution #stageDetail')).toContainText(
+      language === 'en' ? 'Carbon–oxygen white dwarf' : '碳氧白矮星'
+    );
     await expect(page.locator('.claim-chip[href*="annurev.aa.19.090181.000245"]')).toHaveCount(0);
     await expect(page.locator('.claim-chip[href*="annurev.aa.19.090181.001033"]')).toHaveCount(4);
     await expect(page.locator('#black-holes .claim-chip[href*="1973A%26A....24..337S"]')).toHaveCount(1);
@@ -186,9 +190,45 @@ for (const language of locales) {
     });
     expect(betaApp).toBeGreaterThan(1);
     await expect(page.locator('#jetInvariant')).toContainText(language === 'en' ? 'outrun light' : '不会超过光速');
+    await expect(page.locator('#jetRelativityLink')).toHaveAttribute('href', /beta=0\.980&theta=10\.0#jets/);
+    await page.locator('#jetRelativityLink').click();
+    await expect(page).toHaveURL(/relativity\.html\?beta=0\.980&theta=10\.0#jets/);
+    await expect(page.locator('#jetBetaOutput')).toHaveText('β = 0.980');
+    await expect(page.locator('#jetAngleOutput')).toHaveText('10°');
     await assertNoErrors(errors);
   });
 }
+
+test('Astrophysics makes remnant scale, collapse spin, and pulsar geometry explicit', async ({ page }) => {
+  const errors = watchPage(page);
+  await preparePage(page, astroPath, 'en', { motionPreference: 'pause' });
+
+  await expect(page.locator('#stageDetail')).toContainText('Characteristic final size');
+  await setRange(page.locator('#starMass'), 12);
+  await expect(page.locator('#stageDetail')).toContainText('neutron star');
+  await expect(page.locator('#stageDetail')).toContainText('20–26 km');
+
+  await setRange(page.locator('#blackHoleStage'), 5.8);
+  await setRange(page.locator('#blackHoleSpin'), 0.1);
+  await expect(page.locator('#blackHoleSpinEffect')).toContainText('nearly spherical');
+  const lowSpinFrame = await page.locator('#blackHoleCanvas').evaluate(canvas => canvas.toDataURL());
+  await setRange(page.locator('#blackHoleSpin'), 0.85);
+  await expect(page.locator('#blackHoleSpinEffect')).toContainText('circularize into a disk');
+  const highSpinFrame = await page.locator('#blackHoleCanvas').evaluate(canvas => canvas.toDataURL());
+  expect(highSpinFrame).not.toBe(lowSpinFrame);
+
+  await setRange(page.locator('#pulsarTilt'), 0);
+  await expect(page.locator('#pulsarReadout')).toContainText('misses Earth');
+  await expect(page.locator('#pulsarGeometry')).toContainText('align');
+  await setRange(page.locator('#pulsarView'), 0);
+  await expect(page.locator('#pulsarReadout')).toContainText('steady signal');
+  await expect(page.locator('#pulsarDetection')).toContainText('not a rotation-driven lighthouse pulse');
+  await setRange(page.locator('#pulsarTilt'), 36);
+  await setRange(page.locator('#pulsarView'), 36);
+  await expect(page.locator('#pulsarReadout')).toContainText('pulse received');
+  await expect(page.locator('#pulsars .visual-legend')).toContainText('spin axis');
+  await assertNoErrors(errors);
+});
 
 test('Astrophysics stays complete when reduced motion is preferred', async ({ page }) => {
   const errors = watchPage(page);

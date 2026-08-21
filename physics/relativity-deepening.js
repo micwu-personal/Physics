@@ -25,6 +25,7 @@
   const jetRecedeBrightness = document.getElementById('jetRecedeBrightness');
   const jetBrightnessNote = document.getElementById('jetBrightnessNote');
   const jetCausalityNote = document.getElementById('jetCausalityNote');
+  const jetPhaseNote = document.getElementById('jetPhaseNote');
 
   const jetDiagram = document.getElementById('jetDiagram');
   const jetEventA = document.getElementById('jetEventA');
@@ -180,10 +181,10 @@
     const emissionTimeA = 1.18;
     const eventDistanceA = beta * emissionTimeA;
     const eventDistanceB = beta * (emissionTimeA + emissionGap);
-    const approachBlobDistance = beta * (0.24 + phase * (emissionTimeA + emissionGap + 0.26));
-    const recedeBlobDistance = beta * (0.24 + phase * 1.1);
-    const approachRange = Math.max(eventDistanceB + 0.18, approachBlobDistance + 0.12);
-    const recedeRange = Math.max(0.72, recedeBlobDistance + 0.12);
+    const approachBlobDistance = eventDistanceA + phase * (eventDistanceB - eventDistanceA);
+    const recedeBlobDistance = approachBlobDistance;
+    const approachRange = eventDistanceB + 0.28;
+    const recedeRange = eventDistanceB + 0.28;
 
     const upwardRoom = (scene.coreY - scene.upperTop - 26) / Math.max(0.08, sinTheta);
     const downwardRoom = (scene.upperBottom - scene.coreY - 26) / Math.max(0.08, sinTheta);
@@ -257,7 +258,7 @@
       eventB
     } = model;
 
-    jetBetaOutput.textContent = `${beta.toFixed(3)} c`;
+    jetBetaOutput.textContent = `β = ${beta.toFixed(3)}`;
     jetAngleOutput.textContent = `${thetaDeg}\u00B0`;
     jetGamma.textContent = gamma.toFixed(3);
     jetDoppler.textContent = dopplerApproach.toFixed(3);
@@ -278,6 +279,9 @@
       : (isZh()
         ? '在这个速度与视角下，投影效应还不足以把表观横向速度推到 c 以上。'
         : 'At this speed and viewing angle, projection does not compress the arrival interval enough to push the apparent transverse speed above c.');
+    jetPhaseNote.textContent = isZh()
+      ? `黄色亮斑正以恒定 β 从固定事件 A 移向固定事件 B（${Math.round(state.jetPhase * 100)}%）。A、B 不是障碍物；循环结束后动画会回到 A 重新演示。`
+      : `The yellow knot is moving at constant β from fixed event A to fixed event B (${Math.round(state.jetPhase * 100)}%). A and B are not obstacles; the loop returns to A after the demonstration.`;
     setPoint(jetEventA, eventA.x, eventA.y);
     setPoint(jetEventB, eventB.x, eventB.y);
     setLine(jetPhotonA, eventA.x, eventA.y, scene.observerX, scene.observerY);
@@ -354,6 +358,16 @@
   [jetBetaControl, jetAngleControl].forEach(control => {
     control.addEventListener('input', renderJetGeometry);
   });
+
+  const sharedJetParameters = new URLSearchParams(window.location.search);
+  const sharedBeta = sharedJetParameters.has('beta') ? Number(sharedJetParameters.get('beta')) : Number.NaN;
+  const sharedTheta = sharedJetParameters.has('theta') ? Number(sharedJetParameters.get('theta')) : Number.NaN;
+  if (Number.isFinite(sharedBeta)) {
+    jetBetaControl.value = clamp(sharedBeta, Number(jetBetaControl.min), Number(jetBetaControl.max));
+  }
+  if (Number.isFinite(sharedTheta)) {
+    jetAngleControl.value = clamp(sharedTheta, Number(jetAngleControl.min), Number(jetAngleControl.max));
+  }
 
   document.addEventListener('physics-language', () => {
     renderEnergy();
