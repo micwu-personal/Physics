@@ -137,8 +137,8 @@
               <button type="button" data-eclipse-type="solar" aria-pressed="true" data-copy-en="Solar eclipse" data-copy-zh="日食">Solar eclipse</button>
               <button type="button" data-eclipse-type="lunar" aria-pressed="false" data-copy-en="Lunar eclipse" data-copy-zh="月食">Lunar eclipse</button>
             </div>
-            <p class="axis-convention" data-copy-en="One shared north–south axis: slider left / negative is south, slider right / positive is north, and north is up in both diagrams. Parallax reverses the apparent shift: moving the observer north makes the nearby Moon appear south of the distant Sun."
-               data-copy-zh="统一使用南北轴：滑块左侧 / 负值代表南，右侧 / 正值代表北；两幅图均为北上南下。视差会让表观位移反向：观察者向北移动时，较近的月球会显得移到较远太阳的南侧。">One shared north–south axis: slider left / negative is south, slider right / positive is north, and north is up in both diagrams. Parallax reverses the apparent shift: moving the observer north makes the nearby Moon appear south of the distant Sun.</p>
+            <p class="axis-convention" data-copy-en="Two separate dimensions: the north–south sliders choose the eclipse track and observer, while “sky passage” is time through one eclipse. Slider left / negative is south, right / positive is north, and north is up in both diagrams. Parallax reverses the apparent shift: moving the observer north makes the nearby Moon appear south of the distant Sun."
+               data-copy-zh="这里有两个独立维度：南北滑块选择食相轨迹与观察者位置，“天空中的经过”才表示一次食相随时间推进。滑块左侧 / 负值代表南，右侧 / 正值代表北；两幅图均为北上南下。视差会让表观位移反向：观察者向北移动时，较近的月球会显得移到较远太阳的南侧。">Two separate dimensions: the north–south sliders choose the eclipse track and observer, while “sky passage” is time through one eclipse. Slider left / negative is south, right / positive is north, and north is up in both diagrams. Parallax reverses the apparent shift: moving the observer north makes the nearby Moon appear south of the distant Sun.</p>
 
             <div class="range-control">
               <label for="distanceControl">
@@ -176,8 +176,17 @@
               <div class="range-ends"><span data-copy-en="South limb" data-copy-zh="南缘">South limb</span><span data-copy-en="Centre" data-copy-zh="中心">Centre</span><span data-copy-en="North limb" data-copy-zh="北缘">North limb</span></div>
             </div>
 
+            <div class="range-control">
+              <label for="eclipseProgressControl">
+                <span data-copy-en="Sky passage through one eclipse" data-copy-zh="一次食相在天空中的经过">Sky passage through one eclipse</span>
+                <output id="eclipseProgressOutput" for="eclipseProgressControl">Maximum eclipse</output>
+              </label>
+              <input id="eclipseProgressControl" type="range" min="-1" max="1" value="0" step="0.01">
+              <div class="range-ends"><span data-copy-en="Before maximum" data-copy-zh="食甚前">Before maximum</span><span data-copy-en="Maximum" data-copy-zh="食甚">Maximum</span><span data-copy-en="After maximum" data-copy-zh="食甚后">After maximum</span></div>
+            </div>
+
             <div class="transport-row">
-              <button id="playEclipse" type="button" aria-pressed="false" data-copy-en="Sweep the shadow" data-copy-zh="播放影子扫过">Sweep the shadow</button>
+              <button id="playEclipse" type="button" aria-pressed="false" data-copy-en="Play sky passage" data-copy-zh="播放天空经过">Play sky passage</button>
             </div>
           </div>
 
