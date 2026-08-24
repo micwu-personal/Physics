@@ -31,6 +31,10 @@ export async function exerciseTopLevel(page, app, options = {}) {
     await exercisePhysicsOrbital(page, options);
     return;
   }
+  if (app === 'physics-cosmos') {
+    await exercisePhysicsCosmos(page, options);
+    return;
+  }
   if (app === 'physics-light') {
     await exercisePhysicsLight(page, options);
     return;
@@ -210,6 +214,36 @@ export async function exercisePhysicsOrbital(page) {
   await page.locator('[data-eclipse-type="lunar"]').click();
   await expect(page.locator('[data-eclipse-type="lunar"]')).toHaveAttribute('aria-pressed', 'true');
   await page.locator('[data-lab-mode="seasons"]').click();
+}
+
+export async function exercisePhysicsCosmos(page, options = {}) {
+  await expect(page.locator('#addressCanvas')).toBeVisible();
+  await expect(page.locator('#solarCanvas')).toBeVisible();
+  if (!options.keepViewport) {
+    await expectCanvasRendered(page.locator('#addressCanvas'));
+    await expectCanvasRendered(page.locator('#solarCanvas'));
+  }
+  await page.locator('[data-address-scale="galaxy"]').click();
+  await expect(page.locator('[data-address-scale="galaxy"]')).toHaveAttribute('aria-pressed', 'true');
+  await page.locator('[data-solar-scale="reservoirs"]').click();
+  await page.locator('[data-solar-object="eris"]').click();
+  await expect(page.locator('#solarSelection')).not.toHaveText('');
+  await setRange(page.locator('#reachControl'), Math.log10(310000));
+  await expect(page.locator('#reachSummary')).not.toHaveText('');
+  await setRange(page.locator('#missionYear'), 1989.7);
+  await page.locator('[data-mission-filter="voyager2"]').click();
+  await expect(page.locator('#missionEra')).not.toHaveText('');
+  await page.locator('[data-assist-mode="voyager"]').click();
+  await setRange(page.locator('#voyagerEncounter'), 3);
+  await expect(page.locator('#voyagerAssistSummary')).not.toHaveText('');
+  await setRange(page.locator('#neighborDepth'), 55);
+  await page.locator('[data-neighbor="trappist"]').click();
+  await page.locator('[data-galaxy-layer="matter"]').click();
+  await page.locator('[data-galaxy-view="edge"]').click();
+  await setRange(page.locator('#galaxyTime'), 4.5);
+  await page.locator('#observerPosition').selectOption('inner');
+  await setRange(page.locator('#skyDirection'), 0);
+  await expect(page.locator('#skySummary')).not.toHaveText('');
 }
 
 export async function exercisePhysicsPhase(page, options = {}) {

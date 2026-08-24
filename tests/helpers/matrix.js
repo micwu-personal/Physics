@@ -19,6 +19,14 @@ export const entries = [
   { id: 'quantum-mechanics', app: 'physics-area', path: '/physics/quantum.html', generated: false, title: 'Quantum Mechanics — Physics Field Atlas', brandPath: '/physics/index.html' },
   { id: 'astrophysics', app: 'physics-astro', path: '/physics/astrophysics.html', generated: false, title: 'Astrophysics — Physics Field Atlas', brandPath: '/physics/index.html' },
   { id: 'orbital-lab', app: 'physics-orbital', path: '/physics/orbital-lab.html', generated: false, title: 'Sun–Earth–Moon Observatory — Physics Field Atlas', brandPath: '/physics/index.html' },
+  {
+    id: 'solar-system-galaxy',
+    app: 'physics-cosmos',
+    path: '/physics/solar-system-galaxy.html',
+    generated: false,
+    title: { en: 'Solar System & Galaxy Atlas - Physics Field Atlas', 'zh-CN': '太阳系与银河系图谱 - Physics Field Atlas' },
+    brandPath: '/physics/index.html'
+  },
   { id: 'electrodynamics', app: 'physics-light', path: '/physics/electrodynamics.html', generated: false, title: 'Light & Signals — Physics Field Atlas', brandPath: '/physics/index.html' },
   { id: 'phase-transitions', app: 'physics-phase', path: '/physics/phase-transitions.html', generated: false, title: 'Phase Transitions — Physics Field Atlas', brandPath: '/physics/index.html' },
   { id: 'entropy-information', app: 'physics-entropy', path: '/physics/entropy-information.html', generated: false, title: 'Entropy & Information — Physics Field Atlas', brandPath: '/physics/index.html' },
