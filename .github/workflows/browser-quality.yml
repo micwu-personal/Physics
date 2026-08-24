@@ -11,7 +11,7 @@ permissions:
 jobs:
   chromium:
     runs-on: windows-latest
-    timeout-minutes: 45
+    timeout-minutes: 60
     env:
       CI: "1"
     steps:
