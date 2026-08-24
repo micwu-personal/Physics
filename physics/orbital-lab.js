@@ -8,6 +8,7 @@
   const EARTH_RADIUS_KM = 6371;
   const MOON_RADIUS_KM = 1737.4;
   const SUN_EARTH_KM = 149597870.7;
+  const AXIS_EPSILON = 0.005;
   const MONTH_DAYS = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
   const MONTHS = {
     en: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
@@ -269,6 +270,26 @@
       `Subsolar point at ${fixed(Math.abs(declination))}° ${declination > 0 ? 'N' : 'S'}`,
       `太阳直射点位于${declination > 0 ? '北' : '南'}纬 ${fixed(Math.abs(declination))}°`
     );
+  }
+
+  function northToCanvasY(centerY, northOffset, scale) {
+    return centerY - northOffset * scale;
+  }
+
+  function northOffsetLabel(value) {
+    if (Math.abs(value) < AXIS_EPSILON) return t('0.00 R⊕ · centred', '0.00 R⊕ · 中心对齐');
+    return t(
+      `${value > 0 ? '+' : ''}${fixed(value, 2)} R⊕ · ${value > 0 ? 'north' : 'south'}`,
+      `${value > 0 ? '+' : ''}${fixed(value, 2)} R⊕ · ${value > 0 ? '北' : '南'}`
+    );
+  }
+
+  function apparentMoonDirection(observer, shadowAxis) {
+    const relative = observer - shadowAxis;
+    if (Math.abs(relative) < AXIS_EPSILON) return t('Moon centred on the Sun', '月球与太阳中心重合');
+    return relative > 0
+      ? t('Moon appears south of the Sun', '月球看起来位于太阳以南')
+      : t('Moon appears north of the Sun', '月球看起来位于太阳以北');
   }
 
   function eclipseGeometry() {
@@ -755,9 +776,8 @@
     const axisY = height * 0.5;
     const earthRadius = Math.min(54, height * 0.17);
     const moonRadius = Math.min(24, height * 0.068);
-    const offsetY = state.alignment * earthRadius;
-    const moonY = axisY + offsetY * 0.48;
-    const shadowY = axisY + offsetY;
+    const moonY = northToCanvasY(axisY, state.alignment, earthRadius * 0.48);
+    const shadowY = northToCanvasY(axisY, state.alignment, earthRadius);
     const earthScale = earthRadius / EARTH_RADIUS_KM;
     const penumbraPx = Math.max(8, geometry.penumbraRadius * earthScale);
     const centralPx = Math.max(3, Math.abs(geometry.signedCentralShadowRadius) * earthScale);
@@ -790,12 +810,15 @@
     context.fillStyle = geometry.signedCentralShadowRadius >= 0 ? 'rgba(2,4,12,.86)' : 'rgba(255,107,157,.24)';
     context.fillRect(earthX - earthRadius, shadowY - centralPx, earthRadius * 2, centralPx * 2);
     context.restore();
-    circle(context, earthX, axisY + state.observer * earthRadius, 5, '#ff6b9d', '#eef2ff');
+    circle(context, earthX, northToCanvasY(axisY, state.observer, earthRadius), 5, '#ff6b9d', '#eef2ff');
 
     line(context, sunX, axisY, earthX, shadowY, 'rgba(255,209,102,.3)', 1, [4, 6]);
     label(context, t('Sun', '太阳'), sunX, axisY + 58, '#ffd166', 10, 'center');
     label(context, t('Moon', '月球'), moonX, moonY - moonRadius - 15, '#eef2ff', 10, 'center');
     label(context, t('Earth', '地球'), earthX, axisY + earthRadius + 18, '#eef2ff', 10, 'center');
+    label(context, t('N ↑', '北 ↑'), earthX + earthRadius + 16, axisY - earthRadius + 2, '#00d4ff', 10);
+    label(context, t('S ↓', '南 ↓'), earthX + earthRadius + 16, axisY + earthRadius - 2, '#00d4ff', 10);
+    label(context, t('shadow axis', '影轴'), mix(moonX, earthX, 0.7), shadowY - 12, '#ffd166', 9, 'center');
     label(context, t('penumbra', '半影'), mix(moonX, earthX, 0.54), mix(moonY, shadowY, 0.54) + penumbraPx + 14, '#a996ff', 9, 'center');
     label(
       context,
@@ -819,7 +842,7 @@
     const axisY = height * 0.5;
     const earthRadius = Math.min(44, height * 0.14);
     const moonRadius = Math.min(22, height * 0.065);
-    const moonY = axisY + state.alignment * earthRadius * 1.35;
+    const moonY = northToCanvasY(axisY, state.alignment, earthRadius * 1.35);
     const lunarUmbraPx = Math.max(moonRadius * 1.35, geometry.lunarUmbraRadius / MOON_RADIUS_KM * moonRadius);
     const lunarPenumbraPx = lunarUmbraPx * 1.75;
 
@@ -843,6 +866,8 @@
     label(context, t('Earth', '地球'), earthX, axisY + earthRadius + 18, '#eef2ff', 10, 'center');
     label(context, t('Moon', '月球'), moonX, moonY - moonRadius - 15, '#eef2ff', 10, 'center');
     label(context, t("Earth's umbra", '地球本影'), mix(earthX, moonX, 0.58), axisY - 15, '#eef2ff', 9, 'center');
+    label(context, t('N ↑', '北 ↑'), moonX + moonRadius + 15, axisY - earthRadius, '#00d4ff', 10);
+    label(context, t('S ↓', '南 ↓'), moonX + moonRadius + 15, axisY + earthRadius, '#00d4ff', 10);
   }
 
   function drawSolarObserver(geometry) {
@@ -854,15 +879,25 @@
     const sunRadius = geometry.sunAngularRadius * scale;
     const moonRadius = geometry.moonAngularRadius * scale;
     const separationPx = Math.min(width * 0.72, geometry.localSeparation * scale);
-    const direction = state.observer >= state.alignment ? -1 : 1;
+    const direction = Math.sign(state.observer - state.alignment);
 
     const sky = context.createLinearGradient(0, 0, 0, height);
     sky.addColorStop(0, '#10284e');
     sky.addColorStop(1, '#331f43');
     context.fillStyle = sky;
     context.fillRect(0, 0, width, height);
+    line(context, cx, 24, cx, height * 0.78, 'rgba(238,242,255,.2)', 1, [4, 5]);
+    label(context, t('N ↑', '北 ↑'), cx, 16, '#00d4ff', 10, 'center');
+    label(context, t('S ↓', '南 ↓'), cx, height * 0.8, '#00d4ff', 10, 'center');
     drawSun(context, cx, cy, sunRadius);
-    circle(context, cx + separationPx * direction, cy, moonRadius, '#070a12', '#d8deea', 1.2);
+    const moonY = cy + separationPx * direction;
+    observerScene.lastGeometry = {
+      kind: 'solar',
+      northUp: true,
+      sun: { x: cx, y: cy },
+      moon: { x: cx, y: moonY }
+    };
+    circle(context, cx, moonY, moonRadius, '#070a12', '#d8deea', 1.2);
     line(context, 0, height * 0.82, width, height * 0.82, 'rgba(238,242,255,.42)');
     label(context, t('local horizon', '当地地平线'), 12, height * 0.82 + 14, '#aeb8d8', 9);
     label(context, classificationName(geometry.classification), cx, height - 20, '#eef2ff', 11, 'center');
@@ -879,10 +914,20 @@
     const shadowRadius = geometry.lunarUmbraRadius / MOON_RADIUS_KM * moonRadius;
     const offset = state.alignment * shadowRadius * 0.96;
 
+    line(context, cx, 22, cx, height * 0.78, 'rgba(238,242,255,.2)', 1, [4, 5]);
+    label(context, t('N ↑', '北 ↑'), cx, 15, '#00d4ff', 10, 'center');
+    label(context, t('S ↓', '南 ↓'), cx, height * 0.8, '#00d4ff', 10, 'center');
     circle(context, cx, cy, moonRadius, '#d8deea', '#eef2ff');
     context.save();
     context.globalAlpha = 0.86;
-    circle(context, cx + offset, cy, shadowRadius, '#2b1420');
+    const shadowY = cy + offset;
+    observerScene.lastGeometry = {
+      kind: 'lunar',
+      northUp: true,
+      moon: { x: cx, y: cy },
+      shadow: { x: cx, y: shadowY }
+    };
+    circle(context, cx, shadowY, shadowRadius, '#2b1420');
     context.restore();
     line(context, 0, height * 0.82, width, height * 0.82, 'rgba(238,242,255,.42)');
     context.fillStyle = '#0b1518';
@@ -996,8 +1041,8 @@
       `${fixed(state.sunDistance / 1000000, 2)} million km`,
       `${fixed(state.sunDistance / 1000000, 2)} 百万千米`
     );
-    $('alignmentOutput').textContent = `${state.alignment >= 0 ? '+' : ''}${fixed(state.alignment, 2)} R⊕`;
-    $('observerOutput').textContent = Math.abs(state.observer) < 0.02
+    $('alignmentOutput').textContent = northOffsetLabel(state.alignment);
+    $('observerOutput').textContent = Math.abs(state.observer) < AXIS_EPSILON
       ? t('Centre line', '中心线')
       : `${fixed(Math.abs(state.observer), 2)} R⊕ ${state.observer > 0 ? t('north', '以北') : t('south', '以南')}`;
 
@@ -1005,21 +1050,22 @@
       ? t('Where the Moon’s shadow reaches Earth', '月影落在地球何处')
       : t('How the Moon crosses Earth’s shadow', '月球如何穿过地影');
     $('systemSubtitle').textContent = state.eclipseType === 'solar'
-      ? t('The dark core is umbra or antumbra; the wider violet cone is penumbra.', '暗色核心是本影或伪本影；较宽的紫色锥体是半影。')
-      : t('A lunar eclipse is visible across the night side of Earth at nearly the same time.', '月食可由地球夜半球的大范围地区近乎同时看到。');
+      ? t('The dark core is umbra or antumbra; the wider violet cone is penumbra. North is up.', '暗色核心是本影或伪本影；较宽的紫色锥体是半影。北上南下。')
+      : t('The Moon crosses Earth’s shadow on the same north-up axis. A lunar eclipse is visible across much of Earth’s night side.', '月球沿同一条北上南下的轴穿过地影；地球夜半球的大范围地区都可看到月食。');
     $('observerTitle').textContent = state.eclipseType === 'solar'
       ? t('What this observer sees', '该观察者看到什么')
       : t('View from Earth’s night side', '从地球夜半球观察');
     $('observerSubtitle').textContent = state.eclipseType === 'solar'
-      ? t('Move the observer across Earth to enter penumbra, umbra, or antumbra.', '移动地球上的观察者，进入半影、本影或伪本影。')
-      : t('Observer position changes the Moon’s height, not the eclipse phase.', '观察者位置改变月球高度，但不改变月食阶段。');
+      ? t(`${apparentMoonDirection(state.observer, state.alignment)}. North is up; move the observer to enter penumbra, umbra, or antumbra.`, `${apparentMoonDirection(state.observer, state.alignment)}。北上南下；移动观察者可进入半影、本影或伪本影。`)
+      : t('Earth’s shadow moves north–south across the Moon; north is up. Observer position changes the Moon’s height, not the eclipse phase.', '地影沿南北方向扫过月球，北上南下；观察者位置改变月球高度，但不改变月食阶段。');
 
     const centralDiameter = Math.abs(geometry.signedCentralShadowRadius) * 2;
     const shadowKind = geometry.signedCentralShadowRadius >= 0 ? t('Umbra', '本影') : t('Antumbra', '伪本影');
     $('systemLegend').innerHTML = `
       <span class="legend-key" style="--key-color:#a996ff">${t('penumbra', '半影')}</span>
       <span class="legend-key" style="--key-color:${geometry.signedCentralShadowRadius >= 0 ? '#eef2ff' : '#ff6b9d'}">${shadowKind.toLowerCase()}</span>
-      <span class="legend-key" style="--key-color:#ff6b9d">${t('observer', '观察者')}</span>`;
+      <span class="legend-key" style="--key-color:#ff6b9d">${t('observer', '观察者')}</span>
+      <span class="legend-key" style="--key-color:#00d4ff">${t('north ↑ / south ↓', '北 ↑ / 南 ↓')}</span>`;
 
     if (state.eclipseType === 'solar') {
       setReadouts(
@@ -1036,8 +1082,8 @@
           `${fixed(geometry.moonAngularRadius * 2, 3)}° / ${fixed(geometry.sunAngularRadius * 2, 3)}°`,
           `${Math.round(centralDiameter).toLocaleString()} km`,
           `${Math.round(geometry.umbraLength).toLocaleString()} km`,
-          `${state.alignment >= 0 ? '+' : ''}${fixed(state.alignment, 2)} R⊕`,
-          Math.abs(state.observer) < 0.02 ? t('Centre line', '中心线') : `${fixed(state.observer, 2)} R⊕`
+          northOffsetLabel(state.alignment),
+          Math.abs(state.observer) < AXIS_EPSILON ? t('Centre line', '中心线') : `${fixed(state.observer, 2)} R⊕`
         ]
       );
       $('liveSummary').textContent = t(
@@ -1061,8 +1107,8 @@
           `${Math.round(geometry.lunarUmbraRadius * 2).toLocaleString()} km`,
           `${Math.round(MOON_RADIUS_KM * 2).toLocaleString()} km`,
           t('Most of Earth’s night side', '地球夜半球大部分地区'),
-          `${state.alignment >= 0 ? '+' : ''}${fixed(state.alignment, 2)} R⊕`,
-          Math.abs(state.observer) < 0.02 ? t('Centre line', '中心线') : `${fixed(state.observer, 2)} R⊕`
+          northOffsetLabel(state.alignment),
+          Math.abs(state.observer) < AXIS_EPSILON ? t('Centre line', '中心线') : `${fixed(state.observer, 2)} R⊕`
         ]
       );
       $('liveSummary').textContent = t(
@@ -1132,7 +1178,13 @@
       'aria-label',
       seasonsMode
         ? t('Sun Earth Moon system geometry; click the orbit to choose a date', '太阳地球月球系统几何；点击轨道可选择日期')
-        : t('Sun Earth Moon eclipse and shadow geometry', '太阳地球月球食相与影区几何')
+        : t('Sun Earth Moon eclipse and shadow geometry; north is up', '太阳地球月球食相与影区几何；北上南下')
+    );
+    $('observerCanvas').setAttribute(
+      'aria-label',
+      seasonsMode
+        ? t('First-person sky-dome observer view', '第一人称天空穹顶观察视角')
+        : t('First-person eclipse observer view; north is up', '第一人称食相观察视角；北上南下')
     );
     if (seasonsMode) renderSeasons();
     else renderEclipses();
@@ -1300,6 +1352,12 @@
     formatDuration,
     signedDegrees,
     declinationDescription,
+    northToCanvasY,
+    northOffsetLabel,
+    apparentMoonDirection,
+    get observerGeometry() {
+      return observerScene.lastGeometry;
+    },
     solarDeclination,
     solarPosition,
     daylightInfo,

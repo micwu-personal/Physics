@@ -47,8 +47,12 @@ for (const language of ['en', 'zh-CN']) {
     await expect(page.locator('#orbitHint')).toBeHidden();
     await expect(page.locator('#systemCanvas')).toHaveAttribute('tabindex', '-1');
     await expect(page.locator('#systemCanvas')).toHaveAttribute('aria-label', language === 'en'
-      ? 'Sun Earth Moon eclipse and shadow geometry'
-      : '太阳地球月球食相与影区几何');
+      ? 'Sun Earth Moon eclipse and shadow geometry; north is up'
+      : '太阳地球月球食相与影区几何；北上南下');
+    await expect(page.locator('#observerCanvas')).toHaveAttribute('aria-label', language === 'en'
+      ? 'First-person eclipse observer view; north is up'
+      : '第一人称食相观察视角；北上南下');
+    await expect(page.locator('.axis-convention')).toContainText(language === 'en' ? 'north is up' : '北上南下');
 
     await setRange(page.locator('#distanceControl'), 356500);
     await setRange(page.locator('#alignmentControl'), 0);
@@ -60,10 +64,40 @@ for (const language of ['en', 'zh-CN']) {
 
     await setRange(page.locator('#observerControl'), 0.04);
     await expect(page.locator('#metricValueA')).toContainText(language === 'en' ? 'Partial solar eclipse' : '日偏食');
+    await setRange(page.locator('#alignmentControl'), 0.4);
+    await expect(page.locator('#alignmentOutput')).toContainText(language === 'en' ? 'north' : '北');
+    await setRange(page.locator('#alignmentControl'), -0.4);
+    await expect(page.locator('#alignmentOutput')).toContainText(language === 'en' ? 'south' : '南');
+    await setRange(page.locator('#alignmentControl'), 0);
+    await setRange(page.locator('#observerControl'), 0.5);
+    await expect(page.locator('#observerSubtitle')).toContainText(language === 'en' ? 'south of the Sun' : '太阳以南');
+    const northObserverGeometry = await page.evaluate(() => window.__orbitalLab.observerGeometry);
+    expect(northObserverGeometry.kind).toBe('solar');
+    expect(northObserverGeometry.northUp).toBe(true);
+    expect(northObserverGeometry.moon.x).toBe(northObserverGeometry.sun.x);
+    expect(northObserverGeometry.moon.y).toBeGreaterThan(northObserverGeometry.sun.y);
+    await setRange(page.locator('#observerControl'), -0.5);
+    await expect(page.locator('#observerSubtitle')).toContainText(language === 'en' ? 'north of the Sun' : '太阳以北');
+    const southObserverGeometry = await page.evaluate(() => window.__orbitalLab.observerGeometry);
+    expect(southObserverGeometry.moon.x).toBe(southObserverGeometry.sun.x);
+    expect(southObserverGeometry.moon.y).toBeLessThan(southObserverGeometry.sun.y);
+    await setRange(page.locator('#observerControl'), 0.01);
+    await expect(page.locator('#observerOutput')).toContainText(language === 'en' ? 'north' : '北');
 
     await page.locator('[data-eclipse-type="lunar"]').click();
     await setRange(page.locator('#alignmentControl'), 0);
     await expect(page.locator('#metricValueA')).toContainText(language === 'en' ? 'Total lunar eclipse' : '月全食');
+    const axisMap = await page.evaluate(() => ({
+      north: window.__orbitalLab.northToCanvasY(100, 1, 10),
+      south: window.__orbitalLab.northToCanvasY(100, -1, 10)
+    }));
+    expect(axisMap.north).toBeLessThan(100);
+    expect(axisMap.south).toBeGreaterThan(100);
+    await setRange(page.locator('#alignmentControl'), 0.5);
+    const lunarGeometry = await page.evaluate(() => window.__orbitalLab.observerGeometry);
+    expect(lunarGeometry.kind).toBe('lunar');
+    expect(lunarGeometry.shadow.x).toBe(lunarGeometry.moon.x);
+    expect(lunarGeometry.shadow.y).toBeGreaterThan(lunarGeometry.moon.y);
 
     await page.setViewportSize({ width: 390, height: 844 });
     await assertLayout(page);
