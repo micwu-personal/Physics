@@ -1,7 +1,7 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import { expect, test } from '@playwright/test';
 import { expectVisualScenario, fieldVisualScenarios, readFieldVisualState } from './helpers/field-visuals.js';
-import { exerciseBigBang, exerciseLanding, exerciseParticleZoo, exercisePeriodicTable, exercisePhysicsArea, exercisePhysicsAstro, exercisePhysicsAtlas, exercisePhysicsEntropy, exercisePhysicsField, exercisePhysicsLight, exercisePhysicsPhase } from './helpers/journeys.js';
+import { exerciseBigBang, exerciseLanding, exerciseParticleZoo, exercisePeriodicTable, exercisePhysicsArea, exercisePhysicsAstro, exercisePhysicsAtlas, exercisePhysicsCosmos, exercisePhysicsEntropy, exercisePhysicsField, exercisePhysicsLight, exercisePhysicsOrbital, exercisePhysicsPhase } from './helpers/journeys.js';
 import {
   blockExternalAssets,
   installDeterminism,
@@ -17,6 +17,8 @@ const journeys = [
   { id: 'physics-relativity', path: '/physics/relativity.html', run: exercisePhysicsArea },
   { id: 'physics-quantum', path: '/physics/quantum.html', run: exercisePhysicsArea },
   { id: 'physics-astro', path: '/physics/astrophysics.html', run: exercisePhysicsAstro },
+  { id: 'physics-orbital', path: '/physics/orbital-lab.html', run: exercisePhysicsOrbital },
+  { id: 'physics-cosmos', path: '/physics/solar-system-galaxy.html', run: exercisePhysicsCosmos },
   { id: 'physics-light', path: '/physics/electrodynamics.html', run: exercisePhysicsLight },
   { id: 'physics-phase', path: '/physics/phase-transitions.html', run: exercisePhysicsPhase },
   { id: 'physics-entropy', path: '/physics/entropy-information.html', run: exercisePhysicsEntropy },
@@ -179,6 +181,247 @@ for (const journey of journeys) {
     });
   }
 }
+
+test('physics cosmic atlas exhaustive interaction and animation coverage', async ({ page }) => {
+    await collectCoverage(page, 'physics-cosmos-exhaustive', async () => {
+      await preparePage(page, '/physics/solar-system-galaxy.html', 'en', { motionPreference: 'pause' });
+
+      const helperResults = await page.evaluate(() => {
+        const api = window.__cosmicAtlas;
+        let missingElement = false;
+        try {
+          api.requireElement('coverage-missing-element');
+        } catch {
+          missingElement = true;
+        }
+        return {
+          age: [13.8, 16].map(api.formatCosmicAge),
+          angles: [-10, 0, 90, 180, 270, 350].map(api.directionName),
+          au: [1, 10, 1000, 100000, 310000].map(api.formatAU),
+          distance: api.angularDistance(350, 10),
+          fallback: api.localized(null),
+          missingElement
+        };
+      });
+      expect(helperResults.missingElement).toBe(true);
+      expect(helperResults.fallback).toBe('');
+    });
+});
+
+test('physics orbital lab exhaustive geometry and playback coverage', async ({ page }) => {
+        await collectCoverage(page, 'physics-orbital-exhaustive', async () => {
+          await preparePage(page, '/physics/orbital-lab.html', 'en', { motionPreference: 'pause' });
+
+          const helpers = await page.evaluate(() => {
+            const api = window.__orbitalLab;
+            let missingElement = false;
+            try {
+              api.requireElement('coverage-missing-orbital-element');
+            } catch {
+              missingElement = true;
+            }
+            return {
+              clocks: [0, 12, 23.9999, 24].map(api.formatClock),
+              durations: [0, 1.5, 24].map(api.formatDuration),
+              equator: api.seasonName(171, 0),
+              labels: [0, -33.9, 39.9].map(api.latitudeLabel),
+              missingElement,
+              north: api.seasonName(171, 40),
+              polarDay: api.daylightInfo(171, 89),
+              polarNight: api.daylightInfo(355, 89),
+              south: api.seasonName(171, -40)
+            };
+          });
+          expect(helpers.missingElement).toBe(true);
+          expect(helpers.polarDay.kind).toBe('polar-day');
+          expect(helpers.polarNight.kind).toBe('polar-night');
+
+          const dayPresets = page.locator('[data-day]');
+          for (let index = 0; index < await dayPresets.count(); index++) {
+            await dayPresets.nth(index).click();
+          }
+          for (const latitude of [-89, 0, 89]) {
+            await setRange(page.locator('#latitudeControl'), latitude);
+          }
+          for (const hour of [0, 12, 23.999]) {
+            await setRange(page.locator('#timeControl'), hour);
+          }
+          await setRange(page.locator('#dayControl'), 355);
+          await setRange(page.locator('#latitudeControl'), 66.56);
+          await setRange(page.locator('#timeControl'), 12);
+
+          await page.locator('#playDay').click();
+          await page.waitForTimeout(80);
+          await page.locator('#playDay').click();
+          await page.locator('#playYear').click();
+          await page.waitForTimeout(80);
+          await page.locator('#playYear').click();
+          await page.locator('#seasonReset').click();
+
+          await page.locator('[data-lab-mode="eclipses"]').click();
+          await page.locator('[data-eclipse-type="solar"]').click();
+          await setRange(page.locator('#distanceControl'), 356500);
+          await setRange(page.locator('#alignmentControl'), 0);
+          await setRange(page.locator('#observerControl'), 0);
+          await setRange(page.locator('#distanceControl'), 406700);
+          await setRange(page.locator('#observerControl'), 0.04);
+          await setRange(page.locator('#observerControl'), -0.4);
+          await setRange(page.locator('#alignmentControl'), 1.35);
+
+          await page.locator('[data-eclipse-type="lunar"]').click();
+          for (const alignment of [0, 0.6, 1, 1.35]) {
+            await setRange(page.locator('#alignmentControl'), alignment);
+          }
+          await page.evaluate(() => {
+            window.__orbitalLab.state.alignment = 2;
+            window.__orbitalLab.render();
+          });
+          await page.evaluate(() => {
+            window.__orbitalLab.state.alignment = 1.34;
+            window.__orbitalLab.render();
+          });
+          await page.locator('#playEclipse').click();
+          await page.waitForTimeout(80);
+          await page.locator('#playEclipse').click();
+          await page.locator('#eclipseReset').click();
+
+          await page.locator('#playEclipse').click();
+          await page.locator('.motion-toggle').click();
+          await page.locator('[data-lang="zh-CN"]').click();
+          await page.locator('[data-lab-mode="seasons"]').click();
+          await page.evaluate(() => {
+            const api = window.__orbitalLab;
+            api.dateLabel(171);
+            api.azimuthName(180);
+            for (const classification of ['none', 'partial', 'total', 'annular', 'total-lunar', 'partial-lunar', 'penumbral-lunar']) {
+              api.classificationName(classification);
+            }
+            api.stopPlayback();
+            api.animate(0);
+            api.togglePlayback('day');
+            api.stopPlayback();
+          });
+          await page.locator('[data-lang="en"]').click();
+        });
+});
+
+test('physics cosmic atlas exhaustive controls coverage', async ({ page }) => {
+    await collectCoverage(page, 'physics-cosmos-controls', async () => {
+      await preparePage(page, '/physics/solar-system-galaxy.html', 'en', { motionPreference: 'pause' });
+
+      for (const scale of ['solar', 'local', 'galaxy']) {
+        await page.locator(`[data-address-scale="${scale}"]`).click();
+      }
+      for (const scale of ['inner', 'planets', 'heliosphere', 'reservoirs']) {
+        await page.locator(`[data-solar-scale="${scale}"]`).click();
+      }
+      for (const object of ['sun', 'mercury', 'earth', '67p', 'neptune', 'eris']) {
+        await page.locator(`[data-solar-object="${object}"]`).click();
+      }
+      await page.locator('#solarReset').click();
+
+      for (const distance of [1, 50, 100, 500, 5000, 110000, 310000, 800000]) {
+        await setRange(page.locator('#reachControl'), Math.log10(distance));
+      }
+      const reachPresets = page.locator('[data-reach-au]');
+      for (let index = 0; index < await reachPresets.count(); index++) {
+        await reachPresets.nth(index).click();
+      }
+
+      for (const year of [1957, 1959, 1970, 1989.7, 2012.7, 2025, 2030]) {
+        await setRange(page.locator('#missionYear'), year);
+      }
+      for (const mission of ['all', 'luna', 'voyager1', 'voyager2', 'newhorizons', 'clipper']) {
+        await page.locator(`[data-mission-filter="${mission}"]`).click();
+      }
+      await page.locator('#missionReset').click();
+      const missionPresets = page.locator('[data-mission-year]');
+      for (let index = 0; index < await missionPresets.count(); index++) {
+        await missionPresets.nth(index).click();
+      }
+
+      await page.locator('[data-assist-mode="vectors"]').click();
+      await setRange(page.locator('#planetSpeed'), 5);
+      await setRange(page.locator('#turnAngle'), 150);
+      await setRange(page.locator('#encounterSide'), -1);
+      await page.evaluate(() => {
+        window.__cosmicAtlas.state.assistProgress = 0.5;
+        window.__cosmicAtlas.renderAll();
+      });
+      await setRange(page.locator('#encounterSide'), 1);
+      await page.locator('[data-assist-mode="voyager"]').click();
+      for (const encounter of [0, 1, 2, 3]) {
+        await setRange(page.locator('#voyagerEncounter'), encounter);
+      }
+      await page.evaluate(() => {
+        window.__cosmicAtlas.state.assistProgress = 0.8;
+        window.__cosmicAtlas.renderAll();
+      });
+      await page.locator('#assistReset').click();
+
+      await setRange(page.locator('#neighborDepth'), 5);
+      await setRange(page.locator('#neighborDepth'), 55);
+      const neighbors = page.locator('[data-neighbor]');
+      for (let index = 0; index < await neighbors.count(); index++) {
+        await neighbors.nth(index).click();
+      }
+
+      for (const layer of ['stars', 'matter', 'neighbors']) {
+        await page.locator(`[data-galaxy-layer="${layer}"]`).click();
+        if (layer !== 'neighbors') {
+          for (const view of ['face', 'edge']) {
+            await page.locator(`[data-galaxy-view="${view}"]`).click();
+          }
+        }
+      }
+      await page.locator('#galaxyReset').click();
+
+      for (const age of [1, 4.5, 7, 13.8, 16, 18.3]) {
+        await setRange(page.locator('#galaxyTime'), age);
+      }
+      const historyPresets = page.locator('[data-galaxy-time]');
+      for (let index = 0; index < await historyPresets.count(); index++) {
+        await historyPresets.nth(index).click();
+      }
+      await page.locator('#galaxyTimeReset').click();
+
+      for (const observer of ['sun', 'inner', 'outer', 'halo']) {
+        await page.locator('#observerPosition').selectOption(observer);
+        for (const direction of [0, 90, 180, 270, 350]) {
+          await setRange(page.locator('#skyDirection'), direction);
+        }
+        for (const elevation of [-60, 0, 15, 30, 60]) {
+          await setRange(page.locator('#skyElevation'), elevation);
+        }
+      }
+      await page.locator('#skyReset').click();
+
+      await page.evaluate(() => {
+        const { state } = window.__cosmicAtlas;
+        state.missionYear = 2030;
+        state.galaxyTime = 18.3;
+      });
+      for (const id of ['missionPlay', 'assistPlay', 'galaxyRotate', 'galaxyTimePlay', 'skyRotate']) {
+        await page.locator(`#${id}`).click();
+      }
+      await page.waitForTimeout(120);
+      for (const id of ['missionPlay', 'assistPlay', 'galaxyRotate', 'galaxyTimePlay', 'skyRotate']) {
+        await page.locator(`#${id}`).click();
+      }
+      await page.locator('#missionPlay').click();
+      await page.locator('.motion-toggle').click();
+      await page.evaluate(() => {
+        Object.defineProperty(document, 'hidden', { configurable: true, get: () => true });
+        document.dispatchEvent(new Event('visibilitychange'));
+        Object.defineProperty(document, 'hidden', { configurable: true, get: () => false });
+        document.dispatchEvent(new Event('visibilitychange'));
+        Object.defineProperty(window, 'devicePixelRatio', { configurable: true, get: () => 0 });
+        window.__cosmicAtlas.renderAll();
+      });
+      await page.locator('[data-lang="zh-CN"]').click();
+      await page.locator('[data-lang="en"]').click();
+    });
+});
 
 for (const [id, navigatorLanguage] of [['zh', 'zh-CN'], ['en', 'en-US'], ['empty', '']]) {
   for (const [app, path, storageKey, exercise] of [

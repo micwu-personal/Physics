@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!--
+  THESIS: A control teaches only when its physical consequence stays visible beside it.
+  OWN-WORLD: The Evidence Observatory becomes a compact three-window orbital instrument.
+  STORY: Move from seasons and the local sky to eclipse shadows, then connect totality to a historic test of relativity.
+  FIRST VIEWPORT: Controls, system geometry, and an observer's sky remain visible as one synchronized laboratory.
+  FORM: Two task modes share one responsive instrument instead of becoming a long stack of detached charts.
+  -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="A bilingual interactive Sun–Earth–Moon laboratory for seasons, local solar motion, eclipse shadows, total and annular eclipses, and the 1919 light-deflection test.">
+  <title>Sun–Earth–Moon Observatory — Physics Field Atlas</title>
+  <link rel="stylesheet" href="../assets/fonts/fonts.css">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="../assets/brand/brand.css">
+  <link rel="stylesheet" href="orbital-lab.css">
+  <link rel="icon" href="../assets/brand/favicon.svg" type="image/svg+xml">
+</head>
+<body data-topic="orbital">
+  <a class="skip-link" href="#lab" data-copy-en="Skip to the orbital laboratory" data-copy-zh="跳到轨道实验室">Skip to the orbital laboratory</a>
+  <div class="topic-shell orbital-shell">
+    <nav class="route-bar" aria-label="Orbital laboratory routes" data-aria-en="Orbital laboratory routes" data-aria-zh="轨道实验室路线">
+      <div class="route-left">
+        <a class="brand-home" href="./index.html" aria-label="McWoods’ Universe" data-aria-en="McWoods’ Universe" data-aria-zh="米克乐的宇宙">
+          <span class="brand-home__icon" aria-hidden="true"><img src="../assets/brand/favicon.svg" alt=""></span>
+          <span class="brand-home__title">
+            <span class="brand-home__title-zh">米克乐的宇宙</span>
+            <span class="brand-home__title-en">McWoods’ Universe</span>
+          </span>
+        </a>
+        <a class="route-home" href="./astrophysics.html" data-copy-en="Back to astrophysics" data-copy-zh="返回天体物理">Back to astrophysics</a>
+      </div>
+      <div class="route-links">
+        <a href="./solar-system-galaxy.html" data-copy-en="Solar System &amp; Galaxy" data-copy-zh="太阳系与银河系">Solar System &amp; Galaxy</a>
+        <a href="./newtonian.html#orbit-lab" data-copy-en="Orbital mechanics" data-copy-zh="轨道力学">Orbital mechanics</a>
+        <a href="./relativity.html#evidence" data-copy-en="Eclipse & relativity" data-copy-zh="日食与相对论">Eclipse &amp; relativity</a>
+      </div>
+      <div class="site-controls" aria-label="Page controls" data-aria-en="Page controls" data-aria-zh="页面控制">
+        <button class="motion-toggle" type="button" aria-pressed="false">Pause motion</button>
+        <button type="button" data-lang="en" aria-pressed="true">EN</button>
+        <button type="button" data-lang="zh-CN" aria-pressed="false">中文</button>
+      </div>
+    </nav>
+
+    <header class="orbital-intro">
+      <div>
+        <h1 data-copy-en="Sun–Earth–Moon Observatory" data-copy-zh="太阳—地球—月球观测台">Sun–Earth–Moon Observatory</h1>
+        <p data-copy-en="Change one quantity and watch the orbital geometry and the sky at your chosen place respond together."
+           data-copy-zh="改变一个量，同时观察轨道几何与所选地点天空中的结果。">Change one quantity and watch the orbital geometry and the sky at your chosen place respond together.</p>
+      </div>
+      <span class="rep-badge schematic" data-copy-en="Calculated teaching model" data-copy-zh="计算化教学模型">Calculated teaching model</span>
+    </header>
+
+    <main id="lab">
+      <div class="mode-switch" role="tablist" aria-label="Laboratory mode" data-aria-en="Laboratory mode" data-aria-zh="实验模式">
+        <button id="seasonTab" type="button" role="tab" aria-selected="true" aria-controls="orbitalWorkspace" data-lab-mode="seasons">
+          <span data-copy-en="Seasons & local sky" data-copy-zh="季节与当地天空">Seasons &amp; local sky</span>
+        </button>
+        <button id="eclipseTab" type="button" role="tab" aria-selected="false" aria-controls="orbitalWorkspace" data-lab-mode="eclipses">
+          <span data-copy-en="Eclipses & shadows" data-copy-zh="食相与影区">Eclipses &amp; shadows</span>
+        </button>
+      </div>
+
+      <section id="orbitalWorkspace" class="orbital-workspace" aria-labelledby="seasonTab">
+        <aside class="control-rail">
+          <div class="control-set" data-mode-panel="seasons">
+            <div class="control-set-heading">
+              <h2 data-copy-en="Set the observer" data-copy-zh="设置观察者">Set the observer</h2>
+              <button class="quiet-button" id="seasonReset" type="button" data-copy-en="Reset" data-copy-zh="重置">Reset</button>
+            </div>
+
+            <div class="range-control">
+              <label for="dayControl">
+                <span data-copy-en="Date in the year" data-copy-zh="一年中的日期">Date in the year</span>
+                <output id="dayOutput" for="dayControl">21 Jun</output>
+              </label>
+              <input id="dayControl" type="range" min="0" max="364" value="171" step="1">
+              <div class="range-ends"><span data-copy-en="1 Jan" data-copy-zh="1月1日">1 Jan</span><span data-copy-en="31 Dec" data-copy-zh="12月31日">31 Dec</span></div>
+              <div class="preset-row" aria-label="Season markers" data-aria-en="Season markers" data-aria-zh="季节标记">
+                <button type="button" data-day="79" data-copy-en="Mar equinox" data-copy-zh="春分">Mar equinox</button>
+                <button type="button" data-day="171" data-copy-en="Jun solstice" data-copy-zh="夏至">Jun solstice</button>
+                <button type="button" data-day="265" data-copy-en="Sep equinox" data-copy-zh="秋分">Sep equinox</button>
+                <button type="button" data-day="355" data-copy-en="Dec solstice" data-copy-zh="冬至">Dec solstice</button>
+              </div>
+            </div>
+
+            <div class="range-control">
+              <label for="latitudeControl">
+                <span data-copy-en="Observer latitude" data-copy-zh="观察者纬度">Observer latitude</span>
+                <output id="latitudeOutput" for="latitudeControl">39.9° N</output>
+              </label>
+              <input id="latitudeControl" type="range" min="-90" max="90" value="39.9" step="0.1">
+              <div class="range-ends"><span data-copy-en="South Pole" data-copy-zh="南极">South Pole</span><span data-copy-en="Equator" data-copy-zh="赤道">Equator</span><span data-copy-en="North Pole" data-copy-zh="北极">North Pole</span></div>
+            </div>
+
+            <div class="range-control">
+              <label for="timeControl">
+                <span data-copy-en="Local apparent solar time" data-copy-zh="当地真太阳时">Local apparent solar time</span>
+                <output id="timeOutput" for="timeControl">12:00</output>
+              </label>
+              <input id="timeControl" type="range" min="0" max="24" value="12" step="0.05">
+              <div class="range-ends"><span>00:00</span><span>12:00</span><span>24:00</span></div>
+            </div>
+
+            <div class="transport-row">
+              <button id="playDay" type="button" aria-pressed="false" data-copy-en="Play one day" data-copy-zh="播放一天">Play one day</button>
+              <button id="playYear" type="button" aria-pressed="false" data-copy-en="Play one year" data-copy-zh="播放一年">Play one year</button>
+            </div>
+          </div>
+
+          <div class="control-set" data-mode-panel="eclipses" hidden>
+            <div class="control-set-heading">
+              <h2 data-copy-en="Shape the eclipse" data-copy-zh="塑造食相">Shape the eclipse</h2>
+              <button class="quiet-button" id="eclipseReset" type="button" data-copy-en="Reset" data-copy-zh="重置">Reset</button>
+            </div>
+
+            <div class="segmented" role="group" aria-label="Eclipse type" data-aria-en="Eclipse type" data-aria-zh="食相类型">
+              <button type="button" data-eclipse-type="solar" aria-pressed="true" data-copy-en="Solar eclipse" data-copy-zh="日食">Solar eclipse</button>
+              <button type="button" data-eclipse-type="lunar" aria-pressed="false" data-copy-en="Lunar eclipse" data-copy-zh="月食">Lunar eclipse</button>
+            </div>
+
+            <div class="range-control">
+              <label for="distanceControl">
+                <span data-copy-en="Earth–Moon distance" data-copy-zh="地月距离">Earth–Moon distance</span>
+                <output id="distanceOutput" for="distanceControl">370,000 km</output>
+              </label>
+              <input id="distanceControl" type="range" min="356500" max="406700" value="370000" step="100">
+              <div class="range-ends"><span data-copy-en="Near perigee" data-copy-zh="近地点附近">Near perigee</span><span data-copy-en="Near apogee" data-copy-zh="远地点附近">Near apogee</span></div>
+            </div>
+
+            <div class="range-control">
+              <label for="sunDistanceControl">
+                <span data-copy-en="Sun–Earth distance" data-copy-zh="日地距离">Sun–Earth distance</span>
+                <output id="sunDistanceOutput" for="sunDistanceControl">149.60 million km</output>
+              </label>
+              <input id="sunDistanceControl" type="range" min="147100000" max="152100000" value="149597871" step="10000">
+              <div class="range-ends"><span data-copy-en="Near perihelion" data-copy-zh="近日点附近">Near perihelion</span><span data-copy-en="Near aphelion" data-copy-zh="远日点附近">Near aphelion</span></div>
+            </div>
+
+            <div class="range-control">
+              <label for="alignmentControl">
+                <span data-copy-en="Shadow-axis offset" data-copy-zh="影轴偏移">Shadow-axis offset</span>
+                <output id="alignmentOutput" for="alignmentControl">0.00 R⊕</output>
+              </label>
+              <input id="alignmentControl" type="range" min="-1.35" max="1.35" value="0" step="0.01">
+              <div class="range-ends"><span data-copy-en="South of Earth" data-copy-zh="地球南侧">South of Earth</span><span data-copy-en="Centred" data-copy-zh="中心对齐">Centred</span><span data-copy-en="North of Earth" data-copy-zh="地球北侧">North of Earth</span></div>
+            </div>
+
+            <div class="range-control">
+              <label for="observerControl">
+                <span data-copy-en="Observer across Earth's disk" data-copy-zh="观察者在地球截面的位置">Observer across Earth's disk</span>
+                <output id="observerOutput" for="observerControl">Centre line</output>
+              </label>
+              <input id="observerControl" type="range" min="-1" max="1" value="0" step="0.01">
+              <div class="range-ends"><span data-copy-en="South limb" data-copy-zh="南缘">South limb</span><span data-copy-en="Centre" data-copy-zh="中心">Centre</span><span data-copy-en="North limb" data-copy-zh="北缘">North limb</span></div>
+            </div>
+
+            <div class="transport-row">
+              <button id="playEclipse" type="button" aria-pressed="false" data-copy-en="Sweep the shadow" data-copy-zh="播放影子扫过">Sweep the shadow</button>
+            </div>
+          </div>
+
+          <p id="liveSummary" class="live-summary" aria-live="polite"></p>
+        </aside>
+
+        <section class="instrument-panel system-panel">
+          <header>
+            <div>
+              <h2 id="systemTitle">Why seasons change</h2>
+              <p id="systemSubtitle">Earth's axis keeps nearly the same direction as Earth travels around the Sun.</p>
+            </div>
+            <span class="representation-label" data-copy-en="Not to scale" data-copy-zh="非按比例">Not to scale</span>
+          </header>
+          <canvas id="systemCanvas" role="img" aria-label="Sun Earth Moon system geometry" data-aria-en="Sun Earth Moon system geometry" data-aria-zh="太阳地球月球系统几何">Sun–Earth–Moon system geometry.</canvas>
+          <div id="systemLegend" class="instrument-legend"></div>
+        </section>
+
+        <section class="instrument-panel observer-panel">
+          <header>
+            <div>
+              <h2 id="observerTitle">Your local sky</h2>
+              <p id="observerSubtitle">A sky-dome view from the selected latitude and solar time.</p>
+            </div>
+            <span class="representation-label" data-copy-en="Observer view" data-copy-zh="观察者视角">Observer view</span>
+          </header>
+          <canvas id="observerCanvas" role="img" aria-label="First-person observer view" data-aria-en="First-person observer view" data-aria-zh="第一人称观察者视角">First-person observer view.</canvas>
+          <dl class="readout-grid">
+            <div><dt id="metricLabelA">Solar altitude</dt><dd id="metricValueA">73.5°</dd></div>
+            <div><dt id="metricLabelB">Azimuth</dt><dd id="metricValueB">180°</dd></div>
+            <div><dt id="metricLabelC">Daylight</dt><dd id="metricValueC">14 h 51 min</dd></div>
+            <div><dt id="metricLabelD">Sunrise / sunset</dt><dd id="metricValueD">04:35 / 19:25</dd></div>
+          </dl>
+        </section>
+      </section>
+
+      <section class="orbital-explanation" id="science">
+        <header>
+          <h2 data-copy-en="Read the geometry without inheriting its common myths." data-copy-zh="读懂几何，也避开常见误解。">Read the geometry without inheriting its common myths.</h2>
+          <p data-copy-en="These diagrams preserve the angles and causal relationships that matter while compressing enormous distances and sizes."
+             data-copy-zh="这些图保留关键角度与因果关系，同时压缩真实世界中巨大的距离与尺寸。">These diagrams preserve the angles and causal relationships that matter while compressing enormous distances and sizes.</p>
+        </header>
+        <div class="explanation-flow">
+          <article>
+            <div class="explanation-mark">23.44°</div>
+            <div>
+              <h3 data-copy-en="Tilt—not distance—drives the seasons" data-copy-zh="季节由地轴倾斜主导，而非日地距离">Tilt—not distance—drives the seasons</h3>
+              <p data-copy-en="Earth's axis points nearly toward the same direction in space through one orbit. A hemisphere tilted sunward receives higher-angle sunlight and longer days. Earth is actually closest to the Sun in early January, during Northern Hemisphere winter."
+                 data-copy-zh="地球公转一周时，地轴在空间中近似保持同一方向。倾向太阳的半球获得更高角度的阳光与更长白昼。事实上，地球在一月初最接近太阳，此时北半球正值冬季。">Earth's axis points nearly toward the same direction in space through one orbit. A hemisphere tilted sunward receives higher-angle sunlight and longer days. Earth is actually closest to the Sun in early January, during Northern Hemisphere winter.</p>
+            </div>
+          </article>
+          <article>
+            <div class="explanation-mark">5.15°</div>
+            <div>
+              <h3 data-copy-en="New and full Moon are usually not eclipses" data-copy-zh="朔月与满月通常不会发生食">New and full Moon are usually not eclipses</h3>
+              <p data-copy-en="The Moon's orbit is tilted about 5.15° to Earth's orbital plane. An eclipse requires both the right lunar phase and passage near a node where the two orbital planes cross. The 29.53-day synodic month tracks phases; the 27.32-day sidereal month tracks one orbit against the stars."
+                 data-copy-zh="月球轨道相对地球轨道面倾斜约 5.15°。食相既要求合适的月相，也要求月球经过两轨道面交线附近的节点。29.53 天的朔望月描述月相循环；27.32 天的恒星月描述相对恒星的一周公转。">The Moon's orbit is tilted about 5.15° to Earth's orbital plane. An eclipse requires both the right lunar phase and passage near a node where the two orbital planes cross. The 29.53-day synodic month tracks phases; the 27.32-day sidereal month tracks one orbit against the stars.</p>
+            </div>
+          </article>
+          <article>
+            <div class="explanation-mark">0.5°</div>
+            <div>
+              <h3 data-copy-en="Total or annular depends on apparent size" data-copy-zh="全食还是环食，取决于视大小">Total or annular depends on apparent size</h3>
+              <p data-copy-en="The Sun and Moon each span roughly half a degree in our sky. Their exact angular sizes change with distance. If the Moon looks larger, its umbra can reach Earth and totality is possible; if it looks smaller, the antumbra produces an annular eclipse. Rare hybrid eclipses switch between annular and total along their path."
+                 data-copy-zh="太阳与月球在天空中的角直径都约为半度，但会随距离变化。若月球看起来更大，本影可抵达地球并形成全食；若看起来更小，伪本影会形成环食。极少数食会沿路径从环食转为全食或反向转变，称为全环食。">The Sun and Moon each span roughly half a degree in our sky. Their exact angular sizes change with distance. If the Moon looks larger, its umbra can reach Earth and totality is possible; if it looks smaller, the antumbra produces an annular eclipse. Rare hybrid eclipses switch between annular and total along their path.</p>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="relativity-bridge" id="eclipse-relativity">
+        <div class="relativity-diagram" aria-hidden="true">
+          <span class="diagram-star star-a">✦</span>
+          <span class="diagram-star star-b">✦</span>
+          <span class="diagram-sun"></span>
+          <span class="diagram-moon"></span>
+          <span class="bent-ray ray-a"></span>
+          <span class="bent-ray ray-b"></span>
+        </div>
+        <div>
+          <span class="rep-badge schematic" data-copy-en="Historical measurement context" data-copy-zh="历史测量背景">Historical measurement context</span>
+          <h2 data-copy-en="Why totality opened a window onto curved spacetime" data-copy-zh="为什么日全食为弯曲时空打开了观测窗口">Why totality opened a window onto curved spacetime</h2>
+          <p data-copy-en="The Sun's gravity deflects light from background stars by about 1.75 arcseconds for a ray grazing the solar limb. Normally the bright photosphere hides those stars. During totality the Moon blocks the photosphere, allowing the stars' apparent positions near the Sun to be compared with reference photographs. The 1919 result was historically important but uncertain; modern radio, spacecraft, and lensing measurements are far more precise."
+             data-copy-zh="太阳引力会让擦过太阳边缘的背景恒星光线偏折约 1.75 角秒。平时明亮的光球层会淹没这些恒星；日全食时，月球遮住光球层，观测者便可把太阳附近恒星的表观位置与参考照片比较。1919 年结果具有重要历史意义，但不确定度较大；现代射电、航天器与引力透镜测量精度高得多。">The Sun's gravity deflects light from background stars by about 1.75 arcseconds for a ray grazing the solar limb. Normally the bright photosphere hides those stars. During totality the Moon blocks the photosphere, allowing the stars' apparent positions near the Sun to be compared with reference photographs. The 1919 result was historically important but uncertain; modern radio, spacecraft, and lensing measurements are far more precise.</p>
+          <a class="primary-action" href="./relativity.html#evidence" data-copy-en="Continue to the relativity evidence gallery →" data-copy-zh="继续前往相对论证据展区 →">Continue to the relativity evidence gallery →</a>
+        </div>
+      </section>
+
+      <section class="source-band" id="sources">
+        <header>
+          <h2 data-copy-en="Sources and model limits" data-copy-zh="来源与模型边界">Sources and model limits</h2>
+          <p data-copy-en="All illustrations and simulation code on this page are original. No third-party image, texture, or ephemeris is embedded."
+             data-copy-zh="本页所有插图与模拟代码均为原创；未嵌入第三方图片、纹理或星历。">All illustrations and simulation code on this page are original. No third-party image, texture, or ephemeris is embedded.</p>
+        </header>
+        <div class="source-list">
+          <a href="https://gml.noaa.gov/grad/solcalc/calcdetails.html" target="_blank" rel="noopener noreferrer"><strong>NOAA Global Monitoring Laboratory</strong><span data-copy-en="Solar-position equations and atmospheric-refraction convention" data-copy-zh="太阳位置公式与大气折射约定">Solar-position equations and atmospheric-refraction convention</span></a>
+          <a href="https://science.nasa.gov/moon/facts/" target="_blank" rel="noopener noreferrer"><strong>NASA Science</strong><span data-copy-en="Moon radius, orbit, distance, and eclipse geometry" data-copy-zh="月球半径、轨道、距离与食相几何">Moon radius, orbit, distance, and eclipse geometry</span></a>
+          <a href="https://science.nasa.gov/eclipses/types/" target="_blank" rel="noopener noreferrer"><strong>NASA Eclipse Science</strong><span data-copy-en="Umbra, penumbra, total, annular, partial, and lunar eclipses" data-copy-zh="本影、半影、全食、环食、偏食与月食">Umbra, penumbra, total, annular, partial, and lunar eclipses</span></a>
+          <a href="https://science.nasa.gov/eclipses/safety/" target="_blank" rel="noopener noreferrer"><strong>NASA Eclipse Safety</strong><span data-copy-en="When certified solar viewing protection is required" data-copy-zh="何时必须使用合格的太阳观测防护">When certified solar viewing protection is required</span></a>
+          <a href="https://www.einstein-online.info/en/Light_deflection/" target="_blank" rel="noopener noreferrer"><strong>Einstein Online · Max Planck Institute</strong><span data-copy-en="Weak-field light deflection and the eclipse test" data-copy-zh="弱场光线偏折与日食检验">Weak-field light deflection and the eclipse test</span></a>
+        </div>
+        <p class="model-limit" data-copy-en="Scope: solar position uses a compact analytical approximation and local apparent solar time. Eclipse geometry uses spherical bodies and a two-dimensional cross-section; orbit inclination, Earth rotation, topography, atmospheric refraction, exact ephemerides, and safety prediction are outside this model. Never use it to plan eclipse viewing."
+           data-copy-zh="范围：太阳位置采用简化解析近似与当地真太阳时。食相几何采用球形天体与二维截面；轨道倾角、地球自转、地形、大气折射、精密星历及安全预报不在模型范围内。切勿用本模型规划日食观测。">Scope: solar position uses a compact analytical approximation and local apparent solar time. Eclipse geometry uses spherical bodies and a two-dimensional cross-section; orbit inclination, Earth rotation, topography, atmospheric refraction, exact ephemerides, and safety prediction are outside this model. Never use it to plan eclipse viewing.</p>
+        <p class="safety-note" data-copy-en="Eye safety: certified solar viewing protection is required throughout every partial or annular eclipse. Only observers inside the path of totality may look without a filter, and only during the brief total phase."
+           data-copy-zh="观测安全：日偏食与日环食全过程都必须使用合格的太阳观测防护。只有位于全食带内的观察者，才可在短暂的全食阶段摘下滤光设备。">Eye safety: certified solar viewing protection is required throughout every partial or annular eclipse. Only observers inside the path of totality may look without a filter, and only during the brief total phase.</p>
+      </section>
+    </main>
+
+    <footer class="topic-footer site-footer">
+      <span class="site-footer__copy" data-copy-en="Calculated teaching model; angles are physical, drawn sizes and distances are compressed." data-copy-zh="计算化教学模型；角度具有物理意义，绘制的尺寸与距离经过压缩。">Calculated teaching model; angles are physical, drawn sizes and distances are compressed.</span>
+      <span class="site-footer__links">
+        <a href="../LICENSES/THIRD-PARTY-MEDIA.md" data-copy-en="Media licenses" data-copy-zh="媒体许可">Media licenses</a>
+        <a href="./solar-system-galaxy.html" data-copy-en="Expand to the Solar System &amp; Galaxy" data-copy-zh="扩展到太阳系与银河系">Expand to the Solar System &amp; Galaxy</a>
+        <a href="./astrophysics.html" data-copy-en="Return to astrophysics" data-copy-zh="返回天体物理">Return to astrophysics</a>
+        <a href="mailto:micwu@outlook.com" aria-label="Email micwu@outlook.com">micwu@outlook.com</a>
+        <a href="https://github.com/micwu-personal/Physics" aria-label="Open the Physics GitHub repository" data-copy-en="GitHub repository" data-copy-zh="GitHub 仓库">GitHub repository</a>
+      </span>
+    </footer>
+  </div>
+
+  <script src="common.js"></script>
+  <script src="orbital-lab.js"></script>
+</body>
+</html>
