@@ -223,12 +223,16 @@ test('physics orbital lab exhaustive geometry and playback coverage', async ({ p
             return {
               clocks: [0, 12, 23.9999, 24].map(api.formatClock),
               durations: [0, 1.5, 24].map(api.formatDuration),
+              declinations: [-18.5, 0, 18.5].map(api.declinationDescription),
               equator: api.seasonName(171, 0),
               labels: [0, -33.9, 39.9].map(api.latitudeLabel),
               missingElement,
               north: api.seasonName(171, 40),
               polarDay: api.daylightInfo(171, 89),
               polarNight: api.daylightInfo(355, 89),
+              samples: api.sampleAnnual(39.9),
+              seasons: [0, 100, 200, 300].map(day => api.seasonInfo(day, 40)),
+              signed: [-18.5, 18.5].map(api.signedDegrees),
               south: api.seasonName(171, -40)
             };
           });
@@ -240,6 +244,17 @@ test('physics orbital lab exhaustive geometry and playback coverage', async ({ p
           for (let index = 0; index < await dayPresets.count(); index++) {
             await dayPresets.nth(index).click();
           }
+          const latitudePresets = page.locator('[data-latitude]');
+          for (let index = 0; index < await latitudePresets.count(); index++) {
+            await latitudePresets.nth(index).click();
+          }
+          const hourPresets = page.locator('[data-hour]');
+          for (let index = 0; index < await hourPresets.count(); index++) {
+            await hourPresets.nth(index).click();
+          }
+          await page.locator('[data-latitude="39.9"]').click();
+          await page.locator('[data-solar-event="sunrise"]').click();
+          await page.locator('[data-solar-event="sunset"]').click();
           for (const latitude of [-89, 0, 89]) {
             await setRange(page.locator('#latitudeControl'), latitude);
           }
@@ -257,8 +272,19 @@ test('physics orbital lab exhaustive geometry and playback coverage', async ({ p
           await page.waitForTimeout(80);
           await page.locator('#playYear').click();
           await page.locator('#seasonReset').click();
+          const orbitBox = await page.locator('#systemCanvas').boundingBox();
+          await page.mouse.click(orbitBox.x + orbitBox.width * 0.47, orbitBox.y + orbitBox.height * 0.45);
+          await page.mouse.click(orbitBox.x + orbitBox.width * 0.47, orbitBox.y + orbitBox.height * 0.25);
+          await setRange(page.locator('#dayControl'), 171);
+          await setRange(page.locator('#latitudeControl'), 89);
+          await page.evaluate(() => {
+            const sunrise = document.querySelector('[data-solar-event="sunrise"]');
+            sunrise.disabled = false;
+            sunrise.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+          });
 
           await page.locator('[data-lab-mode="eclipses"]').click();
+          await page.mouse.click(orbitBox.x + orbitBox.width * 0.84, orbitBox.y + orbitBox.height * 0.45);
           await page.locator('[data-eclipse-type="solar"]').click();
           await setRange(page.locator('#distanceControl'), 356500);
           await setRange(page.locator('#alignmentControl'), 0);
@@ -266,6 +292,7 @@ test('physics orbital lab exhaustive geometry and playback coverage', async ({ p
           await setRange(page.locator('#distanceControl'), 406700);
           await setRange(page.locator('#observerControl'), 0.04);
           await setRange(page.locator('#observerControl'), -0.4);
+          await setRange(page.locator('#alignmentControl'), -0.4);
           await setRange(page.locator('#alignmentControl'), 1.35);
 
           await page.locator('[data-eclipse-type="lunar"]').click();

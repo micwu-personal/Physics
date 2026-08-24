@@ -44,6 +44,11 @@ for (const language of ['en', 'zh-CN']) {
     const errors = watchPage(page);
     await preparePage(page, path, language, { motionPreference: 'pause' });
     await page.locator('[data-lab-mode="eclipses"]').click();
+    await expect(page.locator('#orbitHint')).toBeHidden();
+    await expect(page.locator('#systemCanvas')).toHaveAttribute('tabindex', '-1');
+    await expect(page.locator('#systemCanvas')).toHaveAttribute('aria-label', language === 'en'
+      ? 'Sun Earth Moon eclipse and shadow geometry'
+      : '太阳地球月球食相与影区几何');
 
     await setRange(page.locator('#distanceControl'), 356500);
     await setRange(page.locator('#alignmentControl'), 0);
@@ -59,6 +64,50 @@ for (const language of ['en', 'zh-CN']) {
     await page.locator('[data-eclipse-type="lunar"]').click();
     await setRange(page.locator('#alignmentControl'), 0);
     await expect(page.locator('#metricValueA')).toContainText(language === 'en' ? 'Total lunar eclipse' : '月全食');
+
+    await page.setViewportSize({ width: 390, height: 844 });
+    await assertLayout(page);
+    await assertNoErrors(errors);
+  });
+
+  test(`Orbital lab restores presets and complementary season views in ${language}`, async ({ page }) => {
+    const errors = watchPage(page);
+    await preparePage(page, path, language, { motionPreference: 'pause' });
+
+    await expect(page.locator('#seasonCanvas')).toBeVisible();
+    await expect(page.locator('#horizonCanvas')).toBeVisible();
+    await expect(page.locator('#annualCanvas')).toBeVisible();
+
+    await page.locator('[data-latitude="-66.56"]').click();
+    await expect(page.locator('#latitudeOutput')).toContainText('66.6');
+    await page.locator('[data-latitude="39.9"]').click();
+    await expect(page.locator('[data-latitude="39.9"]')).toHaveAttribute('aria-pressed', 'true');
+
+    await setRange(page.locator('#dayControl'), 279);
+    await expect(page.locator('#seasonBadge')).toContainText(language === 'en' ? 'autumn' : '秋季');
+    await expect(page.locator('#metricValueE')).toHaveText(/[+-]\d+\.\d°/);
+    await expect(page.locator('#metricValueF')).toContainText(language === 'en' ? 'Subsolar point' : '太阳直射点');
+
+    const sunrise = page.locator('[data-solar-event="sunrise"]');
+    await sunrise.click();
+    await expect(sunrise).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.locator('#timeOutput')).not.toHaveText('12:00');
+    await page.locator('[data-hour="12"]').click();
+    await expect(page.locator('#timeOutput')).toHaveText('12:00');
+    await setRange(page.locator('#dayControl'), 171);
+    await setRange(page.locator('#latitudeControl'), 10);
+    await expect(page.locator('#horizonDescription')).toContainText(language === 'en' ? 'Face north' : '面向北方');
+
+    const orbit = page.locator('#systemCanvas');
+    const box = await orbit.boundingBox();
+    await page.mouse.click(box.x + box.width * 0.47, box.y + box.height * 0.25);
+    await expect.poll(async () => Number(await page.locator('#dayControl').inputValue())).toBeGreaterThan(70);
+    await expect.poll(async () => Number(await page.locator('#dayControl').inputValue())).toBeLessThan(90);
+
+    const annualBefore = await page.locator('#annualCanvas').evaluate(canvas => canvas.toDataURL());
+    await page.locator('[data-latitude="0"]').click();
+    const annualAfter = await page.locator('#annualCanvas').evaluate(canvas => canvas.toDataURL());
+    expect(annualAfter).not.toBe(annualBefore);
 
     await page.setViewportSize({ width: 390, height: 844 });
     await assertLayout(page);

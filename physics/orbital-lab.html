@@ -93,6 +93,16 @@
               </label>
               <input id="latitudeControl" type="range" min="-90" max="90" value="39.9" step="0.1">
               <div class="range-ends"><span data-copy-en="South Pole" data-copy-zh="南极">South Pole</span><span data-copy-en="Equator" data-copy-zh="赤道">Equator</span><span data-copy-en="North Pole" data-copy-zh="北极">North Pole</span></div>
+              <div class="preset-row latitude-presets" aria-label="Latitude presets" data-aria-en="Latitude presets" data-aria-zh="纬度预设">
+                <button type="button" data-latitude="0" data-copy-en="Equator" data-copy-zh="赤道">Equator</button>
+                <button type="button" data-latitude="23.44" data-copy-en="N tropic" data-copy-zh="北回归线">N tropic</button>
+                <button type="button" data-latitude="39.9" data-copy-en="Beijing" data-copy-zh="北京">Beijing</button>
+                <button type="button" data-latitude="66.56" data-copy-en="N Arctic Circle" data-copy-zh="北极圈">N Arctic Circle</button>
+                <button type="button" data-latitude="90" data-copy-en="North Pole" data-copy-zh="北极">North Pole</button>
+                <button type="button" data-latitude="-23.44" data-copy-en="S tropic" data-copy-zh="南回归线">S tropic</button>
+                <button type="button" data-latitude="-66.56" data-copy-en="S Antarctic Circle" data-copy-zh="南极圈">S Antarctic Circle</button>
+                <button type="button" data-latitude="-90" data-copy-en="South Pole" data-copy-zh="南极">South Pole</button>
+              </div>
             </div>
 
             <div class="range-control">
@@ -102,6 +112,13 @@
               </label>
               <input id="timeControl" type="range" min="0" max="24" value="12" step="0.05">
               <div class="range-ends"><span>00:00</span><span>12:00</span><span>24:00</span></div>
+              <div class="preset-row time-presets" aria-label="Solar-time presets" data-aria-en="Solar-time presets" data-aria-zh="太阳时预设">
+                <button type="button" data-solar-event="sunrise" data-copy-en="Today's sunrise" data-copy-zh="当天日出">Today's sunrise</button>
+                <button type="button" data-hour="9" data-copy-en="Morning" data-copy-zh="上午">Morning</button>
+                <button type="button" data-hour="12" data-copy-en="Solar noon" data-copy-zh="太阳正午">Solar noon</button>
+                <button type="button" data-solar-event="sunset" data-copy-en="Today's sunset" data-copy-zh="当天日落">Today's sunset</button>
+                <button type="button" data-hour="0" data-copy-en="Midnight" data-copy-zh="午夜">Midnight</button>
+              </div>
             </div>
 
             <div class="transport-row">
@@ -170,10 +187,11 @@
             <div>
               <h2 id="systemTitle">Why seasons change</h2>
               <p id="systemSubtitle">Earth's axis keeps nearly the same direction as Earth travels around the Sun.</p>
+              <p class="instrument-hint" id="orbitHint" data-copy-en="Click the orbit to choose a date; use the date slider for keyboard control." data-copy-zh="点击轨道可直接选择日期；键盘操作请使用日期滑块。">Click the orbit to choose a date; use the date slider for keyboard control.</p>
             </div>
             <span class="representation-label" data-copy-en="Not to scale" data-copy-zh="非按比例">Not to scale</span>
           </header>
-          <canvas id="systemCanvas" role="img" aria-label="Sun Earth Moon system geometry" data-aria-en="Sun Earth Moon system geometry" data-aria-zh="太阳地球月球系统几何">Sun–Earth–Moon system geometry.</canvas>
+          <canvas id="systemCanvas" role="img" tabindex="0" aria-label="Sun Earth Moon system geometry; click the orbit to choose a date" data-aria-en="Sun Earth Moon system geometry; click the orbit to choose a date" data-aria-zh="太阳地球月球系统几何；点击轨道可选择日期">Sun–Earth–Moon system geometry.</canvas>
           <div id="systemLegend" class="instrument-legend"></div>
         </section>
 
@@ -191,8 +209,92 @@
             <div><dt id="metricLabelB">Azimuth</dt><dd id="metricValueB">180°</dd></div>
             <div><dt id="metricLabelC">Daylight</dt><dd id="metricValueC">14 h 51 min</dd></div>
             <div><dt id="metricLabelD">Sunrise / sunset</dt><dd id="metricValueD">04:35 / 19:25</dd></div>
+            <div><dt id="metricLabelE">Solar declination</dt><dd id="metricValueE">+23.4°</dd></div>
+            <div><dt id="metricLabelF">Subsolar point</dt><dd id="metricValueF">23.4° N</dd></div>
           </dl>
         </section>
+      </section>
+
+      <section id="seasonLearning" class="season-learning" aria-label="Season and local-sky details" data-aria-en="Season and local-sky details" data-aria-zh="季节与当地天空详情">
+        <article class="season-profile">
+          <header>
+            <div>
+              <span class="season-badge" id="seasonBadge">Northern Hemisphere · summer</span>
+              <h2 id="seasonName">June solstice</h2>
+              <p id="seasonDate">21 Jun · orbit day 172</p>
+            </div>
+            <span class="representation-label" data-copy-en="Current season" data-copy-zh="当前季节">Current season</span>
+          </header>
+          <div class="season-profile-body">
+            <canvas id="seasonCanvas" role="img" aria-label="Earth's axial tilt and incoming sunlight" data-aria-en="Earth's axial tilt and incoming sunlight" data-aria-zh="地轴倾角与入射太阳光">Earth's axial tilt and incoming sunlight.</canvas>
+            <div>
+              <p class="season-copy" id="seasonExplanation">The Northern Hemisphere tilts sunward, so sunlight arrives higher and daylight tends to last longer.</p>
+              <dl class="fact-list">
+                <div><dt data-copy-en="Earth rotation" data-copy-zh="地球自转">Earth rotation</dt><dd data-copy-en="23 h 56 min sidereal; about 24 h solar" data-copy-zh="恒星日约 23时56分；太阳日约 24小时">23 h 56 min sidereal; about 24 h solar</dd></div>
+                <div><dt data-copy-en="Earth orbit" data-copy-zh="地球公转">Earth orbit</dt><dd data-copy-en="About 365.24 days" data-copy-zh="约 365.24天">About 365.24 days</dd></div>
+                <div><dt data-copy-en="Moon orbit" data-copy-zh="月球公转">Moon orbit</dt><dd data-copy-en="Sidereal month about 27.3 days" data-copy-zh="恒星月约 27.3天">Sidereal month about 27.3 days</dd></div>
+                <div><dt data-copy-en="Drawing scale" data-copy-zh="图示比例">Drawing scale</dt><dd data-copy-en="Body sizes and distances are teaching schematics" data-copy-zh="天体尺寸与距离均为教学示意">Body sizes and distances are teaching schematics</dd></div>
+              </dl>
+            </div>
+          </div>
+        </article>
+
+        <article class="horizon-panel">
+          <header>
+            <div>
+              <h2 data-copy-en="Sun path through one local day" data-copy-zh="当地一天中的太阳轨迹">Sun path through one local day</h2>
+              <p id="horizonDescription">A flattened horizon-time view complements the sky dome: horizontal position is solar time, vertical position is altitude.</p>
+            </div>
+            <div class="path-legend" aria-label="Sun-path legend" data-aria-en="Sun-path legend" data-aria-zh="太阳轨迹图例">
+              <span class="path-key daylight" data-copy-en="Above horizon" data-copy-zh="地平线上">Above horizon</span>
+              <span class="path-key night" data-copy-en="Below horizon" data-copy-zh="地平线下">Below horizon</span>
+              <span class="path-key current" data-copy-en="Current time" data-copy-zh="当前时刻">Current time</span>
+            </div>
+          </header>
+          <div class="horizon-layout">
+            <canvas id="horizonCanvas" role="img" aria-label="Solar altitude through the selected day" data-aria-en="Solar altitude through the selected day" data-aria-zh="所选日期全天太阳仰角">Solar altitude through the selected day.</canvas>
+            <aside class="horizon-stats">
+              <div class="altitude-gauge">
+                <span data-copy-en="Solar altitude" data-copy-zh="太阳仰角">Solar altitude</span>
+                <strong id="gaugeAltitude">73.5°</strong>
+                <svg viewBox="0 0 220 145" role="img" aria-label="Solar-altitude angle gauge" data-aria-en="Solar-altitude angle gauge" data-aria-zh="太阳仰角量角器">
+                  <path d="M20 118 A90 90 0 0 1 200 118" class="gauge-arc"></path>
+                  <line x1="20" y1="118" x2="200" y2="118" class="gauge-horizon"></line>
+                  <line id="gaugeRay" x1="110" y1="118" x2="133" y2="42" class="gauge-ray"></line>
+                  <circle cx="110" cy="118" r="5" class="gauge-origin"></circle>
+                  <text x="18" y="138" data-copy-en="horizon" data-copy-zh="地平线">horizon</text>
+                  <text x="184" y="138">0°</text>
+                  <text x="102" y="18">90°</text>
+                </svg>
+              </div>
+              <dl class="horizon-readouts">
+                <div><dt data-copy-en="Sunrise" data-copy-zh="日出">Sunrise</dt><dd id="horizonSunrise">04:30</dd></div>
+                <div><dt data-copy-en="Sunset" data-copy-zh="日落">Sunset</dt><dd id="horizonSunset">19:30</dd></div>
+                <div><dt data-copy-en="Day/night state" data-copy-zh="昼夜状态">Day/night state</dt><dd id="horizonState">Normal cycle</dd></div>
+                <div><dt data-copy-en="Current direction" data-copy-zh="当前方向">Current direction</dt><dd id="horizonDirection">South</dd></div>
+              </dl>
+            </aside>
+          </div>
+        </article>
+
+        <article class="annual-panel">
+          <header>
+            <div>
+              <h2 data-copy-en="A year of noon altitude and daylight" data-copy-zh="一年中的正午仰角与白昼长度">A year of noon altitude and daylight</h2>
+              <p data-copy-en="Keep latitude fixed and follow how the two seasonal signals change together. The vertical marker is the selected date." data-copy-zh="保持纬度不变，观察两个季节信号如何共同变化；竖线表示所选日期。">Keep latitude fixed and follow how the two seasonal signals change together. The vertical marker is the selected date.</p>
+            </div>
+            <div class="path-legend">
+              <span class="path-key altitude" data-copy-en="Noon altitude" data-copy-zh="正午仰角">Noon altitude</span>
+              <span class="path-key daylight" data-copy-en="Daylight" data-copy-zh="白昼长度">Daylight</span>
+            </div>
+          </header>
+          <canvas id="annualCanvas" role="img" aria-label="Annual noon solar altitude and daylight chart" data-aria-en="Annual noon solar altitude and daylight chart" data-aria-zh="全年正午太阳仰角与白昼长度图">Annual noon solar altitude and daylight chart.</canvas>
+          <dl class="annual-readouts">
+            <div><dt data-copy-en="Highest noon altitude" data-copy-zh="最高正午仰角">Highest noon altitude</dt><dd id="annualMaxAltitude">73.5°</dd></div>
+            <div><dt data-copy-en="Longest daylight" data-copy-zh="最长白昼">Longest daylight</dt><dd id="annualMaxDaylight">15 h 00 min</dd></div>
+            <div><dt data-copy-en="Shortest daylight" data-copy-zh="最短白昼">Shortest daylight</dt><dd id="annualMinDaylight">9 h 15 min</dd></div>
+          </dl>
+        </article>
       </section>
 
       <section class="orbital-explanation" id="science">
