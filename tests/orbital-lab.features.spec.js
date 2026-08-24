@@ -83,10 +83,81 @@ for (const language of ['en', 'zh-CN']) {
     expect(southObserverGeometry.moon.y).toBeLessThan(southObserverGeometry.sun.y);
     await setRange(page.locator('#observerControl'), 0.01);
     await expect(page.locator('#observerOutput')).toContainText(language === 'en' ? 'north' : '北');
+    await setRange(page.locator('#eclipseProgressControl'), -0.7);
+    await expect(page.locator('#eclipseProgressOutput')).toContainText(language === 'en' ? 'Before maximum' : '食甚前');
+    const beforeConjunction = await page.evaluate(() => ({
+      view: window.__orbitalLab.observerGeometry,
+      classification: window.__orbitalLab.eclipseGeometry().classification
+    }));
+    expect(beforeConjunction.view.moon.x).toBeLessThan(beforeConjunction.view.sun.x);
+    const beforeSeparation = Math.hypot(
+      beforeConjunction.view.moon.x - beforeConjunction.view.sun.x,
+      beforeConjunction.view.moon.y - beforeConjunction.view.sun.y
+    );
+    expect(beforeConjunction.classification !== 'none').toBe(
+      beforeSeparation < beforeConjunction.view.moon.radius + beforeConjunction.view.sun.radius
+    );
+    await setRange(page.locator('#eclipseProgressControl'), 0.7);
+    await expect(page.locator('#eclipseProgressOutput')).toContainText(language === 'en' ? 'After maximum' : '食甚后');
+    const afterConjunction = await page.evaluate(() => ({
+      view: window.__orbitalLab.observerGeometry,
+      classification: window.__orbitalLab.eclipseGeometry().classification
+    }));
+    expect(afterConjunction.view.moon.x).toBeGreaterThan(afterConjunction.view.sun.x);
+    const afterSeparation = Math.hypot(
+      afterConjunction.view.moon.x - afterConjunction.view.sun.x,
+      afterConjunction.view.moon.y - afterConjunction.view.sun.y
+    );
+    expect(afterConjunction.classification !== 'none').toBe(
+      afterSeparation < afterConjunction.view.moon.radius + afterConjunction.view.sun.radius
+    );
+    await setRange(page.locator('#eclipseProgressControl'), 0);
+    await setRange(page.locator('#alignmentControl'), -1.35);
+    await setRange(page.locator('#observerControl'), 1);
+    const extremeCrossTrack = await page.evaluate(() => ({
+      view: window.__orbitalLab.observerGeometry,
+      classification: window.__orbitalLab.eclipseGeometry().classification
+    }));
+    const extremeSeparation = Math.hypot(
+      extremeCrossTrack.view.moon.x - extremeCrossTrack.view.sun.x,
+      extremeCrossTrack.view.moon.y - extremeCrossTrack.view.sun.y
+    );
+    expect(extremeCrossTrack.classification).toBe('none');
+    expect(extremeSeparation).toBeGreaterThanOrEqual(
+      extremeCrossTrack.view.moon.radius + extremeCrossTrack.view.sun.radius
+    );
+    await setRange(page.locator('#alignmentControl'), 0);
+    await setRange(page.locator('#observerControl'), -0.5);
+    await setRange(page.locator('#eclipseProgressControl'), 0);
+    const alignmentBeforePlayback = await page.locator('#alignmentControl').inputValue();
+    await page.locator('#playEclipse').click();
+    await page.waitForTimeout(120);
+    await page.locator('#playEclipse').click();
+    expect(Number(await page.locator('#eclipseProgressControl').inputValue())).toBeGreaterThan(-1);
+    await expect(page.locator('#alignmentControl')).toHaveValue(alignmentBeforePlayback);
+    await setRange(page.locator('#eclipseProgressControl'), 0);
 
     await page.locator('[data-eclipse-type="lunar"]').click();
     await setRange(page.locator('#alignmentControl'), 0);
     await expect(page.locator('#metricValueA')).toContainText(language === 'en' ? 'Total lunar eclipse' : '月全食');
+    await expect(page.locator('#systemLegend')).toContainText(language === 'en' ? 'Earth umbra' : '地球本影');
+    await expect(page.locator('#systemLegend')).toContainText(language === 'en' ? 'Earth penumbra' : '地球半影');
+    await expect(page.locator('#systemLegend')).not.toContainText(language === 'en' ? 'antumbra' : '伪本影');
+    for (const distance of [356500, 406700]) {
+      await setRange(page.locator('#distanceControl'), distance);
+      const scaledShadow = await page.evaluate(() => ({
+        system: window.__orbitalLab.systemGeometry,
+        physical: window.__orbitalLab.eclipseGeometry()
+      }));
+      expect(scaledShadow.system.umbraRadius / scaledShadow.system.scale).toBeCloseTo(
+        scaledShadow.physical.lunarUmbraRadius,
+        6
+      );
+      expect(scaledShadow.system.penumbraRadius / scaledShadow.system.scale).toBeCloseTo(
+        scaledShadow.physical.lunarPenumbraRadius,
+        6
+      );
+    }
     const axisMap = await page.evaluate(() => ({
       north: window.__orbitalLab.northToCanvasY(100, 1, 10),
       south: window.__orbitalLab.northToCanvasY(100, -1, 10)
@@ -98,6 +169,31 @@ for (const language of ['en', 'zh-CN']) {
     expect(lunarGeometry.kind).toBe('lunar');
     expect(lunarGeometry.shadow.x).toBe(lunarGeometry.moon.x);
     expect(lunarGeometry.shadow.y).toBeGreaterThan(lunarGeometry.moon.y);
+    await setRange(page.locator('#eclipseProgressControl'), -0.5);
+    await expect(page.locator('#eclipseProgressOutput')).toContainText(language === 'en' ? 'Before maximum' : '食甚前');
+    const lunarBefore = await page.evaluate(() => ({
+      view: window.__orbitalLab.observerGeometry,
+      classification: window.__orbitalLab.eclipseGeometry().classification
+    }));
+    await setRange(page.locator('#eclipseProgressControl'), 0.5);
+    await expect(page.locator('#eclipseProgressOutput')).toContainText(language === 'en' ? 'After maximum' : '食甚后');
+    const lunarAfter = await page.evaluate(() => ({
+      view: window.__orbitalLab.observerGeometry,
+      classification: window.__orbitalLab.eclipseGeometry().classification
+    }));
+    expect(lunarBefore.view.moon.x).toBeLessThan(lunarBefore.view.shadow.x);
+    expect(lunarAfter.view.moon.x).toBeGreaterThan(lunarAfter.view.shadow.x);
+    expect(lunarBefore.view.shadow.x).toBe(lunarAfter.view.shadow.x);
+    for (const state of [lunarBefore, lunarAfter]) {
+      const separation = Math.hypot(
+        state.view.moon.x - state.view.shadow.x,
+        state.view.moon.y - state.view.shadow.y
+      );
+      const touchesUmbra = separation - state.view.moon.radius < state.view.shadow.umbraRadius;
+      const touchesPenumbra = separation - state.view.moon.radius < state.view.shadow.penumbraRadius;
+      expect(state.classification === 'partial-lunar' || state.classification === 'total-lunar').toBe(touchesUmbra);
+      expect(state.classification !== 'none').toBe(touchesPenumbra);
+    }
 
     await page.setViewportSize({ width: 390, height: 844 });
     await assertLayout(page);

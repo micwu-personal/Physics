@@ -225,6 +225,7 @@ test('physics orbital lab exhaustive geometry and playback coverage', async ({ p
               durations: [0, 1.5, 24].map(api.formatDuration),
               declinations: [-18.5, 0, 18.5].map(api.declinationDescription),
               apparentDirections: [[0, 0], [1, 0], [-1, 0]].map(values => api.apparentMoonDirection(...values)),
+              eclipsePhases: [-1, 0, 1].map(api.eclipseProgressLabel),
               equator: api.seasonName(171, 0),
               labels: [0, -33.9, 39.9].map(api.latitudeLabel),
               missingElement,
@@ -237,6 +238,7 @@ test('physics orbital lab exhaustive geometry and playback coverage', async ({ p
               samples: api.sampleAnnual(39.9),
               seasons: [0, 100, 200, 300].map(day => api.seasonInfo(day, 40)),
               signed: [-18.5, 18.5].map(api.signedDegrees),
+              systemGeometry: api.systemGeometry,
               south: api.seasonName(171, -40)
             };
           });
@@ -298,8 +300,12 @@ test('physics orbital lab exhaustive geometry and playback coverage', async ({ p
           await setRange(page.locator('#observerControl'), -0.4);
           await setRange(page.locator('#alignmentControl'), -0.4);
           await setRange(page.locator('#alignmentControl'), 1.35);
+          for (const progress of [-1, 0, 1]) {
+            await setRange(page.locator('#eclipseProgressControl'), progress);
+          }
 
           await page.locator('[data-eclipse-type="lunar"]').click();
+          await setRange(page.locator('#eclipseProgressControl'), 0);
           for (const alignment of [0, 0.6, 1, 1.35]) {
             await setRange(page.locator('#alignmentControl'), alignment);
           }
@@ -330,6 +336,11 @@ test('physics orbital lab exhaustive geometry and playback coverage', async ({ p
             api.stopPlayback();
             api.animate(0);
             api.togglePlayback('day');
+            api.stopPlayback();
+            api.state.playing = 'eclipse';
+            api.state.eclipseProgress = 1;
+            api.animate(1000);
+            api.animate(1080);
             api.stopPlayback();
           });
           await page.locator('[data-lang="en"]').click();
