@@ -338,6 +338,11 @@ body[data-topic="cosmic-address"] {
   background: var(--cyan);
 }
 
+.cosmic-segmented button:disabled {
+  opacity: 0.46;
+  cursor: not-allowed;
+}
+
 .preset-row button,
 .transport-row button {
   flex: 1 1 auto;

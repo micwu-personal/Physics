@@ -843,6 +843,42 @@
       if (index < 3) arrow(context, x + 24, y - 82, positions[index + 1] - 24, y - 82, palette.gold, 1.5, localized(encounter.next));
     });
     arrow(context, right - 12, y - 74, right + 54, y - 110, palette.green, 2, t('out of ecliptic', '离开黄道面'));
+
+    const selectedIndex = state.voyagerEncounter;
+    const selectedX = positions[selectedIndex];
+    const selectedOffset = selectedIndex % 2 ? -58 : 58;
+    const start = selectedIndex === 0
+      ? { x: left - 38, y: y + 58 }
+      : { x: positions[selectedIndex - 1], y };
+    const encounterPoint = { x: selectedX, y };
+    const end = selectedIndex < positions.length - 1
+      ? { x: positions[selectedIndex + 1], y }
+      : { x: right + 44, y: y - 74 };
+    const progress = state.assistProgress;
+    const quadraticPoint = (from, control, to, amount) => {
+      const inverse = 1 - amount;
+      return {
+        x: inverse * inverse * from.x + 2 * inverse * amount * control.x + amount * amount * to.x,
+        y: inverse * inverse * from.y + 2 * inverse * amount * control.y + amount * amount * to.y
+      };
+    };
+    const probe = progress < 0.68
+      ? quadraticPoint(
+        start,
+        { x: selectedX - 36, y: y + selectedOffset },
+        encounterPoint,
+        progress / 0.68
+      )
+      : quadraticPoint(
+        encounterPoint,
+        { x: selectedX + 36, y: y - selectedOffset },
+        end,
+        (progress - 0.68) / 0.32
+      );
+    circle(context, probe.x, probe.y, 7, palette.paper, palette.cyan, 2);
+    circle(context, probe.x, probe.y, 12 + Math.sin(progress * Math.PI) * 3, 'rgba(0,212,255,0.08)', palette.cyan, 1);
+    line(context, selectedX, y, probe.x, probe.y, 'rgba(0,212,255,0.35)', 1, [3, 4]);
+    text(context, t('VOYAGER 2', '旅行者 2 号'), probe.x, probe.y - 18, palette.cyan, 9, 'center');
     text(context, t('PLANET POSITIONS AND PATH CURVATURE ARE SCHEMATIC', '行星位置与路径曲率均为示意'), width / 2, 28, palette.muted, 9, 'center');
 
     const encounter = voyagerEncounters[state.voyagerEncounter];
@@ -1031,7 +1067,19 @@
     } else {
       drawGalaxyEdge(context, width, height, state.galaxyLayer);
     }
-    text(context, state.galaxyView === 'face' ? t('FACE-ON RECONSTRUCTION', '俯视重建') : t('EDGE-ON RECONSTRUCTION', '侧视重建'), 18, 24, palette.muted, 9);
+    const localGroupMode = state.galaxyLayer === 'neighbors';
+    text(
+      context,
+      localGroupMode
+        ? t('LOCAL GROUP SCHEMATIC', '本星系群示意')
+        : state.galaxyView === 'face'
+          ? t('FACE-ON RECONSTRUCTION', '俯视重建')
+          : t('EDGE-ON RECONSTRUCTION', '侧视重建'),
+      18,
+      24,
+      palette.muted,
+      9
+    );
     const summaries = {
       stars: {
         title: t('Luminous structure', '发光结构'),
@@ -1047,7 +1095,12 @@
       }
     };
     const summary = summaries[state.galaxyLayer];
-    $('galaxySummary').innerHTML = `<strong>${summary.title}</strong><span class="data-line">${state.galaxyView === 'face' ? t('face-on model', '俯视模型') : t('edge-on model', '侧视模型')}</span><p>${summary.body}</p>`;
+    const modelLabel = localGroupMode
+      ? t('relative-layout schematic', '相对布局示意')
+      : state.galaxyView === 'face'
+        ? t('face-on model', '俯视模型')
+        : t('edge-on model', '侧视模型');
+    $('galaxySummary').innerHTML = `<strong>${summary.title}</strong><span class="data-line">${modelLabel}</span><p>${summary.body}</p>`;
     $('galaxyCanvasSubtitle').textContent = state.galaxyLayer === 'neighbors'
       ? t('Galaxy separations are radically compressed.', '星系间距被大幅压缩。')
       : t('A reconstruction from internal observations, not an exterior photograph.', '这是根据内部观测重建的图，并非外部照片。');
@@ -1274,7 +1327,15 @@
       panel.hidden = panel.dataset.assistPanel !== state.assistMode;
     });
     document.querySelectorAll('[data-neighbor]').forEach(button => button.setAttribute('aria-selected', String(button.dataset.neighbor === state.neighbor)));
-    document.querySelectorAll('[data-galaxy-view]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.galaxyView === state.galaxyView)));
+    const localGroupMode = state.galaxyLayer === 'neighbors';
+    document.querySelectorAll('[data-galaxy-view]').forEach(button => {
+      button.setAttribute('aria-pressed', String(button.dataset.galaxyView === state.galaxyView));
+      button.disabled = localGroupMode;
+      button.setAttribute('aria-disabled', String(localGroupMode));
+      button.title = localGroupMode
+        ? t('Face-on and edge-on views apply to Milky Way structure, not this compressed Local Group layout.', '俯视与侧视只适用于银河系结构，不适用于这一压缩的本星系群布局。')
+        : '';
+    });
     document.querySelectorAll('[data-galaxy-layer]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.galaxyLayer === state.galaxyLayer)));
   }
 
@@ -1469,6 +1530,7 @@
   document.querySelectorAll('[data-galaxy-layer]').forEach(button => {
     button.addEventListener('click', () => {
       state.galaxyLayer = button.dataset.galaxyLayer;
+      if (state.galaxyLayer === 'neighbors') state.galaxyView = 'face';
       renderStaticStates();
       drawGalaxy();
     });

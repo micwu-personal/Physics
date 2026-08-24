@@ -353,6 +353,10 @@ test('physics cosmic atlas exhaustive controls coverage', async ({ page }) => {
       for (const encounter of [0, 1, 2, 3]) {
         await setRange(page.locator('#voyagerEncounter'), encounter);
       }
+      await page.evaluate(() => {
+        window.__cosmicAtlas.state.assistProgress = 0.8;
+        window.__cosmicAtlas.renderAll();
+      });
       await page.locator('#assistReset').click();
 
       await setRange(page.locator('#neighborDepth'), 5);
@@ -364,8 +368,10 @@ test('physics cosmic atlas exhaustive controls coverage', async ({ page }) => {
 
       for (const layer of ['stars', 'matter', 'neighbors']) {
         await page.locator(`[data-galaxy-layer="${layer}"]`).click();
-        for (const view of ['face', 'edge']) {
-          await page.locator(`[data-galaxy-view="${view}"]`).click();
+        if (layer !== 'neighbors') {
+          for (const view of ['face', 'edge']) {
+            await page.locator(`[data-galaxy-view="${view}"]`).click();
+          }
         }
       }
       await page.locator('#galaxyReset').click();
