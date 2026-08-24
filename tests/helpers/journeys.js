@@ -27,6 +27,10 @@ export async function exerciseTopLevel(page, app, options = {}) {
     await exercisePhysicsAstro(page, options);
     return;
   }
+  if (app === 'physics-orbital') {
+    await exercisePhysicsOrbital(page, options);
+    return;
+  }
   if (app === 'physics-light') {
     await exercisePhysicsLight(page, options);
     return;
@@ -109,6 +113,7 @@ export async function exercisePhysicsAstro(page, options = {}) {
         painted++;
         colors.add(`${data[offset] >> 3},${data[offset + 1] >> 3},${data[offset + 2] >> 3},${data[offset + 3] >> 5}`);
       }
+
       return { colors: colors.size, painted };
     });
     expect(metrics.painted).toBeGreaterThan(32);
@@ -187,6 +192,24 @@ export async function exercisePhysicsAstro(page, options = {}) {
   await page.locator('[data-lang="zh-CN"]').click();
   await expect(page.locator('html')).toHaveAttribute('lang', 'zh-CN');
   await page.locator('[data-lang="en"]').click();
+}
+
+export async function exercisePhysicsOrbital(page) {
+  await expect(page.locator('#systemCanvas')).toBeVisible();
+  await expect(page.locator('#observerCanvas')).toBeVisible();
+  await setRange(page.locator('#dayControl'), 355);
+  await expect(page.locator('#dayOutput')).not.toHaveText('');
+  await setRange(page.locator('#latitudeControl'), -33.9);
+  await expect(page.locator('#latitudeOutput')).toContainText('33.9');
+  await page.locator('[data-lab-mode="eclipses"]').click();
+  await expect(page.locator('[data-mode-panel="eclipses"]')).toBeVisible();
+  await setRange(page.locator('#distanceControl'), 356500);
+  await setRange(page.locator('#alignmentControl'), 0);
+  await setRange(page.locator('#observerControl'), 0);
+  await expect(page.locator('#metricValueA')).not.toHaveText('');
+  await page.locator('[data-eclipse-type="lunar"]').click();
+  await expect(page.locator('[data-eclipse-type="lunar"]')).toHaveAttribute('aria-pressed', 'true');
+  await page.locator('[data-lab-mode="seasons"]').click();
 }
 
 export async function exercisePhysicsPhase(page, options = {}) {

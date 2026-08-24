@@ -30,6 +30,7 @@
   "physics/labs.js",
   "physics/relativity-deepening.js",
   "physics/light.js",
+  "physics/orbital-lab.js",
   "physics/phase.js",
   "physics/entropy.js",
   "physics/references.js"
