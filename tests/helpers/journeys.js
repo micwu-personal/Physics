@@ -205,6 +205,13 @@ export async function exercisePhysicsOrbital(page) {
   await expect(page.locator('#dayOutput')).not.toHaveText('');
   await setRange(page.locator('#latitudeControl'), -33.9);
   await expect(page.locator('#latitudeOutput')).toContainText('33.9');
+  await page.locator('[data-latitude="39.9"]').click();
+  await page.locator('[data-hour="9"]').click();
+  await page.locator('[data-solar-event="sunrise"]').click();
+  await expect(page.locator('#metricValueE')).not.toHaveText('');
+  await expect(page.locator('#seasonCanvas')).toBeVisible();
+  await expect(page.locator('#horizonCanvas')).toBeVisible();
+  await expect(page.locator('#annualCanvas')).toBeVisible();
   await page.locator('[data-lab-mode="eclipses"]').click();
   await expect(page.locator('[data-mode-panel="eclipses"]')).toBeVisible();
   await setRange(page.locator('#distanceControl'), 356500);

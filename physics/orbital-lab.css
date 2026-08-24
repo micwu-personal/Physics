@@ -191,6 +191,12 @@ body[data-topic="orbital"] {
   background: var(--gold);
 }
 
+.preset-row button:disabled {
+  color: color-mix(in srgb, var(--muted) 52%, transparent);
+  border-color: color-mix(in srgb, var(--line) 60%, transparent);
+  cursor: not-allowed;
+}
+
 .transport-row {
   margin-top: 2px;
 }
@@ -222,6 +228,10 @@ body[data-topic="orbital"] {
   line-height: 1.4;
 }
 
+.instrument-panel > header .instrument-hint {
+  color: var(--cyan);
+}
+
 .representation-label {
   flex: 0 0 auto;
   color: var(--cyan);
@@ -235,6 +245,10 @@ body[data-topic="orbital"] {
   height: 100%;
   min-height: 0;
   background: #050816;
+}
+
+.orbital-workspace[data-mode="seasons"] #systemCanvas {
+  cursor: crosshair;
 }
 
 .instrument-legend {
@@ -294,6 +308,261 @@ body[data-topic="orbital"] {
   overflow-wrap: anywhere;
   color: var(--paper);
   font: 600 12px/1.3 "JetBrains Mono", ui-monospace, monospace;
+}
+
+.season-learning {
+  display: grid;
+  grid-template-columns: minmax(300px, 0.78fr) minmax(0, 1.22fr);
+  gap: 14px;
+  margin-block: 18px 86px;
+}
+
+.season-learning[hidden] {
+  display: none;
+}
+
+.season-profile,
+.horizon-panel,
+.annual-panel {
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--deep);
+}
+
+.season-profile > header,
+.horizon-panel > header,
+.annual-panel > header {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 18px;
+  border-bottom: 1px solid var(--line);
+}
+
+.season-profile h2,
+.horizon-panel h2,
+.annual-panel h2 {
+  margin: 9px 0 0;
+  font-size: clamp(1rem, 2vw, 2rem);
+  line-height: 1.1;
+  letter-spacing: -0.025em;
+}
+
+.season-profile header p,
+.horizon-panel header p,
+.annual-panel header p {
+  max-width: 68ch;
+  margin: 7px 0 0;
+  color: var(--muted);
+  font-size: 0.75rem;
+  line-height: 1.5;
+}
+
+.season-badge {
+  display: inline-flex;
+  min-height: 28px;
+  align-items: center;
+  padding-inline: 10px;
+  border: 1px solid color-mix(in srgb, var(--gold) 52%, transparent);
+  border-radius: 999px;
+  color: var(--gold);
+  font-size: 0.75rem;
+  font-weight: 650;
+}
+
+.season-profile-body {
+  display: grid;
+  grid-template-rows: minmax(220px, 0.8fr) auto;
+}
+
+.season-profile canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 220px;
+  background: #050816;
+}
+
+.season-profile-body > div {
+  padding: 18px;
+  border-top: 1px solid var(--line);
+}
+
+.season-copy {
+  margin: 0 0 18px;
+  color: var(--paper);
+  line-height: 1.65;
+}
+
+.fact-list {
+  display: grid;
+  margin: 0;
+}
+
+.fact-list > div {
+  display: grid;
+  grid-template-columns: minmax(92px, 0.68fr) minmax(0, 1.32fr);
+  gap: 14px;
+  padding-block: 10px;
+  border-top: 1px solid var(--line);
+}
+
+.fact-list dt {
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+.fact-list dd {
+  margin: 0;
+  color: var(--paper);
+  font-size: 0.75rem;
+  text-align: right;
+}
+
+.path-legend {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px 14px;
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+.path-key {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.path-key::before {
+  content: "";
+  width: 18px;
+  height: 3px;
+  border-radius: 999px;
+  background: var(--key, var(--gold));
+}
+
+.path-key.daylight { --key: var(--gold); }
+.path-key.night { --key: var(--violet); }
+.path-key.current,
+.path-key.altitude { --key: var(--cyan); }
+
+.horizon-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 220px;
+  min-height: 490px;
+}
+
+.horizon-panel canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 330px;
+  background: #050816;
+}
+
+.horizon-stats {
+  display: grid;
+  align-content: start;
+  border-left: 1px solid var(--line);
+}
+
+.altitude-gauge {
+  padding: 16px;
+  border-bottom: 1px solid var(--line);
+}
+
+.altitude-gauge > span,
+.horizon-readouts dt,
+.annual-readouts dt {
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+.altitude-gauge strong {
+  display: block;
+  margin-top: 5px;
+  font: 600 1.35rem/1.2 "JetBrains Mono", ui-monospace, monospace;
+}
+
+.altitude-gauge svg {
+  display: block;
+  width: 100%;
+  margin-top: 8px;
+}
+
+.gauge-arc,
+.gauge-horizon {
+  fill: none;
+  stroke: color-mix(in srgb, var(--paper) 24%, transparent);
+  stroke-width: 2;
+}
+
+.gauge-ray {
+  stroke: var(--gold);
+  stroke-width: 4;
+  stroke-linecap: round;
+}
+
+.gauge-origin {
+  fill: var(--paper);
+}
+
+.altitude-gauge text {
+  fill: var(--muted);
+  font-size: 0.75rem;
+}
+
+.horizon-readouts,
+.annual-readouts {
+  display: grid;
+  margin: 0;
+}
+
+.horizon-readouts > div {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--line);
+}
+
+.horizon-readouts > div:last-child {
+  border-bottom: 0;
+}
+
+.horizon-readouts dd,
+.annual-readouts dd {
+  margin: 4px 0 0;
+  color: var(--paper);
+  font: 600 0.75rem/1.35 "JetBrains Mono", ui-monospace, monospace;
+}
+
+.annual-panel {
+  grid-column: 1 / -1;
+}
+
+.annual-panel canvas {
+  display: block;
+  width: 100%;
+  height: 360px;
+  min-height: 360px;
+  background: #050816;
+}
+
+.annual-readouts {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  border-top: 1px solid var(--line);
+}
+
+.annual-readouts > div {
+  min-width: 0;
+  padding: 14px 18px;
+  border-right: 1px solid var(--line);
+}
+
+.annual-readouts > div:last-child {
+  border-right: 0;
 }
 
 .orbital-explanation,
@@ -541,6 +810,14 @@ body[data-topic="orbital"] {
   .source-band > header {
     grid-template-columns: 1fr;
   }
+
+  .season-learning {
+    grid-template-columns: 1fr;
+  }
+
+  .annual-panel {
+    grid-column: auto;
+  }
 }
 
 @media (max-width: 700px) {
@@ -670,6 +947,40 @@ body[data-topic="orbital"] {
   .source-list a:last-child {
     border-bottom: 0;
   }
+
+  .season-learning {
+    margin-bottom: 66px;
+  }
+
+  .season-profile > header,
+  .horizon-panel > header,
+  .annual-panel > header {
+    display: block;
+  }
+
+  .season-profile .representation-label,
+  .horizon-panel .path-legend,
+  .annual-panel .path-legend {
+    display: flex;
+    justify-content: flex-start;
+    margin-top: 12px;
+  }
+
+  .horizon-layout {
+    grid-template-columns: 1fr;
+    min-height: 0;
+  }
+
+  .horizon-stats {
+    grid-template-columns: minmax(180px, 0.8fr) minmax(0, 1.2fr);
+    border-top: 1px solid var(--line);
+    border-left: 0;
+  }
+
+  .altitude-gauge {
+    border-right: 1px solid var(--line);
+    border-bottom: 0;
+  }
 }
 
 @media (max-width: 410px) {
@@ -685,6 +996,29 @@ body[data-topic="orbital"] {
     grid-column: auto;
   }
 
+  .horizon-stats,
+  .annual-readouts {
+    grid-template-columns: 1fr;
+  }
+
+  .altitude-gauge,
+  .annual-readouts > div {
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .annual-readouts > div:last-child {
+    border-bottom: 0;
+  }
+
+  .fact-list > div {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+
+  .fact-list dd {
+    text-align: left;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
