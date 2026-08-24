@@ -38,7 +38,7 @@
   };
   const clamp = (value, minimum, maximum) => Math.min(maximum, Math.max(minimum, value));
   const mix = (start, end, amount) => start + (end - start) * amount;
-  const zh = () => window.PhysicsUI?.language === 'zh-CN';
+  const zh = () => window.PhysicsUI.language === 'zh-CN';
   const t = (en, chinese) => zh() ? chinese : en;
   const fixed = (value, digits = 1) => Number(value).toFixed(digits);
 
@@ -55,7 +55,7 @@
 
   function resizeCanvas(scene) {
     const rect = scene.canvas.getBoundingClientRect();
-    const ratio = Math.min(window.devicePixelRatio || 1, 2);
+    const ratio = clamp(window.devicePixelRatio, 1, 2);
     const width = Math.max(1, Math.round(rect.width));
     const height = Math.max(1, Math.round(rect.height));
     if (scene.width === width && scene.height === height) return;
@@ -803,7 +803,7 @@
       return;
     }
     stopPlayback();
-    window.PhysicsUI?.requestMotion();
+    window.PhysicsUI.requestMotion();
     state.playing = mode;
     frame = requestAnimationFrame(animate);
     render();
@@ -885,9 +885,20 @@
 
   window.__orbitalLab = Object.freeze({
     state,
+    requireElement: $,
+    dateLabel,
+    formatClock,
+    formatDuration,
     solarDeclination,
     solarPosition,
     daylightInfo,
+    seasonName,
+    latitudeLabel,
+    azimuthName,
+    classificationName,
+    animate,
+    stopPlayback,
+    togglePlayback,
     eclipseGeometry,
     render
   });

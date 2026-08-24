@@ -1,7 +1,7 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import { expect, test } from '@playwright/test';
 import { expectVisualScenario, fieldVisualScenarios, readFieldVisualState } from './helpers/field-visuals.js';
-import { exerciseBigBang, exerciseLanding, exerciseParticleZoo, exercisePeriodicTable, exercisePhysicsArea, exercisePhysicsAstro, exercisePhysicsAtlas, exercisePhysicsEntropy, exercisePhysicsField, exercisePhysicsLight, exercisePhysicsPhase } from './helpers/journeys.js';
+import { exerciseBigBang, exerciseLanding, exerciseParticleZoo, exercisePeriodicTable, exercisePhysicsArea, exercisePhysicsAstro, exercisePhysicsAtlas, exercisePhysicsEntropy, exercisePhysicsField, exercisePhysicsLight, exercisePhysicsOrbital, exercisePhysicsPhase } from './helpers/journeys.js';
 import {
   blockExternalAssets,
   installDeterminism,
@@ -17,6 +17,7 @@ const journeys = [
   { id: 'physics-relativity', path: '/physics/relativity.html', run: exercisePhysicsArea },
   { id: 'physics-quantum', path: '/physics/quantum.html', run: exercisePhysicsArea },
   { id: 'physics-astro', path: '/physics/astrophysics.html', run: exercisePhysicsAstro },
+  { id: 'physics-orbital', path: '/physics/orbital-lab.html', run: exercisePhysicsOrbital },
   { id: 'physics-light', path: '/physics/electrodynamics.html', run: exercisePhysicsLight },
   { id: 'physics-phase', path: '/physics/phase-transitions.html', run: exercisePhysicsPhase },
   { id: 'physics-entropy', path: '/physics/entropy-information.html', run: exercisePhysicsEntropy },
@@ -179,6 +180,103 @@ for (const journey of journeys) {
     });
   }
 }
+
+test('physics orbital lab exhaustive geometry and playback coverage', async ({ page }) => {
+  await collectCoverage(page, 'physics-orbital-exhaustive', async () => {
+    await preparePage(page, '/physics/orbital-lab.html', 'en', { motionPreference: 'pause' });
+
+    const helpers = await page.evaluate(() => {
+      const api = window.__orbitalLab;
+      let missingElement = false;
+      try {
+        api.requireElement('coverage-missing-orbital-element');
+      } catch {
+        missingElement = true;
+      }
+      return {
+        clocks: [0, 12, 23.9999, 24].map(api.formatClock),
+        durations: [0, 1.5, 24].map(api.formatDuration),
+        equator: api.seasonName(171, 0),
+        labels: [0, -33.9, 39.9].map(api.latitudeLabel),
+        missingElement,
+        north: api.seasonName(171, 40),
+        polarDay: api.daylightInfo(171, 89),
+        polarNight: api.daylightInfo(355, 89),
+        south: api.seasonName(171, -40)
+      };
+    });
+    expect(helpers.missingElement).toBe(true);
+    expect(helpers.polarDay.kind).toBe('polar-day');
+    expect(helpers.polarNight.kind).toBe('polar-night');
+
+    const dayPresets = page.locator('[data-day]');
+    for (let index = 0; index < await dayPresets.count(); index++) {
+      await dayPresets.nth(index).click();
+    }
+    for (const latitude of [-89, 0, 89]) {
+      await setRange(page.locator('#latitudeControl'), latitude);
+    }
+    for (const hour of [0, 12, 23.999]) {
+      await setRange(page.locator('#timeControl'), hour);
+    }
+    await setRange(page.locator('#dayControl'), 355);
+    await setRange(page.locator('#latitudeControl'), 66.56);
+    await setRange(page.locator('#timeControl'), 12);
+
+    await page.locator('#playDay').click();
+    await page.waitForTimeout(80);
+    await page.locator('#playDay').click();
+    await page.locator('#playYear').click();
+    await page.waitForTimeout(80);
+    await page.locator('#playYear').click();
+    await page.locator('#seasonReset').click();
+
+    await page.locator('[data-lab-mode="eclipses"]').click();
+    await page.locator('[data-eclipse-type="solar"]').click();
+    await setRange(page.locator('#distanceControl'), 356500);
+    await setRange(page.locator('#alignmentControl'), 0);
+    await setRange(page.locator('#observerControl'), 0);
+    await setRange(page.locator('#distanceControl'), 406700);
+    await setRange(page.locator('#observerControl'), 0.04);
+    await setRange(page.locator('#observerControl'), -0.4);
+    await setRange(page.locator('#alignmentControl'), 1.35);
+
+    await page.locator('[data-eclipse-type="lunar"]').click();
+    for (const alignment of [0, 0.6, 1, 1.35]) {
+      await setRange(page.locator('#alignmentControl'), alignment);
+    }
+    await page.evaluate(() => {
+      window.__orbitalLab.state.alignment = 2;
+      window.__orbitalLab.render();
+    });
+    await page.evaluate(() => {
+      window.__orbitalLab.state.alignment = 1.34;
+      window.__orbitalLab.render();
+    });
+    await page.locator('#playEclipse').click();
+    await page.waitForTimeout(80);
+    await page.locator('#playEclipse').click();
+    await page.locator('#eclipseReset').click();
+
+    await page.locator('#playEclipse').click();
+    await page.locator('.motion-toggle').click();
+    await page.locator('[data-lang="zh-CN"]').click();
+    await page.locator('[data-lab-mode="seasons"]').click();
+    await page.evaluate(() => {
+      const api = window.__orbitalLab;
+      api.dateLabel(171);
+      api.azimuthName(180);
+      for (const classification of ['none', 'partial', 'total', 'annular', 'total-lunar', 'partial-lunar', 'penumbral-lunar']) {
+        api.classificationName(classification);
+      }
+      api.stopPlayback();
+      api.animate(0);
+      api.togglePlayback('day');
+      api.stopPlayback();
+    });
+    await page.locator('[data-lang="en"]').click();
+  });
+});
 
 for (const [id, navigatorLanguage] of [['zh', 'zh-CN'], ['en', 'en-US'], ['empty', '']]) {
   for (const [app, path, storageKey, exercise] of [
