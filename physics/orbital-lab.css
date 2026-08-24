@@ -201,6 +201,17 @@ body[data-topic="orbital"] {
   margin-top: 2px;
 }
 
+.axis-convention {
+  margin: 0;
+  padding: 11px 12px;
+  border: 1px solid color-mix(in srgb, var(--cyan) 38%, var(--line));
+  border-radius: 8px;
+  color: var(--paper);
+  background: color-mix(in srgb, var(--cyan) 7%, var(--deep));
+  font-size: 0.75rem;
+  line-height: 1.5;
+}
+
 .live-summary {
   margin: auto 0 0;
   padding-top: 12px;
