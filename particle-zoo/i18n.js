@@ -635,7 +635,7 @@ const LOCALES = {
     'journey.home': '故事线',
     'journey.field': '量子专题',
     'aria.controls': '页面控制',
-    'aria.brandHome': '米克乐的宇宙',
+    'aria.brandHome': '米乐的宇宙',
     'aria.sections': '粒子动物园主题分区',
     'aria.detector': '对撞机探测器各层的简化横截面',
     'alt.atlas': 'ATLAS 重建的四缪子希格斯候选事例显示',

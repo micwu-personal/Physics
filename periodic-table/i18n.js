@@ -132,7 +132,7 @@ const LOCALES = {
     'detail.step':'在元素之间切换','detail.prev':'上一个元素','detail.next':'下一个元素',
     'journey.field':'量子专题',
     'aria.controls':'页面控制',
-    'aria.brandHome':'米克乐的宇宙',
+    'aria.brandHome':'米乐的宇宙',
     'aria.bohr':'历史玻尔电子壳层教学示意图',
     'aria.orbital':'可旋转的三维原子轨道或杂化模型表面',
     'alt.hydrogen':'主量子数 n 从 1 到 4 的氢原子计算概率密度图',
