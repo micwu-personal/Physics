@@ -216,6 +216,45 @@ for (const language of ['en', 'zh-CN']) {
     await expect(page.locator('#seasonCanvas')).toBeVisible();
     await expect(page.locator('#horizonCanvas')).toBeVisible();
     await expect(page.locator('#annualCanvas')).toBeVisible();
+    const expectedToday = await page.evaluate(() => {
+      const now = new Date();
+      const ordinal = Math.floor(
+        (Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()) - Date.UTC(now.getFullYear(), 0, 1)) / 86400000
+      );
+      const year = now.getFullYear();
+      const leap = year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
+      return ordinal - (leap && (now.getMonth() > 1 || (now.getMonth() === 1 && now.getDate() === 29)) ? 1 : 0);
+    });
+    await expect(page.locator('#dayControl')).toHaveValue(String(expectedToday));
+    const leapCalendar = await page.evaluate(() => ({
+      dates: [
+        new Date(2024, 1, 29),
+        new Date(2024, 2, 1),
+        new Date(2024, 5, 21),
+        new Date(2024, 11, 31)
+      ].map(window.__orbitalLab.dayOfYear),
+      leapDefault: window.__orbitalLab.initialDate('', new Date(2024, 1, 29)),
+      leapLabel: window.__orbitalLab.displayDateLabel(58, true),
+      queryDefault: window.__orbitalLab.initialDate('?day=171', new Date(2024, 1, 29)),
+      years: [1900, 2000, 2023, 2024].map(window.__orbitalLab.isLeapYear)
+    }));
+    expect(leapCalendar.dates).toEqual([58, 59, 171, 364]);
+    expect(leapCalendar.leapDefault).toEqual({ day: 58, leapDay: true });
+    expect(leapCalendar.leapLabel).toBe(language === 'en' ? '29 Feb' : '2月29日');
+    expect(leapCalendar.queryDefault).toEqual({ day: 171, leapDay: false });
+    expect(leapCalendar.years).toEqual([false, true, false, true]);
+    await expect(page.locator('#systemLegend')).toContainText(language === 'en' ? 'eastward rotation' : '向东自转');
+    await expect(page.locator('#observerSubtitle')).toContainText(language === 'en' ? 'east is left' : '东方在左');
+    await expect(page.locator('#horizonDescription')).toContainText(language === 'en' ? 'N → E → S → W' : '北 → 东 → 南 → 西');
+    const orientation = await page.evaluate(() => ({
+      east: window.__orbitalLab.skyDomePoint(0, 90, 100, 100, 80),
+      west: window.__orbitalLab.skyDomePoint(0, 270, 100, 100, 80),
+      rotation6: window.__orbitalLab.earthRotationAngle(6),
+      rotation7: window.__orbitalLab.earthRotationAngle(7)
+    }));
+    expect(orientation.east.x).toBeLessThan(100);
+    expect(orientation.west.x).toBeGreaterThan(100);
+    expect(orientation.rotation7).toBeGreaterThan(orientation.rotation6);
     await setRange(page.locator('#timeControl'), 6);
     const morningObserver = await page.evaluate(() => window.__orbitalLab.systemGeometry);
     await setRange(page.locator('#timeControl'), 12);
@@ -254,7 +293,6 @@ for (const language of ['en', 'zh-CN']) {
     await expect(page.locator('#timeOutput')).toHaveText('12:00');
     await setRange(page.locator('#dayControl'), 171);
     await setRange(page.locator('#latitudeControl'), 10);
-    await expect(page.locator('#horizonDescription')).toContainText(language === 'en' ? 'Face north' : '面向北方');
 
     const orbit = page.locator('#systemCanvas');
     await orbit.scrollIntoViewIfNeeded();

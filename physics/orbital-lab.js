@@ -26,9 +26,37 @@
     { longitude: 135, latitude: -25, rx: 0.17, ry: 0.12 }
   ];
 
+  function isLeapYear(year) {
+    return year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
+  }
+
+  function dayOfYear(date) {
+    const yearStart = Date.UTC(date.getFullYear(), 0, 1);
+    const localDate = Date.UTC(date.getFullYear(), date.getMonth(), date.getDate());
+    const ordinal = Math.floor((localDate - yearStart) / 86400000);
+    const leapDayReached = isLeapYear(date.getFullYear())
+      && (date.getMonth() > 1 || (date.getMonth() === 1 && date.getDate() === 29));
+    return ordinal - (leapDayReached ? 1 : 0);
+  }
+
+  function initialDate(search = window.location.search, date = new Date()) {
+    const queryValue = new URLSearchParams(search).get('day');
+    const queryDay = queryValue === null ? Number.NaN : Number(queryValue);
+    if (Number.isFinite(queryDay)) {
+      return { day: Math.min(364, Math.max(0, queryDay)), leapDay: false };
+    }
+    return {
+      day: dayOfYear(date),
+      leapDay: isLeapYear(date.getFullYear()) && date.getMonth() === 1 && date.getDate() === 29
+    };
+  }
+
+  const INITIAL_DATE = initialDate();
+
   const state = {
     mode: 'seasons',
-    day: 171,
+    day: INITIAL_DATE.day,
+    leapDay: INITIAL_DATE.leapDay,
     latitude: 39.9,
     hour: 12,
     eclipseType: 'solar',
@@ -151,6 +179,10 @@
   function dateLabel(day) {
     const { month, date } = dateParts(day);
     return zh() ? `${MONTHS['zh-CN'][month]}${date}日` : `${date} ${MONTHS.en[month]}`;
+  }
+
+  function displayDateLabel(day, leapDay = false) {
+    return leapDay && Math.abs(day - 58) < 0.001 ? t('29 Feb', '2月29日') : dateLabel(day);
   }
 
   function formatClock(hour) {
@@ -406,7 +438,7 @@
 
   function projectEarthPoint(latitudeDegrees, longitudeDegrees, rotation, radius) {
     const latitude = latitudeDegrees * DEG;
-    const longitude = longitudeDegrees * DEG - rotation;
+    const longitude = longitudeDegrees * DEG + rotation;
     const depth = Math.cos(latitude) * Math.cos(longitude);
     const sphereX = Math.cos(latitude) * Math.sin(longitude) * radius;
     const sphereY = -Math.sin(latitude) * radius;
@@ -417,6 +449,10 @@
       x: sphereX * tiltCos - sphereY * tiltSin,
       y: sphereX * tiltSin + sphereY * tiltCos
     };
+  }
+
+  function earthRotationAngle(hour) {
+    return (hour - 12) * 15 * DEG;
   }
 
   function drawEarth(context, x, y, radius, toSun, rotation = 0) {
@@ -493,7 +529,7 @@
     const earthX = cx + rx * Math.cos(angle);
     const earthY = cy + ry * Math.sin(angle);
     const earthRadius = clamp(Math.min(width, height) * 0.052, 16, 29);
-    const earthRotation = (state.hour - 12) * 15 * DEG;
+    const earthRotation = earthRotationAngle(state.hour);
     systemScene.orbit = { cx, cy, rx, ry };
 
     context.strokeStyle = 'rgba(0,212,255,.28)';
@@ -565,6 +601,15 @@
     label(context, t('viewed from north of the ecliptic', '从黄道北侧观察'), 16, 18, '#eef2ff', 10);
   }
 
+  function skyDomePoint(altitude, azimuth, cx, cy, radius) {
+    const radialDistance = radius * (1 - altitude / 90);
+    const angle = (-azimuth - 90) * DEG;
+    return {
+      x: cx + Math.cos(angle) * radialDistance,
+      y: cy + Math.sin(angle) * radialDistance
+    };
+  }
+
   function drawSkyDome() {
     clear(observerScene, '#07101f');
     const { context, width, height } = observerScene;
@@ -585,9 +630,9 @@
     line(context, cx - radius, cy, cx + radius, cy, 'rgba(238,242,255,.12)');
     line(context, cx, cy - radius, cx, cy + radius, 'rgba(238,242,255,.12)');
     label(context, t('N', '北'), cx, cy - radius - 10, '#eef2ff', 10, 'center');
-    label(context, t('E', '东'), cx + radius + 10, cy, '#eef2ff', 10, 'center');
+    label(context, t('W', '西'), cx + radius + 10, cy, '#eef2ff', 10, 'center');
     label(context, t('S', '南'), cx, cy + radius + 12, '#eef2ff', 10, 'center');
-    label(context, t('W', '西'), cx - radius - 10, cy, '#eef2ff', 10, 'center');
+    label(context, t('E', '东'), cx - radius - 10, cy, '#eef2ff', 10, 'center');
 
     const samples = [];
     for (let hour = 0; hour <= 24; hour += 0.1) {
@@ -596,9 +641,7 @@
         samples.push(null);
         continue;
       }
-      const r = radius * (1 - position.altitude / 90);
-      const angle = (position.azimuth - 90) * DEG;
-      samples.push({ x: cx + Math.cos(angle) * r, y: cy + Math.sin(angle) * r });
+      samples.push(skyDomePoint(position.altitude, position.azimuth, cx, cy, radius));
     }
 
     context.strokeStyle = '#ffd166';
@@ -617,13 +660,10 @@
     context.stroke();
 
     const current = solarPosition(state.day, state.latitude, state.hour);
-    const currentRadius = radius * (1 - clamp(current.altitude, 0, 90) / 90);
-    const currentAngle = (current.azimuth - 90) * DEG;
-    const sunX = cx + Math.cos(currentAngle) * currentRadius;
-    const sunY = cy + Math.sin(currentAngle) * currentRadius;
+    const currentPoint = skyDomePoint(clamp(current.altitude, 0, 90), current.azimuth, cx, cy, radius);
     if (current.altitude >= 0) {
-      drawSun(context, sunX, sunY, 7);
-      line(context, cx, cy, sunX, sunY, 'rgba(0,212,255,.5)', 1, [3, 4]);
+      drawSun(context, currentPoint.x, currentPoint.y, 7);
+      line(context, cx, cy, currentPoint.x, currentPoint.y, 'rgba(0,212,255,.5)', 1, [3, 4]);
     } else {
       label(context, t('Sun below horizon', '太阳位于地平线下'), cx, cy, '#aeb8d8', 11, 'center');
     }
@@ -658,7 +698,7 @@
       const y = earthY + offset * earthRadius * 0.38;
       line(context, width * 0.62, y, width * 0.96, y, 'rgba(255,209,102,.72)', 1.5);
     }
-    drawEarth(context, earthX, earthY, earthRadius, 0, (state.hour - 12) * 15 * DEG);
+    drawEarth(context, earthX, earthY, earthRadius, 0, earthRotationAngle(state.hour));
 
     const axisDx = Math.sin(tilt) * earthRadius * 1.55;
     const axisDy = Math.cos(tilt) * earthRadius * 1.55;
@@ -690,8 +730,8 @@
     context.fillStyle = '#0b1718';
     context.fillRect(0, horizonY, width, height - horizonY);
 
-    const mapPoint = (hour, altitude) => ({
-      x: left + hour / 24 * (right - left),
+    const mapPoint = (azimuth, altitude) => ({
+      x: left + azimuth / 360 * (right - left),
       y: altitude >= 0
         ? horizonY - altitude / 90 * (horizonY - 34)
         : horizonY + Math.abs(altitude) / 90 * (height - horizonY - 28)
@@ -701,16 +741,28 @@
       line(context, left, point.y, right, point.y, altitude === 0 ? 'rgba(238,242,255,.5)' : 'rgba(238,242,255,.13)');
       label(context, `${altitude}°`, 10, point.y, '#aeb8d8', 9);
     }
-    for (const hour of [0, 6, 12, 18, 24]) {
-      const x = mapPoint(hour, 0).x;
+    const compass = [
+      [0, t('N', '北')],
+      [90, t('E', '东')],
+      [180, t('S', '南')],
+      [270, t('W', '西')],
+      [360, t('N', '北')]
+    ];
+    for (const [azimuth, direction] of compass) {
+      const x = mapPoint(azimuth, 0).x;
       line(context, x, 20, x, height - 24, 'rgba(238,242,255,.08)');
-      label(context, formatClock(hour), x, height - 13, '#aeb8d8', 9, 'center');
+      label(context, `${direction} · ${azimuth === 360 ? 0 : azimuth}°`, x, height - 13, '#aeb8d8', 9, 'center');
     }
 
     const samples = [];
     for (let hour = 0; hour <= 24.001; hour += 0.2) {
       const position = solarPosition(state.day, state.latitude, hour);
-      samples.push({ ...mapPoint(hour, position.altitude), altitude: position.altitude });
+      samples.push({
+        ...mapPoint(position.azimuth, position.altitude),
+        altitude: position.altitude,
+        azimuth: position.azimuth,
+        hour
+      });
     }
     const drawSegments = (visible, color, dash) => {
       context.save();
@@ -719,15 +771,21 @@
       context.setLineDash(dash);
       context.beginPath();
       let drawing = false;
+      let previousX = 0;
       for (const point of samples) {
         const include = visible ? point.altitude >= 0 : point.altitude < 0;
-        if (!include) {
+        const wrapped = drawing && Math.abs(point.x - previousX) > (right - left) * 0.5;
+        if (!include || wrapped) {
           drawing = false;
-          continue;
+          if (!include) continue;
         }
-        if (!drawing) context.moveTo(point.x, point.y);
-        else context.lineTo(point.x, point.y);
+        if (!drawing) {
+          context.moveTo(point.x, point.y);
+        } else {
+          context.lineTo(point.x, point.y);
+        }
         drawing = true;
+        previousX = point.x;
       }
       context.stroke();
       context.restore();
@@ -736,12 +794,15 @@
     drawSegments(true, '#ffd166', []);
 
     const current = solarPosition(state.day, state.latitude, state.hour);
-    const currentPoint = mapPoint(state.hour, current.altitude);
+    const currentPoint = mapPoint(current.azimuth, current.altitude);
     line(context, currentPoint.x, 18, currentPoint.x, height - 26, 'rgba(0,212,255,.72)', 1.5, [4, 5]);
     drawSun(context, currentPoint.x, currentPoint.y, 7);
     label(
       context,
-      t(`Current azimuth ${fixed(current.azimuth)}° ${azimuthName(current.azimuth)}`, `当前方位 ${fixed(current.azimuth)}° · ${azimuthName(current.azimuth)}`),
+      t(
+        `${formatClock(state.hour)} · current azimuth ${fixed(current.azimuth)}° ${azimuthName(current.azimuth)}`,
+        `${formatClock(state.hour)} · 当前方位 ${fixed(current.azimuth)}° · ${azimuthName(current.azimuth)}`
+      ),
       width / 2,
       18,
       '#eef2ff',
@@ -1084,10 +1145,11 @@
     const position = solarPosition(state.day, state.latitude, state.hour);
     const daylight = daylightInfo(state.day, state.latitude);
     const season = seasonInfo(state.day, state.latitude);
-    $('dayOutput').textContent = dateLabel(state.day);
+    const currentDate = displayDateLabel(state.day, state.leapDay);
+    $('dayOutput').textContent = currentDate;
     $('latitudeOutput').textContent = latitudeLabel(state.latitude);
     $('timeOutput').textContent = formatClock(state.hour);
-    $('dayControl').setAttribute('aria-valuetext', dateLabel(state.day));
+    $('dayControl').setAttribute('aria-valuetext', currentDate);
     $('latitudeControl').setAttribute('aria-valuetext', latitudeLabel(state.latitude));
     $('timeControl').setAttribute('aria-valuetext', t(`Local apparent solar time ${formatClock(state.hour)}`, `当地真太阳时 ${formatClock(state.hour)}`));
 
@@ -1098,13 +1160,14 @@
     );
     $('observerTitle').textContent = t('Your local sky', '你的当地天空');
     $('observerSubtitle').textContent = t(
-      'The circle is your horizon; the centre is the zenith directly overhead.',
-      '圆周是地平线，圆心是头顶正上方的天顶。'
+      'Looking upward toward the zenith with north up: east is left and west is right.',
+      '从地面向上仰望天顶，北方朝上：东方在左，西方在右。'
     );
     $('systemLegend').innerHTML = `
       <span class="legend-key" style="--key-color:#00d4ff">${t('fixed axis direction', '固定地轴方向')}</span>
       <span class="legend-key" style="--key-color:#ff6b9d">${t('selected observer', '所选观察者')}</span>
-      <span class="legend-key" style="--key-color:#ffd166">${t('sunlight', '太阳光')}</span>`;
+      <span class="legend-key" style="--key-color:#ffd166">${t('sunlight', '太阳光')}</span>
+      <span class="legend-key" style="--key-color:#7ee8c5">${t('eastward rotation ↺ from North Pole', '从北极上方看向东自转 ↺')}</span>`;
 
     const riseSet = daylight.kind === 'normal'
       ? `${formatClock(daylight.sunrise)} / ${formatClock(daylight.sunset)}`
@@ -1131,22 +1194,20 @@
     );
 
     $('liveSummary').textContent = t(
-      `${dateLabel(state.day)}, ${latitudeLabel(state.latitude)}: ${seasonName(state.day, state.latitude)}. The Sun is ${Math.abs(position.altitude).toFixed(1)}° ${position.altitude >= 0 ? 'above' : 'below'} the horizon.`,
-      `${dateLabel(state.day)}，${latitudeLabel(state.latitude)}：${seasonName(state.day, state.latitude)}。太阳位于地平线${position.altitude >= 0 ? '上' : '下'} ${Math.abs(position.altitude).toFixed(1)}°。`
+      `${currentDate}, ${latitudeLabel(state.latitude)}: ${seasonName(state.day, state.latitude)}. The Sun is ${Math.abs(position.altitude).toFixed(1)}° ${position.altitude >= 0 ? 'above' : 'below'} the horizon.`,
+      `${currentDate}，${latitudeLabel(state.latitude)}：${seasonName(state.day, state.latitude)}。太阳位于地平线${position.altitude >= 0 ? '上' : '下'} ${Math.abs(position.altitude).toFixed(1)}°。`
     );
     $('seasonBadge').textContent = season.badge;
     $('seasonName').textContent = season.title;
     $('seasonDate').textContent = t(
-      `${dateLabel(state.day)} · orbit day ${Math.floor(normalizeDay(state.day)) + 1}`,
-      `${dateLabel(state.day)} · 公转第${Math.floor(normalizeDay(state.day)) + 1}天`
+      `${currentDate} · orbit day ${Math.floor(normalizeDay(state.day)) + 1}`,
+      `${currentDate} · 公转第${Math.floor(normalizeDay(state.day)) + 1}天`
     );
     $('seasonExplanation').textContent = season.explanation;
 
-    const noonAzimuth = solarPosition(state.day, state.latitude, 12).azimuth;
-    const facing = noonAzimuth < 90 || noonAzimuth > 270 ? t('north', '北方') : t('south', '南方');
     $('horizonDescription').textContent = t(
-      `Face ${facing}. This flattened horizon-time view complements the sky dome: horizontal position is solar time, vertical position is altitude.`,
-      `面向${facing}观察。这个展开的地平线—时间视图补充了天空穹顶：横向表示太阳时，纵向表示仰角。`
+      'Cylindrical horizon panorama: horizontal position is compass azimuth N → E → S → W → N; vertical position is altitude. Sunrise appears near east and sunset near west, with seasonal shifts.',
+      '圆柱形地平线全景：横向为罗盘方位 北 → 东 → 南 → 西 → 北；纵向为仰角。日出接近东方、日落接近西方，并随季节偏移。'
     );
     $('gaugeAltitude').textContent = `${fixed(position.altitude)}°`;
     const gaugeAngle = clamp(position.altitude, -90, 90) * DEG;
@@ -1350,7 +1411,10 @@
     const delta = clamp(timestamp - lastTime, 0, 80);
     lastTime = timestamp;
     if (state.playing === 'day') state.hour = (state.hour + delta * 24 / 12000) % 24;
-    if (state.playing === 'year') state.day = (state.day + delta * DAYS / 18000) % DAYS;
+    if (state.playing === 'year') {
+      state.day = (state.day + delta * DAYS / 18000) % DAYS;
+      state.leapDay = false;
+    }
     if (state.playing === 'eclipse') {
       state.eclipseProgress += delta * 2 / 5200;
       if (state.eclipseProgress > 1) state.eclipseProgress = -1;
@@ -1392,6 +1456,7 @@
     $(id).addEventListener('input', event => {
       stopPlayback();
       state[key] = Number(event.currentTarget.value);
+      if (key === 'day') state.leapDay = false;
       if (key === 'latitude') state.locationStatus = 'idle';
       render();
     });
@@ -1425,6 +1490,7 @@
     button.addEventListener('click', () => {
       stopPlayback();
       state.day = Number(button.dataset.day);
+      state.leapDay = false;
       syncInputs();
       render();
     });
@@ -1468,6 +1534,7 @@
     const angle = Math.atan2((y - cy) / ry, (x - cx) / rx);
     stopPlayback();
     state.day = normalizeDay(171 + angle / (2 * Math.PI) * DAYS);
+    state.leapDay = false;
     syncInputs();
     render();
     return true;
@@ -1503,7 +1570,13 @@
   $('playEclipse').addEventListener('click', () => togglePlayback('eclipse'));
   $('seasonReset').addEventListener('click', () => {
     stopPlayback();
-    Object.assign(state, { day: 171, latitude: 39.9, hour: 12, locationStatus: 'idle' });
+    Object.assign(state, {
+      day: INITIAL_DATE.day,
+      leapDay: INITIAL_DATE.leapDay,
+      latitude: 39.9,
+      hour: 12,
+      locationStatus: 'idle'
+    });
     syncInputs();
     render();
   });
@@ -1536,11 +1609,17 @@
     state,
     requireElement: $,
     dateLabel,
+    isLeapYear,
+    dayOfYear,
+    initialDate,
+    displayDateLabel,
     formatClock,
     formatDuration,
     signedDegrees,
     declinationDescription,
     projectEarthPoint,
+    earthRotationAngle,
+    skyDomePoint,
     northToCanvasY,
     northOffsetLabel,
     apparentMoonDirection,

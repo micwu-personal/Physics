@@ -18,7 +18,7 @@ export const entries = [
   { id: 'relativity', app: 'physics-area', path: '/physics/relativity.html', generated: false, title: 'Relativity — Physics Field Atlas', brandPath: '/physics/index.html' },
   { id: 'quantum-mechanics', app: 'physics-area', path: '/physics/quantum.html', generated: false, title: 'Quantum Mechanics — Physics Field Atlas', brandPath: '/physics/index.html' },
   { id: 'astrophysics', app: 'physics-astro', path: '/physics/astrophysics.html', generated: false, title: 'Astrophysics — Physics Field Atlas', brandPath: '/physics/index.html' },
-  { id: 'orbital-lab', app: 'physics-orbital', path: '/physics/orbital-lab.html', generated: false, title: 'Sun–Earth–Moon Observatory — Physics Field Atlas', brandPath: '/physics/index.html' },
+  { id: 'orbital-lab', app: 'physics-orbital', path: '/physics/orbital-lab.html?day=171', generated: false, title: 'Sun–Earth–Moon Observatory — Physics Field Atlas', brandPath: '/physics/index.html' },
   {
     id: 'solar-system-galaxy',
     app: 'physics-cosmos',
