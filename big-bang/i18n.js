@@ -124,7 +124,7 @@ const LOCALES = {
     'journey.home': '故事线',
     'journey.field': '领域',
     'aria.controls': '页面控制',
-    'aria.brandHome': '米乐的宇宙',
+    'aria.brandHome': '米克乐的宇宙',
     'aria.sections': '大爆炸主题分区',
     'aria.machine': '展示宇宙膨胀、物理尺度与关键事件的交互式时空图',
     'alt.wmap': 'WMAP 测得的宇宙微波背景温度涨落全天假彩色图',

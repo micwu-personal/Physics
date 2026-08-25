@@ -237,6 +237,7 @@ test('physics orbital lab exhaustive geometry and playback coverage', async ({ p
               eclipsePhases: [-1, 0, 1].map(api.eclipseProgressLabel),
               equator: api.seasonName(171, 0),
               earthProjection: api.projectEarthPoint(39.9, 0, api.earthRotationAngle(12), 20),
+              earthPhases: [0, 6, 12, 18].map(hour => api.earthRotationPhase(171, hour)),
               labels: [0, -33.9, 39.9].map(api.latitudeLabel),
               initialDates: [
                 api.initialDate('?day=171', new Date(2024, 1, 29)),
@@ -246,6 +247,7 @@ test('physics orbital lab exhaustive geometry and playback coverage', async ({ p
               leapYears: [1900, 2000, 2023, 2024].map(api.isLeapYear),
               missingElement,
               northCanvasY: api.northToCanvasY(100, 1, 10),
+              northPoleLight: [79, 171, 355].map(api.northPoleIllumination),
               northOffsets: [-0.4, 0, 0.4].map(api.northOffsetLabel),
               observerGeometry: api.observerGeometry,
               north: api.seasonName(171, 40),
@@ -319,21 +321,23 @@ test('physics orbital lab exhaustive geometry and playback coverage', async ({ p
           await page.locator('#playYear').click();
           await page.locator('#seasonReset').click();
           const orbitBox = await page.locator('#systemCanvas').boundingBox();
-          await page.mouse.click(orbitBox.x + orbitBox.width * 0.47, orbitBox.y + orbitBox.height * 0.45);
-          await page.mouse.click(orbitBox.x + orbitBox.width * 0.47, orbitBox.y + orbitBox.height * 0.25);
-          await page.mouse.move(orbitBox.x + orbitBox.width * 0.47, orbitBox.y + orbitBox.height * 0.25);
+          const orbitGeometry = await page.evaluate(() => window.__orbitalLab.systemGeometry.orbit);
+          await page.mouse.click(orbitBox.x + orbitGeometry.cx, orbitBox.y + orbitGeometry.cy);
+          await page.mouse.click(orbitBox.x + orbitGeometry.cx, orbitBox.y + orbitGeometry.cy - orbitGeometry.ry);
+          await page.mouse.move(orbitBox.x + orbitGeometry.cx, orbitBox.y + orbitGeometry.cy - orbitGeometry.ry);
           await page.mouse.down();
-          await page.mouse.move(orbitBox.x + orbitBox.width * 0.84, orbitBox.y + orbitBox.height * 0.45, { steps: 4 });
+          await page.mouse.move(orbitBox.x + orbitGeometry.cx + orbitGeometry.rx, orbitBox.y + orbitGeometry.cy, { steps: 4 });
           await page.mouse.up();
           await page.evaluate(() => {
             const canvas = document.querySelector('#systemCanvas');
             const rect = canvas.getBoundingClientRect();
+            const orbit = window.__orbitalLab.systemGeometry.orbit;
             canvas.setPointerCapture = () => {};
             canvas.hasPointerCapture = () => false;
             canvas.dispatchEvent(new PointerEvent('pointerdown', {
               bubbles: true,
-              clientX: rect.left + rect.width * 0.47,
-              clientY: rect.top + rect.height * 0.25,
+              clientX: rect.left + orbit.cx,
+              clientY: rect.top + orbit.cy - orbit.ry,
               pointerId: 91
             }));
             canvas.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, pointerId: 91 }));
@@ -347,7 +351,7 @@ test('physics orbital lab exhaustive geometry and playback coverage', async ({ p
           });
 
           await page.locator('[data-lab-mode="eclipses"]').click();
-          await page.mouse.click(orbitBox.x + orbitBox.width * 0.84, orbitBox.y + orbitBox.height * 0.45);
+          await page.mouse.click(orbitBox.x + orbitGeometry.cx + orbitGeometry.rx, orbitBox.y + orbitGeometry.cy);
           await page.locator('[data-eclipse-type="solar"]').click();
           await setRange(page.locator('#distanceControl'), 356500);
           await setRange(page.locator('#alignmentControl'), 0);

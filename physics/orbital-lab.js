@@ -10,6 +10,18 @@
   const SUN_EARTH_KM = 149597870.7;
   const AXIS_EPSILON = 0.005;
   const EARTH_TILT = -23.44 * DEG;
+  const ORBIT_CAMERA_ANGLE = 58 * DEG;
+  const EARTH_AXIS_WORLD = {
+    x: Math.sin(EARTH_TILT),
+    y: 0,
+    z: Math.cos(EARTH_TILT)
+  };
+  const EARTH_EQUATOR_X = {
+    x: Math.cos(EARTH_TILT),
+    y: 0,
+    z: -Math.sin(EARTH_TILT)
+  };
+  const EARTH_EQUATOR_Y = { x: 0, y: 1, z: 0 };
   const MONTH_DAYS = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
   const MONTHS = {
     en: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
@@ -436,26 +448,112 @@
     circle(context, x, y, radius, '#ffd166');
   }
 
-  function projectEarthPoint(latitudeDegrees, longitudeDegrees, rotation, radius) {
-    const latitude = latitudeDegrees * DEG;
-    const longitude = longitudeDegrees * DEG + rotation;
-    const depth = Math.cos(latitude) * Math.cos(longitude);
-    const sphereX = Math.cos(latitude) * Math.sin(longitude) * radius;
-    const sphereY = -Math.sin(latitude) * radius;
-    const tiltCos = Math.cos(EARTH_TILT);
-    const tiltSin = Math.sin(EARTH_TILT);
+  function dot3(left, right) {
+    return left.x * right.x + left.y * right.y + left.z * right.z;
+  }
+
+  function normalize3(vector) {
+    const magnitude = Math.hypot(vector.x, vector.y, vector.z);
+    return { x: vector.x / magnitude, y: vector.y / magnitude, z: vector.z / magnitude };
+  }
+
+  function cameraVector(vector) {
+    const cosCamera = Math.cos(ORBIT_CAMERA_ANGLE);
+    const sinCamera = Math.sin(ORBIT_CAMERA_ANGLE);
     return {
-      depth,
-      x: sphereX * tiltCos - sphereY * tiltSin,
-      y: sphereX * tiltSin + sphereY * tiltCos
+      x: vector.x,
+      y: vector.y * cosCamera - vector.z * sinCamera,
+      z: vector.y * sinCamera + vector.z * cosCamera
     };
+  }
+
+  function orbitalAngle(day) {
+    return 2 * Math.PI * (day - 171) / DAYS;
+  }
+
+  function sunDirectionWorld(day) {
+    const angle = orbitalAngle(day);
+    return { x: -Math.cos(angle), y: -Math.sin(angle), z: 0 };
   }
 
   function earthRotationAngle(hour) {
     return (hour - 12) * 15 * DEG;
   }
 
-  function drawEarth(context, x, y, radius, toSun, rotation = 0) {
+  function earthRotationPhase(day, hour) {
+    const sun = sunDirectionWorld(day);
+    const axisProjection = dot3(sun, EARTH_AXIS_WORLD);
+    const equatorialSun = normalize3({
+      x: sun.x - axisProjection * EARTH_AXIS_WORLD.x,
+      y: sun.y - axisProjection * EARTH_AXIS_WORLD.y,
+      z: sun.z - axisProjection * EARTH_AXIS_WORLD.z
+    });
+    const subsolarLongitude = Math.atan2(
+      dot3(equatorialSun, EARTH_EQUATOR_Y),
+      dot3(equatorialSun, EARTH_EQUATOR_X)
+    );
+    return subsolarLongitude + earthRotationAngle(hour);
+  }
+
+  function projectEarthPoint(latitudeDegrees, longitudeDegrees, rotation, radius) {
+    const latitude = latitudeDegrees * DEG;
+    const longitude = longitudeDegrees * DEG + rotation;
+    const surface = {
+      x: Math.sin(latitude) * EARTH_AXIS_WORLD.x
+        + Math.cos(latitude) * (
+          Math.cos(longitude) * EARTH_EQUATOR_X.x + Math.sin(longitude) * EARTH_EQUATOR_Y.x
+        ),
+      y: Math.sin(latitude) * EARTH_AXIS_WORLD.y
+        + Math.cos(latitude) * (
+          Math.cos(longitude) * EARTH_EQUATOR_X.y + Math.sin(longitude) * EARTH_EQUATOR_Y.y
+        ),
+      z: Math.sin(latitude) * EARTH_AXIS_WORLD.z
+        + Math.cos(latitude) * (
+          Math.cos(longitude) * EARTH_EQUATOR_X.z + Math.sin(longitude) * EARTH_EQUATOR_Y.z
+        )
+    };
+    const camera = cameraVector(surface);
+    return {
+      depth: camera.z,
+      world: surface,
+      x: camera.x * radius,
+      y: camera.y * radius
+    };
+  }
+
+  function northPoleIllumination(day) {
+    return dot3(EARTH_AXIS_WORLD, sunDirectionWorld(day));
+  }
+
+  function drawNightMask(context, x, y, radius, lightVector) {
+    const size = Math.max(2, Math.ceil(radius * 2));
+    const mask = document.createElement('canvas');
+    mask.width = size;
+    mask.height = size;
+    const maskContext = mask.getContext('2d');
+    const image = maskContext.createImageData(size, size);
+    const light = normalize3(lightVector);
+    for (let pixelY = 0; pixelY < size; pixelY += 1) {
+      for (let pixelX = 0; pixelX < size; pixelX += 1) {
+        const nx = ((pixelX + 0.5) / size) * 2 - 1;
+        const ny = ((pixelY + 0.5) / size) * 2 - 1;
+        const radialSquared = nx * nx + ny * ny;
+        if (radialSquared > 1) continue;
+        const nz = Math.sqrt(1 - radialSquared);
+        const illumination = nx * light.x + ny * light.y + nz * light.z;
+        const twilight = clamp((0.08 - illumination) / 0.16, 0, 1);
+        const offset = (pixelY * size + pixelX) * 4;
+        image.data[offset] = 3;
+        image.data[offset + 1] = 8;
+        image.data[offset + 2] = 24;
+        image.data[offset + 3] = Math.round(twilight * 196);
+      }
+    }
+    maskContext.putImageData(image, 0, 0);
+    context.drawImage(mask, x - radius, y - radius, radius * 2, radius * 2);
+  }
+
+  function drawEarth(context, x, y, radius, lightVector, rotation = 0) {
     context.save();
     context.beginPath();
     context.arc(x, y, radius, 0, Math.PI * 2);
@@ -498,12 +596,7 @@
       context.restore();
     }
 
-    context.save();
-    context.translate(x, y);
-    context.rotate(toSun);
-    context.fillStyle = 'rgba(3,8,24,.72)';
-    context.fillRect(-radius, -radius, radius, radius * 2);
-    context.restore();
+    drawNightMask(context, x, y, radius, lightVector);
 
     context.strokeStyle = 'rgba(238,242,255,.42)';
     context.lineWidth = Math.max(1, radius * 0.055);
@@ -524,12 +617,12 @@
     const cx = width * 0.47;
     const cy = height * 0.45;
     const rx = Math.max(105, Math.min(width * 0.37, width * 0.43));
-    const ry = Math.max(52, height * 0.2);
-    const angle = 2 * Math.PI * (state.day - 171) / DAYS;
+    const ry = Math.max(52, rx * Math.cos(ORBIT_CAMERA_ANGLE));
+    const angle = orbitalAngle(state.day);
     const earthX = cx + rx * Math.cos(angle);
     const earthY = cy + ry * Math.sin(angle);
     const earthRadius = clamp(Math.min(width, height) * 0.052, 16, 29);
-    const earthRotation = earthRotationAngle(state.hour);
+    const earthRotation = earthRotationPhase(state.day, state.hour);
     systemScene.orbit = { cx, cy, rx, ry };
 
     context.strokeStyle = 'rgba(0,212,255,.28)';
@@ -543,23 +636,32 @@
     drawSun(context, cx, cy, clamp(Math.min(width, height) * 0.055, 20, 34));
     line(context, cx, cy, earthX, earthY, 'rgba(255,209,102,.34)', 1.5, [4, 5]);
 
-    const toSun = Math.atan2(cy - earthY, cx - earthX);
-    drawEarth(context, earthX, earthY, earthRadius, toSun, earthRotation);
+    const lightCamera = cameraVector(sunDirectionWorld(state.day));
+    drawEarth(context, earthX, earthY, earthRadius, lightCamera, earthRotation);
 
-    const tilt = EARTH_TILT;
-    const axisDx = Math.sin(tilt) * earthRadius * 1.75;
-    const axisDy = Math.cos(tilt) * earthRadius * 1.75;
-    line(context, earthX - axisDx, earthY + axisDy, earthX + axisDx, earthY - axisDy, '#00d4ff', 2);
-    label(context, 'N', earthX + axisDx + 3, earthY - axisDy, '#00d4ff', 10);
+    const axisCamera = cameraVector(EARTH_AXIS_WORLD);
+    const axisScreenLength = Math.hypot(axisCamera.x, axisCamera.y);
+    const axisDx = axisCamera.x / axisScreenLength * earthRadius * 1.75;
+    const axisDy = axisCamera.y / axisScreenLength * earthRadius * 1.75;
+    line(context, earthX - axisDx, earthY - axisDy, earthX + axisDx, earthY + axisDy, '#00d4ff', 2);
+    label(context, 'N', earthX + axisDx + 3, earthY + axisDy, '#00d4ff', 10);
 
     const observerPoint = projectEarthPoint(state.latitude, 0, earthRotation, earthRadius);
     const observerX = earthX + observerPoint.x;
     const observerY = earthY + observerPoint.y;
     systemScene.lastGeometry = {
       kind: 'season',
+      orbit: { cx, cy, rx, ry },
       earth: { x: earthX, y: earthY, radius: earthRadius },
-      observer: { x: observerX, y: observerY, depth: observerPoint.depth },
-      rotation: earthRotation
+      observer: {
+        x: observerX,
+        y: observerY,
+        depth: observerPoint.depth,
+        illumination: dot3(observerPoint.world, sunDirectionWorld(state.day))
+      },
+      rotation: earthRotation,
+      light: lightCamera,
+      axis: axisCamera
     };
     context.save();
     context.globalAlpha = observerPoint.depth >= 0 ? 1 : 0.38;
@@ -691,25 +793,33 @@
     const earthX = width * 0.36;
     const earthY = height * 0.5;
     const earthRadius = clamp(Math.min(width, height) * 0.25, 42, 68);
-    const tilt = EARTH_TILT;
     const declination = solarDeclination(state.day);
 
     for (let offset = -2; offset <= 2; offset += 1) {
       const y = earthY + offset * earthRadius * 0.38;
       line(context, width * 0.62, y, width * 0.96, y, 'rgba(255,209,102,.72)', 1.5);
     }
-    drawEarth(context, earthX, earthY, earthRadius, 0, earthRotationAngle(state.hour));
+    drawEarth(
+      context,
+      earthX,
+      earthY,
+      earthRadius,
+      { x: 1, y: 0, z: 0 },
+      earthRotationPhase(state.day, state.hour)
+    );
 
-    const axisDx = Math.sin(tilt) * earthRadius * 1.55;
-    const axisDy = Math.cos(tilt) * earthRadius * 1.55;
-    line(context, earthX - axisDx, earthY + axisDy, earthX + axisDx, earthY - axisDy, '#00d4ff', 2.5);
-    const equatorDx = Math.cos(tilt) * earthRadius * 1.12;
-    const equatorDy = Math.sin(tilt) * earthRadius * 1.12;
+    const axisCamera = cameraVector(EARTH_AXIS_WORLD);
+    const axisLength = Math.hypot(axisCamera.x, axisCamera.y);
+    const axisDx = axisCamera.x / axisLength * earthRadius * 1.55;
+    const axisDy = axisCamera.y / axisLength * earthRadius * 1.55;
+    line(context, earthX - axisDx, earthY - axisDy, earthX + axisDx, earthY + axisDy, '#00d4ff', 2.5);
+    const equatorDx = -axisDy * 0.72;
+    const equatorDy = axisDx * 0.72;
     line(context, earthX - equatorDx, earthY - equatorDy, earthX + equatorDx, earthY + equatorDy, 'rgba(238,242,255,.45)');
 
     const subsolarY = earthY - Math.sin(declination * DEG) * earthRadius * 0.84;
     circle(context, earthX + earthRadius * 0.84, subsolarY, 4.5, '#ffd166', '#eef2ff');
-    label(context, t('North axis', '北极方向'), earthX + axisDx + 7, earthY - axisDy, '#00d4ff', 9);
+    label(context, t('North axis', '北极方向'), earthX + axisDx + 7, earthY + axisDy, '#00d4ff', 9);
     label(context, t('sunlight', '太阳光'), width * 0.79, earthY - earthRadius * 0.92, '#ffd166', 9, 'center');
     label(context, signedDegrees(declination), earthX + earthRadius + 12, subsolarY + 14, '#ffd166', 9);
     label(context, t('23.44° axial tilt', '地轴倾角 23.44°'), 14, height - 16, '#aeb8d8', 9);
@@ -1619,6 +1729,8 @@
     declinationDescription,
     projectEarthPoint,
     earthRotationAngle,
+    earthRotationPhase,
+    northPoleIllumination,
     skyDomePoint,
     northToCanvasY,
     northOffsetLabel,

@@ -11,11 +11,11 @@ function topBarSelectors(entry) {
 }
 
 function expectedBrandLabel(language) {
-  return language === 'zh-CN' ? '米乐的宇宙' : "McWoods’ Universe";
+  return language === 'zh-CN' ? '米克乐的宇宙' : "McWoods’ Universe";
 }
 
-function expectedBrandOrders(language) {
-  return language === 'zh-CN' ? { zh: '1', en: '2' } : { zh: '2', en: '1' };
+function expectedBrandOrders() {
+  return { zh: '1', en: '2' };
 }
 
 const canonicalIconSizes = [16, 32, 64];
