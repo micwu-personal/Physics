@@ -17,7 +17,7 @@ const journeys = [
   { id: 'physics-relativity', path: '/physics/relativity.html', run: exercisePhysicsArea },
   { id: 'physics-quantum', path: '/physics/quantum.html', run: exercisePhysicsArea },
   { id: 'physics-astro', path: '/physics/astrophysics.html', run: exercisePhysicsAstro },
-  { id: 'physics-orbital', path: '/physics/orbital-lab.html', run: exercisePhysicsOrbital },
+  { id: 'physics-orbital', path: '/physics/orbital-lab.html?day=171', run: exercisePhysicsOrbital },
   { id: 'physics-cosmos', path: '/physics/solar-system-galaxy.html', run: exercisePhysicsCosmos },
   { id: 'physics-light', path: '/physics/electrodynamics.html', run: exercisePhysicsLight },
   { id: 'physics-phase', path: '/physics/phase-transitions.html', run: exercisePhysicsPhase },
@@ -224,12 +224,26 @@ test('physics orbital lab exhaustive geometry and playback coverage', async ({ p
             }
             return {
               clocks: [0, 12, 23.9999, 24].map(api.formatClock),
+              calendarDays: [
+                new Date(2024, 0, 1),
+                new Date(2024, 1, 29),
+                new Date(2024, 2, 1),
+                new Date(2024, 11, 31)
+              ].map(api.dayOfYear),
               durations: [0, 1.5, 24].map(api.formatDuration),
               declinations: [-18.5, 0, 18.5].map(api.declinationDescription),
+              displayedDates: [api.displayDateLabel(58, false), api.displayDateLabel(58, true)],
               apparentDirections: [[0, 0], [1, 0], [-1, 0]].map(values => api.apparentMoonDirection(...values)),
               eclipsePhases: [-1, 0, 1].map(api.eclipseProgressLabel),
               equator: api.seasonName(171, 0),
+              earthProjection: api.projectEarthPoint(39.9, 0, api.earthRotationAngle(12), 20),
               labels: [0, -33.9, 39.9].map(api.latitudeLabel),
+              initialDates: [
+                api.initialDate('?day=171', new Date(2024, 1, 29)),
+                api.initialDate('', new Date(2024, 1, 29)),
+                api.initialDate('', new Date(2023, 2, 1))
+              ],
+              leapYears: [1900, 2000, 2023, 2024].map(api.isLeapYear),
               missingElement,
               northCanvasY: api.northToCanvasY(100, 1, 10),
               northOffsets: [-0.4, 0, 0.4].map(api.northOffsetLabel),
@@ -240,6 +254,7 @@ test('physics orbital lab exhaustive geometry and playback coverage', async ({ p
               samples: api.sampleAnnual(39.9),
               seasons: [0, 100, 200, 300].map(day => api.seasonInfo(day, 40)),
               signed: [-18.5, 18.5].map(api.signedDegrees),
+              skyDirections: [0, 90, 180, 270].map(azimuth => api.skyDomePoint(0, azimuth, 100, 100, 80)),
               systemGeometry: api.systemGeometry,
               south: api.seasonName(171, -40)
             };
@@ -348,6 +363,8 @@ test('physics orbital lab exhaustive geometry and playback coverage', async ({ p
 
           await page.locator('[data-eclipse-type="lunar"]').click();
           await setRange(page.locator('#eclipseProgressControl'), 0);
+          await setRange(page.locator('#observerControl'), 0);
+          await setRange(page.locator('#observerControl'), -0.4);
           for (const alignment of [0, 0.6, 1, 1.35]) {
             await setRange(page.locator('#alignmentControl'), alignment);
           }
