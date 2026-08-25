@@ -462,13 +462,24 @@
     const sinCamera = Math.sin(ORBIT_CAMERA_ANGLE);
     return {
       x: vector.x,
-      y: vector.y * cosCamera - vector.z * sinCamera,
+      y: -vector.y * cosCamera + vector.z * sinCamera,
       z: vector.y * sinCamera + vector.z * cosCamera
     };
   }
 
   function orbitalAngle(day) {
     return 2 * Math.PI * (day - 171) / DAYS;
+  }
+
+  function counterClockwiseEllipsePoint(angle, cx, cy, rx, ry) {
+    return {
+      x: cx + rx * Math.cos(angle),
+      y: cy - ry * Math.sin(angle)
+    };
+  }
+
+  function orbitScreenPoint(day, cx, cy, rx, ry) {
+    return counterClockwiseEllipsePoint(orbitalAngle(day), cx, cy, rx, ry);
   }
 
   function sunDirectionWorld(day) {
@@ -619,8 +630,9 @@
     const rx = Math.max(105, Math.min(width * 0.37, width * 0.43));
     const ry = Math.max(52, rx * Math.cos(ORBIT_CAMERA_ANGLE));
     const angle = orbitalAngle(state.day);
-    const earthX = cx + rx * Math.cos(angle);
-    const earthY = cy + ry * Math.sin(angle);
+    const earthPoint = counterClockwiseEllipsePoint(angle, cx, cy, rx, ry);
+    const earthX = earthPoint.x;
+    const earthY = earthPoint.y;
     const earthRadius = clamp(Math.min(width, height) * 0.052, 16, 29);
     const earthRotation = earthRotationPhase(state.day, state.hour);
     systemScene.orbit = { cx, cy, rx, ry };
@@ -674,13 +686,15 @@
     context.beginPath();
     context.ellipse(earthX, earthY, moonOrbit, moonOrbit * 0.42, 0, 0, Math.PI * 2);
     context.stroke();
-    circle(
-      context,
-      earthX + Math.cos(moonAngle) * moonOrbit,
-      earthY + Math.sin(moonAngle) * moonOrbit * 0.42,
-      Math.max(3.5, earthRadius * 0.22),
-      '#d8deea'
+    const moonPoint = counterClockwiseEllipsePoint(
+      moonAngle,
+      earthX,
+      earthY,
+      moonOrbit,
+      moonOrbit * 0.42
     );
+    systemScene.lastGeometry.moon = { ...moonPoint, angle: moonAngle };
+    circle(context, moonPoint.x, moonPoint.y, Math.max(3.5, earthRadius * 0.22), '#d8deea');
 
     label(context, t('Sun', '太阳'), cx, cy + 49, '#ffd166', 11, 'center');
     label(context, t('Selected place', '所选地点'), observerX + 10, observerY - 10, '#ff9abb', 9);
@@ -1277,7 +1291,8 @@
       <span class="legend-key" style="--key-color:#00d4ff">${t('fixed axis direction', '固定地轴方向')}</span>
       <span class="legend-key" style="--key-color:#ff6b9d">${t('selected observer', '所选观察者')}</span>
       <span class="legend-key" style="--key-color:#ffd166">${t('sunlight', '太阳光')}</span>
-      <span class="legend-key" style="--key-color:#7ee8c5">${t('eastward rotation ↺ from North Pole', '从北极上方看向东自转 ↺')}</span>`;
+      <span class="legend-key" style="--key-color:#7ee8c5">${t('eastward rotation ↺ from North Pole', '从北极上方看向东自转 ↺')}</span>
+      <span class="legend-key" style="--key-color:#d8deea">${t('Earth & Moon orbit counter-clockwise ↺ from north', '从北侧看地球与月球均逆时针公转 ↺')}</span>`;
 
     const riseSet = daylight.kind === 'normal'
       ? `${formatClock(daylight.sunrise)} / ${formatClock(daylight.sunset)}`
@@ -1641,7 +1656,7 @@
     const { cx, cy, rx, ry } = systemScene.orbit;
     const normalizedRadius = Math.hypot((x - cx) / rx, (y - cy) / ry);
     if (requireNearOrbit && (normalizedRadius < 0.72 || normalizedRadius > 1.28)) return false;
-    const angle = Math.atan2((y - cy) / ry, (x - cx) / rx);
+    const angle = Math.atan2(-(y - cy) / ry, (x - cx) / rx);
     stopPlayback();
     state.day = normalizeDay(171 + angle / (2 * Math.PI) * DAYS);
     state.leapDay = false;
@@ -1731,6 +1746,8 @@
     earthRotationAngle,
     earthRotationPhase,
     northPoleIllumination,
+    counterClockwiseEllipsePoint,
+    orbitScreenPoint,
     skyDomePoint,
     northToCanvasY,
     northOffsetLabel,

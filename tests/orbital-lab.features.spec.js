@@ -249,6 +249,12 @@ for (const language of ['en', 'zh-CN']) {
     const orientation = await page.evaluate(() => ({
       east: window.__orbitalLab.skyDomePoint(0, 90, 100, 100, 80),
       west: window.__orbitalLab.skyDomePoint(0, 270, 100, 100, 80),
+      orbitStart: window.__orbitalLab.counterClockwiseEllipsePoint(0, 100, 100, 80, 40),
+      orbitLater: window.__orbitalLab.counterClockwiseEllipsePoint(0.1, 100, 100, 80, 40),
+      earthStart: window.__orbitalLab.orbitScreenPoint(171, 100, 100, 80, 40),
+      earthLater: window.__orbitalLab.orbitScreenPoint(172, 100, 100, 80, 40),
+      spinStart: window.__orbitalLab.projectEarthPoint(0, 0, 0, 1),
+      spinLater: window.__orbitalLab.projectEarthPoint(0, 0, 0.1, 1),
       equinoxNorthPole: window.__orbitalLab.northPoleIllumination(79),
       summerNorthPole: window.__orbitalLab.northPoleIllumination(171),
       winterNorthPole: window.__orbitalLab.northPoleIllumination(355),
@@ -257,10 +263,16 @@ for (const language of ['en', 'zh-CN']) {
     }));
     expect(orientation.east.x).toBeLessThan(100);
     expect(orientation.west.x).toBeGreaterThan(100);
+    expect(orientation.orbitLater.y).toBeLessThan(orientation.orbitStart.y);
+    expect(orientation.earthLater.y).toBeLessThan(orientation.earthStart.y);
+    expect(
+      orientation.spinStart.x * orientation.spinLater.y - orientation.spinStart.y * orientation.spinLater.x
+    ).toBeLessThan(0);
     expect(Math.abs(orientation.equinoxNorthPole)).toBeLessThan(0.02);
     expect(orientation.summerNorthPole).toBeGreaterThan(0.35);
     expect(orientation.winterNorthPole).toBeLessThan(-0.35);
     expect(orientation.rotation7).toBeGreaterThan(orientation.rotation6);
+    await expect(page.locator('#systemLegend')).toContainText(language === 'en' ? 'counter-clockwise' : '逆时针');
     await setRange(page.locator('#dayControl'), 171);
     await setRange(page.locator('#latitudeControl'), 39.9);
     for (const hour of [0, 12]) {
@@ -318,13 +330,13 @@ for (const language of ['en', 'zh-CN']) {
     await orbit.scrollIntoViewIfNeeded();
     let box = await orbit.boundingBox();
     const orbitGeometry = await page.evaluate(() => window.__orbitalLab.systemGeometry.orbit);
-    await orbit.click({ position: { x: orbitGeometry.cx, y: orbitGeometry.cy - orbitGeometry.ry } });
+    await orbit.click({ position: { x: orbitGeometry.cx, y: orbitGeometry.cy + orbitGeometry.ry } });
     await expect.poll(async () => Number(await page.locator('#dayControl').inputValue())).toBeGreaterThan(70);
     await expect.poll(async () => Number(await page.locator('#dayControl').inputValue())).toBeLessThan(90);
     const clickedDay = Number(await page.locator('#dayControl').inputValue());
     await orbit.scrollIntoViewIfNeeded();
     box = await orbit.boundingBox();
-    await page.mouse.move(box.x + orbitGeometry.cx, box.y + orbitGeometry.cy - orbitGeometry.ry);
+    await page.mouse.move(box.x + orbitGeometry.cx, box.y + orbitGeometry.cy + orbitGeometry.ry);
     await page.mouse.down();
     await page.mouse.move(box.x + orbitGeometry.cx + orbitGeometry.rx, box.y + orbitGeometry.cy, { steps: 8 });
     await page.mouse.up();
