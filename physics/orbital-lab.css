@@ -70,7 +70,6 @@ body[data-topic="orbital"] {
   display: grid;
   grid-template-columns: minmax(236px, 0.62fr) minmax(420px, 1.38fr) minmax(270px, 0.78fr);
   gap: var(--lab-gap);
-  height: clamp(560px, calc(100svh - 218px), 720px);
   min-height: 560px;
   padding: var(--lab-gap);
   overflow: hidden;
@@ -92,9 +91,42 @@ body[data-topic="orbital"] {
 .control-rail {
   display: flex;
   flex-direction: column;
-  overflow-y: auto;
+  overflow: visible;
   padding: var(--lab-pad);
-  scrollbar-width: thin;
+}
+
+.orbital-workspace[data-mode="seasons"] .control-rail {
+  grid-row: 1 / span 2;
+}
+
+.system-panel {
+  grid-column: 2;
+  grid-row: 1;
+  min-height: 560px;
+}
+
+.observer-panel {
+  grid-column: 3;
+  grid-row: 1;
+  min-height: 560px;
+}
+
+.season-detail-band {
+  display: contents;
+}
+
+.season-detail-band[hidden] {
+  display: none;
+}
+
+.season-detail-band .season-profile {
+  grid-column: 2;
+  grid-row: 2;
+}
+
+.season-detail-band .horizon-panel {
+  grid-column: 3;
+  grid-row: 2;
 }
 
 .control-set {
@@ -148,11 +180,51 @@ body[data-topic="orbital"] {
 }
 
 .range-control input[type="range"] {
+  display: block;
   width: 100%;
-  height: 32px;
-  margin: 6px 0 0;
+  height: 48px;
+  margin: 0;
+  padding-block: 12px;
   accent-color: var(--cyan);
+  background: transparent;
   cursor: pointer;
+  touch-action: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.range-control input[type="range"]::-webkit-slider-runnable-track {
+  height: 8px;
+  border: 1px solid color-mix(in srgb, var(--cyan) 36%, var(--line));
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--cyan) 16%, var(--panel));
+}
+
+.range-control input[type="range"]::-webkit-slider-thumb {
+  width: 26px;
+  height: 26px;
+  margin-top: -10px;
+  border: 2px solid var(--paper);
+  border-radius: 50%;
+  background: var(--cyan);
+  box-shadow: 0 4px 14px color-mix(in srgb, var(--ink) 64%, transparent);
+  -webkit-appearance: none;
+}
+
+.range-control input[type="range"]::-moz-range-track {
+  height: 8px;
+  border: 1px solid color-mix(in srgb, var(--cyan) 36%, var(--line));
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--cyan) 16%, var(--panel));
+}
+
+.range-control input[type="range"]::-moz-range-thumb {
+  width: 24px;
+  height: 24px;
+  border: 2px solid var(--paper);
+  border-radius: 50%;
+  background: var(--cyan);
+  box-shadow: 0 4px 14px color-mix(in srgb, var(--ink) 64%, transparent);
 }
 
 .range-ends {
@@ -199,6 +271,39 @@ body[data-topic="orbital"] {
 
 .transport-row {
   margin-top: 2px;
+}
+
+.location-row {
+  display: grid;
+  gap: 7px;
+  margin-top: 8px;
+}
+
+.location-button {
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--paper);
+  background: color-mix(in srgb, var(--cyan) 8%, var(--deep));
+  cursor: pointer;
+  font: 650 0.75rem/1.35 "Space Grotesk", "PingFang SC", "Microsoft YaHei", sans-serif;
+}
+
+.location-button:hover {
+  border-color: color-mix(in srgb, var(--cyan) 65%, var(--line));
+}
+
+.location-button:disabled {
+  cursor: wait;
+  opacity: 0.72;
+}
+
+#locationStatus {
+  min-height: 1.3em;
+  color: var(--muted);
+  font-size: 0.75rem;
+  line-height: 1.4;
 }
 
 .axis-convention {
@@ -259,7 +364,13 @@ body[data-topic="orbital"] {
 }
 
 .orbital-workspace[data-mode="seasons"] #systemCanvas {
-  cursor: crosshair;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+
+.orbital-workspace[data-mode="seasons"] #systemCanvas.dragging {
+  cursor: grabbing;
 }
 
 .instrument-legend {
@@ -322,9 +433,7 @@ body[data-topic="orbital"] {
 }
 
 .season-learning {
-  display: grid;
-  grid-template-columns: minmax(300px, 0.78fr) minmax(0, 1.22fr);
-  gap: 14px;
+  display: block;
   margin-block: 18px 86px;
 }
 
@@ -800,29 +909,38 @@ body[data-topic="orbital"] {
 @media (max-width: 980px) {
   .orbital-workspace {
     grid-template-columns: minmax(230px, 0.66fr) minmax(0, 1.34fr);
-    height: auto;
     min-height: 0;
   }
 
   .control-rail {
-    grid-row: span 2;
-    max-height: 680px;
+    grid-column: 1;
+    grid-row: 1 / span 2;
   }
 
   .system-panel {
+    grid-column: 2;
+    grid-row: 1;
     min-height: 420px;
   }
 
   .observer-panel {
+    grid-column: 2;
+    grid-row: 2;
     min-height: 370px;
+  }
+
+  .season-detail-band .season-profile {
+    grid-column: 1;
+    grid-row: 3;
+  }
+
+  .season-detail-band .horizon-panel {
+    grid-column: 2;
+    grid-row: 3;
   }
 
   .orbital-explanation > header,
   .source-band > header {
-    grid-template-columns: 1fr;
-  }
-
-  .season-learning {
     grid-template-columns: 1fr;
   }
 
@@ -872,7 +990,7 @@ body[data-topic="orbital"] {
 
   .control-rail {
     grid-row: auto;
-    max-height: none;
+    grid-column: 1;
   }
 
   .control-set {
@@ -905,11 +1023,21 @@ body[data-topic="orbital"] {
   }
 
   .system-panel {
+    grid-column: 1;
+    grid-row: auto;
     min-height: 330px;
   }
 
   .observer-panel {
+    grid-column: 1;
+    grid-row: auto;
     min-height: 360px;
+  }
+
+  .season-detail-band .season-profile,
+  .season-detail-band .horizon-panel {
+    grid-column: 1;
+    grid-row: auto;
   }
 
   .instrument-panel canvas {

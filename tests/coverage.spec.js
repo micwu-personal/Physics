@@ -246,6 +246,29 @@ test('physics orbital lab exhaustive geometry and playback coverage', async ({ p
           expect(helpers.polarDay.kind).toBe('polar-day');
           expect(helpers.polarNight.kind).toBe('polar-night');
 
+          await page.evaluate(() => {
+            Object.defineProperty(navigator, 'geolocation', { configurable: true, value: undefined });
+          });
+          await page.locator('#useLocation').click();
+          await page.evaluate(() => {
+            Object.defineProperty(navigator, 'geolocation', {
+              configurable: true,
+              value: { getCurrentPosition(success, error) { error(new Error('coverage location failure')); } }
+            });
+          });
+          await page.locator('#useLocation').click();
+          await page.evaluate(() => {
+            Object.defineProperty(navigator, 'geolocation', {
+              configurable: true,
+              value: {
+                getCurrentPosition(success) {
+                  success({ coords: { latitude: 51.5, longitude: -0.1 } });
+                }
+              }
+            });
+          });
+          await page.locator('#useLocation').click();
+
           const dayPresets = page.locator('[data-day]');
           for (let index = 0; index < await dayPresets.count(); index++) {
             await dayPresets.nth(index).click();
@@ -281,6 +304,23 @@ test('physics orbital lab exhaustive geometry and playback coverage', async ({ p
           const orbitBox = await page.locator('#systemCanvas').boundingBox();
           await page.mouse.click(orbitBox.x + orbitBox.width * 0.47, orbitBox.y + orbitBox.height * 0.45);
           await page.mouse.click(orbitBox.x + orbitBox.width * 0.47, orbitBox.y + orbitBox.height * 0.25);
+          await page.mouse.move(orbitBox.x + orbitBox.width * 0.47, orbitBox.y + orbitBox.height * 0.25);
+          await page.mouse.down();
+          await page.mouse.move(orbitBox.x + orbitBox.width * 0.84, orbitBox.y + orbitBox.height * 0.45, { steps: 4 });
+          await page.mouse.up();
+          await page.evaluate(() => {
+            const canvas = document.querySelector('#systemCanvas');
+            const rect = canvas.getBoundingClientRect();
+            canvas.setPointerCapture = () => {};
+            canvas.hasPointerCapture = () => false;
+            canvas.dispatchEvent(new PointerEvent('pointerdown', {
+              bubbles: true,
+              clientX: rect.left + rect.width * 0.47,
+              clientY: rect.top + rect.height * 0.25,
+              pointerId: 91
+            }));
+            canvas.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, pointerId: 91 }));
+          });
           await setRange(page.locator('#dayControl'), 171);
           await setRange(page.locator('#latitudeControl'), 89);
           await page.evaluate(() => {

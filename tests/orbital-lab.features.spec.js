@@ -29,7 +29,6 @@ for (const language of ['en', 'zh-CN']) {
     expect(bounds.controlTop).toBeGreaterThanOrEqual(-1);
     expect(bounds.systemTop).toBeGreaterThanOrEqual(-1);
     expect(bounds.observerTop).toBeGreaterThanOrEqual(-1);
-    expect(bounds.controlBottom).toBeLessThanOrEqual(bounds.viewport + 1);
     expect(bounds.systemBottom).toBeLessThanOrEqual(bounds.viewport + 1);
     expect(bounds.observerBottom).toBeLessThanOrEqual(bounds.viewport + 1);
 
@@ -202,11 +201,40 @@ for (const language of ['en', 'zh-CN']) {
 
   test(`Orbital lab restores presets and complementary season views in ${language}`, async ({ page }) => {
     const errors = watchPage(page);
+    await page.addInitScript(() => {
+      Object.defineProperty(navigator, 'geolocation', {
+        configurable: true,
+        value: {
+          getCurrentPosition(success) {
+            success({ coords: { latitude: 51.5, longitude: -0.1 } });
+          }
+        }
+      });
+    });
     await preparePage(page, path, language, { motionPreference: 'pause' });
 
     await expect(page.locator('#seasonCanvas')).toBeVisible();
     await expect(page.locator('#horizonCanvas')).toBeVisible();
     await expect(page.locator('#annualCanvas')).toBeVisible();
+    await setRange(page.locator('#timeControl'), 6);
+    const morningObserver = await page.evaluate(() => window.__orbitalLab.systemGeometry);
+    await setRange(page.locator('#timeControl'), 12);
+    const noonObserver = await page.evaluate(() => window.__orbitalLab.systemGeometry);
+    expect(Math.hypot(
+      morningObserver.observer.x - noonObserver.observer.x,
+      morningObserver.observer.y - noonObserver.observer.y
+    )).toBeGreaterThan(2);
+    expect(morningObserver.rotation).not.toBe(noonObserver.rotation);
+    const sliderTouchMetrics = await page.locator('#latitudeControl').evaluate(element => ({
+      height: element.getBoundingClientRect().height,
+      touchAction: getComputedStyle(element).touchAction
+    }));
+    expect(sliderTouchMetrics.height).toBeGreaterThanOrEqual(44);
+    expect(sliderTouchMetrics.touchAction).toBe('none');
+
+    await page.locator('#useLocation').click();
+    await expect(page.locator('#latitudeOutput')).toContainText('51.5');
+    await expect(page.locator('#locationStatus')).toContainText(language === 'en' ? 'Using latitude' : '已使用纬度');
 
     await page.locator('[data-latitude="-66.56"]').click();
     await expect(page.locator('#latitudeOutput')).toContainText('66.6');
@@ -229,16 +257,38 @@ for (const language of ['en', 'zh-CN']) {
     await expect(page.locator('#horizonDescription')).toContainText(language === 'en' ? 'Face north' : '面向北方');
 
     const orbit = page.locator('#systemCanvas');
-    const box = await orbit.boundingBox();
-    await page.mouse.click(box.x + box.width * 0.47, box.y + box.height * 0.25);
+    await orbit.scrollIntoViewIfNeeded();
+    let box = await orbit.boundingBox();
+    await orbit.click({ position: { x: box.width * 0.47, y: box.height * 0.25 } });
     await expect.poll(async () => Number(await page.locator('#dayControl').inputValue())).toBeGreaterThan(70);
     await expect.poll(async () => Number(await page.locator('#dayControl').inputValue())).toBeLessThan(90);
+    const clickedDay = Number(await page.locator('#dayControl').inputValue());
+    await orbit.scrollIntoViewIfNeeded();
+    box = await orbit.boundingBox();
+    await page.mouse.move(box.x + box.width * 0.47, box.y + box.height * 0.25);
+    await page.mouse.down();
+    await page.mouse.move(box.x + box.width * 0.84, box.y + box.height * 0.45, { steps: 8 });
+    await page.mouse.up();
+    expect(Number(await page.locator('#dayControl').inputValue())).not.toBeCloseTo(clickedDay, 0);
+    await expect(orbit).not.toHaveClass(/dragging/);
 
     const annualBefore = await page.locator('#annualCanvas').evaluate(canvas => canvas.toDataURL());
     await page.locator('[data-latitude="0"]').click();
     const annualAfter = await page.locator('#annualCanvas').evaluate(canvas => canvas.toDataURL());
     expect(annualAfter).not.toBe(annualBefore);
 
+    await page.setViewportSize({ width: 768, height: 1024 });
+    for (const mode of ['seasons', 'eclipses']) {
+      await page.locator(`[data-lab-mode="${mode}"]`).click();
+      const rail = await page.locator('.control-rail').evaluate(element => ({
+        clientHeight: element.clientHeight,
+        overflowY: getComputedStyle(element).overflowY,
+        scrollHeight: element.scrollHeight
+      }));
+      expect(rail.overflowY).not.toBe('auto');
+      expect(rail.overflowY).not.toBe('scroll');
+      expect(rail.scrollHeight).toBeLessThanOrEqual(rail.clientHeight + 1);
+    }
     await page.setViewportSize({ width: 390, height: 844 });
     await assertLayout(page);
     await assertNoErrors(errors);
