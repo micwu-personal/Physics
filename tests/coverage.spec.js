@@ -224,6 +224,7 @@ test('physics orbital lab exhaustive geometry and playback coverage', async ({ p
             }
             return {
               clocks: [0, 12, 23.9999, 24].map(api.formatClock),
+              counterClockwise: [0, 0.1].map(angle => api.counterClockwiseEllipsePoint(angle, 100, 100, 80, 40)),
               calendarDays: [
                 new Date(2024, 0, 1),
                 new Date(2024, 1, 29),
@@ -249,6 +250,7 @@ test('physics orbital lab exhaustive geometry and playback coverage', async ({ p
               northCanvasY: api.northToCanvasY(100, 1, 10),
               northPoleLight: [79, 171, 355].map(api.northPoleIllumination),
               northOffsets: [-0.4, 0, 0.4].map(api.northOffsetLabel),
+              orbitPoints: [171, 172].map(day => api.orbitScreenPoint(day, 100, 100, 80, 40)),
               observerGeometry: api.observerGeometry,
               north: api.seasonName(171, 40),
               polarDay: api.daylightInfo(171, 89),
@@ -323,8 +325,8 @@ test('physics orbital lab exhaustive geometry and playback coverage', async ({ p
           const orbitBox = await page.locator('#systemCanvas').boundingBox();
           const orbitGeometry = await page.evaluate(() => window.__orbitalLab.systemGeometry.orbit);
           await page.mouse.click(orbitBox.x + orbitGeometry.cx, orbitBox.y + orbitGeometry.cy);
-          await page.mouse.click(orbitBox.x + orbitGeometry.cx, orbitBox.y + orbitGeometry.cy - orbitGeometry.ry);
-          await page.mouse.move(orbitBox.x + orbitGeometry.cx, orbitBox.y + orbitGeometry.cy - orbitGeometry.ry);
+          await page.mouse.click(orbitBox.x + orbitGeometry.cx, orbitBox.y + orbitGeometry.cy + orbitGeometry.ry);
+          await page.mouse.move(orbitBox.x + orbitGeometry.cx, orbitBox.y + orbitGeometry.cy + orbitGeometry.ry);
           await page.mouse.down();
           await page.mouse.move(orbitBox.x + orbitGeometry.cx + orbitGeometry.rx, orbitBox.y + orbitGeometry.cy, { steps: 4 });
           await page.mouse.up();
@@ -337,7 +339,7 @@ test('physics orbital lab exhaustive geometry and playback coverage', async ({ p
             canvas.dispatchEvent(new PointerEvent('pointerdown', {
               bubbles: true,
               clientX: rect.left + orbit.cx,
-              clientY: rect.top + orbit.cy - orbit.ry,
+              clientY: rect.top + orbit.cy + orbit.ry,
               pointerId: 91
             }));
             canvas.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, pointerId: 91 }));
