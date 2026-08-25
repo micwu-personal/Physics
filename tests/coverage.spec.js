@@ -200,6 +200,8 @@ test('physics cosmic atlas exhaustive interaction and animation coverage', async
           au: [1, 10, 1000, 100000, 310000].map(api.formatAU),
           distance: api.angularDistance(350, 10),
           fallback: api.localized(null),
+          historyBlends: [0.8, 2.2, 7.2, 13.8].map(api.historyBlendValues),
+          voyagerPositions: [1979, 1979.52, 1983, 1989.65, 1990].map(api.voyagerPosition),
           missingElement
         };
       });
@@ -394,6 +396,28 @@ test('physics cosmic atlas exhaustive controls coverage', async ({ page }) => {
       for (const scale of ['solar', 'local', 'galaxy']) {
         await page.locator(`[data-address-scale="${scale}"]`).click();
       }
+      await page.locator('[data-address-scale="local"]').click();
+      const addressHotspots = page.locator('.address-hotspot');
+      for (let index = 0; index < await addressHotspots.count(); index++) {
+        await addressHotspots.nth(index).dispatchEvent('pointerenter', { pointerType: 'touch' });
+        await addressHotspots.nth(index).dispatchEvent('pointerleave', { pointerType: 'touch' });
+      }
+      const addressHotspot = addressHotspots.first();
+      await addressHotspot.focus();
+      await addressHotspot.dispatchEvent('pointerleave', { pointerType: 'mouse' });
+      await page.waitForTimeout(150);
+      await page.locator('#addressTooltip').dispatchEvent('pointerenter', { pointerType: 'mouse' });
+      await page.locator('#addressTooltip').dispatchEvent('pointerleave', { pointerType: 'mouse' });
+      await page.waitForTimeout(150);
+      await addressHotspot.blur();
+      await addressHotspot.dispatchEvent('pointerleave', { pointerType: 'mouse' });
+      await page.waitForTimeout(150);
+      await addressHotspot.click();
+      await page.keyboard.press('Escape');
+      await page.locator('#addressTooltip').dispatchEvent('pointerleave', { pointerType: 'mouse' });
+      await page.waitForTimeout(150);
+      await page.locator('#addressTitle').dispatchEvent('pointerdown');
+      await page.locator('[data-address-scale="galaxy"]').click();
       for (const scale of ['inner', 'planets', 'heliosphere', 'reservoirs']) {
         await page.locator(`[data-solar-scale="${scale}"]`).click();
       }
@@ -402,7 +426,7 @@ test('physics cosmic atlas exhaustive controls coverage', async ({ page }) => {
       }
       await page.locator('#solarReset').click();
 
-      for (const distance of [1, 50, 100, 500, 5000, 110000, 310000, 800000]) {
+      for (const distance of [1, 50, 100, 500, 1999, 2000, 99999, 100000, 499999, 500000, 800000]) {
         await setRange(page.locator('#reachControl'), Math.log10(distance));
       }
       const reachPresets = page.locator('[data-reach-au]');
@@ -424,21 +448,34 @@ test('physics cosmic atlas exhaustive controls coverage', async ({ page }) => {
 
       await page.locator('[data-assist-mode="vectors"]').click();
       await setRange(page.locator('#planetSpeed'), 5);
-      await setRange(page.locator('#turnAngle'), 150);
+      await setRange(page.locator('#closestApproach'), 1.5);
+      await setRange(page.locator('#closestApproach'), 20);
       await setRange(page.locator('#encounterSide'), -1);
       await page.evaluate(() => {
-        window.__cosmicAtlas.state.assistProgress = 0.5;
+        window.__cosmicAtlas.state.assistProgress = 0.2;
         window.__cosmicAtlas.renderAll();
       });
-      await setRange(page.locator('#encounterSide'), 1);
-      await page.locator('[data-assist-mode="voyager"]').click();
-      for (const encounter of [0, 1, 2, 3]) {
-        await setRange(page.locator('#voyagerEncounter'), encounter);
-      }
       await page.evaluate(() => {
         window.__cosmicAtlas.state.assistProgress = 0.8;
         window.__cosmicAtlas.renderAll();
       });
+      await setRange(page.locator('#encounterSide'), 0);
+      await setRange(page.locator('#encounterSide'), 1);
+      await page.locator('#assistPlay').click();
+      await page.waitForTimeout(80);
+      await page.locator('#assistPlay').click();
+      await page.locator('#vectorTab').focus();
+      await page.locator('#vectorTab').dispatchEvent('keydown', { key: 'Tab' });
+      for (const key of ['End', 'Home', 'ArrowRight', 'ArrowLeft']) {
+        await page.keyboard.press(key);
+      }
+      await page.locator('[data-assist-mode="voyager"]').click();
+      for (const encounter of [1979.52, 1981.65, 1983, 1986.07, 1989.65]) {
+        await setRange(page.locator('#voyagerEncounter'), encounter);
+      }
+      await page.locator('#assistPlay').click();
+      await page.waitForTimeout(80);
+      await page.locator('#assistPlay').click();
       await page.locator('#assistReset').click();
 
       await setRange(page.locator('#neighborDepth'), 5);
@@ -477,6 +514,28 @@ test('physics cosmic atlas exhaustive controls coverage', async ({ page }) => {
         }
       }
       await page.locator('#skyReset').click();
+
+      await page.setViewportSize({ width: 390, height: 844 });
+      await page.evaluate(() => {
+        const api = window.__cosmicAtlas;
+        Object.assign(api.state, {
+          addressScale: 'local',
+          assistMode: 'vectors',
+          neighbor: 'proxima',
+          neighborDepth: 15,
+          reachAU: 120
+        });
+        api.renderAll();
+        Object.assign(api.state, { assistMode: 'voyager', voyagerYear: 1979 });
+        api.renderAll();
+        api.state.voyagerYear = 1990;
+        api.renderAll();
+      });
+      const mobileAddressHotspots = page.locator('.address-hotspot');
+      for (let index = 0; index < await mobileAddressHotspots.count(); index++) {
+        await mobileAddressHotspots.nth(index).dispatchEvent('pointerenter', { pointerType: 'touch' });
+      }
+      await page.keyboard.press('Escape');
 
       await page.evaluate(() => {
         const { state } = window.__cosmicAtlas;

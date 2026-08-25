@@ -113,6 +113,90 @@ body[data-topic="cosmic-address"] {
   background: #040713;
 }
 
+.address-stage {
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+}
+
+.address-stage canvas {
+  position: absolute;
+  inset: 0;
+}
+
+.address-hotspots {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.address-hotspot {
+  position: absolute;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 50%;
+  color: var(--paper);
+  background: transparent;
+  cursor: help;
+  pointer-events: auto;
+  transform: translate(-50%, -50%);
+}
+
+.address-hotspot::before {
+  position: absolute;
+  inset: 15px;
+  border: 1px solid color-mix(in srgb, var(--cyan) 72%, transparent);
+  border-radius: inherit;
+  background: color-mix(in srgb, var(--instrument) 70%, transparent);
+  content: "";
+}
+
+.address-hotspot:hover::before,
+.address-hotspot:focus-visible::before,
+.address-hotspot[aria-expanded="true"]::before {
+  inset: 11px;
+  border-color: var(--cyan);
+  background: color-mix(in srgb, var(--cyan) 20%, var(--instrument));
+}
+
+.address-hotspot:focus-visible {
+  border-color: var(--cyan);
+  outline: 2px solid var(--cyan);
+  outline-offset: 1px;
+}
+
+.address-tooltip {
+  position: absolute;
+  z-index: 5;
+  width: min(250px, calc(100% - 20px));
+  padding: 11px 12px;
+  border: 1px solid color-mix(in srgb, var(--cyan) 52%, var(--line));
+  border-radius: 8px;
+  color: var(--paper);
+  background: #080d1d;
+  box-shadow: 0 12px 36px color-mix(in srgb, var(--ink) 72%, transparent);
+  font-size: 0.75rem;
+  line-height: 1.45;
+  pointer-events: auto;
+}
+
+.address-tooltip strong,
+.address-tooltip span {
+  display: block;
+}
+
+.address-tooltip span {
+  margin-top: 3px;
+  color: var(--muted);
+}
+
+.address-tooltip .data-line {
+  color: var(--cyan);
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+}
+
 .address-controls {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -171,6 +255,10 @@ body[data-topic="cosmic-address"] {
 .atlas-chapter {
   padding-block: clamp(72px, 9vw, 118px);
   border-top: 1px solid var(--line);
+}
+
+.atlas-chapter[id] {
+  scroll-margin-top: 154px;
 }
 
 .chapter-heading {
@@ -495,7 +583,11 @@ body[data-topic="cosmic-address"] {
 }
 
 .reach-instrument {
-  min-height: 560px;
+  min-height: 680px;
+}
+
+.reach-instrument .canvas-bay {
+  grid-template-rows: auto minmax(480px, 1fr) auto;
 }
 
 .mission-instrument {
@@ -559,12 +651,81 @@ body[data-topic="cosmic-address"] {
   background: color-mix(in srgb, var(--cyan) 8%, transparent);
 }
 
+.mode-switch {
+  display: inline-flex;
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--deep);
+}
+
+.mode-switch button {
+  min-height: 44px;
+  padding: 8px 18px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  color: var(--muted);
+  background: transparent;
+  cursor: pointer;
+  font: 650 0.75rem/1.25 "Space Grotesk", "PingFang SC", "Microsoft YaHei", sans-serif;
+}
+
+.mode-switch button:hover {
+  color: var(--paper);
+}
+
+.mode-switch button[aria-selected="true"] {
+  color: #071018;
+  background: var(--cyan);
+}
+
+.mode-switch button:focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: 2px;
+}
+
 .assist-switch {
   margin-bottom: 10px;
 }
 
+.assist-causality {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-bottom: 18px;
+  border-block: 1px solid var(--line);
+}
+
+.assist-causality > span {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+  min-width: 0;
+  padding: 14px;
+  border-right: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 0.75rem;
+  line-height: 1.45;
+}
+
+.assist-causality > span:last-child {
+  border-right: 0;
+}
+
+.assist-causality strong {
+  display: grid;
+  width: 24px;
+  height: 24px;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--cyan) 44%, var(--line));
+  border-radius: 50%;
+  color: var(--cyan);
+  font: 600 0.75rem/1 "JetBrains Mono", ui-monospace, monospace;
+}
+
 .assist-instrument {
-  min-height: 680px;
+  min-height: 720px;
 }
 
 [data-assist-panel][hidden] {
@@ -574,6 +735,26 @@ body[data-topic="cosmic-address"] {
 [data-assist-panel] {
   display: grid;
   gap: 18px;
+}
+
+.derived-readout {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 4px;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--muted);
+  background: #060a17;
+  font-size: 0.75rem;
+  line-height: 1.4;
+}
+
+.derived-readout output {
+  flex: 0 0 auto;
+  color: var(--cyan);
+  font-family: "JetBrains Mono", ui-monospace, monospace;
 }
 
 .neighborhood-instrument {
@@ -587,6 +768,68 @@ body[data-topic="cosmic-address"] {
 
 .history-instrument {
   min-height: 670px;
+}
+
+.orientation-note,
+.transition-note {
+  margin: 0;
+  padding: 13px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--muted);
+  background: #060a17;
+  font-size: 0.75rem;
+  line-height: 1.5;
+}
+
+.orientation-note strong,
+.transition-note strong {
+  color: var(--paper);
+}
+
+.transition-note {
+  display: grid;
+  gap: 6px;
+}
+
+.sky-localizer {
+  display: grid;
+  gap: 9px;
+  min-width: 0;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--line);
+}
+
+.sky-localizer > div {
+  display: grid;
+  gap: 3px;
+}
+
+.sky-localizer strong {
+  color: var(--paper);
+  font-size: 0.75rem;
+}
+
+.sky-localizer span,
+.sky-localizer p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.75rem;
+  line-height: 1.4;
+}
+
+.sky-localizer canvas {
+  display: block;
+  width: 100%;
+  height: 210px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #040713;
+}
+
+.sky-localizer p {
+  color: var(--cyan);
+  font-family: "JetBrains Mono", ui-monospace, monospace;
 }
 
 .milky-ledger {
@@ -780,6 +1023,18 @@ body[data-topic="cosmic-address"] {
   .history-marker {
     border-bottom: 1px solid var(--line);
   }
+
+  .assist-causality {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .assist-causality > span:nth-child(2) {
+    border-right: 0;
+  }
+
+  .assist-causality > span:nth-child(-n + 2) {
+    border-bottom: 1px solid var(--line);
+  }
 }
 
 @media (max-width: 760px) {
@@ -807,6 +1062,18 @@ body[data-topic="cosmic-address"] {
   .address-instrument {
     grid-template-rows: auto minmax(320px, 1fr) auto;
     min-height: 540px;
+  }
+
+  .mode-switch {
+    display: flex;
+    width: 100%;
+    border-radius: 12px;
+  }
+
+  .mode-switch button {
+    flex: 1 1 50%;
+    padding-inline: 10px;
+    border-radius: 8px;
   }
 
   .cosmic-index {
@@ -844,9 +1111,12 @@ body[data-topic="cosmic-address"] {
   .control-heading,
   .selection-readout,
   .model-note,
+  .orientation-note,
+  .transition-note,
   .transport-row,
   .mission-filter,
   .object-picker,
+  .sky-localizer,
   [data-assist-panel] {
     grid-column: 1 / -1;
   }
@@ -866,6 +1136,10 @@ body[data-topic="cosmic-address"] {
 
   .mission-instrument .canvas-bay {
     grid-template-rows: auto minmax(360px, 1fr) auto;
+  }
+
+  .reach-instrument .canvas-bay {
+    grid-template-rows: auto minmax(440px, 1fr) auto;
   }
 
   .object-list {
@@ -923,6 +1197,20 @@ body[data-topic="cosmic-address"] {
     min-height: 500px;
   }
 
+  .assist-causality {
+    grid-template-columns: 1fr;
+  }
+
+  .assist-causality > span,
+  .assist-causality > span:nth-child(2) {
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .assist-causality > span:last-child {
+    border-bottom: 0;
+  }
+
   .address-instrument > header,
   .canvas-bay > header {
     display: grid;
@@ -950,9 +1238,12 @@ body[data-topic="cosmic-address"] {
   .control-heading,
   .selection-readout,
   .model-note,
+  .orientation-note,
+  .transition-note,
   .transport-row,
   .mission-filter,
   .object-picker,
+  .sky-localizer,
   [data-assist-panel],
   [data-assist-panel] .range-control:last-child:nth-child(odd) {
     grid-column: auto;
@@ -961,6 +1252,10 @@ body[data-topic="cosmic-address"] {
   .canvas-bay {
     grid-template-rows: auto minmax(290px, 1fr) auto;
     min-height: 440px;
+  }
+
+  .reach-instrument .canvas-bay {
+    grid-template-rows: auto minmax(420px, 1fr) auto;
   }
 
   .instrument-readouts {
