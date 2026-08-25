@@ -52,7 +52,7 @@
   transition: color 160ms ease-out;
 }
 
-html[lang="zh-CN"] .brand-home__title-zh {
+.brand-home__title-zh {
   order: 1;
   color: #f4f7ff;
   font-size: 1rem;
@@ -60,30 +60,13 @@ html[lang="zh-CN"] .brand-home__title-zh {
   letter-spacing: -0.06em;
 }
 
-html[lang="zh-CN"] .brand-home__title-en {
+.brand-home__title-en {
   order: 2;
   margin-top: 4px;
   color: #9ba5c4;
   font-size: 0.72rem;
   font-weight: 600;
   letter-spacing: 0.04em;
-}
-
-html:not([lang="zh-CN"]) .brand-home__title-en {
-  order: 1;
-  color: #f4f7ff;
-  font-size: 0.84rem;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-}
-
-html:not([lang="zh-CN"]) .brand-home__title-zh {
-  order: 2;
-  margin-top: 4px;
-  color: #9ba5c4;
-  font-size: 0.82rem;
-  font-weight: 600;
-  letter-spacing: -0.05em;
 }
 
 .site-footer {
