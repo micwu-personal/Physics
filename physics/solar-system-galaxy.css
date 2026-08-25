@@ -1118,8 +1118,8 @@ body[data-topic="cosmic-address"] {
 
   .cosmic-index {
     top: calc(max(0px, env(safe-area-inset-top)) + 78px);
-    width: 100vw;
-    margin-left: calc(50% - 50vw);
+    width: 100%;
+    margin-inline: 0;
   }
 
   .atlas-chapter {
