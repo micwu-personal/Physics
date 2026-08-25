@@ -462,8 +462,8 @@
     const sinCamera = Math.sin(ORBIT_CAMERA_ANGLE);
     return {
       x: vector.x,
-      y: -vector.y * cosCamera + vector.z * sinCamera,
-      z: vector.y * sinCamera + vector.z * cosCamera
+      y: -vector.y * cosCamera - vector.z * sinCamera,
+      z: -vector.y * sinCamera + vector.z * cosCamera
     };
   }
 
@@ -661,6 +661,9 @@
     const observerPoint = projectEarthPoint(state.latitude, 0, earthRotation, earthRadius);
     const observerX = earthX + observerPoint.x;
     const observerY = earthY + observerPoint.y;
+    const observerIllumination = dot3(observerPoint.world, sunDirectionWorld(state.day));
+    const observerNearSide = observerPoint.depth >= 0;
+    const observerDaylight = observerIllumination >= 0;
     systemScene.lastGeometry = {
       kind: 'season',
       orbit: { cx, cy, rx, ry },
@@ -669,16 +672,33 @@
         x: observerX,
         y: observerY,
         depth: observerPoint.depth,
-        illumination: dot3(observerPoint.world, sunDirectionWorld(state.day))
+        illumination: observerIllumination,
+        nearSide: observerNearSide,
+        daylight: observerDaylight
       },
       rotation: earthRotation,
       light: lightCamera,
       axis: axisCamera
     };
-    context.save();
-    context.globalAlpha = observerPoint.depth >= 0 ? 1 : 0.38;
-    circle(context, observerX, observerY, 4.5, '#ff6b9d', '#eef2ff', 1);
-    context.restore();
+    if (observerNearSide) {
+      circle(context, observerX, observerY, 4.5, '#ff6b9d', '#eef2ff', 1);
+    } else {
+      context.save();
+      context.setLineDash([2, 2]);
+      circle(context, observerX, observerY, 5.5, '', '#ff6b9d', 2);
+      context.restore();
+    }
+    label(
+      context,
+      t(
+        `${observerNearSide ? 'near side' : 'far side'} · ${observerDaylight ? 'day' : 'night'}`,
+        `${observerNearSide ? '近侧' : '背侧'} · ${observerDaylight ? '白昼' : '夜晚'}`
+      ),
+      observerX + 9,
+      observerY - 10,
+      observerDaylight ? '#ffd166' : '#a78bfa',
+      8
+    );
 
     const moonAngle = 2 * Math.PI * (state.day + state.hour / 24) / 27.321661;
     const moonOrbit = earthRadius * 2.05;
@@ -697,7 +717,6 @@
     circle(context, moonPoint.x, moonPoint.y, Math.max(3.5, earthRadius * 0.22), '#d8deea');
 
     label(context, t('Sun', '太阳'), cx, cy + 49, '#ffd166', 11, 'center');
-    label(context, t('Selected place', '所选地点'), observerX + 10, observerY - 10, '#ff9abb', 9);
 
     const stripY = height - 44;
     line(context, 24, stripY, width - 24, stripY, 'rgba(238,242,255,.2)');
@@ -1289,7 +1308,7 @@
     );
     $('systemLegend').innerHTML = `
       <span class="legend-key" style="--key-color:#00d4ff">${t('fixed axis direction', '固定地轴方向')}</span>
-      <span class="legend-key" style="--key-color:#ff6b9d">${t('selected observer', '所选观察者')}</span>
+      <span class="legend-key" style="--key-color:#ff6b9d">${t('observer: solid near side · dashed far side; label shows day/night', '观察者：实心为近侧 · 虚线圈为背侧；文字标明昼夜')}</span>
       <span class="legend-key" style="--key-color:#ffd166">${t('sunlight', '太阳光')}</span>
       <span class="legend-key" style="--key-color:#7ee8c5">${t('eastward rotation ↺ from North Pole', '从北极上方看向东自转 ↺')}</span>
       <span class="legend-key" style="--key-color:#d8deea">${t('Earth & Moon orbit counter-clockwise ↺ from north', '从北侧看地球与月球均逆时针公转 ↺')}</span>`;

@@ -273,9 +273,11 @@ for (const language of ['en', 'zh-CN']) {
     expect(orientation.winterNorthPole).toBeLessThan(-0.35);
     expect(orientation.rotation7).toBeGreaterThan(orientation.rotation6);
     await expect(page.locator('#systemLegend')).toContainText(language === 'en' ? 'counter-clockwise' : '逆时针');
+    await expect(page.locator('#systemLegend')).toContainText(language === 'en' ? 'solid near side' : '实心为近侧');
     await setRange(page.locator('#dayControl'), 171);
     await setRange(page.locator('#latitudeControl'), 39.9);
-    for (const hour of [0, 12]) {
+    const dailyStates = [];
+    for (const hour of [0, 6, 12, 18]) {
       await setRange(page.locator('#timeControl'), hour);
       const lighting = await page.evaluate(() => ({
         altitude: window.__orbitalLab.solarPosition(
@@ -283,10 +285,17 @@ for (const language of ['en', 'zh-CN']) {
           window.__orbitalLab.state.latitude,
           window.__orbitalLab.state.hour
         ).altitude,
-        marker: window.__orbitalLab.systemGeometry.observer.illumination
+        axisY: window.__orbitalLab.systemGeometry.axis.y,
+        marker: window.__orbitalLab.systemGeometry.observer
       }));
-      expect(Math.sign(lighting.marker)).toBe(Math.sign(lighting.altitude));
+      expect(Math.sign(lighting.marker.illumination)).toBe(Math.sign(lighting.altitude));
+      expect(lighting.marker.nearSide).toBe(lighting.marker.depth >= 0);
+      expect(lighting.marker.daylight).toBe(lighting.marker.illumination >= 0);
+      expect(lighting.axisY).toBeLessThan(0);
+      dailyStates.push(lighting.marker);
     }
+    expect(new Set(dailyStates.map(state => state.nearSide))).toEqual(new Set([true, false]));
+    expect(new Set(dailyStates.map(state => state.daylight))).toEqual(new Set([true, false]));
     await setRange(page.locator('#timeControl'), 6);
     const morningObserver = await page.evaluate(() => window.__orbitalLab.systemGeometry);
     await setRange(page.locator('#timeControl'), 12);
