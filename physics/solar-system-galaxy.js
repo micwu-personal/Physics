@@ -273,7 +273,8 @@
     sirius: 'Sirius AB',
     epsilon: 'Eps Eridani',
     ross128: 'Ross 128',
-    tauceti: 'Tau Ceti'
+    tauceti: 'Tau Ceti',
+    trappist: 'TRAPPIST-1'
   };
 
   const historyStages = [
@@ -530,6 +531,7 @@
       const button = document.createElement('button');
       button.type = 'button';
       button.className = 'address-hotspot';
+      button.dataset.systemId = marker.system.id;
       button.style.left = `${marker.hotspotX}px`;
       button.style.top = `${marker.hotspotY}px`;
       button.setAttribute('aria-expanded', 'false');
@@ -581,10 +583,10 @@
       text(context, t('Planet sizes enlarged', '行星尺寸已放大'), 18, height - 22, palette.muted, 10);
       syncAddressHotspots([]);
     } else if (state.addressScale === 'local') {
-      const scale = maxRadius / 15;
-      for (const distance of [5, 10, 15]) {
-        context.strokeStyle = distance === 15 ? 'rgba(0,212,255,0.24)' : 'rgba(238,242,255,0.1)';
-        context.setLineDash(distance === 15 ? [5, 4] : [2, 5]);
+      const scale = maxRadius / 50;
+      for (const distance of [10, 25, 50]) {
+        context.strokeStyle = distance === 50 ? 'rgba(0,212,255,0.24)' : 'rgba(238,242,255,0.1)';
+        context.setLineDash(distance === 50 ? [5, 4] : [2, 5]);
         context.beginPath();
         context.ellipse(cx, cy, distance * scale, distance * scale * 0.72, 0, 0, TAU);
         context.stroke();
@@ -594,7 +596,7 @@
       line(context, cx, cy - maxRadius * 0.72, cx, cy + maxRadius * 0.72, palette.line);
       circle(context, cx, cy, 6, palette.gold);
       text(context, t('SUN', '太阳'), cx + 10, cy - 10, palette.gold, 10);
-      const markers = nearbySystems.filter(item => item.distance <= 15).map(system => {
+      const markers = nearbySystems.map(system => {
         const x = cx + system.x * scale;
         const y = cy + system.y * scale * 0.72;
         return { system, x, y, side: x < cx ? 'left' : 'right' };
@@ -626,12 +628,12 @@
         addressLabelLayout.push({ id: system.id, side: marker.side, y: marker.labelY });
       }
       const barY = height - 24;
-      const barStart = cx - 5 * scale;
+      const barStart = cx - 10 * scale;
       line(context, barStart, barY, cx, barY, palette.cyan, 2);
       line(context, barStart, barY - 4, barStart, barY + 4, palette.cyan, 1);
       line(context, cx, barY - 4, cx, barY + 4, palette.cyan, 1);
-      text(context, t('5 ly distance scale', '5 光年距离标尺'), (barStart + cx) / 2, barY - 11, palette.cyan, 9, 'center');
-      text(context, t('Projected J2000 positions · rings at 5, 10, 15 ly', 'J2000 投影位置 · 圆环为 5、10、15 光年'), 14, 22, palette.muted, 9);
+      text(context, t('10 ly distance scale', '10 光年距离标尺'), (barStart + cx) / 2, barY - 11, palette.cyan, 9, 'center');
+      text(context, t('Projected J2000 positions · rings at 10, 25, 50 ly', 'J2000 投影位置 · 圆环为 10、25、50 光年'), 14, 22, palette.muted, 9);
       syncAddressHotspots(markers);
     } else {
       drawGalaxyFace(context, cx, cy, maxRadius, 0, 'stars', true);

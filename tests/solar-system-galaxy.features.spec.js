@@ -29,7 +29,13 @@ for (const language of ['en', 'zh-CN']) {
     await expectCanvasRendered(page.locator('#addressCanvas'));
     await page.locator('[data-address-scale="local"]').click();
     const hotspots = page.locator('.address-hotspot');
-    await expect(hotspots).toHaveCount(9);
+    await expect(hotspots).toHaveCount(10);
+    const trappistHotspot = page.locator('[data-system-id="trappist"]');
+    await expect(trappistHotspot).toHaveAttribute('aria-label', /TRAPPIST-1.*40\.70/);
+    await trappistHotspot.hover();
+    await expect(page.locator('#addressTooltip')).toContainText('TRAPPIST-1');
+    await expect(page.locator('#addressTooltip')).toContainText('40.70');
+    await page.keyboard.press('Escape');
 
     const targetSizes = await hotspots.evaluateAll(buttons => buttons.map(button => {
       const rect = button.getBoundingClientRect();
@@ -44,7 +50,7 @@ for (const language of ['en', 'zh-CN']) {
     for (const side of ['left', 'right']) {
       const positions = labelLayout.filter(item => item.side === side).map(item => item.y).sort((a, b) => a - b);
       for (let index = 1; index < positions.length; index++) {
-        expect(positions[index] - positions[index - 1], `${side} address labels should not overlap`).toBeGreaterThanOrEqual(23);
+        expect(positions[index] - positions[index - 1], `${side} address labels should not overlap`).toBeGreaterThanOrEqual(43);
       }
     }
 
@@ -91,13 +97,34 @@ for (const language of ['en', 'zh-CN']) {
       expect(target.centreY).toBeLessThanOrEqual(addressGeometry.stage.bottom);
     }
 
+    await page.setViewportSize({ width: 390, height: 844 });
     await page.locator('[data-address-scale="galaxy"]').click();
     await expect(hotspots).toHaveCount(0);
+
+    const rangeStyles = await page.locator('.range-control input[type="range"]').evaluateAll(inputs => inputs.map(input => {
+      const style = getComputedStyle(input);
+      return {
+        appearance: style.appearance,
+        height: Number.parseFloat(style.height),
+        touchAction: style.touchAction
+      };
+    }));
+    for (const rangeStyle of rangeStyles) {
+      expect(rangeStyle.height).toBeGreaterThanOrEqual(44);
+      expect(rangeStyle.touchAction).toBe('none');
+      expect(rangeStyle.appearance).toBe('none');
+    }
+    const reachControl = page.locator('#reachControl');
+    await reachControl.scrollIntoViewIfNeeded();
+    const reachControlBox = await reachControl.boundingBox();
+    expect(reachControlBox.height).toBeGreaterThanOrEqual(44);
+    await reachControl.dispatchEvent('pointerdown', { isPrimary: true, pointerId: 81, pointerType: 'touch' });
 
     await page.locator('[data-solar-scale="reservoirs"]').click();
     await page.locator('[data-solar-object="eris"]').click();
     await expect(page.locator('#solarSelection')).toContainText(language === 'en' ? 'Eris' : '阋神星');
-    await setRange(page.locator('#reachControl'), Math.log10(100000));
+    await setRange(reachControl, Math.log10(100000));
+    await reachControl.dispatchEvent('pointerup', { isPrimary: true, pointerId: 81, pointerType: 'touch' });
     await expect(page.locator('#reachSummary')).toContainText(language === 'en' ? 'tidal reach' : '潮汐范围');
     await expect(page.locator('#reachSummary')).toContainText(language === 'en' ? 'anisotropic' : '方向性');
     await expect(page.locator('[data-reach-au="100000"]')).toBeVisible();
