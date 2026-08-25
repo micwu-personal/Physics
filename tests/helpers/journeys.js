@@ -230,18 +230,21 @@ export async function exercisePhysicsCosmos(page, options = {}) {
     await expectCanvasRendered(page.locator('#addressCanvas'));
     await expectCanvasRendered(page.locator('#solarCanvas'));
   }
+  await page.locator('[data-address-scale="local"]').click();
   await page.locator('[data-address-scale="galaxy"]').click();
   await expect(page.locator('[data-address-scale="galaxy"]')).toHaveAttribute('aria-pressed', 'true');
   await page.locator('[data-solar-scale="reservoirs"]').click();
   await page.locator('[data-solar-object="eris"]').click();
   await expect(page.locator('#solarSelection')).not.toHaveText('');
-  await setRange(page.locator('#reachControl'), Math.log10(310000));
+  await setRange(page.locator('#reachControl'), Math.log10(100000));
   await expect(page.locator('#reachSummary')).not.toHaveText('');
   await setRange(page.locator('#missionYear'), 1989.7);
   await page.locator('[data-mission-filter="voyager2"]').click();
   await expect(page.locator('#missionEra')).not.toHaveText('');
+  await setRange(page.locator('#closestApproach'), 3);
+  await setRange(page.locator('#encounterSide'), -0.75);
   await page.locator('[data-assist-mode="voyager"]').click();
-  await setRange(page.locator('#voyagerEncounter'), 3);
+  await setRange(page.locator('#voyagerEncounter'), 1989.65);
   await expect(page.locator('#voyagerAssistSummary')).not.toHaveText('');
   await setRange(page.locator('#neighborDepth'), 55);
   await page.locator('[data-neighbor="trappist"]').click();

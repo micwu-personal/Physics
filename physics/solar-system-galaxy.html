@@ -67,9 +67,14 @@
           </div>
           <span class="representation-label" data-copy-en="Nested scales" data-copy-zh="嵌套尺度">Nested scales</span>
         </header>
-        <canvas id="addressCanvas" role="img" aria-label="Nested schematic of Earth's Solar System, stellar neighborhood, and Milky Way location"
-                data-aria-en="Nested schematic of Earth's Solar System, stellar neighborhood, and Milky Way location"
-                data-aria-zh="地球在太阳系、恒星邻域与银河系中位置的嵌套示意">Nested cosmic address schematic.</canvas>
+        <div class="address-stage">
+          <canvas id="addressCanvas" role="img" aria-label="Nested schematic of Earth's Solar System, stellar neighborhood, and Milky Way location"
+                  data-aria-en="Nested schematic of Earth's Solar System, stellar neighborhood, and Milky Way location"
+                  data-aria-zh="地球在太阳系、恒星邻域与银河系中位置的嵌套示意">Nested cosmic address schematic.</canvas>
+          <div id="addressHotspots" class="address-hotspots" aria-label="Nearby-system map markers"
+               data-aria-en="Nearby-system map markers" data-aria-zh="邻近恒星系地图标记"></div>
+          <div id="addressTooltip" class="address-tooltip" role="tooltip" hidden></div>
+        </div>
         <div class="address-controls" role="group" aria-label="Address scale" data-aria-en="Address scale" data-aria-zh="地址尺度">
           <button type="button" data-address-scale="solar" aria-pressed="true"><strong data-copy-en="Solar System" data-copy-zh="太阳系">Solar System</strong><span>1-100,000 AU</span></button>
           <button type="button" data-address-scale="local" aria-pressed="false"><strong data-copy-en="Nearby systems" data-copy-zh="邻近恒星系">Nearby systems</strong><span>0-50 ly</span></button>
@@ -166,7 +171,7 @@
             <p data-copy-en="Solar-wind pressure, magnetic structure, bound small bodies, and gravitational dominance describe different physical questions. Their boundaries must not be collapsed into one circle."
                data-copy-zh="太阳风压强、磁场结构、受束缚小天体与引力主导区回答的是不同物理问题，不能压缩成同一个圆。">Solar-wind pressure, magnetic structure, bound small bodies, and gravitational dominance describe different physical questions. Their boundaries must not be collapsed into one circle.</p>
           </div>
-          <p class="claim-links"><span class="claim-label" data-copy-en="Claim links" data-copy-zh="对应来源">Claim links</span><a class="claim-chip" href="https://science.nasa.gov/heliophysics/focus-areas/heliosphere/" target="_blank" rel="noopener noreferrer">NASA Heliosphere</a><a class="claim-chip" href="https://www.swpc.noaa.gov/phenomena/solar-wind" target="_blank" rel="noopener noreferrer">NOAA Solar Wind</a><a class="claim-chip" href="https://science.nasa.gov/solar-system/oort-cloud/" target="_blank" rel="noopener noreferrer">NASA Oort Cloud</a></p>
+          <p class="claim-links"><span class="claim-label" data-copy-en="Claim links" data-copy-zh="对应来源">Claim links</span><a class="claim-chip" href="https://science.nasa.gov/heliophysics/focus-areas/heliosphere/" target="_blank" rel="noopener noreferrer">NASA Heliosphere</a><a class="claim-chip" href="https://science.nasa.gov/mission/voyager/interstellar-mission/" target="_blank" rel="noopener noreferrer">NASA Voyager crossings</a><a class="claim-chip" href="https://science.nasa.gov/solar-system/oort-cloud/facts/" target="_blank" rel="noopener noreferrer">NASA Oort Cloud</a></p>
         </header>
 
         <div class="instrument-shell reach-instrument">
@@ -178,17 +183,17 @@
             </div>
             <div class="preset-row">
               <button type="button" data-reach-au="1">Earth</button>
-              <button type="button" data-reach-au="94" data-copy-en="Shock" data-copy-zh="终止激波">Shock</button>
+              <button type="button" data-reach-au="84" data-copy-en="Shock" data-copy-zh="终止激波">Shock</button>
               <button type="button" data-reach-au="120" data-copy-en="Heliopause" data-copy-zh="日球层顶">Heliopause</button>
               <button type="button" data-reach-au="2000" data-copy-en="Inner cloud?" data-copy-zh="内云？">Inner cloud?</button>
-              <button type="button" data-reach-au="310000" data-copy-en="Tidal scale?" data-copy-zh="潮汐尺度？">Tidal scale?</button>
+              <button type="button" data-reach-au="100000" data-copy-en="Outer cloud?" data-copy-zh="外云？">Outer cloud?</button>
             </div>
             <div id="reachSummary" class="selection-readout" aria-live="polite"></div>
-            <p class="model-note"><span class="rep-badge model" data-copy-en="Scale comparison" data-copy-zh="尺度比较">Scale comparison</span><span data-copy-en="The heliopause moves with solar activity and the interstellar environment. Oort Cloud and solar Hill-region extents are inferred, definition-dependent, and uncertain by large factors."
-              data-copy-zh="日球层顶会随太阳活动与星际环境移动。奥尔特云与太阳希尔区域的范围来自推断，依赖定义，并存在数量级上的不确定性。">The heliopause moves with solar activity and the interstellar environment. Oort Cloud and solar Hill-region extents are inferred, definition-dependent, and uncertain by large factors.</span></p>
+            <p class="model-note"><span class="rep-badge model" data-copy-en="Scale comparison" data-copy-zh="尺度比较">Scale comparison</span><span data-copy-en="The heliopause moves with solar activity and the interstellar environment. The Oort Cloud's 2,000-100,000 AU span is an order-of-magnitude inference, not a detected shell; farther tidal dominance has no single agreed radius."
+              data-copy-zh="日球层顶会随太阳活动与星际环境移动。奥尔特云约 2,000-100,000 天文单位的范围是数量级推断，并非已探测的壳层；更远处的潮汐主导区也没有唯一公认半径。">The heliopause moves with solar activity and the interstellar environment. The Oort Cloud's 2,000-100,000 AU span is an order-of-magnitude inference, not a detected shell; farther tidal dominance has no single agreed radius.</span></p>
           </aside>
           <section class="canvas-bay">
-            <header><div><h3 data-copy-en="Four kinds of reach" data-copy-zh="四种“影响范围”">Four kinds of reach</h3><p data-copy-en="Slide the marker across a logarithmic distance axis." data-copy-zh="沿对数距离轴移动标记。">Slide the marker across a logarithmic distance axis.</p></div><span class="representation-label" data-copy-en="Boundaries differ" data-copy-zh="边界不同">Boundaries differ</span></header>
+            <header><div><h3 data-copy-en="Four kinds of reach" data-copy-zh="四种“影响范围”">Four kinds of reach</h3><p data-copy-en="The landscape and four comparison rails share one logarithmic distance axis." data-copy-zh="背景图与四条比较轨道共用同一条对数距离轴。">The landscape and four comparison rails share one logarithmic distance axis.</p></div><span class="representation-label" data-copy-en="Orders of magnitude" data-copy-zh="数量级比较">Orders of magnitude</span></header>
             <canvas id="reachCanvas" role="img" aria-label="Logarithmic comparison of planetary, heliospheric, comet-reservoir, and gravitational scales"
                     data-aria-en="Logarithmic comparison of planetary, heliospheric, comet-reservoir, and gravitational scales"
                     data-aria-zh="行星、日球层、彗星储库与引力尺度的对数比较">Comparison of the Sun's different physical reaches.</canvas>
@@ -258,11 +263,18 @@
         </header>
 
         <div class="mode-switch assist-switch" role="tablist" aria-label="Gravity-assist mode" data-aria-en="Gravity-assist mode" data-aria-zh="引力助推模式">
-          <button id="vectorTab" type="button" role="tab" data-assist-mode="vectors" aria-selected="true" data-copy-en="Vector laboratory" data-copy-zh="矢量实验室">Vector laboratory</button>
-          <button id="voyagerTab" type="button" role="tab" data-assist-mode="voyager" aria-selected="false" data-copy-en="Voyager 2 grand tour" data-copy-zh="旅行者 2 号大巡游">Voyager 2 grand tour</button>
+          <button id="vectorTab" type="button" role="tab" aria-controls="assistWorkspace" data-assist-mode="vectors" aria-selected="true" data-copy-en="Vector laboratory" data-copy-zh="矢量实验室">Vector laboratory</button>
+          <button id="voyagerTab" type="button" role="tab" aria-controls="assistWorkspace" data-assist-mode="voyager" aria-selected="false" data-copy-en="Voyager 2 grand tour" data-copy-zh="旅行者 2 号大巡游">Voyager 2 grand tour</button>
         </div>
 
-        <div class="instrument-shell assist-instrument">
+        <div class="assist-causality" aria-label="Gravity-assist causal sequence" data-aria-en="Gravity-assist causal sequence" data-aria-zh="引力助推因果顺序">
+          <span><strong>1</strong><span data-copy-en="The planet already carries orbital velocity." data-copy-zh="行星本身已经带有公转速度。">The planet already carries orbital velocity.</span></span>
+          <span><strong>2</strong><span data-copy-en="Gravity first accelerates the craft toward the planet." data-copy-zh="引力先使航天器朝行星加速。">Gravity first accelerates the craft toward the planet.</span></span>
+          <span><strong>3</strong><span data-copy-en="A closer pass rotates the planet-frame velocity farther." data-copy-zh="越近的飞越会让行星系速度转得越多。">A closer pass rotates the planet-frame velocity farther.</span></span>
+          <span><strong>4</strong><span data-copy-en="Adding the planet velocity back changes the Sun-frame result." data-copy-zh="再加回行星速度，日心系结果随之改变。">Adding the planet velocity back changes the Sun-frame result.</span></span>
+        </div>
+
+        <div id="assistWorkspace" class="instrument-shell assist-instrument">
           <aside class="control-dock">
             <div data-assist-panel="vectors">
               <div class="range-control">
@@ -271,9 +283,10 @@
                 <div class="range-ends"><span data-copy-en="Outer planet" data-copy-zh="外行星">Outer planet</span><span data-copy-en="Inner planet" data-copy-zh="内行星">Inner planet</span></div>
               </div>
               <div class="range-control">
-                <label for="turnAngle"><span data-copy-en="Flyby turn angle" data-copy-zh="飞越转角">Flyby turn angle</span><output id="turnAngleOutput" for="turnAngle">70 degrees</output></label>
-                <input id="turnAngle" type="range" min="10" max="150" value="70" step="1">
-                <div class="range-ends"><span data-copy-en="Distant pass" data-copy-zh="远距离飞越">Distant pass</span><span data-copy-en="Deep pass" data-copy-zh="近距离飞越">Deep pass</span></div>
+                <label for="closestApproach"><span data-copy-en="Closest approach" data-copy-zh="最近接距离">Closest approach</span><output id="closestApproachOutput" for="closestApproach">6.0 Jupiter radii</output></label>
+                <input id="closestApproach" type="range" min="1.5" max="20" value="6" step="0.1">
+                <div class="range-ends"><span data-copy-en="Deeper turn" data-copy-zh="转弯更大">Deeper turn</span><span data-copy-en="Gentler turn" data-copy-zh="转弯更小">Gentler turn</span></div>
+                <div class="derived-readout"><span data-copy-en="Derived turn at fixed 9 km/s far speed" data-copy-zh="固定远场速度 9 km/s 时推导的转角">Derived turn at fixed 9 km/s far speed</span><output id="turnAngleOutput">103 degrees</output></div>
               </div>
               <div class="range-control">
                 <label for="encounterSide"><span data-copy-en="Pass geometry" data-copy-zh="飞越几何">Pass geometry</span><output id="encounterSideOutput" for="encounterSide">Behind planet</output></label>
@@ -283,9 +296,9 @@
             </div>
             <div data-assist-panel="voyager" hidden>
               <div class="range-control">
-                <label for="voyagerEncounter"><span data-copy-en="Voyager 2 encounter" data-copy-zh="旅行者 2 号交会">Voyager 2 encounter</span><output id="voyagerEncounterOutput" for="voyagerEncounter">Neptune - 1989</output></label>
-                <input id="voyagerEncounter" type="range" min="0" max="3" value="3" step="1">
-                <div class="range-ends"><span data-copy-en="Jupiter 1979" data-copy-zh="木星 1979">Jupiter 1979</span><span data-copy-en="Neptune 1989" data-copy-zh="海王星 1989">Neptune 1989</span></div>
+                <label for="voyagerEncounter"><span data-copy-en="Continuous grand-tour time" data-copy-zh="连续大巡游时间">Continuous grand-tour time</span><output id="voyagerEncounterOutput" for="voyagerEncounter">9 Jul 1979</output></label>
+                <input id="voyagerEncounter" type="range" min="1979.52" max="1989.65" value="1979.52" step="0.01">
+                <div class="range-ends"><span data-copy-en="Jupiter · Jul 1979" data-copy-zh="木星 · 1979 年 7 月">Jupiter · Jul 1979</span><span data-copy-en="Neptune · Aug 1989" data-copy-zh="海王星 · 1989 年 8 月">Neptune · Aug 1989</span></div>
               </div>
               <p id="voyagerAssistSummary" class="selection-readout"></p>
             </div>
@@ -293,19 +306,19 @@
               <button id="assistPlay" type="button" aria-pressed="false" data-copy-en="Play the encounter" data-copy-zh="播放交会">Play the encounter</button>
               <button id="assistReset" class="quiet-button" type="button" data-copy-en="Reset geometry" data-copy-zh="重置几何">Reset geometry</button>
             </div>
-            <p class="model-note"><span class="rep-badge model" data-copy-en="Patched-conic model" data-copy-zh="拼接圆锥曲线模型">Patched-conic model</span><span data-copy-en="Force arrows and vector addition are qualitative. Real navigation solves three-dimensional, multi-body trajectories and finite burns; the planet exchanges an immeasurably tiny fraction of its orbital momentum."
-              data-copy-zh="力箭头与矢量相加为定性表达。真实导航求解三维多体轨迹与有限时长点火；行星只交换其轨道动量中微不可测的一小部分。">Force arrows and vector addition are qualitative. Real navigation solves three-dimensional, multi-body trajectories and finite burns; the planet exchanges an immeasurably tiny fraction of its orbital momentum.</span></p>
+            <p class="model-note"><span class="rep-badge model" data-copy-en="Controlled patched-conic model" data-copy-zh="受控拼接圆锥模型">Controlled patched-conic model</span><span data-copy-en="The vector lab fixes planet-frame far speed at 9 km/s and derives the turn from a Jupiter-mass body and closest approach. Pass geometry projects that turn into the orbital plane. Voyager dates are observed milestones; planet positions, transfer curves, sizes, and playback between them are a sourced teaching interpolation, not ephemerides."
+              data-copy-zh="矢量实验室把行星系远场速度固定为 9 km/s，并用木星质量与最近接距离推导转角；飞越几何再把转角投影到轨道面。旅行者日期是观测里程碑；行星位置、转移曲线、尺寸及其间播放均为有来源的教学插值，并非星历。">The vector lab fixes planet-frame far speed at 9 km/s and derives the turn from a Jupiter-mass body and closest approach. Pass geometry projects that turn into the orbital plane. Voyager dates are observed milestones; planet positions, transfer curves, sizes, and playback between them are a sourced teaching interpolation, not ephemerides.</span></p>
           </aside>
           <section class="canvas-bay">
-            <header><div><h3 id="assistCanvasTitle" data-copy-en="Watch force bend the path" data-copy-zh="观察引力如何弯折路径">Watch force bend the path</h3><p id="assistCanvasSubtitle"></p></div><span class="representation-label" data-copy-en="Vectors + dynamics" data-copy-zh="矢量与动力学">Vectors + dynamics</span></header>
+            <header><div><h3 id="assistCanvasTitle" data-copy-en="Watch force bend the path" data-copy-zh="观察引力如何弯折路径">Watch force bend the path</h3><p id="assistCanvasSubtitle"></p></div><span id="assistRepresentationLabel" class="representation-label" data-copy-en="Vectors + dynamics" data-copy-zh="矢量与动力学">Vectors + dynamics</span></header>
             <canvas id="assistCanvas" role="img" aria-label="Animated gravitational-assist force, path, and velocity-vector diagram"
                     data-aria-en="Animated gravitational-assist force, path, and velocity-vector diagram"
                     data-aria-zh="引力助推中的力、路径与速度矢量动画图">Gravity-assist vector animation.</canvas>
             <dl class="instrument-readouts">
-              <div><dt data-copy-en="Incoming Sun-frame speed" data-copy-zh="入射日心速度">Incoming Sun-frame speed</dt><dd id="assistIncoming">18.0 km/s</dd></div>
-              <div><dt data-copy-en="Outgoing Sun-frame speed" data-copy-zh="出射日心速度">Outgoing Sun-frame speed</dt><dd id="assistOutgoing">25.2 km/s</dd></div>
-              <div><dt data-copy-en="Planet-frame far speed" data-copy-zh="行星系远场速度">Planet-frame far speed</dt><dd id="assistRelative">9.0 km/s both ways</dd></div>
-              <div><dt data-copy-en="Sun-frame change" data-copy-zh="日心速度变化">Sun-frame change</dt><dd id="assistDelta">+7.2 km/s</dd></div>
+              <div><dt id="assistIncomingLabel" data-copy-en="Incoming Sun-frame speed" data-copy-zh="入射日心速度">Incoming Sun-frame speed</dt><dd id="assistIncoming">15.9 km/s</dd></div>
+              <div><dt id="assistOutgoingLabel" data-copy-en="Outgoing Sun-frame speed" data-copy-zh="出射日心速度">Outgoing Sun-frame speed</dt><dd id="assistOutgoing">21.8 km/s</dd></div>
+              <div><dt id="assistRelativeLabel" data-copy-en="Planet-frame far speed" data-copy-zh="行星系远场速度">Planet-frame far speed</dt><dd id="assistRelative">9.0 km/s both ways</dd></div>
+              <div><dt id="assistDeltaLabel" data-copy-en="Sun-frame change" data-copy-zh="日心速度变化">Sun-frame change</dt><dd id="assistDelta">+5.9 km/s</dd></div>
             </dl>
           </section>
         </div>
@@ -358,7 +371,7 @@
             <p data-copy-en="Starlight maps a thin and thick disk, central bar and bulge, spiral structure, stellar halo, and satellite systems. Gas and dust reveal other components; motions imply much more gravitating mass than luminous matter supplies."
                data-copy-zh="星光描绘出薄盘、厚盘、中央棒与核球、旋臂结构、恒星晕及卫星系统。气体与尘埃揭示其他成分；天体运动显示，引力质量远多于发光物质所能提供。">Starlight maps a thin and thick disk, central bar and bulge, spiral structure, stellar halo, and satellite systems. Gas and dust reveal other components; motions imply much more gravitating mass than luminous matter supplies.</p>
           </div>
-          <p class="claim-links"><span class="claim-label" data-copy-en="Claim links" data-copy-zh="对应来源">Claim links</span><a class="claim-chip" href="https://science.nasa.gov/universe/galaxies/our-milky-way-galaxy/" target="_blank" rel="noopener noreferrer">NASA Milky Way</a><a class="claim-chip" href="https://doi.org/10.3847/1538-4357/aaf648" target="_blank" rel="noopener noreferrer">Eilers et al. 2019</a></p>
+          <p class="claim-links"><span class="claim-label" data-copy-en="Claim links" data-copy-zh="对应来源">Claim links</span><a class="claim-chip" href="https://doi.org/10.1088/1674-4527/20/10/159" target="_blank" rel="noopener noreferrer">Shen &amp; Zheng 2020</a><a class="claim-chip" href="https://sci.esa.int/web/gaia/-/58206-anatomy-of-the-milky-way" target="_blank" rel="noopener noreferrer">ESA anatomy</a><a class="claim-chip" href="https://doi.org/10.3847/1538-4357/aaf648" target="_blank" rel="noopener noreferrer">Eilers et al. 2019</a></p>
         </header>
 
         <div class="instrument-shell galaxy-instrument">
@@ -382,6 +395,8 @@
               <button id="galaxyRotate" type="button" aria-pressed="false" data-copy-en="Play differential rotation" data-copy-zh="播放差异旋转">Play differential rotation</button>
               <button id="galaxyReset" class="quiet-button" type="button" data-copy-en="Reset view" data-copy-zh="重置视图">Reset view</button>
             </div>
+            <p class="orientation-note"><strong data-copy-en="Orientation:" data-copy-zh="视图方向：">Orientation:</strong> <span data-copy-en="This face-on map follows the Shen & Zheng (2020) figure convention: rotation is clockwise on this screen. Mirroring the map or viewing the disk from the opposite side reverses the apparent handedness; the animation moves tracers, not a rigid pinwheel."
+              data-copy-zh="本俯视图采用 Shen 与 Zheng（2020）图示约定：屏幕上为顺时针旋转。镜像地图或从盘的另一侧观察会反转表观旋向；动画移动的是示踪物，而不是刚性转盘。">This face-on map follows the Shen &amp; Zheng (2020) figure convention: rotation is clockwise on this screen. Mirroring the map or viewing the disk from the opposite side reverses the apparent handedness; the animation moves tracers, not a rigid pinwheel.</span></p>
             <div id="galaxySummary" class="selection-readout" aria-live="polite"></div>
             <p class="model-note"><span class="rep-badge model" data-copy-en="Morphology model" data-copy-zh="形态模型">Morphology model</span><span data-copy-en="The far side of our Galaxy is obscured and spiral-arm maps combine many tracers. Disk diameter and thickness depend on which stellar population and density threshold define the edge."
               data-copy-zh="银河系远侧受遮挡，旋臂地图需要综合多种示踪物。盘的直径与厚度取决于选用哪类恒星以及以何种密度阈值定义边缘。">The far side of our Galaxy is obscured and spiral-arm maps combine many tracers. Disk diameter and thickness depend on which stellar population and density threshold define the edge.</span></p>
@@ -401,8 +416,8 @@
         </div>
 
         <div class="milky-ledger">
-          <article><strong data-copy-en="Shape and thickness" data-copy-zh="形状与厚度">Shape and thickness</strong><span data-copy-en="A useful round number for the luminous disk is about 100,000 light-years across. The young thin disk is roughly a thousand light-years thick near the Sun, while older thick-disk populations extend several times farther; no sharp wall marks either edge."
-            data-copy-zh="发光盘常用约 10 万光年直径作为便于理解的数量级。太阳附近年轻薄盘厚约一千光年，较老的厚盘恒星可延伸数倍更远；两者都没有清晰的墙状边缘。">A useful round number for the luminous disk is about 100,000 light-years across. The young thin disk is roughly a thousand light-years thick near the Sun, while older thick-disk populations extend several times farther; no sharp wall marks either edge.</span></article>
+          <article><strong data-copy-en="Shape and thickness" data-copy-zh="形状与厚度">Shape and thickness</strong><span data-copy-en="A useful round number for the luminous disk is about 100,000 light-years across. ESA's Gaia anatomy gives order-of-magnitude heights near 700 light-years for the thin disk and 3,000 for the thick disk; populations and density thresholds change any quoted edge."
+            data-copy-zh="发光盘常用约 10 万光年直径作为便于理解的数量级。ESA 的 Gaia 结构图给出薄盘约 700 光年、厚盘约 3,000 光年的数量级高度；不同恒星群与密度阈值会改变任何所谓的“边缘”。">A useful round number for the luminous disk is about 100,000 light-years across. ESA's Gaia anatomy gives order-of-magnitude heights near 700 light-years for the thin disk and 3,000 for the thick disk; populations and density thresholds change any quoted edge.</span></article>
           <article><strong data-copy-en="Rotation and inferred dark matter" data-copy-zh="旋转与推断的暗物质">Rotation and inferred dark matter</strong><span data-copy-en="Orbital speeds remain high well beyond most visible mass. Together with lensing, satellite motion, and cosmological evidence, this supports an extended gravitating component called dark matter; the diagram does not claim that component has been directly imaged."
             data-copy-zh="在大部分可见质量之外，轨道速度仍保持较高。结合引力透镜、卫星运动与宇宙学证据，这支持一种延展的引力成分，即暗物质；本图并不声称暗物质已被直接成像。">Orbital speeds remain high well beyond most visible mass. Together with lensing, satellite motion, and cosmological evidence, this supports an extended gravitating component called dark matter; the diagram does not claim that component has been directly imaged.</span></article>
           <article><strong data-copy-en="Interactions, not isolation" data-copy-zh="相互作用，而非孤立">Interactions, not isolation</strong><span data-copy-en="The Sagittarius dwarf and Magellanic Clouds interact with the Milky Way, leaving streams and perturbations. The Milky Way and Andromeda are approaching, but the exact timing and geometry of a future close passage remain model-dependent."
@@ -439,6 +454,8 @@
               <button type="button" data-galaxy-time="18.0" data-copy-en="M31 approach?" data-copy-zh="接近 M31？">M31 approach?</button>
             </div>
             <div id="galaxyHistorySummary" class="selection-readout" aria-live="polite"></div>
+            <div class="transition-note"><strong data-copy-en="How fragments become a disk" data-copy-zh="碎片如何变成盘">How fragments become a disk</strong><span data-copy-en="The animation now overlaps the stages: fragments orbit inward, merge, and fade while an irregular proto-disk grows. The boundary labels organize evidence; they are not instantaneous phase changes."
+              data-copy-zh="动画让阶段彼此重叠：碎片一边向内绕行、并合并淡出，一边让不规则原始盘逐渐增长。阶段标签用于组织证据，并不代表瞬时相变。">The animation now overlaps the stages: fragments orbit inward, merge, and fade while an irregular proto-disk grows. The boundary labels organize evidence; they are not instantaneous phase changes.</span></div>
             <p class="model-note"><span class="rep-badge model" data-copy-en="Evidence-constrained reconstruction" data-copy-zh="受证据约束的重建">Evidence-constrained reconstruction</span><span data-copy-en="The sequence is robust at broad scale, but merger dates, bar age, disk onset, and future Local Group geometry remain active research topics."
               data-copy-zh="宏观顺序较可靠，但并合日期、棒结构年龄、盘形成起点与未来本星系群几何仍是活跃研究课题。">The sequence is robust at broad scale, but merger dates, bar age, disk onset, and future Local Group geometry remain active research topics.</span></p>
           </aside>
@@ -456,14 +473,21 @@
         <header class="chapter-heading">
           <div>
             <h2 data-copy-en="Move the observer and the Galaxy reorganizes around the horizon." data-copy-zh="移动观察者，银河系会围绕地平线重新组织。">Move the observer and the Galaxy reorganizes around the horizon.</h2>
-            <p data-copy-en="Choose a schematic location and viewing direction. The first-person panel responds with an ordinal density field and Milky Way band, not a star catalog or a prediction of the literal sky."
-               data-copy-zh="选择示意位置与视线方向。第一人称面板会用相对密度场与银河带作出响应；它不是星表，也不预测真实天空。">Choose a schematic location and viewing direction. The first-person panel responds with an ordinal density field and Milky Way band, not a star catalog or a prediction of the literal sky.</p>
+            <p data-copy-en="Use the localizer to connect a place and look arrow to the first-person field. The experiment asks how path length through the disk changes apparent density and the Milky Way band; it is not a star catalog or a prediction of the literal sky."
+               data-copy-zh="先用定位器把所在位置与视线箭头对应到第一人称视场。这个实验探究穿过银河盘的路径长度如何改变表观密度与银河带；它不是星表，也不预测真实天空。">Use the localizer to connect a place and look arrow to the first-person field. The experiment asks how path length through the disk changes apparent density and the Milky Way band; it is not a star catalog or a prediction of the literal sky.</p>
           </div>
           <p class="claim-links"><span class="claim-label" data-copy-en="Claim links" data-copy-zh="对应来源">Claim links</span><a class="claim-chip" href="https://science.nasa.gov/universe/black-holes/types/" target="_blank" rel="noopener noreferrer">NASA Sagittarius A*</a><a class="claim-chip" href="https://www.eso.org/public/science/black-holes/" target="_blank" rel="noopener noreferrer">ESO Galactic Centre</a></p>
         </header>
 
         <div class="instrument-shell sky-instrument">
           <aside class="control-dock">
+            <div class="sky-localizer">
+              <div><strong data-copy-en="Where are you looking?" data-copy-zh="你正从哪里看向何处？">Where are you looking?</strong><span data-copy-en="Position, disk plane, and 3D look direction" data-copy-zh="位置、盘面与三维视线方向">Position, disk plane, and 3D look direction</span></div>
+              <canvas id="skyLocalizerCanvas" role="img" aria-label="Three-dimensional schematic localizer of observer position and look direction in the Milky Way"
+                      data-aria-en="Three-dimensional schematic localizer of observer position and look direction in the Milky Way"
+                      data-aria-zh="观察者在银河系中的位置与视线方向三维示意定位器">Observer orientation localizer.</canvas>
+              <p id="skyLocalizerSummary"></p>
+            </div>
             <label class="select-control" for="observerPosition"><span data-copy-en="Observer position" data-copy-zh="观察者位置">Observer position</span><select id="observerPosition"><option value="sun" data-copy-en="Solar neighborhood" data-copy-zh="太阳邻域">Solar neighborhood</option><option value="inner" data-copy-en="Inner disk" data-copy-zh="内盘">Inner disk</option><option value="outer" data-copy-en="Outer disk" data-copy-zh="外盘">Outer disk</option><option value="halo" data-copy-en="Stellar halo" data-copy-zh="恒星晕">Stellar halo</option></select></label>
             <div class="range-control">
               <label for="skyDirection"><span data-copy-en="Galactic longitude" data-copy-zh="银经">Galactic longitude</span><output id="skyDirectionOutput" for="skyDirection">0 degrees - toward centre</output></label>
@@ -527,11 +551,16 @@
           <a href="https://www.swpc.noaa.gov/phenomena/solar-wind" target="_blank" rel="noopener noreferrer"><strong data-copy-en="NOAA Space Weather Prediction Center" data-copy-zh="NOAA 空间天气预报中心">NOAA Space Weather Prediction Center</strong><span data-copy-en="Solar-wind plasma and variable near-Earth speed." data-copy-zh="太阳风等离子体及近地速度变化。">Solar-wind plasma and variable near-Earth speed.</span></a>
           <a href="https://doi.org/10.1093/mnras/staa1520" target="_blank" rel="noopener noreferrer"><strong data-copy-en="Souami et al. 2020" data-copy-zh="Souami 等，2020">Souami et al. 2020</strong><span data-copy-en="Why gravitational spheres of influence depend on the chosen potential and definition." data-copy-zh="解释引力影响区为何依赖所选引力势与定义。">Why gravitational spheres of influence depend on the chosen potential and definition.</span></a>
           <a href="https://science.nasa.gov/mission/voyager/" target="_blank" rel="noopener noreferrer"><strong data-copy-en="NASA Voyager mission" data-copy-zh="NASA 旅行者任务">NASA Voyager mission</strong><span data-copy-en="Launch, planetary encounters, heliopause crossings, and current mission context." data-copy-zh="发射、行星交会、日球层顶穿越与当前任务背景。">Launch, planetary encounters, heliopause crossings, and current mission context.</span></a>
+          <a href="https://science.nasa.gov/learn/basics-of-space-flight/chapter4-1/" target="_blank" rel="noopener noreferrer"><strong data-copy-en="NASA/JPL Basics of Space Flight" data-copy-zh="NASA/JPL 航天基础">NASA/JPL Basics of Space Flight</strong><span data-copy-en="Planet-frame velocity turning, heliocentric vector addition, and gravity-assist energy exchange." data-copy-zh="行星系速度转向、日心矢量相加与引力助推能量交换。">Planet-frame velocity turning, heliocentric vector addition, and gravity-assist energy exchange.</span></a>
+          <a href="https://svs.gsfc.nasa.gov/4140/" target="_blank" rel="noopener noreferrer"><strong data-copy-en="NASA Voyager 2 trajectory visualization" data-copy-zh="NASA 旅行者 2 号轨迹可视化">NASA Voyager 2 trajectory visualization</strong><span data-copy-en="Reference for accelerated-time trajectory storytelling and explicit schematic boundary caveats." data-copy-zh="为加速时间的轨迹叙事与明确的示意边界说明提供参考。">Reference for accelerated-time trajectory storytelling and explicit schematic boundary caveats.</span></a>
           <a href="https://science.nasa.gov/mission/new-horizons/" target="_blank" rel="noopener noreferrer"><strong data-copy-en="NASA New Horizons" data-copy-zh="NASA 新视野号">NASA New Horizons</strong><span data-copy-en="Pluto, Arrokoth, and continued Kuiper Belt travel." data-copy-zh="冥王星、阿罗科特与后续柯伊伯带航行。">Pluto, Arrokoth, and continued Kuiper Belt travel.</span></a>
           <a href="https://www.esa.int/Science_Exploration/Space_Science/Rosetta" target="_blank" rel="noopener noreferrer"><strong data-copy-en="ESA Rosetta" data-copy-zh="ESA 罗塞塔">ESA Rosetta</strong><span data-copy-en="Rendezvous and operations at comet 67P/Churyumov-Gerasimenko." data-copy-zh="与 67P/丘留莫夫-格拉西缅科彗星的交会与运行。">Rendezvous and operations at comet 67P/Churyumov-Gerasimenko.</span></a>
           <a href="https://science.nasa.gov/exoplanets/exoplanet-catalog/" target="_blank" rel="noopener noreferrer"><strong data-copy-en="NASA Exoplanet Archive portal" data-copy-zh="NASA 系外行星档案入口">NASA Exoplanet Archive portal</strong><span data-copy-en="Confirmed exoplanet-system context; the catalog changes as evidence is revised." data-copy-zh="已确认系外行星系统背景；星表会随证据修订而变化。">Confirmed exoplanet-system context; the catalog changes as evidence is revised.</span></a>
           <a href="https://www.cosmos.esa.int/web/gaia/edr3-stellar-census" target="_blank" rel="noopener noreferrer"><strong data-copy-en="ESA Gaia stellar census" data-copy-zh="ESA Gaia 恒星普查">ESA Gaia stellar census</strong><span data-copy-en="Distances and motions that map the Solar neighborhood and Galactic structure." data-copy-zh="用于绘制太阳邻域与银河结构的距离和运动数据。">Distances and motions that map the Solar neighborhood and Galactic structure.</span></a>
           <a href="https://science.nasa.gov/universe/galaxies/our-milky-way-galaxy/" target="_blank" rel="noopener noreferrer"><strong data-copy-en="NASA Milky Way overview" data-copy-zh="NASA 银河系概览">NASA Milky Way overview</strong><span data-copy-en="Barred-spiral morphology, Solar location, scale, and central black hole." data-copy-zh="棒旋形态、太阳位置、尺度与中央黑洞。">Barred-spiral morphology, Solar location, scale, and central black hole.</span></a>
+          <a href="https://doi.org/10.1088/1674-4527/20/10/159" target="_blank" rel="noopener noreferrer"><strong data-copy-en="Shen &amp; Zheng 2020" data-copy-zh="Shen 与 Zheng，2020">Shen &amp; Zheng 2020</strong><span data-copy-en="Bar, bulge, arm-tracer synthesis, and the clockwise convention used by this face-on schematic." data-copy-zh="中央棒、核球、旋臂示踪综合，以及本俯视示意采用的顺时针图示约定。">Bar, bulge, arm-tracer synthesis, and the clockwise convention used by this face-on schematic.</span></a>
+          <a href="https://sci.esa.int/web/gaia/-/58206-anatomy-of-the-milky-way" target="_blank" rel="noopener noreferrer"><strong data-copy-en="ESA Anatomy of the Milky Way" data-copy-zh="ESA 银河系结构">ESA Anatomy of the Milky Way</strong><span data-copy-en="Order-of-magnitude disk diameter, thin/thick-disk height, and stellar-halo scale." data-copy-zh="银河盘直径、薄盘与厚盘高度及恒星晕尺度的数量级。">Order-of-magnitude disk diameter, thin/thick-disk height, and stellar-halo scale.</span></a>
+          <a href="https://www.cosmos.esa.int/web/gaia/milky-way" target="_blank" rel="noopener noreferrer"><strong data-copy-en="ESA Gaia Milky Way map" data-copy-zh="ESA Gaia 银河系地图">ESA Gaia Milky Way map</strong><span data-copy-en="Evidence that arm count and prominence depend on tracers and are less tidy than a literal pinwheel." data-copy-zh="说明旋臂数量与显著程度取决于示踪物，真实结构远非整齐的风车图案。">Evidence that arm count and prominence depend on tracers and are less tidy than a literal pinwheel.</span></a>
           <a href="https://doi.org/10.3847/1538-4357/aaf648" target="_blank" rel="noopener noreferrer"><strong data-copy-en="Eilers et al. 2019" data-copy-zh="Eilers 等，2019">Eilers et al. 2019</strong><span data-copy-en="Milky Way circular-velocity curve from luminous red giant stars." data-copy-zh="利用红巨星测得的银河系圆周速度曲线。">Milky Way circular-velocity curve from luminous red giant stars.</span></a>
           <a href="https://doi.org/10.1038/s41586-018-0625-x" target="_blank" rel="noopener noreferrer"><strong data-copy-en="Helmi et al. 2018" data-copy-zh="Helmi 等，2018">Helmi et al. 2018</strong><span data-copy-en="Kinematic and chemical evidence for a major ancient accretion event." data-copy-zh="一次重大远古吸积事件的运动学与化学证据。">Kinematic and chemical evidence for a major ancient accretion event.</span></a>
           <a href="https://www.eso.org/public/science/black-holes/" target="_blank" rel="noopener noreferrer"><strong data-copy-en="European Southern Observatory" data-copy-zh="欧洲南方天文台">European Southern Observatory</strong><span data-copy-en="Galactic Centre stellar orbits and Sagittarius A* mass measurements." data-copy-zh="银河系中心恒星轨道与人马座 A* 质量测量。">Galactic Centre stellar orbits and Sagittarius A* mass measurements.</span></a>

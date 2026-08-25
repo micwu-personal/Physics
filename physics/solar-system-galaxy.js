@@ -11,6 +11,10 @@
   };
   const clamp = (value, minimum, maximum) => Math.min(maximum, Math.max(minimum, value));
   const mix = (start, end, amount) => start + (end - start) * amount;
+  const smoothstep = (start, end, value) => {
+    const amount = clamp((value - start) / Math.max(0.0001, end - start), 0, 1);
+    return amount * amount * (3 - 2 * amount);
+  };
   const zh = () => window.PhysicsUI.language === 'zh-CN';
   const t = (en, chinese) => zh() ? chinese : en;
   const localized = value => value?.[zh() ? 'zh' : 'en'] ?? '';
@@ -39,10 +43,10 @@
     missionFilter: 'all',
     assistMode: 'vectors',
     planetSpeed: 13.1,
-    turnAngle: 70,
+    closestApproach: 6,
     encounterSide: 0.75,
     assistProgress: 0.18,
-    voyagerEncounter: 3,
+    voyagerYear: 1979.52,
     neighborDepth: 15,
     neighbor: 'proxima',
     galaxyView: 'face',
@@ -222,10 +226,30 @@
   ];
 
   const voyagerEncounters = [
-    { planet: { en: 'Jupiter', zh: '木星' }, year: 1979, color: '#d6a26d', next: { en: 'Saturn transfer', zh: '转向土星' }, purpose: { en: 'Jupiter bent Voyager 2 toward Saturn while changing its Sun-frame energy and direction.', zh: '木星弯折旅行者 2 号的路径，使其转向土星，并改变日心参考系中的能量与方向。' } },
-    { planet: { en: 'Saturn', zh: '土星' }, year: 1981, color: '#e3c17d', next: { en: 'Uranus transfer', zh: '转向天王星' }, purpose: { en: 'The Saturn encounter preserved the geometry needed to continue toward Uranus.', zh: '土星交会保留了继续前往天王星所需的几何条件。' } },
-    { planet: { en: 'Uranus', zh: '天王星' }, year: 1986, color: '#8ce0e8', next: { en: 'Neptune transfer', zh: '转向海王星' }, purpose: { en: 'The Uranus flyby redirected the spacecraft onto the final planetary leg toward Neptune.', zh: '天王星飞越把航天器重定向到前往海王星的最后一段行星航程。' } },
-    { planet: { en: 'Neptune', zh: '海王星' }, year: 1989, color: '#5d79ff', next: { en: 'Out of the planetary plane', zh: '离开行星平面' }, purpose: { en: 'Targeting Triton forced a close Neptune pass that sent Voyager 2 south of the ecliptic after the only Uranus-Neptune tour yet flown.', zh: '对海卫一的瞄准要求近距离飞越海王星，使旅行者 2 号在完成迄今唯一的天王星-海王星巡游后飞向黄道面南侧。' } }
+    {
+      id: 'jupiter', planet: { en: 'Jupiter', zh: '木星' }, dateValue: 1979.52, date: { en: '9 Jul 1979', zh: '1979 年 7 月 9 日' },
+      au: 5.203, period: 11.86, anchorAngle: -2.42, color: '#d6a26d',
+      next: { en: 'Saturn transfer', zh: '转向土星' },
+      purpose: { en: 'Jupiter redirected Voyager 2 toward Saturn while changing its heliocentric energy and direction.', zh: '木星把旅行者 2 号重定向至土星，同时改变了它的日心能量与方向。' }
+    },
+    {
+      id: 'saturn', planet: { en: 'Saturn', zh: '土星' }, dateValue: 1981.65, date: { en: '26 Aug 1981 UTC', zh: '1981 年 8 月 26 日（UTC）' },
+      au: 9.537, period: 29.46, anchorAngle: -1.18, color: '#e3c17d',
+      next: { en: 'Uranus transfer', zh: '转向天王星' },
+      purpose: { en: 'The Saturn flyby retained the geometry needed for the long transfer to Uranus.', zh: '土星飞越保留了继续进行天王星长距离转移所需的几何。' }
+    },
+    {
+      id: 'uranus', planet: { en: 'Uranus', zh: '天王星' }, dateValue: 1986.07, date: { en: '24 Jan 1986', zh: '1986 年 1 月 24 日' },
+      au: 19.19, period: 84.01, anchorAngle: 0.08, color: '#8ce0e8',
+      next: { en: 'Neptune transfer', zh: '转向海王星' },
+      purpose: { en: 'The Uranus flyby redirected the spacecraft onto the final planetary leg toward Neptune.', zh: '天王星飞越把航天器重定向到前往海王星的最后一段行星航程。' }
+    },
+    {
+      id: 'neptune', planet: { en: 'Neptune', zh: '海王星' }, dateValue: 1989.65, date: { en: '25 Aug 1989', zh: '1989 年 8 月 25 日' },
+      au: 30.07, period: 164.8, anchorAngle: 1.12, color: '#5d79ff',
+      next: { en: 'South of the ecliptic', zh: '飞向黄道面南侧' },
+      purpose: { en: 'Targeting Triton required a close Neptune pass that sent Voyager 2 south of the ecliptic.', zh: '对海卫一的瞄准要求近距离飞越海王星，并把旅行者 2 号送向黄道面南侧。' }
+    }
   ];
 
   const nearbySystems = [
@@ -240,20 +264,32 @@
     { id: 'tauceti', name: { en: 'Tau Ceti', zh: '天仓五' }, distance: 11.9, x: 10.27, y: 5.01, z: -3.27, planets: { en: 'Candidate signals not presented as confirmed', zh: '候选信号不作为已确认行星展示' }, note: { en: 'A nearby Sun-like star often discussed in planet searches; candidate status must remain versioned.', zh: '一颗常见于行星搜索讨论的邻近类太阳恒星；候选状态必须标明版本。' }, color: '#ffe3a3' },
     { id: 'trappist', name: { en: 'TRAPPIST-1', zh: 'TRAPPIST-1' }, distance: 40.7, x: 39.2, y: -9.9, z: -3.8, planets: { en: '7 confirmed transiting planets', zh: '7 颗已确认凌日行星' }, note: { en: 'A compact system around an ultracool dwarf; the planet orbits are far too small to resolve on this map.', zh: '一套围绕超冷矮星的紧凑系统；行星轨道远小于本图分辨能力。' }, color: '#d47a67' }
   ];
+  const addressShortNames = {
+    proxima: 'Proxima',
+    alpha: 'Alpha Cen AB',
+    barnard: 'Barnard',
+    luhman: 'Luhman 16',
+    wolf: 'Wolf 359',
+    sirius: 'Sirius AB',
+    epsilon: 'Eps Eridani',
+    ross128: 'Ross 128',
+    tauceti: 'Tau Ceti',
+    trappist: 'TRAPPIST-1'
+  };
 
   const historyStages = [
-    { max: 2.2, title: { en: 'Early fragments and old stars', zh: '早期碎片与古老恒星' }, detail: { en: 'Small progenitors form stars and begin chemical enrichment. Exact ancestry is reconstructed, not filmed.', zh: '小型前身系统形成恒星并开始化学富集。具体祖先关系来自重建，并非被直接记录成影片。' } },
-    { max: 5.8, title: { en: 'Major ancient accretion', zh: '重大远古吸积' }, detail: { en: 'Kinematics and chemistry support a major Gaia-Enceladus/Sausage event roughly 8-11 billion years before today.', zh: '运动学与化学证据支持约在距今 80-110 亿年前发生重大 Gaia-Enceladus/Sausage 吸积事件。' } },
+    { max: 2.2, title: { en: 'Early fragments and old stars', zh: '早期碎片与古老恒星' }, detail: { en: 'Small progenitors form stars, orbit inward, and begin overlapping with a growing irregular proto-disk. Exact ancestry is reconstructed, not filmed.', zh: '小型前身系统形成恒星、向内绕行，并开始与逐渐增长的不规则原始盘重叠。具体祖先关系来自重建，并非被直接记录成影片。' } },
+    { max: 5.8, title: { en: 'Major ancient accretion', zh: '重大远古吸积' }, detail: { en: 'Fragments do not vanish at this label: their merger signatures fade while the proto-disk strengthens. Kinematics and chemistry support a major Gaia-Enceladus/Sausage event.', zh: '碎片不会在这个标签处突然消失：并合痕迹逐渐淡去，原始盘同步增强。运动学与化学证据支持一次重大的 Gaia-Enceladus/Sausage 吸积事件。' } },
     { max: 9.8, title: { en: 'Disk growth and repeated perturbation', zh: '盘增长与反复扰动' }, detail: { en: 'Gas accretion, star formation, internal redistribution, and smaller mergers grow thin and thick disk populations.', zh: '气体吸积、恒星形成、内部再分配与较小并合共同增长薄盘和厚盘恒星群。' } },
     { max: 14.05, title: { en: 'Present barred spiral', zh: '今日棒旋星系' }, detail: { en: 'The Milky Way continues forming stars and interacting with satellites; “present shape” is a changing snapshot.', zh: '银河系仍在形成恒星并与卫星系统相互作用；“今日形状”只是变化中的快照。' } },
     { max: 18.4, title: { en: 'Possible Local Group close passage', zh: '可能的本星系群近距离交会' }, detail: { en: 'Milky Way-Andromeda outcomes depend on uncertain motions and the wider Local Group. A 2025 analysis found no certainty of merger within 10 billion years.', zh: '银河系与仙女座的结局取决于不确定的运动及更广泛的本星系群动力学。2025 年分析显示，未来 100 亿年内并合并非确定事件。' } }
   ];
 
   const observerPositions = {
-    sun: { radius: 8.2, density: 1, label: { en: 'Solar neighborhood', zh: '太阳邻域' }, note: { en: 'Rough local reference: about 0.04 stars per cubic parsec, depending on census limits.', zh: '粗略本地参考值：约每立方秒差距 0.04 颗恒星，取决于普查限值。' } },
-    inner: { radius: 3, density: 16, label: { en: 'Inner disk', zh: '内盘' }, note: { en: 'Stellar density rises strongly inward, but dust also hides visible light along the plane.', zh: '向内恒星密度显著上升，但尘埃也会遮挡盘面方向的可见光。' } },
-    outer: { radius: 14, density: 0.28, label: { en: 'Outer disk', zh: '外盘' }, note: { en: 'The stellar disk thins outward; warps, flares, and substructure make a smooth decline incomplete.', zh: '恒星盘向外逐渐稀疏；翘曲、增厚与次结构使平滑下降只是近似。' } },
-    halo: { radius: 28, density: 0.04, label: { en: 'Stellar halo', zh: '恒星晕' }, note: { en: 'A sparse, extended stellar population surrounds the disk; this is not the much larger inferred dark-matter halo.', zh: '稀疏而延展的恒星群包围着盘；它并不是范围大得多的推断暗物质晕。' } }
+    sun: { radius: 8.2, angle: -0.34, z: 0.02, density: 1, label: { en: 'Solar neighborhood', zh: '太阳邻域' }, note: { en: 'Rough local reference: about 0.04 stars per cubic parsec, depending on census limits.', zh: '粗略本地参考值：约每立方秒差距 0.04 颗恒星，取决于普查限值。' } },
+    inner: { radius: 3, angle: 0.72, z: 0.04, density: 16, label: { en: 'Inner disk', zh: '内盘' }, note: { en: 'Stellar density rises strongly inward, but dust also hides visible light along the plane.', zh: '向内恒星密度显著上升，但尘埃也会遮挡盘面方向的可见光。' } },
+    outer: { radius: 14, angle: 2.38, z: -0.08, density: 0.28, label: { en: 'Outer disk', zh: '外盘' }, note: { en: 'The stellar disk thins outward; warps, flares, and substructure make a smooth decline incomplete.', zh: '恒星盘向外逐渐稀疏；翘曲、增厚与次结构使平滑下降只是近似。' } },
+    halo: { radius: 20, angle: -2.18, z: 8, density: 0.04, label: { en: 'Stellar halo', zh: '恒星晕' }, note: { en: 'A sparse, extended stellar population surrounds the disk; this is not the much larger inferred dark-matter halo.', zh: '稀疏而延展的恒星群包围着盘；它并不是范围大得多的推断暗物质晕。' } }
   };
 
   const scenes = new Map();
@@ -272,6 +308,7 @@
   const neighborScene = setupCanvas('neighborCanvas');
   const galaxyScene = setupCanvas('galaxyCanvas');
   const historyScene = setupCanvas('galaxyHistoryCanvas');
+  const skyLocalizerScene = setupCanvas('skyLocalizerCanvas');
   const skyScene = setupCanvas('skyCanvas');
 
   function resize(scene) {
@@ -359,11 +396,43 @@
     size: 0.45 + starSeed() * 1.15
   }));
   const galaxySeed = seededRandom(602214);
-  const galaxyStars = Array.from({ length: 460 }, () => ({
-    radius: Math.pow(galaxySeed(), 0.72),
+  const galaxyStars = Array.from({ length: 1150 }, (_, index) => {
+    const radius = 0.1 + Math.pow(galaxySeed(), 0.72) * 0.88;
+    const arm = index % 4;
+    return {
+      radius,
+      angle: arm * TAU / 4 - radius * 4.65 + (galaxySeed() - 0.5) * (0.18 + radius * 0.34),
+      offset: (galaxySeed() - 0.5) * 0.12,
+      age: galaxySeed(),
+      arm
+    };
+  });
+  const galaxyClouds = Array.from({ length: 150 }, (_, index) => {
+    const radius = 0.16 + Math.pow(galaxySeed(), 0.75) * 0.78;
+    return {
+      radius,
+      angle: index % 4 * TAU / 4 - radius * 4.65 + (galaxySeed() - 0.5) * 0.18,
+      size: 0.8 + galaxySeed() * 2.4,
+      brightness: 0.04 + galaxySeed() * 0.11
+    };
+  });
+  const galaxyBarStars = Array.from({ length: 180 }, () => ({
+    x: (galaxySeed() - 0.5) * 0.7,
+    y: (galaxySeed() - 0.5) * (0.04 + galaxySeed() * 0.1),
+    brightness: 0.22 + galaxySeed() * 0.62
+  }));
+  const galaxyEdgeStars = Array.from({ length: 420 }, () => ({
+    x: (galaxySeed() - 0.5) * 2,
+    y: (galaxySeed() - 0.5) * 2,
+    height: (galaxySeed() - 0.5) * (galaxySeed() > 0.82 ? 0.34 : 0.11),
+    brightness: 0.2 + galaxySeed() * 0.58
+  }));
+  const historyFragments = Array.from({ length: 18 }, (_, index) => ({
     angle: galaxySeed() * TAU,
-    offset: (galaxySeed() - 0.5) * 0.24,
-    age: galaxySeed()
+    radius: 0.26 + galaxySeed() * 0.5,
+    size: 4 + galaxySeed() * 10,
+    phase: index / 18 * 1.4,
+    gold: index % 3 === 0
   }));
   const skySeed = seededRandom(299792);
   const skyStars = Array.from({ length: 520 }, () => ({
@@ -383,9 +452,114 @@
     }
   }
 
+  let addressTooltipTimer = 0;
+  const addressLabelLayout = [];
+
+  function spreadLabelYs(items, minimum, maximum, gap) {
+    const sorted = [...items].sort((a, b) => a.y - b.y);
+    const slotCount = Math.max(1, sorted.length - 1);
+    const step = Math.min(gap, (maximum - minimum) / slotCount);
+    const average = sorted.reduce((sum, item) => sum + item.y, 0) / Math.max(1, sorted.length);
+    const start = clamp(average - step * (sorted.length - 1) / 2, minimum, maximum - step * (sorted.length - 1));
+    sorted.forEach((item, index) => {
+      item.labelY = start + index * step;
+    });
+    return sorted;
+  }
+
+  function balanceLabelSides(items, centreX) {
+    const maximumPerSide = Math.ceil(items.length / 2);
+    const rebalance = (crowdedSide, openSide) => {
+      const crowded = items.filter(item => item.side === crowdedSide);
+      if (crowded.length <= maximumPerSide) return;
+      crowded
+        .sort((a, b) => Math.abs(a.x - centreX) - Math.abs(b.x - centreX))
+        .slice(0, crowded.length - maximumPerSide)
+        .forEach(item => {
+          item.side = openSide;
+        });
+    };
+    rebalance('left', 'right');
+    rebalance('right', 'left');
+    return {
+      left: items.filter(item => item.side === 'left'),
+      right: items.filter(item => item.side === 'right')
+    };
+  }
+
+  function hideAddressTooltip() {
+    window.clearTimeout(addressTooltipTimer);
+    const tooltip = $('addressTooltip');
+    tooltip.hidden = true;
+    document.querySelectorAll('.address-hotspot[aria-expanded="true"]').forEach(button => {
+      button.setAttribute('aria-expanded', 'false');
+    });
+  }
+
+  function scheduleAddressTooltipHide(button) {
+    window.clearTimeout(addressTooltipTimer);
+    addressTooltipTimer = window.setTimeout(() => {
+      if (document.activeElement === button) return;
+      hideAddressTooltip();
+    }, 120);
+  }
+
+  function showAddressTooltip(button, marker) {
+    window.clearTimeout(addressTooltipTimer);
+    document.querySelectorAll('.address-hotspot').forEach(item => {
+      item.setAttribute('aria-expanded', String(item === button));
+    });
+    const tooltip = $('addressTooltip');
+    tooltip.innerHTML = `<strong>${localized(marker.system.name)}</strong><span class="data-line">${fixed(marker.system.distance, 2)} ${t('light-years', '光年')}</span><span>${localized(marker.system.planets)}</span>`;
+    tooltip.hidden = false;
+    const width = addressScene.width;
+    const height = addressScene.height;
+    const tooltipWidth = Math.min(250, Math.max(180, width - 20));
+    const targetX = marker.hotspotX;
+    const targetY = marker.hotspotY;
+    const left = clamp(targetX - tooltipWidth / 2, 10, width - tooltipWidth - 10);
+    const placeBelow = targetY < 96;
+    tooltip.style.left = `${left}px`;
+    tooltip.style.top = `${clamp(placeBelow ? targetY + 28 : targetY - 112, 10, height - 106)}px`;
+  }
+
+  function syncAddressHotspots(markers) {
+    const host = $('addressHotspots');
+    hideAddressTooltip();
+    host.replaceChildren();
+    for (const marker of markers) {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'address-hotspot';
+      button.dataset.systemId = marker.system.id;
+      button.style.left = `${marker.hotspotX}px`;
+      button.style.top = `${marker.hotspotY}px`;
+      button.setAttribute('aria-expanded', 'false');
+      button.setAttribute('aria-describedby', 'addressTooltip');
+      button.setAttribute(
+        'aria-label',
+        `${localized(marker.system.name)}, ${fixed(marker.system.distance, 2)} ${t('light-years', '光年')}. ${localized(marker.system.planets)}`
+      );
+      button.addEventListener('pointerenter', () => showAddressTooltip(button, marker));
+      button.addEventListener('pointerleave', event => {
+        if (event.pointerType === 'mouse') scheduleAddressTooltipHide(button);
+      });
+      button.addEventListener('focus', () => showAddressTooltip(button, marker));
+      button.addEventListener('blur', () => scheduleAddressTooltipHide(button));
+      button.addEventListener('click', () => showAddressTooltip(button, marker));
+      host.append(button);
+    }
+  }
+
   function drawAddress() {
+    $('addressSummary').textContent = {
+      solar: t('Earth moves around the Sun inside a many-zone planetary system.', '地球围绕太阳运动，位于具有多重分区的行星系统中。'),
+      local: t('The Sun moves among nearby stellar and planetary systems.', '太阳在邻近恒星与行星系统之间运动。'),
+      galaxy: t('The Solar System orbits inside the Milky Way’s disk.', '太阳系在银河系盘内绕行。')
+    }[state.addressScale];
     clear(addressScene);
     drawBackgroundStars(addressScene, 0.72);
+    addressLabelLayout.length = 0;
     const { context, width, height } = addressScene;
     const cx = width * 0.52;
     const cy = height * 0.5;
@@ -407,31 +581,67 @@
       line(context, earthX, earthY - 9, earthX, 40, palette.cyan, 1, [3, 4]);
       text(context, t('EARTH / 1 AU', '地球 / 1 天文单位'), earthX, 28, palette.cyan, 11, 'center');
       text(context, t('Planet sizes enlarged', '行星尺寸已放大'), 18, height - 22, palette.muted, 10);
+      syncAddressHotspots([]);
     } else if (state.addressScale === 'local') {
-      const scale = maxRadius / 13;
+      const scale = maxRadius / 50;
+      for (const distance of [10, 25, 50]) {
+        context.strokeStyle = distance === 50 ? 'rgba(0,212,255,0.24)' : 'rgba(238,242,255,0.1)';
+        context.setLineDash(distance === 50 ? [5, 4] : [2, 5]);
+        context.beginPath();
+        context.ellipse(cx, cy, distance * scale, distance * scale * 0.72, 0, 0, TAU);
+        context.stroke();
+      }
+      context.setLineDash([]);
       line(context, cx - maxRadius, cy, cx + maxRadius, cy, palette.line);
       line(context, cx, cy - maxRadius * 0.72, cx, cy + maxRadius * 0.72, palette.line);
       circle(context, cx, cy, 6, palette.gold);
       text(context, t('SUN', '太阳'), cx + 10, cy - 10, palette.gold, 10);
-      for (const system of nearbySystems.filter(item => item.distance <= 15)) {
+      const markers = nearbySystems.map(system => {
         const x = cx + system.x * scale;
         const y = cy + system.y * scale * 0.72;
+        return { system, x, y, side: x < cx ? 'left' : 'right' };
+      });
+      const balanced = balanceLabelSides(markers, cx);
+      const leftLabels = spreadLabelYs(balanced.left, 48, height - 56, 44);
+      const rightLabels = spreadLabelYs(balanced.right, 48, height - 56, 44);
+      for (const marker of [...leftLabels, ...rightLabels]) {
+        const { system, x, y } = marker;
         const radius = clamp(4 + Math.abs(system.z) * 0.32, 4, 8);
         circle(context, x, y, radius, system.color, system.id === 'proxima' ? palette.cyan : '', 2);
-        text(context, localized(system.name), x + 8, y - 10, palette.paper, 9);
+        const labelX = marker.side === 'left' ? 42 : width - 42;
+        const lineEnd = marker.side === 'left' ? Math.min(cx - maxRadius - 8, x - 10) : Math.max(cx + maxRadius + 8, x + 10);
+        line(context, x, y, lineEnd, marker.labelY, 'rgba(238,242,255,0.25)', 1);
+        context.fillStyle = 'rgba(4,7,19,0.88)';
+        const labelWidth = Math.min(width * 0.31, 144);
+        context.fillRect(marker.side === 'left' ? 6 : width - labelWidth - 6, marker.labelY - 10, labelWidth, 20);
+        text(
+          context,
+          `${zh() ? localized(system.name) : addressShortNames[system.id]} · ${fixed(system.distance, 1)} ly`,
+          labelX,
+          marker.labelY,
+          system.id === 'proxima' ? palette.cyan : palette.paper,
+          width < 520 ? 8 : 9,
+          marker.side
+        );
+        marker.hotspotX = marker.side === 'left' ? 28 : width - 28;
+        marker.hotspotY = marker.labelY;
+        addressLabelLayout.push({ id: system.id, side: marker.side, y: marker.labelY });
       }
-      text(context, t('Projected J2000 snapshot / 15 ly', 'J2000 投影快照 / 15 光年'), 18, height - 22, palette.muted, 10);
+      const barY = height - 24;
+      const barStart = cx - 10 * scale;
+      line(context, barStart, barY, cx, barY, palette.cyan, 2);
+      line(context, barStart, barY - 4, barStart, barY + 4, palette.cyan, 1);
+      line(context, cx, barY - 4, cx, barY + 4, palette.cyan, 1);
+      text(context, t('10 ly distance scale', '10 光年距离标尺'), (barStart + cx) / 2, barY - 11, palette.cyan, 9, 'center');
+      text(context, t('Projected J2000 positions · rings at 10, 25, 50 ly', 'J2000 投影位置 · 圆环为 10、25、50 光年'), 14, 22, palette.muted, 9);
+      syncAddressHotspots(markers);
     } else {
       drawGalaxyFace(context, cx, cy, maxRadius, 0, 'stars', true);
       text(context, t('SUN / ~26,700 ly FROM CENTRE', '太阳 / 距中心约 26,700 光年'), width - 18, 28, palette.cyan, 10, 'right');
-      text(context, t('Reconstructed exterior view', '重建的外部视图'), 18, height - 22, palette.muted, 10);
+      text(context, t('Schematic reconstruction · not an exterior photograph', '示意重建 · 并非外部照片'), 18, height - 22, palette.muted, 10);
+      syncAddressHotspots([]);
     }
 
-    $('addressSummary').textContent = {
-      solar: t('Earth moves around the Sun inside a many-zone planetary system.', '地球围绕太阳运动，位于具有多重分区的行星系统中。'),
-      local: t('The Sun moves among nearby stellar and planetary systems.', '太阳在邻近恒星与行星系统之间运动。'),
-      galaxy: t('The Solar System orbits inside the Milky Way’s disk.', '太阳系在银河系盘内绕行。')
-    }[state.addressScale];
   }
 
   function solarX(distance, config, left, right) {
@@ -456,7 +666,7 @@
       { start: 5, end: 30.2, color: 'rgba(0,212,255,0.06)', labelY: 54, label: { en: 'GIANTS + CENTAURS', zh: '巨行星与半人马天体' } },
       { start: 30, end: 50, color: 'rgba(124,92,255,0.12)', labelY: 54, label: { en: 'KUIPER BELT', zh: '柯伊伯带' } },
       { start: 30, end: 1000, color: 'rgba(255,107,157,0.05)', labelY: 72, label: { en: 'SCATTERED DISK', zh: '散射盘' } },
-      { start: 1000, end: 100000, color: 'rgba(126,232,197,0.08)', labelY: 54, label: { en: 'INFERRED OORT CLOUD', zh: '推断的奥尔特云' } }
+      { start: 2000, end: 100000, color: 'rgba(126,232,197,0.08)', labelY: 54, label: { en: 'INFERRED OORT CLOUD', zh: '推断的奥尔特云' } }
     ];
 
     for (const zone of zones) {
@@ -511,10 +721,10 @@
     }
 
     if (state.solarScale === 'reservoirs') {
-      const hillStart = solarX(206000, config, left, right);
-      const hillEnd = solarX(412000, config, left, right);
-      line(context, hillStart, 88, hillEnd, 88, palette.pink, 4);
-      text(context, t('MODEL-DEPENDENT GALACTIC TIDAL SCALE ~1-2 pc', '依赖模型的银河潮汐尺度约 1-2 秒差距'), (hillStart + hillEnd) / 2, 74, palette.pink, 9, 'center');
+      const tidalStart = solarX(100000, config, left, right);
+      const tidalEnd = solarX(500000, config, left, right);
+      line(context, tidalStart, 88, tidalEnd, 88, palette.pink, 3, [7, 5]);
+      text(context, t('TIDAL COMPETITION / NO UNIQUE EDGE', '潮汐竞争 / 无唯一边界'), (tidalStart + tidalEnd) / 2, 74, palette.pink, 9, 'center');
     }
 
     const selected = solarObjects.find(object => object.id === state.solarObject);
@@ -541,17 +751,17 @@
       title: t('Termination shock to heliopause', '从终止激波到日球层顶'),
       body: t('Voyager 1 and 2 crossed different boundaries at different distances, evidence that this region is not a rigid sphere.', '旅行者 1 号和 2 号在不同距离穿越不同边界，说明该区域并非刚性球面。')
     };
-    if (distance < 1000) return {
+    if (distance < 2000) return {
       title: t('Interstellar plasma, still Solar gravity', '星际等离子体中，仍受太阳引力'),
       body: t('Beyond the heliopause, the surrounding plasma is interstellar; that does not mean the Sun’s gravity has ended.', '越过日球层顶后，周围等离子体属于星际介质；这并不意味着太阳引力已经结束。')
     };
     if (distance < 100000) return {
       title: t('Inferred Oort Cloud regime', '推断的奥尔特云范围'),
-      body: t('Long-period comet orbits motivate a distant reservoir, but its inner structure and outer extent remain model-dependent.', '长周期彗星轨道提示存在遥远储库，但其内部结构与外部范围仍依赖模型。')
+      body: t('Long-period comet orbits motivate a distant reservoir. NASA gives a broad 2,000-100,000 AU order-of-magnitude span, not a detected shell.', '长周期彗星轨道提示存在遥远储库。NASA 给出约 2,000-100,000 天文单位的宽泛数量级范围，并非已探测的壳层。')
     };
-    if (distance < 412000) return {
-      title: t('Galactic tides compete strongly', '银河潮汐开始强烈竞争'),
-      body: t('Near the estimated 1-2 pc tidal/Jacobi scale, Galactic tides and stellar passages can remove weakly bound objects. The scale is anisotropic and potential-dependent.', '接近约 1-2 秒差距的潮汐/雅可比尺度时，银河潮汐与恒星掠过可移走弱束缚天体。该尺度具有方向性并依赖引力势模型。')
+    if (distance < 500000) return {
+      title: t('Far gravitational and tidal reach', '遥远的引力与潮汐范围'),
+      body: t('Beyond the practical outer Oort-cloud scale, Galactic tides and stellar passages increasingly reorganize weakly bound orbits. Any boundary is anisotropic and model-dependent.', '越过实用的奥尔特云外缘尺度后，银河潮汐与恒星掠过会越来越强地重组弱束缚轨道。任何边界都具有方向性并依赖模型。')
     };
     return {
       title: t('Beyond the nominal Solar tidal region', '超出名义太阳潮汐区域'),
@@ -562,47 +772,89 @@
   function drawReach() {
     clear(reachScene);
     const { context, width, height } = reachScene;
-    const left = 118;
-    const right = width - 38;
-    const top = 66;
-    const bottom = height - 52;
-    const maxLog = 6;
-    const xFor = distance => left + Math.log10(clamp(distance, 1, 1000000)) / maxLog * (right - left);
+    const left = width < 520 ? 64 : 92;
+    const right = width - 28;
+    const minimumLog = Math.log10(0.3);
+    const maximumLog = 6;
+    const xFor = distance => {
+      const value = Math.log10(clamp(distance, 0.3, 1000000));
+      return left + (value - minimumLog) / (maximumLog - minimumLog) * (right - left);
+    };
+    const landscapeTop = 48;
+    const landscapeBottom = Math.min(194, height * 0.4);
+    const railTop = landscapeBottom + 42;
+    const railBottom = height - 46;
     const rows = [
-      { y: top + 20, label: { en: 'PLANETS', zh: '行星' }, start: 1, end: 50, color: palette.gold, note: { en: 'major planets + Kuiper overlap', zh: '主要行星与柯伊伯带重叠区' } },
-      { y: top + (bottom - top) * 0.34, label: { en: 'SOLAR WIND', zh: '太阳风' }, start: 1, end: 120, color: palette.cyan, note: { en: 'crossings near 119-122 AU', zh: '穿越位置约 119-122 天文单位' } },
-      { y: top + (bottom - top) * 0.66, label: { en: 'OORT MODEL', zh: '奥尔特模型' }, start: 1000, end: 100000, color: palette.green, note: { en: 'inferred, uncertain', zh: '推断且不确定' } },
-      { y: bottom - 10, label: { en: 'TIDAL SCALE', zh: '潮汐尺度' }, start: 206000, end: 412000, color: palette.pink, note: { en: '~1-2 pc, model-dependent', zh: '约 1-2 秒差距，依赖模型' } }
+      { label: { en: 'PLANET ORBITS', zh: '行星轨道' }, start: 0.3, end: 50, color: palette.gold, note: { en: 'orbits + asteroid / Kuiper populations', zh: '行星轨道与小行星 / 柯伊伯天体群' }, shortNote: { en: 'asteroids + Kuiper', zh: '小行星 + 柯伊伯' } },
+      { label: { en: 'SOLAR WIND', zh: '太阳风' }, start: 0.3, end: 120, color: palette.cyan, note: { en: 'shock ~84-94 AU; heliopause ~119-122 AU', zh: '终止激波约 84-94 AU；日球层顶约 119-122 AU' }, shortNote: { en: 'shock 84-94 · pause 119-122 AU', zh: '激波 84-94 · 层顶 119-122 AU' } },
+      { label: { en: 'OORT MODEL', zh: '奥尔特模型' }, start: 2000, end: 100000, color: palette.green, note: { en: 'inferred order-of-magnitude reservoir', zh: '推断的数量级彗星储库' }, shortNote: { en: 'inferred reservoir', zh: '推断储库' } },
+      { label: { en: 'GRAVITY + TIDES', zh: '引力与潮汐' }, start: 0.3, end: 1000000, color: palette.pink, note: { en: 'continuous force; no agreed hard edge', zh: '力连续存在；没有公认硬边界' }, shortNote: { en: 'continuous; no hard edge', zh: '连续；无硬边界' }, dashed: true }
     ];
+    rows.forEach((row, index) => {
+      row.y = railTop + index / 3 * Math.max(96, railBottom - railTop);
+    });
 
-    for (let exponent = 0; exponent <= maxLog; exponent++) {
+    context.fillStyle = 'rgba(0,212,255,0.035)';
+    context.fillRect(xFor(0.3), landscapeTop, xFor(84) - xFor(0.3), landscapeBottom - landscapeTop);
+    context.fillStyle = 'rgba(124,92,255,0.1)';
+    context.fillRect(xFor(84), landscapeTop, xFor(120) - xFor(84), landscapeBottom - landscapeTop);
+    context.fillStyle = 'rgba(126,232,197,0.07)';
+    context.fillRect(xFor(2000), landscapeTop, xFor(100000) - xFor(2000), landscapeBottom - landscapeTop);
+    context.fillStyle = 'rgba(255,107,157,0.045)';
+    context.fillRect(xFor(100000), landscapeTop, xFor(500000) - xFor(100000), landscapeBottom - landscapeTop);
+    context.fillStyle = 'rgba(255,209,102,0.16)';
+    context.fillRect(xFor(2.1), landscapeTop + 68, Math.max(2, xFor(3.3) - xFor(2.1)), landscapeBottom - landscapeTop - 74);
+
+    for (let exponent = 0; exponent <= maximumLog; exponent++) {
       const x = xFor(10 ** exponent);
-      line(context, x, 36, x, bottom + 28, 'rgba(238,242,255,0.1)');
-      text(context, exponent === 0 ? '1 AU' : `10^${exponent} AU`, x, 24, palette.muted, 9, 'center');
+      line(context, x, 34, x, railBottom + 18, 'rgba(238,242,255,0.09)');
+      text(context, exponent === 0 ? '1 AU' : `10^${exponent} AU`, x, 22, palette.muted, width < 520 ? 8 : 9, 'center');
     }
+
+    const planets = [
+      [0.387, 'Me', '水'], [0.723, 'V', '金'], [1, 'E', '地'], [1.524, 'Ma', '火'],
+      [5.203, 'J', '木'], [9.537, 'S', '土'], [19.19, 'U', '天'], [30.07, 'N', '海']
+    ];
+    const orbitY = landscapeBottom - 22;
+    circle(context, xFor(0.3), orbitY, 13, palette.gold);
+    text(context, t('SUN', '太阳'), xFor(0.3), landscapeTop + 14, palette.gold, 9, 'center');
+    for (const [distance, en, chinese] of planets) {
+      const x = xFor(distance);
+      line(context, x, landscapeTop + 28, x, orbitY, 'rgba(238,242,255,0.2)', 1);
+      circle(context, x, orbitY, distance === 1 ? 5 : 3, distance === 1 ? palette.cyan : palette.paper);
+      text(context, zh() ? chinese : en, x, landscapeTop + 38 + (distance < 2 ? (distance * 17) % 18 : 0), distance === 1 ? palette.cyan : palette.muted, 8, 'center');
+    }
+    text(context, t('ASTEROID BELT', '小行星带'), (xFor(2.1) + xFor(3.3)) / 2, landscapeBottom - 7, palette.gold, 8, 'center');
+    line(context, xFor(84), landscapeTop, xFor(84), landscapeBottom, palette.violet, 1, [4, 3]);
+    line(context, xFor(120), landscapeTop, xFor(120), landscapeBottom, palette.cyan, 2, [4, 3]);
+    text(context, t('HELIOSHEATH', '日鞘'), (xFor(84) + xFor(120)) / 2, landscapeTop + 15, palette.violet, 8, 'center');
+    text(context, t('HELIOPAUSE', '日球层顶'), xFor(120) + 4, landscapeBottom - 8, palette.cyan, 8, 'left');
+    text(context, t('INFERRED OORT CLOUD', '推断的奥尔特云'), (xFor(2000) + xFor(100000)) / 2, landscapeTop + 15, palette.green, 8, 'center');
+    text(context, t('FAR TIDAL REACH?', '遥远潮汐范围？'), (xFor(100000) + xFor(500000)) / 2, landscapeBottom - 8, palette.pink, 8, 'center');
 
     for (const row of rows) {
-      text(context, localized(row.label), left - 12, row.y, row.color, 10, 'right');
-      line(context, xFor(row.start), row.y, xFor(row.end), row.y, row.color, 7);
+      text(context, localized(row.label), left - 10, row.y, row.color, 9, 'right');
+      line(context, xFor(row.start), row.y, xFor(row.end), row.y, row.color, row.dashed ? 3 : 7, row.dashed ? [7, 5] : []);
       circle(context, xFor(row.start), row.y, 4, row.color);
       circle(context, xFor(row.end), row.y, 4, row.color);
-      text(context, localized(row.note), xFor(row.end) + 8, row.y - 12, palette.muted, 9, xFor(row.end) > width - 135 ? 'right' : 'left');
+      const noteX = (xFor(row.start) + xFor(row.end)) / 2;
+      const note = width < 560 ? localized(row.shortNote) : localized(row.note);
+      text(context, note, noteX, row.y - 12, palette.muted, width < 520 ? 8 : 9, 'center');
     }
 
-    line(context, left, bottom + 24, right, bottom + 24, 'rgba(238,242,255,0.28)', 1);
-    arrow(context, left, bottom + 24, right, bottom + 24, palette.muted, 1, t('Gravity fades continuously; no cutoff', '引力连续衰减；没有硬截止'));
-
     const markerX = xFor(state.reachAU);
-    line(context, markerX, 35, markerX, bottom + 32, palette.paper, 2, [4, 4]);
-    circle(context, markerX, top - 17, 7, palette.paper, palette.cyan, 2);
-    text(context, formatAU(state.reachAU), clamp(markerX, 70, width - 70), top - 34, palette.paper, 11, 'center');
+    line(context, markerX, 34, markerX, railBottom + 18, palette.paper, 2, [4, 4]);
+    circle(context, markerX, landscapeTop - 4, 7, palette.paper, palette.cyan, 2);
+    context.fillStyle = palette.ink;
+    context.fillRect(clamp(markerX - 52, 4, width - 108), landscapeTop + 4, 104, 22);
+    text(context, formatAU(state.reachAU), clamp(markerX, 56, width - 56), landscapeTop + 15, palette.paper, 10, 'center');
 
     const classification = reachClassification(state.reachAU);
     $('reachSummary').innerHTML = `<strong>${classification.title}</strong><span class="data-line">${formatAU(state.reachAU)}</span><p>${classification.body}</p>`;
     $('windReadout').textContent = state.reachAU < 84 ? t('Supersonic outward plasma', '超声速向外等离子体') : state.reachAU < 130 ? t('Slowed and diverted', '减速并偏转') : t('Interstellar plasma region', '星际等离子体区域');
     $('heliopauseReadout').textContent = t('Observed crossings ~119-122 AU', '观测穿越约 119-122 天文单位');
-    $('oortReadout').textContent = t('Inferred ~1k-100k AU', '推断约 1 千-10 万天文单位');
-    $('gravityReadout').textContent = t('Tidal scale ~1-2 pc', '潮汐尺度约 1-2 秒差距');
+    $('oortReadout').textContent = t('Inferred ~2k-100k AU', '推断约 2 千-10 万天文单位');
+    $('gravityReadout').textContent = t('No hard cutoff; tides grow important', '无硬截止；潮汐影响逐渐增强');
     $('reachOutput').textContent = formatAU(state.reachAU);
   }
 
@@ -745,35 +997,104 @@
 
   function assistValues() {
     const relative = 9;
-    const turn = state.turnAngle * Math.PI / 180;
-    const geometry = state.encounterSide;
-    const incoming = 18;
-    const delta = 2 * state.planetSpeed * Math.sin(turn / 2) * geometry * 0.43;
-    return { relative, incoming, outgoing: Math.max(2, incoming + delta), delta };
+    const jupiterRadiusKm = 71492;
+    const jupiterMu = 126686534;
+    const periapsisKm = state.closestApproach * jupiterRadiusKm;
+    const eccentricity = 1 + periapsisKm * relative ** 2 / jupiterMu;
+    const turn = 2 * Math.asin(1 / eccentricity);
+    const projectedTurn = turn * state.encounterSide;
+    const incomingRelative = { x: 0, y: -relative };
+    const outgoingRelative = {
+      x: relative * Math.cos(-Math.PI / 2 + projectedTurn),
+      y: relative * Math.sin(-Math.PI / 2 + projectedTurn)
+    };
+    const incomingVector = {
+      x: state.planetSpeed + incomingRelative.x,
+      y: incomingRelative.y
+    };
+    const outgoingVector = {
+      x: state.planetSpeed + outgoingRelative.x,
+      y: outgoingRelative.y
+    };
+    const incoming = Math.hypot(incomingVector.x, incomingVector.y);
+    const outgoing = Math.hypot(outgoingVector.x, outgoingVector.y);
+    return {
+      relative,
+      periapsisKm,
+      eccentricity,
+      turn,
+      turnAngle: turn * 180 / Math.PI,
+      projectedTurn,
+      incomingRelative,
+      outgoingRelative,
+      incomingVector,
+      outgoingVector,
+      incoming,
+      outgoing,
+      delta: outgoing - incoming
+    };
+  }
+
+  function normalizedVector(vector) {
+    const magnitude = Math.max(0.001, Math.hypot(vector.x, vector.y));
+    return { x: vector.x / magnitude, y: vector.y / magnitude };
+  }
+
+  function assistPathVector(vector) {
+    return normalizedVector({ x: -vector.y, y: -vector.x });
   }
 
   function drawAssistVectors() {
     clear(assistScene);
     drawBackgroundStars(assistScene, 0.22);
     const { context, width, height } = assistScene;
-    const cx = width * 0.53;
-    const cy = height * 0.5;
-    const side = state.encounterSide >= 0 ? 1 : -1;
-    const magnitude = Math.max(0.15, Math.abs(state.encounterSide));
-    const span = Math.min(width * 0.36, 270);
-    const vertical = Math.min(height * 0.25, 110) * side * magnitude;
+    const values = assistValues();
+    const cx = width * 0.52;
+    const cy = height * 0.53;
+    const side = state.encounterSide < 0 ? -1 : 1;
+    const span = Math.min(width * 0.39, 290);
+    const closestPixels = mix(38, 108, (state.closestApproach - 1.5) / 18.5);
+    const periapsis = { x: cx, y: cy + side * closestPixels };
+    const incomingDirection = assistPathVector(values.incomingRelative);
+    const outgoingDirection = assistPathVector(values.outgoingRelative);
+    const periapsisDirection = { x: 1, y: 0 };
+    const start = {
+      x: periapsis.x - incomingDirection.x * span,
+      y: periapsis.y - incomingDirection.y * span
+    };
+    const end = {
+      x: periapsis.x + outgoingDirection.x * span,
+      y: periapsis.y + outgoingDirection.y * span
+    };
+    const cubicPoint = (from, control1, control2, to, amount) => {
+      const inverse = 1 - amount;
+      return {
+        x: inverse ** 3 * from.x + 3 * inverse ** 2 * amount * control1.x + 3 * inverse * amount ** 2 * control2.x + amount ** 3 * to.x,
+        y: inverse ** 3 * from.y + 3 * inverse ** 2 * amount * control1.y + 3 * inverse * amount ** 2 * control2.y + amount ** 3 * to.y
+      };
+    };
+    const pathPoint = amount => {
+      if (amount <= 0.55) {
+        return cubicPoint(
+          start,
+          { x: start.x + incomingDirection.x * span * 0.55, y: start.y + incomingDirection.y * span * 0.55 },
+          { x: periapsis.x - periapsisDirection.x * span * 0.2, y: periapsis.y },
+          periapsis,
+          amount / 0.55
+        );
+      }
+      return cubicPoint(
+        periapsis,
+        { x: periapsis.x + periapsisDirection.x * span * 0.2, y: periapsis.y },
+        { x: end.x - outgoingDirection.x * span * 0.55, y: end.y - outgoingDirection.y * span * 0.55 },
+        end,
+        (amount - 0.55) / 0.45
+      );
+    };
 
-    arrow(context, cx - 82, cy - 130, cx + 72, cy - 130, palette.gold, 3, t('planet velocity around Sun', '行星绕日速度'));
+    arrow(context, cx - 82, cy - 142, cx + 72, cy - 142, palette.gold, 3, t('planet orbital velocity', '行星公转速度'));
     circle(context, cx, cy, 30, '#5d79ff', palette.paper, 1.5);
     text(context, t('MOVING PLANET', '运动中的行星'), cx, cy + 48, palette.paper, 10, 'center');
-
-    const pathPoint = amount => {
-      const u = mix(-1.2, 1.2, amount);
-      const x = cx + u * span;
-      const bend = Math.exp(-u * u * 2.2);
-      const y = cy + vertical * (u * 0.66) - side * bend * 88;
-      return { x, y };
-    };
     context.strokeStyle = palette.cyan;
     context.lineWidth = 2;
     context.beginPath();
@@ -783,6 +1104,8 @@
       else context.lineTo(point.x, point.y);
     }
     context.stroke();
+    text(context, t('v infinity, in', 'v∞，入射'), start.x + 8, start.y - 12, palette.cyan, 8, 'left');
+    text(context, t('v infinity, out', 'v∞，出射'), end.x - 8, end.y - 12, palette.cyan, 8, 'right');
 
     const progress = state.assistProgress;
     const craft = pathPoint(progress);
@@ -791,114 +1114,277 @@
     circle(context, craft.x, craft.y, 7, palette.paper, palette.cyan, 2);
     const tangentX = after.x - before.x;
     const tangentY = after.y - before.y;
-    const tangentLength = Math.hypot(tangentX, tangentY);
-    arrow(context, craft.x, craft.y, craft.x + tangentX / tangentLength * 78, craft.y + tangentY / tangentLength * 78, palette.green, 2, t('velocity', '速度'));
+    const tangentLength = Math.max(0.001, Math.hypot(tangentX, tangentY));
+    const velocityEnd = {
+      x: craft.x + tangentX / tangentLength * 78,
+      y: craft.y + tangentY / tangentLength * 78
+    };
+    arrow(context, craft.x, craft.y, velocityEnd.x, velocityEnd.y, palette.green, 2, '');
     const forceX = cx - craft.x;
     const forceY = cy - craft.y;
-    const forceLength = Math.hypot(forceX, forceY);
-    arrow(context, craft.x, craft.y, craft.x + forceX / forceLength * 56, craft.y + forceY / forceLength * 56, palette.pink, 2, t('gravity', '引力'));
+    const forceLength = Math.max(1, Math.hypot(forceX, forceY));
+    const accelerationLength = clamp(2100 / forceLength, 25, 78) * (0.94 + Math.sin(state.assistProgress * TAU * 3) * 0.06);
+    arrow(
+      context,
+      craft.x,
+      craft.y,
+      craft.x + forceX / forceLength * accelerationLength,
+      craft.y + forceY / forceLength * accelerationLength,
+      palette.pink,
+      2,
+      ''
+    );
+    text(context, t('v infinity · planet frame', 'v∞ · 行星系'), velocityEnd.x + 5, velocityEnd.y - 10, palette.green, 9, 'left');
+    text(context, t('a points to planet', 'a 指向行星'), craft.x, craft.y + 22, palette.pink, 9, 'center');
 
-    const turnArcRadius = 72;
+    const turnArcRadius = closestPixels + 28;
     context.strokeStyle = palette.violet;
     context.lineWidth = 2;
     context.beginPath();
-    context.arc(cx, cy, turnArcRadius, -2.6, -2.6 + side * state.turnAngle * Math.PI / 180, side < 0);
+    context.arc(cx, cy, turnArcRadius, -2.5, -2.5 + side * values.turn, side < 0);
     context.stroke();
-    text(context, `${state.turnAngle}°`, cx + side * 18, cy - 92, palette.violet, 11, 'center');
+    text(context, `${fixed(values.turnAngle, 0)}°`, cx + side * 18, cy - turnArcRadius - 14, palette.violet, 11, 'center');
 
-    const values = assistValues();
+    const drawResultVector = (originX, originY, vector, label, color) => {
+      const magnitude = Math.max(0.001, Math.hypot(vector.x, vector.y));
+      const length = Math.min(84, width * 0.15);
+      arrow(
+        context,
+        originX,
+        originY,
+        originX + vector.x / magnitude * length,
+        originY - vector.y / magnitude * length,
+        color,
+        2,
+        label
+      );
+    };
+    drawResultVector(34, 78, values.incomingVector, t('V Sun, before', '飞越前日心 V'), palette.cyan);
+    drawResultVector(width - Math.min(150, width * 0.24), 78, values.outgoingVector, t('V Sun, after', '飞越后日心 V'), palette.green);
+    text(context, t('The path bends inward before closest approach because acceleration points toward the planet.', '最近接之前轨迹先向内弯曲，因为加速度始终指向行星。'), width / 2, height - 24, palette.muted, width < 560 ? 8 : 9, 'center');
+
     $('assistIncoming').textContent = `${fixed(values.incoming, 1)} km/s`;
     $('assistOutgoing').textContent = `${fixed(values.outgoing, 1)} km/s`;
     $('assistRelative').textContent = t(`${fixed(values.relative, 1)} km/s both ways`, `两端均约 ${fixed(values.relative, 1)} km/s`);
     $('assistDelta').textContent = `${values.delta >= 0 ? '+' : ''}${fixed(values.delta, 1)} km/s`;
-    $('assistCanvasSubtitle').textContent = t('The force arrow always points toward the planet; the velocity arrow follows the path.', '力箭头始终指向行星；速度箭头沿路径切线。');
+    $('assistCanvasSubtitle').textContent = t('Animated acceleration turns equal-magnitude planet-frame velocities; vector addition changes the Sun-frame result.', '动画加速度转动大小相等的行星系速度；矢量相加改变日心系结果。');
+  }
+
+  function voyagerOrbitRadius(distance, maximum) {
+    return 28 + Math.sqrt(distance / 30.07) * (maximum - 28);
+  }
+
+  function voyagerAnchorPoints(width, height) {
+    const cx = width * 0.48;
+    const cy = height * 0.46;
+    const maximum = Math.min(width * 0.43, height * 0.39);
+    return voyagerEncounters.map(encounter => {
+      const radius = voyagerOrbitRadius(encounter.au, maximum);
+      return {
+        x: cx + Math.cos(encounter.anchorAngle) * radius,
+        y: cy + Math.sin(encounter.anchorAngle) * radius * 0.68
+      };
+    });
+  }
+
+  function catmullRomPoint(point0, point1, point2, point3, amount) {
+    const squared = amount * amount;
+    const cubed = squared * amount;
+    return {
+      x: 0.5 * (
+        2 * point1.x +
+        (-point0.x + point2.x) * amount +
+        (2 * point0.x - 5 * point1.x + 4 * point2.x - point3.x) * squared +
+        (-point0.x + 3 * point1.x - 3 * point2.x + point3.x) * cubed
+      ),
+      y: 0.5 * (
+        2 * point1.y +
+        (-point0.y + point2.y) * amount +
+        (2 * point0.y - 5 * point1.y + 4 * point2.y - point3.y) * squared +
+        (-point0.y + 3 * point1.y - 3 * point2.y + point3.y) * cubed
+      )
+    };
+  }
+
+  function voyagerPosition(year, width = assistScene.width, height = assistScene.height) {
+    const anchors = voyagerAnchorPoints(width, height);
+    if (year <= voyagerEncounters[0].dateValue) return anchors[0];
+    const finalIndex = voyagerEncounters.length - 1;
+    if (year >= voyagerEncounters[finalIndex].dateValue) return anchors[finalIndex];
+    const nextIndex = voyagerEncounters.findIndex(encounter => encounter.dateValue > year);
+    const previousIndex = nextIndex - 1;
+    const previous = voyagerEncounters[previousIndex];
+    const next = voyagerEncounters[nextIndex];
+    const amount = clamp((year - previous.dateValue) / (next.dateValue - previous.dateValue), 0, 1);
+    const point1 = anchors[previousIndex];
+    const point2 = anchors[nextIndex];
+    const point0 = anchors[previousIndex - 1] || {
+      x: point1.x + point1.x - point2.x,
+      y: point1.y + point1.y - point2.y
+    };
+    const point3 = anchors[nextIndex + 1] || {
+      x: point2.x + point2.x - point1.x,
+      y: point2.y + point2.y - point1.y
+    };
+    return catmullRomPoint(point0, point1, point2, point3, smoothstep(0, 1, amount));
   }
 
   function drawVoyagerAssist() {
     clear(assistScene);
     drawBackgroundStars(assistScene, 0.36);
     const { context, width, height } = assistScene;
-    const left = 70;
-    const right = width - 66;
-    const y = height * 0.56;
-    const positions = voyagerEncounters.map((_, index) => left + index / 3 * (right - left));
-    context.strokeStyle = palette.cyan;
-    context.lineWidth = 2.5;
-    context.beginPath();
-    context.moveTo(left - 38, y + 58);
-    voyagerEncounters.forEach((encounter, index) => {
-      const x = positions[index];
-      const offset = index % 2 ? -58 : 58;
-      context.quadraticCurveTo(x - 36, y + offset, x, y);
+    const cx = width * 0.48;
+    const cy = height * 0.46;
+    const maximum = Math.min(width * 0.43, height * 0.39);
+    const anchors = voyagerAnchorPoints(width, height);
+
+    voyagerEncounters.forEach((encounter, encounterIndex) => {
+      const radius = voyagerOrbitRadius(encounter.au, maximum);
+      context.strokeStyle = 'rgba(238,242,255,0.13)';
+      context.lineWidth = 1;
+      context.beginPath();
+      context.ellipse(cx, cy, radius, radius * 0.68, 0, 0, TAU);
+      context.stroke();
+      const planetAngle = encounter.anchorAngle + (state.voyagerYear - encounter.dateValue) / encounter.period * TAU;
+      const planet = {
+        x: cx + Math.cos(planetAngle) * radius,
+        y: cy + Math.sin(planetAngle) * radius * 0.68
+      };
+      const nearEncounter = Math.abs(state.voyagerYear - encounter.dateValue) < 0.08;
+      circle(context, planet.x, planet.y, nearEncounter ? 9 : 6, encounter.color, nearEncounter ? palette.paper : '', 1.5);
+      text(
+        context,
+        localized(encounter.planet),
+        planet.x + (planet.x > cx ? 9 : -9),
+        planet.y + [-18, -24, 18, 20][encounterIndex],
+        nearEncounter ? palette.cyan : palette.paper,
+        9,
+        planet.x > cx ? 'left' : 'right'
+      );
     });
-    context.lineTo(right + 44, y - 74);
+    circle(context, cx, cy, 10, palette.gold);
+    text(context, t('SUN', '太阳'), cx, cy + 20, palette.gold, 9, 'center');
+
+    const firstYear = voyagerEncounters[0].dateValue;
+    const lastYear = voyagerEncounters[voyagerEncounters.length - 1].dateValue;
+    context.strokeStyle = 'rgba(0,212,255,0.28)';
+    context.lineWidth = 2;
+    context.beginPath();
+    for (let index = 0; index <= 180; index++) {
+      const year = mix(firstYear, lastYear, index / 180);
+      const point = voyagerPosition(year, width, height);
+      if (!index) context.moveTo(point.x, point.y);
+      else context.lineTo(point.x, point.y);
+    }
+    context.stroke();
+
+    context.strokeStyle = palette.cyan;
+    context.lineWidth = 3;
+    context.beginPath();
+    const completedAmount = clamp((state.voyagerYear - firstYear) / (lastYear - firstYear), 0, 1);
+    const completedSteps = Math.max(1, Math.round(180 * completedAmount));
+    for (let index = 0; index <= completedSteps; index++) {
+      const year = mix(firstYear, state.voyagerYear, index / completedSteps);
+      const point = voyagerPosition(year, width, height);
+      if (!index) context.moveTo(point.x, point.y);
+      else context.lineTo(point.x, point.y);
+    }
     context.stroke();
 
     voyagerEncounters.forEach((encounter, index) => {
-      const selected = index === state.voyagerEncounter;
-      const x = positions[index];
-      circle(context, x, y, selected ? 28 : 20, encounter.color, selected ? palette.paper : '', selected ? 2 : 1);
-      text(context, localized(encounter.planet), x, y + 46, selected ? palette.cyan : palette.paper, 10, 'center');
-      text(context, String(encounter.year), x, y + 62, palette.muted, 9, 'center');
-      if (index < 3) arrow(context, x + 24, y - 82, positions[index + 1] - 24, y - 82, palette.gold, 1.5, localized(encounter.next));
-    });
-    arrow(context, right - 12, y - 74, right + 54, y - 110, palette.green, 2, t('out of ecliptic', '离开黄道面'));
-
-    const selectedIndex = state.voyagerEncounter;
-    const selectedX = positions[selectedIndex];
-    const selectedOffset = selectedIndex % 2 ? -58 : 58;
-    const start = selectedIndex === 0
-      ? { x: left - 38, y: y + 58 }
-      : { x: positions[selectedIndex - 1], y };
-    const encounterPoint = { x: selectedX, y };
-    const end = selectedIndex < positions.length - 1
-      ? { x: positions[selectedIndex + 1], y }
-      : { x: right + 44, y: y - 74 };
-    const progress = state.assistProgress;
-    const quadraticPoint = (from, control, to, amount) => {
-      const inverse = 1 - amount;
-      return {
-        x: inverse * inverse * from.x + 2 * inverse * amount * control.x + amount * amount * to.x,
-        y: inverse * inverse * from.y + 2 * inverse * amount * control.y + amount * amount * to.y
-      };
-    };
-    const probe = progress < 0.68
-      ? quadraticPoint(
-        start,
-        { x: selectedX - 36, y: y + selectedOffset },
-        encounterPoint,
-        progress / 0.68
-      )
-      : quadraticPoint(
-        encounterPoint,
-        { x: selectedX + 36, y: y - selectedOffset },
-        end,
-        (progress - 0.68) / 0.32
+      const anchor = anchors[index];
+      circle(context, anchor.x, anchor.y, 4, encounter.color, palette.paper, 1);
+      line(context, anchor.x, anchor.y, anchor.x, anchor.y + (index % 2 ? -30 : 30), encounter.color, 1, [3, 3]);
+      text(
+        context,
+        `${localized(encounter.planet)} · ${Math.floor(encounter.dateValue)}`,
+        anchor.x,
+        anchor.y + (index % 2 ? -41 : 41),
+        encounter.color,
+        width < 560 ? 8 : 9,
+        'center'
       );
-    circle(context, probe.x, probe.y, 7, palette.paper, palette.cyan, 2);
-    circle(context, probe.x, probe.y, 12 + Math.sin(progress * Math.PI) * 3, 'rgba(0,212,255,0.08)', palette.cyan, 1);
-    line(context, selectedX, y, probe.x, probe.y, 'rgba(0,212,255,0.35)', 1, [3, 4]);
-    text(context, t('VOYAGER 2', '旅行者 2 号'), probe.x, probe.y - 18, palette.cyan, 9, 'center');
-    text(context, t('PLANET POSITIONS AND PATH CURVATURE ARE SCHEMATIC', '行星位置与路径曲率均为示意'), width / 2, 28, palette.muted, 9, 'center');
+    });
 
-    const encounter = voyagerEncounters[state.voyagerEncounter];
-    $('voyagerEncounterOutput').textContent = `${localized(encounter.planet)} - ${encounter.year}`;
-    $('voyagerAssistSummary').innerHTML = `<strong>${localized(encounter.planet)} · ${encounter.year}</strong><span class="data-line">${localized(encounter.next)}</span><p>${localized(encounter.purpose)}</p>`;
-    $('assistIncoming').textContent = t(`${localized(encounter.planet)} approach`, `接近${localized(encounter.planet)}`);
-    $('assistOutgoing').textContent = localized(encounter.next);
-    $('assistRelative').textContent = t('Far speed nearly conserved', '远场速度大小近似守恒');
-    $('assistDelta').textContent = t('Sun-frame vector changed', '日心矢量已改变');
-    $('assistCanvasSubtitle').textContent = t('The 176-year planetary alignment made a four-giant-planet route possible; exact targeting still required separate flyby solutions.', '约 176 年一遇的行星排列使四大巨行星路线成为可能；每次飞越仍需单独求解精确瞄准。');
+    const probe = voyagerPosition(state.voyagerYear, width, height);
+    circle(context, probe.x, probe.y, 7, palette.paper, palette.cyan, 2);
+    circle(context, probe.x, probe.y, 12, 'rgba(0,212,255,0.08)', palette.cyan, 1);
+    text(context, t('VOYAGER 2', '旅行者 2 号'), probe.x + 17, probe.y - 20, palette.cyan, 9, 'left');
+    const neptune = anchors[anchors.length - 1];
+    arrow(context, neptune.x, neptune.y, neptune.x + 54, neptune.y + 46, palette.green, 2, t('south of ecliptic', '飞向黄道面南侧'));
+
+    const timelineLeft = 34;
+    const timelineRight = width - 34;
+    const timelineY = height - 28;
+    line(context, timelineLeft, timelineY, timelineRight, timelineY, palette.muted, 1);
+    for (const encounter of voyagerEncounters) {
+      const amount = (encounter.dateValue - firstYear) / (lastYear - firstYear);
+      const x = mix(timelineLeft, timelineRight, amount);
+      line(context, x, timelineY - 6, x, timelineY + 6, encounter.color, 2);
+      if (width >= 560) text(context, encounter.date.en, x, timelineY - 14, palette.muted, 8, 'center');
+    }
+    const timelineX = mix(timelineLeft, timelineRight, completedAmount);
+    circle(context, timelineX, timelineY, 5, palette.paper, palette.cyan, 1);
+    text(context, t('DATED ENCOUNTERS · INTERPOLATED TRANSFERS', '有日期的交会 · 插值的转移段'), width / 2, 22, palette.muted, 9, 'center');
+
+    const closest = [...voyagerEncounters].sort(
+      (a, b) => Math.abs(a.dateValue - state.voyagerYear) - Math.abs(b.dateValue - state.voyagerYear)
+    )[0];
+    const atEncounter = Math.abs(closest.dateValue - state.voyagerYear) <= 0.005;
+    const next = voyagerEncounters.find(encounter => encounter.dateValue > state.voyagerYear);
+    const previous = [...voyagerEncounters].reverse().find(encounter => encounter.dateValue <= state.voyagerYear) || voyagerEncounters[0];
+    const output = atEncounter
+      ? localized(closest.date)
+      : t(`~${fixed(state.voyagerYear, 1)} teaching interpolation`, `约 ${fixed(state.voyagerYear, 1)} 年教学插值`);
+    $('voyagerEncounterOutput').textContent = output;
+    $('voyagerAssistSummary').innerHTML = atEncounter
+      ? `<strong>${localized(closest.planet)} · ${localized(closest.date)}</strong><span class="data-line">${localized(closest.next)}</span><p>${localized(closest.purpose)}</p>`
+      : `<strong>${localized(previous.planet)} → ${localized(next?.planet || closest.planet)}</strong><span class="data-line">${output}</span><p>${t('The curve joins dated encounters continuously; it is not a position prediction between them.', '曲线连续连接有日期的交会点；它不预测其间的实际位置。')}</p>`;
+    $('assistIncoming').textContent = output;
+    $('assistOutgoing').textContent = next ? localized(next.planet) : localized(closest.next);
+    $('assistRelative').textContent = t('Conserved per ideal planet-frame flyby', '每次理想行星系飞越中守恒');
+    $('assistDelta').textContent = t('Changed at every Sun-frame encounter', '每次交会都改变日心系矢量');
+    $('assistCanvasSubtitle').textContent = t('Planet angular rates use approximate orbital periods; encounter anchors are arranged schematically for legibility.', '行星角速度采用近似公转周期；交会锚点为可读性作了示意安排。');
   }
 
   function drawAssist() {
-    if (state.assistMode === 'vectors') drawAssistVectors();
+    const vectorMode = state.assistMode === 'vectors';
+    const labels = vectorMode
+      ? [
+          t('Incoming Sun-frame speed', '入射日心速度'),
+          t('Outgoing Sun-frame speed', '出射日心速度'),
+          t('Planet-frame far speed', '行星系远场速度'),
+          t('Sun-frame change', '日心速度变化')
+        ]
+      : [
+          t('Timeline position', '时间线位置'),
+          t('Next target', '下一目标'),
+          t('Planet-frame rule', '行星系规则'),
+          t('Sun-frame result', '日心系结果')
+        ];
+    ['assistIncomingLabel', 'assistOutgoingLabel', 'assistRelativeLabel', 'assistDeltaLabel'].forEach((id, index) => {
+      $(id).textContent = labels[index];
+    });
+    $('assistCanvasTitle').textContent = vectorMode
+      ? t('Watch force bend the path', '观察引力如何弯折路径')
+      : t('One uninterrupted four-planet route', '一条不间断的四行星路线');
+    $('assistRepresentationLabel').textContent = vectorMode
+      ? t('Vectors + dynamics', '矢量与动力学')
+      : t('Dated route model', '带日期的路线模型');
+    $('assistReset').textContent = vectorMode
+      ? t('Reset geometry', '重置几何')
+      : t('Reset timeline', '重置时间线');
+    if (vectorMode) drawAssistVectors();
     else drawVoyagerAssist();
+    const values = assistValues();
     $('planetSpeedOutput').textContent = `${fixed(state.planetSpeed, 1)} km/s`;
-    $('turnAngleOutput').textContent = t(`${state.turnAngle} degrees`, `${state.turnAngle} 度`);
-    $('encounterSideOutput').textContent = state.encounterSide >= 0
-      ? t('Behind / trailing side', '后方 / 拖后侧')
-      : t('Ahead / leading side', '前方 / 超前侧');
+    $('closestApproachOutput').textContent = t(`${fixed(state.closestApproach, 1)} Jupiter radii`, `${fixed(state.closestApproach, 1)} 个木星半径`);
+    $('turnAngleOutput').textContent = t(`${fixed(values.turnAngle, 0)} degrees`, `${fixed(values.turnAngle, 0)} 度`);
+    $('encounterSideOutput').textContent = state.encounterSide > 0.15
+      ? t('Behind / trailing side · gain', '后方 / 拖后侧 · 增速')
+      : state.encounterSide < -0.15
+        ? t('Ahead / leading side · loss', '前方 / 超前侧 · 减速')
+        : t('Cross-track projection · little speed change', '横向投影 · 速度变化较小');
     updatePlaybackButtons();
   }
 
@@ -922,15 +1408,40 @@
     circle(context, cx, cy, 7, palette.gold, palette.paper, 1);
     text(context, t('SUN', '太阳'), cx + 11, cy - 11, palette.gold, 9);
 
-    for (const system of nearbySystems) {
-      if (system.distance > state.neighborDepth) continue;
-      const x = cx + system.x * scale;
-      const y = cy + system.y * scale;
+    const visibleMarkers = nearbySystems
+      .filter(system => system.distance <= state.neighborDepth)
+      .map(system => ({
+        system,
+        x: cx + system.x * scale,
+        y: cy + system.y * scale,
+        side: cx + system.x * scale < cx ? 'left' : 'right'
+      }));
+    const labelMarkers = new Map();
+    if (state.neighborDepth <= 18) {
+      const balanced = balanceLabelSides(visibleMarkers, cx);
+      const labels = [
+        ...spreadLabelYs(balanced.left, 46, height - 48, 40),
+        ...spreadLabelYs(balanced.right, 46, height - 48, 40)
+      ];
+      labels.forEach(marker => labelMarkers.set(marker.system.id, marker));
+    }
+
+    for (const marker of visibleMarkers) {
+      const { system, x, y } = marker;
       const selected = system.id === state.neighbor;
       const zRadius = 4 + clamp(Math.abs(system.z) / state.neighborDepth * 12, 0, 8);
       circle(context, x, y, selected ? zRadius + 3 : zRadius, system.color, selected ? palette.cyan : '', 2);
-      if (selected || state.neighborDepth <= 18) {
-        text(context, localized(system.name), x + (x > cx ? 9 : -9), y - 12, selected ? palette.cyan : palette.paper, selected ? 10 : 9, x > cx ? 'left' : 'right');
+      const labelMarker = labelMarkers.get(system.id);
+      if (labelMarker) {
+        const labelX = labelMarker.side === 'left' ? 16 : width - 16;
+        const leaderX = labelMarker.side === 'left' ? Math.min(cx - radius - 8, x - 10) : Math.max(cx + radius + 8, x + 10);
+        line(context, x, y, leaderX, labelMarker.labelY, selected ? palette.cyan : 'rgba(238,242,255,0.24)', 1);
+        context.fillStyle = 'rgba(4,7,19,0.88)';
+        const labelWidth = Math.min(width * 0.3, 146);
+        context.fillRect(labelMarker.side === 'left' ? 7 : width - labelWidth - 7, labelMarker.labelY - 10, labelWidth, 20);
+        text(context, localized(system.name), labelX, labelMarker.labelY, selected ? palette.cyan : palette.paper, selected ? 10 : 9, labelMarker.side);
+      } else if (selected) {
+        text(context, localized(system.name), x + (x > cx ? 9 : -9), y - 12, palette.cyan, 10, x > cx ? 'left' : 'right');
       }
       const verticalDirection = system.z < 0 ? 1 : -1;
       line(context, x, y, x, y + verticalDirection * clamp(Math.abs(system.z) * scale * 0.28, 4, 26), system.z < 0 ? palette.violet : palette.green, 1);
@@ -949,56 +1460,134 @@
     $('neighborCanvasSubtitle').textContent = t(`J2000 Cartesian snapshot inside ${state.neighborDepth} light-years`, `J2000 笛卡尔快照，半径 ${state.neighborDepth} 光年`);
   }
 
-  function drawGalaxyFace(context, cx, cy, radius, angle, layer, compact = false) {
-    if (layer === 'matter') {
-      const gradient = context.createRadialGradient(cx, cy, radius * 0.1, cx, cy, radius * 1.05);
-      gradient.addColorStop(0, 'rgba(124,92,255,0.24)');
-      gradient.addColorStop(0.45, 'rgba(124,92,255,0.13)');
-      gradient.addColorStop(1, 'rgba(124,92,255,0.02)');
-      circle(context, cx, cy, radius * 1.02, gradient);
+  function traceSpiralArm(context, radius, arm, angle, flatten, radialShift = 0) {
+    context.beginPath();
+    for (let step = 0; step <= 140; step++) {
+      const amount = step / 140;
+      const r = radius * (0.13 + amount * 0.84 + radialShift);
+      const theta = arm * TAU / 4 - amount * 4.65 + angle;
+      const x = Math.cos(theta) * r;
+      const y = Math.sin(theta) * r * flatten;
+      if (!step) context.moveTo(x, y);
+      else context.lineTo(x, y);
     }
+  }
+
+  function drawGalaxyFace(context, cx, cy, radius, angle, layer, compact = false, showSun = true) {
+    const flatten = compact ? 0.82 : 0.9;
+    const patternAngle = angle * 0.16;
+    if (layer === 'matter') {
+      const halo = context.createRadialGradient(cx, cy, radius * 0.08, cx, cy, radius * 1.2);
+      halo.addColorStop(0, 'rgba(124,92,255,0.26)');
+      halo.addColorStop(0.5, 'rgba(124,92,255,0.12)');
+      halo.addColorStop(1, 'rgba(124,92,255,0.015)');
+      circle(context, cx, cy, radius * 1.18, halo);
+    }
+
+    const disk = context.createRadialGradient(cx, cy, radius * 0.05, cx, cy, radius);
+    disk.addColorStop(0, 'rgba(255,209,102,0.34)');
+    disk.addColorStop(0.18, 'rgba(238,242,255,0.13)');
+    disk.addColorStop(0.72, 'rgba(0,212,255,0.055)');
+    disk.addColorStop(1, 'rgba(0,212,255,0)');
     context.save();
     context.translate(cx, cy);
-    context.rotate(angle);
-    for (let arm = 0; arm < 4; arm++) {
-      context.strokeStyle = arm % 2 ? 'rgba(0,212,255,0.28)' : 'rgba(238,242,255,0.26)';
-      context.lineWidth = compact ? 4 : 7;
-      context.beginPath();
-      for (let step = 0; step <= 120; step++) {
-        const amount = step / 120;
-        const r = radius * (0.12 + amount * 0.82);
-        const theta = arm * TAU / 4 + amount * 4.7;
-        const x = Math.cos(theta) * r;
-        const y = Math.sin(theta) * r * 0.78;
-        if (step === 0) context.moveTo(x, y);
-        else context.lineTo(x, y);
-      }
-      context.stroke();
-    }
-    context.fillStyle = 'rgba(255,209,102,0.56)';
-    context.fillRect(-radius * 0.34, -radius * 0.065, radius * 0.68, radius * 0.13);
+    context.scale(1, flatten);
+    circle(context, 0, 0, radius, disk);
     context.restore();
 
-    const starCount = compact ? 130 : galaxyStars.length;
+    context.save();
+    context.translate(cx, cy);
+    for (let arm = 0; arm < 4; arm++) {
+      context.strokeStyle = arm % 2 ? 'rgba(0,212,255,0.04)' : 'rgba(238,242,255,0.045)';
+      context.lineWidth = compact ? 6 : 11;
+      traceSpiralArm(context, radius, arm, patternAngle, flatten);
+      context.stroke();
+      context.strokeStyle = arm % 2 ? 'rgba(0,212,255,0.14)' : 'rgba(238,242,255,0.14)';
+      context.lineWidth = compact ? 2 : 3.5;
+      traceSpiralArm(context, radius, arm, patternAngle, flatten);
+      context.stroke();
+      context.strokeStyle = arm % 2 ? 'rgba(238,242,255,0.12)' : 'rgba(255,209,102,0.1)';
+      context.lineWidth = compact ? 1 : 1.4;
+      traceSpiralArm(context, radius, arm, patternAngle + 0.045, flatten, 0.018);
+      context.stroke();
+      context.strokeStyle = 'rgba(3,5,13,0.72)';
+      context.lineWidth = compact ? 1.2 : 2.8;
+      traceSpiralArm(context, radius, arm, patternAngle - 0.055, flatten, -0.018);
+      context.stroke();
+    }
+
+    for (const cloud of galaxyClouds) {
+      const theta = cloud.angle + patternAngle;
+      const r = cloud.radius * radius;
+      circle(
+        context,
+        Math.cos(theta) * r,
+        Math.sin(theta) * r * flatten,
+        compact ? cloud.size * 0.5 : cloud.size,
+        `rgba(0,212,255,${cloud.brightness})`
+      );
+    }
+
+    context.save();
+    context.rotate(patternAngle);
+    const barGradient = context.createLinearGradient(-radius * 0.38, 0, radius * 0.38, 0);
+    barGradient.addColorStop(0, 'rgba(255,209,102,0.06)');
+    barGradient.addColorStop(0.5, 'rgba(255,209,102,0.46)');
+    barGradient.addColorStop(1, 'rgba(255,209,102,0.06)');
+    context.fillStyle = barGradient;
+    context.beginPath();
+    context.ellipse(0, 0, radius * 0.38, radius * 0.085, 0, 0, TAU);
+    context.fill();
+    line(context, -radius * 0.32, -radius * 0.038, radius * 0.32, -radius * 0.038, 'rgba(3,5,13,0.64)', compact ? 1 : 3);
+    line(context, -radius * 0.32, radius * 0.038, radius * 0.32, radius * 0.038, 'rgba(3,5,13,0.64)', compact ? 1 : 3);
+    const barCount = compact ? 70 : galaxyBarStars.length;
+    for (let index = 0; index < barCount; index++) {
+      const star = galaxyBarStars[index];
+      circle(
+        context,
+        star.x * radius,
+        star.y * radius,
+        compact ? 0.5 : star.brightness > 0.72 ? 1.15 : 0.65,
+        `rgba(255,232,178,${star.brightness})`
+      );
+    }
+    context.restore();
+    context.restore();
+
+    const starCount = compact ? 190 : galaxyStars.length;
     for (let index = 0; index < starCount; index++) {
       const star = galaxyStars[index];
-      const theta = star.angle + angle * (1 + (1 - star.radius) * 0.35);
+      const angularRate = 0.48 + 0.72 / (0.32 + star.radius);
+      const theta = star.angle + star.offset + angle * angularRate;
       const r = star.radius * radius;
-      const x = cx + Math.cos(theta + star.offset) * r;
-      const y = cy + Math.sin(theta + star.offset) * r * 0.78;
-      const alpha = 0.18 + (1 - star.radius) * 0.4;
-      circle(context, x, y, star.age > 0.94 ? 1.7 : 0.7, `rgba(238,242,255,${alpha})`);
+      const x = cx + Math.cos(theta) * r;
+      const y = cy + Math.sin(theta) * r * flatten;
+      const alpha = 0.25 + (1 - star.radius) * 0.48;
+      const fill = star.age > 0.9
+        ? `rgba(255,209,102,${alpha})`
+        : star.age < 0.16 ? `rgba(0,212,255,${alpha})` : `rgba(238,242,255,${alpha})`;
+      circle(context, x, y, star.age > 0.95 ? 1.6 : compact ? 0.58 : 0.82, fill);
     }
-    circle(context, cx, cy, compact ? 8 : 12, palette.gold);
-    const sunRadius = radius * 0.53;
-    const sunAngle = -0.34 + angle;
-    const sunX = cx + Math.cos(sunAngle) * sunRadius;
-    const sunY = cy + Math.sin(sunAngle) * sunRadius * 0.78;
-    circle(context, sunX, sunY, compact ? 4 : 6, palette.cyan, palette.paper, 1);
-    if (!compact) {
-      line(context, sunX, sunY - 8, sunX, sunY - 36, palette.cyan, 1);
-      text(context, t('SUN', '太阳'), sunX, sunY - 46, palette.cyan, 10, 'center');
-      text(context, t('Sgr A*', '人马座 A*'), cx + 15, cy + 18, palette.gold, 9);
+
+    const bulge = context.createRadialGradient(cx, cy, 2, cx, cy, radius * 0.18);
+    bulge.addColorStop(0, 'rgba(255,242,196,0.94)');
+    bulge.addColorStop(0.35, 'rgba(255,209,102,0.62)');
+    bulge.addColorStop(1, 'rgba(255,209,102,0)');
+    circle(context, cx, cy, radius * 0.19, bulge);
+    circle(context, cx, cy, compact ? 4 : 6, palette.gold);
+
+    if (showSun) {
+      const sunRadius = radius * 0.53;
+      const sunRate = 0.48 + 0.72 / (0.32 + 0.53);
+      const sunAngle = -0.34 + angle * sunRate;
+      const sunX = cx + Math.cos(sunAngle) * sunRadius;
+      const sunY = cy + Math.sin(sunAngle) * sunRadius * flatten;
+      circle(context, sunX, sunY, compact ? 4 : 6, palette.cyan, palette.paper, 1);
+      if (!compact) {
+        line(context, sunX, sunY - 8, sunX, sunY - 36, palette.cyan, 1);
+        text(context, t('SUN · LOCAL ARM', '太阳 · 本地臂'), sunX, sunY - 46, palette.cyan, 9, 'center');
+        text(context, t('Sgr A*', '人马座 A*'), cx + 15, cy + 18, palette.gold, 9);
+      }
     }
   }
 
@@ -1008,23 +1597,51 @@
     const diskWidth = width * 0.78;
     if (layer === 'matter') {
       const gradient = context.createRadialGradient(cx, cy, 10, cx, cy, diskWidth * 0.55);
-      gradient.addColorStop(0, 'rgba(124,92,255,0.24)');
-      gradient.addColorStop(1, 'rgba(124,92,255,0.02)');
+      gradient.addColorStop(0, 'rgba(124,92,255,0.28)');
+      gradient.addColorStop(0.54, 'rgba(124,92,255,0.11)');
+      gradient.addColorStop(1, 'rgba(124,92,255,0.015)');
       context.fillStyle = gradient;
       context.beginPath();
-      context.ellipse(cx, cy, diskWidth * 0.58, height * 0.38, 0, 0, TAU);
+      context.ellipse(cx, cy, diskWidth * 0.62, height * 0.4, 0, 0, TAU);
       context.fill();
     }
-    context.fillStyle = 'rgba(238,242,255,0.08)';
+
+    const thickDisk = context.createRadialGradient(cx, cy, 8, cx, cy, diskWidth * 0.5);
+    thickDisk.addColorStop(0, 'rgba(255,209,102,0.26)');
+    thickDisk.addColorStop(0.42, 'rgba(238,242,255,0.12)');
+    thickDisk.addColorStop(1, 'rgba(238,242,255,0)');
+    context.fillStyle = thickDisk;
     context.beginPath();
-    context.ellipse(cx, cy, diskWidth * 0.5, height * 0.13, 0, 0, TAU);
+    context.ellipse(cx, cy, diskWidth * 0.5, height * 0.15, 0, 0, TAU);
     context.fill();
-    context.fillStyle = 'rgba(0,212,255,0.2)';
-    context.fillRect(cx - diskWidth / 2, cy - 6, diskWidth, 12);
+
+    const thinDisk = context.createLinearGradient(0, cy - 14, 0, cy + 14);
+    thinDisk.addColorStop(0, 'rgba(0,212,255,0)');
+    thinDisk.addColorStop(0.45, 'rgba(0,212,255,0.34)');
+    thinDisk.addColorStop(0.55, 'rgba(238,242,255,0.28)');
+    thinDisk.addColorStop(1, 'rgba(0,212,255,0)');
+    context.fillStyle = thinDisk;
+    context.fillRect(cx - diskWidth / 2, cy - 16, diskWidth, 32);
+
+    for (const star of galaxyEdgeStars) {
+      const radialFade = Math.max(0, 1 - Math.abs(star.x));
+      const x = cx + star.x * diskWidth * 0.5;
+      const y = cy + star.height * height * (0.6 + radialFade * 0.4);
+      circle(context, x, y, star.brightness > 0.7 ? 1.2 : 0.65, `rgba(238,242,255,${star.brightness * (0.35 + radialFade * 0.45)})`);
+    }
+
     const bulge = context.createRadialGradient(cx, cy, 4, cx, cy, height * 0.18);
     bulge.addColorStop(0, 'rgba(255,209,102,0.92)');
+    bulge.addColorStop(0.46, 'rgba(255,209,102,0.38)');
     bulge.addColorStop(1, 'rgba(255,209,102,0)');
-    circle(context, cx, cy, height * 0.2, bulge);
+    context.fillStyle = bulge;
+    context.beginPath();
+    context.ellipse(cx, cy, height * 0.18, height * 0.22, 0, 0, TAU);
+    context.fill();
+
+    context.fillStyle = 'rgba(3,5,13,0.74)';
+    context.fillRect(cx - diskWidth / 2, cy - 2, diskWidth, 5);
+    text(context, t('DUST LANE', '尘埃带'), cx - diskWidth * 0.32, cy + 17, palette.muted, 8, 'center');
     const sunX = cx + diskWidth * 0.265;
     circle(context, sunX, cy - 6, 6, palette.cyan, palette.paper, 1);
     text(context, t('SUN ~65 ly ABOVE NOMINAL MID-PLANE', '太阳约在名义中平面上方 65 光年'), sunX, cy - 28, palette.cyan, 9, 'center');
@@ -1068,6 +1685,25 @@
       drawGalaxyEdge(context, width, height, state.galaxyLayer);
     }
     const localGroupMode = state.galaxyLayer === 'neighbors';
+    if (!localGroupMode && state.galaxyView === 'face') {
+      const arrowX = width - 74;
+      const arrowY = 68;
+      context.strokeStyle = palette.cyan;
+      context.lineWidth = 1.5;
+      context.beginPath();
+      context.arc(arrowX, arrowY, 24, -2.5, 1.2);
+      context.stroke();
+      const endX = arrowX + Math.cos(1.2) * 24;
+      const endY = arrowY + Math.sin(1.2) * 24;
+      context.fillStyle = palette.cyan;
+      context.beginPath();
+      context.moveTo(endX, endY);
+      context.lineTo(endX - 9, endY - 2);
+      context.lineTo(endX - 3, endY - 9);
+      context.closePath();
+      context.fill();
+      text(context, t('CLOCKWISE ON SCREEN', '屏幕上顺时针'), arrowX - 32, arrowY + 38, palette.cyan, 8, 'center');
+    }
     text(
       context,
       localGroupMode
@@ -1083,7 +1719,7 @@
     const summaries = {
       stars: {
         title: t('Luminous structure', '发光结构'),
-        body: t('Stars, gas, dust, and young tracers constrain a barred disk with spiral structure; the far side remains harder to map.', '恒星、气体、尘埃与年轻示踪物约束出带旋臂的棒状盘；银河系远侧仍更难绘制。')
+        body: t('Stars, gas, dust lanes, and young tracers constrain a bar, bulge, and multiple arm segments. Different tracers emphasize different arms, and the far side remains harder to map.', '恒星、气体、尘埃带与年轻示踪物约束出中央棒、核球与多段旋臂。不同示踪物会突出不同旋臂，银河系远侧仍更难绘制。')
       },
       matter: {
         title: t('Inferred gravitating mass', '推断的引力质量'),
@@ -1103,12 +1739,21 @@
     $('galaxySummary').innerHTML = `<strong>${summary.title}</strong><span class="data-line">${modelLabel}</span><p>${summary.body}</p>`;
     $('galaxyCanvasSubtitle').textContent = state.galaxyLayer === 'neighbors'
       ? t('Galaxy separations are radically compressed.', '星系间距被大幅压缩。')
-      : t('A reconstruction from internal observations, not an exterior photograph.', '这是根据内部观测重建的图，并非外部照片。');
+      : state.galaxyView === 'face'
+        ? t('Schematic reconstruction; clockwise in this stated screen convention, not an exterior photograph.', '示意重建；在本页明确的屏幕约定中为顺时针，并非外部照片。')
+        : t('Schematic thickness and dust structure; vertical scale is enlarged.', '厚度与尘埃结构示意；垂直尺度已放大。');
     updatePlaybackButtons();
   }
 
   function historyStage() {
     return historyStages.find(stage => state.galaxyTime <= stage.max);
+  }
+
+  function historyBlendValues(age) {
+    return {
+      diskAmount: smoothstep(1.2, 9.8, age),
+      fragmentFade: 1 - smoothstep(3.8, 7.2, age)
+    };
   }
 
   function drawGalaxyHistory() {
@@ -1120,23 +1765,48 @@
     const cx = width * 0.46;
     const cy = height * 0.46;
     const base = Math.min(width, height);
-    const diskAmount = clamp((state.galaxyTime - 2.2) / 11.6, 0, 1);
+    const { diskAmount, fragmentFade } = historyBlendValues(state.galaxyTime);
 
-    if (state.galaxyTime < 2.2) {
-      const random = seededRandom(1200);
-      for (let index = 0; index < 16; index++) {
-        const x = cx + (random() - 0.5) * width * 0.55;
-        const y = cy + (random() - 0.5) * height * 0.45;
-        circle(context, x, y, 4 + random() * 10, index % 3 ? 'rgba(238,242,255,0.35)' : 'rgba(255,209,102,0.5)');
-      }
-    } else {
-      drawGalaxyFace(context, cx, cy, base * mix(0.16, 0.35, diskAmount), state.galaxyAngle * 0.4, 'stars', true);
-      const satelliteCount = state.galaxyTime < 6 ? 6 : 3;
-      for (let index = 0; index < satelliteCount; index++) {
-        const angle = index / satelliteCount * TAU + state.galaxyTime * 0.08;
-        const radius = base * (0.25 + index * 0.03);
-        circle(context, cx + Math.cos(angle) * radius, cy + Math.sin(angle) * radius * 0.65, 4 + (index % 3), 'rgba(159,140,255,0.58)');
-      }
+    for (const fragment of historyFragments) {
+      const mergeAmount = smoothstep(0.8 + fragment.phase, 5.1 + fragment.phase, state.galaxyTime);
+      const orbit = fragment.angle + state.galaxyTime * (0.18 + fragment.radius * 0.14);
+      const radius = base * fragment.radius * mix(0.52, 0.12, mergeAmount);
+      const x = cx + Math.cos(orbit) * radius;
+      const y = cy + Math.sin(orbit) * radius * 0.64;
+      const alpha = clamp((0.28 + (1 - mergeAmount) * 0.5) * fragmentFade, 0, 0.76);
+      if (alpha <= 0.01) continue;
+      line(context, x, y, cx, cy, `rgba(159,140,255,${alpha * 0.16})`, 1);
+      circle(
+        context,
+        x,
+        y,
+        fragment.size * mix(1, 0.42, mergeAmount),
+        fragment.gold ? `rgba(255,209,102,${alpha})` : `rgba(238,242,255,${alpha})`
+      );
+    }
+
+    if (diskAmount > 0.01) {
+      context.save();
+      context.globalAlpha = 0.18 + diskAmount * 0.82;
+      drawGalaxyFace(
+        context,
+        cx,
+        cy,
+        base * mix(0.08, 0.35, diskAmount),
+        state.galaxyAngle * mix(0.08, 0.4, diskAmount),
+        'stars',
+        true,
+        false
+      );
+      context.restore();
+    }
+
+    const satelliteCount = state.galaxyTime < 6 ? 6 : 3;
+    for (let index = 0; index < satelliteCount; index++) {
+      const satelliteFade = smoothstep(2.2, 5.8, state.galaxyTime);
+      const angle = index / satelliteCount * TAU + state.galaxyTime * 0.08;
+      const radius = base * (0.25 + index * 0.03);
+      circle(context, cx + Math.cos(angle) * radius, cy + Math.sin(angle) * radius * 0.65, 4 + (index % 3), `rgba(159,140,255,${satelliteFade * 0.58})`);
     }
 
     if (state.galaxyTime > PRESENT_AGE) {
@@ -1194,6 +1864,20 @@
     return difference;
   }
 
+  function galacticCentreElevation(observer) {
+    return Math.atan2(-observer.z, observer.radius) * 180 / Math.PI;
+  }
+
+  function sphericalAngularDistance(longitudeA, latitudeA, longitudeB, latitudeB) {
+    const toRadians = value => value * Math.PI / 180;
+    const latitudeARadians = toRadians(latitudeA);
+    const latitudeBRadians = toRadians(latitudeB);
+    const longitudeDifference = toRadians(longitudeA - longitudeB);
+    const cosine = Math.sin(latitudeARadians) * Math.sin(latitudeBRadians) +
+      Math.cos(latitudeARadians) * Math.cos(latitudeBRadians) * Math.cos(longitudeDifference);
+    return Math.acos(clamp(cosine, -1, 1)) * 180 / Math.PI;
+  }
+
   function directionName(direction) {
     const normalized = ((direction % 360) + 360) % 360;
     if (normalized <= 22 || normalized >= 338) return t('toward Galactic Centre', '朝向银河系中心');
@@ -1202,11 +1886,74 @@
     return t('along decreasing galactic longitude', '沿银经减小方向');
   }
 
+  function drawSkyLocalizer(observer) {
+    clear(skyLocalizerScene, '#03050d');
+    const { context, width, height } = skyLocalizerScene;
+    const cx = width * 0.5;
+    const cy = height * 0.6;
+    const diskRadius = Math.min(width * 0.4, height * 0.34);
+    const scale = diskRadius / 16.5;
+    const project = (x, y, z) => ({
+      x: cx + x * scale,
+      y: cy + y * scale * 0.34 - z * scale * 0.72
+    });
+
+    const halo = context.createRadialGradient(cx, cy, 3, cx, cy, diskRadius * 1.2);
+    halo.addColorStop(0, 'rgba(124,92,255,0.14)');
+    halo.addColorStop(1, 'rgba(124,92,255,0)');
+    context.fillStyle = halo;
+    context.beginPath();
+    context.ellipse(cx, cy, diskRadius * 1.12, diskRadius * 0.72, 0, 0, TAU);
+    context.fill();
+    context.fillStyle = 'rgba(238,242,255,0.08)';
+    context.beginPath();
+    context.ellipse(cx, cy, diskRadius, diskRadius * 0.34, 0, 0, TAU);
+    context.fill();
+    context.strokeStyle = 'rgba(0,212,255,0.24)';
+    context.beginPath();
+    context.ellipse(cx, cy, diskRadius, diskRadius * 0.34, 0, 0, TAU);
+    context.stroke();
+    line(context, cx, cy - diskRadius * 0.72, cx, cy + diskRadius * 0.72, palette.violet, 1, [3, 4]);
+    text(context, t('GALACTIC NORTH', '银河北'), cx + 8, cy - diskRadius * 0.68, palette.violet, 8);
+    circle(context, cx, cy, 6, palette.gold);
+
+    const displayRadius = Math.min(observer.radius, 17.5);
+    const observerX = Math.cos(observer.angle) * displayRadius;
+    const observerY = Math.sin(observer.angle) * displayRadius;
+    const observerZ = clamp(observer.z, -7, 7);
+    const observerPoint = project(observerX, observerY, observerZ);
+    const diskPoint = project(observerX, observerY, 0);
+    if (Math.abs(observerZ) > 0.2) line(context, observerPoint.x, observerPoint.y, diskPoint.x, diskPoint.y, palette.muted, 1, [3, 3]);
+    circle(context, observerPoint.x, observerPoint.y, 6, palette.cyan, palette.paper, 1);
+    const centrePoint = project(0, 0, 0);
+    line(context, observerPoint.x, observerPoint.y, centrePoint.x, centrePoint.y, palette.gold, 1, [4, 4]);
+
+    const centreBearing = Math.atan2(-observerY, -observerX);
+    const longitude = state.skyDirection * Math.PI / 180;
+    const elevation = state.skyElevation * Math.PI / 180;
+    const lookAngle = centreBearing + longitude;
+    const lookLength = 6.2;
+    const horizontal = Math.cos(elevation) * lookLength;
+    const lookEnd = project(
+      observerX + Math.cos(lookAngle) * horizontal,
+      observerY + Math.sin(lookAngle) * horizontal,
+      observerZ + Math.sin(elevation) * lookLength
+    );
+    arrow(context, observerPoint.x, observerPoint.y, lookEnd.x, lookEnd.y, palette.green, 2, t('look', '视线'));
+    text(context, t('centre', '中心'), (observerPoint.x + centrePoint.x) / 2, (observerPoint.y + centrePoint.y) / 2 - 8, palette.gold, 8, 'center');
+    text(context, localized(observer.label), observerPoint.x, observerPoint.y + 18, palette.cyan, 8, 'center');
+    text(context, t('3D ORIENTATION SCHEMATIC', '三维方向示意'), 10, 14, palette.muted, 8);
+    const centreElevation = galacticCentreElevation(observer);
+    $('skyLocalizerSummary').textContent = `${localized(observer.label)} · l=${Math.round(state.skyDirection)}° · b=${state.skyElevation >= 0 ? '+' : ''}${Math.round(state.skyElevation)}° · ${t('centre', '中心')} b=${centreElevation >= 0 ? '+' : ''}${fixed(centreElevation, 1)}°`;
+  }
+
   function drawSky() {
     clear(skyScene, '#03050d');
     const { context, width, height } = skyScene;
     const observer = observerPositions[state.observerPosition];
-    const centreDistance = angularDistance(state.skyDirection, 0);
+    drawSkyLocalizer(observer);
+    const centreElevation = galacticCentreElevation(observer);
+    const centreDistance = sphericalAngularDistance(state.skyDirection, state.skyElevation, 0, centreElevation);
     const centreFactor = (1 + Math.cos(centreDistance * Math.PI / 180)) / 2;
     const planeFactor = Math.exp(-Math.abs(state.skyElevation) / 19);
     const densityFactor = clamp((0.42 + centreFactor * 1.7) * planeFactor * Math.sqrt(observer.density), 0.12, 6);
@@ -1238,11 +1985,11 @@
       circle(context, x, clamp(y, 8, height - 8), star.size, `rgba(238,242,255,${alpha})`);
     }
 
-    const sgrVisible = centreDistance < 48 && Math.abs(state.skyElevation) < 26;
+    const sgrVisible = centreDistance < 48;
     if (sgrVisible) {
-      const offset = (state.skyDirection / 48) * width * 0.42;
-      const x = width / 2 - offset;
-      const y = bandY - state.skyElevation / 26 * height * 0.18;
+      const signedLongitude = (((state.skyDirection + 180) % 360) + 360) % 360 - 180;
+      const x = width / 2 - signedLongitude / 48 * width * 0.42;
+      const y = height / 2 + (state.skyElevation - centreElevation) / 48 * height * 0.28;
       circle(context, x, y, 8, palette.gold, palette.paper, 1);
       line(context, x, y + 10, x, y + 43, palette.gold, 1, [4, 3]);
       text(context, t('Sgr A* DIRECTION', '人马座 A* 方向'), x, y + 57, palette.gold, 9, 'center');
@@ -1265,9 +2012,9 @@
       ? t('Long path through disk', '长距离穿过盘')
       : planeFactor > 0.3 ? t('Oblique path', '斜穿盘面') : t('Looking out of disk', '看向盘外');
     $('skySgrStatus').textContent = sgrVisible
-      ? t('Direction marked; optically obscured', '方向已标；光学波段受遮挡')
+      ? t(`Direction marked at centre b=${centreElevation >= 0 ? '+' : ''}${fixed(centreElevation, 1)}°; optically obscured`, `方向已标在中心 b=${centreElevation >= 0 ? '+' : ''}${fixed(centreElevation, 1)}°；光学波段受遮挡`)
       : t('Outside the schematic field', '位于示意视场外');
-    $('skyCanvasSubtitle').textContent = `${localized(observer.label)} · ${directionName(state.skyDirection)}`;
+    $('skyCanvasSubtitle').textContent = `${localized(observer.label)} · ${directionName(state.skyDirection)} · ${t('centre', '中心')} b=${centreElevation >= 0 ? '+' : ''}${fixed(centreElevation, 1)}°`;
     updatePlaybackButtons();
   }
 
@@ -1322,7 +2069,11 @@
     document.querySelectorAll('[data-solar-scale]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.solarScale === state.solarScale)));
     document.querySelectorAll('[data-solar-object]').forEach(button => button.setAttribute('aria-selected', String(button.dataset.solarObject === state.solarObject)));
     document.querySelectorAll('[data-mission-filter]').forEach(button => button.setAttribute('aria-selected', String(button.dataset.missionFilter === state.missionFilter)));
-    document.querySelectorAll('[data-assist-mode]').forEach(button => button.setAttribute('aria-selected', String(button.dataset.assistMode === state.assistMode)));
+    document.querySelectorAll('[data-assist-mode]').forEach(button => {
+      const selected = button.dataset.assistMode === state.assistMode;
+      button.setAttribute('aria-selected', String(selected));
+      button.tabIndex = selected ? 0 : -1;
+    });
     document.querySelectorAll('[data-assist-panel]').forEach(panel => {
       panel.hidden = panel.dataset.assistPanel !== state.assistMode;
     });
@@ -1342,7 +2093,9 @@
   function updatePlaybackButtons() {
     const labels = {
       mission: [t('Play mission history', '播放任务历史'), t('Pause mission history', '暂停任务历史')],
-      assist: [t('Play the encounter', '播放交会'), t('Pause the encounter', '暂停交会')],
+      assist: state.assistMode === 'voyager'
+        ? [t('Play the grand tour', '播放大巡游'), t('Pause the grand tour', '暂停大巡游')]
+        : [t('Play the encounter', '播放交会'), t('Pause the encounter', '暂停交会')],
       galaxy: [t('Play differential rotation', '播放差异旋转'), t('Pause differential rotation', '暂停差异旋转')],
       history: [t('Play assembly history', '播放组装历史'), t('Pause assembly history', '暂停组装历史')],
       sky: [t('Sweep the horizon', '扫过地平线'), t('Pause horizon sweep', '暂停地平线扫动')]
@@ -1393,7 +2146,13 @@
       drawMissions();
     }
     if (state.playing.has('assist')) {
-      state.assistProgress = (state.assistProgress + delta / 5600) % 1;
+      if (state.assistMode === 'vectors') {
+        state.assistProgress = (state.assistProgress + delta / 5600) % 1;
+      } else {
+        state.voyagerYear += delta * (1989.65 - 1979.52) / 15000;
+        if (state.voyagerYear > 1989.65) state.voyagerYear = 1979.52;
+        $('voyagerEncounter').value = String(state.voyagerYear);
+      }
       drawAssist();
     }
     if (state.playing.has('galaxy')) {
@@ -1495,26 +2254,40 @@
     });
   });
 
-  document.querySelectorAll('[data-assist-mode]').forEach(button => {
-    button.addEventListener('click', () => {
-      stopPlaying('assist');
-      state.assistMode = button.dataset.assistMode;
-      renderStaticStates();
-      drawAssist();
+  const assistTabs = [...document.querySelectorAll('[data-assist-mode]')];
+  function activateAssistTab(button) {
+    stopPlaying('assist');
+    state.assistMode = button.dataset.assistMode;
+    renderStaticStates();
+    drawAssist();
+  }
+  assistTabs.forEach((button, buttonIndex) => {
+    button.addEventListener('click', () => activateAssistTab(button));
+    button.addEventListener('keydown', event => {
+      const keys = ['ArrowLeft', 'ArrowRight', 'Home', 'End'];
+      if (!keys.includes(event.key)) return;
+      event.preventDefault();
+      const nextIndex = event.key === 'Home'
+        ? 0
+        : event.key === 'End'
+          ? assistTabs.length - 1
+          : (buttonIndex + (event.key === 'ArrowRight' ? 1 : -1) + assistTabs.length) % assistTabs.length;
+      assistTabs[nextIndex].focus();
+      activateAssistTab(assistTabs[nextIndex]);
     });
   });
   bindRange('planetSpeed', 'planetSpeed', drawAssist, 'assist');
-  bindRange('turnAngle', 'turnAngle', drawAssist, 'assist');
+  bindRange('closestApproach', 'closestApproach', drawAssist, 'assist');
   bindRange('encounterSide', 'encounterSide', drawAssist, 'assist');
-  bindRange('voyagerEncounter', 'voyagerEncounter', drawAssist, 'assist');
+  bindRange('voyagerEncounter', 'voyagerYear', drawAssist, 'assist');
   $('assistPlay').addEventListener('click', () => togglePlaying('assist'));
   $('assistReset').addEventListener('click', () => {
     stopPlaying('assist');
-    Object.assign(state, { planetSpeed: 13.1, turnAngle: 70, encounterSide: 0.75, assistProgress: 0.18, voyagerEncounter: 3 });
+    Object.assign(state, { planetSpeed: 13.1, closestApproach: 6, encounterSide: 0.75, assistProgress: 0.18, voyagerYear: 1979.52 });
     $('planetSpeed').value = '13.1';
-    $('turnAngle').value = '70';
+    $('closestApproach').value = '6';
     $('encounterSide').value = '0.75';
-    $('voyagerEncounter').value = '3';
+    $('voyagerEncounter').value = '1979.52';
     drawAssist();
   });
 
@@ -1586,10 +2359,21 @@
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) stopAll();
   });
+  document.addEventListener('keydown', event => {
+    if (event.key === 'Escape') hideAddressTooltip();
+  });
+  document.addEventListener('pointerdown', event => {
+    if (!event.target.closest('.address-hotspot')) hideAddressTooltip();
+  });
+  $('addressTooltip').addEventListener('pointerenter', () => window.clearTimeout(addressTooltipTimer));
+  $('addressTooltip').addEventListener('pointerleave', () => {
+    scheduleAddressTooltipHide(document.querySelector('.address-hotspot[aria-expanded="true"]'));
+  });
 
   createObjectControls();
   const observer = new ResizeObserver(() => renderAll());
   observer.observe(document.querySelector('.address-instrument'));
+  observer.observe(document.querySelector('.address-stage'));
   document.querySelectorAll('.instrument-shell').forEach(element => observer.observe(element));
 
   window.__cosmicAtlas = Object.freeze({
@@ -1597,6 +2381,9 @@
     solarObjects,
     missions,
     nearbySystems,
+    observerPositions,
+    voyagerEncounters,
+    addressLabelLayout,
     missionSnapshot,
     reachClassification,
     formatAU,
@@ -1604,6 +2391,11 @@
     directionName,
     angularDistance,
     assistValues,
+    assistPathVector,
+    voyagerPosition,
+    historyBlendValues,
+    galacticCentreElevation,
+    sphericalAngularDistance,
     localized,
     requireElement: $,
     renderAll
