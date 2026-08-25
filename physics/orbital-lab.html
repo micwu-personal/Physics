@@ -103,6 +103,10 @@
                 <button type="button" data-latitude="-66.56" data-copy-en="S Antarctic Circle" data-copy-zh="南极圈">S Antarctic Circle</button>
                 <button type="button" data-latitude="-90" data-copy-en="South Pole" data-copy-zh="南极">South Pole</button>
               </div>
+              <div class="location-row">
+                <button class="location-button" id="useLocation" type="button" data-copy-en="Use my current latitude" data-copy-zh="使用我的当前纬度">Use my current latitude</button>
+                <span id="locationStatus" aria-live="polite"></span>
+              </div>
             </div>
 
             <div class="range-control">
@@ -137,9 +141,6 @@
               <button type="button" data-eclipse-type="solar" aria-pressed="true" data-copy-en="Solar eclipse" data-copy-zh="日食">Solar eclipse</button>
               <button type="button" data-eclipse-type="lunar" aria-pressed="false" data-copy-en="Lunar eclipse" data-copy-zh="月食">Lunar eclipse</button>
             </div>
-            <p class="axis-convention" data-copy-en="Two separate dimensions: the north–south sliders choose the eclipse track and observer, while “sky passage” is time through one eclipse. Slider left / negative is south, right / positive is north, and north is up in both diagrams. Parallax reverses the apparent shift: moving the observer north makes the nearby Moon appear south of the distant Sun."
-               data-copy-zh="这里有两个独立维度：南北滑块选择食相轨迹与观察者位置，“天空中的经过”才表示一次食相随时间推进。滑块左侧 / 负值代表南，右侧 / 正值代表北；两幅图均为北上南下。视差会让表观位移反向：观察者向北移动时，较近的月球会显得移到较远太阳的南侧。">Two separate dimensions: the north–south sliders choose the eclipse track and observer, while “sky passage” is time through one eclipse. Slider left / negative is south, right / positive is north, and north is up in both diagrams. Parallax reverses the apparent shift: moving the observer north makes the nearby Moon appear south of the distant Sun.</p>
-
             <div class="range-control">
               <label for="distanceControl">
                 <span data-copy-en="Earth–Moon distance" data-copy-zh="地月距离">Earth–Moon distance</span>
@@ -188,6 +189,8 @@
             <div class="transport-row">
               <button id="playEclipse" type="button" aria-pressed="false" data-copy-en="Play sky passage" data-copy-zh="播放天空经过">Play sky passage</button>
             </div>
+            <p class="axis-convention" data-copy-en="Two separate dimensions: the north–south sliders choose the eclipse track and observer, while “sky passage” is time through one eclipse. Slider left / negative is south, right / positive is north, and north is up in both diagrams. Parallax reverses the apparent shift: moving the observer north makes the nearby Moon appear south of the distant Sun."
+               data-copy-zh="这里有两个独立维度：南北滑块选择食相轨迹与观察者位置，“天空中的经过”才表示一次食相随时间推进。滑块左侧 / 负值代表南，右侧 / 正值代表北；两幅图均为北上南下。视差会让表观位移反向：观察者向北移动时，较近的月球会显得移到较远太阳的南侧。">Two separate dimensions: the north–south sliders choose the eclipse track and observer, while “sky passage” is time through one eclipse. Slider left / negative is south, right / positive is north, and north is up in both diagrams. Parallax reverses the apparent shift: moving the observer north makes the nearby Moon appear south of the distant Sun.</p>
           </div>
 
           <p id="liveSummary" class="live-summary" aria-live="polite"></p>
@@ -224,10 +227,9 @@
             <div><dt id="metricLabelF">Subsolar point</dt><dd id="metricValueF">23.4° N</dd></div>
           </dl>
         </section>
-      </section>
 
-      <section id="seasonLearning" class="season-learning" aria-label="Season and local-sky details" data-aria-en="Season and local-sky details" data-aria-zh="季节与当地天空详情">
-        <article class="season-profile">
+        <div id="seasonDetailBand" class="season-detail-band">
+          <article class="season-profile">
           <header>
             <div>
               <span class="season-badge" id="seasonBadge">Northern Hemisphere · summer</span>
@@ -248,9 +250,9 @@
               </dl>
             </div>
           </div>
-        </article>
+          </article>
 
-        <article class="horizon-panel">
+          <article class="horizon-panel">
           <header>
             <div>
               <h2 data-copy-en="Sun path through one local day" data-copy-zh="当地一天中的太阳轨迹">Sun path through one local day</h2>
@@ -286,8 +288,11 @@
               </dl>
             </aside>
           </div>
-        </article>
+          </article>
+        </div>
+      </section>
 
+      <section id="seasonLearning" class="season-learning" aria-label="Annual season details" data-aria-en="Annual season details" data-aria-zh="全年季节详情">
         <article class="annual-panel">
           <header>
             <div>

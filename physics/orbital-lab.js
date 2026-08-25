@@ -9,11 +9,22 @@
   const MOON_RADIUS_KM = 1737.4;
   const SUN_EARTH_KM = 149597870.7;
   const AXIS_EPSILON = 0.005;
+  const EARTH_TILT = -23.44 * DEG;
   const MONTH_DAYS = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
   const MONTHS = {
     en: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
     'zh-CN': ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月']
   };
+  const EARTH_LAND_BLOBS = [
+    { longitude: -105, latitude: 46, rx: 0.24, ry: 0.16 },
+    { longitude: -88, latitude: 18, rx: 0.18, ry: 0.24 },
+    { longitude: -60, latitude: -18, rx: 0.16, ry: 0.3 },
+    { longitude: 15, latitude: 50, rx: 0.16, ry: 0.11 },
+    { longitude: 22, latitude: 7, rx: 0.22, ry: 0.31 },
+    { longitude: 80, latitude: 45, rx: 0.34, ry: 0.18 },
+    { longitude: 120, latitude: 8, rx: 0.2, ry: 0.16 },
+    { longitude: 135, latitude: -25, rx: 0.17, ry: 0.12 }
+  ];
 
   const state = {
     mode: 'seasons',
@@ -26,12 +37,14 @@
     alignment: 0,
     observer: 0,
     eclipseProgress: 0,
+    locationStatus: 'idle',
     playing: null
   };
 
   const canvases = new Map();
   let frame = 0;
   let lastTime = 0;
+  const orbitDrag = { active: false, pointerId: null };
 
   const $ = id => {
     const element = document.getElementById(id);
@@ -391,6 +404,21 @@
     circle(context, x, y, radius, '#ffd166');
   }
 
+  function projectEarthPoint(latitudeDegrees, longitudeDegrees, rotation, radius) {
+    const latitude = latitudeDegrees * DEG;
+    const longitude = longitudeDegrees * DEG - rotation;
+    const depth = Math.cos(latitude) * Math.cos(longitude);
+    const sphereX = Math.cos(latitude) * Math.sin(longitude) * radius;
+    const sphereY = -Math.sin(latitude) * radius;
+    const tiltCos = Math.cos(EARTH_TILT);
+    const tiltSin = Math.sin(EARTH_TILT);
+    return {
+      depth,
+      x: sphereX * tiltCos - sphereY * tiltSin,
+      y: sphereX * tiltSin + sphereY * tiltCos
+    };
+  }
+
   function drawEarth(context, x, y, radius, toSun, rotation = 0) {
     context.save();
     context.beginPath();
@@ -412,23 +440,27 @@
     context.fillStyle = ocean;
     context.fillRect(x - radius, y - radius, radius * 2, radius * 2);
 
-    context.save();
-    context.translate(x, y);
-    context.rotate(rotation);
     context.fillStyle = '#7ee8c5';
-    context.beginPath();
-    context.moveTo(-radius * 0.68, -radius * 0.24);
-    context.bezierCurveTo(-radius * 0.5, -radius * 0.72, -radius * 0.08, -radius * 0.68, radius * 0.02, -radius * 0.3);
-    context.bezierCurveTo(radius * 0.18, -radius * 0.06, -radius * 0.12, radius * 0.06, -radius * 0.22, radius * 0.4);
-    context.bezierCurveTo(-radius * 0.5, radius * 0.38, -radius * 0.66, radius * 0.1, -radius * 0.68, -radius * 0.24);
-    context.fill();
-    context.beginPath();
-    context.moveTo(radius * 0.12, -radius * 0.48);
-    context.bezierCurveTo(radius * 0.38, -radius * 0.62, radius * 0.72, -radius * 0.32, radius * 0.64, -radius * 0.02);
-    context.bezierCurveTo(radius * 0.56, radius * 0.28, radius * 0.25, radius * 0.12, radius * 0.18, radius * 0.48);
-    context.bezierCurveTo(-radius * 0.02, radius * 0.25, -radius * 0.04, -radius * 0.2, radius * 0.12, -radius * 0.48);
-    context.fill();
-    context.restore();
+    for (const land of EARTH_LAND_BLOBS) {
+      const projected = projectEarthPoint(land.latitude, land.longitude, rotation, radius);
+      if (projected.depth <= -0.08) continue;
+      const foreshortening = clamp((projected.depth + 0.08) / 1.08, 0.08, 1);
+      context.save();
+      context.translate(x + projected.x, y + projected.y);
+      context.rotate(EARTH_TILT);
+      context.beginPath();
+      context.ellipse(
+        0,
+        0,
+        radius * land.rx * foreshortening,
+        radius * land.ry,
+        0,
+        0,
+        Math.PI * 2
+      );
+      context.fill();
+      context.restore();
+    }
 
     context.save();
     context.translate(x, y);
@@ -461,6 +493,7 @@
     const earthX = cx + rx * Math.cos(angle);
     const earthY = cy + ry * Math.sin(angle);
     const earthRadius = clamp(Math.min(width, height) * 0.052, 16, 29);
+    const earthRotation = (state.hour - 12) * 15 * DEG;
     systemScene.orbit = { cx, cy, rx, ry };
 
     context.strokeStyle = 'rgba(0,212,255,.28)';
@@ -475,18 +508,27 @@
     line(context, cx, cy, earthX, earthY, 'rgba(255,209,102,.34)', 1.5, [4, 5]);
 
     const toSun = Math.atan2(cy - earthY, cx - earthX);
-    drawEarth(context, earthX, earthY, earthRadius, toSun, (state.hour - 12) * 15 * DEG);
+    drawEarth(context, earthX, earthY, earthRadius, toSun, earthRotation);
 
-    const tilt = -23.44 * DEG;
+    const tilt = EARTH_TILT;
     const axisDx = Math.sin(tilt) * earthRadius * 1.75;
     const axisDy = Math.cos(tilt) * earthRadius * 1.75;
     line(context, earthX - axisDx, earthY + axisDy, earthX + axisDx, earthY - axisDy, '#00d4ff', 2);
     label(context, 'N', earthX + axisDx + 3, earthY - axisDy, '#00d4ff', 10);
 
-    const observerAngle = (state.latitude - 90) * DEG;
-    const observerX = earthX + Math.cos(observerAngle + tilt) * earthRadius;
-    const observerY = earthY + Math.sin(observerAngle + tilt) * earthRadius;
+    const observerPoint = projectEarthPoint(state.latitude, 0, earthRotation, earthRadius);
+    const observerX = earthX + observerPoint.x;
+    const observerY = earthY + observerPoint.y;
+    systemScene.lastGeometry = {
+      kind: 'season',
+      earth: { x: earthX, y: earthY, radius: earthRadius },
+      observer: { x: observerX, y: observerY, depth: observerPoint.depth },
+      rotation: earthRotation
+    };
+    context.save();
+    context.globalAlpha = observerPoint.depth >= 0 ? 1 : 0.38;
     circle(context, observerX, observerY, 4.5, '#ff6b9d', '#eef2ff', 1);
+    context.restore();
 
     const moonAngle = 2 * Math.PI * (state.day + state.hour / 24) / 27.321661;
     const moonOrbit = earthRadius * 2.05;
@@ -609,7 +651,7 @@
     const earthX = width * 0.36;
     const earthY = height * 0.5;
     const earthRadius = clamp(Math.min(width, height) * 0.25, 42, 68);
-    const tilt = -23.44 * DEG;
+    const tilt = EARTH_TILT;
     const declination = solarDeclination(state.day);
 
     for (let offset = -2; offset <= 2; offset += 1) {
@@ -989,6 +1031,55 @@
     });
   }
 
+  function updateLocationStatus() {
+    const button = $('useLocation');
+    button.disabled = state.locationStatus === 'pending';
+    button.textContent = state.locationStatus === 'pending'
+      ? t('Finding latitude…', '正在获取纬度…')
+      : t('Use my current latitude', '使用我的当前纬度');
+    const messages = {
+      idle: '',
+      pending: '',
+      unavailable: t('Location is unavailable in this browser.', '此浏览器无法获取位置。'),
+      error: t(
+        'Location permission or positioning failed; choose a latitude manually.',
+        '位置权限或定位失败；请手动选择纬度。'
+      ),
+      success: t(
+        `Using latitude ${latitudeLabel(state.latitude)}. Longitude is not needed for local apparent solar time.`,
+        `已使用纬度 ${latitudeLabel(state.latitude)}。当地真太阳时不需要经度。`
+      )
+    };
+    $('locationStatus').textContent = messages[state.locationStatus];
+  }
+
+  function finishLocationRequest(status) {
+    state.locationStatus = status;
+    updateLocationStatus();
+  }
+
+  function requestCurrentLatitude() {
+    state.locationStatus = 'pending';
+    updateLocationStatus();
+    if (!navigator.geolocation) {
+      finishLocationRequest('unavailable');
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      position => {
+        stopPlayback();
+        state.latitude = clamp(position.coords.latitude, -90, 90);
+        syncInputs();
+        render();
+        finishLocationRequest('success');
+      },
+      () => {
+        finishLocationRequest('error');
+      },
+      { enableHighAccuracy: false, timeout: 8000, maximumAge: 600000 }
+    );
+  }
+
   function renderSeasons() {
     const position = solarPosition(state.day, state.latitude, state.hour);
     const daylight = daylightInfo(state.day, state.latitude);
@@ -1225,6 +1316,7 @@
     $('orbitalWorkspace').dataset.mode = state.mode;
     $('orbitalWorkspace').setAttribute('aria-labelledby', state.mode === 'seasons' ? 'seasonTab' : 'eclipseTab');
     $('seasonLearning').hidden = !seasonsMode;
+    $('seasonDetailBand').hidden = !seasonsMode;
     $('orbitHint').hidden = !seasonsMode;
     $('systemCanvas').tabIndex = seasonsMode ? 0 : -1;
     $('systemCanvas').setAttribute(
@@ -1241,6 +1333,7 @@
     );
     if (seasonsMode) renderSeasons();
     else renderEclipses();
+    updateLocationStatus();
     updatePressedStates();
   }
 
@@ -1299,6 +1392,7 @@
     $(id).addEventListener('input', event => {
       stopPlayback();
       state[key] = Number(event.currentTarget.value);
+      if (key === 'latitude') state.locationStatus = 'idle';
       render();
     });
   }
@@ -1319,6 +1413,7 @@
       render();
     });
   });
+  $('useLocation').addEventListener('click', requestCurrentLatitude);
   document.querySelectorAll('[data-eclipse-type]').forEach(button => {
     button.addEventListener('click', () => {
       stopPlayback();
@@ -1338,6 +1433,7 @@
     button.addEventListener('click', () => {
       stopPlayback();
       state.latitude = Number(button.dataset.latitude);
+      state.locationStatus = 'idle';
       syncInputs();
       render();
     });
@@ -1361,27 +1457,53 @@
     });
   });
 
-  $('systemCanvas').addEventListener('click', event => {
+  function selectOrbitDate(event, requireNearOrbit) {
     if (state.mode !== 'seasons' || !systemScene.orbit) return;
     const rect = event.currentTarget.getBoundingClientRect();
     const x = event.clientX - rect.left;
     const y = event.clientY - rect.top;
     const { cx, cy, rx, ry } = systemScene.orbit;
     const normalizedRadius = Math.hypot((x - cx) / rx, (y - cy) / ry);
-    if (normalizedRadius < 0.72 || normalizedRadius > 1.28) return;
+    if (requireNearOrbit && (normalizedRadius < 0.72 || normalizedRadius > 1.28)) return false;
     const angle = Math.atan2((y - cy) / ry, (x - cx) / rx);
     stopPlayback();
     state.day = normalizeDay(171 + angle / (2 * Math.PI) * DAYS);
     syncInputs();
     render();
+    return true;
+  }
+
+  $('systemCanvas').addEventListener('pointerdown', event => {
+    if (!selectOrbitDate(event, true)) return;
+    orbitDrag.active = true;
+    orbitDrag.pointerId = event.pointerId;
+    event.currentTarget.setPointerCapture(event.pointerId);
+    event.currentTarget.classList.add('dragging');
+    event.preventDefault();
   });
+  $('systemCanvas').addEventListener('pointermove', event => {
+    if (!orbitDrag.active || event.pointerId !== orbitDrag.pointerId) return;
+    selectOrbitDate(event, false);
+    event.preventDefault();
+  });
+  const endOrbitDrag = event => {
+    if (!orbitDrag.active || event.pointerId !== orbitDrag.pointerId) return;
+    orbitDrag.active = false;
+    orbitDrag.pointerId = null;
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    }
+    event.currentTarget.classList.remove('dragging');
+  };
+  $('systemCanvas').addEventListener('pointerup', endOrbitDrag);
+  $('systemCanvas').addEventListener('pointercancel', endOrbitDrag);
 
   $('playDay').addEventListener('click', () => togglePlayback('day'));
   $('playYear').addEventListener('click', () => togglePlayback('year'));
   $('playEclipse').addEventListener('click', () => togglePlayback('eclipse'));
   $('seasonReset').addEventListener('click', () => {
     stopPlayback();
-    Object.assign(state, { day: 171, latitude: 39.9, hour: 12 });
+    Object.assign(state, { day: 171, latitude: 39.9, hour: 12, locationStatus: 'idle' });
     syncInputs();
     render();
   });
@@ -1418,10 +1540,12 @@
     formatDuration,
     signedDegrees,
     declinationDescription,
+    projectEarthPoint,
     northToCanvasY,
     northOffsetLabel,
     apparentMoonDirection,
     eclipseProgressLabel,
+    requestCurrentLatitude,
     get systemGeometry() {
       return systemScene.lastGeometry;
     },
