@@ -2129,7 +2129,15 @@
   }
 
   let frame = 0;
+  let resizeRenderFrame = 0;
   let lastTime = 0;
+  function scheduleResizeRender() {
+    if (resizeRenderFrame) return;
+    resizeRenderFrame = requestAnimationFrame(() => {
+      resizeRenderFrame = 0;
+      renderAll();
+    });
+  }
   function animate(timestamp) {
     if (!state.playing.size) {
       frame = 0;
@@ -2371,7 +2379,7 @@
   });
 
   createObjectControls();
-  const observer = new ResizeObserver(() => renderAll());
+  const observer = new ResizeObserver(scheduleResizeRender);
   observer.observe(document.querySelector('.address-instrument'));
   observer.observe(document.querySelector('.address-stage'));
   document.querySelectorAll('.instrument-shell').forEach(element => observer.observe(element));
@@ -2398,6 +2406,7 @@
     sphericalAngularDistance,
     localized,
     requireElement: $,
+    scheduleResizeRender,
     renderAll
   });
 

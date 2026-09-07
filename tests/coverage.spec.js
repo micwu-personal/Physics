@@ -194,6 +194,8 @@ test('physics cosmic atlas exhaustive interaction and animation coverage', async
         } catch {
           missingElement = true;
         }
+        api.scheduleResizeRender();
+        api.scheduleResizeRender();
         return {
           age: [13.8, 16].map(api.formatCosmicAge),
           angles: [-10, 0, 90, 180, 270, 350].map(api.directionName),
@@ -222,6 +224,8 @@ test('physics orbital lab exhaustive geometry and playback coverage', async ({ p
             } catch {
               missingElement = true;
             }
+            api.scheduleResizeRender();
+            api.scheduleResizeRender();
             return {
               clocks: [0, 12, 23.9999, 24].map(api.formatClock),
               counterClockwise: [0, 0.1].map(angle => api.counterClockwiseEllipsePoint(angle, 100, 100, 80, 40)),
