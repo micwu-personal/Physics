@@ -83,6 +83,7 @@
 
   const canvases = new Map();
   let frame = 0;
+  let resizeFrame = 0;
   let lastTime = 0;
   const orbitDrag = { active: false, pointerId: null };
 
@@ -1542,6 +1543,14 @@
     updatePressedStates();
   }
 
+  function scheduleResizeRender() {
+    if (resizeFrame) return;
+    resizeFrame = requestAnimationFrame(() => {
+      resizeFrame = 0;
+      render();
+    });
+  }
+
   function stopPlayback() {
     state.playing = null;
     if (frame) cancelAnimationFrame(frame);
@@ -1745,7 +1754,7 @@
       render();
     }
   });
-  const resizeObserver = new ResizeObserver(render);
+  const resizeObserver = new ResizeObserver(scheduleResizeRender);
   resizeObserver.observe($('orbitalWorkspace'));
   resizeObserver.observe($('seasonLearning'));
 
@@ -1773,6 +1782,7 @@
     apparentMoonDirection,
     eclipseProgressLabel,
     requestCurrentLatitude,
+    scheduleResizeRender,
     get systemGeometry() {
       return systemScene.lastGeometry;
     },

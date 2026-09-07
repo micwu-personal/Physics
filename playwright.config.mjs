@@ -93,6 +93,17 @@ export default defineConfig({
       }
     },
     {
+      name: 'safari-compat',
+      testMatch: /safari-compat\.spec\.js$/,
+      workers: 1,
+      use: {
+        browserName: 'webkit',
+        viewport: { width: 1024, height: 768 },
+        trace: 'retain-on-failure',
+        video: 'retain-on-failure'
+      }
+    },
+    {
       name: 'performance',
       testMatch: /performance\.spec\.js/,
       workers: 1,

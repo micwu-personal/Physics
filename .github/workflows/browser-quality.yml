@@ -21,7 +21,7 @@ jobs:
           node-version: 24.11.1
           cache: npm
       - run: npm ci
-      - run: npx playwright install chromium
+      - run: npx playwright install chromium webkit
       - run: npm run build:mobile
       - run: npm run check:generated
       - run: npm run test:apps
