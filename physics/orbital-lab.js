@@ -1754,9 +1754,10 @@
       render();
     }
   });
-  const resizeObserver = new ResizeObserver(scheduleResizeRender);
-  resizeObserver.observe($('orbitalWorkspace'));
-  resizeObserver.observe($('seasonLearning'));
+  window.addEventListener('resize', scheduleResizeRender);
+  window.addEventListener('orientationchange', scheduleResizeRender);
+  document.fonts.ready.then(scheduleResizeRender);
+  document.fonts.addEventListener('loadingdone', scheduleResizeRender);
 
   window.__orbitalLab = Object.freeze({
     state,

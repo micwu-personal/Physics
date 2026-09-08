@@ -33,6 +33,7 @@ const viewports = [
 
 function readStableGeometry() {
   return {
+    devicePixelRatio: window.devicePixelRatio,
     documentWidth: document.documentElement.scrollWidth,
     viewportWidth: document.documentElement.clientWidth,
     documentHeight: document.documentElement.scrollHeight,
@@ -45,6 +46,13 @@ function readStableGeometry() {
         pixelWidth: canvas.width,
         pixelHeight: canvas.height
       };
+    }),
+    stages: [...document.querySelectorAll('.canvas-stage')].map(stage => {
+      const rect = stage.getBoundingClientRect();
+      return {
+        height: Math.round(rect.height),
+        width: Math.round(rect.width)
+      };
     })
   };
 }
@@ -53,17 +61,52 @@ for (const route of routes) {
   for (const language of ['en', 'zh-CN']) {
     test(`${route.id} remains stable in WebKit ${language}`, async ({ page }) => {
       const errors = watchPage(page);
+      if (route.id === 'orbital-lab') {
+        await page.addInitScript(() => {
+          const NativeResizeObserver = window.ResizeObserver;
+          window.__resizeObserverConstructions = 0;
+          window.ResizeObserver = class extends NativeResizeObserver {
+            constructor(callback) {
+              window.__resizeObserverConstructions += 1;
+              super(callback);
+            }
+          };
+        });
+      }
       await preparePage(page, route.path, language, { motionPreference: 'pause' });
       await route.exercise(page);
 
+      if (route.id === 'orbital-lab') {
+        expect(await page.evaluate(() => window.__resizeObserverConstructions)).toBe(0);
+        await expect(page.locator('link[href*="orbital-lab.css?v=safari-grid-20260908"]')).toHaveCount(1);
+        await expect(page.locator('script[src*="orbital-lab.js?v=safari-grid-20260908"]')).toHaveCount(1);
+        const canvasIsolation = await page.evaluate(() => [...document.querySelectorAll('.canvas-stage')].map(stage => {
+          const canvas = stage.querySelector('canvas');
+          return {
+            canvasPosition: getComputedStyle(canvas).position,
+            containment: getComputedStyle(stage).contain,
+            parentMatches: canvas.parentElement === stage
+          };
+        }));
+        expect(canvasIsolation).toHaveLength(5);
+        for (const isolation of canvasIsolation) {
+          expect(isolation.canvasPosition).toBe('absolute');
+          expect(isolation.containment).toContain('size');
+          expect(isolation.parentMatches).toBe(true);
+        }
+      }
+
       for (const viewport of viewports) {
         await page.setViewportSize(viewport);
-        await page.waitForTimeout(180);
+        await page.waitForTimeout(300);
         await assertLayout(page);
 
         const first = await page.evaluate(readStableGeometry);
-        await page.waitForTimeout(180);
-        const second = await page.evaluate(readStableGeometry);
+        const laterSamples = [];
+        for (let index = 0; index < 6; index++) {
+          await page.waitForTimeout(100);
+          laterSamples.push(await page.evaluate(readStableGeometry));
+        }
 
         expect(first.documentWidth).toBeLessThanOrEqual(first.viewportWidth + 1);
         expect(first.documentHeight).toBeLessThan(30_000);
@@ -71,10 +114,12 @@ for (const route of routes) {
         for (const canvas of first.canvases) {
           expect(canvas.cssWidth, `${route.id} ${canvas.id} WebKit width`).toBeGreaterThan(40);
           expect(canvas.cssHeight, `${route.id} ${canvas.id} WebKit height`).toBeGreaterThan(40);
-          expect(canvas.pixelWidth, `${route.id} ${canvas.id} backing width`).toBeGreaterThanOrEqual(canvas.cssWidth - 1);
-          expect(canvas.pixelHeight, `${route.id} ${canvas.id} backing height`).toBeGreaterThanOrEqual(canvas.cssHeight - 1);
+          expect(canvas.pixelWidth, `${route.id} ${canvas.id} backing width`)
+            .toBe(Math.round(canvas.cssWidth * first.devicePixelRatio));
+          expect(canvas.pixelHeight, `${route.id} ${canvas.id} backing height`)
+            .toBe(Math.round(canvas.cssHeight * first.devicePixelRatio));
         }
-        expect(second).toEqual(first);
+        for (const sample of laterSamples) expect(sample).toEqual(first);
       }
 
       await assertNoErrors(errors);

@@ -15,7 +15,7 @@
   <link rel="stylesheet" href="../assets/fonts/fonts.css">
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="../assets/brand/brand.css">
-  <link rel="stylesheet" href="orbital-lab.css">
+  <link rel="stylesheet" href="orbital-lab.css?v=safari-grid-20260908">
   <link rel="icon" href="../assets/brand/favicon.svg" type="image/svg+xml">
 </head>
 <body data-topic="orbital">
@@ -205,7 +205,9 @@
             </div>
             <span class="representation-label" data-copy-en="Not to scale" data-copy-zh="非按比例">Not to scale</span>
           </header>
-          <canvas id="systemCanvas" role="img" tabindex="0" aria-label="Sun Earth Moon system geometry; click the orbit to choose a date" data-aria-en="Sun Earth Moon system geometry; click the orbit to choose a date" data-aria-zh="太阳地球月球系统几何；点击轨道可选择日期">Sun–Earth–Moon system geometry.</canvas>
+          <div class="canvas-stage instrument-canvas-stage">
+            <canvas id="systemCanvas" role="img" tabindex="0" aria-label="Sun Earth Moon system geometry; click the orbit to choose a date" data-aria-en="Sun Earth Moon system geometry; click the orbit to choose a date" data-aria-zh="太阳地球月球系统几何；点击轨道可选择日期">Sun–Earth–Moon system geometry.</canvas>
+          </div>
           <div id="systemLegend" class="instrument-legend"></div>
         </section>
 
@@ -217,7 +219,9 @@
             </div>
             <span class="representation-label" data-copy-en="Observer view" data-copy-zh="观察者视角">Observer view</span>
           </header>
-          <canvas id="observerCanvas" role="img" aria-label="First-person observer view" data-aria-en="First-person observer view" data-aria-zh="第一人称观察者视角">First-person observer view.</canvas>
+          <div class="canvas-stage instrument-canvas-stage">
+            <canvas id="observerCanvas" role="img" aria-label="First-person observer view" data-aria-en="First-person observer view" data-aria-zh="第一人称观察者视角">First-person observer view.</canvas>
+          </div>
           <dl class="readout-grid">
             <div><dt id="metricLabelA">Solar altitude</dt><dd id="metricValueA">73.5°</dd></div>
             <div><dt id="metricLabelB">Azimuth</dt><dd id="metricValueB">180°</dd></div>
@@ -239,7 +243,9 @@
             <span class="representation-label" data-copy-en="Current season" data-copy-zh="当前季节">Current season</span>
           </header>
           <div class="season-profile-body">
-            <canvas id="seasonCanvas" role="img" aria-label="Earth's axial tilt and incoming sunlight" data-aria-en="Earth's axial tilt and incoming sunlight" data-aria-zh="地轴倾角与入射太阳光">Earth's axial tilt and incoming sunlight.</canvas>
+            <div class="canvas-stage season-canvas-stage">
+              <canvas id="seasonCanvas" role="img" aria-label="Earth's axial tilt and incoming sunlight" data-aria-en="Earth's axial tilt and incoming sunlight" data-aria-zh="地轴倾角与入射太阳光">Earth's axial tilt and incoming sunlight.</canvas>
+            </div>
             <div>
               <p class="season-copy" id="seasonExplanation">The Northern Hemisphere tilts sunward, so sunlight arrives higher and daylight tends to last longer.</p>
               <dl class="fact-list">
@@ -265,7 +271,9 @@
             </div>
           </header>
           <div class="horizon-layout">
-            <canvas id="horizonCanvas" role="img" aria-label="Solar altitude through the selected day" data-aria-en="Solar altitude through the selected day" data-aria-zh="所选日期全天太阳仰角">Solar altitude through the selected day.</canvas>
+            <div class="canvas-stage horizon-canvas-stage">
+              <canvas id="horizonCanvas" role="img" aria-label="Solar altitude through the selected day" data-aria-en="Solar altitude through the selected day" data-aria-zh="所选日期全天太阳仰角">Solar altitude through the selected day.</canvas>
+            </div>
             <aside class="horizon-stats">
               <div class="altitude-gauge">
                 <span data-copy-en="Solar altitude" data-copy-zh="太阳仰角">Solar altitude</span>
@@ -304,7 +312,9 @@
               <span class="path-key daylight" data-copy-en="Daylight" data-copy-zh="白昼长度">Daylight</span>
             </div>
           </header>
-          <canvas id="annualCanvas" role="img" aria-label="Annual noon solar altitude and daylight chart" data-aria-en="Annual noon solar altitude and daylight chart" data-aria-zh="全年正午太阳仰角与白昼长度图">Annual noon solar altitude and daylight chart.</canvas>
+          <div class="canvas-stage annual-canvas-stage">
+            <canvas id="annualCanvas" role="img" aria-label="Annual noon solar altitude and daylight chart" data-aria-en="Annual noon solar altitude and daylight chart" data-aria-zh="全年正午太阳仰角与白昼长度图">Annual noon solar altitude and daylight chart.</canvas>
+          </div>
           <dl class="annual-readouts">
             <div><dt data-copy-en="Highest noon altitude" data-copy-zh="最高正午仰角">Highest noon altitude</dt><dd id="annualMaxAltitude">73.5°</dd></div>
             <div><dt data-copy-en="Longest daylight" data-copy-zh="最长白昼">Longest daylight</dt><dd id="annualMaxDaylight">15 h 00 min</dd></div>
@@ -398,6 +408,6 @@
   </div>
 
   <script src="common.js"></script>
-  <script src="orbital-lab.js"></script>
+  <script src="orbital-lab.js?v=safari-grid-20260908"></script>
 </body>
 </html>
