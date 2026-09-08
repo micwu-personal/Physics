@@ -108,7 +108,9 @@ const report = MCR({
     const normalized = decodeURIComponent(entry.url).replaceAll('\\', '/');
     return pureModules.some(file => normalized.endsWith(`/${file}`));
   },
-  sourcePath: filePath => {
+  sourcePath: (filePath, entry) => {
+    const url = browserUrl(entry.url);
+    if (url && url.pathname !== '/') return url.pathname.slice(1);
     const normalized = filePath.replaceAll('\\', '/');
     for (const directory of ['big-bang', 'periodic-table', 'particle-zoo', 'physics']) {
       const marker = `/${directory}/`;

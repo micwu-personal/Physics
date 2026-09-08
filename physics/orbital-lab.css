@@ -349,12 +349,27 @@ body[data-topic="orbital"] {
   text-transform: uppercase;
 }
 
-.instrument-panel canvas {
+.canvas-stage {
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  contain: size layout paint;
+  background: #050816;
+}
+
+.canvas-stage canvas {
+  position: absolute;
+  inset: 0;
   display: block;
   width: 100%;
   height: 100%;
+  min-width: 0;
   min-height: 0;
-  background: #050816;
+}
+
+.orbital-workspace[data-mode="seasons"] #systemCanvas:focus {
+  outline-offset: -4px;
 }
 
 .orbital-workspace[data-mode="seasons"] #systemCanvas {
@@ -492,12 +507,8 @@ body[data-topic="orbital"] {
   grid-template-rows: minmax(220px, 0.8fr) auto;
 }
 
-.season-profile canvas {
-  display: block;
-  width: 100%;
-  height: 100%;
+.season-canvas-stage {
   min-height: 220px;
-  background: #050816;
 }
 
 .season-profile-body > div {
@@ -570,12 +581,8 @@ body[data-topic="orbital"] {
   min-height: 490px;
 }
 
-.horizon-panel canvas {
-  display: block;
-  width: 100%;
+.horizon-canvas-stage {
   height: 490px;
-  min-height: 0;
-  background: #050816;
 }
 
 .horizon-stats {
@@ -656,12 +663,9 @@ body[data-topic="orbital"] {
   grid-column: 1 / -1;
 }
 
-.annual-panel canvas {
-  display: block;
-  width: 100%;
+.annual-canvas-stage {
   height: 360px;
   min-height: 360px;
-  background: #050816;
 }
 
 .annual-readouts {
@@ -1030,11 +1034,11 @@ body[data-topic="orbital"] {
     grid-template-columns: 1fr;
   }
 
-  .instrument-panel canvas {
+  .instrument-canvas-stage {
     min-height: 210px;
   }
 
-  .horizon-panel canvas {
+  .horizon-canvas-stage {
     height: 330px;
   }
 

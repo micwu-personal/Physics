@@ -337,6 +337,8 @@ for (const language of ['en', 'zh-CN']) {
 
     const orbit = page.locator('#systemCanvas');
     await orbit.scrollIntoViewIfNeeded();
+    await orbit.focus();
+    await expect(orbit).toHaveCSS('outline-offset', '-4px');
     let box = await orbit.boundingBox();
     const orbitGeometry = await page.evaluate(() => window.__orbitalLab.systemGeometry.orbit);
     await orbit.click({ position: { x: orbitGeometry.cx, y: orbitGeometry.cy + orbitGeometry.ry } });

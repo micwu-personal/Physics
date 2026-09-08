@@ -98,6 +98,7 @@ export default defineConfig({
       workers: 1,
       use: {
         browserName: 'webkit',
+        deviceScaleFactor: 2,
         viewport: { width: 1024, height: 768 },
         trace: 'retain-on-failure',
         video: 'retain-on-failure'
