@@ -154,3 +154,157 @@
   if (PhysicsUI.motionPaused()) draw();
   else start();
 })();
+
+(() => {
+  const canvas = document.getElementById('magnetCanvas');
+  const temperature = document.getElementById('magnetTemperature');
+  const field = document.getElementById('magnetField');
+  const context = canvas.getContext('2d');
+  const tempOutput = document.getElementById('magnetTemperatureOutput');
+  const fieldOutput = document.getElementById('magnetFieldOutput');
+  const stateOutput = document.getElementById('magnetState');
+  const orderOutput = document.getElementById('magnetOrder');
+  const correlationOutput = document.getElementById('magnetCorrelation');
+  const reset = document.getElementById('magnetReset');
+  const presets = [...document.querySelectorAll('[data-magnet-preset]')];
+  const columns = 42;
+  const rows = 28;
+  let spins = [];
+  let width = 0;
+  let height = 0;
+  let frame = 0;
+  let settleSteps = 0;
+  let randomState = 0x51f15e;
+
+  const zh = () => PhysicsUI.language === 'zh-CN';
+  const random = () => {
+    randomState = (1664525 * randomState + 1013904223) >>> 0;
+    return randomState / 4294967296;
+  };
+
+  function randomize() {
+    spins = Array.from({ length: rows * columns }, () => random() > 0.5 ? 1 : -1);
+  }
+
+  function index(row, column) {
+    return ((row + rows) % rows) * columns + ((column + columns) % columns);
+  }
+
+  function sweep(count = 1) {
+    const heat = Number(temperature.value);
+    const bias = Number(field.value);
+    for (let pass = 0; pass < count; pass++) {
+      for (let trial = 0; trial < spins.length; trial++) {
+        const row = Math.floor(random() * rows);
+        const column = Math.floor(random() * columns);
+        const current = spins[index(row, column)];
+        const neighbours = spins[index(row - 1, column)] + spins[index(row + 1, column)] + spins[index(row, column - 1)] + spins[index(row, column + 1)];
+        const change = 2 * current * (neighbours + bias * 2.4);
+        if (change <= 0 || random() < Math.exp(-change / heat)) spins[index(row, column)] = -current;
+      }
+    }
+  }
+
+  function summary() {
+    const m = spins.reduce((sum, spin) => sum + spin, 0) / spins.length;
+    const absolute = Math.abs(m);
+    const heat = Number(temperature.value);
+    const state = heat > 2.65
+      ? (zh() ? '热扰动主导' : 'Thermal disorder dominates')
+      : heat > 2.05
+        ? (zh() ? '临界涨落在竞争' : 'Critical fluctuations compete')
+        : (zh() ? '集体有序正在建立' : 'Collective order is forming');
+    const correlation = heat > 2.65
+      ? (zh() ? '短程小团簇' : 'Short-range patches')
+      : heat > 2.05
+        ? (zh() ? '跨越许多方格的团簇' : 'Patches span many tiles')
+        : (zh() ? '长程方向一致性' : 'Long-range directional order');
+    stateOutput.textContent = state;
+    orderOutput.textContent = `m = ${m.toFixed(2)} · |m| = ${absolute.toFixed(2)}`;
+    correlationOutput.textContent = correlation;
+  }
+
+  function draw() {
+    const cell = Math.max(1, Math.min(width / columns, height / rows));
+    const drawWidth = cell * columns;
+    const drawHeight = cell * rows;
+    const left = (width - drawWidth) / 2;
+    const top = (height - drawHeight) / 2;
+    context.fillStyle = '#05070f';
+    context.fillRect(0, 0, width, height);
+    for (let row = 0; row < rows; row++) {
+      for (let column = 0; column < columns; column++) {
+        const spin = spins[index(row, column)];
+        context.fillStyle = spin > 0 ? '#7ee8c5' : '#7c5cff';
+        context.fillRect(left + column * cell + .5, top + row * cell + .5, Math.max(0, cell - 1), Math.max(0, cell - 1));
+      }
+    }
+    context.strokeStyle = 'rgba(238,242,255,.34)';
+    context.lineWidth = 1;
+    context.strokeRect(left, top, drawWidth, drawHeight);
+    context.fillStyle = '#eef2ff';
+    context.font = '600 12px "JetBrains Mono", monospace';
+    context.fillText(zh() ? '二维伊辛教学模型 · T₍c₎ ≈ 2.27 J/k_B' : '2D Ising teaching model · T₍c₎ ≈ 2.27 J/k_B', 18, 28);
+    summary();
+  }
+
+  function resize() {
+    const rectangle = canvas.getBoundingClientRect();
+    const ratio = Math.min(devicePixelRatio, 2);
+    width = Math.max(1, Math.round(rectangle.width));
+    height = Math.max(1, Math.round(rectangle.height));
+    canvas.width = Math.round(width * ratio);
+    canvas.height = Math.round(height * ratio);
+    context.setTransform(ratio, 0, 0, ratio, 0, 0);
+    draw();
+  }
+
+  function tick() {
+    sweep(Number(temperature.value) < 2.3 ? 3 : 1);
+    draw();
+    settleSteps--;
+    frame = settleSteps > 0 ? requestAnimationFrame(tick) : 0;
+  }
+
+  function settle() {
+    settleSteps = 180;
+    if (!frame) frame = requestAnimationFrame(tick);
+  }
+
+  function updateControls() {
+    tempOutput.textContent = Number(temperature.value).toFixed(2);
+    fieldOutput.textContent = Number(field.value).toFixed(2);
+    draw();
+    settle();
+  }
+
+  function setPreset(button) {
+    const presetsByName = { hot: 3.5, critical: 2.27, cold: 1.25 };
+    temperature.value = String(presetsByName[button.dataset.magnetPreset]);
+    for (const candidate of presets) candidate.setAttribute('aria-pressed', String(candidate === button));
+    updateControls();
+  }
+
+  temperature.addEventListener('input', updateControls);
+  field.addEventListener('input', updateControls);
+  reset.addEventListener('click', () => {
+    randomize();
+    updateControls();
+  });
+  for (const button of presets) button.addEventListener('click', () => setPreset(button));
+  document.addEventListener('physics-language', draw);
+  document.addEventListener('physics-motion', event => {
+    if (event.detail.paused) {
+      cancelAnimationFrame(frame);
+      frame = 0;
+      settleSteps = 0;
+      draw();
+    } else {
+      settle();
+    }
+  });
+  new ResizeObserver(resize).observe(canvas);
+  randomize();
+  resize();
+  if (!PhysicsUI.motionPaused()) settle();
+})();

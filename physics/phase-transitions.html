@@ -74,6 +74,7 @@
     <nav class="topic-index" aria-label="Phase-transition sections" data-aria-en="Phase-transition sections" data-aria-zh="相变章节">
       <a href="#language" data-copy-en="Core language" data-copy-zh="核心语言">Core language</a>
       <a href="#landscape" data-copy-en="Landscape lab" data-copy-zh="景观实验台">Landscape lab</a>
+      <a href="#magnet-lab" data-copy-en="Magnet lab" data-copy-zh="磁体实验台">Magnet lab</a>
       <a href="#matter" data-copy-en="Matter spectrum" data-copy-zh="物质相谱">Matter spectrum</a>
       <a href="#life" data-copy-en="Chemistry & life" data-copy-zh="化学与生命">Chemistry &amp; life</a>
       <a href="#vacuum" data-copy-en="Vacuum" data-copy-zh="真空">Vacuum</a>
@@ -156,6 +157,43 @@
                data-copy-zh="无需潜热。序参量连续变化，而磁化率、热容与关联长度可能发散或遵循尖锐标度。埃伦费斯特的导数分类在历史上很有用，但无法容纳所有现代相变。">No latent heat is required. The order parameter changes continuously while susceptibility, heat capacity, and correlation length can diverge or follow sharp scaling. Ehrenfest's derivative classification was historically useful but does not fit every modern transition.</p>
             <span class="formula">ξ ∝ |T-Tc|<sup>-ν</sup></span>
           </article>
+        </div>
+      </section>
+
+      <section id="magnet-lab" class="topic-section magnet-lab-section">
+        <header>
+          <h2 data-copy-en="Cool a magnet through its collective tipping point." data-copy-zh="让磁体穿过集体临界点。">Cool a magnet through its collective tipping point.</h2>
+          <p data-copy-en="Each tile is a teaching spin: green and violet represent two opposite directions, not visible colors or individual atoms. At high temperature thermal agitation scrambles the pattern; below the two-dimensional Ising model's critical temperature, locally aligned patches grow and one direction can win."
+             data-copy-zh="每个方格代表一个教学自旋：绿色和紫色代表两个相反方向，不是可见颜色或单个原子。高温时热扰动打乱图案；低于二维伊辛模型临界温度后，局部对齐的区域会长大，其中一个方向可能胜出。">Each tile is a teaching spin: green and violet represent two opposite directions, not visible colors or individual atoms. At high temperature thermal agitation scrambles the pattern; below the two-dimensional Ising model's critical temperature, locally aligned patches grow and one direction can win.</p>
+        </header>
+        <div class="magnet-lab">
+          <div class="magnet-stage">
+            <canvas id="magnetCanvas" aria-label="Teaching model of a two-dimensional magnet becoming ordered as temperature falls" data-aria-en="Teaching model of a two-dimensional magnet becoming ordered as temperature falls" data-aria-zh="二维磁体在降温时形成有序的教学模型">A two-dimensional magnetic ordering model.</canvas>
+            <div class="magnet-readout" aria-live="polite">
+              <span id="magnetState" data-copy-en="Mixed directions" data-copy-zh="方向混杂">Mixed directions</span>
+              <strong id="magnetOrder">m = 0.00</strong>
+              <span id="magnetCorrelation" data-copy-en="Short-range patches" data-copy-zh="短程小团簇">Short-range patches</span>
+            </div>
+          </div>
+          <div class="magnet-controls">
+            <h3 data-copy-en="Experiment controls" data-copy-zh="实验控制">Experiment controls</h3>
+            <div class="control-group">
+              <label for="magnetTemperature"><span data-copy-en="Temperature / coupling" data-copy-zh="温度 / 耦合">Temperature / coupling</span><output id="magnetTemperatureOutput" for="magnetTemperature">3.50</output></label>
+              <input id="magnetTemperature" type="range" min="0.5" max="4.5" value="3.5" step="0.05">
+            </div>
+            <div class="control-group">
+              <label for="magnetField"><span data-copy-en="Tiny external bias" data-copy-zh="微小外部偏置">Tiny external bias</span><output id="magnetFieldOutput" for="magnetField">0.00</output></label>
+              <input id="magnetField" type="range" min="-0.30" max="0.30" value="0" step="0.01">
+            </div>
+            <div class="lab-buttons magnet-buttons">
+              <button type="button" data-magnet-preset="hot" aria-pressed="true" data-copy-en="Heat it" data-copy-zh="加热">Heat it</button>
+              <button type="button" data-magnet-preset="critical" aria-pressed="false" data-copy-en="Near critical" data-copy-zh="接近临界">Near critical</button>
+              <button type="button" data-magnet-preset="cold" aria-pressed="false" data-copy-en="Quench cold" data-copy-zh="骤冷">Quench cold</button>
+              <button type="button" id="magnetReset" class="wide" data-copy-en="Randomize spins" data-copy-zh="重新随机化自旋">Randomize spins</button>
+            </div>
+            <p class="lab-note"><span class="rep-badge model" data-copy-en="Calculated teaching model" data-copy-zh="计算教学模型">Calculated teaching model</span><br><span data-copy-en="This is a small, stylized Monte Carlo-inspired model. Its finite grid rounds the sharp infinite-system transition; it is meant to reveal collective order, not reproduce a particular material."
+              data-copy-zh="这是一个小型、风格化的蒙特卡洛启发模型。有限网格会抹圆无限系统的尖锐相变；它旨在展示集体有序，而非复现某种特定材料。">This is a small, stylized Monte Carlo-inspired model. Its finite grid rounds the sharp infinite-system transition; it is meant to reveal collective order, not reproduce a particular material.</span></p>
+          </div>
         </div>
       </section>
 
