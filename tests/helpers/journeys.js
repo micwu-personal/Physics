@@ -281,6 +281,7 @@ export async function exercisePhysicsPhase(page, options = {}) {
     button.click();
     button.click();
   });
+  await page.waitForTimeout(3200);
   await page.locator('[data-lang="zh-CN"]').click();
   await expect(page.locator('html')).toHaveAttribute('lang', 'zh-CN');
   await page.locator('[data-lang="en"]').click();
