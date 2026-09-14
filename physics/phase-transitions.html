@@ -62,13 +62,12 @@
           <span class="science-status speculative" data-copy-en="Hypothetical" data-copy-zh="假设性">Hypothetical</span>
         </div>
       </div>
-      <div class="hero-instrument deep-topic-canvas">
-        <canvas id="phaseCanvas" aria-label="Calculated free-energy landscape paired with a teaching schematic of domains changing phase" data-aria-en="Calculated free-energy landscape paired with a teaching schematic of domains changing phase" data-aria-zh="自由能景观计算图与相畴变化教学示意">A free-energy curve changes shape while domains nucleate and coarsen.</canvas>
-        <div class="instrument-label">
-          <span><strong data-copy-en="Landscape above; collective outcome below." data-copy-zh="上方是自由能景观，下方是集体结果。">Landscape above; collective outcome below.</strong><span data-copy-en="The curve is a reduced model and the domains are qualitative—not a molecular simulation." data-copy-zh="曲线是约化模型，相畴为定性示意，并非分子模拟。">The curve is a reduced model and the domains are qualitative—not a molecular simulation.</span></span>
-          <span class="rep-badge model" data-copy-en="Calculated teaching model" data-copy-zh="计算教学模型">Calculated teaching model</span>
-        </div>
-      </div>
+      <aside class="phase-hero-brief">
+        <span class="rep-badge model" data-copy-en="Interactive teaching model" data-copy-zh="交互式教学模型">Interactive teaching model</span>
+        <strong data-copy-en="One control. Two radically different outcomes." data-copy-zh="同一个控制量，两种截然不同的结果。">One control. Two radically different outcomes.</strong>
+        <p data-copy-en="In the Landscape lab, put the controls and free-energy curve side by side: reshape a minimum, cross a barrier, or seed a growing droplet yourself." data-copy-zh="在景观实验台中，控制器与自由能曲线并排呈现：重塑极小值、跨越势垒，或亲手播下会生长的液滴。">In the Landscape lab, put the controls and free-energy curve side by side: reshape a minimum, cross a barrier, or seed a growing droplet yourself.</p>
+        <a class="primary-action" href="#landscape" data-copy-en="Try the landscape lab" data-copy-zh="体验景观实验台">Try the landscape lab</a>
+      </aside>
     </header>
 
     <nav class="topic-index" aria-label="Phase-transition sections" data-aria-en="Phase-transition sections" data-aria-zh="相变章节">
@@ -121,7 +120,16 @@
             The same visual language separates nucleation, spinodal decomposition, and continuous ordering. Hysteresis often appears because a metastable phase survives while a barrier remains, but hysteresis is kinetic and is not itself the definition of first order.
           </p>
         </header>
-        <div class="scrub-panel">
+        <div class="phase-workbench">
+          <div class="phase-stage">
+            <canvas id="phaseCanvas" tabindex="0" aria-label="Interactive free-energy landscape and phase-domain model. Choose a mechanism and adjust the control parameter." data-aria-en="Interactive free-energy landscape and phase-domain model. Choose a mechanism and adjust the control parameter." data-aria-zh="交互式自由能景观与相畴模型。选择机制并调节控制参量。">A free-energy curve changes shape while domains nucleate and coarsen.</canvas>
+            <div class="phase-readout" aria-live="polite">
+              <span id="phaseMechanism" data-copy-en="Continuous ordering" data-copy-zh="连续有序化">Continuous ordering</span>
+              <strong id="phaseOutcome" data-copy-en="One minimum is about to split." data-copy-zh="单个极小值即将分裂。">One minimum is about to split.</strong>
+              <span id="phasePrompt" data-copy-en="Sweep through zero to make two equally favored directions appear." data-copy-zh="扫过零点，让两个等价方向出现。">Sweep through zero to make two equally favored directions appear.</span>
+            </div>
+          </div>
+          <div class="scrub-panel">
           <div class="scrub-copy">
             <h3 data-copy-en="Choose the mechanism" data-copy-zh="选择相变机制">Choose the mechanism</h3>
             <p data-copy-en="Continuous mode splits one minimum smoothly. First-order mode creates two competing minima and a nucleation barrier. Spinodal mode removes the barrier so fluctuations grow everywhere. Cosmic mode labels cooling events by evidential status instead of pretending the universe was a laboratory sample."
@@ -135,11 +143,12 @@
               <button type="button" data-phase-mode="cosmic" aria-pressed="false" data-copy-en="Cosmic cooling" data-copy-zh="宇宙冷却">Cosmic cooling</button>
             </div>
             <div class="control-group">
-              <label for="phaseControl"><span data-copy-en="Control parameter" data-copy-zh="控制参量">Control parameter</span><output id="phaseOutput" for="phaseControl">0.20</output></label>
+              <label for="phaseControl"><span id="phaseControlLabel" data-copy-en="Distance from the tipping point" data-copy-zh="距临界点的距离">Distance from the tipping point</span><output id="phaseOutput" for="phaseControl">0.20</output></label>
               <input id="phaseControl" type="range" min="-1" max="1" value="0.2" step="0.01">
             </div>
             <p class="lab-note"><span class="rep-badge model" data-copy-en="Calculated teaching model" data-copy-zh="计算教学模型">Calculated teaching model</span><br><span data-copy-en="The polynomial landscape is dimensionless. Domain motion illustrates nucleation and coarsening qualitatively; it is not molecular dynamics and carries no literal time or length scale."
                data-copy-zh="多项式景观使用无量纲量。相畴运动仅定性展示成核与粗化，并非分子动力学，也不代表真实时间或长度尺度。">The polynomial landscape is dimensionless. Domain motion illustrates nucleation and coarsening qualitatively; it is not molecular dynamics and carries no literal time or length scale.</span></p>
+          </div>
           </div>
         </div>
         <div class="classification-grid" style="margin-top:18px">

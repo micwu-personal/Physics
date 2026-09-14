@@ -3,8 +3,13 @@
   const context = canvas.getContext('2d');
   const control = document.getElementById('phaseControl');
   const output = document.getElementById('phaseOutput');
+  const controlLabel = document.getElementById('phaseControlLabel');
+  const mechanismOutput = document.getElementById('phaseMechanism');
+  const outcomeOutput = document.getElementById('phaseOutcome');
+  const promptOutput = document.getElementById('phasePrompt');
   const buttons = [...document.querySelectorAll('[data-phase-mode]')];
   let mode = 'continuous';
+  let seed = null;
   let elapsed = 0;
   let frame = 0;
   let previous = performance.now();
@@ -22,6 +27,40 @@
     canvas.height = Math.round(height * ratio);
     context.setTransform(ratio, 0, 0, ratio, 0, 0);
     draw();
+  }
+
+  function updateReadout() {
+    const copy = {
+      continuous: {
+        label: ['Distance from the tipping point', '距临界点的距离'],
+        mechanism: ['Continuous ordering', '连续有序化'],
+        outcome: ['One minimum smoothly becomes two equally favorable directions.', '一个极小值平滑地变为两个等价方向。'],
+        prompt: ['Sweep through zero: the curve splits without a barrier.', '扫过零点：曲线在没有势垒的情况下分裂。']
+      },
+      first: {
+        label: ['Supercooling / driving force', '过冷度 / 驱动力'],
+        mechanism: ['First-order nucleation', '一级相变成核'],
+        outcome: seed ? ['A seeded droplet is testing whether it can overcome the barrier.', '一个被播下的液滴正在检验能否越过势垒。'] : ['Two phases compete; a barrier makes the old phase temporarily survive.', '两种相在竞争；势垒让旧相暂时存活。'],
+        prompt: ['Click the lower map to seed a droplet, then sweep the driving force.', '点击下方图案播下一个液滴，再调节驱动力。']
+      },
+      spinodal: {
+        label: ['Quench depth', '淬火深度'],
+        mechanism: ['Spinodal decomposition', '旋节分解'],
+        outcome: ['The barrier is gone, so small fluctuations grow everywhere at once.', '势垒消失了，所以微小涨落会同时在各处增长。'],
+        prompt: ['Sweep deeper to amplify the whole field instead of planting one seed.', '向更深处扫动，让整个场放大而不是种下单个晶核。']
+      },
+      cosmic: {
+        label: ['Cooling progress', '冷却进程'],
+        mechanism: ['Cosmic cooling', '宇宙冷却'],
+        outcome: ['Cooling changes the stable description, but the evidence differs event by event.', '冷却会改变稳定描述，但每个事件的证据强度不同。'],
+        prompt: ['Use this as a timeline schematic, not a laboratory recreation.', '把它当作时间线示意，而不是实验室复现。']
+      }
+    }[mode];
+    const language = zh() ? 1 : 0;
+    controlLabel.textContent = copy.label[language];
+    mechanismOutput.textContent = copy.mechanism[language];
+    outcomeOutput.textContent = copy.outcome[language];
+    promptOutput.textContent = copy.prompt[language];
   }
 
   function landscape(x, parameter) {
@@ -94,6 +133,16 @@
         context.fillRect(x, y, cell - 1, cell - 1);
       }
     }
+    if (mode === 'first' && seed) {
+      const radius = 10 + (1 - parameter) * Math.min(columns, rows) * 0.36;
+      context.beginPath();
+      context.arc(seed.x, seed.y, radius, 0, Math.PI * 2);
+      context.fillStyle = 'rgba(126,232,197,.26)';
+      context.fill();
+      context.strokeStyle = '#eef2ff';
+      context.lineWidth = 2;
+      context.stroke();
+    }
     context.fillStyle = '#eef2ff';
     context.font = '600 12px "JetBrains Mono", monospace';
     const labels = {
@@ -111,6 +160,7 @@
     context.fillRect(0, 0, width, height);
     drawLandscape(parameter);
     drawDomains(parameter);
+    updateReadout();
   }
 
   function tick(now) {
@@ -145,6 +195,16 @@
       draw();
     });
   }
+
+  canvas.addEventListener('click', event => {
+    if (mode !== 'first') return;
+    const rectangle = canvas.getBoundingClientRect();
+    seed = {
+      x: event.clientX - rectangle.left,
+      y: Math.max(height * 0.55 + 16, Math.min(height - 48, event.clientY - rectangle.top))
+    };
+    draw();
+  });
 
   new ResizeObserver(resize).observe(canvas);
   document.addEventListener('physics-language', draw);

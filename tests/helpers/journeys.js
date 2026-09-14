@@ -263,9 +263,14 @@ export async function exercisePhysicsPhase(page, options = {}) {
   }
   const modes = page.locator('[data-phase-mode]');
   await expect(modes).toHaveCount(4);
+  await page.locator('#phaseCanvas').click({ position: { x: 180, y: 330 } });
   for (let index = 0; index < await modes.count(); index++) {
     await modes.nth(index).click();
     await expect(modes.nth(index)).toHaveAttribute('aria-pressed', 'true');
+    if (index === 1) {
+      await page.locator('#phaseCanvas').click({ position: { x: 180, y: 330 } });
+      await expect(page.locator('#phaseOutcome')).not.toHaveText('');
+    }
   }
   const control = page.locator('#phaseControl');
   await setRange(control, await control.getAttribute('max'));
