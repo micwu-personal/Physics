@@ -159,8 +159,6 @@
   const canvas = document.getElementById('magnetCanvas');
   const temperature = document.getElementById('magnetTemperature');
   const field = document.getElementById('magnetField');
-  if (!canvas || !temperature || !field) return;
-
   const context = canvas.getContext('2d');
   const tempOutput = document.getElementById('magnetTemperatureOutput');
   const fieldOutput = document.getElementById('magnetFieldOutput');

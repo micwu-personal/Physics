@@ -277,7 +277,10 @@ export async function exercisePhysicsPhase(page, options = {}) {
   await page.locator('[data-magnet-preset="critical"]').click();
   await page.locator('[data-magnet-preset="cold"]').click();
   await expect(page.locator('[data-magnet-preset="cold"]')).toHaveAttribute('aria-pressed', 'true');
-  await page.locator('#magnetReset').click();
+  await page.locator('#magnetReset').evaluate(button => {
+    button.click();
+    button.click();
+  });
   await page.locator('[data-lang="zh-CN"]').click();
   await expect(page.locator('html')).toHaveAttribute('lang', 'zh-CN');
   await page.locator('[data-lang="en"]').click();
