@@ -273,6 +273,8 @@ export async function exercisePhysicsPhase(page, options = {}) {
   await expect(page.locator('#magnetCanvas')).toBeVisible();
   await setRange(page.locator('#magnetTemperature'), 2.27);
   await setRange(page.locator('#magnetField'), 0.15);
+  await page.locator('[data-magnet-preset="hot"]').click();
+  await page.locator('[data-magnet-preset="critical"]').click();
   await page.locator('[data-magnet-preset="cold"]').click();
   await expect(page.locator('[data-magnet-preset="cold"]')).toHaveAttribute('aria-pressed', 'true');
   await page.locator('#magnetReset').click();
