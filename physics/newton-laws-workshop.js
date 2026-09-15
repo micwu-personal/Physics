@@ -221,7 +221,7 @@
     const nozzleX = balloonX - radius - 8;
     const particleCount = 4 + Math.round(p * 18);
     for (let index = 0; index < particleCount; index++) {
-      const age = particleCount === 1 ? 0 : index / (particleCount - 1);
+      const age = index / (particleCount - 1);
       const particleX = nozzleX - 14 - age * (34 + p * width * 0.34);
       const particleY = y + Math.sin(index * 2.1) * (8 + age * 16);
       const particleRadius = 5 + age * 7;

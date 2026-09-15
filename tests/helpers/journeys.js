@@ -124,6 +124,11 @@ export async function exercisePhysicsArea(page) {
     await page.locator('#inertiaReset').click();
     await expect(page.locator('#newtonReadout')).toContainText(workshopInChinese ? '预测' : 'Prediction:');
 
+    await page.locator('#cartLaunch').dispatchEvent('click');
+    await expect(page.locator('#dynamicsPanel')).toBeVisible();
+    await page.locator('#inertiaReset').dispatchEvent('click');
+    await expect(page.locator('#inertiaPanel')).toBeVisible();
+
     await page.locator('#dynamicsTab').click();
     await expect(page.locator('#dynamicsPanel')).toBeVisible();
     for (const selector of ['#cartMass', '#cartForce']) {
@@ -144,6 +149,8 @@ export async function exercisePhysicsArea(page) {
     await setRange(rocketAir, await rocketAir.getAttribute('min'));
     await page.locator('#rocketLaunch').click();
     await expect(page.locator('#newtonReadout')).toContainText(workshopInChinese ? '结果' : 'Result:');
+    await page.waitForTimeout(1_600);
+    await expect(page.locator('#newtonStatus')).toContainText(workshopInChinese ? '时间线已暂停' : 'timeline paused');
     await page.locator('#rocketReset').click();
 
     await page.locator('[data-lang="zh-CN"]').click();
