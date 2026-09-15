@@ -112,12 +112,22 @@ export async function exercisePhysicsArea(page) {
     await page.locator('#inertiaTab').focus();
     await page.keyboard.press('ArrowRight');
     await expect(page.locator('#dynamicsTab')).toHaveAttribute('aria-selected', 'true');
+    await expect(page.locator('#inertiaPanel')).toBeHidden();
+    await expect(page.locator('#dynamicsPanel')).toBeVisible();
+    await expect(page.locator('#recoilPanel')).toBeHidden();
     await page.locator('#inertiaTab').click();
+    await expect(page.locator('#inertiaPanel')).toBeVisible();
+    await expect(page.locator('#dynamicsPanel')).toBeHidden();
     await page.locator('#inertiaLaunch').click();
     await page.waitForTimeout(250);
     await expect(page.locator('#newtonReadout')).toContainText(workshopInChinese ? '结果' : 'Result:');
     await page.locator('#inertiaReset').click();
     await expect(page.locator('#newtonReadout')).toContainText(workshopInChinese ? '预测' : 'Prediction:');
+
+    await page.locator('#cartLaunch').dispatchEvent('click');
+    await expect(page.locator('#dynamicsPanel')).toBeVisible();
+    await page.locator('#inertiaReset').dispatchEvent('click');
+    await expect(page.locator('#inertiaPanel')).toBeVisible();
 
     await page.locator('#dynamicsTab').click();
     await expect(page.locator('#dynamicsPanel')).toBeVisible();
@@ -128,6 +138,8 @@ export async function exercisePhysicsArea(page) {
     }
     await page.locator('#cartLaunch').click();
     await expect(page.locator('#newtonReadout')).toContainText('F =');
+    await page.waitForTimeout(1_600);
+    await expect(page.locator('#newtonStatus')).toContainText(workshopInChinese ? '时间线已暂停' : 'timeline paused');
     await page.locator('#cartReset').click();
 
     await page.locator('#recoilTab').click();
@@ -137,6 +149,8 @@ export async function exercisePhysicsArea(page) {
     await setRange(rocketAir, await rocketAir.getAttribute('min'));
     await page.locator('#rocketLaunch').click();
     await expect(page.locator('#newtonReadout')).toContainText(workshopInChinese ? '结果' : 'Result:');
+    await page.waitForTimeout(1_600);
+    await expect(page.locator('#newtonStatus')).toContainText(workshopInChinese ? '时间线已暂停' : 'timeline paused');
     await page.locator('#rocketReset').click();
 
     await page.locator('[data-lang="zh-CN"]').click();

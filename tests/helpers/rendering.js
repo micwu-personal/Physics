@@ -110,7 +110,7 @@ async function scrollIntoStableView(locator) {
   for (let attempt = 0; attempt < 4; attempt++) {
     await locator.evaluate(element => element.scrollIntoView({ block: 'center', inline: 'center' }));
     await locator.page().waitForTimeout(50);
-    const current = await locator.evaluate(element => {
+    let current = await locator.evaluate(element => {
       const rect = element.getBoundingClientRect();
       return {
         bottom: rect.bottom,
@@ -120,12 +120,32 @@ async function scrollIntoStableView(locator) {
         width: rect.width
       };
     });
+    let fits = current.height > current.viewportHeight ||
+      (current.top >= -1 && current.bottom <= current.viewportHeight + 1);
+
+    if (!fits && current.height <= current.viewportHeight) {
+      await locator.evaluate(element => {
+        const { bottom, top } = element.getBoundingClientRect();
+        window.scrollBy(0, bottom > innerHeight ? bottom - innerHeight + 1 : top + 1);
+      });
+      current = await locator.evaluate(element => {
+        const rect = element.getBoundingClientRect();
+        return {
+          bottom: rect.bottom,
+          height: rect.height,
+          top: rect.top,
+          viewportHeight: innerHeight,
+          width: rect.width
+        };
+      });
+      fits = current.top >= -1 && current.bottom <= current.viewportHeight + 1;
+      if (fits) return;
+    }
+
     const settled = previous &&
       Math.abs(current.top - previous.top) < 0.5 &&
       Math.abs(current.width - previous.width) < 0.5 &&
       Math.abs(current.height - previous.height) < 0.5;
-    const fits = current.height > current.viewportHeight ||
-      (current.top >= -1 && current.bottom <= current.viewportHeight + 1);
     if (settled && fits) return;
     previous = current;
   }
