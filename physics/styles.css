@@ -3136,6 +3136,10 @@ html[data-motion="paused"] *::after {
   gap: 18px;
 }
 
+.newton-panel[hidden] {
+  display: none;
+}
+
 .newton-panel h3 {
   margin: 0;
   color: var(--paper);

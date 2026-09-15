@@ -112,7 +112,12 @@ export async function exercisePhysicsArea(page) {
     await page.locator('#inertiaTab').focus();
     await page.keyboard.press('ArrowRight');
     await expect(page.locator('#dynamicsTab')).toHaveAttribute('aria-selected', 'true');
+    await expect(page.locator('#inertiaPanel')).toBeHidden();
+    await expect(page.locator('#dynamicsPanel')).toBeVisible();
+    await expect(page.locator('#recoilPanel')).toBeHidden();
     await page.locator('#inertiaTab').click();
+    await expect(page.locator('#inertiaPanel')).toBeVisible();
+    await expect(page.locator('#dynamicsPanel')).toBeHidden();
     await page.locator('#inertiaLaunch').click();
     await page.waitForTimeout(250);
     await expect(page.locator('#newtonReadout')).toContainText(workshopInChinese ? '结果' : 'Result:');
@@ -128,6 +133,8 @@ export async function exercisePhysicsArea(page) {
     }
     await page.locator('#cartLaunch').click();
     await expect(page.locator('#newtonReadout')).toContainText('F =');
+    await page.waitForTimeout(1_600);
+    await expect(page.locator('#newtonStatus')).toContainText(workshopInChinese ? '时间线已暂停' : 'timeline paused');
     await page.locator('#cartReset').click();
 
     await page.locator('#recoilTab').click();
