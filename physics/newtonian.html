@@ -66,6 +66,7 @@
 
     <nav class="topic-index" aria-label="Newtonian mechanics sections" data-aria-en="Newtonian mechanics sections" data-aria-zh="牛顿力学章节">
       <a href="#laws" data-copy-en="The laws" data-copy-zh="三条定律">The laws</a>
+      <a href="#newton-workshop" data-copy-en="Law workshop" data-copy-zh="定律工作坊">Law workshop</a>
       <a href="#orbit-lab" data-copy-en="Orbit laboratory" data-copy-zh="轨道实验室">Orbit laboratory</a>
       <a href="#evidence" data-copy-en="Newton & Principia" data-copy-zh="牛顿与《原理》">Newton &amp; Principia</a>
       <a href="#limits" data-copy-en="Where it stops" data-copy-zh="适用边界">Where it stops</a>
@@ -101,6 +102,76 @@
             <p data-copy-en="Forces between two bodies are equal and opposite. They act on different bodies, so they do not cancel inside either body’s equation of motion."
                data-copy-zh="两个物体之间的力大小相等、方向相反。它们作用在不同物体上，因此不会在任一物体自身的运动方程中彼此抵消。">Forces between two bodies are equal and opposite. They act on different bodies, so they do not cancel inside either body’s equation of motion.</p>
           </article>
+        </div>
+      </section>
+
+      <section id="newton-workshop" class="topic-section">
+        <header>
+          <h2 data-copy-en="Put each law to work." data-copy-zh="让每一条定律动起来。">Put each law to work.</h2>
+          <p data-copy-en="Choose an experiment, change the inputs, and run it. Each view marks what is being represented and names the idealization, so the diagram is a tool for thinking rather than a disguised measurement."
+             data-copy-zh="选择一个实验，改变输入并运行它。每个视图都标明所表示的内容与理想化假设，因此图示是思考工具，而不是伪装成测量结果的图片。">
+            Choose an experiment, change the inputs, and run it. Each view marks what is being represented and names the idealization, so the diagram is a tool for thinking rather than a disguised measurement.
+          </p>
+        </header>
+        <div class="newton-workshop">
+          <div class="newton-workshop__tabs" role="tablist" aria-label="Newton law experiments" data-aria-en="Newton law experiments" data-aria-zh="牛顿定律实验">
+            <button id="inertiaTab" type="button" role="tab" aria-selected="true" aria-controls="inertiaPanel" data-newton-experiment="inertia" data-copy-en="I · Coin and card" data-copy-zh="第一定律 · 硬币与卡片">I · Coin and card</button>
+            <button id="dynamicsTab" type="button" role="tab" tabindex="-1" aria-selected="false" aria-controls="dynamicsPanel" data-newton-experiment="dynamics" data-copy-en="II · Cart launch" data-copy-zh="第二定律 · 小车发射">II · Cart launch</button>
+            <button id="recoilTab" type="button" role="tab" tabindex="-1" aria-selected="false" aria-controls="recoilPanel" data-newton-experiment="recoil" data-copy-en="III · Balloon rocket" data-copy-zh="第三定律 · 气球火箭">III · Balloon rocket</button>
+          </div>
+          <div class="newton-workshop__body">
+            <div class="newton-stage">
+              <canvas id="newtonWorkshopCanvas" tabindex="0" aria-describedby="newtonReadout newtonCaveat" aria-label="Interactive Newton law experiment diagram" data-aria-en="Interactive Newton law experiment diagram" data-aria-zh="牛顿定律互动实验图">Interactive diagram of a Newton law experiment.</canvas>
+              <div class="newton-stage__legend">
+                <span class="rep-badge schematic" data-copy-en="Interactive teaching schematic" data-copy-zh="互动教学示意">Interactive teaching schematic</span>
+                <span id="newtonStatus" class="newton-status" aria-live="polite"></span>
+              </div>
+            </div>
+            <div class="newton-workshop__controls">
+              <div id="inertiaPanel" class="newton-panel" role="tabpanel" aria-labelledby="inertiaTab">
+                <h3 data-copy-en="First law: yank the card" data-copy-zh="第一定律：抽走卡片">First law: yank the card</h3>
+                <p data-copy-en="A coin rests over a glass on a card. Pull the card quickly: the coin initially keeps its horizontal velocity, then gravity drops it into the glass."
+                   data-copy-zh="一枚硬币随卡片放在玻璃杯上方。快速抽走卡片：硬币起初保持原有的水平速度，随后因重力落入杯中。">A coin rests over a glass on a card. Pull the card quickly: the coin initially keeps its horizontal velocity, then gravity drops it into the glass.</p>
+                <div class="newton-buttons">
+                  <button id="inertiaLaunch" type="button" data-copy-en="Yank the card" data-copy-zh="抽走卡片">Yank the card</button>
+                  <button id="inertiaReset" type="button" data-copy-en="Set it again" data-copy-zh="重新摆好">Set it again</button>
+                </div>
+              </div>
+              <div id="dynamicsPanel" class="newton-panel" role="tabpanel" aria-labelledby="dynamicsTab" hidden>
+                <h3 data-copy-en="Second law: launch a cart" data-copy-zh="第二定律：发射小车">Second law: launch a cart</h3>
+                <p data-copy-en="Set a constant horizontal net force and cart mass. The acceleration and the growing velocity vector are calculated from F = ma."
+                   data-copy-zh="设置恒定的水平合力与小车质量。加速度和逐渐增长的速度箭头由 F = ma 计算得出。">Set a constant horizontal net force and cart mass. The acceleration and the growing velocity vector are calculated from F = ma.</p>
+                <div class="control-group">
+                  <label for="cartMass"><span data-copy-en="Cart mass" data-copy-zh="小车质量">Cart mass</span><output id="cartMassOutput" for="cartMass">2.0 kg</output></label>
+                  <input id="cartMass" type="range" min="0.5" max="5" value="2" step="0.5">
+                </div>
+                <div class="control-group">
+                  <label for="cartForce"><span data-copy-en="Net force" data-copy-zh="合力">Net force</span><output id="cartForceOutput" for="cartForce">4.0 N</output></label>
+                  <input id="cartForce" type="range" min="1" max="10" value="4" step="1">
+                </div>
+                <div class="newton-buttons">
+                  <button id="cartLaunch" type="button" data-copy-en="Apply force" data-copy-zh="施加力">Apply force</button>
+                  <button id="cartReset" type="button" data-copy-en="Reset cart" data-copy-zh="重置小车">Reset cart</button>
+                </div>
+              </div>
+              <div id="recoilPanel" class="newton-panel" role="tabpanel" aria-labelledby="recoilTab" hidden>
+                <h3 data-copy-en="Third law: balloon rocket" data-copy-zh="第三定律：气球火箭">Third law: balloon rocket</h3>
+                <p data-copy-en="Air is expelled left and the balloon moves right along a string. The paired arrows have equal size but are drawn on different bodies: air and balloon."
+                   data-copy-zh="空气向左喷出，气球沿绳向右运动。成对箭头大小相等，却画在不同物体上：空气和气球。">Air is expelled left and the balloon moves right along a string. The paired arrows have equal size but are drawn on different bodies: air and balloon.</p>
+                <div class="control-group">
+                  <label for="rocketAir"><span data-copy-en="Air in balloon" data-copy-zh="气球中的空气">Air in balloon</span><output id="rocketAirOutput" for="rocketAir">70%</output></label>
+                  <input id="rocketAir" type="range" min="25" max="100" value="70" step="5">
+                </div>
+                <div class="newton-buttons">
+                  <button id="rocketLaunch" type="button" data-copy-en="Release balloon" data-copy-zh="放开气球">Release balloon</button>
+                  <button id="rocketReset" type="button" data-copy-en="Inflate again" data-copy-zh="再次充气">Inflate again</button>
+                </div>
+              </div>
+              <div id="newtonReadout" class="newton-readout" aria-live="polite"></div>
+              <p id="newtonCaveat" class="newton-caveat"><span class="rep-badge model" data-copy-en="Model caveat" data-copy-zh="模型提示">Model caveat</span><br><span data-copy-en="Friction, air turbulence, the card's flexing, and the changing mass of the balloon are simplified or omitted. Equal-and-opposite forces are simultaneous; motion depends on each body's other forces and mass."
+                data-copy-zh="摩擦、空气湍流、卡片弯曲和气球质量变化均被简化或略去。大小相等、方向相反的力同时出现；运动取决于每个物体受到的其他力和自身质量。">Friction, air turbulence, the card's flexing, and the changing mass of the balloon are simplified or omitted. Equal-and-opposite forces are simultaneous; motion depends on each body's other forces and mass.</span></p>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -250,5 +321,6 @@
   <script src="common.js"></script>
   <script src="references.js"></script>
   <script src="labs.js"></script>
+  <script src="newton-laws-workshop.js"></script>
 </body>
 </html>

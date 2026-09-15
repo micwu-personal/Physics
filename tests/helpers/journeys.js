@@ -90,6 +90,87 @@ export async function exercisePhysicsArea(page) {
   await page.locator('#labReset').click();
   await page.locator('#audioToggle').click();
   await expect(page.locator('#audioToggle')).toHaveAttribute('aria-pressed', 'true');
+
+  const newtonCanvas = page.locator('#newtonWorkshopCanvas');
+  if (await newtonCanvas.count()) {
+    const workshopInChinese = (await page.locator('html').getAttribute('lang')) === 'zh-CN';
+    await newtonCanvas.evaluate(element => element.scrollIntoView({ block: 'center' }));
+    await expect(newtonCanvas).toBeVisible();
+    const canvasMetrics = await newtonCanvas.evaluate(canvas => {
+      const context = canvas.getContext('2d');
+      const { data } = context.getImageData(0, 0, canvas.width, canvas.height);
+      let painted = 0;
+      for (let offset = 3; offset < data.length; offset += 400) {
+        if (data[offset]) painted++;
+      }
+      return { height: canvas.height, painted, width: canvas.width };
+    });
+    expect(canvasMetrics.width).toBeGreaterThan(20);
+    expect(canvasMetrics.height).toBeGreaterThan(20);
+    expect(canvasMetrics.painted).toBeGreaterThan(32);
+
+    await page.locator('#inertiaTab').focus();
+    await page.keyboard.press('ArrowRight');
+    await expect(page.locator('#dynamicsTab')).toHaveAttribute('aria-selected', 'true');
+    await page.locator('#inertiaTab').click();
+    await page.locator('#inertiaLaunch').click();
+    await page.waitForTimeout(250);
+    await expect(page.locator('#newtonReadout')).toContainText(workshopInChinese ? '结果' : 'Result:');
+    await page.locator('#inertiaReset').click();
+    await expect(page.locator('#newtonReadout')).toContainText(workshopInChinese ? '预测' : 'Prediction:');
+
+    await page.locator('#dynamicsTab').click();
+    await expect(page.locator('#dynamicsPanel')).toBeVisible();
+    for (const selector of ['#cartMass', '#cartForce']) {
+      const control = page.locator(selector);
+      await setRange(control, await control.getAttribute('max'));
+      await setRange(control, await control.getAttribute('min'));
+    }
+    await page.locator('#cartLaunch').click();
+    await expect(page.locator('#newtonReadout')).toContainText('F =');
+    await page.locator('#cartReset').click();
+
+    await page.locator('#recoilTab').click();
+    await expect(page.locator('#recoilPanel')).toBeVisible();
+    const rocketAir = page.locator('#rocketAir');
+    await setRange(rocketAir, await rocketAir.getAttribute('max'));
+    await setRange(rocketAir, await rocketAir.getAttribute('min'));
+    await page.locator('#rocketLaunch').click();
+    await expect(page.locator('#newtonReadout')).toContainText(workshopInChinese ? '结果' : 'Result:');
+    await page.locator('#rocketReset').click();
+
+    await page.locator('[data-lang="zh-CN"]').click();
+    await expect(page.locator('#newtonReadout')).toContainText('预测');
+    await page.locator('[data-lang="en"]').click();
+
+    await page.locator('#inertiaTab').focus();
+    await page.keyboard.press('ArrowLeft');
+    await expect(page.locator('#recoilTab')).toHaveAttribute('aria-selected', 'true');
+    await page.keyboard.press('Home');
+    await expect(page.locator('#inertiaTab')).toHaveAttribute('aria-selected', 'true');
+    await page.keyboard.press('End');
+    await expect(page.locator('#recoilTab')).toHaveAttribute('aria-selected', 'true');
+    await page.keyboard.press('a');
+
+    await page.locator('#dynamicsTab').click();
+    await page.locator('#cartLaunch').click();
+    await page.waitForTimeout(1_600);
+    await page.locator('#cartLaunch').click();
+    await page.locator('.motion-toggle').click();
+    await page.locator('.motion-toggle').click();
+    await page.locator('#cartLaunch').click();
+    await page.evaluate(() => {
+      Object.defineProperty(document, 'hidden', { configurable: true, get: () => true });
+      document.dispatchEvent(new Event('visibilitychange'));
+      Object.defineProperty(document, 'hidden', { configurable: true, get: () => false });
+      document.dispatchEvent(new Event('visibilitychange'));
+    });
+    await page.locator('.motion-toggle').click();
+    await page.locator('#inertiaTab').click();
+    await page.locator('#inertiaLaunch').click();
+    await expect(page.locator('#newtonStatus')).toContainText('static result');
+    await page.locator('.motion-toggle').click();
+  }
 }
 
 export async function exercisePhysicsAstro(page, options = {}) {

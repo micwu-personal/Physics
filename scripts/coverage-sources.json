@@ -28,6 +28,7 @@
   "physics/fields-data.js",
   "physics/formula.js",
   "physics/labs.js",
+  "physics/newton-laws-workshop.js",
   "physics/relativity-deepening.js",
   "physics/light.js",
   "physics/orbital-lab.js",

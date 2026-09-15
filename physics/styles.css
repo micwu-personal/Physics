@@ -3044,3 +3044,183 @@ html[data-motion="paused"] *::before,
 html[data-motion="paused"] *::after {
   animation-play-state: paused !important;
 }
+
+.newton-workshop {
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--enamel);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.3);
+}
+
+.newton-workshop__tabs {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  border-bottom: 1px solid var(--line);
+  background: var(--line);
+}
+
+.newton-workshop__tabs button {
+  min-height: 52px;
+  padding: 12px 16px;
+  border: 0;
+  color: var(--muted);
+  background: var(--deep);
+  cursor: pointer;
+  font: 650 12px/1.25 "Space Grotesk", "Segoe UI", sans-serif;
+  text-align: left;
+}
+
+.newton-workshop__tabs button:hover,
+.newton-workshop__tabs button[aria-selected="true"] {
+  color: var(--paper);
+  background: var(--panel);
+}
+
+.newton-workshop__tabs button[aria-selected="true"] {
+  box-shadow: inset 0 -3px var(--topic);
+}
+
+.newton-workshop__body {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(280px, 0.65fr);
+  min-height: 500px;
+}
+
+.newton-stage {
+  position: relative;
+  min-height: 500px;
+  background: #050816;
+}
+
+.newton-stage canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 500px;
+  outline-offset: -4px;
+}
+
+.newton-stage__legend {
+  position: absolute;
+  inset: auto 12px 12px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: rgba(9, 13, 29, 0.9);
+  pointer-events: none;
+}
+
+.newton-status {
+  color: var(--topic);
+  font: 600 11px/1.35 "JetBrains Mono", monospace;
+  text-align: right;
+}
+
+.newton-workshop__controls {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 24px;
+  border-left: 1px solid var(--line);
+  background: var(--deep);
+}
+
+.newton-panel {
+  display: grid;
+  gap: 18px;
+}
+
+.newton-panel h3 {
+  margin: 0;
+  color: var(--paper);
+  font-size: 23px;
+  line-height: 1.1;
+}
+
+.newton-panel > p {
+  margin: -8px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.58;
+}
+
+.newton-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.newton-buttons button {
+  min-height: 44px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--paper);
+  background: var(--panel);
+  cursor: pointer;
+  font: 650 12px/1.25 "Space Grotesk", "Segoe UI", sans-serif;
+}
+
+.newton-buttons button:hover {
+  border-color: var(--topic);
+}
+
+.newton-readout {
+  min-height: 8.5em;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  color: var(--paper);
+  background: rgba(14, 22, 47, 0.65);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.newton-caveat {
+  margin: auto 0 0;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.55;
+}
+
+@media (max-width: 1180px) {
+  .newton-workshop__body {
+    grid-template-columns: 1fr;
+  }
+
+  .newton-workshop__controls {
+    border-top: 1px solid var(--line);
+    border-left: 0;
+  }
+}
+
+@media (max-width: 760px) {
+  .newton-workshop__tabs {
+    grid-template-columns: 1fr;
+  }
+
+  .newton-workshop__tabs button {
+    min-height: 44px;
+  }
+
+  .newton-stage,
+  .newton-stage canvas {
+    min-height: 390px;
+  }
+
+  .newton-stage__legend {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .newton-status {
+    text-align: left;
+  }
+}

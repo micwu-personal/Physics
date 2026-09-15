@@ -17,7 +17,9 @@ const physicsTopicRenderings = [
     heroCanvas: '#heroCanvas',
     frame: '.topic-hero',
     labCanvas: '#labCanvas',
-    labFrame: '#orbit-lab .lab'
+    labFrame: '#orbit-lab .lab',
+    experimentCanvas: '#newtonWorkshopCanvas',
+    experimentFrame: '#newton-workshop'
   },
   {
     id: 'relativity',
@@ -82,6 +84,16 @@ test.describe('deterministic scientific renderers', () => {
           await stepVisualClock(page, 16, 4);
           await expectCanvasRendered(labCanvas);
           await captureRendering(page.locator(topic.labFrame), `${topic.id}-lab-zh-CN.png`);
+        }
+
+        if (topic.experimentCanvas && topic.experimentFrame) {
+          const experimentCanvas = page.locator(topic.experimentCanvas);
+          await experimentCanvas.evaluate(element => element.scrollIntoView({ block: 'center' }));
+          await page.waitForTimeout(80);
+          await page.evaluate(() => dispatchEvent(new Event('resize')));
+          await stepVisualClock(page, 16, 4);
+          await expectCanvasRendered(experimentCanvas);
+          await captureRendering(page.locator(topic.experimentFrame), `${topic.id}-workshop-zh-CN.png`);
         }
       });
     }
