@@ -182,10 +182,11 @@
     const time = p * 2.5;
     const velocity = acceleration * time;
     const physicalDistance = 0.5 * acceleration * time * time * width * 0.055;
-    const cameraOffset = Math.max(0, physicalDistance - width * 0.48);
-    const x = width * 0.13 + physicalDistance - cameraOffset;
+    const startX = width * 0.13;
+    const x = startX + physicalDistance;
     const y = height * 0.6;
     const cartWidth = Math.min(105, width * 0.2);
+    const cartVisible = x + cartWidth > 0 && x < width;
 
     text(copy('SECOND LAW · DYNAMICS', '第二定律 · 动力学'), 24, 32, '#f6c85f');
     context.strokeStyle = '#64748b';
@@ -196,35 +197,47 @@
     context.stroke();
     context.strokeStyle = 'rgba(158,175,196,.35)';
     context.lineWidth = 1;
-    for (let distance = 0; distance <= width * 1.2; distance += 72) {
-      const tickX = width * 0.13 + distance - cameraOffset;
-      if (tickX < width * 0.06 || tickX > width * 0.94) continue;
+    for (let tickX = startX; tickX <= width * 1.1; tickX += 72) {
       context.beginPath();
       context.moveTo(tickX, y + 42);
       context.lineTo(tickX, y + 51);
       context.stroke();
     }
-    context.fillStyle = '#27445d';
-    context.fillRect(x, y, cartWidth, 32);
-    context.fillStyle = '#60d6c5';
-    context.fillRect(x + 12, y - 21, cartWidth * 0.55, 21);
-    context.fillStyle = '#0b1022';
-    for (const wheelX of [x + 20, x + cartWidth - 20]) {
-      context.beginPath();
-      context.arc(wheelX, y + 37, 10, 0, Math.PI * 2);
-      context.fill();
-      context.strokeStyle = '#d7e4f5';
-      context.lineWidth = 2;
-      context.stroke();
+    context.strokeStyle = 'rgba(96,214,197,.55)';
+    context.lineWidth = 2;
+    context.setLineDash([6, 8]);
+    context.beginPath();
+    context.moveTo(startX, y + 16);
+    context.lineTo(Math.min(x + cartWidth * 0.5, width * 0.94), y + 16);
+    context.stroke();
+    context.setLineDash([]);
+
+    if (cartVisible) {
+      context.fillStyle = '#27445d';
+      context.fillRect(x, y, cartWidth, 32);
+      context.fillStyle = '#60d6c5';
+      context.fillRect(x + 12, y - 21, cartWidth * 0.55, 21);
+      context.fillStyle = '#0b1022';
+      for (const wheelX of [x + 20, x + cartWidth - 20]) {
+        context.beginPath();
+        context.arc(wheelX, y + 37, 10, 0, Math.PI * 2);
+        context.fill();
+        context.strokeStyle = '#d7e4f5';
+        context.lineWidth = 2;
+        context.stroke();
+      }
+      const forceLength = 44 + force * 5;
+      arrow(x + cartWidth + 4, y + 16, x + cartWidth + 4 + forceLength, y + 16, '#ff8d6b', `F = ${force.toFixed(1)} N`);
+      const accelerationLength = 34 + acceleration * 12;
+      arrow(x + cartWidth / 2, y - 42, x + cartWidth / 2 + accelerationLength, y - 42, '#60d6c5', `a = ${acceleration.toFixed(2)} m/s²`);
+      if (p > 0) {
+        arrow(x + cartWidth / 2, y + 81, x + cartWidth / 2 + Math.min(130, velocity * 24), y + 81, '#f6c85f', `v = ${velocity.toFixed(2)} m/s`, 20);
+      }
+    } else if (x >= width) {
+      arrow(width * 0.72, y - 42, width * 0.92, y - 42, '#f6c85f', copy('cart beyond frame →', '小车已驶出画面 →'));
+      text(copy('fixed frame · motion continues beyond the right edge', '固定画面 · 运动继续超出右侧边界'), width * 0.5, y - 70, '#f6c85f', 'center');
     }
-    const forceLength = 44 + force * 5;
-    arrow(x + cartWidth + 4, y + 16, x + cartWidth + 4 + forceLength, y + 16, '#ff8d6b', `F = ${force.toFixed(1)} N`);
-    const accelerationLength = 34 + acceleration * 12;
-    arrow(x + cartWidth / 2, y - 42, x + cartWidth / 2 + accelerationLength, y - 42, '#60d6c5', `a = ${acceleration.toFixed(2)} m/s²`);
-    if (p > 0) {
-      arrow(x + cartWidth / 2, y + 81, x + cartWidth / 2 + Math.min(130, velocity * 24), y + 81, '#f6c85f', `v = ${velocity.toFixed(2)} m/s`, 20);
-    }
-    text(copy('constant net force · view follows the cart →', '恒定合力 · 视野跟随小车 →'), width * 0.5, height * 0.78, '#9eafc4', 'center');
+    text(copy('constant net force · fixed frame', '恒定合力 · 固定画面'), width * 0.5, height * 0.78, '#9eafc4', 'center');
     drawTimelinePause();
   }
 
