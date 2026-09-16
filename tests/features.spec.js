@@ -393,7 +393,7 @@ test('Acoustics studio isolates tab controls and emits audible experiment cues',
   await page.locator('[data-control-value="shock"]').click();
   await expect(page.locator('#fieldVisualHost input[data-control-key="shockMach"]')).toBeVisible();
   await expect(page.locator('#fieldVisualHost input[data-control-key="toneFrequency"]')).toHaveCount(0);
-  await page.getByRole('button', { name: 'Hear the shock pulse' }).click();
+  await page.getByRole('button', { name: 'Hear this shock demonstration' }).click();
   await page.waitForTimeout(50);
   const shockEvents = await page.evaluate(() => window.__audioEvents);
   expect(shockEvents.some(event => event.kind === 'oscillator-start')).toBe(true);
@@ -403,9 +403,18 @@ test('Acoustics studio isolates tab controls and emits audible experiment cues',
   await expect(page.locator('#fieldVisualHost')).toContainText('spectrum: each bar is one sinusoidal component');
   await expect(page.locator('#fieldVisualHost input[data-control-key="shockMach"]')).toHaveCount(0);
   await expect(page.locator('#fieldVisualHost input[data-control-key="mixFrequency1"]')).toBeVisible();
+  await expect(page.locator('#fieldVisualHost .acoustic-component-rack .acoustic-component')).toHaveCount(3);
+
+  await page.locator('[data-control-value="room"]').click();
+  await expect(page.locator('#fieldVisualHost')).not.toContainText('undefined');
+  await page.getByRole('button', { name: 'Hear convolution reverb' }).click();
+  await page.waitForTimeout(50);
+  const roomEvents = await page.evaluate(() => window.__audioEvents);
+  expect(roomEvents.some(event => event.kind === 'oscillator-start')).toBe(true);
+
   await page.locator('[data-lang="zh-CN"]').click();
   await expect(page.locator('#fieldVisualHost .field-visual-card')).toBeVisible();
-  await expect(page.locator('#fieldVisualHost input[data-control-key="mixFrequency1"]')).toBeVisible();
+  await expect(page.locator('#fieldVisualHost .field-control-group[data-control-key="room"]')).toBeVisible();
 });
 
 test('Thermodynamics visual clamps crossing reservoir values and preserves the normalized state across language rerenders', async ({ page }) => {

@@ -434,10 +434,31 @@ html[data-motion="paused"] .field-visual-stage * {
   padding-top: 0.25rem;
 }
 
+.acoustic-component-rack {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.7rem;
+  min-width: 0;
+  padding: 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0.7rem;
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.acoustic-component {
+  min-width: 0;
+  padding: 0.2rem 0.55rem 0.35rem;
+  border-left: 1px solid rgba(255, 255, 255, 0.09);
+}
+
+.acoustic-component:first-child {
+  border-left: 0;
+}
+
 .acoustic-component-label {
-  margin-top: 0.3rem;
-  padding-top: 0.55rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  margin-top: 0.05rem;
+  padding-top: 0.2rem;
   color: #ffd166;
   font: 700 0.78rem "JetBrains Mono", ui-monospace, monospace;
   letter-spacing: 0.04em;
@@ -461,5 +482,31 @@ html[data-motion="paused"] .field-visual-stage * {
 @media (max-width: 900px) {
   .field-visual-layout {
     grid-template-columns: 1fr;
+  }
+
+  .acoustic-component-rack {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .acoustic-component:nth-child(3) {
+    border-left: 0;
+  }
+}
+
+@media (max-width: 560px) {
+  .acoustic-component-rack {
+    grid-template-columns: 1fr;
+  }
+
+  .acoustic-component,
+  .acoustic-component:nth-child(3) {
+    border-left: 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.09);
+    padding-top: 0.6rem;
+  }
+
+  .acoustic-component:first-child {
+    border-top: 0;
+    padding-top: 0.2rem;
   }
 }

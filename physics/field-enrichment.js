@@ -80,6 +80,7 @@
     'noaa-sound': source('Sound in the ocean', 'NOAA', 'https://oceanservice.noaa.gov/facts/sound.html', 'How sound propagates and refracts through a material medium.', '说明声音如何在物质介质中传播与折射。'),
     'nih-hear': source('How do we hear?', 'NIH / NIDCD', 'https://www.nidcd.nih.gov/health/how-do-we-hear', 'How pressure waves become traveling waves and then electrical signals.', '说明压强波如何变成行波，再转化为电信号。'),
     'unsw-pipes': source('Pipes and harmonics: cylindrical and conical bores', 'University of New South Wales', 'https://newt.phys.unsw.edu.au/jw/pipes.html', 'Explains why open-open pipes support all harmonics while one-end-closed pipes support only the odd sequence in the ideal air-column model.', '解释理想空气柱模型里为何两端开口的管支持全部谐波，而一端封闭的管只支持奇次序列。'),
+    'koda-helium': source('Helium-modulated voices and the source-filter theory', 'Journal of the Acoustical Society of America', 'https://doi.org/10.1121/1.4921607', 'A peer-reviewed study separating vocal-fold fundamental frequency from vocal-tract resonances: helium shifts the filter/formants while the source frequency is not simply multiplied.', '同行评议研究把声带基频与声道共振分开：氦气会移动滤波器/共振峰，但声源频率不会简单地整体乘倍。'),
     'nist-temperature': source('SI units: temperature', 'NIST', 'https://www.nist.gov/pml/owm/si-units-temperature', 'The kelvin, thermodynamic temperature, and the meaning of absolute zero.', '开尔文、热力学温度与绝对零度的含义。'),
     'nist-boltzmann': source('Boltzmann constant', 'NIST', 'https://physics.nist.gov/cgi-bin/cuu/Value?k', 'The standard constant linking microscopic energy scales to temperature and entropy.', '连接微观能量尺度、温度与熵的标准常数。'),
     'utexas-heat-engines': source('Heat engines', 'University of Texas at Austin', 'https://farside.ph.utexas.edu/teaching/sm1/lectures/node57.html', 'Derives the heat-engine efficiency bound and shows that a reversible engine reaches the Carnot form 1 − T_c/T_h.', '推导热机效率上限，并说明可逆热机达到卡诺形式 1 − T_c/T_h。'),
@@ -352,10 +353,10 @@
   ];
 
   const ROOM_PROFILES = {
-    dry: { label: t('dry room', '干燥房间'), duration: 0.08, tail: 0.08, early: [0.018, 0.036], damping: 0.25, wet: 0.05 },
-    bedroom: { label: t('bedroom', '卧室'), duration: 0.42, tail: 0.34, early: [0.035, 0.073, 0.12], damping: 0.62, wet: 0.32 },
-    hall: { label: t('concert hall', '音乐厅'), duration: 1.55, tail: 1.2, early: [0.055, 0.11, 0.19, 0.31], damping: 0.34, wet: 0.62 },
-    cathedral: { label: t('cathedral', '大教堂'), duration: 2.8, tail: 2.45, early: [0.08, 0.17, 0.29, 0.46, 0.68], damping: 0.18, wet: 0.82 }
+    dry: { label: { en: 'dry room', zh: '干燥房间' }, duration: 0.08, tail: 0.08, early: [0.018, 0.036], damping: 0.25, wet: 0.05 },
+    bedroom: { label: { en: 'bedroom', zh: '卧室' }, duration: 0.42, tail: 0.34, early: [0.035, 0.073, 0.12], damping: 0.62, wet: 0.32 },
+    hall: { label: { en: 'concert hall', zh: '音乐厅' }, duration: 1.55, tail: 1.2, early: [0.055, 0.11, 0.19, 0.31], damping: 0.34, wet: 0.62 },
+    cathedral: { label: { en: 'cathedral', zh: '大教堂' }, duration: 2.8, tail: 2.45, early: [0.08, 0.17, 0.29, 0.46, 0.68], damping: 0.18, wet: 0.82 }
   };
 
   function acousticComponents(state) {
@@ -380,20 +381,25 @@
   }
 
   function heliumVoiceWeight(frequency, base = 140, helium = false) {
-    const formants = helium ? [base * 4.4, base * 8.2, base * 12.6] : [base * 2.7, base * 5.1, base * 8.3];
-    const nearest = Math.min(...formants.map(formant => Math.abs(frequency - formant)));
-    return clamp(0.24 + Math.exp(-nearest / (helium ? base * 1.35 : base * 1.8)) * 0.9, 0.12, 1);
+    const formants = helium ? [850, 2550, 4100] : [500, 1500, 2500];
+    const bandwidths = helium ? [180, 420, 620] : [110, 260, 420];
+    const harmonic = Math.max(1, frequency / base);
+    const sourceRollOff = 1 / Math.pow(harmonic, 0.72);
+    const resonance = formants.reduce((sum, formant, index) => sum + Math.exp(-0.5 * Math.pow((frequency - formant) / bandwidths[index], 2)), 0);
+    return clamp(0.1 * sourceRollOff + 0.9 * resonance / formants.length, 0.08, 1);
   }
 
   function roomImpulse(roomKey, samples = 96) {
     const profile = ROOM_PROFILES[roomKey] || ROOM_PROFILES.hall;
-    return Array.from({ length: samples }, (_, index) => {
-      const time = index / (samples - 1) * profile.duration;
+    const impulse = Array.from({ length: samples }, (_, index) => {
+      const time = index / Math.max(1, samples - 1) * profile.duration;
       const direct = index === 0 ? 1 : 0;
       const reflection = profile.early.reduce((sum, delay, reflectionIndex) => sum + (Math.abs(time - delay) < profile.duration / samples * 1.5 ? 0.62 / (reflectionIndex + 1.2) : 0), 0);
       const tail = time < 0.012 ? 0 : Math.exp(-time / Math.max(0.04, profile.tail * 0.34)) * (0.18 + 0.1 * Math.sin(index * 2.7) ** 2);
       return direct + reflection + tail;
     });
+    const peak = Math.max(1, ...impulse.map(value => Math.abs(value)));
+    return impulse.map(value => value / peak);
   }
 
   function acousticPath(samples, x0, y0, width, height) {
@@ -414,15 +420,17 @@
     const maxWave = Math.max(1, ...wave.map(value => Math.abs(value)));
     const wavePath = acousticPath(wave.map(value => value / maxWave), 56, 118, 620, 54);
     const reconstruction = lab === 'fourier' ? acousticPath(samples.map(time => acousticSignal(state, time / 240, components.slice(0, Math.max(1, Number(state.fourierKeep) || 1))) / maxWave), 56, 118, 620, 54) : '';
-    const bars = filtered.map((item, index) => { const x = 72 + index * Math.min(88, 610 / Math.max(1, filtered.length)); const barWidth = Math.min(44, 560 / Math.max(1, filtered.length)); const height = 18 + clamp(item.amplitude, 0, 1) * 72; const selected = lab === 'fourier' && index < Number(state.fourierKeep || 1); return `<rect x="${x.toFixed(1)}" y="${300 - height}" width="${barWidth.toFixed(1)}" height="${height.toFixed(1)}" rx="7" fill="${selected || lab !== 'fourier' ? (index % 2 ? '#ffd166' : '#00d4ff') : 'rgba(255,255,255,0.22)'}"></rect><text class="field-svg-label" text-anchor="middle" x="${(x + barWidth / 2).toFixed(1)}" y="324">${Math.round(item.frequency)} Hz</text>`; }).join('');
+    const spectrumBaseline = 276;
+    const bars = filtered.map((item, index) => { const x = 72 + index * Math.min(88, 610 / Math.max(1, filtered.length)); const barWidth = Math.min(44, 560 / Math.max(1, filtered.length)); const height = 18 + clamp(item.amplitude, 0, 1) * 72; const selected = lab === 'fourier' && index < Number(state.fourierKeep || 1); return `<rect x="${x.toFixed(1)}" y="${spectrumBaseline - height}" width="${barWidth.toFixed(1)}" height="${height.toFixed(1)}" rx="7" fill="${selected || lab !== 'fourier' ? (index % 2 ? '#ffd166' : '#00d4ff') : 'rgba(255,255,255,0.22)'}"></rect><text class="field-svg-label" text-anchor="middle" x="${(x + barWidth / 2).toFixed(1)}" y="298">${Math.round(item.frequency)} Hz</text>`; }).join('');
     const labLabel = ACOUSTIC_LABS.find(item => item[0] === lab)?.[zh() ? 2 : 1] || lab;
-    let visual = `${acousticPanel(20, zh() ? '时域波形' : 'pressure waveform / time-domain waveform')}<line class="field-svg-soft" x1="56" y1="118" x2="676" y2="118"></line><path class="field-svg-accent" d="${wavePath}"></path>${reconstruction ? `<path class="field-svg-secondary" stroke-dasharray="7 6" d="${reconstruction}"></path><text class="field-svg-label" x="470" y="54">${zh() ? '虚线：保留后的重建' : 'dashed: partial reconstruction'}</text>` : ''}${acousticPanel(162, lab === 'fourier' ? (zh() ? '频域分析：峰值来自哪些成分？' : 'frequency-domain analysis: which components are present?') : (zh() ? '频谱' : 'frequency spectrum'))}<line class="field-svg-soft" x1="56" y1="300" x2="676" y2="300"></line>${bars}`;
+    let visual = `${acousticPanel(20, zh() ? '时域波形' : 'pressure waveform / time-domain waveform')}<line class="field-svg-soft" x1="56" y1="118" x2="676" y2="118"></line><path class="field-svg-accent" d="${wavePath}"></path>${reconstruction ? `<path class="field-svg-secondary" stroke-dasharray="7 6" d="${reconstruction}"></path><text class="field-svg-label" x="470" y="54">${zh() ? '虚线：保留后的重建' : 'dashed: partial reconstruction'}</text>` : ''}${acousticPanel(162, lab === 'fourier' ? (zh() ? '频域分析：峰值来自哪些成分？' : 'frequency-domain analysis: which components are present?') : (zh() ? '频谱' : 'frequency spectrum'))}<line class="field-svg-soft" x1="56" y1="${spectrumBaseline}" x2="676" y2="${spectrumBaseline}"></line>${bars}`;
     if (lab === 'medium') {
       const responsePoints = Array.from({ length: 72 }, (_, index) => [56 + index * 8.65, 438 - acousticResponse(state.medium, 100 + index * 78) * 72]);
       visual += `${acousticPanel(306, zh() ? '材料频率响应' : 'material frequency response')}<path class="field-svg-secondary" d="${pathFromPoints(responsePoints)}"></path><line x1="56" y1="438" x2="676" y2="438" class="field-svg-soft"></line><text class="field-svg-label" x="56" y="466">${zh() ? `${state.medium}：同一输入被介质重新加权` : `${state.medium}: the same input is re-weighted by the medium`}</text>`;
     } else if (lab === 'helium') {
-      const formantXs = [160, 300, 470];
-      visual += `${acousticPanel(306, zh() ? '声带基频与声道共振' : 'vocal-fold fundamental vs vocal-tract resonances')}<line x1="56" y1="438" x2="676" y2="438" class="field-svg-soft"></line>${formantXs.map(x => `<line x1="${x}" y1="438" x2="${x}" y2="${438 - (state.heliumMode === 'helium' ? 58 : 36)}" stroke="${state.heliumMode === 'helium' ? '#ffd166' : '#00d4ff'}" stroke-width="10" stroke-linecap="round"></line>`).join('')}<circle cx="84" cy="418" r="8" fill="#ff6b9d"></circle><text class="field-svg-label" x="56" y="466">${zh() ? '基频保持在约 140 Hz；氦气主要把共振峰上移，改变音色而非把声带频率乘以 1.74。' : 'The glottal fundamental stays near 140 Hz; helium mainly shifts resonances upward, changing timbre rather than multiplying vocal-fold frequency by 1.74.'}</text>`;
+      const formantXs = state.heliumMode === 'helium' ? [188, 410, 610] : [130, 300, 470];
+      const formantLabels = state.heliumMode === 'helium' ? ['F1 ≈ 850', 'F2 ≈ 2550', 'F3 ≈ 4100'] : ['F1 ≈ 500', 'F2 ≈ 1500', 'F3 ≈ 2500'];
+      visual += `${acousticPanel(306, zh() ? '同一声带源：共振峰移动' : 'same source: formants move')}<line x1="56" y1="438" x2="676" y2="438" class="field-svg-soft"></line>${formantXs.map((x, index) => `<line x1="${x}" y1="438" x2="${x}" y2="${438 - (state.heliumMode === 'helium' ? 58 : 36)}" stroke="${state.heliumMode === 'helium' ? '#ffd166' : '#00d4ff'}" stroke-width="10" stroke-linecap="round"></line><text class="field-svg-label" text-anchor="middle" x="${x}" y="${state.heliumMode === 'helium' ? 370 : 390}">${formantLabels[index]}</text>`).join('')}<circle cx="84" cy="418" r="8" fill="#ff6b9d"></circle><text class="field-svg-label" x="56" y="466">${zh() ? '声带源的基频仍约 140 Hz；吸入氦气主要提高声速、把声道共振峰推高，所以变化主要是音色与亮度。' : 'The vocal-fold source stays near 140 Hz. Inhaled helium mainly raises sound speed and vocal-tract resonances, so the main change is timbre and brightness—not a multiplied pitch.'}</text>`;
     } else if (lab === 'room') {
       const response = roomImpulse(state.room);
       visual += `${acousticPanel(306, zh() ? '密集脉冲响应：早期反射 + 混响尾巴' : 'dense impulse response: early reflections + reverb tail')}<path class="field-svg-secondary" d="${acousticPath(response.map(value => clamp(value / 1.15, 0, 1)), 56, 438, 620, 72)}"></path><line x1="56" y1="438" x2="676" y2="438" class="field-svg-soft"></line><text class="field-svg-label" x="56" y="466">${zh() ? `${ROOM_PROFILES[state.room].label.zh}：尾巴时长约 ${ROOM_PROFILES[state.room].tail.toFixed(1)} s` : `${ROOM_PROFILES[state.room].label.en}: dense tail ≈ ${ROOM_PROFILES[state.room].tail.toFixed(1)} s`}</text>`;
@@ -467,6 +475,7 @@
     const tabs = create('div', 'field-control-group acoustic-lab-tabs');
     tabs.dataset.controlKey = 'lab';
     const controlHost = create('div', 'acoustic-control-host');
+    const componentRack = create('div', 'acoustic-component-rack');
     const audioStatus = create('p', 'acoustic-audio-status', zh() ? '音频尚未播放。浏览器若阻止声音，请先点击一次“听一听”。' : 'Audio is idle. If the browser blocks sound, press Hear it once to unlock it.');
     stage.append(stageHost, audioStatus);
     controls.append(create('h3', null, zh() ? '选择一个声学实验' : 'Choose a sound experiment'), tabs, controlHost);
@@ -487,11 +496,31 @@
     };
     const playRoom = (context, start) => {
       const profile = ROOM_PROFILES[state.room] || ROOM_PROFILES.hall; const end = start + Math.max(1, profile.duration + 0.45);
-      if (context.createBuffer && context.createBufferSource && context.createConvolver) {
-        const impulse = roomImpulse(state.room, Math.max(128, Math.floor(context.sampleRate * profile.duration))); const buffer = context.createBuffer(2, impulse.length, context.sampleRate); for (let channel = 0; channel < 2; channel++) { const data = buffer.getChannelData(channel); impulse.forEach((value, index) => { data[index] = value * (channel ? 0.92 : 1); }); }
-        const convolver = context.createConvolver(); const wet = context.createGain(); convolver.buffer = buffer; audioParam(wet.gain, 'setValueAtTime', state.reverb * profile.wet, start); convolver.connect(wet); wet.connect(context.destination); playNoise(context, 0.22, start, start + 0.08, convolver); activeNodes.push(convolver);
-      } else {
-        [0, 0.06, 0.14, 0.25, 0.42, 0.68, 0.95].forEach((delay, index) => playOscillator(context, 180 + index * 13, 0.2 * state.reverb * Math.exp(-delay / Math.max(0.2, profile.tail)), start + delay, Math.min(end, start + delay + 0.42), 180 + index * 13, 180 + index * 13, 'triangle'));
+      const playFallbackRoom = () => [0, 0.06, 0.14, 0.25, 0.42, 0.68, 0.95].forEach((delay, index) => playOscillator(context, 180 + index * 13, 0.2 * state.reverb * Math.exp(-delay / Math.max(0.2, profile.tail)), start + delay, Math.min(end, start + delay + 0.42), 180 + index * 13, 180 + index * 13, 'triangle'));
+      const canConvolve = typeof context.createBuffer === 'function'
+        && typeof context.createBufferSource === 'function'
+        && typeof context.createConvolver === 'function';
+      if (!canConvolve) {
+        playFallbackRoom();
+        return;
+      }
+      try {
+        const impulse = roomImpulse(state.room, Math.max(128, Math.floor(context.sampleRate * profile.duration)));
+        const impulseBuffer = context.createBuffer(2, impulse.length, context.sampleRate);
+        for (let channel = 0; channel < 2; channel++) {
+          const data = impulseBuffer.getChannelData(channel);
+          impulse.forEach((value, index) => { data[index] = value * (channel ? 0.92 : 1); });
+        }
+        const sourceBuffer = context.createBuffer(1, Math.max(1, Math.floor(context.sampleRate * 0.12)), context.sampleRate);
+        const sourceData = sourceBuffer.getChannelData(0);
+        for (let index = 0; index < sourceData.length; index++) sourceData[index] = (Math.random() * 2 - 1) * Math.exp(-index / Math.max(1, sourceData.length * 0.12));
+        const source = context.createBufferSource(); const dry = context.createGain(); const convolver = context.createConvolver(); const wet = context.createGain();
+        source.buffer = sourceBuffer; convolver.buffer = impulseBuffer; if ('normalize' in convolver) convolver.normalize = true;
+        source.connect(dry); source.connect(convolver); dry.connect(context.destination); convolver.connect(wet); wet.connect(context.destination);
+        audioParam(dry.gain, 'setValueAtTime', 0.18, start); audioParam(wet.gain, 'setValueAtTime', clamp(state.reverb * profile.wet, 0.05, 0.9), start);
+        source.start(start); source.stop(start + 0.12); activeNodes.push(source, convolver);
+      } catch {
+        playFallbackRoom();
       }
     };
     const hear = async kind => {
@@ -501,7 +530,7 @@
       if (kind === 'mixer') playStack(context, acousticComponents(state).map(component => ({ frequency: component.frequency, gain: 0.18 * component.amplitude, type: 'sine' })), start, start + 2.4);
       if (kind === 'fourier') { const count = Math.max(1, Number(state.fourierKeep) || 1); playStack(context, acousticComponents(state).slice(0, count).map(component => ({ frequency: component.frequency, gain: 0.18 * component.amplitude, type: 'sine' })), start, start + 2.4); }
       if (kind === 'medium') { const response = acousticResponse(state.medium, state.mediumFrequency); playStack(context, [1, 2, 3, 4].map(index => ({ frequency: state.mediumFrequency * index, gain: 0.13 * response / Math.pow(index, 0.55), type: index === 1 ? 'sine' : 'triangle' })), start, start + 2.3); }
-      if (kind === 'helium') { const helium = state.heliumMode === 'helium'; playStack(context, Array.from({ length: 8 }, (_, index) => ({ frequency: 140 * (index + 1), gain: 0.11 * heliumVoiceWeight(140 * (index + 1), 140, helium) / Math.pow(index + 1, 0.35), type: index % 2 ? 'triangle' : 'sine' })), start, start + 2.5); }
+      if (kind === 'helium') { const helium = state.heliumMode === 'helium'; playStack(context, Array.from({ length: 12 }, (_, index) => ({ frequency: 140 * (index + 1), gain: 0.2 * heliumVoiceWeight(140 * (index + 1), 140, helium), type: index % 3 === 0 ? 'sawtooth' : 'sine' })), start, start + 2.5); }
       if (kind === 'room') playRoom(context, start);
       if (kind === 'instrument') {
         const base = state.instrument === 'pipe' ? 196 : state.instrument === 'drum' ? 130 : 110;
@@ -509,8 +538,31 @@
         else if (state.instrument === 'pipe') playStack(context, [1, 2, 3, 4].map(index => ({ frequency: base * index, gain: (index % 2 ? 0.19 : 0.06) / index, type: 'sawtooth', attack: 0.18, release: 0.25 })), start, start + 2.5);
         else { playNoise(context, 0.2, start, start + 0.12); playStack(context, [1, 1.47, 2.11, 2.76].map((ratio, index) => ({ frequency: base * ratio, gain: 0.2 / (index + 1), type: 'square', startFrequency: base * ratio * 1.18, endFrequency: base * ratio, attack: 0.005, release: 0.42 })), start, start + 0.95); }
       }
-      if (kind === 'doppler') { const duration = 5.2; const shift = clamp(Number(state.dopplerSpeed), -0.85, 0.85); const sign = shift >= 0 ? 1 : -1; const high = state.dopplerBase * (1 + Math.abs(shift) * 0.82); const low = state.dopplerBase * (1 - Math.abs(shift) * 0.45); playOscillator(context, state.dopplerBase, 0.2, start, start + 1.75, sign > 0 ? low : high, sign > 0 ? high : low, 'sine', context.destination, 0.22, 0.22); playOscillator(context, state.dopplerBase, 0.2, start + 1.68, start + 3.52, high, high, 'sine', context.destination, 0.12, 0.12); playOscillator(context, state.dopplerBase, 0.2, start + 3.45, start + duration, sign > 0 ? high : low, sign > 0 ? low : high, 'sine', context.destination, 0.12, 0.35); }
-      if (kind === 'shock') { const mode = state.shockMode || 'cone'; const boomStart = start + 0.42; playNoise(context, mode === 'boom' ? 0.38 : 0.2, boomStart, boomStart + 0.22); playOscillator(context, 72, mode === 'boom' ? 0.3 : 0.18, boomStart, boomStart + 0.62, 150, 55, 'sawtooth', context.destination, 0.01, 0.35); playOscillator(context, 180, 0.12, boomStart, boomStart + 0.18, 480, 120, 'triangle', context.destination, 0.005, 0.1); }
+      if (kind === 'doppler') {
+        const duration = 5.2; const shift = clamp(Number(state.dopplerSpeed), -0.85, 0.85); const sign = shift >= 0 ? 1 : -1;
+        const high = state.dopplerBase * (1 + Math.abs(shift) * 0.82); const low = state.dopplerBase * (1 - Math.abs(shift) * 0.45);
+        const oscillator = context.createOscillator(); const gain = context.createGain(); const approachEnd = start + 1.8; const retreatStart = start + 3.4;
+        oscillator.type = 'sine'; oscillator.connect(gain); gain.connect(context.destination);
+        audioParam(oscillator.frequency, 'setValueAtTime', sign > 0 ? low : high, start); audioParam(oscillator.frequency, 'exponentialRampToValueAtTime', sign > 0 ? high : low, approachEnd); audioParam(oscillator.frequency, 'setValueAtTime', sign > 0 ? high : low, retreatStart); audioParam(oscillator.frequency, 'exponentialRampToValueAtTime', sign > 0 ? low : high, start + duration);
+        audioParam(gain.gain, 'setValueAtTime', 0.0001, start); audioParam(gain.gain, 'exponentialRampToValueAtTime', 0.2, start + 0.18); audioParam(gain.gain, 'setValueAtTime', 0.2, start + duration - 0.25); audioParam(gain.gain, 'exponentialRampToValueAtTime', 0.0001, start + duration);
+        oscillator.start(start); oscillator.stop(start + duration); activeNodes.push(oscillator);
+      }
+      if (kind === 'shock') {
+        const mode = state.shockMode || 'cone';
+        if (mode === 'cone') {
+          [0, 0.34, 0.68, 1.02, 1.36].forEach((delay, index) => playOscillator(context, 240, 0.13, start + delay, start + delay + 0.16, 240, 240, 'sine', context.destination, 0.01, 0.06));
+          playNoise(context, 0.08, start, start + 1.55);
+        } else if (mode === 'barrier') {
+          playOscillator(context, 210, 0.22, start, start + 1.8, 210, 980, 'sawtooth', context.destination, 0.04, 0.2);
+          playNoise(context, 0.26, start + 1.72, start + 2.04);
+          playOscillator(context, 90, 0.12, start + 1.72, start + 2.35, 150, 70, 'triangle', context.destination, 0.01, 0.35);
+        } else {
+          const boomStart = start + 0.55;
+          playNoise(context, 0.42, boomStart, boomStart + 0.09);
+          playNoise(context, 0.28, boomStart + 0.075, boomStart + 0.23);
+          playOscillator(context, 72, 0.3, boomStart, boomStart + 0.72, 140, 48, 'sawtooth', context.destination, 0.01, 0.42);
+        }
+      }
       if (kind === 'noise') { const attenuation = state.noiseTreatment === 'none' ? 1 : state.noiseTreatment === 'absorb' ? 0.42 : state.noiseTreatment === 'barrier' ? 0.58 : 0.5; playNoise(context, 0.28 * attenuation, start, start + 1.4); playStack(context, [{ frequency: 180, gain: 0.12 * attenuation, type: 'sawtooth' }, { frequency: 760, gain: 0.09 * attenuation, type: 'square' }, { frequency: 2200, gain: 0.06 * attenuation, type: 'triangle' }], start, start + 1.4); }
       audioStatus.textContent = zh() ? '正在播放：改变参数后再次点击即可听见新的结果。' : 'Playing: change a parameter and press Hear it again to compare.';
     };
@@ -519,23 +571,28 @@
     const toggle = definition => toggleControl(definition, state, render);
     const renderControls = () => {
       tabs.innerHTML = ''; for (const [key, en, zhLabel] of ACOUSTIC_LABS) { const tab = button(zh() ? zhLabel : en, () => { stopAudio(); state.lab = key; render(); }, 'acoustic-lab-tab'); tab.dataset.controlValue = key; tab.setAttribute('aria-pressed', String(state.lab === key)); tabs.append(tab); }
-      controlHost.innerHTML = ''; const add = (...nodes) => controlHost.append(...nodes);
+      controlHost.innerHTML = ''; componentRack.innerHTML = '';
+      const add = (...nodes) => controlHost.append(...nodes);
       if (state.lab === 'tone') add(range({ type: 'range', key: 'toneFrequency', min: 80, max: 1000, step: 1, value: state.toneFrequency, label: t('Frequency', '频率'), formatter: value => `${Math.round(value)} Hz` }), range({ type: 'range', key: 'toneLoudness', min: 0.05, max: 0.35, step: 0.01, value: state.toneLoudness, label: t('Loudness', '响度'), formatter: value => value.toFixed(2) }), range({ type: 'range', key: 'tonePhase', min: 0, max: 360, step: 1, value: state.tonePhase, label: t('Phase (visible in the waveform)', '相位（在波形中可见）'), formatter: value => `${Math.round(value)}°` }), button(zh() ? '听一听纯音' : 'Hear the sine tone', () => hear('tone')));
-      if (state.lab === 'mixer' || state.lab === 'fourier') for (const index of [1, 2, 3]) add(create('div', 'acoustic-component-label', `${zh() ? '成分' : 'component'} ${index}`), range({ type: 'range', key: `mixFrequency${index}`, min: 80, max: 1200, step: 1, value: state[`mixFrequency${index}`], label: t('Frequency', '频率'), formatter: value => `${Math.round(value)} Hz` }), range({ type: 'range', key: `mixAmplitude${index}`, min: 0, max: 1, step: 0.01, value: state[`mixAmplitude${index}`], label: t('Amplitude', '振幅'), formatter: value => value.toFixed(2) }), range({ type: 'range', key: `mixPhase${index}`, min: 0, max: 360, step: 1, value: state[`mixPhase${index}`], label: t('Phase', '相位'), formatter: value => `${Math.round(value)}°` }));
-      if (state.lab === 'mixer') add(button(zh() ? '听一听混合波' : 'Hear the mixture', () => hear('mixer')), create('p', 'acoustic-mini-note', zh() ? '频谱：每根柱子代表一个正弦成分。' : 'spectrum: each bar is one sinusoidal component. Mixer is forward synthesis: choose ingredients, then hear their sum.'));
+      if (state.lab === 'mixer' || state.lab === 'fourier') for (const index of [1, 2, 3]) {
+        const component = create('div', 'acoustic-component');
+        component.append(create('div', 'acoustic-component-label', `${zh() ? '成分' : 'component'} ${index}`), range({ type: 'range', key: `mixFrequency${index}`, min: 80, max: 1200, step: 1, value: state[`mixFrequency${index}`], label: t('Frequency', '频率'), formatter: value => `${Math.round(value)} Hz` }), range({ type: 'range', key: `mixAmplitude${index}`, min: 0, max: 1, step: 0.01, value: state[`mixAmplitude${index}`], label: t('Amplitude', '振幅'), formatter: value => value.toFixed(2) }), range({ type: 'range', key: `mixPhase${index}`, min: 0, max: 360, step: 1, value: state[`mixPhase${index}`], label: t('Phase', '相位'), formatter: value => `${Math.round(value)}°` }));
+        componentRack.append(component);
+      }
+      if (state.lab === 'mixer') add(button(zh() ? '听一听混合波' : 'Hear the mixture', () => hear('mixer')), create('p', 'acoustic-mini-note', zh() ? '频谱：每根柱子代表一个正弦成分。谐波混合是正向合成：先选成分，再听总和。' : 'spectrum: each bar is one sinusoidal component. Mixer is forward synthesis: choose ingredients, then hear their sum.'));
       if (state.lab === 'fourier') add(range({ type: 'range', key: 'fourierKeep', min: 1, max: 3, step: 1, value: state.fourierKeep, label: t('Components retained in reconstruction', '重建保留的成分数'), formatter: value => format(value, 0) }), button(zh() ? '听一听重建' : 'Hear the reconstruction', () => hear('fourier')), create('p', 'acoustic-mini-note', zh() ? '频谱：每根柱子代表一个正弦成分。傅里叶透镜先分析，再只保留选中的峰重建波形。' : 'spectrum: each bar is one sinusoidal component. Fourier lens analyzes first, then reconstructs with only the selected peaks.'));
       if (state.lab === 'medium') add(toggle({ type: 'toggle', key: 'medium', value: state.medium, label: t('Medium', '介质'), options: [['air', 'Air', '空气'], ['water', 'Water', '水'], ['steel', 'Solid / steel', '固体 / 钢']].map(([value, en, zhLabel]) => ({ value, label: t(en, zhLabel) })) }), range({ type: 'range', key: 'mediumFrequency', min: 80, max: 4000, step: 1, value: state.mediumFrequency, label: t('Test frequency', '测试频率'), formatter: value => `${Math.round(value)} Hz` }), button(zh() ? '听一听介质后的声音' : 'Hear through this medium', () => hear('medium')), create('p', 'acoustic-mini-note', zh() ? '空气、水和钢的响应曲线不同；这里展示“传播会筛选频率”。' : 'Air, water, and steel have different response curves: propagation filters the spectrum.'));
-      if (state.lab === 'helium') add(toggle({ type: 'toggle', key: 'heliumMode', value: state.heliumMode, label: t('Vocal tract', '声道'), options: [['normal', 'Normal air', '普通空气'], ['helium', 'Helium', '氦气']].map(([value, en, zhLabel]) => ({ value, label: t(en, zhLabel) })) }), button(zh() ? '听一听声道变化' : 'Hear the vocal-tract change', () => hear('helium')), create('p', 'acoustic-mini-note', zh() ? '物理要点：氦气主要提高声速，把声道共振峰推高；声带基频由张力、长度和质量决定，不会简单乘以 1.74。' : 'Physics note: helium mainly raises sound speed and vocal-tract resonances. Vocal-fold pitch is set by tension, length, and mass; it is not simply multiplied by 1.74.'));
+      if (state.lab === 'helium') add(toggle({ type: 'toggle', key: 'heliumMode', value: state.heliumMode, label: t('Vocal tract', '声道'), options: [['normal', 'Normal air', '普通空气'], ['helium', 'Helium', '氦气']].map(([value, en, zhLabel]) => ({ value, label: t(en, zhLabel) })) }), button(zh() ? '听一听声道变化' : 'Hear the vocal-tract change', () => hear('helium')), create('p', 'acoustic-mini-note', zh() ? '研究证据：氦气让声速和声道共振峰上移，但声带基频由张力、长度和面密度决定；这里保持约 140 Hz，只改变声道滤波器。参考 Koda 等，JASA 2015。' : 'Evidence-based model: helium raises sound speed and vocal-tract formants, while vocal-fold f0 is set mainly by tension, length, and mass per area. This demo holds f0 near 140 Hz and changes only the vocal-tract filter (Koda et al., JASA 2015).'));
       if (state.lab === 'room') add(toggle({ type: 'toggle', key: 'room', value: state.room, label: t('Room', '房间'), options: [['dry', 'Dry room', '干燥房间'], ['bedroom', 'Bedroom', '卧室'], ['hall', 'Concert hall', '音乐厅'], ['cathedral', 'Cathedral', '大教堂']].map(([value, en, zhLabel]) => ({ value, label: t(en, zhLabel) })) }), range({ type: 'range', key: 'reverb', min: 0.1, max: 1, step: 0.05, value: state.reverb, label: t('Reverb strength', '混响强度'), formatter: value => value.toFixed(2) }), button(zh() ? '听一声真实混响' : 'Hear convolution reverb', () => hear('room')), create('p', 'acoustic-mini-note', zh() ? '脉冲响应包含早期反射和密集尾巴；浏览器支持时使用 ConvolverNode。' : 'The impulse response contains early reflections and a dense tail; ConvolverNode is used when the browser supports it.'));
       if (state.lab === 'instrument') add(toggle({ type: 'toggle', key: 'instrument', value: state.instrument, label: t('Instrument family', '乐器家族'), options: [['string', 'String', '弦'], ['pipe', 'Pipe', '管'], ['drum', 'Percussion', '打击']].map(([value, en, zhLabel]) => ({ value, label: t(en, zhLabel) })) }), range({ type: 'range', key: 'instrumentMode', min: 1, max: 6, step: 1, value: state.instrumentMode, label: t('Mode / partial count', '模态 / 泛音数'), formatter: value => format(value, 0) }), range({ type: 'range', key: 'damping', min: 0, max: 1, step: 0.05, value: state.damping, label: t('Damping', '阻尼'), formatter: value => value.toFixed(2) }), button(zh() ? '听一听乐器音色' : 'Hear the instrument', () => hear('instrument')));
       if (state.lab === 'doppler') add(range({ type: 'range', key: 'dopplerBase', min: 120, max: 800, step: 1, value: state.dopplerBase, label: t('Source frequency', '声源频率'), formatter: value => `${Math.round(value)} Hz` }), range({ type: 'range', key: 'dopplerSpeed', min: -0.85, max: 0.85, step: 0.01, value: state.dopplerSpeed, label: t('Relative speed (− receding, + approaching)', '相对速度（−远离，+接近）'), formatter: value => value.toFixed(2) }), button(zh() ? '听完整多普勒过程' : 'Hear approach → pass → retreat', () => hear('doppler')));
-      if (state.lab === 'shock') add(toggle({ type: 'toggle', key: 'shockMode', value: state.shockMode, label: t('Demonstration', '演示'), options: [['cone', 'Mach cone', '马赫锥'], ['barrier', 'Crossing the barrier', '穿越音障'], ['boom', 'Sonic boom', '音爆']].map(([value, en, zhLabel]) => ({ value, label: t(en, zhLabel) })) }), range({ type: 'range', key: 'shockMach', min: 0.4, max: 2, step: 0.01, value: state.shockMach, label: t('Mach number', '马赫数'), formatter: value => `M ${value.toFixed(2)}` }), button(zh() ? '听一听音爆脉冲' : 'Hear the shock pulse', () => hear('shock')), create('p', 'acoustic-mini-note', zh() ? '马赫锥、音障和音爆是不同但相连的现象；用三个模式分别观察几何、跨越和压强波形。' : 'Mach cone, sound barrier, and sonic boom are related but distinct: compare geometry, crossing, and the pressure signature.'));
+      if (state.lab === 'shock') add(toggle({ type: 'toggle', key: 'shockMode', value: state.shockMode, label: t('Demonstration', '演示'), options: [['cone', 'Mach cone', '马赫锥'], ['barrier', 'Crossing the barrier', '穿越音障'], ['boom', 'Sonic boom', '音爆']].map(([value, en, zhLabel]) => ({ value, label: t(en, zhLabel) })) }), range({ type: 'range', key: 'shockMach', min: 0.4, max: 2, step: 0.01, value: state.shockMach, label: t('Mach number', '马赫数'), formatter: value => `M ${value.toFixed(2)}` }), button(zh() ? '听一听当前激波演示' : 'Hear this shock demonstration', () => hear('shock')), create('p', 'acoustic-mini-note', zh() ? '马赫锥是重复的波前几何声；穿越音障是持续升高、在 M≈1 处出现压缩瞬态；音爆是短促的双脉冲 N 形压强波。' : 'Listen for three different signatures: the Mach cone is a repeating wavefront pulse, barrier crossing is a rising sweep with a sharp M≈1 transient, and a sonic boom is a short double-impulse N-wave.'));
       if (state.lab === 'noise') add(toggle({ type: 'toggle', key: 'noiseTreatment', value: state.noiseTreatment, label: t('Treatment', '处理方式'), options: [['none', 'No treatment', '无处理'], ['absorb', 'Absorption', '吸声'], ['barrier', 'Barrier / mass', '屏障 / 质量'], ['isolate', 'Decoupling', '隔振 / 解耦']].map(([value, en, zhLabel]) => ({ value, label: t(en, zhLabel) })) }), button(zh() ? '听一听降噪效果' : 'Hear the noise-control effect', () => hear('noise')), create('p', 'acoustic-mini-note', zh() ? '降噪策略：控制声源、吸收能量、增加屏障质量、用空气层与隔振减少结构传递。' : 'Noise strategies: control the source, absorb energy, add barrier mass, and decouple structures with air gaps and isolation.'));
     };
     const render = () => { visual.normalizeState?.(state); visualStateCache.set(fieldId, { ...state }); stageHost.innerHTML = acousticSvg(state); renderControls(); };
     const note = create('p', 'field-visual-note', pick(visual.limitations)); const reduced = create('p', 'field-visual-note', pick(visual.reducedMotion)); const status = create('p', 'field-visual-note', zh() ? '选择一个实验开始；每个标签只显示自己的控制器。' : 'Choose a lab to begin; each tab reveals only its own controls.');
-    layout.append(stage, controls); card.append(copy, layout, note, reduced, status); if (visual.sources?.length) { const sourceBlock = create('div', 'field-visual-sources'); sourceBlock.append(create('h3', null, zh() ? '支撑这一图示的资料' : 'Sources behind this visual'), sourceList(visual.sources, 'field-visual-sources')); card.append(sourceBlock); } host.append(card); render();
-  }
+    layout.append(stage, controls, componentRack); card.append(copy, layout, note, reduced, status); if (visual.sources?.length) {
+ const sourceBlock = create('div', 'field-visual-sources'); sourceBlock.append(create('h3', null, zh() ? '支撑这一图示的资料' : 'Sources behind this visual'), sourceList(visual.sources, 'field-visual-sources')); card.append(sourceBlock); } host.append(card); render();  }
 
   function thermodynamics(state) {
     const hot = state.hot;
@@ -1415,7 +1472,7 @@
           { key: 'dopplerBase', value: 330 }, { key: 'dopplerSpeed', value: 0.45 }, { key: 'shockMach', value: 1.2 }, { key: 'shockMode', value: 'cone' },
           { key: 'fourierKeep', value: 2 }, { key: 'noiseTreatment', value: 'none' }
         ],
-        sources: ['noaa-sound', 'nih-hear', 'unsw-pipes']
+        sources: ['noaa-sound', 'nih-hear', 'unsw-pipes', 'koda-helium']
       },
       experiment: experimentCard('observation', 'Resonance in strings, pipes, and cavities made sound visibly measurable.', '弦、管和腔体中的共振让声音第一次变得“看得见、量得着”。', 'By sweeping frequency and watching which patterns grow, experimenters could map nodes, antinodes, and resonant peaks. That turned pitch and timbre into geometry plus boundary conditions.', '通过扫描频率并观察哪些图样被放大，实验者能够描出节点、腹部和共振峰，从而把音高与音色化成几何与边界条件的问题。', 'The displayed mode shapes are idealized; real resonators broaden and shift because of damping and coupling to their surroundings.', '图中的模态形状经过理想化处理；真实共振器会因阻尼和环境耦合而展宽、偏移。', ['unsw-pipes']),
       mechanism: {
