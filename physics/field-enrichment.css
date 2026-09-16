@@ -350,6 +350,109 @@ html[data-motion="paused"] .field-visual-stage * {
   transition: none !important;
 }
 
+.acoustic-lab-layout {
+  grid-template-columns: minmax(0, 1.75fr) minmax(290px, 0.95fr);
+}
+
+.acoustic-lab-stage {
+  min-width: 0;
+  padding: 0.55rem;
+}
+
+.acoustic-stage-svg {
+  min-width: 0;
+}
+
+.acoustic-stage-svg svg {
+  min-height: 360px;
+}
+
+.acoustic-lab-controls {
+  align-content: start;
+  max-height: 620px;
+  overflow: auto;
+  scrollbar-color: color-mix(in srgb, var(--topic, #7c5cff) 55%, transparent) transparent;
+}
+
+.acoustic-lab-tabs {
+  display: grid;
+  gap: 0.4rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.acoustic-lab-tab,
+.acoustic-action,
+.acoustic-secondary-action {
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 0.7rem;
+  padding: 0.58rem 0.65rem;
+  color: #eef2ff;
+  background: rgba(255, 255, 255, 0.045);
+  cursor: pointer;
+  font: inherit;
+  line-height: 1.25;
+}
+
+.acoustic-lab-tab {
+  text-align: left;
+  min-height: 2.55rem;
+}
+
+.acoustic-lab-tab[aria-pressed="true"],
+.acoustic-action {
+  border-color: color-mix(in srgb, var(--topic, #7c5cff) 65%, white);
+  background: color-mix(in srgb, var(--topic, #7c5cff) 22%, rgba(255, 255, 255, 0.06));
+}
+
+.acoustic-secondary-action {
+  border-color: rgba(255, 209, 102, 0.45);
+  color: #ffd166;
+}
+
+.acoustic-lab-tab:hover,
+.acoustic-lab-tab:focus-visible,
+.acoustic-action:hover,
+.acoustic-action:focus-visible,
+.acoustic-secondary-action:hover,
+.acoustic-secondary-action:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--topic, #7c5cff) 60%, white);
+  outline-offset: 2px;
+}
+
+.acoustic-control-host {
+  display: grid;
+  gap: 0.7rem;
+  padding-top: 0.2rem;
+}
+
+.acoustic-control-host .field-control-group {
+  padding-top: 0.25rem;
+}
+
+.acoustic-component-label {
+  margin-top: 0.3rem;
+  padding-top: 0.55rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  color: #ffd166;
+  font: 700 0.78rem "JetBrains Mono", ui-monospace, monospace;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.acoustic-mini-note,
+.acoustic-audio-status {
+  margin: 0;
+  color: rgba(232, 236, 255, 0.76);
+  font-size: 0.84rem;
+  line-height: 1.5;
+}
+
+.acoustic-audio-status {
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 0.7rem 0.25rem 0.1rem;
+  color: #9fe8ff;
+}
+
 @media (max-width: 900px) {
   .field-visual-layout {
     grid-template-columns: 1fr;
