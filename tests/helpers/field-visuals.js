@@ -12,8 +12,9 @@ export const fieldVisualScenarios = {
     { state: { reynolds: 3200 }, expect: 'wake-dominated; real transition still depends on geometry and disturbance' }
   ],
   acoustics: [
-    { state: { boundary: 'open-open', mode: 4 }, expect: 'open-open pipe: integer harmonics' },
-    { state: { boundary: 'open-closed', mode: 4 }, expect: 'open-closed pipe: odd modes only' }
+    { state: { lab: 'tone' }, expect: 'pressure waveform' },
+    { state: { lab: 'doppler' }, expect: 'compresses wavefronts' },
+    { state: { lab: 'shock' }, expect: 'Mach cone' }
   ],
   thermodynamics: [
     { state: { hot: 350, cold: 420 }, expect: 'T_h = 350 K, T_c = 345 K', expectedState: { hot: 350, cold: 345 } },

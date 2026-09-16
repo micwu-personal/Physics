@@ -149,7 +149,7 @@ const auditedFieldSourceMappings = [
   { fieldId: 'fluids', part: 'visual', sources: ['nasa-sphere-drag'] },
   { fieldId: 'fluids', part: 'experiment', sources: ['reynolds-1883'] },
   { fieldId: 'fluids', part: 'claims', index: 0, sources: ['nasa-sphere-drag', 'reynolds-1883'] },
-  { fieldId: 'acoustics', part: 'visual', sources: ['unsw-pipes'] },
+  { fieldId: 'acoustics', part: 'visual', sources: ['noaa-sound', 'nih-hear', 'unsw-pipes'] },
   { fieldId: 'acoustics', part: 'experiment', sources: ['unsw-pipes'] },
   { fieldId: 'acoustics', part: 'claims', index: 0, sources: ['unsw-pipes'] },
   { fieldId: 'thermodynamics', part: 'visual', sources: ['utexas-heat-engines', 'nist-boltzmann'] },
@@ -381,6 +381,31 @@ test('Shared field guide visuals preserve control state across language rerender
     await expect(page.locator('#fieldVisualHost .field-visual-card')).toBeVisible();
     expect(await readFieldVisualState(page)).toEqual(before);
   }
+});
+
+test('Acoustics studio isolates tab controls and emits audible experiment cues', async ({ page }) => {
+  await installAudioProbe(page);
+  await preparePage(page, '/physics/field.html?id=acoustics', 'en');
+  await expect(page.locator('#fieldVisualHost')).toContainText('pressure waveform');
+  await expect(page.locator('#fieldVisualHost input[data-control-key="toneFrequency"]')).toBeVisible();
+  await expect(page.locator('#fieldVisualHost input[data-control-key="mixFrequency1"]')).toHaveCount(0);
+
+  await page.locator('[data-control-value="shock"]').click();
+  await expect(page.locator('#fieldVisualHost input[data-control-key="shockMach"]')).toBeVisible();
+  await expect(page.locator('#fieldVisualHost input[data-control-key="toneFrequency"]')).toHaveCount(0);
+  await page.getByRole('button', { name: 'Hear the shock pulse' }).click();
+  await page.waitForTimeout(50);
+  const shockEvents = await page.evaluate(() => window.__audioEvents);
+  expect(shockEvents.some(event => event.kind === 'oscillator-start')).toBe(true);
+  expect(shockEvents.some(event => event.kind === 'resume-end')).toBe(true);
+
+  await page.locator('[data-control-value="fourier"]').click();
+  await expect(page.locator('#fieldVisualHost')).toContainText('spectrum: each bar is one sinusoidal component');
+  await expect(page.locator('#fieldVisualHost input[data-control-key="shockMach"]')).toHaveCount(0);
+  await expect(page.locator('#fieldVisualHost input[data-control-key="mixFrequency1"]')).toBeVisible();
+  await page.locator('[data-lang="zh-CN"]').click();
+  await expect(page.locator('#fieldVisualHost .field-visual-card')).toBeVisible();
+  await expect(page.locator('#fieldVisualHost input[data-control-key="mixFrequency1"]')).toBeVisible();
 });
 
 test('Thermodynamics visual clamps crossing reservoir values and preserves the normalized state across language rerenders', async ({ page }) => {
