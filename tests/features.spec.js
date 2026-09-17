@@ -149,7 +149,7 @@ const auditedFieldSourceMappings = [
   { fieldId: 'fluids', part: 'visual', sources: ['nasa-sphere-drag'] },
   { fieldId: 'fluids', part: 'experiment', sources: ['reynolds-1883'] },
   { fieldId: 'fluids', part: 'claims', index: 0, sources: ['nasa-sphere-drag', 'reynolds-1883'] },
-  { fieldId: 'acoustics', part: 'visual', sources: ['noaa-sound', 'nih-hear', 'unsw-pipes'] },
+  { fieldId: 'acoustics', part: 'visual', sources: ['noaa-sound', 'nih-hear', 'unsw-pipes', 'koda-helium'] },
   { fieldId: 'acoustics', part: 'experiment', sources: ['unsw-pipes'] },
   { fieldId: 'acoustics', part: 'claims', index: 0, sources: ['unsw-pipes'] },
   { fieldId: 'thermodynamics', part: 'visual', sources: ['utexas-heat-engines', 'nist-boltzmann'] },
@@ -415,6 +415,62 @@ test('Acoustics studio isolates tab controls and emits audible experiment cues',
   await page.locator('[data-lang="zh-CN"]').click();
   await expect(page.locator('#fieldVisualHost .field-visual-card')).toBeVisible();
   await expect(page.locator('#fieldVisualHost .field-control-group[data-control-key="room"]')).toBeVisible();
+});
+
+test('Acoustics media, instruments, Doppler, and Mach controls stay coupled to visuals and audio', async ({ page }) => {
+  await installAudioProbe(page);
+  await preparePage(page, '/physics/field.html?id=acoustics', 'en');
+
+  await page.locator('[data-control-value="medium"]').click();
+  await expect(page.locator('#fieldVisualHost [data-wave-legend="input"]')).toHaveCount(1);
+  await expect(page.locator('#fieldVisualHost [data-wave-legend="output"]')).toHaveCount(1);
+  const markerBefore = await page.locator('#fieldVisualHost [data-medium-frequency-marker]').getAttribute('x1');
+  await page.locator('#fieldVisualHost input[data-control-key="mediumFrequency"]').evaluate(input => {
+    input.value = '3200';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+  });
+  const markerAfter = await page.locator('#fieldVisualHost [data-medium-frequency-marker]').getAttribute('x1');
+  expect(markerAfter).not.toBe(markerBefore);
+  await page.locator('#fieldVisualHost [data-control-value="wideband"]').click();
+  await expect(page.locator('#fieldVisualHost [data-spectrum-frequency]')).toHaveCount(6);
+
+  await page.locator('[data-control-value="instrument"]').click();
+  await page.locator('#fieldVisualHost input[data-control-key="instrumentMode"]').evaluate(input => {
+    input.value = '1';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+  });
+  await expect(page.locator('#fieldVisualHost [data-spectrum-frequency]')).toHaveCount(1);
+  await page.locator('#fieldVisualHost input[data-control-key="instrumentMode"]').evaluate(input => {
+    input.value = '6';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+  });
+  await expect(page.locator('#fieldVisualHost [data-spectrum-frequency]')).toHaveCount(6);
+
+  await page.locator('[data-control-value="doppler"]').click();
+  const sourceBefore = await page.locator('#fieldVisualHost [data-doppler-source]').getAttribute('cx');
+  await page.getByRole('button', { name: 'Hear approach → pass → retreat' }).click();
+  await page.waitForTimeout(120);
+  const sourceDuring = await page.locator('#fieldVisualHost [data-doppler-source]').getAttribute('cx');
+  expect(Number(sourceDuring)).toBeGreaterThan(Number(sourceBefore));
+
+  await page.locator('[data-control-value="shock"]').click();
+  await page.locator('#fieldVisualHost input[data-control-key="shockMach"]').evaluate(input => {
+    input.value = '0.4';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+  });
+  await page.evaluate(() => { window.__audioEvents = []; });
+  await page.getByRole('button', { name: 'Hear this shock demonstration' }).click();
+  await page.waitForTimeout(50);
+  const lowMachFrequency = await page.evaluate(() => window.__audioEvents.filter(event => event.kind === 'frequency' && event.operation === 'set').map(event => event.value));
+  await page.locator('#fieldVisualHost input[data-control-key="shockMach"]').evaluate(input => {
+    input.value = '2';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+  });
+  await page.evaluate(() => { window.__audioEvents = []; });
+  await page.getByRole('button', { name: 'Hear this shock demonstration' }).click();
+  await page.waitForTimeout(50);
+  const highMachFrequency = await page.evaluate(() => window.__audioEvents.filter(event => event.kind === 'frequency' && event.operation === 'set').map(event => event.value));
+  expect(highMachFrequency).not.toEqual(lowMachFrequency);
 });
 
 test('Thermodynamics visual clamps crossing reservoir values and preserves the normalized state across language rerenders', async ({ page }) => {
