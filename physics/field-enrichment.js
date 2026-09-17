@@ -560,7 +560,10 @@
     };
     const startDopplerAnimation = duration => {
       cancelAnimation();
-      if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches || document.documentElement.dataset.motion === 'paused') return;
+      if (document.documentElement.dataset.motion === 'paused') {
+        audioStatus.textContent = zh() ? '音频正在播放；动画已暂停。点击页面顶部“播放动画”即可显示声源运动。' : 'Audio is playing; motion is paused. Press “Play motion” at the top of the page to show the source moving.';
+        return;
+      }
       const token = animationToken;
       const started = performance.now();
       const tick = now => {
@@ -638,7 +641,10 @@
         oscillator.type = 'sine'; oscillator.connect(gain); gain.connect(context.destination);
         audioParam(oscillator.frequency, 'setValueAtTime', sign > 0 ? low : high, start); audioParam(oscillator.frequency, 'exponentialRampToValueAtTime', sign > 0 ? high : low, approachEnd); audioParam(oscillator.frequency, 'setValueAtTime', sign > 0 ? high : low, passAt); audioParam(oscillator.frequency, 'exponentialRampToValueAtTime', sign > 0 ? low : high, start + duration);
         audioParam(gain.gain, 'setValueAtTime', 0.0001, start); audioParam(gain.gain, 'exponentialRampToValueAtTime', 0.2, start + 0.18); audioParam(gain.gain, 'setValueAtTime', 0.2, start + duration - 0.25); audioParam(gain.gain, 'exponentialRampToValueAtTime', 0.0001, start + duration);
-        oscillator.start(start); oscillator.stop(start + duration); activeNodes.push(oscillator); startDopplerAnimation(duration);
+        oscillator.start(start); oscillator.stop(start + duration); activeNodes.push(oscillator);
+        // Hearing an experiment is an explicit request to see its motion too.
+        window.PhysicsUI?.requestMotion?.();
+        startDopplerAnimation(duration);
       }
       if (kind === 'shock') {
         const mode = state.shockMode || 'cone';

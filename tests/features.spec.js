@@ -453,6 +453,17 @@ test('Acoustics media, instruments, Doppler, and Mach controls stay coupled to v
   const sourceDuring = await page.locator('#fieldVisualHost [data-doppler-source]').getAttribute('cx');
   expect(Number(sourceDuring)).toBeGreaterThan(Number(sourceBefore));
 
+  // Starting the named experiment also resumes motion after a persisted pause.
+  await page.evaluate(() => localStorage.setItem('physics.motion', 'pause'));
+  await page.reload();
+  await page.locator('[data-control-value="doppler"]').click();
+  const pausedSourceBefore = await page.locator('#fieldVisualHost [data-doppler-source]').getAttribute('cx');
+  await page.getByRole('button', { name: 'Hear approach → pass → retreat' }).click();
+  await page.waitForTimeout(120);
+  const pausedSourceDuring = await page.locator('#fieldVisualHost [data-doppler-source]').getAttribute('cx');
+  expect(await page.locator('html').getAttribute('data-motion')).toBe('playing');
+  expect(Number(pausedSourceDuring)).toBeGreaterThan(Number(pausedSourceBefore));
+
   await page.locator('[data-control-value="shock"]').click();
   await page.locator('#fieldVisualHost input[data-control-key="shockMach"]').evaluate(input => {
     input.value = '0.4';
