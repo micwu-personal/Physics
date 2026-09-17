@@ -367,6 +367,40 @@
     })).filter(component => component.amplitude > 0.01);
   }
 
+  function mediumComponents(state) {
+    if (state.mediumSource !== 'wideband') return [{ frequency: Number(state.mediumFrequency), amplitude: 1, phase: 0 }];
+    return [
+      { frequency: 120, amplitude: 0.92, phase: 0 },
+      { frequency: 240, amplitude: 0.68, phase: 18 },
+      { frequency: 480, amplitude: 0.48, phase: 42 },
+      { frequency: 960, amplitude: 0.34, phase: 70 },
+      { frequency: 1920, amplitude: 0.23, phase: 105 },
+      { frequency: 3840, amplitude: 0.14, phase: 140 }
+    ];
+  }
+
+  function instrumentPartials(state) {
+    const count = clamp(Math.round(Number(state.instrumentMode) || 1), 1, 6);
+    const families = {
+      string: { base: 110, ratios: [1, 2, 3, 4, 5, 6], amplitudes: [1, 0.52, 0.32, 0.22, 0.16, 0.12], type: 'triangle' },
+      pipe: { base: 196, ratios: [1, 3, 5, 7, 9, 11], amplitudes: [1, 0.42, 0.25, 0.16, 0.11, 0.08], type: 'sawtooth' },
+      drum: { base: 130, ratios: [1, 1.46, 2.02, 2.71, 3.58, 4.81], amplitudes: [1, 0.62, 0.42, 0.3, 0.21, 0.15], type: 'square' }
+    };
+    const family = families[state.instrument] || families.string;
+    return family.ratios.slice(0, count).map((ratio, index) => ({
+      ratio,
+      frequency: family.base * ratio,
+      amplitude: family.amplitudes[index],
+      type: family.type
+    }));
+  }
+
+  function instrumentSample(partials, time, damping = 0) {
+    const level = clamp(Number(damping) || 0, 0, 1);
+    const envelope = Math.exp(-(0.35 + level * 5.6) * time);
+    return envelope * partials.reduce((sum, partial) => sum + partial.amplitude * Math.sin(2 * Math.PI * partial.frequency * time), 0);
+  }
+
   function acousticSignal(state, time, components = acousticComponents(state)) {
     if (state.lab === 'tone') return Math.sin(2 * Math.PI * state.toneFrequency * time + state.tonePhase * Math.PI / 180);
     return components.reduce((sum, component) => sum + component.amplitude * Math.sin(2 * Math.PI * component.frequency * time + component.phase * Math.PI / 180), 0);
@@ -414,19 +448,36 @@
     const samples = Array.from({ length: 128 }, (_, index) => index / 127);
     const components = acousticComponents(state);
     const lab = state.lab;
-    const baseSpectrum = lab === 'tone' ? [{ frequency: Number(state.toneFrequency), amplitude: 1 }] : lab === 'helium' ? Array.from({ length: 7 }, (_, index) => ({ frequency: 140 * (index + 1), amplitude: heliumVoiceWeight(140 * (index + 1), 140, false) })) : lab === 'medium' ? (components.length ? components.map(component => ({ frequency: component.frequency, amplitude: component.amplitude })) : [{ frequency: Number(state.mediumFrequency), amplitude: 1 }]) : lab === 'noise' ? [{ frequency: 180, amplitude: 0.8 }, { frequency: 760, amplitude: 0.62 }, { frequency: 2200, amplitude: 0.52 }, { frequency: 5200, amplitude: 0.34 }] : components.map(component => ({ frequency: component.frequency, amplitude: component.amplitude }));
+    const mediumSource = lab === 'medium' ? mediumComponents(state) : [];
+    const instrumentData = lab === 'instrument' ? instrumentPartials(state) : [];
+    const baseSpectrum = lab === 'tone' ? [{ frequency: Number(state.toneFrequency), amplitude: 1 }] : lab === 'helium' ? Array.from({ length: 7 }, (_, index) => ({ frequency: 140 * (index + 1), amplitude: heliumVoiceWeight(140 * (index + 1), 140, false) })) : lab === 'medium' ? mediumSource : lab === 'instrument' ? instrumentData : lab === 'noise' ? [{ frequency: 180, amplitude: 0.8 }, { frequency: 760, amplitude: 0.62 }, { frequency: 2200, amplitude: 0.52 }, { frequency: 5200, amplitude: 0.34 }] : components.map(component => ({ frequency: component.frequency, amplitude: component.amplitude }));
     const filtered = baseSpectrum.map(item => ({ ...item, amplitude: lab === 'medium' ? item.amplitude * acousticResponse(state.medium, item.frequency) : lab === 'helium' ? item.amplitude * heliumVoiceWeight(item.frequency, 140, true) : lab === 'noise' ? item.amplitude * (state.noiseTreatment === 'absorb' ? (item.frequency > 1000 ? 0.35 : 0.82) : state.noiseTreatment === 'barrier' ? (item.frequency > 700 ? 0.52 : 0.72) : state.noiseTreatment === 'isolate' ? 0.68 : 1) : item.amplitude }));
-    const wave = samples.map(time => { const source = lab === 'helium' ? Array.from({ length: 7 }, (_, index) => heliumVoiceWeight(140 * (index + 1), 140, state.heliumMode === 'helium') * 0.42 * Math.sin(2 * Math.PI * 140 * (index + 1) * time / 6)).reduce((sum, value) => sum + value, 0) : acousticSignal(state, time / 240, components); return source * (lab === 'medium' ? acousticResponse(state.medium, state.mediumFrequency) : 1); });
-    const maxWave = Math.max(1, ...wave.map(value => Math.abs(value)));
+    const inputWave = samples.map(time => {
+      if (lab === 'medium') return mediumSource.reduce((sum, component) => sum + component.amplitude * Math.sin(2 * Math.PI * component.frequency * time * 0.018 + component.phase * Math.PI / 180), 0);
+      if (lab === 'instrument') return instrumentSample(instrumentData, time * 0.04, 0);
+      if (lab === 'helium') return Array.from({ length: 7 }, (_, index) => heliumVoiceWeight(140 * (index + 1), 140, false) * 0.42 * Math.sin(2 * Math.PI * 140 * (index + 1) * time / 6)).reduce((sum, value) => sum + value, 0);
+      return acousticSignal(state, time / 240, components);
+    });
+    const wave = samples.map((time, index) => {
+      if (lab === 'medium') return mediumSource.reduce((sum, component) => sum + component.amplitude * acousticResponse(state.medium, component.frequency) * Math.sin(2 * Math.PI * component.frequency * time * 0.018 + component.phase * Math.PI / 180), 0);
+      if (lab === 'instrument') return instrumentSample(instrumentData, time * 0.04, state.damping);
+      if (lab === 'helium') return Array.from({ length: 7 }, (_, harmonicIndex) => heliumVoiceWeight(140 * (harmonicIndex + 1), 140, state.heliumMode === 'helium') * 0.42 * Math.sin(2 * Math.PI * 140 * (harmonicIndex + 1) * time / 6)).reduce((sum, value) => sum + value, 0);
+      return inputWave[index] * (lab === 'medium' ? acousticResponse(state.medium, state.mediumFrequency) : 1);
+    });
+    const maxWave = Math.max(1, ...inputWave.map(value => Math.abs(value)), ...wave.map(value => Math.abs(value)));
     const wavePath = acousticPath(wave.map(value => value / maxWave), 56, 118, 620, 54);
+    const inputWavePath = acousticPath(inputWave.map(value => value / maxWave), 56, 118, 620, 54);
     const reconstruction = lab === 'fourier' ? acousticPath(samples.map(time => acousticSignal(state, time / 240, components.slice(0, Math.max(1, Number(state.fourierKeep) || 1))) / maxWave), 56, 118, 620, 54) : '';
     const spectrumBaseline = 276;
-    const bars = filtered.map((item, index) => { const x = 72 + index * Math.min(88, 610 / Math.max(1, filtered.length)); const barWidth = Math.min(44, 560 / Math.max(1, filtered.length)); const height = 18 + clamp(item.amplitude, 0, 1) * 72; const selected = lab === 'fourier' && index < Number(state.fourierKeep || 1); return `<rect x="${x.toFixed(1)}" y="${spectrumBaseline - height}" width="${barWidth.toFixed(1)}" height="${height.toFixed(1)}" rx="7" fill="${selected || lab !== 'fourier' ? (index % 2 ? '#ffd166' : '#00d4ff') : 'rgba(255,255,255,0.22)'}"></rect><text class="field-svg-label" text-anchor="middle" x="${(x + barWidth / 2).toFixed(1)}" y="298">${Math.round(item.frequency)} Hz</text>`; }).join('');
+    const bars = filtered.map((item, index) => { const x = 72 + index * Math.min(88, 610 / Math.max(1, filtered.length)); const barWidth = Math.min(44, 560 / Math.max(1, filtered.length)); const height = 18 + clamp(item.amplitude, 0, 1) * 72; const selected = lab === 'fourier' && index < Number(state.fourierKeep || 1); return `<rect data-spectrum-frequency="${Math.round(item.frequency)}" x="${x.toFixed(1)}" y="${spectrumBaseline - height}" width="${barWidth.toFixed(1)}" height="${height.toFixed(1)}" rx="7" fill="${selected || lab !== 'fourier' ? (index % 2 ? '#ffd166' : '#00d4ff') : 'rgba(255,255,255,0.22)'}"></rect><text class="field-svg-label" text-anchor="middle" x="${(x + barWidth / 2).toFixed(1)}" y="298">${Math.round(item.frequency)} Hz</text>`; }).join('');
     const labLabel = ACOUSTIC_LABS.find(item => item[0] === lab)?.[zh() ? 2 : 1] || lab;
-    let visual = `${acousticPanel(20, zh() ? '时域波形' : 'pressure waveform / time-domain waveform')}<line class="field-svg-soft" x1="56" y1="118" x2="676" y2="118"></line><path class="field-svg-accent" d="${wavePath}"></path>${reconstruction ? `<path class="field-svg-secondary" stroke-dasharray="7 6" d="${reconstruction}"></path><text class="field-svg-label" x="470" y="54">${zh() ? '虚线：保留后的重建' : 'dashed: partial reconstruction'}</text>` : ''}${acousticPanel(162, lab === 'fourier' ? (zh() ? '频域分析：峰值来自哪些成分？' : 'frequency-domain analysis: which components are present?') : (zh() ? '频谱' : 'frequency spectrum'))}<line class="field-svg-soft" x1="56" y1="${spectrumBaseline}" x2="676" y2="${spectrumBaseline}"></line>${bars}`;
+    const mediumLegend = lab === 'medium' ? `<line data-wave-legend="input" x1="500" y1="50" x2="522" y2="50" stroke="#00d4ff" stroke-width="3"></line><text class="field-svg-label" x="528" y="54">${zh() ? '输入 / 声源' : 'input / source'}</text><line data-wave-legend="output" x1="500" y1="70" x2="522" y2="70" stroke="#ffd166" stroke-width="3"></line><text class="field-svg-label" x="528" y="74">${zh() ? '输出 / 介质后' : 'output / after medium'}</text>` : '';
+    let visual = `${acousticPanel(20, lab === 'medium' ? (zh() ? '输入 → 输出波形' : 'input → output waveform') : zh() ? '时域波形' : 'pressure waveform / time-domain waveform')}<line class="field-svg-soft" x1="56" y1="118" x2="676" y2="118"></line>${lab === 'medium' ? `<path class="field-svg-secondary" stroke-dasharray="7 6" d="${inputWavePath}"></path><path class="field-svg-accent" d="${wavePath}"></path>${mediumLegend}` : `<path class="field-svg-accent" d="${wavePath}"></path>`}${reconstruction ? `<path class="field-svg-secondary" stroke-dasharray="7 6" d="${reconstruction}"></path><text class="field-svg-label" x="470" y="54">${zh() ? '虚线：保留后的重建' : 'dashed: partial reconstruction'}</text>` : ''}${acousticPanel(162, lab === 'fourier' ? (zh() ? '频域分析：峰值来自哪些成分？' : 'frequency-domain analysis: which components are present?') : (zh() ? '频谱' : 'frequency spectrum'))}<line class="field-svg-soft" x1="56" y1="${spectrumBaseline}" x2="676" y2="${spectrumBaseline}"></line>${bars}`;
     if (lab === 'medium') {
-      const responsePoints = Array.from({ length: 72 }, (_, index) => [56 + index * 8.65, 438 - acousticResponse(state.medium, 100 + index * 78) * 72]);
-      visual += `${acousticPanel(306, zh() ? '材料频率响应' : 'material frequency response')}<path class="field-svg-secondary" d="${pathFromPoints(responsePoints)}"></path><line x1="56" y1="438" x2="676" y2="438" class="field-svg-soft"></line><text class="field-svg-label" x="56" y="466">${zh() ? `${state.medium}：同一输入被介质重新加权` : `${state.medium}: the same input is re-weighted by the medium`}</text>`;
+      const responsePoints = Array.from({ length: 72 }, (_, index) => [56 + index * 8.65, 408 - acousticResponse(state.medium, 100 + index * 78) * 58]);
+      const markerX = 56 + clamp((Number(state.mediumFrequency) - 100) / 5600, 0, 1) * 620;
+      const markerY = 408 - acousticResponse(state.medium, Number(state.mediumFrequency)) * 58;
+      visual += `${acousticPanel(306, zh() ? '材料频率响应：选中的测试频率落在哪里？' : 'material frequency response: where does the selected test frequency land?')}<path class="field-svg-secondary" d="${pathFromPoints(responsePoints)}"></path><line x1="56" y1="408" x2="676" y2="408" class="field-svg-soft"></line><line data-medium-frequency-marker x1="${markerX.toFixed(1)}" y1="348" x2="${markerX.toFixed(1)}" y2="408" stroke="#ff6b9d" stroke-width="3" stroke-dasharray="5 4"></line><circle cx="${markerX.toFixed(1)}" cy="${markerY.toFixed(1)}" r="6" fill="#ff6b9d"></circle><text class="field-svg-label" x="${Math.min(614, markerX + 8).toFixed(1)}" y="350">${Math.round(Number(state.mediumFrequency))} Hz</text><text class="field-svg-label" x="56" y="466">${state.mediumSource === 'wideband' ? (zh() ? '宽带输入：每个频率成分都按曲线被分别衰减；纯音则只保留选中的频率。' : 'Wide-band input: each frequency component is attenuated by the curve; a pure tone keeps only the selected frequency.') : (zh() ? '纯音输入：线性介质不会凭空制造新频率，只会改变幅度（以及真实系统中的相位）。' : 'Pure sine input: a linear medium does not create new frequencies; it changes amplitude (and, in real systems, phase).')}</text>`;
     } else if (lab === 'helium') {
       const formantXs = state.heliumMode === 'helium' ? [188, 410, 610] : [130, 300, 470];
       const formantLabels = state.heliumMode === 'helium' ? ['F1 ≈ 850', 'F2 ≈ 2550', 'F3 ≈ 4100'] : ['F1 ≈ 500', 'F2 ≈ 1500', 'F3 ≈ 2500'];
@@ -435,13 +486,20 @@
       const response = roomImpulse(state.room);
       visual += `${acousticPanel(306, zh() ? '密集脉冲响应：早期反射 + 混响尾巴' : 'dense impulse response: early reflections + reverb tail')}<path class="field-svg-secondary" d="${acousticPath(response.map(value => clamp(value / 1.15, 0, 1)), 56, 438, 620, 72)}"></path><line x1="56" y1="438" x2="676" y2="438" class="field-svg-soft"></line><text class="field-svg-label" x="56" y="466">${zh() ? `${ROOM_PROFILES[state.room].label.zh}：尾巴时长约 ${ROOM_PROFILES[state.room].tail.toFixed(1)} s` : `${ROOM_PROFILES[state.room].label.en}: dense tail ≈ ${ROOM_PROFILES[state.room].tail.toFixed(1)} s`}</text>`;
     } else if (lab === 'instrument') {
-      const mode = Math.round(state.instrumentMode);
-      const points = Array.from({ length: 96 }, (_, index) => [56 + index * 6.55, 438 - Math.sin(Math.PI * mode * index / 95) * 38 * (1 - state.damping * 0.4)]);
-      visual += `${acousticPanel(306, zh() ? '边界条件与音色' : 'boundary conditions and timbre')}<path class="field-svg-secondary" d="${pathFromPoints(points)}"></path><line x1="56" y1="438" x2="676" y2="438" class="field-svg-soft"></line><text class="field-svg-label" x="56" y="466">${state.instrument === 'string' ? (zh() ? '弦：短起音、丰富衰减泛音' : 'string: pluck transient with decaying harmonics') : state.instrument === 'pipe' ? (zh() ? '管：稳定基频与管腔共振' : 'pipe: stable fundamental shaped by the air column') : (zh() ? '打击：非谐和模态快速衰减' : 'percussion: inharmonic modes with a fast decay')}</text>`;
+      const points = Array.from({ length: 96 }, (_, index) => [56 + index * 6.55, 410 - instrumentSample(instrumentData, index / 95 * 0.04, state.damping) * 26]);
+      const envelope = Array.from({ length: 96 }, (_, index) => Math.exp(-(0.35 + clamp(Number(state.damping) || 0, 0, 1) * 5.6) * index / 95 * 0.04));
+      const upperEnvelope = acousticPath(envelope, 56, 410, 620, 26);
+      const lowerEnvelope = acousticPath(envelope.map(value => -value), 56, 410, 620, 26);
+      const familyCopy = state.instrument === 'string'
+        ? (zh() ? '弦：固定边界 → 整数谐波；泛音越多，音色越亮。' : 'string: fixed boundaries → integer harmonics; more partials make the timbre brighter.')
+        : state.instrument === 'pipe'
+          ? (zh() ? '管：一端开一端闭的简化模型 → 1、3、5…奇次泛音。' : 'pipe: simplified open–closed boundary → odd partials 1, 3, 5…')
+          : (zh() ? '打击：膜/板的模态通常不谐和，因此频谱不会整齐排成整数倍。' : 'percussion: membrane/plate modes are usually inharmonic, so the spectrum is not an integer ladder.');
+      visual += `${acousticPanel(306, zh() ? '泛音合成与时间包络' : 'partial synthesis and time envelope')}<path class="field-svg-secondary" d="${pathFromPoints(points)}"></path><path class="field-svg-soft" stroke-dasharray="5 4" d="${upperEnvelope}"></path><path class="field-svg-soft" stroke-dasharray="5 4" d="${lowerEnvelope}"></path><line x1="56" y1="410" x2="676" y2="410" class="field-svg-soft"></line><text class="field-svg-label" x="56" y="350">${zh() ? `当前 ${instrumentData.length} 个部分：` : `${instrumentData.length} partials:`} ${instrumentData.map(partial => `${Math.round(partial.frequency)} Hz`).join(' · ')}</text><text class="field-svg-label" x="56" y="466">${familyCopy} ${zh() ? `阻尼 ${Number(state.damping).toFixed(2)} 让包络随时间衰减。` : `Damping ${Number(state.damping).toFixed(2)} controls the time-dependent envelope.`}</text>`;
     } else if (lab === 'doppler') {
-      const speed = clamp(Number(state.dopplerSpeed), -0.85, 0.85); const direction = speed >= 0 ? 1 : -1; const sourceX = 360 + speed * 180;
-      const rings = Array.from({ length: 7 }, (_, index) => { const radius = 16 + index * 24; const cx = sourceX - direction * index * speed * 24; return `<circle cx="${cx.toFixed(1)}" cy="410" r="${radius}" fill="none" stroke="${index % 2 ? '#ffd166' : '#00d4ff'}" stroke-opacity="${0.72 - index * 0.07}" stroke-width="2"></circle>`; }).join('');
-      visual += `${acousticPanel(306, zh() ? '接近 → 最近点 → 远离' : 'approach → closest approach → retreat')}<line x1="84" y1="410" x2="640" y2="410" class="field-svg-soft"></line><circle cx="84" cy="410" r="6" fill="#eef2ff"></circle><circle cx="360" cy="410" r="6" fill="#eef2ff"></circle><circle cx="640" cy="410" r="6" fill="#eef2ff"></circle>${rings}<circle cx="${sourceX.toFixed(1)}" cy="410" r="9" fill="#ff6b9d"></circle><text class="field-svg-label" x="56" y="466">${zh() ? '长音频让三个阶段都能听见；接近时频率升高，远离时降低。' : 'The longer sound makes all three phases audible: frequency rises on approach and falls after the pass.'}</text>`;
+      const speed = clamp(Number(state.dopplerSpeed), -0.85, 0.85); const direction = speed >= 0 ? 1 : -1; const sourceX = direction > 0 ? 100 : 620;
+      const rings = Array.from({ length: 7 }, (_, index) => { const radius = 16 + index * 24; const cx = sourceX - direction * index * Math.abs(speed) * 24; return `<circle data-doppler-ring="${index}" cx="${cx.toFixed(1)}" cy="410" r="${radius}" fill="none" stroke="${index % 2 ? '#ffd166' : '#00d4ff'}" stroke-opacity="${0.72 - index * 0.07}" stroke-width="2"></circle>`; }).join('');
+      visual += `${acousticPanel(306, zh() ? '接近 → 最近点 → 远离（与声音同步）' : 'approach → closest approach → retreat (synced to audio)')}<line x1="84" y1="410" x2="640" y2="410" class="field-svg-soft"></line><circle cx="84" cy="410" r="6" fill="#eef2ff"></circle><circle cx="360" cy="410" r="6" fill="#eef2ff"></circle><circle cx="640" cy="410" r="6" fill="#eef2ff"></circle>${rings}<circle data-doppler-source cx="${sourceX.toFixed(1)}" cy="410" r="9" fill="#ff6b9d"></circle><text class="field-svg-label" x="56" y="466">${zh() ? '按下播放后，声源会在图中完成一次经过观察者的运动；最近点只是一瞬间。' : 'Press play: the source crosses the observer once; closest approach is a brief instant, not a long pause.'}</text>`;
     } else if (lab === 'shock') {
       const mach = Number(state.shockMach); const cone = mach > 1 ? Math.asin(1 / mach) : Math.PI / 2; const dx = 230 * Math.cos(cone); const dy = 230 * Math.sin(cone); const mode = state.shockMode || 'cone';
       visual += `${acousticPanel(306, mode === 'boom' ? (zh() ? '音爆：N 形压强波' : 'sonic boom: N-wave pressure signature') : mode === 'barrier' ? (zh() ? '穿越音障：波前从前方堆叠成锥' : 'crossing the sound barrier: fronts stack into a cone') : (zh() ? '马赫锥几何' : 'Mach-cone geometry'))}`;
@@ -483,12 +541,43 @@
     const state = { ...defaults, ...(visualStateCache.get(fieldId) || {}) };
     let audioContext = null;
     let activeNodes = [];
-    const stopAudio = () => { for (const node of activeNodes) { try { node.stop?.(); } catch {} } activeNodes = []; };
-    const ensureAudio = async () => { const AudioContextClass = window.AudioContext || window.webkitAudioContext; if (!AudioContextClass) return null; audioContext ||= new AudioContextClass(); if (audioContext.state === 'suspended') await audioContext.resume(); return audioContext; };
-    const playOscillator = (context, frequency, gainValue, start, end, startFrequency = frequency, endFrequency = frequency, type = 'sine', destination = context.destination, attack = 0.05, release = 0.08) => {
-      const oscillator = context.createOscillator(); const gain = context.createGain(); oscillator.type = type; audioParam(oscillator.frequency, 'setValueAtTime', Math.max(20, startFrequency), start); if (endFrequency !== startFrequency) audioParam(oscillator.frequency, 'exponentialRampToValueAtTime', Math.max(20, endFrequency), end); oscillator.connect(gain); gain.connect(destination); audioParam(gain.gain, 'setValueAtTime', 0.0001, start); audioParam(gain.gain, 'exponentialRampToValueAtTime', Math.max(0.0001, gainValue), start + attack); audioParam(gain.gain, 'exponentialRampToValueAtTime', 0.0001, Math.max(start + attack + 0.02, end - release)); oscillator.start(start); oscillator.stop(end); activeNodes.push(oscillator); return oscillator;
+    let animationFrame = null;
+    let animationToken = 0;
+    const cancelAnimation = () => { animationToken += 1; if (animationFrame) cancelAnimationFrame(animationFrame); animationFrame = null; };
+    const updateDopplerFrame = progress => {
+      const source = stageHost.querySelector('[data-doppler-source]');
+      const rings = [...stageHost.querySelectorAll('[data-doppler-ring]')];
+      if (!source) return;
+      const direction = Number(state.dopplerSpeed) >= 0 ? 1 : -1;
+      const approachProgress = clamp(progress / 0.48, 0, 1);
+      const retreatProgress = clamp((progress - 0.48) / 0.52, 0, 1);
+      const sourceX = direction > 0
+        ? progress < 0.48 ? 100 + 260 * approachProgress : 360 + 260 * retreatProgress
+        : progress < 0.48 ? 620 - 260 * approachProgress : 360 - 260 * retreatProgress;
+      source.setAttribute('cx', sourceX.toFixed(1));
+      const spacing = Math.max(5, Math.abs(Number(state.dopplerSpeed)) * 25);
+      rings.forEach((ring, index) => ring.setAttribute('cx', (sourceX - direction * index * spacing).toFixed(1)));
     };
-    const playStack = (context, partials, start, end, destination = context.destination) => partials.forEach(partial => playOscillator(context, partial.frequency, partial.gain, start, end, partial.startFrequency || partial.frequency, partial.endFrequency || partial.frequency, partial.type || 'sine', destination, partial.attack || 0.05, partial.release || 0.1));
+    const startDopplerAnimation = duration => {
+      cancelAnimation();
+      if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches || document.documentElement.dataset.motion === 'paused') return;
+      const token = animationToken;
+      const started = performance.now();
+      const tick = now => {
+        if (token !== animationToken) return;
+        const progress = clamp((now - started) / (duration * 1000), 0, 1);
+        updateDopplerFrame(progress);
+        if (progress < 1) animationFrame = requestAnimationFrame(tick);
+        else animationFrame = null;
+      };
+      animationFrame = requestAnimationFrame(tick);
+    };
+    const stopAudio = () => { cancelAnimation(); for (const node of activeNodes) { try { node.stop?.(); } catch {} } activeNodes = []; };
+    const ensureAudio = async () => { const AudioContextClass = window.AudioContext || window.webkitAudioContext; if (!AudioContextClass) return null; audioContext ||= new AudioContextClass(); if (audioContext.state === 'suspended') await audioContext.resume(); return audioContext; };
+    const playOscillator = (context, frequency, gainValue, start, end, startFrequency = frequency, endFrequency = frequency, type = 'sine', destination = context.destination, attack = 0.05, release = 0.08, decay = 0) => {
+      const oscillator = context.createOscillator(); const gain = context.createGain(); oscillator.type = type; audioParam(oscillator.frequency, 'setValueAtTime', Math.max(20, startFrequency), start); if (endFrequency !== startFrequency) audioParam(oscillator.frequency, 'exponentialRampToValueAtTime', Math.max(20, endFrequency), end); oscillator.connect(gain); gain.connect(destination); audioParam(gain.gain, 'setValueAtTime', 0.0001, start); audioParam(gain.gain, 'exponentialRampToValueAtTime', Math.max(0.0001, gainValue), start + attack); const decayEnd = Math.max(start + attack + 0.02, end - release); const decayTarget = decay > 0 ? Math.max(0.0001, gainValue * Math.exp(-decay * Math.max(0.1, decayEnd - (start + attack)))) : 0.0001; audioParam(gain.gain, 'exponentialRampToValueAtTime', decayTarget, decayEnd); if (decay > 0) audioParam(gain.gain, 'exponentialRampToValueAtTime', 0.0001, Math.max(decayEnd + 0.02, end - release / 2)); oscillator.start(start); oscillator.stop(end); activeNodes.push(oscillator); return oscillator;
+    };
+    const playStack = (context, partials, start, end, destination = context.destination) => partials.forEach(partial => playOscillator(context, partial.frequency, partial.gain, start, end, partial.startFrequency || partial.frequency, partial.endFrequency || partial.frequency, partial.type || 'sine', destination, partial.attack || 0.05, partial.release || 0.1, partial.decay || 0));
     const playNoise = (context, gainValue, start, end, destination = context.destination) => {
       if (!context.createBuffer || !context.createBufferSource) return false;
       const buffer = context.createBuffer(1, Math.max(1, Math.floor(context.sampleRate * (end - start))), context.sampleRate); const data = buffer.getChannelData(0); for (let index = 0; index < data.length; index++) data[index] = Math.random() * 2 - 1;
@@ -529,38 +618,51 @@
       if (kind === 'tone') playOscillator(context, state.toneFrequency, state.toneLoudness, start, start + 2.3, state.toneFrequency, state.toneFrequency, 'sine', context.destination, 0.08, 0.18);
       if (kind === 'mixer') playStack(context, acousticComponents(state).map(component => ({ frequency: component.frequency, gain: 0.18 * component.amplitude, type: 'sine' })), start, start + 2.4);
       if (kind === 'fourier') { const count = Math.max(1, Number(state.fourierKeep) || 1); playStack(context, acousticComponents(state).slice(0, count).map(component => ({ frequency: component.frequency, gain: 0.18 * component.amplitude, type: 'sine' })), start, start + 2.4); }
-      if (kind === 'medium') { const response = acousticResponse(state.medium, state.mediumFrequency); playStack(context, [1, 2, 3, 4].map(index => ({ frequency: state.mediumFrequency * index, gain: 0.13 * response / Math.pow(index, 0.55), type: index === 1 ? 'sine' : 'triangle' })), start, start + 2.3); }
+      if (kind === 'medium') {
+        const source = mediumComponents(state);
+        if (state.mediumSource === 'wideband') playStack(context, source.map(component => ({ frequency: component.frequency, gain: 0.2 * component.amplitude * acousticResponse(state.medium, component.frequency), type: component.frequency < 500 ? 'sine' : 'triangle' })), start, start + 2.3);
+        else { const response = acousticResponse(state.medium, state.mediumFrequency); playOscillator(context, state.mediumFrequency, 0.24 * response, start, start + 2.3, state.mediumFrequency, state.mediumFrequency, 'sine', context.destination, 0.08, 0.2); }
+      }
       if (kind === 'helium') { const helium = state.heliumMode === 'helium'; playStack(context, Array.from({ length: 12 }, (_, index) => ({ frequency: 140 * (index + 1), gain: 0.2 * heliumVoiceWeight(140 * (index + 1), 140, helium), type: index % 3 === 0 ? 'sawtooth' : 'sine' })), start, start + 2.5); }
       if (kind === 'room') playRoom(context, start);
       if (kind === 'instrument') {
-        const base = state.instrument === 'pipe' ? 196 : state.instrument === 'drum' ? 130 : 110;
-        if (state.instrument === 'string') playStack(context, [1, 2, 3, 4, 5].map(index => ({ frequency: base * index, gain: 0.22 / Math.pow(index, 1.05), type: index < 3 ? 'triangle' : 'sine', attack: 0.015, release: 0.5 })), start, start + 2.1);
-        else if (state.instrument === 'pipe') playStack(context, [1, 2, 3, 4].map(index => ({ frequency: base * index, gain: (index % 2 ? 0.19 : 0.06) / index, type: 'sawtooth', attack: 0.18, release: 0.25 })), start, start + 2.5);
-        else { playNoise(context, 0.2, start, start + 0.12); playStack(context, [1, 1.47, 2.11, 2.76].map((ratio, index) => ({ frequency: base * ratio, gain: 0.2 / (index + 1), type: 'square', startFrequency: base * ratio * 1.18, endFrequency: base * ratio, attack: 0.005, release: 0.42 })), start, start + 0.95); }
+        const partials = instrumentPartials(state);
+        const duration = state.instrument === 'drum' ? 1.15 : 2.25;
+        if (state.instrument === 'drum') playNoise(context, 0.16 + Number(state.damping) * 0.08, start, start + 0.12);
+        playStack(context, partials.map((partial, index) => ({ frequency: partial.frequency, gain: 0.2 * partial.amplitude, type: partial.type, startFrequency: state.instrument === 'drum' ? partial.frequency * 1.14 : partial.frequency, endFrequency: partial.frequency, attack: state.instrument === 'pipe' ? 0.14 : 0.015, release: state.instrument === 'drum' ? 0.2 : 0.28, decay: 0.35 + Number(state.damping) * (state.instrument === 'drum' ? 4.2 : 2.8) })), start, start + duration);
       }
       if (kind === 'doppler') {
         const duration = 5.2; const shift = clamp(Number(state.dopplerSpeed), -0.85, 0.85); const sign = shift >= 0 ? 1 : -1;
         const high = state.dopplerBase * (1 + Math.abs(shift) * 0.82); const low = state.dopplerBase * (1 - Math.abs(shift) * 0.45);
-        const oscillator = context.createOscillator(); const gain = context.createGain(); const approachEnd = start + 1.8; const retreatStart = start + 3.4;
+        const oscillator = context.createOscillator(); const gain = context.createGain(); const approachEnd = start + duration * 0.45; const passAt = start + duration * 0.48; const retreatStart = start + duration * 0.5;
         oscillator.type = 'sine'; oscillator.connect(gain); gain.connect(context.destination);
-        audioParam(oscillator.frequency, 'setValueAtTime', sign > 0 ? low : high, start); audioParam(oscillator.frequency, 'exponentialRampToValueAtTime', sign > 0 ? high : low, approachEnd); audioParam(oscillator.frequency, 'setValueAtTime', sign > 0 ? high : low, retreatStart); audioParam(oscillator.frequency, 'exponentialRampToValueAtTime', sign > 0 ? low : high, start + duration);
+        audioParam(oscillator.frequency, 'setValueAtTime', sign > 0 ? low : high, start); audioParam(oscillator.frequency, 'exponentialRampToValueAtTime', sign > 0 ? high : low, approachEnd); audioParam(oscillator.frequency, 'setValueAtTime', sign > 0 ? high : low, passAt); audioParam(oscillator.frequency, 'exponentialRampToValueAtTime', sign > 0 ? low : high, start + duration);
         audioParam(gain.gain, 'setValueAtTime', 0.0001, start); audioParam(gain.gain, 'exponentialRampToValueAtTime', 0.2, start + 0.18); audioParam(gain.gain, 'setValueAtTime', 0.2, start + duration - 0.25); audioParam(gain.gain, 'exponentialRampToValueAtTime', 0.0001, start + duration);
-        oscillator.start(start); oscillator.stop(start + duration); activeNodes.push(oscillator);
+        oscillator.start(start); oscillator.stop(start + duration); activeNodes.push(oscillator); startDopplerAnimation(duration);
       }
       if (kind === 'shock') {
         const mode = state.shockMode || 'cone';
+        const mach = clamp(Number(state.shockMach) || 1.2, 0.4, 2.8);
+        const excess = mach - 1;
+        const supersonic = Math.max(0, excess);
+        const subsonic = Math.max(0, -excess);
+        const pulseSpacing = clamp(0.46 - supersonic * 0.12 + subsonic * 0.14, 0.11, 0.62);
+        const pulseFrequency = 150 + mach * 90;
         if (mode === 'cone') {
-          [0, 0.34, 0.68, 1.02, 1.36].forEach((delay, index) => playOscillator(context, 240, 0.13, start + delay, start + delay + 0.16, 240, 240, 'sine', context.destination, 0.01, 0.06));
-          playNoise(context, 0.08, start, start + 1.55);
+          [0, 1, 2, 3, 4].forEach(index => playOscillator(context, pulseFrequency, 0.08 + Math.abs(excess) * 0.03, start + index * pulseSpacing, start + index * pulseSpacing + 0.14, pulseFrequency, pulseFrequency * (1 + supersonic * 0.06), 'sine', context.destination, 0.01, 0.055));
+          playNoise(context, 0.04 + Math.abs(excess) * 0.04, start, start + 1.55);
         } else if (mode === 'barrier') {
-          playOscillator(context, 210, 0.22, start, start + 1.8, 210, 980, 'sawtooth', context.destination, 0.04, 0.2);
-          playNoise(context, 0.26, start + 1.72, start + 2.04);
-          playOscillator(context, 90, 0.12, start + 1.72, start + 2.35, 150, 70, 'triangle', context.destination, 0.01, 0.35);
+          const sweepEnd = 540 + mach * 250;
+          const crossing = start + clamp(1.3 - supersonic * 0.22 + subsonic * 0.18, 0.72, 1.62);
+          playOscillator(context, 150 + mach * 32, 0.14 + Math.abs(excess) * 0.05, start, crossing, 150 + mach * 32, sweepEnd, 'sawtooth', context.destination, 0.04, 0.2);
+          playNoise(context, 0.12 + Math.abs(excess) * 0.08, crossing - 0.04, crossing + 0.28);
+          playOscillator(context, 62 + mach * 12, 0.08 + Math.abs(excess) * 0.04, crossing, crossing + 0.62 + supersonic * 0.12 + subsonic * 0.08, 115 + mach * 20, 52 + mach * 8, 'triangle', context.destination, 0.01, 0.35);
         } else {
-          const boomStart = start + 0.55;
-          playNoise(context, 0.42, boomStart, boomStart + 0.09);
-          playNoise(context, 0.28, boomStart + 0.075, boomStart + 0.23);
-          playOscillator(context, 72, 0.3, boomStart, boomStart + 0.72, 140, 48, 'sawtooth', context.destination, 0.01, 0.42);
+          const boomStart = start + clamp(0.58 - supersonic * 0.06 + subsonic * 0.12, 0.32, 0.72);
+          const boomGain = 0.18 + Math.abs(excess) * 0.18;
+          playNoise(context, boomGain, boomStart, boomStart + Math.max(0.04, 0.075 + excess * 0.018));
+          playNoise(context, boomGain * 0.66, boomStart + 0.06, boomStart + Math.max(0.12, 0.21 + excess * 0.04));
+          playOscillator(context, 52 + mach * 11, Math.max(0.12, 0.2 + excess * 0.045), boomStart, boomStart + Math.max(0.36, 0.62 + excess * 0.08), 120 + mach * 22, 42 + mach * 8, 'sawtooth', context.destination, 0.01, 0.42);
         }
       }
       if (kind === 'noise') { const attenuation = state.noiseTreatment === 'none' ? 1 : state.noiseTreatment === 'absorb' ? 0.42 : state.noiseTreatment === 'barrier' ? 0.58 : 0.5; playNoise(context, 0.28 * attenuation, start, start + 1.4); playStack(context, [{ frequency: 180, gain: 0.12 * attenuation, type: 'sawtooth' }, { frequency: 760, gain: 0.09 * attenuation, type: 'square' }, { frequency: 2200, gain: 0.06 * attenuation, type: 'triangle' }], start, start + 1.4); }
@@ -581,10 +683,10 @@
       }
       if (state.lab === 'mixer') add(button(zh() ? '听一听混合波' : 'Hear the mixture', () => hear('mixer')), create('p', 'acoustic-mini-note', zh() ? '频谱：每根柱子代表一个正弦成分。谐波混合是正向合成：先选成分，再听总和。' : 'spectrum: each bar is one sinusoidal component. Mixer is forward synthesis: choose ingredients, then hear their sum.'));
       if (state.lab === 'fourier') add(range({ type: 'range', key: 'fourierKeep', min: 1, max: 3, step: 1, value: state.fourierKeep, label: t('Components retained in reconstruction', '重建保留的成分数'), formatter: value => format(value, 0) }), button(zh() ? '听一听重建' : 'Hear the reconstruction', () => hear('fourier')), create('p', 'acoustic-mini-note', zh() ? '频谱：每根柱子代表一个正弦成分。傅里叶透镜先分析，再只保留选中的峰重建波形。' : 'spectrum: each bar is one sinusoidal component. Fourier lens analyzes first, then reconstructs with only the selected peaks.'));
-      if (state.lab === 'medium') add(toggle({ type: 'toggle', key: 'medium', value: state.medium, label: t('Medium', '介质'), options: [['air', 'Air', '空气'], ['water', 'Water', '水'], ['steel', 'Solid / steel', '固体 / 钢']].map(([value, en, zhLabel]) => ({ value, label: t(en, zhLabel) })) }), range({ type: 'range', key: 'mediumFrequency', min: 80, max: 4000, step: 1, value: state.mediumFrequency, label: t('Test frequency', '测试频率'), formatter: value => `${Math.round(value)} Hz` }), button(zh() ? '听一听介质后的声音' : 'Hear through this medium', () => hear('medium')), create('p', 'acoustic-mini-note', zh() ? '空气、水和钢的响应曲线不同；这里展示“传播会筛选频率”。' : 'Air, water, and steel have different response curves: propagation filters the spectrum.'));
+      if (state.lab === 'medium') add(toggle({ type: 'toggle', key: 'medium', value: state.medium, label: t('Medium', '介质'), options: [['air', 'Air', '空气'], ['water', 'Water', '水'], ['steel', 'Solid / steel', '固体 / 钢']].map(([value, en, zhLabel]) => ({ value, label: t(en, zhLabel) })) }), toggle({ type: 'toggle', key: 'mediumSource', value: state.mediumSource, label: t('Input signal', '输入信号'), options: [['tone', 'Single sine', '单一正弦波'], ['wideband', 'Wide-band sound', '宽带声音']].map(([value, en, zhLabel]) => ({ value, label: t(en, zhLabel) })) }), range({ type: 'range', key: 'mediumFrequency', min: 80, max: 4000, step: 1, value: state.mediumFrequency, label: t('Test frequency / marker', '测试频率 / 标记'), formatter: value => `${Math.round(value)} Hz` }), button(zh() ? '听一听介质后的声音' : 'Hear through this medium', () => hear('medium')), create('p', 'acoustic-mini-note', zh() ? '单一正弦波通过线性介质仍是正弦波，只改变幅度；宽带模式把多个频率成分分别按响应曲线衰减，所以既能看见也能听见材料的筛选。' : 'A single sine stays a sine through a linear medium and mainly changes amplitude. Wide-band mode sends several components through the response curve so the filtering is visible and audible.'));
       if (state.lab === 'helium') add(toggle({ type: 'toggle', key: 'heliumMode', value: state.heliumMode, label: t('Vocal tract', '声道'), options: [['normal', 'Normal air', '普通空气'], ['helium', 'Helium', '氦气']].map(([value, en, zhLabel]) => ({ value, label: t(en, zhLabel) })) }), button(zh() ? '听一听声道变化' : 'Hear the vocal-tract change', () => hear('helium')), create('p', 'acoustic-mini-note', zh() ? '研究证据：氦气让声速和声道共振峰上移，但声带基频由张力、长度和面密度决定；这里保持约 140 Hz，只改变声道滤波器。参考 Koda 等，JASA 2015。' : 'Evidence-based model: helium raises sound speed and vocal-tract formants, while vocal-fold f0 is set mainly by tension, length, and mass per area. This demo holds f0 near 140 Hz and changes only the vocal-tract filter (Koda et al., JASA 2015).'));
       if (state.lab === 'room') add(toggle({ type: 'toggle', key: 'room', value: state.room, label: t('Room', '房间'), options: [['dry', 'Dry room', '干燥房间'], ['bedroom', 'Bedroom', '卧室'], ['hall', 'Concert hall', '音乐厅'], ['cathedral', 'Cathedral', '大教堂']].map(([value, en, zhLabel]) => ({ value, label: t(en, zhLabel) })) }), range({ type: 'range', key: 'reverb', min: 0.1, max: 1, step: 0.05, value: state.reverb, label: t('Reverb strength', '混响强度'), formatter: value => value.toFixed(2) }), button(zh() ? '听一声真实混响' : 'Hear convolution reverb', () => hear('room')), create('p', 'acoustic-mini-note', zh() ? '脉冲响应包含早期反射和密集尾巴；浏览器支持时使用 ConvolverNode。' : 'The impulse response contains early reflections and a dense tail; ConvolverNode is used when the browser supports it.'));
-      if (state.lab === 'instrument') add(toggle({ type: 'toggle', key: 'instrument', value: state.instrument, label: t('Instrument family', '乐器家族'), options: [['string', 'String', '弦'], ['pipe', 'Pipe', '管'], ['drum', 'Percussion', '打击']].map(([value, en, zhLabel]) => ({ value, label: t(en, zhLabel) })) }), range({ type: 'range', key: 'instrumentMode', min: 1, max: 6, step: 1, value: state.instrumentMode, label: t('Mode / partial count', '模态 / 泛音数'), formatter: value => format(value, 0) }), range({ type: 'range', key: 'damping', min: 0, max: 1, step: 0.05, value: state.damping, label: t('Damping', '阻尼'), formatter: value => value.toFixed(2) }), button(zh() ? '听一听乐器音色' : 'Hear the instrument', () => hear('instrument')));
+      if (state.lab === 'instrument') add(toggle({ type: 'toggle', key: 'instrument', value: state.instrument, label: t('Instrument family', '乐器家族'), options: [['string', 'String', '弦'], ['pipe', 'Pipe', '管'], ['drum', 'Percussion', '打击']].map(([value, en, zhLabel]) => ({ value, label: t(en, zhLabel) })) }), range({ type: 'range', key: 'instrumentMode', min: 1, max: 6, step: 1, value: state.instrumentMode, label: t('Partial count (resonant components)', '泛音数（共振成分数）'), formatter: value => format(value, 0) }), range({ type: 'range', key: 'damping', min: 0, max: 1, step: 0.05, value: state.damping, label: t('Damping (time envelope)', '阻尼（时间包络）'), formatter: value => value.toFixed(2) }), button(zh() ? '听一听乐器音色' : 'Hear the instrument', () => hear('instrument')), create('p', 'acoustic-mini-note', zh() ? '这里的“泛音数”是加入合成的频率成分数量，不是把一根弦真的切成几段：弦用整数倍，简化管用奇次倍，打击乐用不谐和模态。' : 'Partial count means how many frequency components are included in the synthesis—not how many pieces a string is cut into: strings use integer multiples, the simplified pipe odd multiples, and percussion inharmonic modes.'));
       if (state.lab === 'doppler') add(range({ type: 'range', key: 'dopplerBase', min: 120, max: 800, step: 1, value: state.dopplerBase, label: t('Source frequency', '声源频率'), formatter: value => `${Math.round(value)} Hz` }), range({ type: 'range', key: 'dopplerSpeed', min: -0.85, max: 0.85, step: 0.01, value: state.dopplerSpeed, label: t('Relative speed (− receding, + approaching)', '相对速度（−远离，+接近）'), formatter: value => value.toFixed(2) }), button(zh() ? '听完整多普勒过程' : 'Hear approach → pass → retreat', () => hear('doppler')));
       if (state.lab === 'shock') add(toggle({ type: 'toggle', key: 'shockMode', value: state.shockMode, label: t('Demonstration', '演示'), options: [['cone', 'Mach cone', '马赫锥'], ['barrier', 'Crossing the barrier', '穿越音障'], ['boom', 'Sonic boom', '音爆']].map(([value, en, zhLabel]) => ({ value, label: t(en, zhLabel) })) }), range({ type: 'range', key: 'shockMach', min: 0.4, max: 2, step: 0.01, value: state.shockMach, label: t('Mach number', '马赫数'), formatter: value => `M ${value.toFixed(2)}` }), button(zh() ? '听一听当前激波演示' : 'Hear this shock demonstration', () => hear('shock')), create('p', 'acoustic-mini-note', zh() ? '马赫锥是重复的波前几何声；穿越音障是持续升高、在 M≈1 处出现压缩瞬态；音爆是短促的双脉冲 N 形压强波。' : 'Listen for three different signatures: the Mach cone is a repeating wavefront pulse, barrier crossing is a rising sweep with a sharp M≈1 transient, and a sonic boom is a short double-impulse N-wave.'));
       if (state.lab === 'noise') add(toggle({ type: 'toggle', key: 'noiseTreatment', value: state.noiseTreatment, label: t('Treatment', '处理方式'), options: [['none', 'No treatment', '无处理'], ['absorb', 'Absorption', '吸声'], ['barrier', 'Barrier / mass', '屏障 / 质量'], ['isolate', 'Decoupling', '隔振 / 解耦']].map(([value, en, zhLabel]) => ({ value, label: t(en, zhLabel) })) }), button(zh() ? '听一听降噪效果' : 'Hear the noise-control effect', () => hear('noise')), create('p', 'acoustic-mini-note', zh() ? '降噪策略：控制声源、吸收能量、增加屏障质量、用空气层与隔振减少结构传递。' : 'Noise strategies: control the source, absorb energy, add barrier mass, and decouple structures with air gaps and isolation.'));
@@ -1466,7 +1568,7 @@
           { key: 'mixFrequency1', value: 220 }, { key: 'mixAmplitude1', value: 0.8 }, { key: 'mixPhase1', value: 0 },
           { key: 'mixFrequency2', value: 440 }, { key: 'mixAmplitude2', value: 0.45 }, { key: 'mixPhase2', value: 45 },
           { key: 'mixFrequency3', value: 660 }, { key: 'mixAmplitude3', value: 0.25 }, { key: 'mixPhase3', value: 90 },
-          { key: 'medium', value: 'air' }, { key: 'mediumFrequency', value: 440 }, { key: 'heliumMode', value: 'normal' },
+          { key: 'medium', value: 'air' }, { key: 'mediumSource', value: 'tone' }, { key: 'mediumFrequency', value: 440 }, { key: 'heliumMode', value: 'normal' },
           { key: 'room', value: 'hall' }, { key: 'reverb', value: 0.65 },
           { key: 'instrument', value: 'string' }, { key: 'instrumentMode', value: 2 }, { key: 'damping', value: 0.2 },
           { key: 'dopplerBase', value: 330 }, { key: 'dopplerSpeed', value: 0.45 }, { key: 'shockMach', value: 1.2 }, { key: 'shockMode', value: 'cone' },
