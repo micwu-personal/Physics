@@ -74,6 +74,8 @@
     'nasa-hubble-optics': source('Hubble optics', 'NASA', 'https://science.nasa.gov/mission/hubble/observatory/design/optics/', 'How mirrors, aperture, and focusing turn incoming light into astronomical measurements.', '说明反射镜、口径与聚焦如何把入射光转化为天文测量。'),
     'nasa-wave-behaviors': source('Wave behaviors', 'NASA', 'https://science.nasa.gov/ems/03_behaviors/', 'Official guide to reflection, refraction, diffraction, and scattering.', '反射、折射、衍射与散射的官方导览。'),
     'nasa-bernoulli': source("Bernoulli's equation", 'NASA Glenn', 'https://www1.grc.nasa.gov/beginners-guide-to-aeronautics/bernoullis-equation-1/', 'A derivation of the pressure-speed relation and the assumptions behind it.', '推导压强—速度关系，并说明其成立条件。'),
+    'openstax-fluid-dynamics': source('Bernoulli’s equation and applications', 'OpenStax', 'https://openstax.org/books/physics/pages/14-6-bernoullis-equation', 'A worked introduction to continuity, pressure, speed, Torricelli outflow, and the limits of the ideal relation.', '介绍连续性、压强、速度、托里拆利出流以及理想关系的适用边界。'),
+    'nasa-pitot-static': source('Pitot-static tube', 'NASA Glenn', 'https://www1.grc.nasa.gov/beginners-guide-to-aeronautics/airspeed/', 'How stagnation and static pressure are combined to infer airspeed.', '说明如何结合总压与静压反推出空速。'),
     'nasa-lift': source('What is lift?', 'NASA Glenn', 'https://www1.grc.nasa.gov/beginners-guide-to-aeronautics/what-is-lift/', 'Why a complete account of lift requires fluid turning and momentum, not one slogan.', '解释完整的升力理论为何需要流体偏转与动量，而不是一句口号。'),
     'nasa-sphere-drag': source('Drag of a Sphere', 'NASA Glenn Research Center', 'https://www1.grc.nasa.gov/beginners-guide-to-aeronautics/drag-of-a-sphere/', 'Uses bluff-body flow around a sphere to connect Reynolds number, separation, wake growth, and the fact that roughness can shift transition.', '用球体绕流把雷诺数、分离、尾迹增长，以及粗糙度会改变转捩这件事联系起来。'),
     'reynolds-1883': source('XXIX. An experimental investigation of the circumstances which determine whether the motion of water shall be direct or sinuous, and of the law of resistance in parallel channels', 'The Royal Society', 'https://doi.org/10.1098/rstl.1883.0029', 'Osborne Reynolds’s primary dye-streak pipe-flow experiment showing how orderly and sinuous regimes separate in a geometry-specific way.', 'Osborne Reynolds 关于染料丝管流实验的原始论文，展示了平直与弯曲流态如何以几何相关的方式分离出来。'),
@@ -297,6 +299,130 @@
         ? '这里只画出圆柱绕流的代表性变化。雷诺数能组织直觉，但“哪一个 Re 一定转捩”并不是普适常数。'
         : 'This sketch shows representative flow past a cylinder. Reynolds number organizes the intuition, but no single critical value is universal across all geometries.'
     };
+  }
+
+  function fluidLab(state) {
+    const lab = state.lab || 'reynolds';
+    if (lab === 'reynolds') return fluids(state);
+
+    const rhoAir = 1.225;
+    let inner = '';
+    let footer = [];
+    let status = '';
+
+    if (lab === 'venturi') {
+      const ratio = clamp(Number(state.venturiRatio) || 0.58, 0.35, 1);
+      const inletSpeed = clamp(Number(state.venturiSpeed) || 3, 0.5, 12);
+      const vThroat = inletSpeed / (ratio * ratio);
+      const pInlet = 101.3;
+      const pThroat = Math.max(2, pInlet + 0.0005 * 1000 * (inletSpeed ** 2 - vThroat ** 2));
+      const neckStart = 190;
+      const neckEnd = 330;
+      const halfWide = 42;
+      const halfNarrow = 16 + ratio * 10;
+      const arrow = (x, y, length, color = '#00d4ff') => `<line x1="${x}" y1="${y}" x2="${x + length}" y2="${y}" stroke="${color}" stroke-width="3" stroke-linecap="round"></line><path d="M${x + length - 8} ${y - 5} L${x + length} ${y} L${x + length - 8} ${y + 5}" fill="none" stroke="${color}" stroke-width="2"></path>`;
+      inner = `
+        <path d="M30 94 H150 L${neckStart} ${94 + halfNarrow} H${neckEnd} L390 94 H490" fill="none" stroke="#00d4ff" stroke-width="4"></path>
+        <path d="M30 186 H150 L${neckStart} ${186 - halfNarrow} H${neckEnd} L390 186 H490" fill="none" stroke="#00d4ff" stroke-width="4"></path>
+        <path d="M30 94 H150 L${neckStart} ${94 + halfNarrow} H${neckEnd} L390 94 H490 V186 H390 L${neckEnd} ${186 - halfNarrow} H${neckStart} L150 186 H30 Z" fill="rgba(0,212,255,0.08)"></path>
+        ${arrow(52, 140, 70)}${arrow(174, 140, 88)}${arrow(278, 140, 60)}${arrow(382, 140, 72)}
+        <line x1="116" y1="84" x2="116" y2="196" stroke="#ffd166" stroke-width="3"></line>
+        <line x1="260" y1="112" x2="260" y2="168" stroke="#ffd166" stroke-width="3"></line>
+        <text class="field-svg-label" x="46" y="70">${zh() ? '大截面 A₁' : 'wide section A₁'}</text>
+        <text class="field-svg-label" x="232" y="102">${zh() ? '喉部 A₂' : 'throat A₂'}</text>
+        <text class="field-svg-label" x="62" y="226">${zh() ? `v₁ = ${format(inletSpeed, 1)} m/s · p₁ = ${format(pInlet, 1)} kPa` : `v₁ = ${format(inletSpeed, 1)} m/s · p₁ = ${format(pInlet, 1)} kPa`}</text>
+        <text class="field-svg-label" x="236" y="242">${zh() ? `v₂ = ${format(vThroat, 1)} m/s · p₂ = ${format(pThroat, 1)} kPa` : `v₂ = ${format(vThroat, 1)} m/s · p₂ = ${format(pThroat, 1)} kPa`}</text>`;
+      footer = zh()
+        ? ['连续性：A₁v₁ = A₂v₂。', '伯努利：速度升高时静压降低。']
+        : ['Continuity: A₁v₁ = A₂v₂.', 'Bernoulli: faster flow trades away static pressure.'];
+      status = zh() ? `喉部速度约为 ${format(vThroat, 1)} m/s，静压下降约 ${format(pInlet - pThroat, 1)} kPa。` : `The throat reaches about ${format(vThroat, 1)} m/s and loses about ${format(pInlet - pThroat, 1)} kPa of static pressure.`;
+    } else if (lab === 'tank') {
+      const head = clamp(Number(state.tankHead) || 1.2, 0.2, 3);
+      const jetSpeed = Math.sqrt(2 * 9.81 * head);
+      const jetRange = jetSpeed * Math.sqrt(2 * head / 9.81);
+      const endX = 150 + clamp(jetRange * 42, 80, 300);
+      const endY = 196;
+      const curve = `M150 118 Q${150 + (endX - 150) / 2} 62 ${endX} ${endY}`;
+      inner = `
+        <rect x="54" y="62" width="116" height="136" rx="10" fill="rgba(0,212,255,0.08)" stroke="#00d4ff" stroke-width="3"></rect>
+        <path d="M54 112 H170 V198 H54 Z" fill="rgba(0,212,255,0.28)"></path>
+        <line x1="170" y1="118" x2="170" y2="118" stroke="#ffd166" stroke-width="5"></line>
+        <path d="${curve}" fill="none" stroke="#ffd166" stroke-width="4" stroke-linecap="round"></path>
+        <circle cx="150" cy="118" r="5" fill="#ff6b9d"></circle>
+        <path d="M${endX - 9} ${endY - 4} L${endX} ${endY} L${endX - 9} ${endY + 4}" fill="none" stroke="#ffd166" stroke-width="2"></path>
+        <line x1="188" y1="118" x2="188" y2="198" stroke="#ff6b9d" stroke-width="2"></line>
+        <text class="field-svg-label" x="66" y="94">${zh() ? '液面' : 'free surface'}</text>
+        <text class="field-svg-label" x="190" y="156">${zh() ? `水头 h = ${format(head, 2)} m` : `head h = ${format(head, 2)} m`}</text>
+        <text class="field-svg-label" x="190" y="176">${zh() ? `喷速 ≈ ${format(jetSpeed, 1)} m/s` : `jet speed ≈ ${format(jetSpeed, 1)} m/s`}</text>
+        <text class="field-svg-label" x="190" y="196">${zh() ? `理想水平射程 ≈ ${format(jetRange, 1)} m` : `ideal horizontal range ≈ ${format(jetRange, 1)} m`}</text>`;
+      footer = [zh() ? '托里拆利定律：ρgh 的压强头转成约 ½ρv² 的动能头。' : 'Torricelli: pressure head ρgh becomes kinetic head ½ρv².'];
+      status = zh() ? `水头越高，喷流速度按 √h 增长；真实喷嘴还会有收缩与黏性损失。` : `More head makes the jet faster as √h; a real nozzle also adds contraction and viscous losses.`;
+    } else if (lab === 'pitot') {
+      const speed = clamp(Number(state.pitotSpeed) || 40, 5, 100);
+      const dynamic = 0.5 * rhoAir * speed ** 2;
+      const total = 101.3 + dynamic / 1000;
+      inner = `
+        <path d="M36 140 H220" stroke="#00d4ff" stroke-width="3" stroke-dasharray="8 7"></path>
+        <path d="M220 114 H390 Q424 114 424 140 Q424 166 390 166 H220" fill="rgba(0,212,255,0.08)" stroke="#00d4ff" stroke-width="3"></path>
+        <path d="M220 140 H344" stroke="#ff6b9d" stroke-width="5"></path>
+        <circle cx="220" cy="140" r="8" fill="#ff6b9d"></circle>
+        <path d="M74 124 l18 16 l-18 16 M120 124 l18 16 l-18 16" fill="none" stroke="#00d4ff" stroke-width="2"></path>
+        <line x1="220" y1="140" x2="220" y2="218" stroke="#ffd166" stroke-width="3"></line>
+        <line x1="344" y1="140" x2="344" y2="218" stroke="#ffd166" stroke-width="3"></line>
+        <text class="field-svg-label" x="42" y="92">${zh() ? '来流' : 'flow'}</text>
+        <text class="field-svg-label" x="192" y="104">${zh() ? '总压口' : 'stagnation port'}</text>
+        <text class="field-svg-label" x="314" y="104">${zh() ? '静压口' : 'static port'}</text>
+        <text class="field-svg-label" x="38" y="242">${zh() ? `q = ½ρv² = ${format(dynamic, 0)} Pa` : `q = ½ρv² = ${format(dynamic, 0)} Pa`}</text>
+        <text class="field-svg-label" x="284" y="242">${zh() ? `p₀ ≈ ${format(total, 1)} kPa` : `p₀ ≈ ${format(total, 1)} kPa`}</text>`;
+      footer = zh()
+        ? ['总压 − 静压 = 动压。', '压差给出速度，而不是直接“测风”。']
+        : ['p₀ − p = q = ½ρv².', 'Pressure difference reveals airspeed.'];
+      status = zh() ? `空速 ${format(speed, 0)} m/s 对应动压约 ${format(dynamic, 0)} Pa。` : `At ${format(speed, 0)} m/s, the dynamic pressure is about ${format(dynamic, 0)} Pa.`;
+    } else if (lab === 'airfoil') {
+      const speed = clamp(Number(state.airfoilSpeed) || 38, 10, 90);
+      const angle = clamp(Number(state.airfoilAngle) || 5, -4, 12);
+      const alpha = angle * Math.PI / 180;
+      const coefficient = clamp(2 * Math.PI * alpha, -0.8, 1.4);
+      const dynamic = 0.5 * rhoAir * speed ** 2;
+      const lift = coefficient * dynamic;
+      const top = clamp(50 - coefficient * 17, 14, 82);
+      const bottom = clamp(50 + coefficient * 17, 14, 82);
+      inner = `
+        <path d="M40 102 C120 78 186 78 286 112 C186 128 112 130 40 102 Z" fill="rgba(255,209,102,0.22)" stroke="#ffd166" stroke-width="3" transform="rotate(${angle} 160 105)"></path>
+        <path d="M24 72 C102 44 202 50 306 84 M24 142 C112 150 210 138 306 118" fill="none" stroke="#00d4ff" stroke-width="2"></path>
+        <path d="M306 84 C364 102 388 126 432 156 M306 118 C366 138 398 162 436 180" fill="none" stroke="#ff6b9d" stroke-width="3" stroke-dasharray="7 7"></path>
+        <rect x="348" y="58" width="18" height="${top}" rx="8" fill="#00d4ff"></rect>
+        <rect x="380" y="${140 - bottom}" width="18" height="${bottom}" rx="8" fill="#ff6b9d"></rect>
+        <text class="field-svg-label" x="342" y="48">${zh() ? '上表面压强' : 'upper-surface pressure'}</text>
+        <text class="field-svg-label" x="334" y="232">${zh() ? '下表面压强' : 'lower-surface pressure'}</text>
+        <text class="field-svg-label" x="42" y="196">${zh() ? `α = ${format(angle, 1)}° · v = ${format(speed, 0)} m/s` : `α = ${format(angle, 1)}° · v = ${format(speed, 0)} m/s`}</text>
+        <text class="field-svg-label" x="42" y="218">${zh() ? `升力/面积 ≈ ${format(lift, 0)} N/m²` : `lift / area ≈ ${format(lift, 0)} N/m²`}</text>`;
+      footer = zh()
+        ? ['不是“等时到达”：压强差是真实的一部分。', '流体转向与尾迹向下动量也必须计入。']
+        : ['Not equal-transit-time: pressure differences are real.', 'Flow turning and downward wake momentum complete the picture.'];
+      status = zh() ? `尾流被向下偏转；这里用薄翼小迎角模型估算压力差，不代表完整 CFD。` : `The wake turns downward; this is a thin-airfoil small-angle estimate, not a full CFD solution.`;
+    } else {
+      const gasSpeed = clamp(Number(state.atomizerSpeed) || 35, 5, 90);
+      const pressureDrop = 0.5 * 1.2 * gasSpeed ** 2;
+      const draw = clamp(pressureDrop / 80, 10, 64);
+      inner = `
+        <path d="M34 104 H284" stroke="#00d4ff" stroke-width="18" stroke-linecap="round"></path>
+        <path d="M284 104 H456" stroke="#00d4ff" stroke-width="8" stroke-linecap="round"></path>
+        <path d="M284 104 C334 104 354 74 388 72" fill="none" stroke="#ffd166" stroke-width="3"></path>
+        <path d="M284 104 C334 104 354 134 388 136" fill="none" stroke="#ffd166" stroke-width="3"></path>
+        <path d="M188 204 V146" stroke="#ff6b9d" stroke-width="8"></path>
+        <path d="M188 204 H238" stroke="#ff6b9d" stroke-width="8"></path>
+        ${Array.from({ length: 7 }, (_, index) => `<circle cx="${374 + index * 15}" cy="${72 + (index % 3) * 18}" r="${5 - Math.min(3, index * 0.35)}" fill="#ffd166" opacity="${0.85 - index * 0.08}"></circle>`).join('')}
+        <text class="field-svg-label" x="42" y="72">${zh() ? '快速气流' : 'fast gas flow'}</text>
+        <text class="field-svg-label" x="132" y="236">${zh() ? '液体被吸上来' : 'liquid is drawn upward'}</text>
+        <text class="field-svg-label" x="304" y="196">${zh() ? `Δp ≈ ${format(pressureDrop, 0)} Pa` : `Δp ≈ ${format(pressureDrop, 0)} Pa`}</text>`;
+      footer = zh()
+        ? ['低压区把液体向上吸入。', '真实雾化还依赖剪切、表面张力和液滴破碎。']
+        : ['Low pressure draws liquid upward.', 'Real spray also needs shear, surface tension, and breakup.'];
+      status = zh() ? `气流越快，喉部压强越低，吸液趋势越强；这是伯努利直觉而非完整喷雾 CFD。` : `Faster gas lowers the throat pressure and strengthens suction; this is Bernoulli intuition, not a full spray CFD model.`;
+    }
+
+    return { svg: visualFrame(`${inner}${footer.map((line, index) => `<text class="field-svg-label" x="18" y="${256 + index * 14}">${line}</text>`).join('')}`), status };
   }
 
   function acoustics(state) {
@@ -1166,6 +1292,7 @@
   const visualRenderers = Object.freeze({
     'astronomy-optics': astronomyOptics,
     fluids,
+    'fluids-lab': fluidLab,
     acoustics,
     thermodynamics,
     electromagnetism,
@@ -1517,17 +1644,33 @@
         scaleCard('Where it fails', '何时失效', 'Transition and rarefaction resist simple rules', '转捩与稀薄极限不服从简单口号', 'The continuum picture breaks down near molecular mean free paths, and transition to turbulence depends on geometry, roughness, and noise. No single Reynolds number is a universal cliff for all flows.', '当尺度接近分子平均自由程时，连续介质图像会失效；而转入湍流还依赖几何、粗糙度和噪声。不存在一个适用于所有流动的“万能临界雷诺数”。')
       ],
       visual: {
-        type: 'fluids',
-        kind: 'schematic',
-        repNote: t('A field-specific wake sketch tied to Reynolds-number intuition.', '把尾迹形态与雷诺数直觉联系起来的领域示意。'),
-        title: t('As Re rises, attached streamlines give way to separation and wake growth.', '随着 Re 升高，附着流线会让位于分离和放大的尾迹。'),
-        lede: t('Slide the Reynolds number to move from a smooth attached pattern toward a wake-dominated one. The geometry is deliberately simple so the change in regime is easy to read.', '拖动雷诺数，观察流线如何从平滑附着转向尾迹主导。几何被刻意简化，这样不同区域的变化会更容易读懂。'),
-        limitations: t('This is not a CFD solution. It is a geometry-specific schematic for flow past a bluff body, so it teaches the role of separation without pretending to predict a universal transition threshold.', '这不是 CFD 数值解，而是一个针对钝体绕流的几何示意图。它强调分离的重要性，但不假装给出普适的转捩阈值。'),
-        reducedMotion: t('No time animation is needed to see the full flow structure. Reduced-motion mode therefore preserves the entire explanatory state.', '无需时间动画也能看到完整流动结构，因此减少动态时不会损失任何解释信息。'),
+        type: 'fluids-lab',
+        kind: 'model',
+        repNote: t('Calculated teaching models for flow speed, pressure, and momentum exchange.', '用计算教学模型展示流速、压强与动量交换。'),
+        title: t('Bernoulli lab: follow pressure head as it becomes speed.', '伯努利实验室：追踪压强头如何转化为速度。'),
+        lede: t('Choose a bench-top experiment: Reynolds wake, Venturi pressure drop, tank outflow, Pitot airspeed, airfoil lift, or an atomizer. Each control belongs to the active apparatus, so the causal story stays visible.', '选择一个实验台：雷诺数尾迹、文丘里压降、水箱出流、皮托空速、机翼升力或喷雾器。每个控制只属于当前装置，让因果链保持清楚。'),
+        limitations: t('Bernoulli’s equation is most direct for steady, incompressible, low-loss flow along a streamline. These are transparent models, not full CFD; real viscous losses, turbulence, separation, and three-dimensional effects can change the result.', '伯努利方程最直接地适用于沿流线的稳态、不可压、低损耗流动。这些是透明的教学模型，不是完整 CFD；真实的黏性损失、湍流、分离和三维效应会改变结果。'),
+        reducedMotion: t('No autoplay is required: the apparatus, measured quantities, and balance are visible in one solved frame. Reduced-motion mode therefore preserves the evidence.', '无需自动播放：装置、测量量和能量平衡都在一个求解后的画面中可见。因此减少动态时仍保留全部证据。'),
+        normalizeState: state => { state.lab ||= 'reynolds'; },
         controls: [
-          { type: 'range', key: 'reynolds', min: 50, max: 4000, step: 10, value: 280, label: t('Reynolds number Re', '雷诺数 Re'), formatter: value => format(value, 0) }
+          { type: 'toggle', key: 'lab', value: 'reynolds', label: t('Experiment bench', '实验台'), options: [
+            { value: 'reynolds', label: t('Reynolds wake', '雷诺数尾迹') },
+            { value: 'venturi', label: t('Venturi tube', '文丘里管') },
+            { value: 'tank', label: t('Tank outflow', '水箱出流') },
+            { value: 'pitot', label: t('Pitot tube', '皮托管') },
+            { value: 'airfoil', label: t('Airfoil', '机翼') },
+            { value: 'atomizer', label: t('Atomizer', '喷雾器') }
+          ] },
+          { type: 'range', key: 'reynolds', min: 50, max: 4000, step: 10, value: 280, label: t('Reynolds number Re', '雷诺数 Re'), formatter: value => format(value, 0), visibleWhen: state => state.lab === 'reynolds' },
+          { type: 'range', key: 'venturiRatio', min: 0.35, max: 1, step: 0.01, value: 0.58, label: t('Throat / inlet diameter', '喉部 / 入口直径'), formatter: value => format(value, 2), visibleWhen: state => state.lab === 'venturi' },
+          { type: 'range', key: 'venturiSpeed', min: 0.5, max: 12, step: 0.1, value: 3, label: t('Inlet speed (m/s)', '入口速度（m/s）'), formatter: value => `${format(value, 1)} m/s`, visibleWhen: state => state.lab === 'venturi' },
+          { type: 'range', key: 'tankHead', min: 0.2, max: 3, step: 0.05, value: 1.2, label: t('Water head h (m)', '水头 h（m）'), formatter: value => `${format(value, 2)} m`, visibleWhen: state => state.lab === 'tank' },
+          { type: 'range', key: 'pitotSpeed', min: 5, max: 100, step: 1, value: 40, label: t('Airspeed (m/s)', '空速（m/s）'), formatter: value => `${format(value, 0)} m/s`, visibleWhen: state => state.lab === 'pitot' },
+          { type: 'range', key: 'airfoilAngle', min: -4, max: 12, step: 0.5, value: 5, label: t('Angle of attack α', '迎角 α'), formatter: value => `${format(value, 1)}°`, visibleWhen: state => state.lab === 'airfoil' },
+          { type: 'range', key: 'airfoilSpeed', min: 10, max: 90, step: 1, value: 38, label: t('Flow speed (m/s)', '来流速度（m/s）'), formatter: value => `${format(value, 0)} m/s`, visibleWhen: state => state.lab === 'airfoil' },
+          { type: 'range', key: 'atomizerSpeed', min: 5, max: 90, step: 1, value: 35, label: t('Gas speed (m/s)', '气流速度（m/s）'), formatter: value => `${format(value, 0)} m/s`, visibleWhen: state => state.lab === 'atomizer' }
         ],
-        sources: ['nasa-sphere-drag']
+        sources: ['nasa-bernoulli', 'openstax-fluid-dynamics', 'nasa-pitot-static', 'nasa-lift']
       },
       experiment: experimentCard('observation', 'Dye streaks in pipe flow showed that “smooth” and “turbulent” are distinct regimes, not moods.', '管流中的染料条纹表明“平滑”和“湍流”是不同区域，而不是模糊印象。', 'Injecting a thin dye filament into water revealed when neighbouring fluid layers stayed coherent and when disturbances amplified into mixing. The experiment gave fluid mechanics one of its clearest regime pictures.', '把细染料丝注入水流，能直接看见相邻流层何时保持相干，何时扰动被放大并导致混合。这个实验给了流体力学最清楚的区域图像之一。', 'The visual regime boundary depends on geometry and disturbance level, so the picture is diagnostic rather than universal.', '可见的区域边界还取决于几何和扰动水平，因此它更像诊断工具，而不是普适常数。', ['reynolds-1883']),
       mechanism: {
@@ -1548,7 +1691,8 @@
       },
       claims: [
         claimCard('Reynolds number is a regime guide, not a universal oracle.', '雷诺数是区域导向，而不是万能神谕。', 'Reynolds number compares inertia to viscosity and therefore helps organize laminar, transitional, and wake-dominated behavior, but geometry, roughness, and disturbance history still matter.', '雷诺数比较惯性与黏性，因此能帮助组织层流、转捩和尾迹主导等行为，但几何、粗糙度和扰动历史依然重要。', 'That is why the same nominal Re can look tame in one setup and unstable in another. The ratio is essential, yet never the only story.', '这就是为何相同名义上的 Re 在一种装置里看起来温和，在另一种装置里却可能不稳定。这个比值非常重要，但从来不是唯一故事。', ['nasa-sphere-drag', 'reynolds-1883']),
-        claimCard('A wing’s lift needs flow turning and momentum, not just a slogan about fast air.', '机翼升力需要气流转向与动量，而不是一句“上快下慢”的口号。', 'Pressure differences over a wing are real, but a complete explanation must include how the wing and boundary layer redirect the flow and create a trailing wake.', '机翼上下的压强差当然真实存在，但完整解释必须包括机翼和边界层如何让气流转向并形成尾迹。', 'Bernoulli’s relation is part of the bookkeeping, not a substitute for momentum conservation and boundary conditions.', '伯努利关系是记账的一部分，而不能代替动量守恒和边界条件。', ['nasa-lift', 'nasa-bernoulli'])
+        claimCard('A wing’s lift needs flow turning and momentum, not just a slogan about fast air.', '机翼升力需要气流转向与动量，而不是一句“上快下慢”的口号。', 'Pressure differences over a wing are real, but a complete explanation must include how the wing and boundary layer redirect the flow and create a trailing wake.', '机翼上下的压强差当然真实存在，但完整解释必须包括机翼和边界层如何让气流转向并形成尾迹。', 'Bernoulli’s relation is part of the bookkeeping, not a substitute for momentum conservation and boundary conditions.', '伯努利关系是记账的一部分，而不能代替动量守恒和边界条件。', ['nasa-lift', 'nasa-bernoulli']),
+        claimCard('Bernoulli instruments turn pressure differences into useful measurements.', '伯努利仪器把压强差变成有用测量。', 'Venturi meters, Pitot tubes, nozzles, aspirators, and many ventilation systems exploit the same energy bookkeeping: geometry changes the speed, and pressure taps reveal the tradeoff.', '文丘里流量计、皮托管、喷嘴、抽吸器和许多通风系统都利用同一套能量记账：几何改变速度，而取压口揭示这种交换。', 'In engineering, the ideal equation is usually paired with calibration and loss coefficients because walls, turbulence, and separation dissipate energy.', '在工程中，理想方程通常还要配合标定和损失系数，因为壁面、湍流和分离会耗散能量。', ['nasa-bernoulli', 'openstax-fluid-dynamics', 'nasa-pitot-static'])
       ]
     },
     acoustics: {
@@ -2125,9 +2269,17 @@
     const defaultState = Object.fromEntries((visual.controls || []).map(control => [control.key, control.value]));
     const state = { ...defaultState, ...(visualStateCache.get(fieldId) || {}) };
     const syncControls = [];
+    const controlHosts = new Map();
     const render = () => {
       visual.normalizeState?.(state);
       for (const syncControl of syncControls) syncControl();
+      for (const control of visual.controls || []) {
+        const host = controlHosts.get(control.key);
+        if (!host) continue;
+        const visible = !control.visibleWhen || control.visibleWhen(state);
+        host.hidden = !visible;
+        host.setAttribute('aria-hidden', String(!visible));
+      }
       visualStateCache.set(fieldId, { ...state });
       const renderer = visualRenderers[visual.type];
       if (!renderer) throw new Error(`Missing field visual renderer ${visual.type}`);
@@ -2136,12 +2288,14 @@
       status.textContent = result.status;
     };
     for (const control of visual.controls || []) {
-      controls.append((control.type === 'toggle' ? toggleControl : rangeControl)(
+      const host = (control.type === 'toggle' ? toggleControl : rangeControl)(
         control,
         state,
         render,
         sync => syncControls.push(sync)
-      ));
+      );
+      controlHosts.set(control.key, host);
+      controls.append(host);
     }
     const note = create('p', 'field-visual-note', pick(visual.limitations));
     const reduced = create('p', 'field-visual-note', pick(visual.reducedMotion));

@@ -168,6 +168,10 @@
   gap: 0.42rem;
 }
 
+.field-control-group[hidden] {
+  display: none;
+}
+
 .field-control-group label,
 .field-control-group output,
 .field-toggle button,
