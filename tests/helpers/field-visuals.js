@@ -13,12 +13,16 @@ export const fieldVisualScenarios = {
   ],
   acoustics: [
     { state: { lab: 'tone' }, expect: 'pressure waveform' },
-    { state: { lab: 'doppler' }, expect: 'compresses wavefronts' },
+    { state: { lab: 'doppler' }, expect: 'approach → closest approach → retreat' },
     { state: { lab: 'shock' }, expect: 'Mach cone' }
   ],
   thermodynamics: [
-    { state: { hot: 350, cold: 420 }, expect: 'T_h = 350 K, T_c = 345 K', expectedState: { hot: 350, cold: 345 } },
-    { state: { hot: 900, cold: 120 }, expect: 'Carnot ceiling = 0.867' }
+    { state: { lab: 'engine', hot: 350, cold: 420 }, expect: 'Q_h = 500 kJ  →  W = 7 kJ', expectedState: { hot: 350, cold: 345 } },
+    { state: { lab: 'engine', hot: 900, cold: 120 }, expect: 'reversible ceiling η_C = 0.867' },
+    { state: { lab: 'pv', process: 'compression', volumeRatio: 2.5 }, expect: 'compression · isothermal ideal gas: W = -3.05 kJ' },
+    { state: { lab: 'thermalize', bodyHot: 600, bodyCold: 280 }, expect: 'energy conserved' },
+    { state: { lab: 'refrigerator', fridgeCold: 270, fridgeRoom: 300 }, expect: 'work moves heat uphill' },
+    { state: { lab: 'distribution', distributionTemperature: 800 }, expect: 'higher T → broader, higher-energy tail' }
   ],
   electromagnetism: [
     { state: { fluxRate: -1, fieldStrength: 0.4 }, expect: 'induced current direction: clockwise' },

@@ -64,6 +64,13 @@
     ],
     thermodynamics: [
       {
+        title: 'Heat engines',
+        institution: 'University of Texas at Austin',
+        url: 'https://farside.ph.utexas.edu/teaching/sm1/lectures/node57.html',
+        en: 'Derives the reversible heat-engine efficiency bound and tracks heat, work, and rejected heat.',
+        zh: '推导可逆热机效率上限，并追踪输入热量、功与排出热量。'
+      },
+      {
         title: 'SI units: temperature',
         institution: 'NIST',
         url: 'https://www.nist.gov/pml/owm/si-units-temperature',
@@ -76,6 +83,13 @@
         url: 'https://physics.nist.gov/cgi-bin/cuu/Value?k',
         en: 'The standard constant linking microscopic energy scales to temperature and entropy.',
         zh: '连接微观能量尺度、温度与熵的标准常数。'
+      },
+      {
+        title: 'Boltzmann constant and entropy',
+        institution: 'NIST',
+        url: 'https://www.nist.gov/pml/special-publication-330/sp-330-section-2',
+        en: 'The SI account of the Boltzmann constant and microscopic state counting.',
+        zh: '国际单位制对玻尔兹曼常数与微观状态计数的说明。'
       }
     ],
     electromagnetism: [

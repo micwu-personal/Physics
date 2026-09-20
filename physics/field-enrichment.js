@@ -829,37 +829,190 @@
  const sourceBlock = create('div', 'field-visual-sources'); sourceBlock.append(create('h3', null, zh() ? '支撑这一图示的资料' : 'Sources behind this visual'), sourceList(visual.sources, 'field-visual-sources')); card.append(sourceBlock); } host.append(card); render();  }
 
   function thermodynamics(state) {
-    const hot = state.hot;
-    const cold = Math.min(state.cold, hot - 5);
-    const eta = clamp(1 - cold / hot, 0, 1);
-    const energies = [0, 1, 2, 3, 4];
-    const bars = temperature => {
-      const weights = energies.map(level => Math.exp(-level / (temperature / 210)));
-      const sum = weights.reduce((left, right) => left + right, 0);
-      return weights.map(weight => weight / sum);
+    const lab = state.lab || 'engine';
+    const arrow = (x1, y1, x2, y2, color = '#ffd166', width = 4) => {
+      const angle = Math.atan2(y2 - y1, x2 - x1);
+      const left = [x2 - 10 * Math.cos(angle - Math.PI / 6), y2 - 10 * Math.sin(angle - Math.PI / 6)];
+      const right = [x2 - 10 * Math.cos(angle + Math.PI / 6), y2 - 10 * Math.sin(angle + Math.PI / 6)];
+      return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${color}" stroke-width="${width}" stroke-linecap="round"></line><path d="M${left[0].toFixed(1)} ${left[1].toFixed(1)} L${x2} ${y2} L${right[0].toFixed(1)} ${right[1].toFixed(1)}" fill="none" stroke="${color}" stroke-width="${Math.max(2, width - 1)}" stroke-linecap="round" stroke-linejoin="round"></path>`;
     };
-    const hotBars = bars(hot);
-    const coldBars = bars(cold);
+
+    if (lab === 'engine') {
+      const hot = state.hot;
+      const cold = Math.min(state.cold, hot - 5);
+      const heatIn = state.heatIn;
+      const eta = clamp(1 - cold / hot, 0, 1);
+      const work = heatIn * eta;
+      const rejected = heatIn - work;
+      return {
+        svg: visualFrame(`
+          <rect x="34" y="72" width="116" height="112" rx="18" fill="rgba(255,107,157,0.16)" stroke="#ff6b9d"></rect>
+          <rect x="204" y="84" width="112" height="92" rx="18" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.2)"></rect>
+          <rect x="370" y="72" width="116" height="112" rx="18" fill="rgba(0,212,255,0.16)" stroke="#00d4ff"></rect>
+          ${arrow(150, 112, 204, 112, '#ff6b9d', 5)}
+          ${arrow(316, 154, 370, 154, '#00d4ff', 4)}
+          ${arrow(260, 84, 260, 48, '#ffd166', 5)}
+          <text class="field-svg-label" x="45" y="58">${zh() ? '高温热源' : 'hot reservoir'}</text>
+          <text class="field-svg-label" x="218" y="70">${zh() ? '循环热机' : 'cyclic engine'}</text>
+          <text class="field-svg-label" x="382" y="58">${zh() ? '低温热源' : 'cold reservoir'}</text>
+          <text class="field-svg-label" x="64" y="112">Q_h</text>
+          <text class="field-svg-label" x="416" y="154">Q_c</text>
+          <text class="field-svg-label" x="269" y="50">W</text>
+          <text class="field-svg-label" x="220" y="124">η_C = ${(eta * 100).toFixed(1)}%</text>
+          <text class="field-svg-label" x="222" y="146">${zh() ? '只把一部分热变成功' : 'only part becomes work'}</text>
+        `, [
+          `Q_h = ${format(heatIn, 0)} kJ  →  W = ${format(work, 0)} kJ`,
+          `Q_c = ${format(rejected, 0)} kJ  ·  ${zh() ? '可逆上限' : 'reversible ceiling'} η_C = ${eta.toFixed(3)}`
+        ]),
+        status: zh()
+          ? '把热机当成能量账本：每个循环都必须满足 Q_h = W + Q_c。卡诺效率是可逆极限，不是真实发动机的保证值。'
+          : 'Treat the engine as an energy ledger: every cycle obeys Q_h = W + Q_c. Carnot efficiency is a reversible upper bound, not a promise for a real machine.'
+      };
+    }
+
+    if (lab === 'pv') {
+      const expansion = state.process === 'expansion';
+      const n = 1;
+      const R = 8.314;
+      const T = state.gasTemperature;
+      const baseVolume = 0.01;
+      const ratio = state.volumeRatio;
+      const startVolume = expansion ? baseVolume : baseVolume * ratio;
+      const endVolume = expansion ? baseVolume * ratio : baseVolume;
+      const startPressure = n * R * T / startVolume;
+      const endPressure = n * R * T / endVolume;
+      const work = n * R * T * Math.log(endVolume / startVolume) / 1000;
+      const minV = baseVolume;
+      const maxV = baseVolume * ratio;
+      const maxP = n * R * T / minV;
+      const xForV = volume => 84 + ((volume - minV) / Math.max(1e-6, maxV - minV)) * 360;
+      const yForP = pressure => 202 - (pressure / maxP) * 132;
+      const points = Array.from({ length: 28 }, (_, index) => {
+        const progress = index / 27;
+        const volume = startVolume + (endVolume - startVolume) * progress;
+        const pressure = n * R * T / volume;
+        return [xForV(volume), yForP(pressure)];
+      });
+      const path = pathFromPoints(points);
+      const pistonX = 54 + clamp((startVolume - minV) / Math.max(1e-6, maxV - minV), 0, 1) * 98;
+      return {
+        svg: visualFrame(`
+          <rect x="36" y="70" width="126" height="128" rx="10" fill="rgba(0,212,255,0.08)" stroke="#00d4ff"></rect>
+          <rect x="48" y="104" width="${Math.max(10, pistonX - 48)}" height="82" fill="rgba(255,107,157,0.18)"></rect>
+          <line x1="${pistonX}" y1="78" x2="${pistonX}" y2="190" stroke="#ffd166" stroke-width="6"></line>
+          <line x1="${pistonX}" y1="78" x2="${pistonX + (expansion ? 30 : -30)}" y2="60" stroke="#ffd166" stroke-width="3"></line>
+          <path d="M${pistonX + (expansion ? 22 : -22)} 60 L${pistonX + (expansion ? 30 : -30)} 60 L${pistonX + (expansion ? 25 : -25)} 52" fill="none" stroke="#ffd166" stroke-width="2"></path>
+          <line class="field-svg-axis" x1="76" y1="214" x2="458" y2="214"></line>
+          <line class="field-svg-axis" x1="76" y1="54" x2="76" y2="214"></line>
+          <path d="${path}" fill="none" stroke="#ffd166" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path>
+          <circle cx="${points[0][0]}" cy="${points[0][1]}" r="5" fill="#ff6b9d"></circle>
+          <circle cx="${points[points.length - 1][0]}" cy="${points[points.length - 1][1]}" r="5" fill="#00d4ff"></circle>
+          <text class="field-svg-label" x="48" y="54">${zh() ? '理想气体活塞' : 'ideal-gas piston'}</text>
+          <text class="field-svg-label" x="420" y="232">V</text>
+          <text class="field-svg-label" x="56" y="64">P</text>
+          <text class="field-svg-label" x="88" y="238">${zh() ? '起点' : 'start'}</text>
+          <text class="field-svg-label" x="410" y="238">${zh() ? '终点' : 'end'}</text>
+        `, [
+          `${expansion ? 'expansion' : 'compression'} · ${zh() ? '等温理想气体' : 'isothermal ideal gas'}: W = ${work >= 0 ? '+' : ''}${format(work, 2)} kJ`,
+          `P_start = ${format(startPressure / 1000, 1)} kPa  ·  P_end = ${format(endPressure / 1000, 1)} kPa  ·  V₂/V₁ = ${format(endVolume / startVolume, 2)}`
+        ]),
+        status: zh()
+          ? `曲线下的有向面积就是功：膨胀时气体对外做正功，压缩时外界对气体做负功。这里用等温理想气体 W = nRT ln(V₂/V₁)。`
+          : `The signed area under the path is work: expansion gives positive work by the gas, compression gives negative work. This uses the isothermal ideal-gas relation W = nRT ln(V₂/V₁).`
+      };
+    }
+
+    if (lab === 'thermalize') {
+      const hot = state.bodyHot;
+      const cold = Math.min(state.bodyCold, hot - 5);
+      const capacityRatio = state.capacityRatio;
+      const finalTemperature = (capacityRatio * hot + cold) / (capacityRatio + 1);
+      const entropy = capacityRatio * Math.log(finalTemperature / hot) + Math.log(finalTemperature / cold);
+      const bar = temperature => 198 - clamp((temperature - 100) / 800, 0.05, 1) * 128;
+      return {
+        svg: visualFrame(`
+          <rect x="42" y="${bar(hot)}" width="74" height="${198 - bar(hot)}" rx="10" fill="rgba(255,107,157,0.25)" stroke="#ff6b9d"></rect>
+          <rect x="146" y="${bar(cold)}" width="74" height="${198 - bar(cold)}" rx="10" fill="rgba(0,212,255,0.25)" stroke="#00d4ff"></rect>
+          <rect x="322" y="${bar(finalTemperature)}" width="74" height="${198 - bar(finalTemperature)}" rx="10" fill="rgba(255,209,102,0.26)" stroke="#ffd166"></rect>
+          ${arrow(116, 112, 146, 112, '#ffd166', 4)}
+          ${arrow(220, 132, 322, 132, '#ffd166', 4)}
+          <line x1="42" y1="198" x2="220" y2="198" class="field-svg-axis"></line>
+          <line x1="322" y1="198" x2="396" y2="198" class="field-svg-axis"></line>
+          <text class="field-svg-label" x="48" y="54">${zh() ? '接触前' : 'before contact'}</text>
+          <text class="field-svg-label" x="330" y="54">${zh() ? '共同平衡' : 'common equilibrium'}</text>
+          <text class="field-svg-label" x="60" y="218">A: ${format(hot, 0)} K</text>
+          <text class="field-svg-label" x="152" y="218">B: ${format(cold, 0)} K</text>
+          <text class="field-svg-label" x="326" y="218">T_f: ${format(finalTemperature, 0)} K</text>
+          <text class="field-svg-label" x="230" y="92">${zh() ? '有限温差导热' : 'finite-gap heat flow'}</text>
+        `, [
+          `${zh() ? '能量守恒' : 'energy conserved'}: T_f = ${format(finalTemperature, 1)} K  ·  C_A/C_B = ${format(capacityRatio, 2)}`,
+          `${zh() ? '系统熵变' : 'system entropy change'} ΔS = ${format(entropy, 3)} J/K  ${entropy > 0 ? '≥ 0' : ''}`
+        ]),
+        status: zh()
+          ? '把两个物体直接接触，热量从高温物体流向低温物体，直到温度相同。有限温差导热产生正熵；这里把 C_B 归一化为 1 J/K。'
+          : 'Put two bodies in direct contact: heat flows from hot to cold until they share a temperature. Finite-temperature-gap conduction produces positive entropy; C_B is normalized to 1 J/K here.'
+      };
+    }
+
+    if (lab === 'refrigerator') {
+      const cold = state.fridgeCold;
+      const room = Math.max(state.fridgeRoom, cold + 5);
+      const coolingLoad = state.coolingLoad;
+      const cop = cold / (room - cold);
+      const work = coolingLoad / cop;
+      const rejected = coolingLoad + work;
+      return {
+        svg: visualFrame(`
+          <rect x="40" y="70" width="122" height="118" rx="16" fill="rgba(0,212,255,0.16)" stroke="#00d4ff"></rect>
+          <rect x="198" y="84" width="122" height="90" rx="18" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.2)"></rect>
+          <rect x="356" y="70" width="126" height="118" rx="16" fill="rgba(255,107,157,0.16)" stroke="#ff6b9d"></rect>
+          ${arrow(162, 126, 198, 126, '#00d4ff', 5)}
+          ${arrow(320, 104, 356, 104, '#ff6b9d', 5)}
+          ${arrow(260, 174, 260, 214, '#ffd166', 5)}
+          <text class="field-svg-label" x="58" y="56">${zh() ? '冷藏空间' : 'cold space'}</text>
+          <text class="field-svg-label" x="218" y="70">${zh() ? '压缩机' : 'compressor'}</text>
+          <text class="field-svg-label" x="374" y="56">${zh() ? '室内 / 热源' : 'room / hot side'}</text>
+          <text class="field-svg-label" x="62" y="126">Q_c</text>
+          <text class="field-svg-label" x="374" y="104">Q_h</text>
+          <text class="field-svg-label" x="270" y="226">W_in</text>
+          <text class="field-svg-label" x="214" y="132">${zh() ? '用功把热“搬上坡”' : 'work moves heat uphill'}</text>
+        `, [
+          `Q_c = ${format(coolingLoad, 0)} kJ  ·  W_min = ${format(work, 0)} kJ  ·  Q_h = ${format(rejected, 0)} kJ`,
+          `${zh() ? '可逆制冷系数' : 'reversible COP'} = ${cop.toFixed(2)}  ·  T_c = ${format(cold, 0)} K, T_h = ${format(room, 0)} K`
+        ]),
+        status: zh()
+          ? '制冷机不是“制造冷”，而是用外界功把热量从低温处搬到高温处。这里给出可逆极限；真实压缩机需要更多功。'
+          : 'A refrigerator does not create cold: it uses outside work to move heat from a colder place to a warmer one. This is the reversible limit; real compressors need more work.'
+      };
+    }
+
+    const temperature = state.distributionTemperature;
+    const points = Array.from({ length: 36 }, (_, index) => {
+      const energy = index / 35 * 5;
+      const theta = temperature / 300;
+      const density = Math.sqrt(energy + 0.001) * Math.exp(-energy / theta) / Math.pow(theta, 1.5);
+      return [72 + energy * 78, 202 - clamp(density * 72, 0, 142)];
+    });
+    const distributionPath = pathFromPoints(points);
+    const peak = Math.min(5, temperature / 600);
     return {
       svg: visualFrame(`
-        <rect x="44" y="72" width="104" height="112" rx="18" fill="rgba(255,107,157,0.16)" stroke="#ff6b9d"></rect>
-        <rect x="372" y="72" width="104" height="112" rx="18" fill="rgba(0,212,255,0.16)" stroke="#00d4ff"></rect>
-        <rect x="206" y="92" width="108" height="72" rx="20" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.12)"></rect>
-        <path class="field-svg-accent" d="M150 100 C 188 100, 188 92, 206 92"></path>
-        <path class="field-svg-secondary" d="M314 164 C 352 164, 352 176, 372 176"></path>
-        <path d="M248 92 L268 92 L268 ${92 - eta * 50}" stroke="#ffd166" stroke-width="8" stroke-linecap="round"></path>
-        ${hotBars.map((value, index) => `<rect x="${58 + index * 18}" y="${168 - value * 70}" width="12" height="${value * 70}" fill="#ff6b9d"></rect>`).join('')}
-        ${coldBars.map((value, index) => `<rect x="${386 + index * 18}" y="${168 - value * 70}" width="12" height="${value * 70}" fill="#00d4ff"></rect>`).join('')}
-        <text class="field-svg-label" x="52" y="58">${zh() ? '高温库' : 'hot reservoir'}</text>
-        <text class="field-svg-label" x="384" y="58">${zh() ? '低温库' : 'cold reservoir'}</text>
-        <text class="field-svg-label" x="226" y="128">${zh() ? '可逆极限' : 'reversible limit'}</text>
+        <line class="field-svg-axis" x1="72" y1="202" x2="464" y2="202"></line>
+        <line class="field-svg-axis" x1="72" y1="54" x2="72" y2="202"></line>
+        <path d="${distributionPath}" fill="none" stroke="#ffd166" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path>
+        <line x1="${72 + peak * 78}" y1="202" x2="${72 + peak * 78}" y2="${202 - 72}" stroke="#ff6b9d" stroke-dasharray="5 5"></line>
+        <text class="field-svg-label" x="82" y="44">${zh() ? '能量概率密度' : 'energy probability density'}</text>
+        <text class="field-svg-label" x="352" y="222">E / k_B·300 K</text>
+        <text class="field-svg-label" x="42" y="68">p(E)</text>
+        <text class="field-svg-label" x="${82 + peak * 78}" y="76">${zh() ? '峰值移动' : 'peak shifts'}</text>
+        <text class="field-svg-label" x="270" y="126">${zh() ? '更高温度 → 更宽、更高能' : 'higher T → broader, higher-energy tail'}</text>
       `, [
-        `T_h = ${format(hot, 0)} K, T_c = ${format(cold, 0)} K`,
-        `${zh() ? '卡诺效率上限' : 'Carnot ceiling'} = ${eta.toFixed(3)}`
+        `T = ${format(temperature, 0)} K  ·  ${zh() ? '平均平动动能' : 'mean translational energy'} ≈ 1.5 k_B T`,
+        `${zh() ? '这是一维能量分布示意，不是分子轨迹' : 'schematic energy distribution, not molecular trajectories'}`
       ]),
       status: zh()
-        ? '箭头宽度只表示热流去向与效率上限；左、右柱形图则表示高温与低温下微观能量分布的宽窄。'
-        : 'Arrow widths only indicate the heat-flow bookkeeping and efficiency ceiling; the bar sets show how hot and cold ensembles spread across microscopic energy levels.'
+        ? '提高温度不会让每个分子都拥有同样的速度；它会把平衡能量分布推向更高能量，并拉长高能尾部。'
+        : 'Raising temperature does not give every molecule the same speed; it shifts the equilibrium energy distribution upward and lengthens the high-energy tail.'
     };
   }
 
@@ -1761,43 +1914,63 @@
       visual: {
         type: 'thermodynamics',
         kind: 'model',
-        repNote: t('A calculated reversible ceiling paired with schematic energy-level populations.', '把计算出的可逆上限与示意性的能级占据并列展示。'),
-        title: t('Temperature sets both the Carnot ceiling and the breadth of microscopic energy occupancy.', '温度既决定卡诺上限，也决定微观能级占据有多宽。'),
-        lede: t('Move the hot and cold reservoirs to see two linked ideas at once: the efficiency ceiling for a reversible engine, and the broader energy spread available at higher temperature.', '拖动高温与低温热源，可以同时看到两个相连的想法：可逆热机的效率上限，以及更高温度下更宽的微观能量分布。'),
-        limitations: t('The bars are a toy equilibrium distribution, not a molecular simulation, and the engine sketch suppresses every practical loss besides the thermodynamic ceiling.', '这些柱形图只是玩具式平衡分布，而非分子模拟；热机示意图也省略了除热力学上限之外的一切工程损耗。'),
-        reducedMotion: t('The full argument is visible in a static state because the relevant quantities are state variables, not moving trajectories.', '相关论证在静态状态下就完整可见，因为这里关键的是状态变量，而不是运动轨迹。'),
+        repNote: t('Five calculated teaching models: heat bookkeeping, P–V work, thermalization, refrigeration, and a statistical energy distribution.', '五个计算教学模型：热量记账、P–V 功、热平衡、制冷，以及统计能量分布。'),
+        title: t('Thermodynamics is an accounting laboratory: follow energy, work, and entropy.', '热力学是一间记账实验室：追踪能量、功与熵。'),
+        lede: t('Choose one bench at a time. Each view isolates a process, names its assumptions, and makes the conservation law or inequality visible instead of hiding it behind a decorative animation.', '一次只选择一个实验台。每个视图都单独说明一个过程、列出假设，并把守恒定律或不等式直接画出来，而不是藏在装饰性动画后面。'),
+        limitations: t('These are calculated, low-dimensional models: the engine is a reversible ceiling, the piston is isothermal, thermalization uses lumped heat capacities, refrigeration is an ideal limit, and the distribution is schematic rather than a molecular movie.', '这些都是低维计算模型：热机是可逆上限，活塞过程是等温的，热平衡使用集中参数热容，制冷是理想极限，而分布图是示意性的，不是分子电影。'),
+        reducedMotion: t('The evidence is encoded in static arrows, curves, bars, and ledgers, so reduced-motion mode keeps every experiment understandable.', '证据由静态箭头、曲线、柱形和账本表达，因此减少动态不会损失实验的可理解性。'),
         normalizeState(state) {
-          state.hot = clamp(Number(state.hot), 350, 900);
-          state.cold = clamp(Number(state.cold), 120, 420);
+          const number = (value, fallback) => Number.isFinite(Number(value)) ? Number(value) : fallback;
+          const labs = ['engine', 'pv', 'thermalize', 'refrigerator', 'distribution'];
+          state.lab = labs.includes(state.lab) ? state.lab : 'engine';
+          state.hot = clamp(number(state.hot, 700), 350, 900);
+          state.cold = clamp(number(state.cold, 290), 120, 420);
           state.cold = Math.min(state.cold, state.hot - 5);
+          state.heatIn = clamp(number(state.heatIn, 500), 100, 1000);
+          state.process = state.process === 'compression' ? 'compression' : 'expansion';
+          state.volumeRatio = clamp(number(state.volumeRatio, 2.5), 1.2, 4);
+          state.gasTemperature = clamp(number(state.gasTemperature, 400), 250, 800);
+          state.bodyHot = clamp(number(state.bodyHot, 600), 320, 900);
+          state.bodyCold = clamp(number(state.bodyCold, 280), 120, 800);
+          state.bodyCold = Math.min(state.bodyCold, state.bodyHot - 5);
+          state.capacityRatio = clamp(number(state.capacityRatio, 1), 0.25, 4);
+          state.fridgeCold = clamp(number(state.fridgeCold, 270), 240, 290);
+          state.fridgeRoom = clamp(number(state.fridgeRoom, 300), 295, 340);
+          state.fridgeRoom = Math.max(state.fridgeRoom, state.fridgeCold + 5);
+          state.coolingLoad = clamp(number(state.coolingLoad, 120), 50, 300);
+          state.distributionTemperature = clamp(number(state.distributionTemperature, 450), 150, 1000);
         },
         controls: [
           {
-            type: 'range',
-            key: 'hot',
-            min: 350,
-            max: 900,
-            minFromState: state => Math.max(350, state.cold + 5),
-            step: 5,
-            value: 700,
-            label: t('Hot reservoir T_h', '高温热源 T_h'),
-            formatter: value => `${format(value, 0)} K`
+            type: 'toggle',
+            key: 'lab',
+            value: 'engine',
+            label: t('Experiment bench', '实验台'),
+            options: [
+              { value: 'engine', label: t('Heat engine', '热机账本') },
+              { value: 'pv', label: t('P–V work', 'P–V 做功') },
+              { value: 'thermalize', label: t('Thermalization', '热平衡') },
+              { value: 'refrigerator', label: t('Refrigerator', '制冷机') },
+              { value: 'distribution', label: t('Energy distribution', '能量分布') }
+            ]
           },
-          {
-            type: 'range',
-            key: 'cold',
-            min: 120,
-            max: 420,
-            maxFromState: state => Math.min(420, state.hot - 5),
-            step: 5,
-            value: 290,
-            label: t('Cold reservoir T_c', '低温热源 T_c'),
-            formatter: value => `${format(value, 0)} K`
-          }
+          { type: 'range', key: 'hot', min: 350, max: 900, minFromState: state => Math.max(350, state.cold + 5), step: 5, value: 700, label: t('Hot reservoir T_h', '高温热源 T_h'), formatter: value => `${format(value, 0)} K`, visibleWhen: state => state.lab === 'engine' },
+          { type: 'range', key: 'cold', min: 120, max: 420, maxFromState: state => Math.min(420, state.hot - 5), step: 5, value: 290, label: t('Cold reservoir T_c', '低温热源 T_c'), formatter: value => `${format(value, 0)} K`, visibleWhen: state => state.lab === 'engine' },
+          { type: 'range', key: 'heatIn', min: 100, max: 1000, step: 10, value: 500, label: t('Heat input Q_h', '输入热量 Q_h'), formatter: value => `${format(value, 0)} kJ`, visibleWhen: state => state.lab === 'engine' },
+          { type: 'toggle', key: 'process', value: 'expansion', label: t('Piston process', '活塞过程'), options: [{ value: 'expansion', label: t('Expansion', '膨胀') }, { value: 'compression', label: t('Compression', '压缩') }], visibleWhen: state => state.lab === 'pv' },
+          { type: 'range', key: 'volumeRatio', min: 1.2, max: 4, step: 0.1, value: 2.5, label: t('Volume ratio V₂/V₁', '体积比 V₂/V₁'), formatter: value => format(value, 2), visibleWhen: state => state.lab === 'pv' },
+          { type: 'range', key: 'gasTemperature', min: 250, max: 800, step: 10, value: 400, label: t('Gas temperature', '气体温度'), formatter: value => `${format(value, 0)} K`, visibleWhen: state => state.lab === 'pv' },
+          { type: 'range', key: 'bodyHot', min: 320, max: 900, step: 5, value: 600, label: t('Body A temperature', '物体 A 温度'), formatter: value => `${format(value, 0)} K`, visibleWhen: state => state.lab === 'thermalize' },
+          { type: 'range', key: 'bodyCold', min: 120, max: 800, maxFromState: state => Math.min(800, state.bodyHot - 5), step: 5, value: 280, label: t('Body B temperature', '物体 B 温度'), formatter: value => `${format(value, 0)} K`, visibleWhen: state => state.lab === 'thermalize' },
+          { type: 'range', key: 'capacityRatio', min: 0.25, max: 4, step: 0.05, value: 1, label: t('Heat-capacity ratio C_A/C_B', '热容比 C_A/C_B'), formatter: value => format(value, 2), visibleWhen: state => state.lab === 'thermalize' },
+          { type: 'range', key: 'fridgeCold', min: 240, max: 290, step: 1, value: 270, label: t('Cold-space temperature T_c', '冷藏空间温度 T_c'), formatter: value => `${format(value, 0)} K`, visibleWhen: state => state.lab === 'refrigerator' },
+          { type: 'range', key: 'fridgeRoom', min: 295, max: 340, minFromState: state => Math.max(295, state.fridgeCold + 5), step: 1, value: 300, label: t('Room temperature T_h', '室内温度 T_h'), formatter: value => `${format(value, 0)} K`, visibleWhen: state => state.lab === 'refrigerator' },
+          { type: 'range', key: 'coolingLoad', min: 50, max: 300, step: 5, value: 120, label: t('Heat removed Q_c', '移走热量 Q_c'), formatter: value => `${format(value, 0)} kJ`, visibleWhen: state => state.lab === 'refrigerator' },
+          { type: 'range', key: 'distributionTemperature', min: 150, max: 1000, step: 10, value: 450, label: t('Temperature T', '温度 T'), formatter: value => `${format(value, 0)} K`, visibleWhen: state => state.lab === 'distribution' }
         ],
-        sources: ['utexas-heat-engines', 'nist-boltzmann']
+        sources: ['utexas-heat-engines', 'nist-boltzmann', 'nist-entropy']
       },
-      experiment: experimentCard('model', 'Modern temperature metrology ties the kelvin to microscopic energy, not to one specific material sample.', '现代温度计量把开尔文直接连到微观能量尺度，而不是某一份特定样品。', 'The kelvin and the Boltzmann constant anchor thermal measurements in a way that lets engine limits, heat capacities, and molecular energies speak the same language.', '开尔文与玻尔兹曼常数为热学测量提供了统一锚点，使热机上限、热容和分子能量能够说同一种语言。', 'This card is about metrological grounding rather than a single laboratory apparatus.', '这张卡片强调的是计量学基础，而不是某一台独立实验装置。', ['nist-temperature', 'nist-boltzmann']),
+      experiment: experimentCard('reconstruction', 'Joule’s paddle-wheel experiment made the first law tangible: mechanical work can raise a body’s temperature.', '焦耳的桨轮实验把第一定律变得可触摸：机械功可以提高物体的温度。', 'Falling weights turned paddles in water. The water warmed even though no hot object touched it, making the equivalence between work and heat measurable.', '下落的砝码带动水中的桨轮转动。即使没有热物体接触，水仍然升温，于是功与热的等价关系变得可测。', 'This is a historical reconstruction, not a browser reenactment; the P–V and heat-ledger benches below make the same accounting explicit.', '这是历史重构而不是浏览器复刻；下面的 P–V 与热量账本实验会把同一套记账关系直接画出来。', ['utexas-heat-engines', 'nist-entropy']),
       mechanism: {
         title: t('Why no engine can turn one reservoir completely into work', '为什么没有热机能把单一热源全部变成功'),
         steps: [
