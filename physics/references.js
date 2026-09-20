@@ -30,6 +30,20 @@
         url: 'https://www1.grc.nasa.gov/beginners-guide-to-aeronautics/what-is-lift/',
         en: 'Why a complete account of lift requires fluid turning and momentum, not one slogan.',
         zh: '解释完整的升力理论为何需要流体偏转与动量，而不是一句口号。'
+      },
+      {
+        title: 'Bernoulli’s equation and applications',
+        institution: 'OpenStax',
+        url: 'https://openstax.org/books/physics/pages/14-6-bernoullis-equation',
+        en: 'A worked introduction to continuity, pressure, speed, Torricelli outflow, and the limits of the ideal relation.',
+        zh: '介绍连续性、压强、速度、托里拆利出流以及理想关系的适用边界。'
+      },
+      {
+        title: 'Pitot-static tube',
+        institution: 'NASA Glenn',
+        url: 'https://www1.grc.nasa.gov/beginners-guide-to-aeronautics/airspeed/',
+        en: 'How stagnation and static pressure are combined to infer airspeed.',
+        zh: '说明如何结合总压与静压反推出空速。'
       }
     ],
     acoustics: [

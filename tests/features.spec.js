@@ -98,6 +98,16 @@ const auditedFieldSourceCatalog = {
     institution: 'The Royal Society',
     url: 'https://doi.org/10.1098/rstl.1883.0029'
   },
+  'openstax-fluid-dynamics': {
+    title: 'Bernoulli’s equation and applications',
+    institution: 'OpenStax',
+    url: 'https://openstax.org/books/physics/pages/14-6-bernoullis-equation'
+  },
+  'nasa-pitot-static': {
+    title: 'Pitot-static tube',
+    institution: 'NASA Glenn',
+    url: 'https://www1.grc.nasa.gov/beginners-guide-to-aeronautics/airspeed/'
+  },
   'unsw-pipes': {
     title: 'Pipes and harmonics: cylindrical and conical bores',
     institution: 'University of New South Wales',
@@ -146,9 +156,10 @@ const auditedFieldSourceCatalog = {
 };
 
 const auditedFieldSourceMappings = [
-  { fieldId: 'fluids', part: 'visual', sources: ['nasa-sphere-drag'] },
+  { fieldId: 'fluids', part: 'visual', sources: ['nasa-bernoulli', 'openstax-fluid-dynamics', 'nasa-pitot-static', 'nasa-lift'] },
   { fieldId: 'fluids', part: 'experiment', sources: ['reynolds-1883'] },
   { fieldId: 'fluids', part: 'claims', index: 0, sources: ['nasa-sphere-drag', 'reynolds-1883'] },
+  { fieldId: 'fluids', part: 'claims', index: 2, sources: ['nasa-bernoulli', 'openstax-fluid-dynamics', 'nasa-pitot-static'] },
   { fieldId: 'acoustics', part: 'visual', sources: ['noaa-sound', 'nih-hear', 'unsw-pipes', 'koda-helium'] },
   { fieldId: 'acoustics', part: 'experiment', sources: ['unsw-pipes'] },
   { fieldId: 'acoustics', part: 'claims', index: 0, sources: ['unsw-pipes'] },
@@ -381,6 +392,47 @@ test('Shared field guide visuals preserve control state across language rerender
     await expect(page.locator('#fieldVisualHost .field-visual-card')).toBeVisible();
     expect(await readFieldVisualState(page)).toEqual(before);
   }
+});
+
+test('Fluid Bernoulli lab isolates apparatus controls and updates the measured balance', async ({ page }) => {
+  await preparePage(page, '/physics/field.html?id=fluids', 'en');
+  await expect(page.locator('#fieldVisualHost')).toContainText('Bernoulli lab');
+  await expect(page.locator('#fieldVisualHost input[data-control-key="reynolds"]')).toBeVisible();
+  await expect(page.locator('#fieldVisualHost input[data-control-key="venturiSpeed"]')).toBeHidden();
+
+  await page.locator('#fieldVisualHost [data-control-value="venturi"]').click();
+  await expect(page.locator('#fieldVisualHost input[data-control-key="reynolds"]')).toBeHidden();
+  await expect(page.locator('#fieldVisualHost input[data-control-key="venturiSpeed"]')).toBeVisible();
+  const before = await page.locator('#fieldVisualHost').textContent();
+  await page.locator('#fieldVisualHost input[data-control-key="venturiRatio"]').evaluate(input => {
+    input.value = '0.4';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+  });
+  const after = await page.locator('#fieldVisualHost').textContent();
+  expect(after).not.toBe(before);
+  expect(after).toContain('Continuity');
+
+  await page.locator('#fieldVisualHost [data-control-value="tank"]').click();
+  await expect(page.locator('#fieldVisualHost input[data-control-key="tankHead"]')).toBeVisible();
+  await expect(page.locator('#fieldVisualHost')).toContainText('Torricelli');
+
+  await page.locator('#fieldVisualHost [data-control-value="pitot"]').click();
+  await expect(page.locator('#fieldVisualHost input[data-control-key="pitotSpeed"]')).toBeVisible();
+  await expect(page.locator('#fieldVisualHost input[data-control-key="tankHead"]')).toBeHidden();
+  await expect(page.locator('#fieldVisualHost')).toContainText('dynamic pressure');
+
+  await page.locator('#fieldVisualHost [data-control-value="airfoil"]').click();
+  await expect(page.locator('#fieldVisualHost input[data-control-key="airfoilAngle"]')).toBeVisible();
+  await expect(page.locator('#fieldVisualHost')).toContainText('downward wake');
+
+  await page.locator('#fieldVisualHost [data-control-value="atomizer"]').click();
+  await expect(page.locator('#fieldVisualHost input[data-control-key="atomizerSpeed"]')).toBeVisible();
+  await expect(page.locator('#fieldVisualHost input[data-control-key="airfoilAngle"]')).toBeHidden();
+  await expect(page.locator('#fieldVisualHost')).toContainText('Real spray');
+
+  await page.locator('[data-lang="zh-CN"]').click();
+  await expect(page.locator('#fieldVisualHost .field-visual-card')).toBeVisible();
+  await expect(page.locator('#fieldVisualHost')).toContainText('皮托管');
 });
 
 test('Acoustics studio isolates tab controls and emits audible experiment cues', async ({ page }) => {
