@@ -28,14 +28,18 @@
 .brand-home__icon {
   display: block;
   width: 42px;
-  height: 42px;
-  flex: 0 0 auto;
+  aspect-ratio: 1;
+  flex: 0 0 42px;
+  overflow: hidden;
+  border-radius: 12px;
 }
 
 .brand-home__icon img {
   display: block;
   width: 100%;
   height: 100%;
+  object-fit: cover;
+  object-position: center;
 }
 
 .brand-home__title {
