@@ -20,7 +20,7 @@ const appJs  = fs.readFileSync(path.join(ROOT, 'app.js'), 'utf8');
 const brandCss = fs.readFileSync(path.join(ROOT, '..', 'assets', 'brand', 'brand.css'), 'utf8');
 const referencePaneCss = fs.readFileSync(path.join(ROOT, '..', 'assets', 'reference-pane.css'), 'utf8');
 const referencePaneJs = fs.readFileSync(path.join(ROOT, '..', 'assets', 'reference-pane.js'), 'utf8');
-const brandSvg = fs.readFileSync(path.join(ROOT, '..', 'assets', 'brand', 'favicon.svg')).toString('base64');
+const brandPng = fs.readFileSync(path.join(ROOT, '..', 'assets', 'brand', 'favicon.png')).toString('base64');
 
 function inlineMedia(source) {
   return source.replace(/\.\.\/assets\/media\/([A-Za-z0-9_.-]+)/g, (match, filename) => {
@@ -60,7 +60,7 @@ let out = html
   .replace(/<link\s+rel="stylesheet"\s+href="features\/features\.css"\s*\/?>\s*/, '')
   .replace(/<link\s+rel="stylesheet"\s+href="\.\.\/assets\/brand\/brand\.css"\s*\/?>/, `<style>\n${brandCss}\n</style>`)
   .replace(/<link\s+rel="stylesheet"\s+href="\.\.\/assets\/reference-pane\.css"\s*\/?>/, `<style>\n${referencePaneCss}\n</style>`)
-  .replace(/<link\s+rel="icon"\s+href="\.\.\/assets\/brand\/favicon\.svg"\s+type="image\/svg\+xml"\s*\/?>/, `<link rel="icon" href="data:image/svg+xml;base64,${brandSvg}" type="image/svg+xml">`)
+  .replace(/<link\s+rel="icon"\s+href="\.\.\/assets\/brand\/favicon\.png"\s+type="image\/png"\s*\/?>/, `<link rel="icon" href="data:image/png;base64,${brandPng}" type="image/png">`)
   .replace(/<script\s+src="i18n\.js"><\/script>/, `<script>\n${i18nJs}\n</script>`)
   .replace(/<script\s+src="features\/features-i18n\.js"><\/script>/, `<script>\n${featI18n}\n</script>`)
   .replace(/<script\s+src="science\.js"><\/script>/, `<script>\n${scienceJs}\n</script>`)
@@ -75,7 +75,7 @@ let out = html
   .replace(/<script\s+src="features\/ligand\.js"><\/script>/,   `<script>\n${featLigand}\n</script>`)
   .replace(/<script\s+src="\.\.\/assets\/reference-pane\.js"><\/script>/, `<script>\n${referencePaneJs}\n</script>`);
 out = inlineMedia(out);
-out = out.replace(/\.\.\/assets\/brand\/favicon\.svg/g, `data:image/svg+xml;base64,${brandSvg}`);
+out = out.replace(/\.\.\/assets\/brand\/favicon\.png/g, `data:image/png;base64,${brandPng}`);
 out = inlineFonts(out);
 out = out.replace(/href="\.\.\/(?!https?:)/g, 'href="../../');
 

@@ -77,7 +77,7 @@ async function readIconParity(page) {
     const bounds = brandImage.getBoundingClientRect();
     const navSize = Math.max(1, Math.round(Math.max(bounds.width, bounds.height)));
     const sizes = [...new Set([...requestedSizes, navSize])];
-    const sourceHref = new URL('/assets/brand/favicon.svg', window.location.href).href;
+    const sourceHref = new URL('/assets/brand/favicon.png', window.location.href).href;
     const source = {};
     const favicon = {};
     const brand = {};
@@ -98,11 +98,11 @@ async function assertIconParity(page, entry, language, viewportLabel) {
   for (const size of parity.sizes) {
     expect(
       parity.favicon[size],
-      `${entry.id} ${language} ${viewportLabel} favicon should match assets/brand/favicon.svg at ${size}px`
+      `${entry.id} ${language} ${viewportLabel} favicon should match assets/brand/favicon.png at ${size}px`
     ).toBe(parity.source[size]);
     expect(
       parity.brand[size],
-      `${entry.id} ${language} ${viewportLabel} brand icon should match assets/brand/favicon.svg at ${size}px`
+      `${entry.id} ${language} ${viewportLabel} brand icon should match assets/brand/favicon.png at ${size}px`
     ).toBe(parity.source[size]);
   }
 }
@@ -148,7 +148,7 @@ for (const entry of entries) {
       expect(await page.title()).toBe(expectedEntryTitle(entry, language));
 
       const faviconHref = await page.locator('link[rel~="icon"]').getAttribute('href');
-      expect(faviconHref).toMatch(/favicon\.svg|^data:image\/svg\+xml/);
+      expect(faviconHref).toMatch(/favicon\.png|^data:image\/png/);
       await brandHome.scrollIntoViewIfNeeded();
       await assertIconParity(page, entry, language, `${page.viewportSize()?.width ?? 0}px`);
 
@@ -213,7 +213,7 @@ for (const entry of generatedEntries) {
         expect(generated.brandText).toBe(source.brandText);
         expect(generated.footerCopy).toBe(source.footerCopy);
         expect(generated.mailHref).toBe('mailto:micwu@outlook.com');
-        expect(generated.faviconHref).toMatch(/^data:image\/svg\+xml/);
+        expect(generated.faviconHref).toMatch(/^data:image\/png/);
         expect(generated.bundleLinks).toEqual([]);
       } finally {
         await Promise.allSettled([
