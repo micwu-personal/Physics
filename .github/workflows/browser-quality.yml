@@ -25,6 +25,7 @@ jobs:
       - run: npm run build:mobile
       - run: npm run check:generated
       - run: npm run test:apps
+      - run: node --test tests\relativity-observatory-model.test.mjs
       - if: always()
         run: npm run test:e2e
       - if: always()

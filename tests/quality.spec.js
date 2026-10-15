@@ -297,7 +297,8 @@ for (const language of locales) {
     const rail = page.locator('.topic-index');
     await expect(rail).toBeVisible();
     const anchors = rail.locator('a[href^="#"]');
-    await expect(anchors).toHaveCount(9);
+    await expect(anchors).toHaveCount(10);
+    await expect(rail.locator('a[href="#observatory"]')).toHaveCount(1);
 
     const railMetrics = await rail.evaluate(element => ({
       clientWidth: element.clientWidth,
