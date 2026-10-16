@@ -17,6 +17,7 @@
   <link rel="icon" href="../assets/brand/favicon.png" type="image/png">
   <link rel="stylesheet" href="../assets/brand/brand.css">
   <link rel="stylesheet" href="relativity-deepening.css">
+  <link rel="stylesheet" href="relativity-observatory.css">
 </head>
 <body data-topic="relativity">
   <a class="skip-link" href="#main" data-copy-en="Skip to relativity" data-copy-zh="跳到相对论内容">Skip to relativity</a>
@@ -54,6 +55,7 @@
         <span class="hero-equation" data-tex="c^2\Delta\tau^2 = c^2\Delta t^2 - \Delta x^2 - \Delta y^2,\qquad p^\mu p_\mu = m^2 c^2">c^2 Delta tau^2 = c^2 Delta t^2 - Delta x^2 - Delta y^2</span>
         <div class="hero-actions">
           <a class="primary-action" href="#clock-lab" data-copy-en="Compare two frames" data-copy-zh="比较两个参考系">Compare two frames</a>
+          <a class="secondary-action" href="#observatory" data-copy-en="Enter the 3D observatory" data-copy-zh="进入三维相对论观测站">Enter the 3D observatory</a>
           <a class="secondary-action" href="#particle-regimes" data-copy-en="When particles turn relativistic" data-copy-zh="粒子何时进入相对论区">When particles turn relativistic</a>
         </div>
       </div>
@@ -84,6 +86,7 @@
     </header>
 
     <nav class="topic-index" aria-label="Relativity sections" data-aria-en="Relativity sections" data-aria-zh="相对论章节">
+      <a href="#observatory" data-copy-en="3D observatory" data-copy-zh="三维观测站">3D observatory</a>
       <a href="#principles" data-copy-en="Invariants" data-copy-zh="不变量">Invariants</a>
       <a href="#clock-lab" data-copy-en="Light-clock laboratory" data-copy-zh="光钟实验室">Light-clock laboratory</a>
       <a href="#particle-regimes" data-copy-en="Relativistic particles" data-copy-zh="相对论性粒子">Relativistic particles</a>
@@ -96,6 +99,78 @@
     </nav>
 
     <main id="main">
+      <!--
+      THESIS: Inhabit a measurement, then distinguish it from a photograph.
+      OWN-WORLD: The atlas's dark observatory, cyan coordinate rails, gold clock beacons, and pink tidal vectors; controls stay outside the scene.
+      STORY: Fly through a stationary beacon field, compare measured and received signals, then place supported clocks outside one spherical compact body.
+      FIRST VIEWPORT: A large interactive perspective scene beside short controls, with three clock comparisons immediately below.
+      FORM: Additive experience-led instrument in the inherited Evidence Observatory; no replacement world or external runtime.
+      -->
+      <section id="observatory" class="topic-section ob" aria-labelledby="ob-title">
+        <header>
+          <h2 id="ob-title" data-copy-en="Step inside relativity." data-copy-zh="走进相对论。">Step inside relativity.</h2>
+          <p data-copy-en="Fly past a field of clocks. Then hold a station near a compact body and move your probes closer. Space, clock rates, and the light you receive tell different parts of the story."
+             data-copy-zh="飞过布满时钟的空间，再让观测站悬停在致密天体附近，把探针移得更近。空间尺度、时钟速率和接收到的光，讲述的是同一物理的不同侧面。">Fly past a field of clocks. Then hold a station near a compact body and move your probes closer. Space, clock rates, and the light you receive tell different parts of the story.</p>
+        </header>
+        <div class="ob-modes" role="tablist" aria-label="Observatory experiment" data-aria-en="Observatory experiment" data-aria-zh="观测站实验">
+          <button id="ob-flight-tab" type="button" role="tab" aria-selected="true" aria-controls="ob-flight-controls" data-ob-mode="flight" data-copy-en="Relativistic flight" data-copy-zh="相对论飞行">Relativistic flight</button>
+          <button id="ob-gravity-tab" type="button" role="tab" aria-selected="false" aria-controls="ob-gravity-controls" data-ob-mode="gravity" data-copy-en="Gravity station" data-copy-zh="引力观测站">Gravity station</button>
+        </div>
+        <div class="ob-workspace">
+          <div class="ob-scene-column">
+            <div class="ob-scene-heading"><strong id="ob-scene-title">Simultaneous measurements</strong><span id="ob-status" role="status">Ready</span></div>
+            <canvas id="ob-canvas" tabindex="0" aria-describedby="ob-navigation ob-scene-note" aria-label="Interactive three-dimensional relativity scene. Drag or use arrow keys to look around." data-aria-en="Interactive three-dimensional relativity scene. Drag or use arrow keys to look around." data-aria-zh="交互式三维相对论场景。拖动或按方向键环顾四周。">The clock rates, distances, redshift and tides are also available in the text readouts below.</canvas>
+            <p id="ob-scene-note" class="ob-caption"></p>
+            <div class="ob-navigation" id="ob-navigation">
+              <span data-copy-en="Drag / arrow keys: look" data-copy-zh="拖动 / 方向键：环顾">Drag / arrow keys: look</span>
+              <button type="button" data-ob-look="front" data-copy-en="Ahead" data-copy-zh="前方">Ahead</button>
+              <button type="button" data-ob-look="side" data-copy-en="Side" data-copy-zh="侧面">Side</button>
+              <button type="button" data-ob-look="back" data-copy-en="Behind" data-copy-zh="后方">Behind</button>
+              <button id="ob-fullscreen" type="button" data-copy-en="Expand scene" data-copy-zh="展开场景">Expand scene</button>
+            </div>
+            <div class="ob-measurements" aria-label="Your measurements" data-aria-en="Your measurements" data-aria-zh="你的测量">
+              <div><span data-copy-en="Your clock" data-copy-zh="你的时钟">Your clock</span><strong id="ob-your-time">0.00 s</strong><small data-copy-en="Always 1 local second / second" data-copy-zh="始终每本地秒走 1 秒">Always 1 local second / second</small></div>
+              <div><span id="ob-metric-label">Lorentz factor</span><strong id="ob-metric-value">1.250</strong><small id="ob-metric-note"></small></div>
+              <div><span id="ob-secondary-label">10 light-second ruler</span><strong id="ob-secondary-value">8.00 light-s</strong><small id="ob-secondary-note"></small></div>
+            </div>
+          </div>
+          <aside class="ob-controls" aria-label="Observatory controls" data-aria-en="Observatory controls" data-aria-zh="观测站控制">
+            <div id="ob-flight-controls" role="tabpanel" aria-labelledby="ob-flight-tab">
+              <label class="ob-control" for="ob-speed"><span data-copy-en="Speed along the cyan rails" data-copy-zh="沿青色轨道的速度">Speed along the cyan rails</span><output id="ob-speed-output" for="ob-speed">60% c</output><input id="ob-speed" type="range" min="0" max="99" step="1" value="60"></label>
+              <div class="ob-view-buttons" aria-label="Scene interpretation" data-aria-en="Scene interpretation" data-aria-zh="场景解释">
+                <button type="button" data-ob-view="measured" aria-pressed="true" data-copy-en="Measure space & time" data-copy-zh="测量空间与时间">Measure space &amp; time</button>
+                <button type="button" data-ob-view="optical" aria-pressed="false" data-copy-en="See arriving light" data-copy-zh="观看到达的光">See arriving light</button>
+              </div>
+              <p id="ob-flight-explanation"></p>
+              <dl class="ob-facts"><div><dt data-copy-en="Forward frequency" data-copy-zh="正前方频率">Forward frequency</dt><dd id="ob-forward">2.000 ×</dd></div><div><dt data-copy-en="Rear frequency" data-copy-zh="正后方频率">Rear frequency</dt><dd id="ob-rear">0.500 ×</dd></div><div><dt data-copy-en="Station-clock rate, measured" data-copy-zh="测得的站点钟速">Station-clock rate, measured</dt><dd id="ob-station-rate">0.800 ×</dd></div></dl>
+              <button type="button" data-ob-preset="flight" data-copy-en="Try 90% of light speed" data-copy-zh="试试 90% 光速">Try 90% of light speed</button>
+            </div>
+            <div id="ob-gravity-controls" role="tabpanel" aria-labelledby="ob-gravity-tab" hidden>
+              <label class="ob-control" for="ob-body"><span data-copy-en="Add / replace central body" data-copy-zh="添加 / 替换中心天体">Add / replace central body</span><select id="ob-body"><option value="blackHole" data-copy-en="Black hole · 10 solar masses" data-copy-zh="黑洞 · 10 个太阳质量">Black hole · 10 solar masses</option><option value="neutronStar" data-copy-en="Neutron star · 1.4 solar masses" data-copy-zh="中子星 · 1.4 个太阳质量">Neutron star · 1.4 solar masses</option><option value="whiteDwarf" data-copy-en="White dwarf · 0.6 solar masses" data-copy-zh="白矮星 · 0.6 个太阳质量">White dwarf · 0.6 solar masses</option><option value="sun" data-copy-en="Sun-like star · 1 solar mass" data-copy-zh="类太阳恒星 · 1 个太阳质量">Sun-like star · 1 solar mass</option></select></label>
+              <p id="ob-body-facts"></p>
+              <label class="ob-control" for="ob-observer"><span data-copy-en="Your station: distance from center" data-copy-zh="你的观测站：距中心距离">Your station: distance from center</span><output id="ob-observer-output" for="ob-observer">8.00 R</output><input id="ob-observer" type="range" min="1.05" max="20" step="0.05" value="8"></label>
+              <p class="ob-model-warning" data-copy-en="Held stationary, not orbiting or falling. Hovering needs thrust; these locations are not safe for a human. One central body at a time: this is not a multiple-body spacetime solver." data-copy-zh="保持静止，不是轨道运动或自由下落。悬停需要推力，这些位置不一定适合人类生存。每次一个中心天体，不是多天体时空求解器。">Held stationary, not orbiting or falling. Hovering needs thrust; these locations are not safe for a human. One central body at a time: this is not a multiple-body spacetime solver.</p>
+              <button type="button" data-ob-preset="gravity" data-copy-en="Compare close & distant clocks" data-copy-zh="比较近处与远处的时钟">Compare close &amp; distant clocks</button>
+            </div>
+            <div class="ob-playback"><button id="ob-play" type="button" aria-pressed="false" data-copy-en="Start experiment" data-copy-zh="开始实验">Start experiment</button><button id="ob-reset" type="button" data-copy-en="Reset" data-copy-zh="重置">Reset</button></div>
+            <p class="ob-reset-note" data-copy-en="Parameter changes restart the counters. No sound or flashing strobe; the clock hands show the rates." data-copy-zh="改变参数会重新开始计时。没有自动音效或闪烁，钟针显示走时速率。">Parameter changes restart the counters. No sound or flashing strobe; the clock hands show the rates.</p>
+          </aside>
+        </div>
+        <div class="ob-probes" aria-label="Three clock probes" data-aria-en="Three clock probes" data-aria-zh="三个时钟探针">
+          <article class="ob-probe" data-probe="0"><header><strong id="ob-probe-name-0">A · ahead</strong><canvas id="ob-clock-0" width="64" height="64" aria-hidden="true"></canvas></header><label class="ob-control ob-probe-position" for="ob-radius-0" hidden><span data-copy-en="Distance from center" data-copy-zh="距中心距离">Distance from center</span><output id="ob-radius-output-0" for="ob-radius-0">1.15 R</output><input id="ob-radius-0" type="range" min="1.05" max="20" step="0.05" value="1.15"></label><p><strong id="ob-rate-0">0.800000 ×</strong> <span id="ob-rate-label-0">measured rate / your clock</span></p><p id="ob-time-label-0">Measured clock counter</p><p id="ob-time-0" class="ob-probe-time">0.00 s</p><p id="ob-signal-0"></p><p id="ob-tide-0" class="ob-tide" hidden></p></article>
+          <article class="ob-probe" data-probe="1"><header><strong id="ob-probe-name-1">B · beside</strong><canvas id="ob-clock-1" width="64" height="64" aria-hidden="true"></canvas></header><label class="ob-control ob-probe-position" for="ob-radius-1" hidden><span data-copy-en="Distance from center" data-copy-zh="距中心距离">Distance from center</span><output id="ob-radius-output-1" for="ob-radius-1">2.50 R</output><input id="ob-radius-1" type="range" min="1.05" max="20" step="0.05" value="2.5"></label><p><strong id="ob-rate-1">0.800000 ×</strong> <span id="ob-rate-label-1">measured rate / your clock</span></p><p id="ob-time-label-1">Measured clock counter</p><p id="ob-time-1" class="ob-probe-time">0.00 s</p><p id="ob-signal-1"></p><p id="ob-tide-1" class="ob-tide" hidden></p></article>
+          <article class="ob-probe" data-probe="2"><header><strong id="ob-probe-name-2">C · behind</strong><canvas id="ob-clock-2" width="64" height="64" aria-hidden="true"></canvas></header><label class="ob-control ob-probe-position" for="ob-radius-2" hidden><span data-copy-en="Distance from center" data-copy-zh="距中心距离">Distance from center</span><output id="ob-radius-output-2" for="ob-radius-2">7.50 R</output><input id="ob-radius-2" type="range" min="1.05" max="20" step="0.05" value="7.5"></label><p><strong id="ob-rate-2">0.800000 ×</strong> <span id="ob-rate-label-2">measured rate / your clock</span></p><p id="ob-time-label-2">Measured clock counter</p><p id="ob-time-2" class="ob-probe-time">0.00 s</p><p id="ob-signal-2"></p><p id="ob-tide-2" class="ob-tide" hidden></p></article>
+        </div>
+        <p id="ob-conclusion" class="ob-conclusion" aria-live="polite"></p>
+        <details class="ob-model"><summary data-copy-en="What is exact, and what is a teaching model?" data-copy-zh="哪些是精确计算，哪些是教学模型？">What is exact, and what is a teaching model?</summary>
+          <div class="ob-model-columns">
+            <div><h3 data-copy-en="Flight: measuring is not photographing" data-copy-zh="飞行：测量不是拍照">Flight: measuring is not photographing</h3><p data-copy-en="The station field is at rest. Your velocity points along +z even when you look sideways. Measured view uses simultaneous ship-frame positions: longitudinal lengths L₀/γ, station-clock rates 1/γ. Optical view aberrates incoming directions and shifts their frequencies; stationary geometry needs no changing source-position correction. Clock rates in that view include propagation effects, not just time dilation. A moving object's photograph is not simply a squeezed model." data-copy-zh="站点场处于静止状态。即使你看向侧面，速度仍沿 +z。测量视图采用飞船系中的同时位置：纵向长度 L₀/γ，站点钟速 1/γ。光学视图变换到达光线的方向与频率；静止的源几何无需随发射时刻改变位置。此时接收钟速包含传播效应，不只是钟慢。运动物体的照片不能简单画成压扁的模型。">The station field is at rest. Your velocity points along +z even when you look sideways. Measured view uses simultaneous ship-frame positions: longitudinal lengths L₀/γ, station-clock rates 1/γ. Optical view aberrates incoming directions and shifts their frequencies; stationary geometry needs no changing source-position correction. Clock rates in that view include propagation effects, not just time dilation. A moving object's photograph is not simply a squeezed model.</p><p data-copy-en="γ = 1/√(1−β²). For source direction μ in the station frame, D = γ(1+βμ), μ′ = (μ+β)/(1+βμ). Each beacon emits 550 nm light. UV/IR are false-colored violet/red rather than truly visible. The cube edges and coordinate rails are sampled 3D geometry; this is not a broadband, photorealistic camera." data-copy-zh="γ = 1/√(1−β²)。站点系中源方向余弦为 μ，则 D = γ(1+βμ)，μ′ = (μ+β)/(1+βμ)。每个信标发出 550 nm 光。紫外 / 红外用紫色 / 红色伪彩显示，不代表人眼真能看见。立方体边和坐标轨道来自采样三维几何，不是宽频谱、照片级相机。">γ = 1/√(1−β²). For source direction μ in the station frame, D = γ(1+βμ), μ′ = (μ+β)/(1+βμ). Each beacon emits 550 nm light. UV/IR are false-colored violet/red rather than truly visible. The cube edges and coordinate rails are sampled 3D geometry; this is not a broadband, photorealistic camera.</p></div>
+            <div><h3 data-copy-en="Gravity: exterior, static, spherical" data-copy-zh="引力：外部、静态、球对称">Gravity: exterior, static, spherical</h3><p data-copy-en="Schwarzschild exterior: rₛ = 2GM/c², α(r) = √(1−rₛ/r). A supported emitter's clock and received frequency relative to your supported station are α(emitter)/α(you). Your local clock always ticks normally. All probes stay outside the surface or horizon. R means surface radius for a star and horizon radius for this nonrotating black hole. Distance is circumferential radius from the center, not ruler-measured radial distance." data-copy-zh="史瓦西外部解：rₛ = 2GM/c²，α(r) = √(1−rₛ/r)。静止发射端的钟速和接收频率相对你的静止观测站为 α(发射端)/α(你)。你的本地时钟始终正常走时。所有探针都在表面或视界之外。R 对恒星表示表面半径，对此无旋转黑洞表示视界半径。距离是从中心算起的周长半径，不是用尺测得的径向固有距离。">Schwarzschild exterior: rₛ = 2GM/c², α(r) = √(1−rₛ/r). A supported emitter's clock and received frequency relative to your supported station are α(emitter)/α(you). Your local clock always ticks normally. All probes stay outside the surface or horizon. R means surface radius for a star and horizon radius for this nonrotating black hole. Distance is circumferential radius from the center, not ruler-measured radial distance.</p><p data-copy-en="The perspective geometry is a coordinate illustration, not curved-space ray tracing: lensing, black-hole shadow, spin, accretion and interiors are not simulated. Each body is rescaled to the same scene radius; clock-rate differences are NOT exaggerated. Pink tidal arrows show radial stretching and transverse squeezing. Their lengths are logarithmic, not predicted deformation. Δaᵣ = 2GMℓ/r³ is the leading local free-fall differential acceleration over ℓ = 2 m, not the thrust required to hover." data-copy-zh="透视几何是坐标示意，不是弯曲空间的光线追踪：不模拟引力透镜、黑洞阴影、自旋、吸积或内部。各天体在场景中缩放到相同半径，但钟速差没有夸大。粉色潮汐箭头表示径向拉伸、横向压缩，长度为对数编码，不是预测形变。Δaᵣ = 2GMℓ/r³ 是长度 ℓ = 2 m 上局部自由落体差分加速度的首阶值，不是悬停所需推力。">The perspective geometry is a coordinate illustration, not curved-space ray tracing: lensing, black-hole shadow, spin, accretion and interiors are not simulated. Each body is rescaled to the same scene radius; clock-rate differences are NOT exaggerated. Pink tidal arrows show radial stretching and transverse squeezing. Their lengths are logarithmic, not predicted deformation. Δaᵣ = 2GMℓ/r³ is the leading local free-fall differential acceleration over ℓ = 2 m, not the thrust required to hover.</p></div>
+          </div>
+          <p data-copy-en="Counters integrate the selected rates, starting at zero for comparison. They are not a claim of instantaneous physical synchronization across space. Moving a slider starts a new experiment rather than simulating an accelerated journey or transporting a clock." data-copy-zh="计数器从零开始积分当前速率，便于比较，不声称跨空间瞬时物理同步。拖动滑块会开启新实验，不模拟加速旅程或搬运时钟。">Counters integrate the selected rates, starting at zero for comparison. They are not a claim of instantaneous physical synchronization across space. Moving a slider starts a new experiment rather than simulating an accelerated journey or transporting a clock.</p>
+          <ul class="ob-sources"><li><a href="https://math.ucr.edu/home/baez/physics/Relativity/SR/penrose.html" target="_blank" rel="noopener noreferrer">UC Riverside Physics FAQ — measurement, photography &amp; Penrose–Terrell rotation</a></li><li><a href="https://www.einstein-online.info/en/spotlight/doppler/" target="_blank" rel="noopener noreferrer">Max Planck / Einstein Online — Doppler signals</a></li><li><a href="https://jila.colorado.edu/~ajsh/bh/schwp.html" target="_blank" rel="noopener noreferrer">JILA / Andrew Hamilton — Schwarzschild geometry</a></li><li><a href="https://www.einstein-online.info/en/spotlight/redshift_white_dwarfs/" target="_blank" rel="noopener noreferrer">Einstein Online — gravitational redshift &amp; white dwarfs</a></li><li><a href="https://science.nasa.gov/universe/black-holes/" target="_blank" rel="noopener noreferrer">NASA — black holes &amp; tidal stretching</a></li></ul>
+        </details>
+      </section>
       <section id="principles" class="topic-section">
         <header>
           <h2 data-copy-en="Relativity changes coordinates, but it protects invariants." data-copy-zh="相对论会改变坐标，却保护不变量。">Relativity changes coordinates, but it protects invariants.</h2>
@@ -775,5 +850,6 @@
   <script src="common.js"></script>
   <script src="labs.js"></script>
   <script src="relativity-deepening.js"></script>
+  <script type="module" src="relativity-observatory.js"></script>
 </body>
 </html>

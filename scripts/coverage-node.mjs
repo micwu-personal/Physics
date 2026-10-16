@@ -7,6 +7,18 @@ await mkdir(outputDir, { recursive: true });
 
 const suites = [
   {
+    cwd: '.',
+    args: [
+      '--test',
+      '--experimental-test-coverage',
+      '--test-coverage-include=physics/relativity-observatory-model.js',
+      '--test-coverage-lines=100',
+      '--test-coverage-functions=100',
+      '--test-coverage-branches=100',
+      'tests/relativity-observatory-model.test.mjs'
+    ]
+  },
+  {
     cwd: 'big-bang',
     args: [
       '--test',

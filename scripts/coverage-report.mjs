@@ -18,7 +18,8 @@ const pureModules = [
   'periodic-table/science.js',
   'periodic-table/source-registry.js',
   'particle-zoo/physics-core.js',
-  'particle-zoo/references.js'
+  'particle-zoo/references.js',
+  'physics/relativity-observatory-model.js'
 ];
 
 /* The static server binds a worktree-specific port, so every URL check works on

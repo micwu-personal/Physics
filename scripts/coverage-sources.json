@@ -30,6 +30,8 @@
   "physics/labs.js",
   "physics/newton-laws-workshop.js",
   "physics/relativity-deepening.js",
+  "physics/relativity-observatory-model.js",
+  "physics/relativity-observatory.js",
   "physics/light.js",
   "physics/orbital-lab.js",
   "physics/solar-system-galaxy.js",
