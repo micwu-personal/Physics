@@ -23,6 +23,18 @@ An interactive timeline showing how physics areas branch, inherit ideas, and rec
 
 **Entropy & information** follows thermodynamic and statistical entropy into Shannon coding, Landauer erasure, Maxwell's demon, von Neumann and entanglement entropy, quantum channels and error correction, black-hole thermodynamics and the information paradox, gravitational entropy, chemistry, and living open systems.
 
+### 🎮 [Universe, In Person / 宇宙现场](./physics/game.html) — First-person physics
+
+The playable first chapter follows water from a coastal buoyancy experiment into a fictional molecular-scale lens and a 10 g phase-change experiment. Walk with WASD, look with arrows or drag, or use the screen controls. Predict, release, measure, and save local observations; add heat to discover constant-temperature melting and boiling plateaus. EN/中文, opt-in motion, and a usable no-WebGL notebook are included. Quantitative models are distinguished from enlarged geometry and illustrative molecular motion.
+
+The long-term worlds and implementation milestones are recorded in [PHYSICS-GAME-PLAN.md](./PHYSICS-GAME-PLAN.md). Future worlds are not yet playable. Serve this ES-module page over HTTP (`node scripts\static-server.mjs`); it is not bundled into the single-file apps below.
+
+Targeted validation:
+```powershell
+node --test tests\game-model.test.mjs tests\game-renderer.test.mjs
+npx playwright test --project=features --project=coverage "game.(features|coverage)" --workers=1
+```
+
 ### 🌌 [particle-zoo](./particle-zoo/) — The Standard Model
 An interactive visual journey through the Standard Model of particle physics — and beyond.
 
