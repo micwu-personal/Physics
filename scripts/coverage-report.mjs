@@ -19,7 +19,9 @@ const pureModules = [
   'periodic-table/source-registry.js',
   'particle-zoo/physics-core.js',
   'particle-zoo/references.js',
-  'physics/relativity-observatory-model.js'
+  'physics/relativity-observatory-model.js',
+  'physics/game-model.js',
+  'physics/game-renderer.js'
 ];
 
 /* The static server binds a worktree-specific port, so every URL check works on
@@ -103,7 +105,7 @@ const report = MCR({
     const url = browserUrl(entry.url);
     if (url) {
       const path = url.pathname.slice(1);
-      // Pure modules are measured by their Node unit tests, not twice.
+      // Node-tested modules are measured by unit tests, not twice.
       return url.pathname === '/' || (browserPath.test(path) && !pureModules.includes(path));
     }
     const normalized = decodeURIComponent(entry.url).replaceAll('\\', '/');

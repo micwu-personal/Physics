@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!--
+  THESIS: Follow one water sample across scales, testing predictions rather than browsing exhibit cards.
+  OWN-WORLD: The Atlas's starlight instruments frame a sunlit coastal WebGL workshop; cyan encodes manipulation and gold encodes supplied heat.
+  STORY: Release a body, measure buoyancy, enter a clearly fictional scale lens, and follow heat through phase changes.
+  FIRST VIEWPORT: A first-person scene owns the left field; a compact field notebook at right carries the current experiment and primary action. Touch stacks the notebook below a reachable scene.
+  FORM: Diegetic field-notebook docking beside an inhabited world, sixth grounded structure; seed 08ccdfc7. The scene changes scale while the notebook keeps the causal thread.
+  -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A bilingual first-person physics game: explore a coastal workshop, enter a molecular teaching model, and discover where heat goes during phase changes.">
+  <title>Universe, In Person — Physics Field Atlas</title>
+  <link rel="icon" href="../assets/brand/favicon.png" type="image/png">
+  <link rel="stylesheet" href="../assets/fonts/fonts.css">
+  <link rel="stylesheet" href="../assets/brand/brand.css">
+  <link rel="stylesheet" href="../assets/reference-pane.css">
+  <link rel="stylesheet" href="game.css">
+</head>
+<body>
+  <a class="skip-link" href="#notebook" data-copy-en="Skip to experiment controls" data-copy-zh="跳到实验操作">Skip to experiment controls</a>
+  <nav class="game-nav" aria-label="Journey and preferences" data-aria-en="Journey and preferences" data-aria-zh="旅程与偏好">
+    <a class="brand-home" href="../index.html"><img class="brand-home__icon" src="../assets/brand/favicon.png" width="38" height="38" alt=""><span class="brand-home__title"><span class="brand-home__title-zh">米乐的宇宙</span><span class="brand-home__title-en">McWoods’ Universe</span></span></a>
+    <a href="index.html" data-copy-en="Field Atlas ↗" data-copy-zh="领域图谱 ↗">Field Atlas ↗</a>
+    <div class="site-controls">
+      <button type="button" class="motion-toggle" aria-pressed="true">Play motion</button>
+      <button type="button" data-lang="en" aria-pressed="true">EN</button>
+      <button type="button" data-lang="zh-CN" aria-pressed="false">中文</button>
+    </div>
+  </nav>
+  <main class="game-layout" id="game">
+    <section class="world" aria-label="First-person exploration" data-aria-en="First-person exploration" data-aria-zh="第一人称探索">
+      <div class="view">
+        <canvas id="game-canvas" tabindex="0" aria-label="3D scene. WASD moves, arrow keys turn, E approaches the experiment. Drag to look." data-aria-en="3D scene. WASD moves, arrow keys turn, E approaches the experiment. Drag to look." data-aria-zh="三维场景。WASD 移动，方向键转向，E 前往实验。拖拽改变视线。"></canvas>
+        <div class="world-title"><h1 data-copy-en="Universe, In Person" data-copy-zh="宇宙现场">Universe, In Person</h1><p id="place"></p></div>
+        <div class="reticle" aria-hidden="true">+</div>
+        <div class="world-caption"><span id="scene-caption"></span><span id="play-status"></span></div>
+        <p id="gpu-message" role="status" hidden data-copy-en="3D graphics are unavailable. The complete experiment still works in the notebook. Try a WebGL-enabled browser to explore the world." data-copy-zh="三维图形不可用。你仍可用笔记完成全部实验；请尝试支持 WebGL 的浏览器来探索场景。">3D graphics are unavailable. The complete experiment still works in the notebook. Try a WebGL-enabled browser to explore the world.</p>
+      </div>
+      <div class="scene-instrument" id="scene-instrument" hidden><strong id="scene-quantities"></strong><span id="scene-fractions"></span><span id="scene-model" data-copy-en="Molecular schematic · not to scale" data-copy-zh="分子示意 · 非真实比例">Molecular schematic · not to scale</span></div>
+      <div class="movement" aria-label="Movement and view controls" data-aria-en="Movement and view controls" data-aria-zh="移动与视线操作">
+        <div class="move-pad"><button type="button" data-move="left" aria-label="Step left" data-aria-en="Step left" data-aria-zh="向左走">←</button><button type="button" data-move="forward" aria-label="Step forward" data-aria-en="Step forward" data-aria-zh="向前走">↑</button><button type="button" data-move="back" aria-label="Step back" data-aria-en="Step back" data-aria-zh="向后走">↓</button><button type="button" data-move="right" aria-label="Step right" data-aria-en="Step right" data-aria-zh="向右走">→</button></div>
+        <div class="look-pad"><button type="button" data-look="left" data-copy-en="Look left" data-copy-zh="向左看">Look left</button><button type="button" data-look="right" data-copy-en="Look right" data-copy-zh="向右看">Look right</button></div>
+        <button type="button" id="approach" data-copy-en="Approach · E" data-copy-zh="前往实验 · E">Approach · E</button>
+        <button type="button" id="mouse-lock" data-copy-en="Mouse look" data-copy-zh="鼠标视角">Mouse look</button>
+      </div>
+    </section>
+    <aside class="notebook" id="notebook" aria-label="Field notebook and experiment controls" data-aria-en="Field notebook and experiment controls" data-aria-zh="观察笔记与实验操作">
+      <div class="playback"><button id="play" type="button" class="primary" data-copy-en="Begin exploring" data-copy-zh="开始探索">Begin exploring</button><button id="reset" type="button" data-copy-en="Start over" data-copy-zh="重新开始">Start over</button></div>
+      <p class="welcome" id="welcome" data-copy-en="A playable first chapter. Follow one drop from the shore into a model of its molecules. No account needed; notes stay in this browser." data-copy-zh="这是可玩的第一章。跟随一滴水从海岸进入分子模型。无需账号，观察笔记只保存在本浏览器。">A playable first chapter. Follow one drop from the shore into a model of its molecules. No account needed; notes stay in this browser.</p>
+      <nav class="chapters" aria-label="Chapter route" data-aria-en="Chapter route" data-aria-zh="章节路线">
+        <button type="button" data-scene="coast" aria-current="step" data-copy-en="Shore" data-copy-zh="海岸">Shore</button>
+        <button type="button" data-scene="molecules" disabled data-copy-en="Scale lens" data-copy-zh="尺度透镜">Scale lens</button>
+        <button type="button" data-scene="heat" disabled data-copy-en="Heat" data-copy-zh="热量">Heat</button>
+      </nav>
+      <h2 id="task-title"></h2><p id="task-copy"></p>
+      <section id="coast-tools" class="tools">
+        <label for="density" data-copy-en="Body material · 1 L volume" data-copy-zh="物体材质 · 体积 1 L">Body material · 1 L volume</label>
+        <select id="density"><option value="650" data-copy-en="Wood · 650 kg/m³" data-copy-zh="木材 · 650 kg/m³">Wood · 650 kg/m³</option><option value="1000" data-copy-en="Matched density · 1000 kg/m³" data-copy-zh="相同密度 · 1000 kg/m³">Matched density · 1000 kg/m³</option><option value="7800" data-copy-en="Steel · 7800 kg/m³" data-copy-zh="钢材 · 7800 kg/m³">Steel · 7800 kg/m³</option></select>
+        <label for="prediction" data-copy-en="Predict before releasing" data-copy-zh="释放之前，先预测">Predict before releasing</label>
+        <select id="prediction"><option value="float" data-copy-en="It will float partly above water" data-copy-zh="会部分露出水面">It will float partly above water</option><option value="neutral" data-copy-en="It will stay fully immersed" data-copy-zh="会完全浸没并悬浮">It will stay fully immersed</option><option value="sink" data-copy-en="It will sink" data-copy-zh="会下沉">It will sink</option></select>
+        <button type="button" id="release" class="primary" data-copy-en="Release into water" data-copy-zh="释放到水中">Release into water</button>
+        <button type="button" id="measure" disabled data-copy-en="Measure & save observation" data-copy-zh="测量并记录观察">Measure &amp; save observation</button>
+        <dl class="readings"><div><dt data-copy-en="Weight ↓" data-copy-zh="重力 ↓">Weight ↓</dt><dd id="weight"></dd></div><div><dt data-copy-en="Maximum buoyancy ↑" data-copy-zh="最大浮力 ↑">Maximum buoyancy ↑</dt><dd>9.81 N</dd></div><div><dt data-copy-en="Equilibrium immersion" data-copy-zh="平衡浸入比例">Equilibrium immersion</dt><dd id="immersion"></dd></div></dl>
+      </section>
+      <section id="molecule-tools" class="tools" hidden>
+        <label for="phase-preview" data-copy-en="Compare the same water sample" data-copy-zh="比较同一份水的相态">Compare the same water sample</label>
+        <select id="phase-preview"><option value="0" data-copy-en="Ice · −20 °C" data-copy-zh="冰 · −20 °C">Ice · −20 °C</option><option value="4.6" data-copy-en="Liquid water · 20 °C" data-copy-zh="液态水 · 20 °C">Liquid water · 20 °C</option><option value="31" data-copy-en="Water vapor · 125 °C" data-copy-zh="水蒸气 · 125 °C">Water vapor · 125 °C</option></select>
+        <p data-copy-en="Ice: neighbors stay in place and vibrate. Liquid: neighbors exchange. Gas: molecules spread out. Red marks oxygen; white marks hydrogen—not visible colors." data-copy-zh="冰：邻居基本固定但不断振动。液体：邻居不断交换。气体：分子分散。红色标氧，白色标氢，并非肉眼可见颜色。">Ice: neighbors stay in place and vibrate. Liquid: neighbors exchange. Gas: molecules spread out. Red marks oxygen; white marks hydrogen—not visible colors.</p>
+        <button type="button" id="compare" class="primary" data-copy-en="Record the phase comparison" data-copy-zh="记录相态对比">Record the phase comparison</button>
+      </section>
+      <section id="heat-tools" class="tools" hidden>
+        <p data-copy-en="10 g · nominal 1 atm · starts as −20 °C ice · heater: 0.75 kW." data-copy-zh="10 g · 名义压力 1 atm · 初态：−20 °C 冰 · 加热器：0.75 kW。">10 g · nominal 1 atm · starts as −20 °C ice · heater: 0.75 kW.</p>
+        <label for="heat" data-copy-en="Net heat added to the sample" data-copy-zh="向样品净输入的热量">Net heat added to the sample</label>
+        <input id="heat" type="range" min="0" max="32" step="0.01" value="0">
+        <div class="thermal-actions"><button type="button" id="heat-up" data-copy-en="Heater on" data-copy-zh="开启加热">Heater on</button><button type="button" id="cool" data-copy-en="Cool down" data-copy-zh="冷却">Cool down</button><button type="button" id="heater-stop" data-copy-en="Hold heat" data-copy-zh="停止传热">Hold heat</button></div>
+        <dl class="readings"><div><dt data-copy-en="Net heat" data-copy-zh="净热量">Net heat</dt><dd id="heat-value"></dd></div><div><dt data-copy-en="Temperature" data-copy-zh="温度">Temperature</dt><dd id="temperature"></dd></div><div><dt data-copy-en="Current phase" data-copy-zh="当前相态">Current phase</dt><dd id="phase-name"></dd></div></dl>
+        <div class="fraction-bar" aria-hidden="true"><span id="solid-bar"></span><span id="liquid-bar"></span><span id="gas-bar"></span></div><p id="fractions"></p>
+        <p id="thermal-note"></p>
+        <button type="button" id="record-heat" class="primary" data-copy-en="Record a temperature plateau" data-copy-zh="记录一个温度平台">Record a temperature plateau</button>
+      </section>
+      <p id="feedback" role="status" aria-live="polite"></p>
+      <button type="button" id="next" class="primary" disabled data-copy-en="Use the scale lens →" data-copy-zh="使用尺度透镜 →">Use the scale lens →</button>
+      <details class="journal"><summary data-copy-en="Your field notes" data-copy-zh="你的观察笔记">Your field notes</summary><ol id="notes"></ol><p id="storage-status"></p></details>
+    </aside>
+  </main>
+  <section class="guide">
+    <div><h2 data-copy-en="Stay curious. Keep the model honest." data-copy-zh="保持好奇，也看清模型的边界。">Stay curious. Keep the model honest.</h2><p data-copy-en="WASD walks; arrow keys look; drag the scene to look around. E returns you to the current experiment. Escape pauses and releases mouse look. Screen buttons also work when motion is paused. Nothing begins moving until you choose to start." data-copy-zh="WASD 行走，方向键转向，拖拽场景改变视线。E 到达当前实验。Escape 暂停并退出鼠标视角。暂停时仍可用屏幕按钮操作。只有主动开始后，场景才运动。">WASD walks; arrow keys look; drag the scene to look around. E returns you to the current experiment. Escape pauses and releases mouse look. Screen buttons also work when motion is paused. Nothing begins moving until you choose to start.</p><a href="https://github.com/micwu-personal/Physics/blob/main/PHYSICS-GAME-PLAN.md" data-copy-en="Read the full game roadmap ↗" data-copy-zh="阅读完整游戏路线图 ↗">Read the full game roadmap ↗</a></div>
+    <div><h3 data-copy-en="What is calculated, what is imagined?" data-copy-zh="哪些是计算，哪些是想象？">What is calculated, what is imagined?</h3><p data-copy-en="Buoyancy readouts use Archimedes’ law with water density 1000 kg/m³. The cube is enlarged, its settling is illustrative, and we omit flow/drag simulation. Phase temperatures and mass fractions use a piecewise calorimetry model; the open-pressure sample has no heat loss or container heat capacity. Molecular motion, distances and oxygen/hydrogen colors are teaching schematics—not molecular dynamics, measured trajectories or visible atoms. The scale lens is fictional; water vapor is invisible, unlike a cloud of condensed droplets." data-copy-zh="浮力数据按阿基米德定律计算，水密度取 1000 kg/m³。方块被放大，沉浮过程作示意，没有求解流体阻力。相态温度和质量比例由分段量热模型计算；样品在固定压力下，没有热损失或容器热容。分子运动、距离和氧氢配色为教学示意，不是分子动力学、测量轨迹或可见原子。尺度透镜是虚构工具；水蒸气不可见，不等于凝结液滴形成的白雾。">Buoyancy readouts use Archimedes’ law with water density 1000 kg/m³. The cube is enlarged, its settling is illustrative, and we omit flow/drag simulation. Phase temperatures and mass fractions use a piecewise calorimetry model; the open-pressure sample has no heat loss or container heat capacity. Molecular motion, distances and oxygen/hydrogen colors are teaching schematics—not molecular dynamics, measured trajectories or visible atoms. The scale lens is fictional; water vapor is invisible, unlike a cloud of condensed droplets.</p></div>
+    <div><h3 data-copy-en="Continue into the Atlas" data-copy-zh="继续深入图谱">Continue into the Atlas</h3><ul><li><a href="field.html?id=fluids" data-copy-en="Fluid mechanics & buoyancy" data-copy-zh="流体力学与浮力">Fluid mechanics &amp; buoyancy</a></li><li><a href="phase-transitions.html" data-copy-en="Phase transitions" data-copy-zh="相变">Phase transitions</a></li><li><a href="field.html?id=thermodynamics" data-copy-en="Thermodynamics" data-copy-zh="热力学">Thermodynamics</a></li></ul><h3 data-copy-en="Scientific sources" data-copy-zh="科学来源">Scientific sources</h3><ul><li><a href="https://openstax.org/books/university-physics-volume-1/pages/14-4-archimedes-principle-and-buoyancy">OpenStax · Archimedes’ principle</a></li><li><a href="https://openstax.org/books/university-physics-volume-2/pages/1-5-phase-changes">OpenStax · Phase changes</a></li><li><a href="https://openstax.org/books/chemistry-2e/pages/10-1-intermolecular-forces">OpenStax · Intermolecular forces</a></li></ul></div>
+  </section>
+  <script src="common.js"></script><script type="module" src="game.js"></script>
+</body>
+</html>
