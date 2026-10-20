@@ -40,7 +40,7 @@ const copy = {
   resume:['Resume','继续'],pauseButton:['Pause','暂停'],
   victory:['The lighthouse is back.','灯塔再次亮起。'],failure:['The signal window closed.','信号窗口已关闭。'],
   failureCopy:['Your 120 active seconds ran out. Replay, or uncheck the timer for unhurried practice.','120 秒有效游戏时间已用完。可重玩，或取消计时，轻松练习。'],
-  canvas:['First-person coastal rescue. WASD moves, drag or arrow keys look, E interacts, Space jumps, F throws; Escape pauses.','第一人称海岸救援。WASD 移动，拖拽或方向键观察，E 互动，空格跳跃，F 投掷，Escape 暂停。']
+  canvas:['First-person coastal rescue. WASD or held touch arrows move; drag, arrow keys or opt-in device rotation look. E interacts, Space jumps, F throws. Onscreen Pause/Exit, Escape, or double-click while mouse-locked release capture.','第一人称海岸救援。WASD 或长按屏幕箭头移动，拖拽、方向键或主动开启的设备转动观察；E 互动，空格跳跃，F 投掷。可用屏幕暂停／退出或 Escape；鼠标锁定时也可双击退出。']
 };
 const lang = () => document.documentElement.lang === 'zh-CN' ? 1 : 0;
 const words = value => value[lang()];

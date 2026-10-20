@@ -70,6 +70,18 @@
 
 海岸、天气、水波、船舶阻力、角色与桥梁均为示意；没有求解海况、CFD、真实稳定性/翻覆或人物刚体碰撞。未来工坊扩展应该延续“行动 → 世界反馈 → 修正方案”的循环，而不是继续堆放虚拟教学屏幕。
 
+## 移动设备沉浸操作 / Mobile immersion
+
+手机／平板可以主动开启“设备视角”，转动设备左右观察、抬低设备上下观察；地平线保持水平。长按屏幕箭头控制虚拟行走／操筏，拖拽仍可用。第一次有效读数、暂停后继续、重新对齐、设备横竖屏变化及切换人物视点都会重新建立基准，不突然跳转。方向数据按 W3C 的 Z–X′–Y″ 旋转求屏幕法向，不把 alpha 当作所有握持姿态下的视线方向。
+
+“展开视图”使用适配安全区域的页面布局，不依赖手机 Fullscreen API；退出／暂停位于视图顶部，控制面板可滚动，短横屏采用侧边操作区。鼠标锁定时双击场景或 Escape 即可释放并暂停。传感器许可必须由玩家点击触发；拒绝、设备不支持或无有效读数时有明确说明，仍可拖拽与按箭头完成游戏。离页、图形丢失与退出展开视图会停用对应输入。
+
+**不把转动感知伪装成真实行走追踪**。标准 iPhone／iPad Safari 没有供此 WebGL 游戏使用的相机定位 WebXR 6DoF 路径；加速度二重积分的漂移也不能作为可靠行走定位。当前不启用相机、不积分加速度、不保存或发送方向数据。请坐着或站稳在空旷位置使用，不要求玩家边看屏幕边真实行走。兼容 Android 的 WebXR AR 和原生 iOS 定位属于未来独立项目，不声称已实现。
+
+验证包括数学／权限／取消与超时单元测试、合成方向事件驱动真实相机的浏览器测试、实际多点触屏事件行走、鼠标锁定双击退出、横竖屏与手机／平板布局，以及 WebKit 兼容性。浏览器模拟不等于实体 iPhone／iPad 的硬件传感器实测。
+
+来源：[W3C Device Orientation](https://w3c.github.io/deviceorientation/)、[W3C Motion Sensors：位置积分漂移](https://w3c.github.io/motion-sensors/)、[MDN WebXR 兼容记录](https://github.com/mdn/browser-compat-data/blob/main/api/XRSystem.json)、[Google WebXR AR 要求](https://developers.google.com/ar/develop/webxr/requirements)、[W3C Pointer Lock](https://w3c.github.io/pointerlock/)。
+
 ## OpenIntelligentUI 参考与版权边界 / Inspiration and rights
 
 调研固定到 [CopilotKit/OpenIntelligentUI，8391a94](https://github.com/CopilotKit/OpenIntelligentUI/tree/8391a94c1c3939c679e40ddd7bfc08a9ef690e70)。它是生成式答案/UI 应用，**不是游戏引擎**；飞机、太阳系等画廊条目是生成提示，不是现成、经过验证的游戏实现。
@@ -84,7 +96,8 @@
 
 - `game-model.js`：纯科学计算、确定性相态示意；Node 可测试。
 - `game-renderer.js`：小型自托管 WebGL 绘制器；场景几何、颜色、透视/深度和相态示意。不承担科学状态管理。
-- `game.js`：共享输入、模式、动画生命周期，以及原实验室/版本化观察记录。
+- `game.js`：共享输入、展开视图／可触摸退出、模式、动画生命周期，以及原实验室/版本化观察记录。
+- `game-device-look.js`：纯方向转换与可注入环境的权限／校准／暂停／取消控制器；不独立启动动画循环或跟踪位置，Node 可测试。
 - `game-adventure-model.js`：纯救援状态、浮筏载重/吃水、地形、热继电器、抛射和恢复；Node 可测试。
 - `game-adventure.js`：救援任务、连续行走/跳跃、情境操作、地图、计时、重玩与本地最佳记录。
 - `game-adventure-world.js` / `game-audio.js`：原创程序化群岛/工具与主动开启的合成音效，无外部资产或服务。

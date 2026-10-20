@@ -25,7 +25,8 @@ const pureModules = [
   'physics/game-renderer.js',
   'physics/game-adventure-world.js',
   'physics/game-audio.js',
-  'physics/game-adventure.js'
+  'physics/game-adventure.js',
+  'physics/game-device-look.js'
 ];
 
 /* The static server binds a worktree-specific port, so every URL check works on

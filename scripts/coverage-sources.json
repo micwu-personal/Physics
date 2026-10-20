@@ -28,6 +28,7 @@
   "physics/fields-data.js",
   "physics/formula.js",
   "physics/game.js",
+  "physics/game-device-look.js",
   "physics/game-adventure.js",
   "physics/game-adventure-model.js",
   "physics/game-adventure-world.js",

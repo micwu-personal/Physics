@@ -2,7 +2,7 @@
 version: 1
 slug: "physics-game-html"
 primary_target: "physics/game.html"
-related_targets: ["physics/game.js","physics/game.css","physics/game-renderer.js","physics/game-adventure.js","physics/game-adventure-world.js"]
+related_targets: ["physics/game.js","physics/game.css","physics/game-renderer.js","physics/game-adventure.js","physics/game-adventure-world.js","physics/game-device-look.js"]
 ---
 
 # Universe, In Person
@@ -11,4 +11,4 @@ Scope: physics/game.html, an Experience-mode surface within the existing Evidenc
 
 Direction: scene-first original coastal adventure. Slate sea/sky, timber tools and amber relay geometry are a local procedural-world palette; interface panels use the incumbent cosmic-black/deep-space, starlight, cyan, gold and green tokens. Compact objectives, contextual actions, a route map and physical feedback recede around the 3D view. Memorable moment: a freely aimed capsule reaches the ring and the lighthouse comes alive. No replacement global brand, borrowed artwork or fabricated future worlds.
 
-Constraints: locally rendered 3D, keyboard/drag/touch, continuous movement/jump/steering, opt-in motion and synthesized audio; checkpoint recovery, practice/default and optional 120-second replay. Only best time and lab notes persist locally. No-GPU users retain the full lab. Flotation/calorimetry/projectiles are calculated; steering, water, enlarged sensor and relay mechanism are explicit approximations. UI title sizes 1.25rem and 1.5rem follow the existing heading range; 0.75rem is reserved for compact HUD labels/readouts on phones. The roadmap records scientific and upstream inspiration/licensing boundaries: PHYSICS-GAME-PLAN.md.
+Constraints: locally rendered 3D, keyboard/drag/touch, continuous movement/jump/steering, opt-in calibrated device-rotation looking and synthesized audio; checkpoint recovery, practice/default and optional 120-second replay. Expanded view keeps touch walking available while ancillary controls scroll; portrait/landscape and safe areas are supported. Onscreen Pause/Exit and mouse-locked double-click eliminate Escape-only exits. Permission denial and absent sensors preserve drag/touch fallback. Rotation is not physical walking; no camera, acceleration integration, stored/transmitted sensor data or handheld Safari WebXR claim. Only best time and lab notes persist locally. No-GPU users retain the full lab. Flotation/calorimetry/projectiles are calculated; steering, water, enlarged sensor and relay mechanism are explicit approximations. UI title sizes 1.25rem and 1.5rem follow the existing heading range; 0.75rem is reserved for compact HUD labels/readouts on phones. The roadmap records scientific and upstream inspiration/licensing boundaries: PHYSICS-GAME-PLAN.md.

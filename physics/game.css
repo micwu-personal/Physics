@@ -91,7 +91,6 @@ summary { cursor: pointer; min-height: 44px; }
   .world-caption { font-size: 1rem; left: 8px; right: 8px; bottom: 8px; }
   .world-caption span:first-child { max-width: 100%; }
   .movement { justify-content: space-between; }
-  #mouse-lock { display: none; }
   #approach { flex: 1; }
   .notebook { border-left: 0; padding: 24px 20px; }
   .welcome { max-width: 65ch; }
@@ -166,4 +165,51 @@ summary { cursor: pointer; min-height: 44px; }
   .adventure-controls { justify-content:flex-start; }
   .adventure-controls #adventure-interact { flex:1; }
   #adventure-recover { margin-left:auto; }
+}
+.view-toolbar { position:absolute; z-index:5; top:12px; right:12px; display:flex; flex-wrap:wrap; gap:4px; max-width:calc(100% - 24px); }
+.view-toolbar button { background:var(--surface); }
+.world-title { max-width:calc(100% - 225px); }
+.world[data-mode='adventure'] .adventure-hud { top:74px; }
+.capture-hint { position:absolute; z-index:5; bottom:12px; left:12px; max-width:calc(100% - 24px); margin:0; padding:8px 12px; background:var(--surface); color:var(--gold); pointer-events:none; }
+.view:has(#capture-hint:not([hidden])) .world-caption { visibility:hidden; }
+.device-controls { display:flex; align-items:center; flex-wrap:wrap; gap:8px; padding:12px 16px; background:var(--surface); border-top:1px solid var(--line); }
+.device-controls button[aria-pressed='true'] { color:var(--gold); border-color:var(--gold); }
+#device-status { flex:1 1 340px; margin:0; color:var(--muted); font-size:.875rem; }
+.device-help { flex:1 1 100%; color:var(--muted); font-size:.875rem; }
+.device-help summary { display:flex; align-items:center; color:var(--cyan); width:fit-content; }
+.device-help summary::before { content:'+'; margin-right:8px; }
+.device-help[open] summary::before { content:'−'; }
+.device-help p { max-width:70ch; margin:8px 0 0; }
+.move-pad button { touch-action:none; user-select:none; -webkit-user-select:none; }
+.game-expanded { overflow:hidden; }
+.game-expanded .game-nav { visibility:hidden; }
+.game-expanded .reference-pane { display:none; }
+.game-expanded .world { position:fixed; inset:0; z-index:100; display:grid; grid-template-rows:minmax(0,1fr) auto; height:100dvh; background:var(--bg); padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); }
+.game-expanded .world .view { height:100%; min-height:0; }
+.game-expanded .world .control-deck { display:grid; grid-template-rows:auto auto minmax(0,1fr); max-height:36dvh; overflow:hidden; background:var(--surface); }
+.game-expanded .scene-instrument { grid-row:1; }
+.game-expanded .movement { grid-row:2; }
+.game-expanded .control-deck-options { grid-row:3; min-height:0; overflow-y:auto; overscroll-behavior:contain; }
+.game-expanded .movement,.game-expanded .adventure-controls { justify-content:center; }
+.game-expanded .world .world-title { top:12px; }
+.game-expanded .world .world-title h1 { font-size:1rem; }
+.game-expanded .world-title p { display:none; }
+@media (any-pointer:coarse) and (hover:none) { #mouse-lock { display:none; } }
+@media (max-width:740px) {
+  .view-toolbar button { padding-inline:8px; font-size:.875rem; }
+  .world-title { max-width:calc(100% - 205px); }
+  .world[data-looking='true'] .world-title { visibility:hidden; }
+  .device-controls { padding:10px 12px; }
+}
+@media (max-height:550px) and (min-width:620px) {
+  .game-expanded .world { grid-template-columns:minmax(0,1fr) 280px; grid-template-rows:1fr; }
+  .game-expanded .world .control-deck { max-height:none; height:100%; border-left:1px solid var(--line); }
+  .game-expanded .movement,.game-expanded .adventure-controls { justify-content:flex-start; }
+  .game-expanded .mission-objective { max-height:calc(100dvh - 210px); overflow:auto; pointer-events:auto; }
+  .game-expanded .mission-navigation { width:63px; }
+  .game-expanded #mission-map { width:40px; height:60px; }
+  .game-expanded .mission-message { max-height:48px; overflow:auto; pointer-events:auto; font-size:.75rem; }
+  .game-expanded .mission-prompt { bottom:48px; font-size:.75rem; }
+  .game-expanded .world-title { display:none; }
+  .game-expanded .world-caption span:first-child { display:none; }
 }

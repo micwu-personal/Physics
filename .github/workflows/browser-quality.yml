@@ -25,7 +25,7 @@ jobs:
       - run: npm run build:mobile
       - run: npm run check:generated
       - run: npm run test:apps
-      - run: node --test tests\relativity-observatory-model.test.mjs tests\game-model.test.mjs tests\game-adventure-model.test.mjs tests\game-adventure-controller.test.mjs tests\game-audio.test.mjs tests\game-renderer.test.mjs
+      - run: node --test tests\relativity-observatory-model.test.mjs tests\game-model.test.mjs tests\game-adventure-model.test.mjs tests\game-adventure-controller.test.mjs tests\game-audio.test.mjs tests\game-renderer.test.mjs tests\game-device-look.test.mjs
       - if: always()
         run: npm run test:e2e
       - if: always()

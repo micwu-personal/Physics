@@ -1,6 +1,7 @@
 import { buoyancy, clamp, MAX_HEAT, waterState } from './game-model.js';
 import { createRenderer } from './game-renderer.js';
 import { createAdventureController } from './game-adventure.js';
+import { createDeviceLook } from './game-device-look.js';
 
 const $ = id => document.getElementById(id);
 const canvas = $('game-canvas');
@@ -40,8 +41,19 @@ const copy = {
   noteHeat: ['Latent heat: a phase change absorbs energy at constant temperature in this fixed-pressure model.', '潜热：在这个固定压力模型中，相变在恒温下吸收能量。'],
   nextLens: ['Use the scale lens →', '使用尺度透镜 →'], nextHeat: ['Follow the energy →', '追踪能量 →'], return: ['Return to the shore ↩', '返回海岸 ↩'],
   reset: ['Journey reset. Your previous local notes have been cleared.', '旅程已重置，之前的本地笔记已清除。'],
-  lockFailed: ['Mouse lock is unavailable. Drag to look, or use the arrow keys. Escape always pauses.', '鼠标锁定不可用。请拖拽观察，或使用方向键。Escape 始终可以暂停。'],
-  lockActive: ['Mouse look active · Escape to pause', '鼠标视角已启用 · Escape 暂停']
+  lockFailed: ['Mouse lock is unavailable. Drag to look, or use the arrow keys.', '鼠标锁定不可用。请拖拽观察，或使用方向键。'],
+  lockActive: ['Mouse look · double-click the scene or press Escape to release and pause', '鼠标视角 · 双击场景或按 Escape 退出并暂停'],
+  expandView: ['Expand view', '展开视图'], exitView: ['Exit view', '退出视图'],
+  stopLook: ['Stop looking', '停止视角'], mouseLook: ['Mouse look', '鼠标视角'],
+  deviceLook: ['Device look', '设备视角'], deviceStop: ['Stop device look', '停止设备视角'],
+  deviceOff: ['Rotate to look; hold arrows to walk. Physical walking is not tracked.', '转动设备观察，长按箭头行走；不追踪真实行走。'],
+  deviceRequesting: ['Allow device orientation in the browser prompt. No camera is used.', '请在浏览器提示中允许设备方向访问；不启用相机。'],
+  deviceWaiting: ['Hold the device comfortably. Resume play, then turn to look.', '舒适地握住设备，继续游戏后转动观察。'],
+  deviceActive: ['Device look on · turn or tilt to look; hold arrows to move.', '设备视角已开启 · 转动或抬低设备观察，长按箭头移动。'],
+  devicePaused: ['Device look paused. Resume to recalibrate without a view jump.', '设备视角已暂停；继续后重新校准，视线不会跳转。'],
+  deviceDenied: ['Orientation permission was not granted. Use drag and arrows, or allow access in browser settings and retry.', '未获设备方向许可。可拖拽与按箭头操作，或在浏览器设置中允许后重试。'],
+  deviceUnavailable: ['Device orientation is unavailable here. Use drag and arrows.', '此处无法使用设备方向传感器；请拖拽与按箭头操作。'],
+  deviceNoReadings: ['No usable orientation readings arrived. Use drag and arrows, or retry on a supported device.', '未收到有效设备方向数据。请拖拽与按箭头操作，或在支持的设备上重试。']
 };
 const text = key => copy[key][document.documentElement.lang === 'zh-CN' ? 1 : 0];
 const state = {
@@ -63,6 +75,37 @@ let frames = 0, raf = 0, last = 0, nextReadout = 0, dragging = null;
 const keys = new Set();
 state.mode = renderer ? 'adventure' : 'lab';
 const adventure = createAdventureController(state,{change,play,getGpu:() => Boolean(renderer)});
+let expanded = false, mouseWanted = false, mouseRequest = 0;
+const deviceLook = createDeviceLook({environment:window,getCamera:() => state.camera,
+  isActive:() => Boolean(renderer) && state.playing && state.visible && !document.hidden,onStatus:refreshLook});
+
+function refreshLook() {
+  const look = deviceLook.snapshot(), locked = document.pointerLockElement === canvas;
+  const phaseKeys = {off:'deviceOff',requesting:'deviceRequesting',waiting:'deviceWaiting',active:'deviceActive',paused:'devicePaused',denied:'deviceDenied',unavailable:'deviceUnavailable',noReadings:'deviceNoReadings'};
+  $('device-look').textContent = text(look.enabled || look.pending ? 'deviceStop' : 'deviceLook');
+  $('device-look').setAttribute('aria-pressed',String(look.enabled)); $('device-look').disabled = !renderer;
+  $('device-recenter').disabled = !look.enabled;
+  $('device-status').textContent = text(phaseKeys[look.phase]);
+  $('look-stop').hidden = !look.enabled && !look.pending && !locked && !mouseWanted;
+  $('look-stop').textContent = text('stopLook');
+  $('capture-hint').hidden = !locked; $('capture-hint').textContent = text('lockActive');
+  $('mouse-lock').textContent = text(locked || mouseWanted ? 'stopLook' : 'mouseLook');
+  $('view-toggle').textContent = text(expanded ? 'exitView' : 'expandView');
+  $('view-toggle').setAttribute('aria-expanded',String(expanded)); $('view-toggle').disabled = !renderer;
+  $('view-play').textContent = text(state.playing ? 'pause' : 'resume');
+  $('view-play').setAttribute('aria-pressed',String(state.playing));
+  const mission = adventure.diagnostic();
+  $('view-play').disabled = !renderer || state.mode === 'adventure' && (!mission.started || mission.won || mission.lost);
+  document.querySelector('.world').dataset.looking = String(look.enabled || look.pending || locked || mouseWanted);
+}
+function releaseMouse() { mouseWanted = false; mouseRequest++; if (document.pointerLockElement === canvas) document.exitPointerLock(); }
+function stopLook() { deviceLook.disable(); play(false); }
+function setExpanded(value) {
+  expanded = value; document.body.classList.toggle('game-expanded',value);
+  for (const element of document.querySelectorAll('.game-nav,.notebook,.guide,.skip-link,.reference-pane')) element.inert = value;
+  if (!value) stopLook();
+  change(); (value ? canvas : $('view-toggle')).focus();
+}
 
 function save() {
   try { localStorage.setItem(storageKey,JSON.stringify({ version:1,completed:state.completed })); }
@@ -120,7 +163,7 @@ function refresh() {
   $('approach').textContent = document.documentElement.lang === 'zh-CN' ? '靠近实验 · E' : 'Approach experiment · E';
   canvas.setAttribute('aria-label',canvas.dataset.ariaEn);
   if (document.documentElement.lang === 'zh-CN') canvas.setAttribute('aria-label',canvas.dataset.ariaZh);
-  adventure.refresh();
+  adventure.refresh(); refreshLook();
 }
 function change() { refresh(); render(); }
 function approach() {
@@ -148,8 +191,8 @@ function schedule() { if (!raf && state.playing && state.visible && !document.hi
 function play(value) {
   state.playing = value; keys.clear(); adventure.clearHeld();
   if (value) { state.started = true; window.PhysicsUI.requestMotion(); }
-  else { cancelAnimationFrame(raf); raf = 0; last = 0; }
-  change(); schedule();
+  else { cancelAnimationFrame(raf); raf = 0; last = 0; dragging = null; releaseMouse(); }
+  deviceLook.sync(); change(); schedule();
 }
 function tick(now) {
   raf = 0;
@@ -200,7 +243,14 @@ $('reset').addEventListener('click',() => {
   state.visited = new Set([0]); state.density = 650; state.started = false; $('density').value = '650'; $('prediction').value = 'float'; $('phase-preview').value = '0';
   scene('coast'); state.camera = {x:0,y:1.65,z:6,yaw:0,pitch:0}; state.message = 'reset'; save(); change();
 });
-for (const button of document.querySelectorAll('[data-move]')) button.addEventListener('click',() => { move(button.dataset.move,.55); change(); });
+for (const button of document.querySelectorAll('[data-move]')) {
+  button.addEventListener('click',() => { move(button.dataset.move,.55); change(); });
+  button.addEventListener('pointerdown',event => {
+    if (state.mode !== 'lab' || !state.playing) return;
+    event.preventDefault(); keys.add(button.dataset.move); button.setPointerCapture(event.pointerId);
+  });
+  for (const event of ['pointerup','pointercancel','lostpointercapture']) button.addEventListener(event,() => keys.delete(button.dataset.move));
+}
 for (const button of document.querySelectorAll('[data-look]')) button.addEventListener('click',() => { state.camera.yaw += button.dataset.look === 'left' ? -.25 : .25; change(); });
 const movementKeys = { w:'forward',s:'back',a:'left',d:'right' };
 canvas.addEventListener('keydown',event => {
@@ -220,40 +270,67 @@ canvas.addEventListener('keydown',event => {
 });
 canvas.addEventListener('keyup',event => { keys.delete(movementKeys[event.key.toLowerCase()]); if (event.key === 'Shift') keys.delete('sprint'); });
 canvas.addEventListener('blur',() => { keys.clear(); adventure.clearHeld(); dragging = null; });
-canvas.addEventListener('pointerdown',event => { dragging = {x:event.clientX,y:event.clientY,id:event.pointerId}; canvas.setPointerCapture(event.pointerId); canvas.focus(); });
+canvas.addEventListener('pointerdown',event => {
+  canvas.focus(); if (document.pointerLockElement === canvas) return;
+  dragging = {x:event.clientX,y:event.clientY,id:event.pointerId}; canvas.setPointerCapture(event.pointerId);
+});
 canvas.addEventListener('pointermove',event => {
   const locked = document.pointerLockElement === canvas;
-  if (!dragging && !locked) return;
+  if (!dragging && !locked || dragging && !locked && event.pointerId !== dragging.id) return;
   const dx = locked ? event.movementX : event.clientX-dragging.x, dy = locked ? event.movementY : event.clientY-dragging.y;
   state.camera.yaw += dx*.004; state.camera.pitch = clamp(state.camera.pitch-dy*.004,-1,1);
   if (dragging) dragging = {x:event.clientX,y:event.clientY,id:event.pointerId};
   change();
 });
 for (const event of ['pointerup','pointercancel','lostpointercapture']) canvas.addEventListener(event,() => { dragging = null; });
+$('view-toggle').addEventListener('click',() => setExpanded(!expanded));
+$('view-play').addEventListener('click',() => play(!state.playing));
+$('look-stop').addEventListener('click',stopLook);
+$('device-look').addEventListener('click',() => { releaseMouse(); deviceLook.enable(); });
+$('device-recenter').addEventListener('click',() => deviceLook.recenter());
+canvas.addEventListener('dblclick',() => { if (document.pointerLockElement === canvas) stopLook(); });
 $('mouse-lock').addEventListener('click',async () => {
+  if (mouseWanted || document.pointerLockElement === canvas) { stopLook(); return; }
+  const request = ++mouseRequest; mouseWanted = true; deviceLook.disable(); refreshLook();
   try {
     if (!canvas.requestPointerLock) throw new Error('Unavailable');
-    await canvas.requestPointerLock(); canvas.focus();
-  } catch { state.message = 'lockFailed'; refresh(); }
+    await canvas.requestPointerLock();
+    if (request !== mouseRequest) return;
+    canvas.focus();
+  } catch { if (request === mouseRequest) { mouseWanted = false; state.message = 'lockFailed'; refresh(); } }
 });
 document.addEventListener('pointerlockchange',() => {
-  state.message = document.pointerLockElement === canvas ? 'lockActive' : ''; refresh();
+  const locked = document.pointerLockElement === canvas;
+  if (locked && !mouseWanted) { releaseMouse(); return; }
+  if (!locked) mouseWanted = false;
+  state.message = locked ? 'lockActive' : ''; refresh();
 });
-document.addEventListener('pointerlockerror',() => { state.message = 'lockFailed'; refresh(); });
-document.addEventListener('keydown',event => { if (event.key === 'Escape') { play(false); if (document.pointerLockElement) document.exitPointerLock(); } });
+document.addEventListener('pointerlockerror',() => { releaseMouse(); state.message = 'lockFailed'; refresh(); });
+document.addEventListener('keydown',event => {
+  if (event.key === 'Escape') { if (expanded) setExpanded(false); else stopLook(); }
+  if (event.key === 'Tab' && expanded) {
+    const items = [...document.querySelector('.world').querySelectorAll('button:not(:disabled),summary,[tabindex="0"]')].filter(element => element.getClientRects().length);
+    const first = items[0], last = items.at(-1);
+    if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+    else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+  }
+});
 window.addEventListener('blur',() => { play(false); dragging = null; });
-document.addEventListener('visibilitychange',() => { keys.clear(); adventure.clearHeld(); last = 0; schedule(); });
+document.addEventListener('visibilitychange',() => { keys.clear(); adventure.clearHeld(); dragging = null; releaseMouse(); deviceLook.sync(); last = 0; schedule(); });
 document.addEventListener('physics-language',refresh);
 document.addEventListener('physics-motion',event => { if (event.detail.paused) play(false); else refresh(); });
-const observer = new IntersectionObserver(entries => { state.visible = entries[0].isIntersecting; keys.clear(); adventure.clearHeld(); last = 0; schedule(); });
+const observer = new IntersectionObserver(entries => { state.visible = entries[0].isIntersecting; keys.clear(); adventure.clearHeld(); deviceLook.sync(); last = 0; schedule(); });
 observer.observe(canvas);
 window.addEventListener('resize',() => { state.dpr = Math.min(window.devicePixelRatio || 1,2); render(); });
-canvas.addEventListener('webglcontextlost',event => { event.preventDefault(); play(false); renderer = null; $('gpu-message').hidden = false; adventure.mode('lab'); });
+const orientationChanged = () => { deviceLook.recenter(); render(); };
+window.addEventListener('orientationchange',orientationChanged);
+window.screen.orientation?.addEventListener('change',orientationChanged);
+canvas.addEventListener('webglcontextlost',event => { event.preventDefault(); if (expanded) setExpanded(false); deviceLook.disable(); play(false); renderer = null; $('gpu-message').hidden = false; adventure.mode('lab'); });
 canvas.addEventListener('webglcontextrestored',() => {
   try { renderer = createRenderer(canvas); } catch { renderer = null; }
   $('gpu-message').hidden = Boolean(renderer); change();
 });
-window.addEventListener('pagehide',event => { play(false); observer.disconnect(); if (!event.persisted) adventure.dispose(); });
+window.addEventListener('pagehide',event => { if (expanded) setExpanded(false); stopLook(); observer.disconnect(); if (!event.persisted) adventure.dispose(); });
 window.addEventListener('pageshow',() => { observer.observe(canvas); render(); });
-window.__physicsGame = Object.freeze({ snapshot:() => ({ mode:state.mode,adventure:adventure.diagnostic(),scene:state.scene,camera:{...state.camera},heat:state.heat,water:waterState(state.heat),density:state.density,released:state.released,releaseAge:state.releaseAge,playing:state.playing,time:state.time,heater:state.heater,completed:[...state.completed],visible:state.visible,frames,gpu:Boolean(renderer) }) });
+window.__physicsGame = Object.freeze({ snapshot:() => ({ mode:state.mode,adventure:adventure.diagnostic(),scene:state.scene,camera:{...state.camera},heat:state.heat,water:waterState(state.heat),density:state.density,released:state.released,releaseAge:state.releaseAge,playing:state.playing,time:state.time,heater:state.heater,completed:[...state.completed],visible:state.visible,expanded,deviceLook:deviceLook.snapshot(),frames,gpu:Boolean(renderer) }) });
 change();
