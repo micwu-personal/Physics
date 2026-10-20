@@ -1,4 +1,5 @@
 import { makeParticles, particlePosition, waterState, buoyancy } from './game-model.js';
+import { createAdventureWorld } from './game-adventure-world.js';
 
 const vertexSource = `
 attribute vec3 aPosition;
@@ -115,6 +116,7 @@ export function createRenderer(canvas) {
   const eye = gl.getUniformLocation(program, 'uEye'), look = gl.getUniformLocation(program, 'uLook');
   const aspect = gl.getUniformLocation(program, 'uAspect'), sky = gl.getUniformLocation(program, 'uSky');
   const shore = coastGeometry(), micro = moleculeGeometry(), particles = makeParticles();
+  const adventureWorld = createAdventureWorld({box,sphere,ring,quad});
   const oxygen = [], hydrogen = [];
   sphere(oxygen,0,0,0,.105,[.95,.25,.34]); sphere(hydrogen,0,0,0,.065,[.91,.96,1]);
   function translated(list,mesh,x,y,z) {
@@ -128,7 +130,7 @@ export function createRenderer(canvas) {
     render(state) {
       const w = Math.max(1, Math.round(canvas.clientWidth * state.dpr)), h = Math.max(1, Math.round(canvas.clientHeight * state.dpr));
       if (canvas.width !== w || canvas.height !== h) { canvas.width = w; canvas.height = h; }
-      const isCoast = state.scene === 'coast', background = isCoast ? [.24,.47,.59] : [.025,.045,.085];
+      const isCoast = state.scene === 'coast', background = state.mode === 'adventure' ? [.24,.34,.41] : isCoast ? [.24,.47,.59] : [.025,.045,.085];
       gl.viewport(0,0,w,h); gl.clearColor(...background,1); gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
       gl.useProgram(program); gl.bindBuffer(gl.ARRAY_BUFFER,buffer);
       gl.enableVertexAttribArray(position); gl.vertexAttribPointer(position,3,gl.FLOAT,false,28,0);
@@ -136,6 +138,13 @@ export function createRenderer(canvas) {
       gl.uniform3fv(eye, [state.camera.x,state.camera.y,state.camera.z]);
       gl.uniform2f(look,state.camera.yaw,state.camera.pitch); gl.uniform1f(aspect,w/h); gl.uniform3fv(sky,background);
       gl.enable(gl.DEPTH_TEST); gl.disable(gl.BLEND); gl.depthMask(true);
+      if (state.mode === 'adventure') {
+        const world = adventureWorld(state);
+        draw(world.opaque);
+        gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA); gl.depthMask(false);
+        draw(world.water); draw(world.light); gl.depthMask(true);
+        return;
+      }
       const list = [...(isCoast ? shore : micro)];
       const water = waterState(state.heat);
       if (isCoast) {

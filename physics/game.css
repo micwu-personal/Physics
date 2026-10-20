@@ -97,3 +97,73 @@ summary { cursor: pointer; min-height: 44px; }
   .welcome { max-width: 65ch; }
   .guide { grid-template-columns: 1fr; gap: 32px; padding: 40px 20px; }
 }
+.mode-switch { display:flex; gap:4px; }
+.mode-switch [aria-pressed='true'] { border-color:var(--gold); color:var(--gold); }
+.game-layout[data-mode='adventure'] { display:block; }
+.world[data-mode='adventure'] { position:relative; }
+.world[data-mode='adventure'] .view { height:calc(100svh - 225px); min-height:540px; }
+.world[data-mode='adventure'] .world-title { top:18px; left:20px; padding:0; border:0; background:none; }
+.world[data-mode='adventure'] .world-title h1 { font-size:1.25rem; text-shadow:0 2px 5px var(--bg); }
+.world[data-mode='adventure'] .world-title { z-index:3; }
+.world[data-mode='adventure'] .world-title p { display:none; }
+.world[data-mode='adventure'] .world-caption { font-size:.75rem; z-index:2; }
+.adventure-hud { position:absolute; z-index:2; top:57px; left:20px; right:20px; display:flex; justify-content:space-between; align-items:flex-start; gap:18px; pointer-events:none; }
+.mission-objective { padding:14px 18px; width:390px; max-width:calc(100% - 125px); background:var(--surface); border-radius:8px; }
+.mission-objective h2 { font-size:1.25rem; margin-bottom:8px; }
+.mission-objective p { margin:0; font-size:1rem; }
+#mission-readout { margin-top:12px; color:var(--gold); font:.75rem/1.5 'JetBrains Mono',monospace; }
+.mission-navigation { display:grid; justify-items:center; gap:6px; background:var(--surface); padding:8px; border-radius:8px; width:110px; }
+#mission-map { width:78px; height:110px; }
+#mission-clock { font:1rem/1.5 'JetBrains Mono',monospace; }
+.world-markers { position:absolute; z-index:1; inset:0; pointer-events:none; }
+.world-markers span { position:absolute; transform:translate(-50%,-100%); padding:3px 8px; white-space:nowrap; background:var(--surface); color:var(--gold); border:1px solid var(--gold); border-radius:8px; font-size:.75rem; }
+.mission-prompt { position:absolute; z-index:2; bottom:70px; left:50%; transform:translateX(-50%); max-width:calc(100% - 32px); padding:8px 14px; background:var(--surface); border-radius:8px; text-align:center; pointer-events:none; }
+.mission-prompt strong,.mission-prompt span { display:block; }
+.mission-prompt span { font-size:.75rem; color:var(--muted); }
+.mission-message { position:absolute; z-index:2; left:20px; bottom:130px; background:var(--surface); padding:8px 12px; max-width:500px; color:#7ee8c5; pointer-events:none; }
+.mission-overlay { position:absolute; z-index:4; left:50%; top:52%; transform:translate(-50%,-50%); width:610px; max-width:calc(100% - 32px); padding:28px; background:var(--surface); border:1px solid var(--line); border-radius:8px; }
+.mission-overlay h2 { font-size:clamp(1.5rem,3vw,2.3rem); }
+.mission-overlay p { max-width:60ch; }
+.mission-keys { font-size:1rem; color:var(--muted); }
+#mission-timing { display:flex; align-items:center; gap:8px; margin:18px 0; font-size:1rem; }
+#timed-run { width:22px; height:22px; accent-color:var(--gold); }
+.mission-overlay-actions { display:flex; gap:8px; }
+#mission-start,#mission-retry { min-width:180px; }
+#mission-record { margin:12px 0 0; font-size:1rem; color:var(--gold); }
+.adventure-controls { display:flex; justify-content:center; flex-wrap:wrap; align-items:center; gap:6px; padding:8px 12px 12px; background:var(--surface); }
+.adventure-controls button { font-size:1rem; }
+.adventure-controls button[aria-pressed='true'] { border-color:var(--gold); color:var(--gold); }
+.world[data-mode='adventure'] .movement { min-height:62px; padding:8px; border:0; }
+.world[data-mode='adventure'] #scene-caption { max-width:55ch; }
+@media (max-width:1000px) {
+  .game-nav { flex-wrap:wrap; }
+  .mode-switch { margin-left:auto; }
+  .site-controls { margin-left:0; }
+}
+@media (max-width:740px) {
+  .game-nav .mode-switch { flex:1; }
+  .mode-switch button { flex:1; padding-inline:6px; font-size:.75rem; }
+  .site-controls { justify-content:flex-end; }
+  .world[data-mode='adventure'] .view { height:calc(100svh - 320px); min-height:440px; }
+  .world[data-mode='adventure'] .world-title { top:12px; left:12px; }
+  .world[data-mode='adventure'] .world-title h1 { font-size:1rem; }
+  .adventure-hud { top:45px; left:12px; right:12px; gap:8px; }
+  .mission-objective { max-width:calc(100% - 71px); padding:10px; }
+  .mission-objective h2 { font-size:1rem; margin-bottom:6px; }
+  .mission-objective p { font-size:.75rem; }
+  #mission-readout { margin-top:8px; }
+  .mission-navigation { width:63px; padding:4px; }
+  #mission-map { width:48px; height:80px; }
+  #mission-clock { font-size:.75rem; }
+  .mission-overlay { padding:20px; top:54%; max-height:calc(100% - 65px); overflow:auto; }
+  .mission-overlay p { font-size:1rem; margin-bottom:12px; }
+  .mission-overlay .mission-keys { font-size:.75rem; }
+  #mission-timing { font-size:.75rem; margin:12px 0; }
+  .mission-message { left:12px; bottom:120px; max-width:calc(100% - 24px); font-size:.75rem; }
+  .mission-prompt { bottom:45px; width:max-content; font-size:.75rem; }
+  .adventure-controls button { font-size:.75rem; }
+  .world[data-mode='adventure'] .world-caption span:first-child { display:none; }
+  .adventure-controls { justify-content:flex-start; }
+  .adventure-controls #adventure-interact { flex:1; }
+  #adventure-recover { margin-left:auto; }
+}

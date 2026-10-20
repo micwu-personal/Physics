@@ -1,5 +1,6 @@
 import { buoyancy, clamp, MAX_HEAT, waterState } from './game-model.js';
 import { createRenderer } from './game-renderer.js';
+import { createAdventureController } from './game-adventure.js';
 
 const $ = id => document.getElementById(id);
 const canvas = $('game-canvas');
@@ -19,6 +20,7 @@ const copy = {
   schematic: ['Teaching scene · sizes enlarged; quantities calculated', '教学场景 · 尺寸放大，数值按模型计算'],
   microCaption: ['Molecular schematic · not measured trajectories or molecular dynamics', '分子示意 · 不是测量轨迹或分子动力学'],
   playing: ['Exploring', '探索中'], paused: ['Paused · controls still work', '已暂停 · 操作仍可用'],
+  rescuePlaying: ['Rescue in progress', '救援进行中'], rescuePaused: ['Paused · resume the rescue', '已暂停 · 继续救援后可行动'],
   resume: ['Resume exploring', '继续探索'], pause: ['Pause', '暂停'], begin: ['Begin exploring', '开始探索'],
   released: ['Released. The motion is illustrative; Measure reports the predicted equilibrium, not a time-resolved fluid calculation.', '已释放。运动过程为示意；“测量”显示模型预测的平衡值，不是随时间求解的流体结果。'],
   correct: ['Your prediction agrees with the model. Try another material, or follow the water into the scale lens.', '你的预测符合模型。试试另一种材质，或跟随水进入尺度透镜。'],
@@ -59,6 +61,8 @@ try { renderer = createRenderer(canvas); } catch { renderer = null; }
 $('gpu-message').hidden = Boolean(renderer);
 let frames = 0, raf = 0, last = 0, nextReadout = 0, dragging = null;
 const keys = new Set();
+state.mode = renderer ? 'adventure' : 'lab';
+const adventure = createAdventureController(state,{change,play,getGpu:() => Boolean(renderer)});
 
 function save() {
   try { localStorage.setItem(storageKey,JSON.stringify({ version:1,completed:state.completed })); }
@@ -74,7 +78,7 @@ function refresh() {
   motion.setAttribute('aria-label',text('motionPermission')); motion.title = text('motionPermission');
   $('place').textContent = text(state.scene);
   $('scene-caption').textContent = text(state.scene === 'coast' ? 'schematic' : 'microCaption');
-  $('play-status').textContent = text(state.playing ? 'playing' : 'paused');
+  $('play-status').textContent = text(state.mode === 'adventure' ? state.playing ? 'rescuePlaying' : 'rescuePaused' : state.playing ? 'playing' : 'paused');
   $('play').textContent = text(state.playing ? 'pause' : state.started ? 'resume' : 'begin');
   $('play').setAttribute('aria-pressed', String(state.playing));
   $('task-title').textContent = text(`${state.scene}Title`); $('task-copy').textContent = text(`${state.scene}Task`);
@@ -113,6 +117,10 @@ function refresh() {
   }
   if (!state.completed.some(Boolean)) { const li = document.createElement('li'); li.textContent = text('empty'); $('notes').append(li); }
   $('storage-status').textContent = text(state.storage ? 'saved' : 'noStorage');
+  $('approach').textContent = document.documentElement.lang === 'zh-CN' ? '靠近实验 · E' : 'Approach experiment · E';
+  canvas.setAttribute('aria-label',canvas.dataset.ariaEn);
+  if (document.documentElement.lang === 'zh-CN') canvas.setAttribute('aria-label',canvas.dataset.ariaZh);
+  adventure.refresh();
 }
 function change() { refresh(); render(); }
 function approach() {
@@ -127,6 +135,7 @@ function scene(next) {
   change();
 }
 function move(direction, distance) {
+  if (state.mode === 'adventure') return adventure.move(direction,distance);
   const angle = state.camera.yaw;
   const forward = Number(direction === 'forward') - Number(direction === 'back');
   const right = Number(direction === 'right') - Number(direction === 'left');
@@ -137,7 +146,7 @@ function move(direction, distance) {
 }
 function schedule() { if (!raf && state.playing && state.visible && !document.hidden) raf = requestAnimationFrame(tick); }
 function play(value) {
-  state.playing = value; keys.clear();
+  state.playing = value; keys.clear(); adventure.clearHeld();
   if (value) { state.started = true; window.PhysicsUI.requestMotion(); }
   else { cancelAnimationFrame(raf); raf = 0; last = 0; }
   change(); schedule();
@@ -147,8 +156,9 @@ function tick(now) {
   if (!state.playing || !state.visible || document.hidden) { last = 0; return; }
   const dt = last ? clamp((now-last)/1000,0,.05) : 0; last = now;
   state.time += dt; if (state.released) state.releaseAge += dt;
-  for (const direction of keys) move(direction,dt*2.7);
-  if (state.heater && state.scene === 'heat') {
+  if (state.mode === 'adventure') adventure.update(dt,keys);
+  else for (const direction of keys) move(direction,dt*2.7);
+  if (state.mode === 'lab' && state.heater && state.scene === 'heat') {
     state.heat = clamp(state.heat+state.heater*.75*dt,0,MAX_HEAT);
     if (state.heat === 0 || state.heat === MAX_HEAT) state.heater = 0;
   }
@@ -156,7 +166,7 @@ function tick(now) {
   render(); schedule();
 }
 $('play').addEventListener('click',() => play(!state.playing));
-$('approach').addEventListener('click',approach);
+$('approach').addEventListener('click',() => state.mode === 'adventure' ? adventure.face() : approach());
 $('density').addEventListener('change',() => {
   state.density = Number($('density').value); state.released = false; state.releaseAge = 0; state.message = ''; change();
 });
@@ -203,11 +213,13 @@ canvas.addEventListener('keydown',event => {
     if (key === 'arrowup') state.camera.pitch = clamp(state.camera.pitch+.12,-1,1);
     if (key === 'arrowdown') state.camera.pitch = clamp(state.camera.pitch-.12,-1,1);
     change();
-  } else if (key === 'e') approach();
-  else if (key === ' ') { event.preventDefault(); play(!state.playing); }
+  } else if (key === 'e') state.mode === 'adventure' ? adventure.interaction() : approach();
+  else if (key === 'f' && state.mode === 'adventure') adventure.action('throw');
+  else if (key === 'shift' && state.mode === 'adventure' && state.playing) keys.add('sprint');
+  else if (key === ' ') { event.preventDefault(); if (state.mode === 'adventure') adventure.action('jump'); else play(!state.playing); }
 });
-canvas.addEventListener('keyup',event => keys.delete(movementKeys[event.key.toLowerCase()]));
-canvas.addEventListener('blur',() => { keys.clear(); dragging = null; });
+canvas.addEventListener('keyup',event => { keys.delete(movementKeys[event.key.toLowerCase()]); if (event.key === 'Shift') keys.delete('sprint'); });
+canvas.addEventListener('blur',() => { keys.clear(); adventure.clearHeld(); dragging = null; });
 canvas.addEventListener('pointerdown',event => { dragging = {x:event.clientX,y:event.clientY,id:event.pointerId}; canvas.setPointerCapture(event.pointerId); canvas.focus(); });
 canvas.addEventListener('pointermove',event => {
   const locked = document.pointerLockElement === canvas;
@@ -230,18 +242,18 @@ document.addEventListener('pointerlockchange',() => {
 document.addEventListener('pointerlockerror',() => { state.message = 'lockFailed'; refresh(); });
 document.addEventListener('keydown',event => { if (event.key === 'Escape') { play(false); if (document.pointerLockElement) document.exitPointerLock(); } });
 window.addEventListener('blur',() => { play(false); dragging = null; });
-document.addEventListener('visibilitychange',() => { keys.clear(); last = 0; schedule(); });
+document.addEventListener('visibilitychange',() => { keys.clear(); adventure.clearHeld(); last = 0; schedule(); });
 document.addEventListener('physics-language',refresh);
 document.addEventListener('physics-motion',event => { if (event.detail.paused) play(false); else refresh(); });
-const observer = new IntersectionObserver(entries => { state.visible = entries[0].isIntersecting; keys.clear(); last = 0; schedule(); });
+const observer = new IntersectionObserver(entries => { state.visible = entries[0].isIntersecting; keys.clear(); adventure.clearHeld(); last = 0; schedule(); });
 observer.observe(canvas);
 window.addEventListener('resize',() => { state.dpr = Math.min(window.devicePixelRatio || 1,2); render(); });
-canvas.addEventListener('webglcontextlost',event => { event.preventDefault(); play(false); renderer = null; $('gpu-message').hidden = false; });
+canvas.addEventListener('webglcontextlost',event => { event.preventDefault(); play(false); renderer = null; $('gpu-message').hidden = false; adventure.mode('lab'); });
 canvas.addEventListener('webglcontextrestored',() => {
   try { renderer = createRenderer(canvas); } catch { renderer = null; }
-  $('gpu-message').hidden = Boolean(renderer); render();
+  $('gpu-message').hidden = Boolean(renderer); change();
 });
-window.addEventListener('pagehide',() => { play(false); observer.disconnect(); });
+window.addEventListener('pagehide',event => { play(false); observer.disconnect(); if (!event.persisted) adventure.dispose(); });
 window.addEventListener('pageshow',() => { observer.observe(canvas); render(); });
-window.__physicsGame = Object.freeze({ snapshot:() => ({ scene:state.scene,camera:{...state.camera},heat:state.heat,water:waterState(state.heat),density:state.density,released:state.released,releaseAge:state.releaseAge,playing:state.playing,time:state.time,heater:state.heater,completed:[...state.completed],visible:state.visible,frames,gpu:Boolean(renderer) }) });
+window.__physicsGame = Object.freeze({ snapshot:() => ({ mode:state.mode,adventure:adventure.diagnostic(),scene:state.scene,camera:{...state.camera},heat:state.heat,water:waterState(state.heat),density:state.density,released:state.released,releaseAge:state.releaseAge,playing:state.playing,time:state.time,heater:state.heater,completed:[...state.completed],visible:state.visible,frames,gpu:Boolean(renderer) }) });
 change();

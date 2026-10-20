@@ -21,7 +21,11 @@ const pureModules = [
   'particle-zoo/references.js',
   'physics/relativity-observatory-model.js',
   'physics/game-model.js',
-  'physics/game-renderer.js'
+  'physics/game-adventure-model.js',
+  'physics/game-renderer.js',
+  'physics/game-adventure-world.js',
+  'physics/game-audio.js',
+  'physics/game-adventure.js'
 ];
 
 /* The static server binds a worktree-specific port, so every URL check works on

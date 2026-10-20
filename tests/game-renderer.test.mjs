@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { createRenderer } from '../physics/game-renderer.js';
+import { createAdventure } from '../physics/game-adventure-model.js';
 
 function fixture({ compile = true, link = true } = {}) {
   const calls = [], uploads = []; let compiled = 0;
@@ -41,6 +42,19 @@ test('native depth projection, dynamic geometry and GPU resources are exercised'
     renderer.render(scene({scene:'molecules',heat,time:2}));
     renderer.render(scene({scene:'heat',heat,time:2}));
   }
+  for (const config of [
+    {}, {wood:1}, {wood:2,riding:true}, {steel:1},
+    {carrying:'wood'}, {carrying:'steel'}, {carrying:'capsule'},
+    {carrying:'capsule',camera:{x:0,y:1.65,z:-31,yaw:0,pitch:.8}},
+    {heat:2,beam:1}, {heat:4.6,beam:-1}, {heat:12},
+    {heat:31,stage:2,bridgeOpen:true},
+    {stage:2,projectile:{x:0,y:3,z:-36},trail:[{x:0,y:3,z:-35}]},
+    {won:true,stage:3,bridgeOpen:true}
+  ]) {
+    const {camera,...mission} = config;
+    renderer.render(scene({mode:'adventure',time:2,adventure:{...createAdventure(),...mission},...(camera ? {camera} : {})}));
+  }
+  assert.ok(uploads.some(upload => upload.some((value,index) => index%7 === 6 && Math.abs(value-.2) < 1e-6)));
   canvas.clientWidth = 0; canvas.clientHeight = 0;
   renderer.render(scene({dpr:2}));
   assert.equal(canvas.width,1); assert.equal(canvas.height,1);

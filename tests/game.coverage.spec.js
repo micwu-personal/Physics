@@ -11,6 +11,7 @@ async function collect(page,id,run,init) {
   if (init) await page.addInitScript(init);
   await preparePage(page,'/physics/game.html','en',{reducedMotion:'reduce'});
   await page.waitForFunction(() => Boolean(window.__physicsGame));
+  await page.locator('#mode-lab').click();
   await run(); await assertNoErrors(errors);
   await mkdir(coverageDir,{recursive:true});
   await writeFile(`${coverageDir}/game-${id}.json`,JSON.stringify(await page.coverage.stopJSCoverage()));

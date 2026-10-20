@@ -7,6 +7,7 @@ const snapshot = page => page.evaluate(() => window.__physicsGame.snapshot());
 async function start(page,lang='en') {
   await preparePage(page,'/physics/game.html',lang,{reducedMotion:'reduce'});
   await page.waitForFunction(() => Boolean(window.__physicsGame));
+  await page.locator('#mode-lab').click();
 }
 async function completeShore(page) {
   await page.locator('#release').click(); await page.locator('#measure').click();
@@ -71,6 +72,7 @@ test('first-person journey links buoyancy, molecules and conserved latent heat',
   expect((await snapshot(page)).camera.z).toBe(-1);
   await page.reload(); await page.waitForFunction(() => Boolean(window.__physicsGame));
   expect((await snapshot(page)).completed).toEqual([true,true,true]);
+  await page.locator('#mode-lab').click();
   await page.locator('#reset').click(); expect((await snapshot(page)).completed).toEqual([false,false,false]);
   await assertNoErrors(errors);
 });

@@ -12,8 +12,12 @@ const suites = [
       '--test', '--experimental-test-coverage',
       '--test-coverage-include=physics/game-model.js',
       '--test-coverage-include=physics/game-renderer.js',
+      '--test-coverage-include=physics/game-adventure-model.js',
+      '--test-coverage-include=physics/game-adventure-world.js',
+      '--test-coverage-include=physics/game-audio.js',
+      '--test-coverage-include=physics/game-adventure.js',
       '--test-coverage-lines=100', '--test-coverage-functions=100', '--test-coverage-branches=100',
-      'tests/game-model.test.mjs', 'tests/game-renderer.test.mjs'
+      'tests/game-model.test.mjs', 'tests/game-adventure-model.test.mjs', 'tests/game-adventure-controller.test.mjs', 'tests/game-audio.test.mjs', 'tests/game-renderer.test.mjs'
     ]
   },
   {
