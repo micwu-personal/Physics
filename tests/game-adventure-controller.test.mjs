@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createAdventureController } from '../physics/game-adventure.js';
-import { ADVENTURE, createAdventure } from '../physics/game-adventure-model.js';
+import { ADVENTURE, createAdventure, receiverAim, projectilePoint } from '../physics/game-adventure-model.js';
 
 const IDS = [
   'timed-run', 'game-canvas', 'adventure-hud', 'adventure-controls', 'world-markers',
@@ -185,13 +185,13 @@ function finish(f, elapsed = 4.95) {
   f.click('adventure-throw');
   assert.equal(f.state.adventure.shots, 1);
   assert.ok(f.state.adventure.projectile);
-  Object.assign(f.state.adventure.projectile, { x: 0, y: 2, z: -41.7, vx: 0, vy: 0, vz: -11, age: 0 });
+  Object.assign(f.state.adventure.projectile, { x: 0, y: 2, z: ADVENTURE.receiver.z+ADVENTURE.receiver.radius+.05, vx: 0, vy: 0, vz: -11, age: 0 });
   f.state.adventure.elapsed = elapsed;
   f.controller.update(.05, new Set());
   assert.equal(f.state.adventure.won, true);
   assert.equal(f.state.adventure.stage, 3);
   assert.equal(f.state.adventure.projectile, null);
-  assert.ok(f.state.adventure.trail.at(-1).z < -41.7);
+  assert.ok(f.state.adventure.trail.at(-1).z < ADVENTURE.receiver.z+ADVENTURE.receiver.radius+.05);
   assert.equal(f.state.playing, false);
 }
 
@@ -507,6 +507,32 @@ scenario('heat, cool and hold require relay proximity and preserve calorimetry a
   assert.equal(f.state.adventure.beam, -1);
 });
 
+scenario('a beginner can aim once at the capsule pedestal and complete the real throw', f => {
+  f.click('mission-start'); launch(f); f.click('adventure-interact');
+  const position = {x:f.state.camera.x,y:f.state.camera.y,z:f.state.camera.z};
+  f.controller.face();
+  assert.deepEqual({x:f.state.camera.x,y:f.state.camera.y,z:f.state.camera.z},position);
+  assert.match(f.el('mission-message').textContent,/Gravity-correct aim set/);
+  f.click('adventure-throw'); advance(f,80);
+  assert.equal(f.state.adventure.won,true);
+  assert.equal(f.state.adventure.shots,1);
+});
+
+for (const lang of ['en','zh-CN']) scenario(`unreachable aim explains recovery in ${lang}`,{lang},f => {
+  f.click('mission-start'); launch(f); f.click('adventure-interact');
+  f.state.camera.z = -29; f.state.camera.x = 4;
+  f.controller.face();
+  assert.equal(f.state.adventure.message,'aimCloser');
+  assert.match(f.el('mission-message').textContent,lang === 'en' ? /Walk nearer the launch edge/ : /向发射岛岸边走近/);
+  assert.equal(f.state.adventure.carrying,'capsule');
+  assert.equal(f.state.adventure.projectile,null);
+  f.state.camera.z = -34; f.controller.face();
+  assert.equal(f.state.adventure.message,'aimReady');
+  assert.match(f.el('approach').textContent,lang === 'en' ? /Aim throw at receiver/ : /对准接收环投掷/);
+  f.click('adventure-throw'); advance(f,80);
+  assert.equal(f.state.adventure.won,true);
+});
+
 scenario('capsule pickup, aiming, throwing, misses and retry supply use the real controller', f => {
   f.click('mission-start'); launch(f);
   assert.equal(f.el('adventure-interact').textContent, 'Pick up capsule · E');
@@ -518,15 +544,20 @@ scenario('capsule pickup, aiming, throwing, misses and retry supply use the real
   assert.match(f.el('mission-message').textContent, /Signal capsule ready/);
   f.controller.face();
   close(f.state.camera.yaw, 0);
-  assert.equal(f.state.camera.pitch, .3);
+  close(f.state.camera.pitch, receiverAim(f.state.camera).pitch);
+  assert.equal(f.el('approach').textContent, 'Aim throw at receiver');
+  assert.match(f.el('mission-message').textContent, /Gravity-correct aim set/);
   assert.equal(f.el('mission-target').textContent, 'Receiver');
+  f.state.camera.yaw = Math.PI/2;
+  const origin = projectilePoint(f.state.camera,0), pitch = f.state.camera.pitch;
   f.click('adventure-throw');
   assert.equal(f.state.adventure.carrying, null);
   assert.equal(f.state.adventure.shots, 1);
   assert.equal(f.el('adventure-throw').hidden, true);
   assert.match(f.el('mission-message').textContent, /Capsule away/);
   f.controller.update(.05, new Set());
-  close(f.state.adventure.projectile.z, -31 - (.45 + 11 * .05) * Math.cos(.3));
+  close(f.state.adventure.projectile.x, origin.x + 11 * .05 * Math.cos(pitch));
+  close(f.state.adventure.projectile.z, origin.z);
   const snapshot = f.controller.diagnostic();
   assert.ok(snapshot.projectile && snapshot.trail.length > 0);
   snapshot.projectile.x = 500; snapshot.trail[0].x = 500; snapshot.boat.x = 500;

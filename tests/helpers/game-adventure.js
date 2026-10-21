@@ -62,7 +62,8 @@ export async function signal(page,keyboard=false) {
   await page.locator('#adventure-interact').click();
   expect((await adventureSnapshot(page)).adventure.carrying).toBe('capsule');
   await page.locator('#approach').click();
-  await page.locator('#game-canvas').focus(); await page.keyboard.press('ArrowUp'); await page.keyboard.press('ArrowUp');
-  if (keyboard) await page.keyboard.press('f'); else await page.locator('#adventure-throw').click();
+  await expect(page.locator('#mission-message')).toContainText('Gravity-correct aim set');
+  if (keyboard) { await page.locator('#game-canvas').focus(); await page.keyboard.press('f'); }
+  else await page.locator('#adventure-throw').click();
   await expect.poll(async () => (await adventureSnapshot(page)).adventure.won,{timeout:7000}).toBe(true);
 }

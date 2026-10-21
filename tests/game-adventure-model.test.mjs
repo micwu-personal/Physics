@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   ADVENTURE, createAdventure, raftState, groundHeight, nearestStation,
-  interact, stepAdventure, throwCapsule, projectilePoint, rescue
+  interact, stepAdventure, throwCapsule, projectilePoint, receiverAim, rescue
 } from '../physics/game-adventure-model.js';
 import { waterState } from '../physics/game-model.js';
 
@@ -64,7 +64,7 @@ test('configuration is scientifically explicit and deeply frozen', () => {
     throwSpeed: 11, deckHeight: 0, waterLevel: -0.6, eyeHeight: 1.65
   };
   for (const [key, value] of Object.entries(scalars)) assert.equal(ADVENTURE[key], value);
-  assert.deepEqual(ADVENTURE.receiver, { x: 0, y: 2, z: -43, radius: 1.25 });
+  assert.deepEqual(ADVENTURE.receiver, { x: 0, y: 2, z: -43, radius: 1.5 });
   assert.deepEqual(ADVENTURE.bounds, { minX: -9, maxX: 9, minZ: -47, maxZ: 9 });
   assert.deepEqual(ADVENTURE.stations, {
     wood: { x: -3, z: 3 }, steel: { x: 3, z: 3 }, raft: { x: 0, z: -5 },
@@ -507,6 +507,51 @@ test('boat remains inside the first channel and automatically docks without boar
   assert.equal(state.event, event + 1);
 });
 
+test('optional low-arc camera aim hits from the capsule pedestal, edge and off-centre positions', () => {
+  for (const [x,z,y] of [[0,-31,1.65],[0,-34.8,1.65],[-4,-34,1.65],[4,-34,1.65],[1,-33,3.2]]) {
+    const camera = { x,y,z,yaw:2,pitch:-.4 }, before = {...camera};
+    const aim = receiverAim(camera);
+    assert.ok(aim && aim.pitch >= -1 && aim.pitch <= 1);
+    assert.deepEqual(camera,before);
+    const aimed = {...camera,...aim}, distance = Math.hypot(x,z+43);
+    const time = (distance-.45*Math.cos(aim.pitch))/(11*Math.cos(aim.pitch));
+    const impact = projectilePoint(aimed,time);
+    for (const key of ['x','y','z']) close(impact[key],ADVENTURE.receiver[key],1e-8);
+    const { state } = atLaunch();
+    assert.equal(throwCapsule(state,aimed),true);
+    advanceUntil(state,aimed,() => state.won,80);
+    assert.equal(state.shots,1);
+  }
+});
+
+test('low-arc aiming remains accurate close to the maximum range, without coarse angle sampling', () => {
+  const range = pitch => {
+    const vertical = 11*Math.sin(pitch);
+    const time = (vertical+Math.sqrt(vertical**2-2*9.81*.35))/9.81;
+    return (.45+11*time)*Math.cos(pitch);
+  };
+  let low = .4, high = 1;
+  for (let i=0;i<60;i++) {
+    const a = low+(high-low)/3, b = high-(high-low)/3;
+    if (range(a) < range(b)) low = a; else high = b;
+  }
+  const maximumPitch = (low+high)/2, distance = range(maximumPitch)-1e-7;
+  const camera = cameraAt(0,-43+distance), aim = receiverAim(camera);
+  assert.ok(aim && aim.pitch < maximumPitch);
+  const time = (distance-.45*Math.cos(aim.pitch))/(11*Math.cos(aim.pitch));
+  close(projectilePoint({...camera,...aim},time).y,2,1e-8);
+});
+
+test('aim assistance reports impossible low arcs instead of inventing launch energy or homing', () => {
+  for (const camera of [cameraAt(0,-23),cameraAt(0,3),cameraAt(0,-43),cameraAt(0,-42.8),
+    {...cameraAt(0,-34),y:-1},{...cameraAt(0,-35),y:30},{...cameraAt(0,1),y:74}]) {
+    assert.equal(receiverAim(camera),null);
+  }
+  for (const camera of [null,{x:NaN,y:1.65,z:-31},{x:0,y:Infinity,z:-31},{x:0,y:1.65,z:undefined}]) {
+    assert.throws(() => receiverAim(camera),RangeError);
+  }
+});
+
 test('projectile preview exactly matches the shared camera origin and unassisted launch velocity', () => {
   const camera = cameraAt(1, -33, Math.PI / 6, 0.4);
   const before = structuredClone(camera);
@@ -608,7 +653,7 @@ test('a feasible aimed throw reaches the lighthouse, wins once and freezes progr
   assert.equal(state.projectile, null);
   assert.equal(state.shots, 1);
   const contact = state.trail.at(-1);
-  close(Math.hypot(contact.x, contact.y - 2, contact.z + 43), 1.25, 1e-8);
+  close(Math.hypot(contact.x, contact.y - 2, contact.z + 43), ADVENTURE.receiver.radius, 1e-8);
   const won = structuredClone(state);
   stepAdventure(state, camera, 0.05);
   assert.equal(interact(state, 'capsule', cameraAt(0, -31)), false);
@@ -624,9 +669,17 @@ test('swept segment-sphere contact prevents tunnelling even across an entire rec
   assert.equal(state.won, true);
   assert.equal(state.message, 'won');
   const nearMiss = atLaunch();
-  nearMiss.state.projectile = { x: 1.251, y: 2, z: -40, vx: 0, vy: 0, vz: -1000, age: 0 };
+  nearMiss.state.projectile = { x: ADVENTURE.receiver.radius + .001, y: 2, z: -40, vx: 0, vy: 0, vz: -1000, age: 0 };
   stepAdventure(nearMiss.state, nearMiss.camera, 0.05);
   assert.equal(nearMiss.state.won, false);
+});
+
+test('the visibly wider receiver accepts a modest near-centre miss without steering the projectile', () => {
+  const { state,camera } = atLaunch();
+  state.projectile = {x:1.35,y:2,z:-40,vx:0,vy:0,vz:-11,age:0};
+  advanceUntil(state,camera,() => state.won,20);
+  close(state.trail.at(-1).x,1.35);
+  close(Math.hypot(state.trail.at(-1).x,state.trail.at(-1).y-2,state.trail.at(-1).z+43),ADVENTURE.receiver.radius,1e-8);
 });
 
 test('a projectile initially inside the receiver registers contact', () => {

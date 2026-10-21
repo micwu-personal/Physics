@@ -14,7 +14,7 @@ export const ADVENTURE = Object.freeze({
   safeDraft: 0.9,
   heaterPower: 0.75,
   throwSpeed: 11,
-  receiver: Object.freeze({ x: 0, y: 2, z: -43, radius: 1.25 }),
+  receiver: Object.freeze({ x: 0, y: 2, z: -43, radius: 1.5 }),
   stations: Object.freeze({
     wood: Object.freeze({ x: -3, z: 3 }),
     steel: Object.freeze({ x: 3, z: 3 }),
@@ -233,6 +233,34 @@ export function projectilePoint(camera, seconds) {
     throw new RangeError('camera position and nonnegative time must be finite');
   }
   return trajectoryPoint(launchProjectile(camera), seconds);
+}
+
+// Optional camera aim, not projectile assistance. Find the lower ballistic arc
+// within the camera's pitch limits, including the shared 0.45 m launch offset.
+export function receiverAim(camera) {
+  if (!eyePosition(camera)) throw new RangeError('camera position must be finite');
+  const target = ADVENTURE.receiver;
+  const distance = Math.hypot(target.x - camera.x, target.z - camera.z);
+  if (distance <= 0.45 || distance > ADVENTURE.throwSpeed * PROJECTILE_LIFETIME + 0.45
+      || camera.y < ADVENTURE.waterLevel) return null;
+  const yaw = Math.atan2(target.x - camera.x, camera.z - target.z);
+  const flightTime = pitch => (distance - 0.45 * Math.cos(pitch))
+    / (ADVENTURE.throwSpeed * Math.cos(pitch));
+  const height = pitch => projectilePoint({ ...camera, yaw, pitch }, flightTime(pitch)).y;
+  let left = -1, right = 1;
+  for (let i = 0; i < 48; i++) {
+    const a = left + (right - left) / 3, b = right - (right - left) / 3;
+    if (height(a) < height(b)) left = a; else right = b;
+  }
+  const peak = (left + right) / 2;
+  if (height(-1) > target.y || height(peak) < target.y) return null;
+  left = -1; right = peak;
+  for (let i = 0; i < 48; i++) {
+    const middle = (left + right) / 2;
+    if (height(middle) < target.y) left = middle; else right = middle;
+  }
+  const pitch = (left + right) / 2;
+  return flightTime(pitch) <= PROJECTILE_LIFETIME ? { yaw, pitch } : null;
 }
 
 export function throwCapsule(state, camera) {

@@ -1,4 +1,4 @@
-import { ADVENTURE, createAdventure, raftState, groundHeight, nearestStation, interact, stepAdventure, throwCapsule, rescue } from './game-adventure-model.js';
+import { ADVENTURE, createAdventure, raftState, groundHeight, nearestStation, interact, stepAdventure, throwCapsule, receiverAim, rescue } from './game-adventure-model.js';
 import { waterState, clamp } from './game-model.js';
 import { createGameAudio } from './game-audio.js';
 
@@ -17,7 +17,9 @@ const messages = {
   cooling:['Cooling reverses the sample’s calorimetry.','冷却会沿量热曲线反向变化。'],
   hold:['Beam stopped. The ideal sample keeps its current heat.','传热已停止。理想样品保持当前热量。'],
   bridgeOpen:['Relay restored: at least 95% liquid, no vapor. Cross the opened bridge.','继电器已恢复：至少 95% 液态、没有蒸气。走过打开的桥。'],
-  pickedCapsule:['Signal capsule ready. Drag upward to aim; the dotted path predicts gravity.','信号舱就绪。向上瞄准；虚线轨迹按重力预测。'],
+  pickedCapsule:['Signal capsule ready. Use “Aim throw at receiver”, then throw. You can still adjust the dotted gravity path yourself.','信号舱就绪。先点“对准接收环投掷”，再投出；也可自行调整按重力预测的虚线轨迹。'],
+  aimReady:['Gravity-correct aim set. Throw now, or adjust the view yourself. Turning changes your aim.','已按重力校准投掷角度。现在可以投出，也可自行调整；转动视角会改变瞄准方向。'],
+  aimCloser:['No low-arc throw reaches the receiver from here. Walk nearer the launch edge, then aim again.','这里无法用当前俯仰范围内的低抛物线命中。向发射岛岸边走近，再重新瞄准。'],
   thrown:['Capsule away. Watch its trajectory.','信号舱已投出。观察它的轨迹。'],
   retryCapsule:['Missed the receiver. Another capsule is available at the launch pedestal.','未命中接收环。发射台上还有信号舱。'],
   recovered:['Recovered at your checkpoint. Built equipment and relay progress are kept.','已回到检查点。保留已建装备和继电器进度。'],
@@ -29,13 +31,14 @@ const messages = {
 };
 const copy = {
   title:[['01 / Build your crossing','01 / 造好渡水工具'],['02 / Reopen the relay','02 / 恢复继电器'],['03 / Send the signal','03 / 送出信号'],['04 / Lighthouse restored','04 / 灯塔已恢复']],
-  task:[['Carry timber from the left supply to the raft. Install two pontoons; board and steer to the island.','把左侧木材带到筏边。装好两块浮体，再上筏驶向岛屿。'],['Walk to the relay. Melt the enlarged 10 g ice sensor to open the bridge.','走向继电器。融化放大显示的 10 g 冰传感样品，开启桥梁。'],['Cross the bridge, collect a capsule, aim at the golden ring and throw. You can walk nearer the edge.','过桥取信号舱，瞄准金色接收环投掷。可以走近岸边缩短距离。'],['Your choices restored the island link. Explore, or replay with a clock.','你的行动恢复了岛间通信。继续探索，或开启计时重玩。']],
+  task:[['Carry timber from the left supply to the raft. Install two pontoons; board and steer to the island.','把左侧木材带到筏边。装好两块浮体，再上筏驶向岛屿。'],['Walk to the relay. Melt the enlarged 10 g ice sensor to open the bridge.','走向继电器。融化放大显示的 10 g 冰传感样品，开启桥梁。'],['Cross the bridge and collect a capsule. Use “Aim throw at receiver” for a gravity-correct angle, then throw. Walk nearer the edge if needed.','过桥取信号舱。用“对准接收环投掷”按重力校准角度，再投出；必要时向岸边走近。'],['Your choices restored the island link. Explore, or replay with a clock.','你的行动恢复了岛间通信。继续探索，或开启计时重玩。']],
   labels:{wood:['Timber supply','木材补给'],steel:['Steel supply','钢块补给'],raft:['Raft','浮筏'],relay:['Thermal relay','热继电器'],capsule:['Signal capsules','信号舱'],receiver:['Receiver','接收环']},
   actions:{wood:['Carry timber · E','拿起木材 · E'],steel:['Carry steel · E','拿起钢块 · E'],install:['Install carried pontoon · E','装上手中浮体 · E'],board:['Board raft · E','登上浮筏 · E'],relay:['Toggle relay heat · E','切换继电器加热 · E'],capsule:['Pick up capsule · E','拿起信号舱 · E'],approach:['Walk closer to interact','走近后互动']},
   pause:['Paused. Resume when ready.','已暂停。准备好后继续。'],
   coast:['Storm islands · first-person rescue','风暴群岛 · 第一人称救援'],
   caption:['Calculated buoyancy, heat and gravity · terrain and steering are illustrative','浮力、热量、重力按模型计算 · 地形与操筏过程为示意'],
   aim:['Face next objective','朝向下个目标'],
+  aimThrow:['Aim throw at receiver','对准接收环投掷'],
   audioOff:['Sound off','声音：关'],audioOn:['Sound on','声音：开'],
   resume:['Resume','继续'],pauseButton:['Pause','暂停'],
   victory:['The lighthouse is back.','灯塔再次亮起。'],failure:['The signal window closed.','信号窗口已关闭。'],
@@ -105,7 +108,11 @@ export function createAdventureController(state,{change,play,getGpu}) {
   function face() {
     const target = objective(), c = state.camera;
     c.yaw = Math.atan2(target.x-c.x,c.z-target.z);
-    if (target.id === 'receiver') c.pitch = .3; else c.pitch = -.1;
+    if (target.id === 'receiver') {
+      const aim = receiverAim(c);
+      c.pitch = aim ? aim.pitch : clamp(Math.atan2(target.y-c.y,Math.hypot(target.x-c.x,target.z-c.z)),-1,1);
+      state.adventure.message = aim ? 'aimReady' : 'aimCloser'; state.adventure.event++;
+    } else c.pitch = -.1;
     change();
   }
   function update(dt,keys) {
@@ -152,7 +159,8 @@ export function createAdventureController(state,{change,play,getGpu}) {
     if (!on) { $('mission-overlay').hidden = true; $('mission-message').hidden = true; return; }
     $('welcome').hidden = true; $('scene-instrument').hidden = true;
     $('place').textContent = words(copy.coast); $('scene-caption').textContent = words(copy.caption);
-    $('approach').textContent = words(copy.aim); $('game-canvas').setAttribute('aria-label',words(copy.canvas));
+    const aimLabel = words(s.carrying === 'capsule' ? copy.aimThrow : copy.aim);
+    $('approach').textContent = aimLabel; $('game-canvas').setAttribute('aria-label',words(copy.canvas));
     $('mission-title').textContent = words(copy.title[s.stage]); $('mission-task').textContent = words(copy.task[s.stage]);
     const boat = raftState(s), sample = waterState(s.heat), zh = lang() === 1;
     $('mission-readout').textContent = s.stage === 0
@@ -167,7 +175,7 @@ export function createAdventureController(state,{change,play,getGpu}) {
     $('adventure-interact').textContent = words(copy.actions[actionKey]);
     $('adventure-interact').disabled = !writable() || !target || s.riding;
     $('mission-target').textContent = target ? words(copy.actions[actionKey]) : words(copy.labels[next.id]);
-    $('mission-bearing').textContent = !started ? '' : !state.playing && !s.won && !lost ? words(copy.pause) : `${Math.hypot(next.x-state.camera.x,next.z-state.camera.z).toFixed(1)} m · ${zh ? '用“朝向下个目标”找方向' : 'use “Face next objective” to orient'}`;
+    $('mission-bearing').textContent = !started ? '' : !state.playing && !s.won && !lost ? words(copy.pause) : `${Math.hypot(next.x-state.camera.x,next.z-state.camera.z).toFixed(1)} m · ${zh ? `用“${aimLabel}”找方向` : `use “${aimLabel}” to orient`}`;
     $('adventure-throw').hidden = s.carrying !== 'capsule';
     for (const id of ['heat','cool','hold']) $(`adventure-${id}`).hidden = target?.id !== 'relay';
     $('adventure-drop').hidden = !s.carrying;
@@ -204,7 +212,7 @@ export function createAdventureController(state,{change,play,getGpu}) {
     const frag = document.createDocumentFragment();
     for (const id of stations) {
       const point = id === 'raft' ? s.boat : id === 'receiver' ? ADVENTURE.receiver : ADVENTURE.stations[id];
-      const projected = project({...point,y:id === 'receiver' ? 3.5 : 1.7});
+      const projected = project({...point,y:id === 'receiver' ? ADVENTURE.receiver.y+ADVENTURE.receiver.radius+.3 : 1.7});
       if (!projected || !started || s.won || lost) continue;
       const label = document.createElement('span'); label.textContent = words(copy.labels[id]); label.style.left = `${projected.x}%`; label.style.top = `${projected.y}%`; frag.append(label);
     }

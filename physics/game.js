@@ -49,7 +49,7 @@ const copy = {
   deviceOff: ['Rotate to look; hold arrows to walk. Physical walking is not tracked.', '转动设备观察，长按箭头行走；不追踪真实行走。'],
   deviceRequesting: ['Allow device orientation in the browser prompt. No camera is used.', '请在浏览器提示中允许设备方向访问；不启用相机。'],
   deviceWaiting: ['Hold the device comfortably. Resume play, then turn to look.', '舒适地握住设备，继续游戏后转动观察。'],
-  deviceActive: ['Device look on · turn or tilt to look; hold arrows to move.', '设备视角已开启 · 转动或抬低设备观察，长按箭头移动。'],
+  deviceActive: ['Rotation only · physical walking is not tracked. Hold arrows to move.', '仅追踪转动，不追踪真实行走位移。长按箭头在游戏中移动。'],
   devicePaused: ['Device look paused. Resume to recalibrate without a view jump.', '设备视角已暂停；继续后重新校准，视线不会跳转。'],
   deviceDenied: ['Orientation permission was not granted. Use drag and arrows, or allow access in browser settings and retry.', '未获设备方向许可。可拖拽与按箭头操作，或在浏览器设置中允许后重试。'],
   deviceUnavailable: ['Device orientation is unavailable here. Use drag and arrows.', '此处无法使用设备方向传感器；请拖拽与按箭头操作。'],
