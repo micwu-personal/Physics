@@ -2,6 +2,7 @@ import { buoyancy, clamp, MAX_HEAT, waterState } from './game-model.js';
 import { createRenderer } from './game-renderer.js';
 import { createAdventureController } from './game-adventure.js';
 import { createDeviceLook } from './game-device-look.js';
+import { createCameraWalk } from './game-camera-walk.js';
 
 const $ = id => document.getElementById(id);
 const canvas = $('game-canvas');
@@ -46,10 +47,23 @@ const copy = {
   expandView: ['Expand view', '展开视图'], exitView: ['Exit view', '退出视图'],
   stopLook: ['Stop looking', '停止视角'], mouseLook: ['Mouse look', '鼠标视角'],
   deviceLook: ['Device look', '设备视角'], deviceStop: ['Stop device look', '停止设备视角'],
-  deviceOff: ['Rotate to look; hold arrows to walk. Physical walking is not tracked.', '转动设备观察，长按箭头行走；不追踪真实行走。'],
-  deviceRequesting: ['Allow device orientation in the browser prompt. No camera is used.', '请在浏览器提示中允许设备方向访问；不启用相机。'],
+  deviceOff: ['Device look rotates the view. Use arrows, or set up Camera walking for position.', '设备视角控制转动；位置可用箭头，或另外设置相机行走。'],
+  deviceRequesting: ['Allow device orientation in the browser prompt. This sensor mode does not use a camera.', '请在浏览器提示中允许设备方向访问；此传感器模式不使用相机。'],
+  cameraOff: ['Camera off · set up a stationary marker for real movement.', '相机已关闭 · 设置固定定位卡后可追踪真实移动。'],
+  cameraRequesting: ['Allow the rear camera · microphone stays off.', '请允许后置相机 · 麦克风始终关闭。'],
+  cameraSearching: ['Show the whole upright marker in the preview.', '请让预览中能看到整张竖直定位卡。'],
+  cameraCalibrating: ['Hold still · anchoring your current position.', '请握稳 · 正在锚定当前位置。'],
+  cameraActive: ['Tracking · gentle forward, backward and sideways motion moves your position.', '追踪中 · 轻轻向前、向后或横向移动会改变游戏位置。'],
+  cameraLost: ['Marker lost · movement frozen. Show the card and hold still to re-anchor.', '定位卡丢失 · 已冻结移动。对准定位卡、握稳后重新锚定。'],
+  cameraUnstable: ['Sudden movement rejected · hold still to re-anchor safely.', '已拒绝位置突跳 · 请握稳，安全地重新锚定。'],
+  cameraPaused: ['Camera off while paused or riding. Resume walking to re-anchor without teleporting.', '暂停或操筏时相机已关闭；恢复步行后重新锚定，不会瞬移。'],
+  cameraDenied: ['Camera permission denied. Use arrows, or allow camera access in browser settings and retry.', '相机授权被拒绝；请用箭头，或在浏览器设置中允许相机后重试。'],
+  cameraUnavailable: ['Camera tracking requires a secure page and camera access. Touch movement remains available.', '相机追踪需要安全网页和相机访问；仍可使用触屏移动。'],
+  cameraNotFound: ['No marker for 15 seconds · camera stopped. Check the card, lighting and measured size, then retry.', '15 秒未找到定位卡 · 相机已停止。请检查定位卡、光线和实测尺寸后重试。'],
+  cameraFailed: ['Camera stopped or could not start. Retry, or use touch movement.', '相机已停止或无法启动。请重试，或使用触屏移动。'],
+  cameraWalk: ['Camera walking', '相机行走'], cameraStop: ['Stop camera', '关闭相机'],
   deviceWaiting: ['Hold the device comfortably. Resume play, then turn to look.', '舒适地握住设备，继续游戏后转动观察。'],
-  deviceActive: ['Rotation only · physical walking is not tracked. Hold arrows to move.', '仅追踪转动，不追踪真实行走位移。长按箭头在游戏中移动。'],
+  deviceActive: ['Rotation only · use arrows or the separate Camera walking mode for position.', '此传感器仅追踪转动；位置请用箭头或独立的相机行走模式。'],
   devicePaused: ['Device look paused. Resume to recalibrate without a view jump.', '设备视角已暂停；继续后重新校准，视线不会跳转。'],
   deviceDenied: ['Orientation permission was not granted. Use drag and arrows, or allow access in browser settings and retry.', '未获设备方向许可。可拖拽与按箭头操作，或在浏览器设置中允许后重试。'],
   deviceUnavailable: ['Device orientation is unavailable here. Use drag and arrows.', '此处无法使用设备方向传感器；请拖拽与按箭头操作。'],
@@ -78,15 +92,33 @@ const adventure = createAdventureController(state,{change,play,getGpu:() => Bool
 let expanded = false, mouseWanted = false, mouseRequest = 0;
 const deviceLook = createDeviceLook({environment:window,getCamera:() => state.camera,
   isActive:() => Boolean(renderer) && state.playing && state.visible && !document.hidden,onStatus:refreshLook});
+const cameraWalk = createCameraWalk({environment:window,video:$('walking-video'),surface:document.createElement('canvas'),
+  getCamera:() => state.camera,isActive:() => Boolean(renderer) && state.playing && state.visible && !document.hidden && !(state.mode==='adventure' && adventure.diagnostic().riding),
+  getOptions:() => ({size:Number($('camera-marker-size').value)/100,fieldOfView:Number($('camera-fov').value)}),
+  onStatus:refreshLook,onMotion:(x,z) => {
+    const angle=state.camera.yaw;
+    move('forward',x*Math.sin(angle)-z*Math.cos(angle));
+    move('right',x*Math.cos(angle)+z*Math.sin(angle));
+    render();
+  }});
 
 function refreshLook() {
-  const look = deviceLook.snapshot(), locked = document.pointerLockElement === canvas;
+  cameraWalk.sync();
+  const look = deviceLook.snapshot(), walk = cameraWalk.snapshot(), locked = document.pointerLockElement === canvas;
+  const cameraKeys={off:'cameraOff',requesting:'cameraRequesting',searching:'cameraSearching',calibrating:'cameraCalibrating',active:'cameraActive',lost:'cameraLost',unstable:'cameraUnstable',paused:'cameraPaused',denied:'cameraDenied',unavailable:'cameraUnavailable',notFound:'cameraNotFound',failed:'cameraFailed'};
+  $('camera-walk').textContent=text(walk.wanted ? 'cameraStop' : 'cameraWalk');
+  $('camera-walk').setAttribute('aria-pressed',String(walk.wanted)); $('camera-walk').disabled=!renderer;
+  $('camera-recenter').disabled=!walk.enabled;
+  $('camera-walk-status').textContent=text(cameraKeys[walk.phase]);
+  $('camera-preview').hidden=!walk.wanted; $('camera-preview-status').textContent=text(cameraKeys[walk.phase]);
+  $('camera-fov-value').textContent=`${$('camera-fov').value}°`;
+  document.querySelector('.world').dataset.camera=String(walk.wanted);
   const phaseKeys = {off:'deviceOff',requesting:'deviceRequesting',waiting:'deviceWaiting',active:'deviceActive',paused:'devicePaused',denied:'deviceDenied',unavailable:'deviceUnavailable',noReadings:'deviceNoReadings'};
   $('device-look').textContent = text(look.enabled || look.pending ? 'deviceStop' : 'deviceLook');
   $('device-look').setAttribute('aria-pressed',String(look.enabled)); $('device-look').disabled = !renderer;
   $('device-recenter').disabled = !look.enabled;
   $('device-status').textContent = text(phaseKeys[look.phase]);
-  $('look-stop').hidden = !look.enabled && !look.pending && !locked && !mouseWanted;
+  $('look-stop').hidden = !look.enabled && !look.pending && !locked && !mouseWanted && !walk.wanted;
   $('look-stop').textContent = text('stopLook');
   $('capture-hint').hidden = !locked; $('capture-hint').textContent = text('lockActive');
   $('mouse-lock').textContent = text(locked || mouseWanted ? 'stopLook' : 'mouseLook');
@@ -96,10 +128,10 @@ function refreshLook() {
   $('view-play').setAttribute('aria-pressed',String(state.playing));
   const mission = adventure.diagnostic();
   $('view-play').disabled = !renderer || state.mode === 'adventure' && (!mission.started || mission.won || mission.lost);
-  document.querySelector('.world').dataset.looking = String(look.enabled || look.pending || locked || mouseWanted);
+  document.querySelector('.world').dataset.looking = String(look.enabled || look.pending || locked || mouseWanted || walk.wanted);
 }
 function releaseMouse() { mouseWanted = false; mouseRequest++; if (document.pointerLockElement === canvas) document.exitPointerLock(); }
-function stopLook() { deviceLook.disable(); play(false); }
+function stopLook() { deviceLook.disable(); cameraWalk.disable(); play(false); }
 function setExpanded(value) {
   expanded = value; document.body.classList.toggle('game-expanded',value);
   for (const element of document.querySelectorAll('.game-nav,.notebook,.guide,.skip-link,.reference-pane')) element.inert = value;
@@ -288,10 +320,13 @@ $('view-play').addEventListener('click',() => play(!state.playing));
 $('look-stop').addEventListener('click',stopLook);
 $('device-look').addEventListener('click',() => { releaseMouse(); deviceLook.enable(); });
 $('device-recenter').addEventListener('click',() => deviceLook.recenter());
+$('camera-walk').addEventListener('click',() => {if (!cameraWalk.snapshot().wanted && !$('camera-marker-size').reportValidity()) return;releaseMouse();cameraWalk.enable();});
+$('camera-recenter').addEventListener('click',() => cameraWalk.recenter());
+for (const id of ['camera-marker-size','camera-fov']) $(id).addEventListener('input',() => {cameraWalk.recenter();refreshLook();});
 canvas.addEventListener('dblclick',() => { if (document.pointerLockElement === canvas) stopLook(); });
 $('mouse-lock').addEventListener('click',async () => {
   if (mouseWanted || document.pointerLockElement === canvas) { stopLook(); return; }
-  const request = ++mouseRequest; mouseWanted = true; deviceLook.disable(); refreshLook();
+  const request = ++mouseRequest; mouseWanted = true; deviceLook.disable(); cameraWalk.disable(); refreshLook();
   try {
     if (!canvas.requestPointerLock) throw new Error('Unavailable');
     await canvas.requestPointerLock();
@@ -309,28 +344,28 @@ document.addEventListener('pointerlockerror',() => { releaseMouse(); state.messa
 document.addEventListener('keydown',event => {
   if (event.key === 'Escape') { if (expanded) setExpanded(false); else stopLook(); }
   if (event.key === 'Tab' && expanded) {
-    const items = [...document.querySelector('.world').querySelectorAll('button:not(:disabled),summary,[tabindex="0"]')].filter(element => element.getClientRects().length);
+    const items = [...document.querySelector('.world').querySelectorAll('button:not(:disabled),a[href],input:not(:disabled),summary,[tabindex="0"]')].filter(element => element.getClientRects().length && (element.tagName==='SUMMARY' || !element.closest('details:not([open])')));
     const first = items[0], last = items.at(-1);
     if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
     else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
   }
 });
 window.addEventListener('blur',() => { play(false); dragging = null; });
-document.addEventListener('visibilitychange',() => { keys.clear(); adventure.clearHeld(); dragging = null; releaseMouse(); deviceLook.sync(); last = 0; schedule(); });
+document.addEventListener('visibilitychange',() => { keys.clear(); adventure.clearHeld(); dragging = null; releaseMouse(); deviceLook.sync(); cameraWalk.sync(); last = 0; schedule(); });
 document.addEventListener('physics-language',refresh);
 document.addEventListener('physics-motion',event => { if (event.detail.paused) play(false); else refresh(); });
-const observer = new IntersectionObserver(entries => { state.visible = entries[0].isIntersecting; keys.clear(); adventure.clearHeld(); deviceLook.sync(); last = 0; schedule(); });
+const observer = new IntersectionObserver(entries => { state.visible = entries[0].isIntersecting; keys.clear(); adventure.clearHeld(); deviceLook.sync(); cameraWalk.sync(); last = 0; schedule(); });
 observer.observe(canvas);
 window.addEventListener('resize',() => { state.dpr = Math.min(window.devicePixelRatio || 1,2); render(); });
-const orientationChanged = () => { deviceLook.recenter(); render(); };
+const orientationChanged = () => { deviceLook.recenter(); cameraWalk.recenter(); render(); };
 window.addEventListener('orientationchange',orientationChanged);
 window.screen.orientation?.addEventListener('change',orientationChanged);
-canvas.addEventListener('webglcontextlost',event => { event.preventDefault(); if (expanded) setExpanded(false); deviceLook.disable(); play(false); renderer = null; $('gpu-message').hidden = false; adventure.mode('lab'); });
+canvas.addEventListener('webglcontextlost',event => { event.preventDefault(); if (expanded) setExpanded(false); deviceLook.disable(); cameraWalk.disable(); play(false); renderer = null; $('gpu-message').hidden = false; adventure.mode('lab'); });
 canvas.addEventListener('webglcontextrestored',() => {
   try { renderer = createRenderer(canvas); } catch { renderer = null; }
   $('gpu-message').hidden = Boolean(renderer); change();
 });
 window.addEventListener('pagehide',event => { if (expanded) setExpanded(false); stopLook(); observer.disconnect(); if (!event.persisted) adventure.dispose(); });
 window.addEventListener('pageshow',() => { observer.observe(canvas); render(); });
-window.__physicsGame = Object.freeze({ snapshot:() => ({ mode:state.mode,adventure:adventure.diagnostic(),scene:state.scene,camera:{...state.camera},heat:state.heat,water:waterState(state.heat),density:state.density,released:state.released,releaseAge:state.releaseAge,playing:state.playing,time:state.time,heater:state.heater,completed:[...state.completed],visible:state.visible,expanded,deviceLook:deviceLook.snapshot(),frames,gpu:Boolean(renderer) }) });
+window.__physicsGame = Object.freeze({ snapshot:() => ({ mode:state.mode,adventure:adventure.diagnostic(),scene:state.scene,camera:{...state.camera},heat:state.heat,water:waterState(state.heat),density:state.density,released:state.released,releaseAge:state.releaseAge,playing:state.playing,time:state.time,heater:state.heater,completed:[...state.completed],visible:state.visible,expanded,deviceLook:deviceLook.snapshot(),cameraWalk:cameraWalk.snapshot(),frames,gpu:Boolean(renderer) }) });
 change();

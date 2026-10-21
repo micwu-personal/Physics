@@ -17,8 +17,10 @@ const suites = [
       '--test-coverage-include=physics/game-audio.js',
       '--test-coverage-include=physics/game-adventure.js',
       '--test-coverage-include=physics/game-device-look.js',
+      '--test-coverage-include=physics/game-marker-model.js',
+      '--test-coverage-include=physics/game-camera-walk.js',
       '--test-coverage-lines=100', '--test-coverage-functions=100', '--test-coverage-branches=100',
-      'tests/game-model.test.mjs', 'tests/game-adventure-model.test.mjs', 'tests/game-adventure-controller.test.mjs', 'tests/game-audio.test.mjs', 'tests/game-renderer.test.mjs', 'tests/game-device-look.test.mjs'
+      'tests/game-model.test.mjs', 'tests/game-adventure-model.test.mjs', 'tests/game-adventure-controller.test.mjs', 'tests/game-audio.test.mjs', 'tests/game-renderer.test.mjs', 'tests/game-device-look.test.mjs', 'tests/game-marker-model.test.mjs', 'tests/game-camera-walk.test.mjs'
     ]
   },
   {

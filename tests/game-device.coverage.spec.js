@@ -26,9 +26,9 @@ test('game mobile runtime control, focus, lifecycle and permission coverage',asy
     await page.locator('#mission-start').click(); await emit(page); await emit(page,20,80);
     await page.locator('#game-canvas').focus(); await page.keyboard.press('Tab');
     await page.locator('.device-help summary').focus(); await page.keyboard.press('Shift+Tab');
-    await page.locator('.device-help summary').focus(); await page.keyboard.press('Tab');
+    await page.locator('.camera-help summary').focus(); await page.keyboard.press('Tab');
     await expect(page.locator('#game-canvas')).toBeFocused(); await page.keyboard.press('Shift+Tab');
-    await expect(page.locator('.device-help summary')).toBeFocused();
+    await expect(page.locator('.camera-help summary')).toBeFocused();
     await page.locator('#device-recenter').click(); await emit(page,150);
     await page.evaluate(() => { window.dispatchEvent(new Event('orientationchange')); screen.orientation.dispatchEvent(new Event('change')); });
     await emit(page,160); await page.locator('#view-play').click(); await emit(page,170);

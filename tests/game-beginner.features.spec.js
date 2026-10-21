@@ -18,7 +18,7 @@ test('tablet touch aim survives sensor recalibration, small hand movement and bi
     await build(page); await dock(page); await relay(page); await travel(page,'z',-31);
     await page.locator('#adventure-interact').tap();
     await page.locator('#view-toggle').tap(); await page.locator('#device-look').tap(); await emit(page,0);
-    await expect(page.locator('#device-status')).toContainText('physical walking is not tracked');
+    await expect(page.locator('#device-status')).toContainText('separate Camera walking mode');
     const position = (await snap(page)).camera;
     await emit(page,20);
     await page.locator('#approach').tap();

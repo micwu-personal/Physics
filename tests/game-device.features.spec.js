@@ -77,14 +77,14 @@ test('portrait/landscape rotation, lifecycle and keyboard focus preserve calibra
   expect((await snapshot(page)).camera.yaw).toBeCloseTo(yaw-Math.PI/6,5);
   await page.evaluate(() => window.dispatchEvent(new Event('orientationchange'))); const recalibrated = (await snapshot(page)).camera.yaw;
   await emit(page,200,90,0); expect((await snapshot(page)).camera.yaw).toBe(recalibrated);
-  await page.locator('#game-canvas').focus(); await page.keyboard.press('Shift+Tab'); await expect(page.locator('.device-help summary')).toBeFocused();
+  await page.locator('#game-canvas').focus(); await page.keyboard.press('Shift+Tab'); await expect(page.locator('.camera-help summary')).toBeFocused();
   await page.keyboard.press('Tab'); await expect(page.locator('#game-canvas')).toBeFocused();
   await page.evaluate(() => window.dispatchEvent(new Event('blur'))); const paused = await snapshot(page); await emit(page,250);
   expect((await snapshot(page)).camera.yaw).toBe(paused.camera.yaw); expect(paused.playing).toBe(false);
   await page.locator('#view-play').click(); await emit(page); await page.keyboard.press('Escape');
   expect((await snapshot(page)).expanded).toBe(false); expect((await snapshot(page)).deviceLook.enabled).toBe(false);
   await page.locator('[data-lang="zh-CN"]').click(); await expect(page.locator('#device-look')).toHaveText('设备视角');
-  await expect(page.locator('#device-status')).toContainText('不追踪真实行走'); await assertNoErrors(errors);
+  await expect(page.locator('#device-status')).toContainText('位置可用箭头，或另外设置相机行走'); await assertNoErrors(errors);
 });
 
 test('desktop mouse capture really releases on double-click without needing Escape',async ({page}) => {

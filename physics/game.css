@@ -213,3 +213,22 @@ summary { cursor: pointer; min-height: 44px; }
   .game-expanded .world-title { display:none; }
   .game-expanded .world-caption span:first-child { display:none; }
 }
+.camera-controls { display:flex; flex-wrap:wrap; align-items:center; gap:8px; padding:12px 16px; background:var(--surface); border-top:1px solid var(--line); }
+.camera-controls button[aria-pressed='true'] { color:var(--gold); border-color:var(--gold); }
+#camera-walk-status { flex:1 1 340px; margin:0; font-size:.875rem; color:var(--muted); }
+.camera-help { flex:1 1 100%; color:var(--muted); font-size:.875rem; }
+.camera-help summary { width:fit-content; color:var(--cyan); }
+.camera-help p { max-width:70ch; margin:12px 0; }
+.camera-help a { display:inline-flex; align-items:center; min-height:44px; color:var(--cyan); text-underline-offset:4px; }
+.camera-calibration { display:grid; grid-template-columns:minmax(0,1fr) 85px; align-items:center; gap:8px 16px; max-width:500px; margin:12px 0; }
+.camera-calibration label { grid-column:1/-1; }
+#camera-marker-size { grid-column:1/-1; width:100%; min-height:44px; padding:8px; border:1px solid var(--line); background:var(--bg); color:var(--text); font:inherit; }
+#camera-fov { width:100%; min-height:44px; }
+#camera-fov-value { text-align:right; }
+.camera-preview { position:absolute; z-index:4; right:12px; top:74px; width:clamp(128px,25vw,220px); margin:0; border:1px solid var(--cyan); background:var(--bg); pointer-events:none; }
+.camera-preview video { display:block; width:100%; height:clamp(90px,18vw,150px); object-fit:contain; background:#080e15; }
+.camera-preview figcaption { padding:6px 8px; font-size:.7rem; line-height:1.35; color:var(--text); }
+.world[data-camera='true'] .mission-navigation { display:none; }
+.world[data-camera='true'] .mission-objective { max-width:calc(100% - clamp(152px,25vw + 24px,244px)); max-height:180px; overflow:auto; pointer-events:auto; }
+@media (max-width:740px) { .camera-controls { padding:10px 12px; } }
+@media (max-height:550px) and (min-width:620px) { .game-expanded .world[data-camera='true'] .mission-objective { max-height:calc(100dvh - 210px); } }
